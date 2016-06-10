@@ -1,0 +1,429 @@
+---
+swagger: "2.0"
+info:
+  version: "v4"
+  title: "Projects API"
+# during production,should point to your server machine
+host: localhost:3000
+basePath: "/v4"
+# during production, should use https
+schemes:
+- "http"
+produces:
+- application/json
+consumes:
+- application/json
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+paths:
+  /projects:
+    get:
+      tags:
+        - project
+      operationId: findProjects
+      description: Retreive projects that match the filter
+      responses:
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of projects
+          schema:
+            $ref: "#/definitions/ProjectListResponse"
+      parameters:
+        - $ref: "#/parameters/offsetParam"
+        - $ref: "#/parameters/limitParam"
+        - name: filter
+          required: true
+          type: string
+          in: query
+          description: |
+            Url encoded list of Supported filters
+             - domain
+             - status
+        - name: sort
+          required: false
+          description: |
+            sort projects by status, name
+          in: query
+          type: string
+    post:
+      operationId: addProject
+      security:
+        - Bearer: []
+      description: Create a project
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProjectBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project
+          schema:
+            $ref: "#/definitions/ProjectResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projects/{projectId}:
+    get:
+      description: Retrieve project by id
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a project
+          schema:
+            $ref: "#/definitions/ProjectResponse"
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+      operationId: getProject
+
+    patch:
+      operationId: updateProject
+      security:
+        - Bearer: []
+      description: Update a project that user has access to.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated project. Returns entire project object
+          schema:
+            $ref: "#/definitions/ProjectResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ProjectBodyParam"
+
+
+  /projects/{projectId}/estimates:
+    get:
+      description: Retrieve project estimates
+      responses:
+        "200":
+          description: Retrieve project estimates
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+    post:
+      description: add a new project estimate
+      responses:
+        "201":
+          description: create a new project estimate
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+
+  /projects/{projectId}/estimates/{estimateId}:
+    get:
+      description: Retrieve project estimates
+      responses:
+        "200":
+          description: Retrieve project estimates
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - $ref: "#/parameters/projectEstimateIdParam"
+    put:
+      description: add a new project estimate
+      responses:
+        "201":
+          description: create a new project estimate
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - $ref: "#/parameters/projectEstimateIdParam"
+
+
+parameters:
+  projectIdParam:
+    name: projectId
+    in: path
+    description: project identifier
+    required: true
+    type: integer
+    format: int64
+  offsetParam:
+    name: offset
+    description: "number of items to skip. Defaults to 0"
+    in: query
+    required: false
+    type: integer
+    format: int32
+  limitParam:
+    name: limit
+    description: "max records to return. Defaults to 10"
+    in: query
+    required: false
+    type: integer
+    format: int32
+  projectEstimateIdParam:
+    name: estimateId
+    description: unique identifier for project estimate
+    in: path
+    required: true
+    type: integer
+
+
+
+definitions:
+  ResponseMetadata:
+    title: Metadata object for a response
+    type: object
+    properties:
+      totalCount:
+        type: integer
+        format: int64
+        description: Total count of the objects
+
+  ErrorModel:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            description: http status code
+            type: integer
+            format: int32
+          debug:
+            type: object
+          content:
+            type: object
+
+  ProjectBodyParam:
+    type: object
+    properties:
+      param:
+        $ref: "#/definitions/Project"
+
+  NewProject:
+    type: object
+    required:
+       - name
+    properties:
+      name:
+        type: string
+        description: project name
+      domain:
+        type: string
+        description: enumerated project domain
+        enum: ["skills", "events"]
+      categories:
+        description: array of categories
+        type: array
+        items:
+          type: string
+          enum: ["develop", "design", "data_science"]
+      status:
+        type: string
+        description: enumerated project categories
+        enum: ["approved", "pending"]
+      priority:
+        type: integer
+        description: priority of the project
+      synonyms:
+        description: Other names for this project
+        type: array
+        items:
+          type: string
+
+
+  NewProjectBodyParam:
+    type: object
+    properties:
+      param:
+        $ref: "#/definitions/NewProject"
+
+  MemberEligibility:
+    description: Object describing who is eligible to work on this task
+    type: object
+    properties:
+        role:
+          type: string
+          enum: ["submitter", "reviewer", "copilot", "observer"]
+        users:
+          type: array
+          items:
+            type: integer
+            format: int64
+        groups:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+
+  Project:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      directProjectId:
+        description: unique identifier in direct
+        type: integer
+        format: int64
+      title:
+        type: string
+        description: project name
+      external:
+        type: object
+        description: READ-ONLY, OPTIONAL. Refernce to external task/issue.
+        properties:
+          id:
+            type: string
+            description: Identifier for external reference
+          type:
+            type: string
+            description: external source type
+            enum: [ "github", "jira", "asana", "other"]
+          data:
+            type: string
+            description: "250 Char length text blob for customer provided data"
+      type:
+        type: string
+        description: project type
+        enum: ["design", "code", "...from product offerings..."]
+
+      tags:
+        description: Array of tags associated with this project.
+        type: array
+        items:
+          type: integer
+      state:
+        type: string
+        description: current state of the task
+        enum: ["draft", "active", "paused", "cancelled", "completed"]
+      memberEligibility:
+        description: List of eligibility criteria (one entry per role)
+        type: array
+        items:
+          $ref: "#/definitions/MemberEligibility"
+
+      details:
+        $ref: "#/definitions/ProjectDetails"
+
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+
+  ProjectDetails:
+    description: Project details
+    type: object
+    properties:
+      summary:
+        type: string
+        description: text summary of the project
+      TBD_usageDescription:
+        type: string
+        description: a description of how the app will be used
+      TBD_features:
+        type: object
+        properties:
+          id:
+            type: integer
+          title:
+            type: string
+          description:
+            type: string
+          isCustom:
+            type: boolean
+
+
+  ProjectResponse:
+    title: Single project object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            $ref: "#/definitions/Project"
+
+  ProjectListResponse:
+    title: List response
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/Project"

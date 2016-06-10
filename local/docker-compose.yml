@@ -1,0 +1,17 @@
+postgres:
+  image: "postgres:9.4"
+  ports:
+    - "5432:5432"
+  environment:
+    - POSTGRES_PASSWORD=mysecretpassword
+    - POSTGRES_USER=coder
+    - POSTGRES_DB=tagsdb
+elasticsearch:
+  image: "elasticsearch:1.5.2"
+  ports:
+    - "9200:9200"
+    - "9300:9300"
+redis:
+  image: redis:2.8
+  ports:
+    - "6379:6379"

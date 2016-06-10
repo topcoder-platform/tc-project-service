@@ -1,0 +1,13 @@
+{
+  "authSecret": "secret",
+  "logLevel": "info",
+  "version": "v3",
+  "captureLogs": "false",
+  "logentriesToken": "",
+  "dbConfig": {
+    "masterUrl": "postgres://coder:mysecretpassword@dockerhost:5432/projectsdb",
+    "maxPoolSize": 50,
+    "minPoolSize": 4,
+    "idleTimeout": 1000
+  }
+}

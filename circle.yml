@@ -1,0 +1,23 @@
+machine:
+  node:
+    version: 5.9
+  environment:
+    DB_MASTER_URL: postgres://ubuntu:@127.0.0.1:5432/circle_test
+    AUTH_SECRET: secret
+    AUTH_DOMAIN: topcoder-dev.com
+    LOG_LEVEL: debug
+    APP_VERSION: v3
+
+dependencies:
+  pre:
+    - sudo pip install awsebcli
+
+  override:
+    - npm install --dev
+
+general:
+  branches:
+    only:
+      - master
+      - dev
+      - feature/.*
