@@ -64,7 +64,7 @@ module.exports = [
 
     if (util.hasRole(req, req.app.locals.ROLES.TOPCODER_ADMIN)) {
       // admin has access to all projects
-      console.log(req.query.fields)
+      
       return _retrieveProjects(req, criteria, req.query.fields)
         .then((result) => {
           return res.json(util.wrapResponse(req.id, result.rows, result.count))

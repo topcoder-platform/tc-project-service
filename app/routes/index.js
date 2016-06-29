@@ -31,6 +31,13 @@ router.route('/v4/projects/:projectId(\\d+)')
   .get(require('./projects/get'))
   // .put(require('./projects/update'))
 
+router.route('/v4/projects/:projectId(\\d+)/members')
+    .post(require('./projectMembers/create'))
+
+router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
+    .delete(require('./projectMembers/delete'))
+    // .put(require('./projects/update'))
+
 
 // register error handler
 router.use((err, req, res, next) => {

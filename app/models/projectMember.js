@@ -42,6 +42,15 @@ module.exports = function(sequelize, DataTypes) {
         .then((res) => {
           return _.map(res, 'projectId')
         })
+      },
+      getActiveProjectMembers: function(projectId) {
+        return this.findAll({
+          where: {
+            deletedAt: { $eq: null },
+            projectId: projectId
+          },
+          raw: true
+        })
       }
     }
   })

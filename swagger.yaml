@@ -129,39 +129,85 @@ paths:
             $ref: "#/definitions/ProjectBodyParam"
 
 
-  /projects/{projectId}/estimates:
-    get:
-      description: Retrieve project estimates
-      responses:
-        "200":
-          description: Retrieve project estimates
-      parameters:
-        - $ref: "#/parameters/projectIdParam"
-    post:
-      description: add a new project estimate
-      responses:
-        "201":
-          description: create a new project estimate
-      parameters:
-        - $ref: "#/parameters/projectIdParam"
+  # /projects/{projectId}/estimates:
+  #   get:
+  #     description: Retrieve project estimates
+  #     responses:
+  #       "200":
+  #         description: Retrieve project estimates
+  #     parameters:
+  #       - $ref: "#/parameters/projectIdParam"
+  #   post:
+  #     description: add a new project estimate
+  #     responses:
+  #       "201":
+  #         description: create a new project estimate
+  #     parameters:
+  #       - $ref: "#/parameters/projectIdParam"
 
-  /projects/{projectId}/estimates/{estimateId}:
-    get:
-      description: Retrieve project estimates
-      responses:
-        "200":
-          description: Retrieve project estimates
+  # /projects/{projectId}/estimates/{estimateId}:
+  #   get:
+  #     description: Retrieve project estimates
+  #     responses:
+  #       "200":
+  #         description: Retrieve project estimates
+  #     parameters:
+  #       - $ref: "#/parameters/projectIdParam"
+  #       - $ref: "#/parameters/projectEstimateIdParam"
+  #   put:
+  #     description: add a new project estimate
+  #     responses:
+  #       "201":
+  #         description: create a new project estimate
+  #     parameters:
+  #       - $ref: "#/parameters/projectIdParam"
+  #       - $ref: "#/parameters/projectEstimateIdParam"
+
+  /projects/{projectId}/members:
+    post:
+      description: add a new project member
+      security:
+        - Bearer: []
       parameters:
         - $ref: "#/parameters/projectIdParam"
-        - $ref: "#/parameters/projectEstimateIdParam"
-    put:
-      description: add a new project estimate
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProjectMemberBodyParam'
       responses:
-        "201":
-          description: create a new project estimate
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project
+          schema:
+            $ref: "#/definitions/ProjectResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projects/{projectId}/members/{id}:
+    delete:
+      description: add a new project member
+      security:
+        - Bearer: []
       parameters:
         - $ref: "#/parameters/projectIdParam"
-        - $ref: "#/parameters/projectEstimateIdParam"
+        - in: path
+          name: id
+          required: true
+          type: integer
+
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Member successfully removed
 
 
 parameters:
@@ -192,7 +238,6 @@ parameters:
     in: path
     required: true
     type: integer
-
 
 
 definitions:
@@ -236,33 +281,49 @@ definitions:
   NewProject:
     type: object
     required:
-       - name
+       - title
+       - description
+       - type
     properties:
-      name:
+      title:
         type: string
         description: project name
-      domain:
+      description:
         type: string
-        description: enumerated project domain
-        enum: ["skills", "events"]
-      categories:
-        description: array of categories
+        description: Project description
+      external:
+        type: object
+        description: READ-ONLY, OPTIONAL. Refernce to external task/issue.
+        properties:
+          id:
+            type: string
+            description: Identifier for external reference
+          type:
+            type: string
+            description: external source type
+            enum: [ "github", "jira", "asana", "other"]
+          data:
+            type: string
+            description: "250 Char length text blob for customer provided data"
+      type:
+        type: string
+        description: project type
+        enum: ["generic", "design", "design+dev", "...from product offerings..."]
+      challengeEligibility:
+        description: List of eligibility criteria (one entry per role)
         type: array
         items:
-          type: string
-          enum: ["develop", "design", "data_science"]
-      status:
-        type: string
-        description: enumerated project categories
-        enum: ["approved", "pending"]
-      priority:
-        type: integer
-        description: priority of the project
-      synonyms:
-        description: Other names for this project
-        type: array
-        items:
-          type: string
+          $ref: "#/definitions/ChallengeEligibility"
+      details:
+        $ref: "#/definitions/ProjectDetails"
+      utm:
+        description: READ-ONLY. Used for tracking
+        type: object
+        properties:
+          campaign:
+            type: string
+          source:
+            type: string
 
 
   NewProjectBodyParam:
@@ -271,7 +332,7 @@ definitions:
       param:
         $ref: "#/definitions/NewProject"
 
-  MemberEligibility:
+  ChallengeEligibility:
     description: Object describing who is eligible to work on this task
     type: object
     properties:
@@ -304,6 +365,10 @@ definitions:
       title:
         type: string
         description: project name
+      description:
+        type: string
+        description: Project description
+
       external:
         type: object
         description: READ-ONLY, OPTIONAL. Refernce to external task/issue.
@@ -322,22 +387,27 @@ definitions:
         type: string
         description: project type
         enum: ["design", "code", "...from product offerings..."]
-
       tags:
         description: Array of tags associated with this project.
         type: array
         items:
           type: integer
-      state:
+      status:
         type: string
         description: current state of the task
         enum: ["draft", "active", "paused", "cancelled", "completed"]
-      memberEligibility:
+      challengeEligibility:
         description: List of eligibility criteria (one entry per role)
         type: array
         items:
-          $ref: "#/definitions/MemberEligibility"
-
+          $ref: "#/definitions/ChallengeEligibility"
+      members:
+        description: |
+          READ-ONLY. List of project members.
+          Use project member api to add/remove members
+        type: array
+        items:
+          $ref: "#/definitions/ProjectMember"
       details:
         $ref: "#/definitions/ProjectDetails"
 
@@ -381,6 +451,88 @@ definitions:
             type: string
           isCustom:
             type: boolean
+
+
+  NewProjectMember:
+    title: Project Member object
+    type: object
+    required:
+      - userId
+      - role
+    properties:
+      userId:
+        type: number
+        format: int64
+        description: user identifier
+      role:
+        type: string
+        description: member role on specified project
+        enum: ["customer", "manager", "copilot"]
+
+  NewProjectMemberBodyParam:
+    type: object
+    properties:
+      param:
+        $ref: "#/definitions/NewProjectMember"
+
+
+  ProjectMember:
+    title: Project Member object
+    type: object
+    properties:
+      id:
+        type: number
+        description: unique identifier for record
+      userId:
+        type: number
+        format: int64
+        description: user identifier
+      projectId:
+        type: number
+        format: int64
+        description: project identifier
+      role:
+        type: string
+        description: member role on specified project
+        enum: ["customer", "manager", "copilot"]
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+
+  NewProjectMemberResponse:
+    title: Project member object response
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            $ref: "#/definitions/ProjectMember"
 
 
   ProjectResponse:

@@ -151,7 +151,7 @@ describe('Project', λ => {
         })
     })
 
-    it.only('should return the project for administrator ', (done) => {
+    it('should return the project for administrator ', (done) => {
       request(server)
         .get('/v4/projects/?fields=id%2Cmembers.id')
         .set({

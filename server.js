@@ -67,7 +67,7 @@ app.use(coreLib.middleware.logger(null, logger))
 // ========================
 // Permissions
 // ========================
-// require('app/permissions')()
+require('app/permissions')()
 
 // ========================
 // Routes

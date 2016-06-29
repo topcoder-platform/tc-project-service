@@ -44,7 +44,7 @@ function clearDB(done) {
 }
 
 describe('Project', λ => {
-  var project1, project2
+  var project1, member1
   before((done) => {
     clearDB()
       .then(() => {
@@ -60,39 +60,18 @@ describe('Project', λ => {
         }).then((p) => {
           project1 = p
             // create members
-          var pm1 = models.ProjectMember.create({
-            userId: 40051331,
-            projectId: project1.id,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1
-          })
-          var pm2 = models.ProjectMember.create({
-            userId: 40051333,
+          models.ProjectMember.create({
+            userId: 40051332,
             projectId: project1.id,
             role: 'copilot',
             isPrimary: true,
             createdBy: 1,
             updatedBy: 1
+          }).then((pm) => {
+            member1 = pm
+            done()
           })
-          return Promise.all([pm1, pm2])
         })
-
-        var p2 = models.Project.create({
-          type: 'design',
-          billingAccountId: '1',
-          title: 'test2',
-          description: 'test project2',
-          status: 'draft',
-          details: {},
-          createdBy: 1,
-          updatedBy: 1
-        }).then((p) => {
-          project2 = p
-        })
-        return Promise.all([p1, p2])
-          .then(() => done())
       })
   })
 
@@ -100,70 +79,24 @@ describe('Project', λ => {
     clearDB(done)
   })
 
-  describe('GET /projects/{id}', () => {
-    it('should return 403 if user is not authenticated', (done) => {
+  describe('DELETE /projects/{id}/members/{id}', () => {
+    it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .get('/v4/projects/' + project2.id)
-        .expect(403, done)
-    })
-
-    it('should return 404 if requested project doesn\'t exist', (done) => {
-      request(server)
-        .get('/v4/projects/14343323')
-        .set({
-          'Authorization': 'Bearer ' + jwts.admin
-        })
-        .expect(404, done)
-    })
-
-    it('should return 404 if user does not have access to the project', (done) => {
-      request(server)
-        .get('/v4/projects/' + project2.id)
+        .delete('/v4/projects/' + project1.id + '/members/' + member1.id)
         .set({
           'Authorization': 'Bearer ' + jwts.member
         })
+        .send({ param: {userId: 1, projectId: project1.id, role: 'customer'}})
         .expect(403, done)
     })
 
-    it('should return the project when registerd member attempts to access the project', (done) => {
+    it('should return 204 if user has access to the project', (done) => {
       request(server)
-        .get('/v4/projects/' + project1.id + '/?fields=id%2Ctitle%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId')
+      .delete('/v4/projects/' + project1.id + '/members/' + member1.id)
         .set({
-          'Authorization': 'Bearer ' + jwts.member
+          'Authorization': 'Bearer ' + jwts.copilot
         })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end(function(err, res) {
-          if (err) {
-            return done(err)
-          }
-          var resJson = res.body.result.content
-          should.exist(resJson)
-          should.not.exist(resJson.billingAccountId)
-          should.exist(resJson.title)
-          resJson.status.should.be.eql('draft')
-          resJson.members.should.have.lengthOf(2)
-          done()
-        })
-    })
-
-    it('should return the project for administrator ', (done) => {
-      request(server)
-        .get('/v4/projects/' + project1.id)
-        .set({
-          'Authorization': 'Bearer ' + jwts.admin
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end(function(err, res) {
-          if (err) {
-            return done(err)
-          }
-          var resJson = res.body.result.content
-          should.exist(resJson)
-          done()
-        })
+        .expect(204, done)
     })
   })
-
 })

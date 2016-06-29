@@ -15,9 +15,6 @@ var models = require('app/models'),
   util     = require('app/util'),
   permissions = require('tc-core-library-js').middleware.permissions
 
-const ROLE_TOPCODER_MANAGER = 'Topcoder Manager'
-
-
 const createProjectValdiations = {
   body: {
     param: Joi.object().keys({
@@ -29,6 +26,8 @@ const createProjectValdiations = {
         medium: Joi.string().allow(null),
         campaign: Joi.string().allow(null)
       }).allow(null),
+      estimatedPrice: Joi.number().precision(2).positive().optional().allow(null),
+      terms: Joi.array().items(Joi.number().positive()).optional(),
       external: Joi.object().keys({
         id: Joi.string(),
         type: Joi.any().valid('github', 'jira', 'asana', 'other'),
@@ -39,8 +38,8 @@ const createProjectValdiations = {
       details: Joi.any(),
       challengeEligibility: Joi.array().items(Joi.object().keys({
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
-        users: Joi.array().items(Joi.number()),
-        groups: Joi.array().items(Joi.number())
+        users: Joi.array().items(Joi.number().positive()),
+        groups: Joi.array().items(Joi.number().positive())
       })).allow(null)
     })
   }
@@ -49,8 +48,7 @@ const createProjectValdiations = {
 module.exports = [
   // handles request validations
   validate(createProjectValdiations),
-  // FIXME - uncomment this once we have permissions in place
-  // permissions('project.create'),
+  permissions('project.create'),
   /**
    * POST projects/
    * Create a project if the user has access
@@ -73,7 +71,7 @@ module.exports = [
       updatedBy: req.authUser.userId,
       members: [{
         isPrimary: true,
-        role: util.hasRole(req, ROLE_TOPCODER_MANAGER) ? 'manager': 'customer',
+        role: util.hasRole(req, req.app.locals.ROLES.TOPCODER_MANAGER) ? 'manager': 'customer',
         userId: req.authUser.userId,
         updatedBy: req.authUser.userId,
         createdBy: req.authUser.userId,
@@ -92,9 +90,12 @@ module.exports = [
           newProject = _newProject.get({plain: true})
           req.log.debug('new project created (id# %d, title: %s)',
             newProject.id, newProject.title)
-          // TODO create direct project
 
+          // TODO create direct project
+          // remove utm details & deletedAt field
+          newProject = _.omit(newProject, ['deletedAt', 'utm'])
           req.app.emit('internal.project.draft-created', newProject)
+
           res.status(201).json(util.wrapResponse(req.id, newProject))
         })
         .catch((err) => {

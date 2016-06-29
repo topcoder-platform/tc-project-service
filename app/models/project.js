@@ -9,6 +9,13 @@ module.exports = function(sequelize, DataTypes) {
     description: DataTypes.TEXT,
     external: DataTypes.JSON,
     utm: { type: DataTypes.JSON, allowNull: true },
+    estimatedPrice: { type: DataTypes.DECIMAL(10,2), allowNull: true },
+    actualPrice: { type: DataTypes.DECIMAL(10,2), allowNull: true},
+    terms: {
+      type: DataTypes.ARRAY(DataTypes.INTEGER),
+      allowNull: false,
+      defaultValue: []
+    },
     type: {
       type: DataTypes.STRING,
       allowNull: false,

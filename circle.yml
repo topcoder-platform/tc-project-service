@@ -1,19 +1,26 @@
 machine:
+
   node:
     version: 5.9
   environment:
     DB_MASTER_URL: postgres://ubuntu:@127.0.0.1:5432/circle_test
+    #RABBITMQ_URL: amqp://localhost:5672
     AUTH_SECRET: secret
     AUTH_DOMAIN: topcoder-dev.com
     LOG_LEVEL: debug
-    APP_VERSION: v3
+    APP_VERSION: v4
 
 dependencies:
   pre:
-    - sudo pip install awsebcli
-
+    - pip install awsebcli
   override:
     - npm install --dev
+
+deployment:
+  development:
+    branch: dev
+    commands:
+      - ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
 
 general:
   branches:
