@@ -12,7 +12,7 @@ machine:
 
 dependencies:
   pre:
-    - sudo pip install awsebcli
+    - pip install awsebcli
   override:
     - npm install --dev
 
