@@ -48,6 +48,6 @@ module.exports = (app, logger) => {
     //     }
     //   })
     // }
-    app.services.es = require('elasticsearch').Client(esConfig)
+    // app.services.es = require('elasticsearch').Client(esConfig)
   }
 }
