@@ -33,21 +33,21 @@ module.exports = (app, logger) => {
         gracefulShutdown()
       })
 
-    // elasticsearch
-    var esConfig = {
-      hosts: config.get('esUrl'),
-      apiVersion: '1.5'
-    }
-    if (process.env.ENVIRONMENT.toLowerCase() !== 'local') {
-      _.assign(esConfig, {
-        connectionClass: require('http-aws-es'),
-        amazonES: {
-          region: "us-east-1",
-          accessKey: config.get('awsAccessKey'),
-          secretKey: config.get('awsAccessSecret')
-        }
-      })
-    }
+    // // elasticsearch
+    // var esConfig = {
+    //   hosts: config.get('esUrl'),
+    //   apiVersion: '1.5'
+    // }
+    // if (process.env.ENVIRONMENT.toLowerCase() !== 'local') {
+    //   _.assign(esConfig, {
+    //     connectionClass: require('http-aws-es'),
+    //     amazonES: {
+    //       region: "us-east-1",
+    //       accessKey: config.get('awsAccessKey'),
+    //       secretKey: config.get('awsAccessSecret')
+    //     }
+    //   })
+    // }
     app.services.es = require('elasticsearch').Client(esConfig)
   }
 }
