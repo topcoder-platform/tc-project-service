@@ -1,7 +1,7 @@
 branch-defaults:
   dev:
     ec2_keyname: topcoder-dev-vpc-app
-    environment: project-api-v4-prod
+    environment: project-api-v4-dev
     group_suffix: null
   master:
     ec2_keyname: topcoder-prod-vpc-app
@@ -9,11 +9,11 @@ branch-defaults:
     group_suffix: null
   release:
     ec2_keyname: topcoder-qa-vpc-app
-    environment: project-api-v4-prod
+    environment: project-api-v4-dev
     group_suffix: null
     profile: tc-qa
 global:
-  application_name: tc-projects-service
+  application_name: tc-project-api
   default_ec2_keyname: topcoder-dev-vpc-app
   default_platform: Docker 1.9.1
   default_region: us-east-1

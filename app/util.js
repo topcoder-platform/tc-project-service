@@ -9,6 +9,7 @@
 'use strict'
 
 var _ = require('lodash'),
+  querystring = require('querystring'),
   config = require('config')
 
 var util = _.cloneDeep(require('tc-core-library-js').util(config))
@@ -47,7 +48,56 @@ _.assignIn(util, {
       }
     })
     return valid
+  },
+  /**
+   * Helper funtion to verify if user has specified role
+   * @param  {object} req  Request object that should contain authUser
+   * @param  {string} role specified role
+   * @return {boolean}      true/false
+   */
+  hasRole: (req, role) => {
+    let roles = _.get(req, 'authUser.roles', [])
+    roles = roles.map(s => s.toLowerCase())
+    return _.indexOf(roles, role.toLowerCase()) >= 0
+  },
+
+  /**
+   * Parses query fields and groups them per table
+   * @param  {array} queryFields list of query fields
+   * @return {object}
+   */
+  parseFields: (queryFields, allowedFields) => {
+    var fields = _.cloneDeep(allowedFields)
+    if (queryFields.length) {
+      // remove any inavlid fields
+      fields['projects'] = _.intersection(queryFields, allowedFields['projects'])
+      fields['project_members'] = _.filter(queryFields, (f) => { return f.indexOf('members.') === 0})
+      // remove members. prefix
+      fields['project_members'] = _.map(fields['project_members'], (f) => { return f.substring(8) })
+      // remove any errorneous fields
+      fields['project_members'] = _.intersection(fields['project_members'], allowedFields['project_members'])
+      if (fields['project_members'].length === 0 && _.indexOf(queryFields, 'members') > -1) {
+        fields['project_members'] = allowedFields['project_members']
+      }
+    }
+    return fields
+  },
+
+  parseQueryFilter: (queryFilter) => {
+    queryFilter = querystring.parse(queryFilter)
+    // convert in to array
+    queryFilter = _.mapValues(queryFilter, (val) => {
+      if (val.indexOf('in(') > -1) {
+        return { $in: val.substring(3, val.length-1).split(',') }
+      }
+      return val
+    })
+    if (queryFilter.id) {
+      queryFilter.id['$in'] = _.map(queryFilter.id['$in'], _.parseInt)
+    }
+    return queryFilter
   }
+
 })
 
 module.exports = util

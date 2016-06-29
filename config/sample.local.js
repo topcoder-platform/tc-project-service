@@ -9,6 +9,7 @@ if (process.env.ENVIRONMENT === 'test') {
       "logLevel": "debug",
       "captureLogs": "false",
       "logentriesToken": "",
+      "rabbitmqURL": "amqp://dockerhost:5672",
       "dbConfig": {
           "masterUrl": "postgres://coder:mysecretpassword@dockerhost:5432/projectsdb",
           "maxPoolSize": 50,

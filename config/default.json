@@ -4,6 +4,10 @@
   "version": "v3",
   "captureLogs": "false",
   "logentriesToken": "",
+  "rabbitmqURL": "amqp://dockerhost:5672",
+  "esUrl": "//localhost:9200",
+  "pubsubQueueName": "project.service",
+  "pubsubExchangeName": "projects",
   "dbConfig": {
     "masterUrl": "postgres://coder:mysecretpassword@dockerhost:5432/projectsdb",
     "maxPoolSize": 50,

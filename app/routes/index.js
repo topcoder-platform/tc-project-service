@@ -10,7 +10,6 @@ ev.options({
   allowUnknownBody: false
 })
 
-
 // health check
 router.get('/_health', (req, res, next) => {
   // TODO more checks
@@ -19,13 +18,18 @@ router.get('/_health', (req, res, next) => {
   })
 })
 
-// router.route('/v3/tags')
-//   .get(require('./tags.list'))
-//   .post(require('./tags.create'))
-//
-// router.route('/v3/tags/:tagId(\\d+)')
-//   .get(require('./tags.get'))
-//   .put(require('./tags.update'))
+// All project service endpoints need authentication
+var jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator
+router.all('/v4/projects*', jwtAuth())
+
+// Register all the routes
+router.route('/v4/projects')
+  .post(require('./projects/create'))
+  .get(require('./projects/list'))
+
+router.route('/v4/projects/:projectId(\\d+)')
+  .get(require('./projects/get'))
+  // .put(require('./projects/update'))
 
 
 // register error handler
@@ -53,8 +57,10 @@ router.use((err, req, res, next) => {
   if (_.indexOf(['development', 'test', 'qa'], process.env.ENVIRONMENT) > -1) {
     body.result.debug = err.stack
   }
+  err.status = err.status || 500
+  req.log.error(err)
   res
-    .status(err.status || 500)
+    .status(err.status)
     .send(body)
 })
 

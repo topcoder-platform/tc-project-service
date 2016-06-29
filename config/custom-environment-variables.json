@@ -5,6 +5,8 @@
   "version": "APP_VERSION",
   "captureLogs": "CAPTURE_LOGS",
   "logentriesToken": "LOGENTRIES_TOKEN",
+  "esUrl": "PROJECTS_ES_URL",
+  "rabbitmqURL": "RABBITMQ_URL",
   "dbConfig": {
     "masterUrl": "DB_MASTER_URL",
     "maxPoolSize": "DB_MAX_POOL_SIZE",

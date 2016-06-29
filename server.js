@@ -64,19 +64,66 @@ var logger = coreLib.logger({
 })
 app.use(coreLib.middleware.logger(null, logger))
 
-// =======================
-// routes ================
-// =======================
+// ========================
+// Permissions
+// ========================
+// require('app/permissions')()
+
+// ========================
+// Routes
+// ========================
 const router = require('app/routes')
 app.use(router)
 
 // =======================
+// Register events handler
+// =======================
+require('app/events/projects')(app, logger)
+
+// =======================
+// Global - locals
+// =======================
+_.assign(app.locals, {
+  ROLES: {
+    TOPCODER_ADMIN: 'administrator',
+    TOPCODER_MANAGER: 'Topcoder Manager',
+    COPILOT: 'Topcoder copilot'
+  }
+})
+
+// =======================
+// Initialize services
+// =======================
+require('app/services')(app, logger)
+
+/**
+ * Handle server shutdown gracefully
+ */
+function gracefulShutdown() {
+  app.services.pubsub.disconnect()
+    .then(()=> {
+      logger.info('Gracefully shutting down server')
+      process.exit()
+    }).catch((err) => {
+      console.log(err)
+    })
+  // if after
+   setTimeout(function() {
+       console.error("Could not close connections in time, forcefully shutting down");
+       process.exit()
+  }, 10*1000);
+}
+process.on('SIGTERM', gracefulShutdown)
+process.on('SIGINT', gracefulShutdown)
+
+// =======================
 // start the server ======
 // =======================
-
 var server = app.listen(port, λ => {
   logger.info("Starting server on PORT: %d", port)
-  logger.info("Routes", require('express-list-routes')({prefix: '', spacer: 7}, 'APIs:', router))
+  let authz = require('tc-core-library-js').Authorizer
+  logger.info("Registered Policies", authz.getRegisteredPolicies())
+  require('express-list-routes')({prefix: '', spacer: 7}, 'APIs:', router)
 })
 
 module.exports = server

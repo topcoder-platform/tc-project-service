@@ -3,8 +3,10 @@
     "logLevel": "debug",
     "captureLogs": "false",
     "logentriesToken": "",
+    "esUrl": "//localhost:9200",
+    "rabbitmqUrl": "amqp://localhost:5672",
     "dbConfig": {
-        "masterUrl": "postgres://coder:mysecretpassword@dockerhost:5432/projectsdb_test",
+        "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",
         "maxPoolSize": 50,
         "minPoolSize": 4,
         "idleTimeout": 1000
