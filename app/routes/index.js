@@ -29,7 +29,7 @@ router.route('/v4/projects')
 
 router.route('/v4/projects/:projectId(\\d+)')
   .get(require('./projects/get'))
-  // .put(require('./projects/update'))
+  .patch(require('./projects/update'))
 
 router.route('/v4/projects/:projectId(\\d+)/members')
     .post(require('./projectMembers/create'))
