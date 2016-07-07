@@ -23,8 +23,5 @@ deployment:
       - ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
 
 general:
-  branches:
-    only:
-      - master
-      - dev
-      - feature/.*
+  artifacts:
+    - ./coverage

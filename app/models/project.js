@@ -3,6 +3,7 @@
 module.exports = function(sequelize, DataTypes) {
   var Project = sequelize.define('Project', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
+    legacyProjectId: { type: DataTypes.STRING, allowNull: true },
     directProjectId: DataTypes.BIGINT,
     billingAccountId: DataTypes.STRING,
     title: { type: DataTypes.STRING, allowNull: false },
@@ -45,6 +46,7 @@ module.exports = function(sequelize, DataTypes) {
     deletedAt: true,
     indexes: [
       { fields: ['status'] },
+      { fields: ['legacyProjectId'] },
       { fields: ['directProjectId'] }
     ],
     classMethods: {

@@ -14,7 +14,7 @@ var models = require('app/models'),
   util = require('app/util'),
   permissions = require('tc-core-library-js').middleware.permissions
 
-const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), ['utm', 'deletedAt'])
+const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), ['utm', 'deletedAt', 'legacyProjectId'])
 const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes), ['deletedAt'])
 
 module.exports = [

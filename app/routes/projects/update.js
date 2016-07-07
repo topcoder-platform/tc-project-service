@@ -81,7 +81,7 @@ module.exports = [
       updatedProps = req.body.param
     var projectId = _.parseInt(req.params.projectId)
     // prune any fields that cannot be updated directly
-    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id'])
+    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id', 'legacyProjectId'])
 
     models.sequelize.transaction((t) => {
 

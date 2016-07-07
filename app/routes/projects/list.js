@@ -14,8 +14,8 @@ var models = require('app/models'),
   util = require('app/util'),
   permissions = require('tc-core-library-js').middleware.permissions
 
-const PROJECT_ATTRIBUTES = _.keys(models.Project.rawAttributes)
-const PROJECT_MEMBER_ATTRIBUTES = _.keys(models.ProjectMember.rawAttributes)
+const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), ['utm', 'deletedAt', 'legacyProjectId'])
+const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes), ['deletedAt'])
 
 var _retrieveProjects = (req, criteria, fields) => {
   fields = fields ? fields.split(',') : []
@@ -64,7 +64,7 @@ module.exports = [
 
     if (util.hasRole(req, req.app.locals.ROLES.TOPCODER_ADMIN)) {
       // admin has access to all projects
-      
+
       return _retrieveProjects(req, criteria, req.query.fields)
         .then((result) => {
           return res.json(util.wrapResponse(req.id, result.rows, result.count))
