@@ -45,7 +45,7 @@ describe('Project', λ => {
     clearDB(done)
   })
 
-  describe.only('PATCH /projects', () => {
+  describe('PATCH /projects', () => {
     var body = {
       param: {
         title: 'updatedProject title'
