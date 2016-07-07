@@ -20,7 +20,7 @@ deployment:
   development:
     branch: dev
     commands:
-      - ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
+      - ./ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
 
 general:
   artifacts:
