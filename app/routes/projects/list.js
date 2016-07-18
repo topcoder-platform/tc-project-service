@@ -14,9 +14,20 @@ var models = require('app/models'),
   util = require('app/util'),
   permissions = require('tc-core-library-js').middleware.permissions
 
-const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), ['utm', 'deletedAt', 'legacyProjectId'])
-const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes), ['deletedAt'])
+const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes),
+   'utm',
+   'deletedAt',
+   'legacyProjectId'
+ )
+const PROJECT_MEMBER_ATTRIBUTES = _.without(
+  _.keys(models.ProjectMember.rawAttributes),
+  'deletedAt'
+)
+const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
+  _.keys(models.ProjectAttachment.rawAttributes),
+  'deletedAt'
 
+)
 var _retrieveProjects = (req, criteria, fields) => {
   fields = fields ? fields.split(',') : []
     // parse the fields string to determine what fields are to be returned
@@ -24,6 +35,19 @@ var _retrieveProjects = (req, criteria, fields) => {
     'projects': PROJECT_ATTRIBUTES,
     'project_members': PROJECT_MEMBER_ATTRIBUTES
   })
+  let retrieveAttachments = !req.query.fields || _.indexOf(fields, 'attachments') > -1
+  var includedModels = [{
+    model: models.ProjectMember,
+    as: 'members',
+    attributes: _.get(fields, 'project_members', null)
+  }]
+  if (retrieveAttachments) {
+    includedModels.push({
+      model: models.ProjectAttachment,
+      as: 'attachments',
+      attributes: PROJECT_ATTACHMENT_ATTRIBUTES
+    })
+  }
   return models.Project
     .findAndCountAll({
       logging: (str) => { req.log.debug(str)},
@@ -31,13 +55,10 @@ var _retrieveProjects = (req, criteria, fields) => {
       limit : criteria.limit,
       offset: criteria.offset,
       attributes: _.get(fields, 'projects', null),
-      include: [{
-        model: models.ProjectMember,
-        as: 'members',
-        attributes: _.get(fields, 'project_members', null)
-      }]
+      include: includedModels
     })
 }
+
 module.exports = [
   /**
    * GET projects/
@@ -77,7 +98,10 @@ module.exports = [
         .then((accessibleProjectIds) => {
           // filter based on accessible
           if (_.get(criteria.filters, 'id', null)) {
-            criteria.filters.id['$in'] = _.intersection(accessibleProjectIds, criteria.filters.id['$in'])
+            criteria.filters.id['$in'] = _.intersection(
+              accessibleProjectIds,
+              criteria.filters.id['$in']
+            )
           } else {
             criteria.filters.id = { $in : accessibleProjectIds}
           }

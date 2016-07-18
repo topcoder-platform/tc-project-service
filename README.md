@@ -18,14 +18,11 @@ Microservice to manage CRUD operations for all things Tags.
 
 #### Database
 Once you start your PostgreSQL database through docker, it will create a projectsDB.
-*To create projects table*
+*To create tables - note this will drop tables if they already exist*
 ```
-> ENVIRONMENT=development node -e "require('./app/models').Tag.sync().then((res)=> console.log('Success: ', res)).catch((err)=> console.log('Failed: ', err));"
+> ENVIRONMENT=development node -e "require('./app/models').sequelize.sync({force: true}).then((res)=> console.log('Success: ', res)).catch((err)=> console.log('Failed: ', err));"
 ```
-*To drop projects table*
-```
-> ENVIRONMENT=development node -e 'model.Tag.drop().then((res)=> console.log('Success: ', res)).catch((err)=> console.log('Failed: ', err));"
-```
+
 #### Redis
 Docker compose command will start a local redis instance as well. You should be able to connect to this instance using url `$(docker-machine ip):6379`
 

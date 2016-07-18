@@ -17,8 +17,6 @@ var jwts = {
   admin: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMyIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.uiZHiDXF-_KysU5tq-G82oBTYBR0gV_w-svLX_2O6ts'
 }
 
-var server = require('../../../server')
-
 /**
  * Clear the db data
  */
@@ -44,8 +42,9 @@ function clearDB(done) {
 }
 
 describe('Project', λ => {
-  var project1, member1
+  var project1, member1, server
   before((done) => {
+    server = require('../../../server')
     clearDB()
       .then(() => {
         var p1 = models.Project.create({
@@ -76,7 +75,7 @@ describe('Project', λ => {
   })
 
   after((done) => {
-    clearDB(done)
+    server.close(clearDB(done))
   })
 
   describe('DELETE /projects/{id}/members/{id}', () => {

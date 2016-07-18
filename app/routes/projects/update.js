@@ -117,7 +117,9 @@ module.exports = [
           return project.reload(project.id)
         })
         .then(() => {
-          req.log.debug('updated project', project.get({plain: true}))
+          project = project.get({plain: true})
+          project = _.omit(project, ['deletedAt'])
+          req.log.debug('updated project', project)
           res.json(util.wrapResponse(req.id, project))
         })
         .catch((err) => next(err))

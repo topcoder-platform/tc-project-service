@@ -38,11 +38,17 @@ router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
     .delete(require('./projectMembers/delete'))
     // .put(require('./projects/update'))
 
+router.route('/v4/projects/:projectId(\\d+)/attachments')
+    .post(require('./attachments/create'))
+
+// router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
+//     .delete(require('./projectMembers/delete'))
+
 
 // register error handler
 router.use((err, req, res, next) => {
   let content = {}
-  let httpStatus = 500
+  let httpStatus = err.status || 500
   // specific for validation errors
   if (err instanceof ev.ValidationError) {
     content.message = err.message + ": " + err.toJSON()

@@ -7,7 +7,7 @@
     "start": "nodemon server.js",
     "local-start": "nodemon server.js | ./node_modules/.bin/bunyan",
     "test": "ENVIRONMENT=test ./node_modules/.bin/istanbul cover _mocha $(find app -path '*spec.js*')",
-    "live-test": "ENVIRONMENT=test ./node_modules/.bin/mocha -w $(find app -path '*spec.js*')"
+    "live-test": "ENVIRONMENT=test ./node_modules/.bin/mocha -w $(find app -path '*spec.js*') | ./node_modules/.bin/bunyan"
   },
   "repository": {
     "type": "git",

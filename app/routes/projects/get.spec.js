@@ -6,7 +6,8 @@ var chai = require('chai'),
   _ = require('lodash'),
   sinon = require('sinon'),
   request = require('supertest'),
-  models = require('../../../app/models')
+  models = require('../../../app/models'),
+  util = require('../../../app/util')
 
 var jwts = {
   // userId = 40051331
@@ -16,8 +17,6 @@ var jwts = {
   // userId = 40051333
   admin: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMyIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.uiZHiDXF-_KysU5tq-G82oBTYBR0gV_w-svLX_2O6ts'
 }
-
-var server = require('../../../server')
 
 /**
  * Clear the db data
@@ -39,13 +38,20 @@ function clearDB(done) {
       })
     })
     .then(() => {
+      return models.ProjectAttachment.truncate({
+        cascade: true,
+        logging: false
+      })
+    })
+    .then(() => {
       if (done) done()
     })
 }
 
-describe('Project', λ => {
-  var project1, project2
+describe('GET Project', λ => {
+  var project1, project2, server
   before((done) => {
+    server = require('../../../server')
     clearDB()
       .then(() => {
         var p1 = models.Project.create({
@@ -93,11 +99,14 @@ describe('Project', λ => {
         })
         return Promise.all([p1, p2])
           .then(() => done())
+          .catch((err) => {
+            console.log(err)
+          })
       })
   })
 
   after((done) => {
-    clearDB(done)
+    server.close(clearDB(done))
   })
 
   describe('GET /projects/{id}', () => {
@@ -139,6 +148,7 @@ describe('Project', λ => {
           }
           var resJson = res.body.result.content
           should.exist(resJson)
+          should.not.exist(resJson.deletedAt)
           should.not.exist(resJson.billingAccountId)
           should.exist(resJson.title)
           resJson.status.should.be.eql('draft')
@@ -163,6 +173,63 @@ describe('Project', λ => {
           should.exist(resJson)
           done()
         })
+    })
+
+    it('should return attachment with downloadUrl', (done) => {
+      models.ProjectAttachment.create({
+        projectId: project1.id,
+        filePath: 'projects/1/spec.pdf',
+        contentType: 'application/pdf',
+        createdBy: 1,
+        updatedBy: 1,
+        title: 'spec.pdf',
+        description: 'blah'
+      }).then((attachment) => {
+        var mockHttpClient = {
+          defaults: { headers: { common: {} } },
+          post: () => {
+            return new Promise((resolve, reject) => {
+              return resolve({
+                status: 200,
+                data: {
+                  result: {
+                    status: 200,
+                    content: {
+                      filePath: 'projects/1/spec.pdf',
+                      preSignedURL: 'https://www.topcoder-dev.com/downloadUrl'
+                    }
+                  }
+                }
+              })
+            })
+          }
+        }
+        var spy = sinon.spy(mockHttpClient, 'post')
+        var stub = sinon.stub(util, 'getHttpClient', () => { return mockHttpClient } )
+
+        request(server)
+          .get('/v4/projects/' + project1.id)
+          .set({
+            'Authorization': 'Bearer ' + jwts.admin
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            spy.should.have.been.calledOnce
+            resJson.attachments.should.have.lengthOf(1)
+            resJson.attachments[0].filePath.should.equal(attachment.filePath)
+            resJson.attachments[0].downloadUrl.should.exist
+            stub.restore()
+            done()
+          })
+
+      })
+
     })
   })
 

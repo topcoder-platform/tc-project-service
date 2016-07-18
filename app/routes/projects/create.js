@@ -94,6 +94,8 @@ module.exports = [
           // TODO create direct project
           // remove utm details & deletedAt field
           newProject = _.omit(newProject, ['deletedAt', 'utm', 'legacyProjectId'])
+          // add an empty attachments array
+          newProject.attachments = []
           req.app.emit('internal.project.draft-created', newProject)
 
           res.status(201).json(util.wrapResponse(req.id, newProject))

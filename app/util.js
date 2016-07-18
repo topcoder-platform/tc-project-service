@@ -10,6 +10,7 @@
 
 var _ = require('lodash'),
   querystring = require('querystring'),
+  AWS = require('aws-sdk'),
   config = require('config')
 
 var util = _.cloneDeep(require('tc-core-library-js').util(config))
@@ -27,7 +28,6 @@ _.assignIn(util, {
       error: err
     })
     let apiErr = new Error(msg)
-    let details = err.details || msg
     _.assign(apiErr, {
       status: _.get(err, 'status', 500),
       details: _.get(err, 'details', msg)
@@ -83,6 +83,11 @@ _.assignIn(util, {
     return fields
   },
 
+  /**
+   * [description]
+   * @param  {[type]} queryFilter [description]
+   * @return {[type]}             [description]
+   */
   parseQueryFilter: (queryFilter) => {
     queryFilter = querystring.parse(queryFilter)
     // convert in to array
@@ -96,8 +101,69 @@ _.assignIn(util, {
       queryFilter.id['$in'] = _.map(queryFilter.id['$in'], _.parseInt)
     }
     return queryFilter
-  }
+  },
 
+  /**
+   * Moves file from source to destination
+   * @param  {object} req    request object
+   * @param  {object} source source object
+   * @param  {string} dest   destination url
+   * @return {promise}       promise
+   */
+  s3FileTransfer: (req, source, dest) => {
+    return new Promise((resolve, reject) => {
+      var cmdStr = _.join([
+        'aws s3 mv',
+        source,
+        dest,
+        '--region us-east-1'
+      ], ' ')
+
+      const exec = require('child_process').exec
+      const child = exec(cmdStr, (error, stdout, stderr) => {
+        req.log.debug(`s3FileTransfer: stdout: ${stdout}`)
+        req.log.debug(`s3FileTransfer: stderr: ${stderr}`)
+        if (error !== null) {
+          req.log.error(`exec error: ${error}`)
+          return reject(error)
+        }
+        return resolve({success: true})
+      })
+    })
+  },
+
+
+  /**
+   * retrieve download urls for all attachments
+   * @param  {[type]} req         original request
+   * @param  {[type]} attachments list of attachments to retrieve urls for
+   * @return {[type]}             [description]
+   */
+  getFileDownloadUrl: (req, filePath) => {
+    if (!filePath) {
+      return Promise.reject( new Error('file path empty'))
+    }
+    let fileServiceUrl = config.get('fileServiceEndpoint')
+    if (fileServiceUrl.substr(-1) !== '/') fileServiceUrl += '/'
+    // get presigned Url
+    var httpClient = util.getHttpClient(req)
+    httpClient.defaults.headers.common['Authorization'] = req.headers.authorization
+    return httpClient.post(fileServiceUrl + 'downloadurl', {
+        param: {
+          filePath: filePath
+        }
+      })
+      .then((resp) => {
+        req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2))
+        if (resp.status !== 200 || resp.data.result.status !== 200) {
+          return Promise.reject(new Error("Unable to fetch pre-signed url"))
+        }
+        return [
+          filePath,
+          resp.data.result.content.preSignedURL
+        ]
+      })
+    }
 })
 
 module.exports = util
