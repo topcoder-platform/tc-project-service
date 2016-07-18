@@ -1,15 +1,19 @@
 {
   "authSecret": "secret",
   "logLevel": "info",
-  "version": "v3",
+  "version": "v4",
   "captureLogs": "false",
   "logentriesToken": "",
-  "rabbitmqURL": "amqp://dockerhost:5672",
-  "esUrl": "//localhost:9200",
+  "rabbitmqURL": "",
+  "esUrl": "",
   "pubsubQueueName": "project.service",
   "pubsubExchangeName": "projects",
+  "fileServiceEndpoint": "",
+  "attachmentsS3Bucket": "topcoder-prod-media",
+  "projectAttachmentPathPrefix": "projects",
+  "projectAttachmentPathSuffix": "attachments",
   "dbConfig": {
-    "masterUrl": "postgres://coder:mysecretpassword@dockerhost:5432/projectsdb",
+    "masterUrl": "",
     "maxPoolSize": 50,
     "minPoolSize": 4,
     "idleTimeout": 1000

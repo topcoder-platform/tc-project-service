@@ -105,11 +105,11 @@ function gracefulShutdown() {
       logger.info('Gracefully shutting down server')
       process.exit()
     }).catch((err) => {
-      console.log(err)
+      logger.error(err)
     })
   // if after
    setTimeout(function() {
-       console.error("Could not close connections in time, forcefully shutting down");
+       logger.error("Could not close connections in time, forcefully shutting down");
        process.exit()
   }, 10*1000);
 }

@@ -38,6 +38,12 @@ router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
     .delete(require('./projectMembers/delete'))
     // .put(require('./projects/update'))
 
+router.route('/v4/projects/:projectId(\\d+)/attachments')
+    .post(require('./attachments/create'))
+
+// router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
+//     .delete(require('./projectMembers/delete'))
+
 
 // register error handler
 router.use((err, req, res, next) => {

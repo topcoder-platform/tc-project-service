@@ -6,6 +6,7 @@ var chai = require('chai'),
   _ = require('lodash'),
   sinon = require('sinon'),
   request = require('supertest'),
+  util     = require('../../../app/util'),
   models = require('../../../app/models')
 
 var jwts = {
@@ -18,6 +19,7 @@ var jwts = {
 }
 
 
+
 /**
  * Clear the db data
  */
@@ -25,27 +27,36 @@ function clearDB(done) {
   return models.sequelize.sync({
       force: true
     })
-    .then(() => {
-      return models.Project.truncate({
-        cascade: true,
-        logging: false
-      })
-    })
-    .then(() => {
-      return models.ProjectMember.truncate({
-        cascade: true,
-        logging: false
-      })
-    })
+    // .then(() => {
+    //   return models.Project.truncate({
+    //     cascade: true,
+    //     logging: false
+    //   })
+    // })
+    // .then(() => {
+    //   return models.ProjectMember.truncate({
+    //     cascade: true,
+    //     logging: false
+    //   })
+    // })
     .then(() => {
       if (done) done()
     })
 }
 
-describe('Project Members', λ => {
+var body = {
+  title: "Spec.pdf",
+  description: "kindly do the needfool... ",
+  filePath: "projects/1/spec.pdf",
+  s3Bucket: "submissions-staging-dev",
+  contentType: "application/pdf"
+}
+describe('Project Attachments', λ => {
   var project1, server
   before((done) => {
     server = require('../../../server')
+
+    // mocks
 
     clearDB()
       .then(() => {
@@ -78,55 +89,90 @@ describe('Project Members', λ => {
     server.close(clearDB(done))
   })
 
-  describe('POST /projects/{id}/members/', () => {
+  describe('POST /projects/{id}/attachments/', () => {
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .post('/v4/projects/' + project1.id + '/members/')
+        .post('/v4/projects/' + project1.id + '/attachments/')
         .set({
           'Authorization': 'Bearer ' + jwts.member
         })
-        .send({ param: {userId: 1, role: 'customer'}})
+        .send({ param: body })
         .expect('Content-Type', /json/)
         .expect(403, done)
     })
 
-    it('should return 400 if user is already registered', (done) => {
+    it('should return 201 return attachment record', (done) => {
+      var mockHttpClient = {
+        defaults: { headers: { common: {} } },
+        post: () => {
+          return new Promise((resolve, reject) => {
+            return resolve({
+              status: 200,
+              data: {
+                status: 200,
+                result: {
+                  success: true,
+                  status: 200,
+                  content: {
+                    filePath: "tmp/spec.pdf",
+                    preSignedURL: "www.topcoder.com/media/spec.pdf"
+                  }
+                }
+              }
+            })
+          })
+        },
+        get: () => {
+          return new Promise((resolve, reject) => {
+            return resolve({
+              status: 200,
+              data: {
+                result: {
+                  success: true,
+                  status: 200,
+                  content: {
+                    filePath: "tmp/spec.pdf",
+                    preSignedURL: "http://topcoder-media.s3.amazon.com/projects/1/spec.pdf"
+                  }
+                }
+              }
+            })
+          })
+        }
+      }
+      var postSpy = sinon.spy(mockHttpClient, 'post')
+      var getSpy = sinon.spy(mockHttpClient, 'get')
+      var stub = sinon.stub(util, 'getHttpClient', () => { return mockHttpClient } )
+      // mock util s3FileTransfer
+      util.s3FileTransfer = (req, source, dest) => {
+        console.log(source, dest)
+        return Promise.resolve(true)
+      }
       request(server)
-        .post('/v4/projects/' + project1.id + '/members/')
-        .set({
-          'Authorization': 'Bearer ' + jwts.admin
-        })
-        .send({ param: {userId: 40051332, role: 'customer'}})
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            return done(err)
-          }
-          res.body.result.status.should.equal(400)
-          done()
-        })
-    })
-
-    it('should return 201 and register member', (done) => {
-      request(server)
-        .post('/v4/projects/' + project1.id + '/members/')
+        .post('/v4/projects/' + project1.id + '/attachments/')
         .set({
           'Authorization': 'Bearer ' + jwts.copilot
         })
-        .send({ param: {userId: 1, role: 'customer'}})
+        .send({ param: body })
         .expect('Content-Type', /json/)
         .expect(201)
         .end(function(err, res) {
           if (err) {
             return done(err)
           }
+
           var resJson = res.body.result.content
           should.exist(resJson)
-          resJson.role.should.equal('customer')
-          resJson.isPrimary.should.be.truthy
-          resJson.projectId.should.equal(project1.id)
-          resJson.userId.should.equal(1)
+
+
+          postSpy.should.have.been.calledOnce
+          getSpy.should.have.been.calledOnce
+          stub.restore()
+          console.log(JSON.stringify(resJson, null, 2))
+          // resJson.role.should.equal('customer')
+          // resJson.isPrimary.should.be.truthy
+          // resJson.projectId.should.equal(project1.id)
+          // resJson.userId.should.equal(1)
           done()
         })
     })

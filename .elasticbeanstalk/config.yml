@@ -1,4 +1,6 @@
 branch-defaults:
+  2-project-attachment:
+    environment: tc-project-api-v4-dev
   dev:
     ec2_keyname: topcoder-dev-vpc-app
     environment: tc-project-api-v4-dev

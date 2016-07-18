@@ -17,8 +17,6 @@ var jwts = {
   admin: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMyIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.uiZHiDXF-_KysU5tq-G82oBTYBR0gV_w-svLX_2O6ts'
 }
 
-var server = require('../../../server')
-
 /**
  * Clear the db data
  */
@@ -43,9 +41,10 @@ function clearDB(done) {
     })
 }
 
-describe('Project', λ => {
-  var project1, project2
+describe('LIST Project', λ => {
+  var project1, project2, server
   before((done) => {
+    server = require('../../../server')
     clearDB()
       .then(() => {
         var p1 = models.Project.create({
@@ -76,7 +75,16 @@ describe('Project', λ => {
             createdBy: 1,
             updatedBy: 1
           })
-          return Promise.all([pm1, pm2])
+          var pa1 = models.ProjectAttachment.create({
+            title: 'Spec',
+            projectId: project1.id,
+            description: "specification",
+            filePath: "projects/1/spec.pdf",
+            contentType: "application/pdf",
+            createdBy: 1,
+            updatedBy: 1
+          })
+          return Promise.all([pm1, pm2, pa1])
         })
 
         var p2 = models.Project.create({
@@ -104,9 +112,9 @@ describe('Project', λ => {
       })
   })
 
-  // after((done) => {
-  //   clearDB(done)
-  // })
+  after((done) => {
+    server.close(clearDB(done))
+  })
 
   describe('GET /projects/', () => {
     it('should return 403 if user is not authenticated', (done) => {

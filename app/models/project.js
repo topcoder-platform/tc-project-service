@@ -43,7 +43,7 @@ module.exports = function(sequelize, DataTypes) {
     timestamps: true,
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
-    deletedAt: true,
+    deletedAt: 'deletedAt',
     indexes: [
       { fields: ['status'] },
       { fields: ['legacyProjectId'] },
@@ -52,6 +52,7 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: (models) => {
         Project.hasMany(models.ProjectMember, { as : 'members', foreignKey: 'projectId' })
+        Project.hasMany(models.ProjectAttachment, { as : 'attachments', foreignKey: 'projectId' })
       }
     }
   })

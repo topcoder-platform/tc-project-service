@@ -1,4 +1,5 @@
 {
   "pubsubQueueName": "dev.project.service",
-  "pubsubExchangeName": "dev.projects"
+  "pubsubExchangeName": "dev.projects",
+  "attachmentsS3Bucket": "topcoder-dev-media"
 }
