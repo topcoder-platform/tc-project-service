@@ -21,14 +21,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isIn: [['generic', 'design', 'design+dev']]
+        isIn: [['generic', 'visual_design', 'visual_prototype', 'app_dev']]
       }
     },
     status: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isIn: [['draft', 'pending_approval', 'active', 'completed', 'cancelled']]
+        isIn: [['draft', 'in_review', 'reviewed', 'active', 'completed', 'cancelled']]
       }
     },
     details: { type: DataTypes.JSON },
