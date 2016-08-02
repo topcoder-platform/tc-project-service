@@ -2,6 +2,7 @@
 
 var util = require('app/util'),
   models = require('app/models'),
+  constants = require('app/constants'),
   _ = require('lodash')
 
 /**
@@ -16,10 +17,10 @@ module.exports = (req) => {
         req.context = req.context || {}
         req.context.currentProjectMembers = members
         // check if auth user has acecss to this project
-        let hasAccess = util.hasRole(req, req.app.locals.ROLES.TOPCODER_ADMIN)
-          || util.hasRole(req, req.app.locals.ROLES.TOPCODER_MANAGER)
+        let hasAccess = util.hasRole(req, constants.USER_ROLE.TOPCODER_ADMIN)
+          || util.hasRole(req, constants.USER_ROLE.TOPCODER_MANAGER)
           || !_.isUndefined(_.find(members, (m) => {return m.userId === req.authUser.userId}))
-        
+
         if (!hasAccess) {
           // user is not an admin nor is a registered project member
           return reject(new Error('You do not have permissions to perform this action'))

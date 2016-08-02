@@ -13,6 +13,7 @@ var models = require('app/models'),
   _        = require('lodash'),
   Joi      = require('joi'),
   util     = require('app/util'),
+  constants = require('app/constants'),
   permissions = require('tc-core-library-js').middleware.permissions
 
 const createProjectValdiations = {
@@ -34,7 +35,7 @@ const createProjectValdiations = {
         data: Joi.string().max(300) // TODO - restrict length
       }).allow(null),
       // TODO - add more types
-      type: Joi.any().valid('generic', 'design', 'design+dev'),
+      type: Joi.any().valid(_.values(constants.PROJECT_TYPE)),
       details: Joi.any(),
       challengeEligibility: Joi.array().items(Joi.object().keys({
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
@@ -55,7 +56,9 @@ module.exports = [
    */
   (req, res, next) => {
     var project = req.body.param
-
+    const userRole = util.hasRole(req, constants.USER_ROLE.TOPCODER_MANAGER)
+                      ? constants.PROJECT_MEMBER_ROLE.TOPCODER_MANAGER
+                      : constants.PROJECT_MEMBER_ROLE.CUSTOMER
     // set defaults
     _.defaults(project, {
         createdBy: req.authUser.userId,
@@ -66,12 +69,12 @@ module.exports = [
       })
       // override values
     _.assign(project, {
-      status: 'draft',
+      status: constants.PROJECT_STATUS.DRAFT,
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       members: [{
         isPrimary: true,
-        role: util.hasRole(req, req.app.locals.ROLES.TOPCODER_MANAGER) ? 'manager': 'customer',
+        role: userRole,
         userId: req.authUser.userId,
         updatedBy: req.authUser.userId,
         createdBy: req.authUser.userId,

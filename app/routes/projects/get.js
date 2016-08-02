@@ -25,6 +25,7 @@ module.exports = [
    */
   (req, res, next) => {
     const projectId = Number(req.params.projectId)
+    console.log('PROJECT_ID', projectId)
     var fields = req.query.fields
     fields = fields ? fields.split(',') : []
       // parse the fields string to determine what fields are to be returned
@@ -40,6 +41,7 @@ module.exports = [
         raw: true
       })
       .then((_project) => {
+        console.log("FOUND project", _project)
         project = _project
         if (!project) {
           // returning 404

@@ -13,6 +13,7 @@ var models = require('app/models'),
   _        = require('lodash'),
   Joi      = require('joi'),
   util     = require('app/util'),
+  constants = require('app/constants'),
   permissions = require('tc-core-library-js').middleware.permissions
 
 const updateProjectValdiations = {
@@ -22,7 +23,7 @@ const updateProjectValdiations = {
       title: Joi.string(),
       description: Joi.string(),
       billingAccountId: Joi.string(),
-      status: Joi.any().valid('draft', 'pending-approval', 'active', 'completed', 'paused', 'cancelled'),
+      status: Joi.any().valid(_.values(constants.PROJECT_STATUS)),
       estimatedPrice: Joi.number().precision(2).positive().allow(null),
       actualPrice: Joi.number().precision(2).positive(),
       terms: Joi.array().items(Joi.number().positive()),
@@ -31,7 +32,7 @@ const updateProjectValdiations = {
         type: Joi.any().valid('github', 'jira', 'asana', 'other'),
         data: Joi.string().max(300) // TODO - restrict length
       }).allow(null),
-      type: Joi.any().valid('generic', 'design', 'design+dev'),
+      type: Joi.any().valid(_.values(constants.PROJECT_TYPE)),
       details: Joi.any(),
       memers: Joi.any(),
       createdBy: Joi.any(),

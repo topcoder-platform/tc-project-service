@@ -89,7 +89,7 @@ describe('Project Attachments', λ => {
     server.close(clearDB(done))
   })
 
-  describe('POST /projects/{id}/attachments/', () => {
+  describe.skip('POST /projects/{id}/attachments/', () => {
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
         .post('/v4/projects/' + project1.id + '/attachments/')

@@ -86,7 +86,7 @@ describe('GET Project', λ => {
         })
 
         var p2 = models.Project.create({
-          type: 'design',
+          type: 'visual_design',
           billingAccountId: '1',
           title: 'test2',
           description: 'test project2',

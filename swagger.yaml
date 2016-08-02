@@ -292,7 +292,7 @@ definitions:
       type:
         type: string
         description: project type
-        enum: ["generic", "design", "design+dev", "...from product offerings..."]
+        enum: ["generic", "visual_design", "visual_prototype", "app_dev"]
       challengeEligibility:
         description: List of eligibility criteria (one entry per role)
         type: array

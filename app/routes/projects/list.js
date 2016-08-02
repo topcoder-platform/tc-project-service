@@ -12,6 +12,7 @@ var models = require('app/models'),
   _ = require('lodash'),
   Joi = require('joi'),
   util = require('app/util'),
+  constants = require('app/constants'),
   permissions = require('tc-core-library-js').middleware.permissions
 
 const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes),
@@ -83,7 +84,7 @@ module.exports = [
     }
     req.log.debug(criteria)
 
-    if (util.hasRole(req, req.app.locals.ROLES.TOPCODER_ADMIN)) {
+    if (util.hasRole(req, constants.USER_ROLE.TOPCODER_ADMIN)) {
       // admin has access to all projects
 
       return _retrieveProjects(req, criteria, req.query.fields)

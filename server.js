@@ -81,17 +81,6 @@ app.use(router)
 require('app/events/projects')(app, logger)
 
 // =======================
-// Global - locals
-// =======================
-_.assign(app.locals, {
-  ROLES: {
-    TOPCODER_ADMIN: 'administrator',
-    TOPCODER_MANAGER: 'Topcoder Manager',
-    COPILOT: 'Topcoder copilot'
-  }
-})
-
-// =======================
 // Initialize services
 // =======================
 require('app/services')(app, logger)

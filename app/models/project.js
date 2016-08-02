@@ -1,4 +1,6 @@
 'use strict'
+const constants = require('../constants'),
+  _ = require('lodash')
 
 module.exports = function(sequelize, DataTypes) {
   var Project = sequelize.define('Project', {
@@ -21,14 +23,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isIn: [['generic', 'visual_design', 'visual_prototype', 'app_dev']]
+        isIn: [_.values(constants.PROJECT_TYPE)]
       }
     },
     status: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isIn: [['draft', 'in_review', 'reviewed', 'active', 'completed', 'cancelled']]
+        isIn: [_.values(constants.PROJECT_STATUS)]
       }
     },
     details: { type: DataTypes.JSON },

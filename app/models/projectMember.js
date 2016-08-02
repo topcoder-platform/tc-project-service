@@ -1,5 +1,6 @@
 'use strict'
-var _ = require('lodash')
+var _ = require('lodash'),
+  constants = require('../constants')
 
 module.exports = function(sequelize, DataTypes) {
   var ProjectMember = sequelize.define('ProjectMember', {
@@ -9,7 +10,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isIn: [['customer', 'manager', 'copilot']]
+        isIn: [_.values(constants.PROJECT_MEMBER_ROLE)]
       }
     },
     isPrimary: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
