@@ -46,9 +46,10 @@
     "istanbul": "^0.4.3",
     "mocha": "^2.5.3",
     "nodemon": "^1.9.1",
+    "really-need": "^1.9.2",
     "sequelize-cli": "^2.4.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "supertest": "^1.2.0"
+    "supertest": "^2.0.0"
   }
 }

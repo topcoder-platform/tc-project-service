@@ -49,15 +49,27 @@ var _retrieveProjects = (req, criteria, fields) => {
       attributes: PROJECT_ATTACHMENT_ATTRIBUTES
     })
   }
-  return models.Project
-    .findAndCountAll({
+
+  var promises = [
+    models.Project.findAll({
       logging: (str) => { req.log.debug(str)},
       where: criteria.filters,
       limit : criteria.limit,
       offset: criteria.offset,
       attributes: _.get(fields, 'projects', null),
       include: includedModels
+    }),
+    models.Project.count({
+      logging: (str) => { req.log.debug(str)},
+      where: criteria.filters
     })
+  ]
+  return Promise.all(promises)
+    .then(result => {
+      return { rows: result[0], count: result[1] }
+    })
+
+
 }
 
 module.exports = [
@@ -88,15 +100,15 @@ module.exports = [
       // admin has access to all projects
 
       return _retrieveProjects(req, criteria, req.query.fields)
-        .then((result) => {
+        .then(result => {
           return res.json(util.wrapResponse(req.id, result.rows, result.count))
         })
-        .catch((err) => next(err))
+        .catch(err => next(err))
     } else {
       // determine if user has access to the project being retreived
       return models.ProjectMember
         .getProjectIdsForUser(req.authUser.userId)
-        .then((accessibleProjectIds) => {
+        .then(accessibleProjectIds => {
           // filter based on accessible
           if (_.get(criteria.filters, 'id', null)) {
             criteria.filters.id['$in'] = _.intersection(
@@ -108,10 +120,10 @@ module.exports = [
           }
           return _retrieveProjects(req, criteria, req.query.fields)
         })
-        .then((result) => {
+        .then(result => {
           return res.json(util.wrapResponse(req.id, result.rows, result.count))
         })
-        .catch((err) => next(err))
+        .catch(err => next(err))
     }
   }
 ]

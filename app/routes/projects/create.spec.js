@@ -9,44 +9,20 @@ var chai = require('chai'),
   request = require('supertest'),
   util = require('../../../app/util'),
   models = require('../../../app/models'),
-  RabbitMQService = require('../../../app/services/rabbitmq')
+  RabbitMQService = require('../../../app/services/rabbitmq'),
+  server = require('../../../app'),
+  testUtil = require('../../tests/util')
 
 sinon.stub(RabbitMQService.prototype, 'init', ()=> {})
 sinon.stub(RabbitMQService.prototype, 'publish', ()=> {console.log('publish called')})
 
-var jwts = {
-  // userId = 40051331
-  member: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W10sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMSIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.p13tStpp0A1RJjYJ2axSKCTx7lyWIS3kYtCvs8u88WM",
-  // userId = 40051332
-  copilot: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJjb3BpbG90Il0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMiIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.tY_eE9fjtKQ_Hp9XPwmhwMaaTdOYKoR09tdGgvZ8RLw",
-  // userId = 40051333
-  admin: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMyIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.uiZHiDXF-_KysU5tq-G82oBTYBR0gV_w-svLX_2O6ts"
-}
-
-
-/**
- * Clear the db data
- */
-function clearDB(done) {
-  models.sequelize.sync({force:true})
-    .then(() => {
-      return models.Project.truncate({cascade: true, logging: false})
-    })
-    .then(() => {
-      return models.ProjectMember.truncate({cascade: true, logging: false})
-    })
-    .then(() => done())
-}
-
 describe('Project', λ => {
-  var server
-  before((done) => {
-    server = require('../../../server')
-    clearDB(done)
+  before(done =>  {
+    testUtil.clearDb(done)
   })
 
-  after((done) => {
-    server.close(clearDB(done))
+  after(done =>  {
+    testUtil.clearDb(done)
   })
 
   describe('POST /projects', () => {
@@ -60,29 +36,29 @@ describe('Project', λ => {
       }
     }
 
-    it('should return 403 if user is not authenticated', (done) => {
+    it('should return 403 if user is not authenticated', done =>  {
       request(server)
         .post("/v4/projects")
         .send(body)
         .expect(403,done)
     })
 
-    it('should return 422 if validations dont pass', (done) => {
+    it('should return 422 if validations dont pass', done =>  {
       let invalidBody = _.cloneDeep(body)
       delete invalidBody.param.title
       request(server)
         .post("/v4/projects")
-        .set({"Authorization": "Bearer " + jwts.member})
+        .set({"Authorization": "Bearer " + testUtil.jwts.member})
         .send(invalidBody)
         .expect('Content-Type', /json/)
         .expect(422,done)
     })
 
-    it('should return 201 if valid user and data', (done) => {
+    it('should return 201 if valid user and data', done =>  {
 
       request(server)
         .post("/v4/projects")
-        .set({"Authorization": "Bearer " + jwts.member})
+        .set({"Authorization": "Bearer " + testUtil.jwts.member})
         .send(body)
         .expect('Content-Type', /json/)
         .expect(201)

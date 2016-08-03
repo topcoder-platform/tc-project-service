@@ -7,52 +7,14 @@ var chai = require('chai'),
   sinon = require('sinon'),
   request = require('supertest'),
   models = require('../../../app/models'),
-  util = require('../../../app/util')
-
-var jwts = {
-  // userId = 40051331
-  member: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W10sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMSIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.p13tStpp0A1RJjYJ2axSKCTx7lyWIS3kYtCvs8u88WM',
-  // userId = 40051332
-  copilot: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJjb3BpbG90Il0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMiIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.tY_eE9fjtKQ_Hp9XPwmhwMaaTdOYKoR09tdGgvZ8RLw',
-  // userId = 40051333
-  admin: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzMyIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.uiZHiDXF-_KysU5tq-G82oBTYBR0gV_w-svLX_2O6ts'
-}
-
-/**
- * Clear the db data
- */
-function clearDB(done) {
-  return models.sequelize.sync({
-      force: true
-    })
-    .then(() => {
-      return models.Project.truncate({
-        cascade: true,
-        logging: false
-      })
-    })
-    .then(() => {
-      return models.ProjectMember.truncate({
-        cascade: true,
-        logging: false
-      })
-    })
-    .then(() => {
-      return models.ProjectAttachment.truncate({
-        cascade: true,
-        logging: false
-      })
-    })
-    .then(() => {
-      if (done) done()
-    })
-}
+  util = require('../../../app/util'),
+  server = require('../../../app'),
+  testUtil = require('../../tests/util')
 
 describe('GET Project', λ => {
-  var project1, project2, server
-  before((done) => {
-    server = require('../../../server')
-    clearDB()
+  var project1, project2
+  before(done =>  {
+    testUtil.clearDb()
       .then(() => {
         var p1 = models.Project.create({
           type: 'generic',
@@ -63,7 +25,7 @@ describe('GET Project', λ => {
           details: {},
           createdBy: 1,
           updatedBy: 1
-        }).then((p) => {
+        }).then(p => {
           project1 = p
             // create members
           var pm1 = models.ProjectMember.create({
@@ -94,7 +56,7 @@ describe('GET Project', λ => {
           details: {},
           createdBy: 1,
           updatedBy: 1
-        }).then((p) => {
+        }).then(p => {
           project2 = p
         })
         return Promise.all([p1, p2])
@@ -103,42 +65,44 @@ describe('GET Project', λ => {
             console.log(err)
           })
       })
+
   })
 
-  after((done) => {
-    server.close(clearDB(done))
+  after(done =>  {
+    testUtil.clearDb(done)
   })
 
   describe('GET /projects/{id}', () => {
-    it('should return 403 if user is not authenticated', (done) => {
+    it('should return 403 if user is not authenticated', done =>  {
+      console.log(server)
       request(server)
         .get('/v4/projects/' + project2.id)
         .expect(403, done)
     })
 
-    it('should return 404 if requested project doesn\'t exist', (done) => {
+    it('should return 404 if requested project doesn\'t exist', done =>  {
       request(server)
         .get('/v4/projects/14343323')
         .set({
-          'Authorization': 'Bearer ' + jwts.admin
+          'Authorization': 'Bearer ' + testUtil.jwts.admin
         })
         .expect(404, done)
     })
 
-    it('should return 404 if user does not have access to the project', (done) => {
+    it('should return 404 if user does not have access to the project', done =>  {
       request(server)
         .get('/v4/projects/' + project2.id)
         .set({
-          'Authorization': 'Bearer ' + jwts.member
+          'Authorization': 'Bearer ' + testUtil.jwts.member
         })
         .expect(403, done)
     })
 
-    it('should return the project when registerd member attempts to access the project', (done) => {
+    it('should return the project when registerd member attempts to access the project', done =>  {
       request(server)
         .get('/v4/projects/' + project1.id + '/?fields=id%2Ctitle%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId')
         .set({
-          'Authorization': 'Bearer ' + jwts.member
+          'Authorization': 'Bearer ' + testUtil.jwts.member
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -157,11 +121,11 @@ describe('GET Project', λ => {
         })
     })
 
-    it('should return the project for administrator ', (done) => {
+    it('should return the project for administrator ', done =>  {
       request(server)
         .get('/v4/projects/' + project1.id)
         .set({
-          'Authorization': 'Bearer ' + jwts.admin
+          'Authorization': 'Bearer ' + testUtil.jwts.admin
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -175,7 +139,7 @@ describe('GET Project', λ => {
         })
     })
 
-    it('should return attachment with downloadUrl', (done) => {
+    it('should return attachment with downloadUrl', done =>  {
       models.ProjectAttachment.create({
         projectId: project1.id,
         filePath: 'projects/1/spec.pdf',
@@ -210,7 +174,7 @@ describe('GET Project', λ => {
         request(server)
           .get('/v4/projects/' + project1.id)
           .set({
-            'Authorization': 'Bearer ' + jwts.admin
+            'Authorization': 'Bearer ' + testUtil.jwts.admin
           })
           .expect('Content-Type', /json/)
           .expect(200)
