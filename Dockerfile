@@ -15,14 +15,19 @@ RUN pip install awscli
 
 RUN apt-get install libpq-dev
 # Create app directory
+
 RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
 
 # Bundle app source
-COPY . /usr/src/app
-# Install app dependencies
-RUN npm install
+COPY src /usr/src/app/src
+COPY config /usr/src/app/config
+COPY node_modules /usr/src/app/node_modules
+COPY package.json /usr/src/app/
+COPY .babelrc /usr/src/app/
+COPY newrelic.js /usr/src/app/
+COPY README.md /usr/src/app/
 
+WORKDIR /usr/src/app
 
 EXPOSE 3000
 
