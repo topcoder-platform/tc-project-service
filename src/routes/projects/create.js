@@ -21,7 +21,7 @@ var  permissions = require('tc-core-library-js').middleware.permissions
 const createProjectValdiations = {
   body: {
     param: Joi.object().keys({
-      title: Joi.string().required(),
+      name: Joi.string().required(),
       description: Joi.string().required(),
       billingAccountId: Joi.string(),
       utm: Joi.object().keys({
@@ -93,8 +93,8 @@ module.exports = [
         })
         .then((_newProject) => {
           newProject = _newProject.get({plain: true})
-          req.log.debug('new project created (id# %d, title: %s)',
-            newProject.id, newProject.title)
+          req.log.debug('new project created (id# %d, name: %s)',
+            newProject.id, newProject.name)
 
           // TODO create direct project
           // remove utm details & deletedAt field

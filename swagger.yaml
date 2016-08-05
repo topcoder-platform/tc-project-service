@@ -265,11 +265,11 @@ definitions:
   NewProject:
     type: object
     required:
-       - title
+       - name
        - description
        - type
     properties:
-      title:
+      name:
         type: string
         description: project name
       description:
@@ -346,7 +346,7 @@ definitions:
         description: unique identifier in direct
         type: integer
         format: int64
-      title:
+      name:
         type: string
         description: project name
       description:

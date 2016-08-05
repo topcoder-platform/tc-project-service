@@ -13,7 +13,7 @@ import testUtil from '../../tests/util'
 var should = chai.should()
 
 var body = {
-  title: "Spec.pdf",
+  name: "Spec.pdf",
   description: "kindly do the needfool... ",
   filePath: "projects/1/spec.pdf",
   s3Bucket: "submissions-staging-dev",
@@ -28,7 +28,7 @@ describe('Project Attachments', λ => {
         var p1 = models.Project.create({
           type: 'generic',
           billingAccountId: '1',
-          title: 'test1',
+          name: 'test1',
           description: 'test project1',
           status: 'draft',
           details: {},

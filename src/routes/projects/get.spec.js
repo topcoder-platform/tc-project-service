@@ -19,7 +19,7 @@ describe('GET Project', λ => {
         var p1 = models.Project.create({
           type: 'generic',
           billingAccountId: '1',
-          title: 'test1',
+          name: 'test1',
           description: 'test project1',
           status: 'draft',
           details: {},
@@ -50,7 +50,7 @@ describe('GET Project', λ => {
         var p2 = models.Project.create({
           type: 'visual_design',
           billingAccountId: '1',
-          title: 'test2',
+          name: 'test2',
           description: 'test project2',
           status: 'draft',
           details: {},
@@ -99,7 +99,7 @@ describe('GET Project', λ => {
 
     it('should return the project when registerd member attempts to access the project', done =>  {
       request(server)
-        .get('/v4/projects/' + project1.id + '/?fields=id%2Ctitle%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId')
+        .get('/v4/projects/' + project1.id + '/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId')
         .set({
           'Authorization': 'Bearer ' + testUtil.jwts.member
         })
@@ -113,7 +113,7 @@ describe('GET Project', λ => {
           should.exist(resJson)
           should.not.exist(resJson.deletedAt)
           should.not.exist(resJson.billingAccountId)
-          should.exist(resJson.title)
+          should.exist(resJson.name)
           resJson.status.should.be.eql('draft')
           resJson.members.should.have.lengthOf(2)
           done()
@@ -145,7 +145,7 @@ describe('GET Project', λ => {
         contentType: 'application/pdf',
         createdBy: 1,
         updatedBy: 1,
-        title: 'spec.pdf',
+        name: 'spec.pdf',
         description: 'blah'
       }).then((attachment) => {
         var mockHttpClient = {

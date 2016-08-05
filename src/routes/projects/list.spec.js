@@ -20,7 +20,7 @@ describe('LIST Project', λ => {
         var p1 = models.Project.create({
           type: 'generic',
           billingAccountId: '1',
-          title: 'test1',
+          name: 'test1',
           description: 'test project1',
           status: 'active',
           details: {},
@@ -60,7 +60,7 @@ describe('LIST Project', λ => {
         var p2 = models.Project.create({
           type: 'visual_design',
           billingAccountId: '1',
-          title: 'test2',
+          name: 'test2',
           description: 'test project2',
           status: 'draft',
           details: {},

@@ -31,7 +31,7 @@ describe('Project', λ => {
         description: "test project",
         details: {},
         billingAccountId: "billingAccountId",
-        title: "test project1"
+        name: "test project1"
       }
     }
 
@@ -44,7 +44,7 @@ describe('Project', λ => {
 
     it('should return 422 if validations dont pass', done =>  {
       let invalidBody = _.cloneDeep(body)
-      delete invalidBody.param.title
+      delete invalidBody.param.name
       request(server)
         .post("/v4/projects")
         .set({"Authorization": "Bearer " + testUtil.jwts.member})
@@ -68,7 +68,7 @@ describe('Project', λ => {
           var resJson = res.body.result.content
           should.exist(resJson)
           should.exist(resJson.billingAccountId)
-          should.exist(resJson.title)
+          should.exist(resJson.name)
           resJson.status.should.be.eql('draft')
           resJson.type.should.be.eql(body.param.type)
           resJson.members.should.have.lengthOf(1)

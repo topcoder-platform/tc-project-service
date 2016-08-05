@@ -24,14 +24,14 @@ describe('Project', λ => {
   describe('PATCH /projects', () => {
     var body = {
       param: {
-        title: 'updatedProject title'
+        name: 'updatedProject name'
       }
     }
     before(done =>  {
       var p1 = models.Project.create({
         type: 'generic',
         billingAccountId: '1',
-        title: 'test1',
+        name: 'test1',
         description: 'test project1',
         status: 'draft',
         details: {},
@@ -72,7 +72,7 @@ describe('Project', λ => {
           }
           var resJson = res.body.result.content
           should.exist(resJson)
-          resJson.title.should.equal('updatedProject title')
+          resJson.name.should.equal('updatedProject name')
           resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
           resJson.updatedBy.should.equal(40051332)
           done()

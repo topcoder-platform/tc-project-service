@@ -8,7 +8,7 @@ module.exports = function(sequelize, DataTypes) {
     legacyProjectId: { type: DataTypes.STRING, allowNull: true },
     directProjectId: DataTypes.BIGINT,
     billingAccountId: DataTypes.STRING,
-    title: { type: DataTypes.STRING, allowNull: false },
+    name: { type: DataTypes.STRING, allowNull: false },
     description: DataTypes.TEXT,
     external: DataTypes.JSON,
     utm: { type: DataTypes.JSON, allowNull: true },

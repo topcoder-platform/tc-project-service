@@ -22,7 +22,7 @@ const updateProjectValdiations = {
   body: {
     param: Joi.object().keys({
       id: Joi.number().valid(Joi.ref('$params.id')),
-      title: Joi.string(),
+      name: Joi.string(),
       description: Joi.string(),
       billingAccountId: Joi.string(),
       status: Joi.any().valid(_.values(PROJECT_STATUS)),
