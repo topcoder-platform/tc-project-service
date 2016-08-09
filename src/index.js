@@ -1,8 +1,9 @@
 'use strict'
 
 // include newrelic
-if (process.env.ENVIRONMENT !== 'test')
+if (process.env.ENVIRONMENT !== 'test' && process.env.ENVIRONMENT !== 'local') {
   require('newrelic')
+}
 
 const app = require('./app')
 

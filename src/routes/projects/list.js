@@ -60,7 +60,7 @@ var _retrieveProjects = (req, criteria, fields) => {
     }),
     models.Project.count({
       logging: (str) => { req.log.debug(str)},
-      where: criteria.filters
+      where: _.omit(criteria.filters, ['limit', 'offset']) // total count
     })
   ]
   return Promise.all(promises)

@@ -55,7 +55,7 @@
     "pg": "^4.5.5",
     "pg-native": "^1.10.0",
     "sequelize": "^3.23.0",
-    "tc-core-library-js": "^1.0.5"
+    "tc-core-library-js": "^1.0.6"
   },
   "devDependencies": {
     "babel-cli": "^6.9.0",
