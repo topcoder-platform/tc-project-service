@@ -45,8 +45,10 @@ paths:
           in: query
           description: |
             Url encoded list of Supported filters
-             - domain
+             - type
              - status
+             - memberOnly
+             - name
         - name: sort
           required: false
           description: |
@@ -130,7 +132,7 @@ paths:
 
   /projects/{projectId}/attachments:
     post:
-      description: add a new project member
+      description: add a new project attachment
       security:
         - Bearer: []
       parameters:
@@ -153,6 +155,53 @@ paths:
           description: Invalid input
           schema:
             $ref: "#/definitions/ErrorModel"
+
+  /projects/{projectId}/attachments/{id}:
+    patch:
+      description: Update an existing attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - in: path
+          name: id
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProjectAttachmentBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project
+          schema:
+            $ref: "#/definitions/NewProjectAttachmentResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    delete:
+      description: remove an existing attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - in: path
+          name: id
+          required: true
+          type: integer
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Attachment successfully removed
 
   /projects/{projectId}/members:
     post:

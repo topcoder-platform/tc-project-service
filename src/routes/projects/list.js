@@ -83,10 +83,13 @@ module.exports = [
     if (sort && sort.indexOf(" ") == -1) {
       sort = sort + ' asc'
     }
-    if (!util.isValidFilter(filters, ['id', 'status', 'type']) ||
+    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly']) ||
       (sort && _.indexOf(['createdAt', 'createdAt asc', 'createdAt desc'], sort) < 0)) {
       util.handleError('Invalid filters or sort', null, req, next)
     }
+    // check if user only wants to retrieve projects where he/she is a member
+    const memberOnly = _.get(filters, 'memberOnly', false)
+    filters = _.omit(filters, 'memberOnly')
 
     var criteria = {
       filters: filters,
@@ -95,9 +98,8 @@ module.exports = [
     }
     req.log.debug(criteria)
 
-    if (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)) {
-      // admin has access to all projects
-
+    if (!memberOnly && (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) || util.hasRole(req, USER_ROLE.TOPCODER_MANAGER))) {
+      // admins & topcoder managers can see all projects
       return _retrieveProjects(req, criteria, req.query.fields)
         .then(result => {
           return res.json(util.wrapResponse(req.id, result.rows, result.count))
