@@ -28,47 +28,66 @@ const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
   'deletedAt'
 
 )
-var _retrieveProjects = (req, criteria, fields) => {
+var _retrieveProjects = (req, criteria, sort, fields) => {
+  // order by
+  const order = sort ? [sort.split(' ')] : [['createdAt', 'asc']]
   fields = fields ? fields.split(',') : []
     // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     'projects': PROJECT_ATTRIBUTES,
     'project_members': PROJECT_MEMBER_ATTRIBUTES
   })
-  let retrieveAttachments = !req.query.fields || _.indexOf(fields, 'attachments') > -1
-  var includedModels = [{
-    model: models.ProjectMember,
-    as: 'members',
-    attributes: _.get(fields, 'project_members', null)
-  }]
-  if (retrieveAttachments) {
-    includedModels.push({
-      model: models.ProjectAttachment,
-      as: 'attachments',
-      attributes: PROJECT_ATTACHMENT_ATTRIBUTES
-    })
-  }
+  // make sure project.id is part of fields
+  if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id')
+  let retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1
+  let retrieveMembers = !req.query.fields || !!fields.project_members.length
 
-  var promises = [
-    models.Project.findAll({
-      logging: (str) => { req.log.debug(str)},
-      where: criteria.filters,
-      limit : criteria.limit,
-      offset: criteria.offset,
-      attributes: _.get(fields, 'projects', null),
-      include: includedModels
-    }),
-    models.Project.count({
-      logging: (str) => { req.log.debug(str)},
-      where: _.omit(criteria.filters, ['limit', 'offset']) // total count
-    })
-  ]
-  return Promise.all(promises)
-    .then(result => {
-      return { rows: result[0], count: result[1] }
-    })
-
-
+  return models.Project.findAndCountAll({
+    logging: (str) => { req.log.debug(str)},
+    where: criteria.filters,
+    order,
+    limit : criteria.limit,
+    offset: criteria.offset,
+    attributes: _.get(fields, 'projects', null),
+    raw: true,
+  })
+  .then( ({rows, count}) => {
+    const projectIds = _.map(rows, 'id')
+    const promises = []
+    // retrieve members
+    if (projectIds.length && retrieveMembers) {
+      promises.push(
+        models.ProjectMember.findAll({
+          attributes: _.get(fields, 'ProjectMembers'),
+          where: { projectId: { in: projectIds } },
+          raw: true
+        })
+      )
+    }
+    if (projectIds.length && retrieveAttachments) {
+      promises.push(
+        models.ProjectAttachment.findAll({
+          attributes: PROJECT_ATTACHMENT_ATTRIBUTES,
+          where: { projectId: { in: projectIds } },
+          raw: true
+        })
+      )
+    }
+    // return results after promise(s) have resolved
+    return Promise.all(promises)
+      .then(values => {
+        _.forEach(rows, p => {
+          // if values length is 1 it could be either attachments or members
+          if (retrieveMembers) {
+            p.members = _.filter(values.shift(), m => m.projectId === p.id)
+          }
+          if (retrieveAttachments) {
+            p.attachments = _.filter(values.shift(), a => a.projectId === p.id)
+          }
+        })
+        return { rows, count }
+      })
+  })
 }
 
 module.exports = [
@@ -84,7 +103,7 @@ module.exports = [
       sort = sort + ' asc'
     }
     if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly']) ||
-      (sort && _.indexOf(['createdAt', 'createdAt asc', 'createdAt desc'], sort) < 0)) {
+      (sort && _.indexOf(['createdAt', 'createdAt asc', 'createdAt desc', 'status', 'status asc', 'status desc'], sort) < 0)) {
       util.handleError('Invalid filters or sort', null, req, next)
     }
     // check if user only wants to retrieve projects where he/she is a member
@@ -100,7 +119,7 @@ module.exports = [
 
     if (!memberOnly && (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) || util.hasRole(req, USER_ROLE.TOPCODER_MANAGER))) {
       // admins & topcoder managers can see all projects
-      return _retrieveProjects(req, criteria, req.query.fields)
+      return _retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => {
           return res.json(util.wrapResponse(req.id, result.rows, result.count))
         })
