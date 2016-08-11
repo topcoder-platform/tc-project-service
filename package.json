@@ -37,7 +37,7 @@
     }
   },
   "dependencies": {
-    "app-module-path": "^1.0.6",
+    "app-module-path": "^1.0.7",
     "bluebird": "^3.4.1",
     "body-parser": "^1.15.0",
     "config": "^1.20.1",

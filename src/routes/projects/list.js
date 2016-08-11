@@ -76,11 +76,9 @@ var _retrieveProjects = (req, criteria, sort, fields) => {
     // return results after promise(s) have resolved
     return Promise.all(promises)
       .then(values => {
-        console.log('\n\nMEMBERS: ', JSON.stringify(values[0], null, 2))
         const allMembers = retrieveMembers ? values.shift() : []
         const allAttachments = retrieveAttachments ? values.shift() : []
         _.forEach(rows, p => {
-          console.log('project--', p.id)
           // if values length is 1 it could be either attachments or members
           if (retrieveMembers) {
             p.members = _.filter(allMembers, m => m.projectId === p.id)
