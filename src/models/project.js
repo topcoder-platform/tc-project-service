@@ -47,6 +47,9 @@ module.exports = function(sequelize, DataTypes) {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     indexes: [
+      { fields: ['createdAt'] },
+      { fields: ['name'] },
+      { fields: ['type'] },
       { fields: ['status'] },
       { fields: ['legacyProjectId'] },
       { fields: ['directProjectId'] }

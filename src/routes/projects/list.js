@@ -42,8 +42,12 @@ var _retrieveProjects = (req, criteria, sort, fields) => {
   let retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1
   let retrieveMembers = !req.query.fields || !!fields.project_members.length
 
-  console.log('Criteria', criteria)
-  console.log('')
+
+  // special handling for name filter
+  if (_.has(criteria.filters, 'name')) {
+    criteria.filters.name = { ilike: `%${criteria.filters.name}%`}
+  }
+
   return models.Project.findAndCountAll({
     logging: (str) => { req.log.debug(str)},
     where: criteria.filters,
@@ -106,7 +110,7 @@ module.exports = [
     if (sort && sort.indexOf(" ") == -1) {
       sort = sort + ' asc'
     }
-    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly']) ||
+    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'name']) ||
       (sort && _.indexOf(['createdAt', 'createdAt asc', 'createdAt desc', 'status', 'status asc', 'status desc'], sort) < 0)) {
       util.handleError('Invalid filters or sort', null, req, next)
     }
