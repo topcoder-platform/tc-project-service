@@ -42,6 +42,8 @@ var _retrieveProjects = (req, criteria, sort, fields) => {
   let retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1
   let retrieveMembers = !req.query.fields || !!fields.project_members.length
 
+  console.log('Criteria', criteria)
+  console.log('')
   return models.Project.findAndCountAll({
     logging: (str) => { req.log.debug(str)},
     where: criteria.filters,
@@ -140,7 +142,7 @@ module.exports = [
           } else {
             criteria.filters.id = { $in : accessibleProjectIds}
           }
-          return _retrieveProjects(req, criteria, req.query.fields)
+          return _retrieveProjects(req, criteria, sort, req.query.fields)
         })
         .then(result => {
           return res.json(util.wrapResponse(req.id, result.rows, result.count))
