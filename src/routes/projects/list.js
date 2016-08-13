@@ -110,8 +110,14 @@ module.exports = [
     if (sort && sort.indexOf(" ") == -1) {
       sort = sort + ' asc'
     }
+    const sortableProps = [
+      'createdAt', 'createdAt asc', 'createdAt desc',
+      'status', 'status asc', 'status desc',
+      'name', 'name asc', 'name desc',
+      'type', 'type asc', 'type desc'
+    ]
     if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'name']) ||
-      (sort && _.indexOf(['createdAt', 'createdAt asc', 'createdAt desc', 'status', 'status asc', 'status desc'], sort) < 0)) {
+      (sort && _.indexOf(sortableProps, sort) < 0)) {
       util.handleError('Invalid filters or sort', null, req, next)
     }
     // check if user only wants to retrieve projects where he/she is a member
