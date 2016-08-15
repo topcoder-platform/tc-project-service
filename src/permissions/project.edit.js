@@ -19,7 +19,7 @@ module.exports = (req) => {
         req.context.currentProjectMembers = members
         // check if auth user has acecss to this project
         let hasAccess = util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)
-          || util.hasRole(req, USER_ROLE.TOPCODER_MANAGER)
+          || util.hasRole(req, USER_ROLE.MANAGER)
           || !_.isUndefined(_.find(members, (m) => {return m.userId === req.authUser.userId}))
 
         if (!hasAccess) {

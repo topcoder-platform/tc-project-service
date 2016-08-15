@@ -59,8 +59,8 @@ module.exports = [
    */
       (req, res, next) => {
     var project = req.body.param
-    const userRole = util.hasRole(req, USER_ROLE.TOPCODER_MANAGER)
-        ? PROJECT_MEMBER_ROLE.TOPCODER_MANAGER
+    const userRole = util.hasRole(req, USER_ROLE.MANAGER)
+        ? PROJECT_MEMBER_ROLE.MANAGER
         : PROJECT_MEMBER_ROLE.CUSTOMER
     // set defaults
     _.defaults(project, {

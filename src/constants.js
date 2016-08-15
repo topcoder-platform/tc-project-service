@@ -17,7 +17,6 @@ export const PROJECT_STATUS = {
 }
 
 export const PROJECT_MEMBER_ROLE = {
-  TOPCODER_MANAGER : 'topcoder_manager',
   MANAGER          : 'manager',
   CUSTOMER         : 'customer',
   COPILOT          : 'copilot'
@@ -25,6 +24,6 @@ export const PROJECT_MEMBER_ROLE = {
 
 export const USER_ROLE = {
   TOPCODER_ADMIN: 'administrator',
-  TOPCODER_MANAGER: 'Topcoder Manager',
+  MANAGER: 'Manager',
   COPILOT: 'Topcoder copilot'
 }

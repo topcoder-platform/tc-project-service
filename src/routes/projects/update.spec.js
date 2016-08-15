@@ -79,7 +79,7 @@ describe('Project', () => {
               updatedBy: 1
             },{
               projectId: project1.id,
-              role: 'topcoder_manager',
+              role: 'manager',
               userId: 40051333,
               createdBy: 1,
               updatedBy: 1

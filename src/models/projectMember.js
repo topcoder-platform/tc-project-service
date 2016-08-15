@@ -27,6 +27,7 @@ module.exports = function(sequelize, DataTypes) {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     indexes: [
+      { fields: ['deletedAt'] },
       { fields: ['userId'] },
       { fields: ['role'] }
     ],

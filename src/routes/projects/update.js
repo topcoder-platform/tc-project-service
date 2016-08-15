@@ -106,7 +106,7 @@ module.exports = [
             }
             // Only project manager (user with manager role assigned) should be allowed to transition project status to 'active'.
             const members = req.context.currentProjectMembers
-            const validRoles = [PROJECT_MEMBER_ROLE.MANAGER,  PROJECT_MEMBER_ROLE.TOPCODER_MANAGER].map(x => x.toLowerCase())
+            const validRoles = [PROJECT_MEMBER_ROLE.MANAGER,  PROJECT_MEMBER_ROLE.MANAGER].map(x => x.toLowerCase())
             const matchRole = (role) => _.indexOf(validRoles, role.toLowerCase()) >= 0
             if(updatedProps.status === PROJECT_STATUS.ACTIVE &&
                 _.isUndefined(_.find(members, (m) => m.userId === req.authUser.userId && matchRole(m.role)))) {

@@ -15,6 +15,7 @@ function _getHttpClient(req){
     var httpClient = util.getHttpClient(req)
     httpClient.defaults.headers.common['Authorization'] = req.headers.authorization
     httpClient.defaults.baseURL = config.get('directProjectServiceEndpoint')
+    httpClient.defaults.timeout = 4000
     httpClient.interceptors.response.use((resp) => {
         req.log.debug('resp: ', JSON.stringify(resp.data, null, 2))
         if (resp.status !== 200 || resp.data.result.status !== 200) {
@@ -33,7 +34,7 @@ export default {
      * @param body the body contains project information
      */
     createDirectProject: (req, body) =>_getHttpClient(req)
-        .post('/direct/projects/', body),
+        .post('/projects/', body),
     /**
      * Add direct project copilot
      * @param req the request
@@ -41,7 +42,7 @@ export default {
      * @param body the body contains project copilot information
      */
     addCopilot: (req, directProjectId, body) =>_getHttpClient(req)
-        .post(`/direct/projects/${directProjectId}/copilot`, body),
+        .post(`/projects/${directProjectId}/copilot`, body),
     /**
      * Remove direct project copilot
      * @param req the request
@@ -49,7 +50,7 @@ export default {
      * @param body the body contains project copilot information
      */
     deleteCopilot: (req, directProjectId, body) =>_getHttpClient(req)
-        .delete(`/direct/projects/${directProjectId}/copilot`, body),
+        .delete(`/projects/${directProjectId}/copilot`, body),
     /**
      * Add billing account for direct project
      * @param req the request
@@ -57,6 +58,5 @@ export default {
      * @param body the body contains billing account information
      */
     addBillingAccount: (req, directProjectId, body) =>_getHttpClient(req)
-        .post(`/direct/projects/${directProjectId}/billingaccount`, body),
+        .post(`/projects/${directProjectId}/billingaccount`, body),
 }
-
