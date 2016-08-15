@@ -111,9 +111,9 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
         '200':
-          description: Successfully updated project. Returns entire project object
+          description: Successfully updated project. Returns original and updated project object
           schema:
-            $ref: "#/definitions/ProjectResponse"
+            $ref: "#/definitions/UpdateProjectResponse"
         '422':
           description: Invalid input
           schema:
@@ -248,6 +248,42 @@ paths:
             $ref: "#/definitions/ErrorModel"
         '204':
           description: Member successfully removed
+    patch:
+        security:
+          - Bearer: []
+        description: Support editing project member roles & primary option.
+        responses:
+          '403':
+            description: No permission or wrong token
+            schema:
+              $ref: "#/definitions/ErrorModel"
+          '404':
+            description: Not found
+            schema:
+              $ref: "#/definitions/ErrorModel"
+          '200':
+            description: Successfully updated project member. Returns entire project member object
+            schema:
+              $ref: "#/definitions/UpdateProjectMemberResponse"
+          '422':
+            description: Invalid input
+            schema:
+              $ref: "#/definitions/ErrorModel"
+          default:
+            description: error payload
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        parameters:
+          - $ref: "#/parameters/projectIdParam"
+          - in: path
+            name: id
+            required: true
+            type: integer
+          - name: body
+            in: body
+            required: true
+            schema:
+              $ref: "#/definitions/UpdateProjectMemberBodyParam"
 
 
 parameters:
@@ -515,6 +551,26 @@ definitions:
       param:
         $ref: "#/definitions/NewProjectMember"
 
+  UpdateProjectMember:
+      title: Project Member object
+      type: object
+      required:
+        - role
+      properties:
+        isPrimary:
+          type: boolean
+          description: primary option
+        role:
+          type: string
+          description: member role on specified project
+          enum: ["customer", "manager", "copilot"]
+
+  UpdateProjectMemberBodyParam:
+    type: object
+    properties:
+      param:
+        $ref: "#/definitions/UpdateProjectMember"
+
   NewProjectAttachment:
     title: Project attachment request
     type: object
@@ -660,6 +716,26 @@ definitions:
           content:
             $ref: "#/definitions/ProjectMember"
 
+  UpdateProjectMemberResponse:
+    title: Project member object response
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            $ref: "#/definitions/ProjectMember"
+
 
   ProjectResponse:
     title: Single project object
@@ -680,6 +756,31 @@ definitions:
             description: http status code
           content:
             $ref: "#/definitions/Project"
+
+  UpdateProjectResponse:
+    title: response with original and updated project object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            type: object
+            properties:
+              original:
+                $ref: "#/definitions/Project"
+              updated:
+                 $ref: "#/definitions/Project"
 
   ProjectListResponse:
     title: List response

@@ -10,6 +10,8 @@ if (process.env.ENVIRONMENT === 'test') {
       "captureLogs": "false",
       "logentriesToken": "",
       "rabbitmqURL": "amqp://dockerhost:5672",
+      // must be valid url with version
+      "directProjectServiceEndpoint": "https://api.topcoder-dev.com/v3",
       "dbConfig": {
           "masterUrl": "postgres://coder:mysecretpassword@dockerhost:5432/projectsdb",
           "maxPoolSize": 50,
