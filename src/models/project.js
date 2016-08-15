@@ -1,5 +1,5 @@
 'use strict'
-import { PROJECT_TYPE, PROJECT_STATUS } from '../constants'
+import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants'
 import _ from 'lodash'
 
 module.exports = function(sequelize, DataTypes) {
@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes) {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     legacyProjectId: { type: DataTypes.STRING, allowNull: true },
     directProjectId: DataTypes.BIGINT,
-    billingAccountId: DataTypes.STRING,
+    billingAccountId: DataTypes.BIGINT,
     name: { type: DataTypes.STRING, allowNull: false },
     description: DataTypes.TEXT,
     external: DataTypes.JSON,
@@ -55,6 +55,41 @@ module.exports = function(sequelize, DataTypes) {
       { fields: ['directProjectId'] }
     ],
     classMethods: {
+      /*
+       * @Co-pilots should be able to view projects any of the following conditions are met:
+       * a. they are registered active project members on the project
+       * b. any project that is in 'active' state AND does not yet have a co-pilot assigned
+       * @param userId the id of user
+       */
+      getProjectIdsForCopilot: function(userId) {
+        return this.findAll({
+          where: {
+            $or: [
+              ['EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" IS NULL AND "projectId" = "Project".id AND "userId" = ? )', userId],
+              ['"Project".status=? AND NOT EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" IS NULL AND "projectId" = "Project".id AND "role" = ? )',
+                PROJECT_STATUS.ACTIVE,  PROJECT_MEMBER_ROLE.COPILOT]
+            ]
+          },
+          attributes:['id'],
+          raw: true
+        })
+            .then((res) => {
+              return _.map(res, 'id')
+            })
+      },
+      /**
+       * Get direct project id
+       * @param id the id of project
+       */
+      getDirectProjectId: function(id) {
+        return this.findById(id, {
+          attributes:['directProjectId'],
+          raw: true
+        })
+            .then((res) => {
+              return res.directProjectId
+            })
+      },
       associate: (models) => {
         Project.hasMany(models.ProjectMember, { as : 'members', foreignKey: 'projectId' })
         Project.hasMany(models.ProjectAttachment, { as : 'attachments', foreignKey: 'projectId' })

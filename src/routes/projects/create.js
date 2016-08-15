@@ -7,6 +7,7 @@ import Joi from 'joi'
 import models from '../../models'
 import {PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE } from '../../constants'
 import util from '../../util'
+import directProject from '../../services/directProject'
 
 /**
  * API to handle creating a new project.
@@ -23,7 +24,7 @@ const createProjectValdiations = {
     param: Joi.object().keys({
       name: Joi.string().required(),
       description: Joi.string().required(),
-      billingAccountId: Joi.string(),
+      billingAccountId: Joi.number().positive(),
       utm: Joi.object().keys({
         source: Joi.string().allow(null),
         medium: Joi.string().allow(null),
@@ -56,20 +57,20 @@ module.exports = [
    * POST projects/
    * Create a project if the user has access
    */
-  (req, res, next) => {
+      (req, res, next) => {
     var project = req.body.param
     const userRole = util.hasRole(req, USER_ROLE.TOPCODER_MANAGER)
-                      ? PROJECT_MEMBER_ROLE.TOPCODER_MANAGER
-                      : PROJECT_MEMBER_ROLE.CUSTOMER
+        ? PROJECT_MEMBER_ROLE.TOPCODER_MANAGER
+        : PROJECT_MEMBER_ROLE.CUSTOMER
     // set defaults
     _.defaults(project, {
-        createdBy: req.authUser.userId,
-        updatedBy: req.authUser.userId,
-        challengeEligibility: [],
-        external: null,
-        utm: null
-      })
-      // override values
+      createdBy: req.authUser.userId,
+      updatedBy: req.authUser.userId,
+      challengeEligibility: [],
+      external: null,
+      utm: null
+    })
+    // override values
     _.assign(project, {
       status: PROJECT_STATUS.DRAFT,
       createdBy: req.authUser.userId,
@@ -85,29 +86,46 @@ module.exports = [
     models.sequelize.transaction(() => {
       var newProject = null
       return models.Project
-        .create(project, {
-          include: [{
-            model: models.ProjectMember,
-            as: 'members'
-          }]
-        })
-        .then((_newProject) => {
-          newProject = _newProject.get({plain: true})
-          req.log.debug('new project created (id# %d, name: %s)',
-            newProject.id, newProject.name)
-
-          // TODO create direct project
-          // remove utm details & deletedAt field
-          newProject = _.omit(newProject, ['deletedAt', 'utm', 'legacyProjectId'])
-          // add an empty attachments array
-          newProject.attachments = []
-          req.app.emit('internal.project.draft-created', newProject)
-
-          res.status(201).json(util.wrapResponse(req.id, newProject))
-        })
-        .catch((err) => {
-          util.handleError('Error creating project', err, req, next)
-        })
+          .create(project, {
+            include: [{
+              model: models.ProjectMember,
+              as: 'members'
+            }]
+          })
+          .then((_newProject) => {
+            newProject = _newProject
+            req.log.debug('new project created (id# %d, name: %s)',
+                newProject.id, newProject.name)
+            // create direct project with name and description
+            var body = {
+              projectName: newProject.name,
+              projectDescription: newProject.description
+            }
+            // billingAccountId is optional field
+            if(newProject.billingAccountId){
+              body.billingAccountId = newProject.billingAccountId
+            }
+            return directProject.createDirectProject(req, body)
+          })
+          .then((resp) => {
+            newProject.directProjectId = resp.data.result.content.projectId
+            return newProject.save()
+          })
+          .then(() => {
+            return newProject.reload(newProject.id)
+          })
+          .then(() => {
+            newProject = newProject.get({plain: true})
+            // remove utm details & deletedAt field
+            newProject = _.omit(newProject, ['deletedAt', 'utm', 'legacyProjectId'])
+            // add an empty attachments array
+            newProject.attachments = []
+            req.app.emit('internal.project.draft-created', newProject)
+            res.status(201).json(util.wrapResponse(req.id, newProject))
+          })
+          .catch((err) => {
+            util.handleError('Error creating project', err, req, next)
+          })
     })
   }
 ]

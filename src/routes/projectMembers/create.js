@@ -3,10 +3,12 @@
 import validate from 'express-validation'
 import _ from 'lodash'
 import Joi from 'joi'
-
 import models from '../../models'
 import util from '../../util'
+import { PROJECT_MEMBER_ROLE } from '../../constants'
+import directProject from '../../services/directProject'
 import { middleware as tcMiddleware} from 'tc-core-library-js'
+
 
 /**
  * API to add a project member.
@@ -20,7 +22,7 @@ const addMemberValidations = {
     param: Joi.object().keys({
       userId: Joi.number().required(),
       isPrimary: Joi.boolean(),
-      role: Joi.any().valid('customer', 'manager', 'copilot').required()
+      role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.COPILOT).required()
     })
   }
 }
@@ -51,24 +53,43 @@ module.exports = [
       return next(err)
     }
     // check if another member is registered for this role as primary,
-    // if not mark this memmber as primary
+    // if not mark this member as primary
     if (_.isUndefined(member.isPrimary)) {
       member.isPrimary = _.isUndefined(_.find(members, (m) => {
         return m.isPrimary && m.role === member.role
       }))
     }
     req.log.debug('creating member', member)
-      // register member
+    let newMember = null
+    // register member
     return models.ProjectMember.create(member)
-      .then((newMember) => {
-        // TODO fire event
-        req.app.emit('internal.project.member-registered', newMember)
-        res.status(201).json(util.wrapResponse(req.id, newMember))
-      })
-      .catch((err) => {
-        req.log.error('Unable to register ', err)
-        next(err)
-      })
+        .then((_newMember) => {
+          newMember = _newMember.get({plain: true})
+          if(newMember.role === PROJECT_MEMBER_ROLE.COPILOT) {
+            // Add co-pilot when a co-pilot is added to a project
+            return models.Project.getDirectProjectId(projectId)
+                .then(directProjectId => {
+                  if(directProjectId){
+                    return  directProject.addCopilot(req, directProjectId, {
+                      copilotUserId: newMember.userId
+                    })
+                  } else {
+                    return Promise.resolve()
+                  }
+                })
+          } else {
+            return Promise.resolve()
+          }
+        })
+        .then(() => {
+          // TODO fire event
+          req.app.emit('internal.project.member-registered', newMember)
+          res.status(201).json(util.wrapResponse(req.id, newMember))
+        })
+        .catch((err) => {
+          req.log.error('Unable to register ', err)
+          next(err)
+        })
 
   }
 ]

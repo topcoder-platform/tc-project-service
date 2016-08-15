@@ -9,7 +9,9 @@
     "build": "babel src -d dist --presets es2015",
     "start": "node dist",
     "prestart": "npm run -s build",
-    "lint": "./node_modules/.bin/eslint src --ignore-pattern **/*.spec.js"
+    "seed": "babel-node src/tests/seed.js --presets es2015",
+    "direct": "babel-node src/mocks/direct.js --presets es2015",
+    "lint": "./node_modules/.bin/eslint src"
   },
   "repository": {
     "type": "git",
@@ -29,7 +31,11 @@
       "sourceType": "module"
     },
     "env": {
-      "node": true
+      "node": true,
+      "mocha": true
+    },
+    "globals": {
+      "Promise": true
     },
     "rules": {
       "no-console": 0,

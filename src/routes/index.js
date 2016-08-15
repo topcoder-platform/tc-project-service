@@ -37,7 +37,7 @@ router.route('/v4/projects/:projectId(\\d+)/members')
 
 router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
     .delete(require('./projectMembers/delete'))
-    // .put(require('./projects/update'))
+    .patch(require('./projectMembers/update'))
 
 router.route('/v4/projects/:projectId(\\d+)/attachments')
     .post(require('./attachments/create'))
@@ -47,7 +47,7 @@ router.route('/v4/projects/:projectId(\\d+)/attachments')
 
 
 // register error handler
-router.use((err, req, res, next) => {
+router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint
   // complains that it is not being used.
   let content = {}
@@ -72,6 +72,9 @@ router.use((err, req, res, next) => {
   // will print stacktrace
   if (_.indexOf(['development', 'test', 'qa'], process.env.ENVIRONMENT) > -1) {
     body.result.debug = err.stack
+    if (err.details) {
+      body.result.details = err.details
+    }
   }
   err.status = err.status || 500
   req.log.error(err)

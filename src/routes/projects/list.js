@@ -8,7 +8,7 @@ import { USER_ROLE } from '../../constants'
 import util from '../../util'
 
 /**
- * API to handle retrieving a single project by id
+ * API to handle retrieving projects
  *
  * Permissions:
  * Only users that have access to the project can retrieve it.
@@ -140,8 +140,10 @@ module.exports = [
         .catch(err => next(err))
     } else {
       // determine if user has access to the project being retreived
-      return models.ProjectMember
-        .getProjectIdsForUser(req.authUser.userId)
+      var getProjectIds = util.hasRole(req, USER_ROLE.COPILOT) ?
+          models.Project.getProjectIdsForCopilot(req.authUser.userId) :
+          models.ProjectMember.getProjectIdsForUser(req.authUser.userId)
+      return getProjectIds
         .then(accessibleProjectIds => {
           // filter based on accessible
           if (_.get(criteria.filters, 'id', null)) {
