@@ -3,6 +3,7 @@ import chai from 'chai'
 import sinon from 'sinon'
 import request from 'supertest'
 
+import server from '../../app'
 import models from '../../models'
 import util from '../../util'
 import testUtil from '../../tests/util'
@@ -10,14 +11,15 @@ import testUtil from '../../tests/util'
 var should = chai.should()
 
 var body = {
-  name: "Spec.pdf",
-  description: "kindly do the needfool... ",
+  title: "Spec.pdf",
+  description: "",
+  category: 'appDefinition',
   filePath: "projects/1/spec.pdf",
   s3Bucket: "submissions-staging-dev",
   contentType: "application/pdf"
 }
-describe('Project Attachments', () => {
-  var project1, server
+describe.only('Project Attachments', () => {
+  var project1
   before(done =>  {
     // mocks
     testUtil.clearDb()
@@ -51,7 +53,7 @@ describe('Project Attachments', () => {
     testUtil.clearDb(done)
   })
 
-  describe.skip('POST /projects/{id}/attachments/', () => {
+  describe('POST /projects/{id}/attachments/', () => {
     it('should return 403 if user does not have permissions', done =>  {
       request(server)
           .post('/v4/projects/' + project1.id + '/attachments/')
@@ -120,6 +122,7 @@ describe('Project Attachments', () => {
           .expect(201)
           .end(function(err, res) {
             if (err) {
+              console.log(err)
               return done(err)
             }
 

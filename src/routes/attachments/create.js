@@ -19,7 +19,9 @@ const addAttachmentValidations = {
   body: {
     param: Joi.object().keys({
       title: Joi.string().required(),
-      description: Joi.string().optional(),
+      description: Joi.string().optional().allow(null).allow(''),
+      size: Joi.number().optional(),
+      category: Joi.string().optional(),
       filePath: Joi.string().required(),
       s3Bucket: Joi.string().required(),
       contentType: Joi.string().required()
