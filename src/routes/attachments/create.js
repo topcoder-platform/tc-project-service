@@ -20,6 +20,7 @@ const addAttachmentValidations = {
     param: Joi.object().keys({
       title: Joi.string().required(),
       description: Joi.string().optional().allow(null).allow(''),
+      category: Joi.string().optional().allow(null).allow(''),
       size: Joi.number().optional(),
       category: Joi.string().optional(),
       filePath: Joi.string().required(),
@@ -36,7 +37,8 @@ module.exports = [
   /**
    * Add project attachment
    */
-      (req, res, next) => {
+  (req, res, next) => {
+    console.log('here1')
     var data = req.body.param
     // default values
     var projectId = req.params.projectId
@@ -98,6 +100,8 @@ module.exports = [
                 createdBy: req.authUser.userId,
                 updatedBy: req.authUser.userId,
                 title: data.title,
+                size: data.size,
+                category: data.category || null,
                 description: data.description,
                 contentType: data.contentType,
                 filePath: filePath
