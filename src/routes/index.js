@@ -41,9 +41,9 @@ router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
 
 router.route('/v4/projects/:projectId(\\d+)/attachments')
     .post(require('./attachments/create'))
-
-// router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
-//     .delete(require('./projectMembers/delete'))
+router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
+    .patch(require('./attachments/update'))
+    .delete(require('./attachments/delete'))
 
 
 // register error handler

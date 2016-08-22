@@ -18,7 +18,7 @@ var body = {
   s3Bucket: "submissions-staging-dev",
   contentType: "application/pdf"
 }
-describe.only('Project Attachments', () => {
+describe('Project Attachments', () => {
   var project1
   before(done =>  {
     // mocks
