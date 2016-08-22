@@ -341,6 +341,15 @@ definitions:
           content:
             type: object
 
+  ProjectBookMark:
+    title: Project bookmark
+    type: object
+    properties:
+      title:
+        type: string
+      address:
+        type: string
+
   ProjectBodyParam:
     type: object
     properties:
@@ -378,6 +387,10 @@ definitions:
         type: string
         description: project type
         enum: ["generic", "visual_design", "visual_prototype", "app_dev"]
+      bookmarks:
+        type: array
+        items:
+          $ref: "#/definitions/ProjectBookMark"
       challengeEligibility:
         description: List of eligibility criteria (one entry per role)
         type: array
@@ -470,6 +483,10 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/ChallengeEligibility"
+      bookmarks:
+        type: array
+        items:
+          $ref: "#/definitions/ProjectBookMark"
       members:
         description: |
           READ-ONLY. List of project members.
@@ -695,6 +712,8 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this task
         readOnly: true
+
+
 
   NewProjectMemberResponse:
     title: Project member object response

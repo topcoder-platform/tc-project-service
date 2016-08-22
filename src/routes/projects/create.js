@@ -30,6 +30,10 @@ const createProjectValdiations = {
         medium: Joi.string().allow(null),
         campaign: Joi.string().allow(null)
       }).allow(null),
+      bookmarks: Joi.array().items(Joi.object().keys({
+        title: Joi.string(),
+        address: Joi.string()
+      })).optional().allow(null),
       estimatedPrice: Joi.number().precision(2).positive().optional().allow(null),
       terms: Joi.array().items(Joi.number().positive()).optional(),
       external: Joi.object().keys({
