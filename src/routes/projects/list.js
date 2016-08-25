@@ -16,9 +16,8 @@ import util from '../../util'
  */
 const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes),
    'utm',
-   'deletedAt',
-   'legacyProjectId'
- )
+   'deletedAt'
+)
 const PROJECT_MEMBER_ATTRIBUTES = _.without(
   _.keys(models.ProjectMember.rawAttributes),
   'deletedAt'

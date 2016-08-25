@@ -160,8 +160,7 @@ describe('Project', () => {
             var result = res.body.result
             result.success.should.be.true
             result.status.should.equal(200)
-            result.content.original.status.should.equal('draft')
-            result.content.updated.status.should.equal('active')
+            result.content.status.should.equal('active')
             done()
           })
     })
@@ -179,10 +178,9 @@ describe('Project', () => {
             }
             var resJson = res.body.result.content
             should.exist(resJson)
-            resJson.original.name.should.equal('test1')
-            resJson.updated.name.should.equal('updatedProject name')
-            resJson.updated.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
-            resJson.updated.updatedBy.should.equal(40051332)
+            resJson.name.should.equal('updatedProject name')
+            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+            resJson.updatedBy.should.equal(40051332)
             done()
           })
     })
@@ -249,10 +247,9 @@ describe('Project', () => {
             }
             var resJson = res.body.result.content
             should.exist(resJson)
-            resJson.original.billingAccountId.should.equal(1)
-            resJson.updated.billingAccountId.should.equal(123)
-            resJson.updated.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
-            resJson.updated.updatedBy.should.equal(40051332)
+            resJson.billingAccountId.should.equal(123)
+            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+            resJson.updatedBy.should.equal(40051332)
             postSpy.should.have.been.calledOnce
             done()
           })
@@ -275,10 +272,8 @@ describe('Project', () => {
             }
             var resJson = res.body.result.content
             should.exist(resJson)
-            resJson.updated.billingAccountId.should.equal(1)
-            resJson.updated.billingAccountId.should.equal(resJson.original.billingAccountId)
-            resJson.updated.updatedAt.should.be.equal(resJson.original.updatedAt)
-            resJson.updated.updatedBy.should.equal(resJson.original.updatedBy)
+            resJson.billingAccountId.should.equal(1)
+            resJson.billingAccountId.should.equal(1)
             done()
           })
     })
@@ -300,9 +295,9 @@ describe('Project', () => {
             }
             var resJson = res.body.result.content
             should.exist(resJson)
-            resJson.updated.billingAccountId.should.equal(1)
-            resJson.updated.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
-            resJson.updated.updatedBy.should.equal(40051333)
+            resJson.billingAccountId.should.equal(1)
+            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+            resJson.updatedBy.should.equal(40051333)
             done()
           })
     })

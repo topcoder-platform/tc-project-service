@@ -5,7 +5,6 @@ import _ from 'lodash'
 module.exports = function(sequelize, DataTypes) {
   var Project = sequelize.define('Project', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-    legacyProjectId: { type: DataTypes.STRING, allowNull: true },
     directProjectId: DataTypes.BIGINT,
     billingAccountId: DataTypes.BIGINT,
     name: { type: DataTypes.STRING, allowNull: false },
@@ -51,7 +50,6 @@ module.exports = function(sequelize, DataTypes) {
       { fields: ['name'] },
       { fields: ['type'] },
       { fields: ['status'] },
-      { fields: ['legacyProjectId'] },
       { fields: ['directProjectId'] }
     ],
     classMethods: {

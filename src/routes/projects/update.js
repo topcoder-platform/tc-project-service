@@ -13,6 +13,16 @@ import { middleware as tcMiddleware } from 'tc-core-library-js'
  */
 const permissions = tcMiddleware.permissions
 
+/**
+ * Customizer used to merge project properties -
+ * Used with lodash mergeWith, recursively merges all values except array type
+ * values which are replaced.
+ */
+const mergeCustomizer = (objValue, srcValue) => {
+  if (_.isArray(objValue))
+    return srcValue
+}
+
 const updateProjectValdiations = {
   body: {
     param: Joi.object().keys({
@@ -77,7 +87,7 @@ module.exports = [
         updatedProps = req.body.param
     var projectId = _.parseInt(req.params.projectId)
     // prune any fields that cannot be updated directly
-    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id', 'legacyProjectId'])
+    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id', 'directProjectId'])
 
     let previousValue
     models.sequelize.transaction(() => {
@@ -120,7 +130,7 @@ module.exports = [
               return Promise.resolve()
             }
             updatedProps.updatedBy = req.authUser.userId
-            _.assign(project, updatedProps)
+            _.mergeWith(project, updatedProps, mergeCustomizer)
             return project.save()
           })
           .then(() => {
@@ -145,12 +155,12 @@ module.exports = [
             project = _.omit(project, ['deletedAt'])
             req.log.debug('updated project', project)
             previousValue =  _.omit(previousValue, ['deletedAt'])
-            req.log.debug('previous project', previousValue)
-            // response original and updated project information
-            res.json(util.wrapResponse(req.id, {
+            // emit original and updated project information
+            req.app.emit('internal.project.updated', {
               original: previousValue,
               updated: project
-            }))
+            })
+            res.json(util.wrapResponse(req.id, project))
           })
           .catch((err) => next(err))
     })

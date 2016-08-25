@@ -117,7 +117,7 @@ module.exports = [
           .then(() => {
             newProject = newProject.get({plain: true})
             // remove utm details & deletedAt field
-            newProject = _.omit(newProject, ['deletedAt', 'utm', 'legacyProjectId'])
+            newProject = _.omit(newProject, ['deletedAt', 'utm'])
             // add an empty attachments array
             newProject.attachments = []
             req.app.emit('internal.project.draft-created', newProject)

@@ -19,7 +19,7 @@ import { middleware as tcMiddleware} from 'tc-core-library-js'
 
 // var permissions = require('tc-core-library-js').middleware.permissions
 const permissions = tcMiddleware.permissions
-const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), 'utm', 'deletedAt', 'legacyProjectId')
+const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), 'utm', 'deletedAt')
 const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes), 'deletedAt')
 
 module.exports = [
