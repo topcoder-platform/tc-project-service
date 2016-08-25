@@ -134,7 +134,8 @@ module.exports = [
               return Promise.resolve()
             }
             updatedProps.updatedBy = req.authUser.userId
-            _.mergeWith(project, updatedProps, mergeCustomizer)
+            const newValues = _.mergeWith({}, previousValue, updatedProps, mergeCustomizer)
+            project.set(newValues)
             return project.save()
           })
           .then(() => {
