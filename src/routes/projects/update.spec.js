@@ -301,6 +301,52 @@ describe('Project', () => {
             done()
           })
     })
+
+   it('should return 200 and update bookmarks', done =>  {
+      request(server)
+          .patch("/v4/projects/" + project1.id)
+          .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+          .send({
+              param: {
+                  bookmarks:[{
+                      title:'title1',
+                      address:'address1'
+                  }]
+              }
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function (err,res) {
+              if (err) {
+                  return done(err)
+              }
+              var resJson = res.body.result.content
+              should.exist(resJson)
+              resJson.updated.bookmarks.should.have.lengthOf(1)
+              resJson.updated.bookmarks[0].title.should.be.eql('title1')
+              resJson.updated.bookmarks[0].address.should.be.eql('address1')
+              request(server)
+                  .patch("/v4/projects/" + project1.id)
+                  .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+                  .send({
+                      param: {
+                          bookmarks: null
+                      }
+                  })
+                  .expect('Content-Type', /json/)
+                  .expect(200)
+                  .end(function (err,res) {
+                      if (err) {
+                          return done(err)
+                      }
+                      resJson = res.body.result.content
+                      should.exist(resJson)
+                      should.not.exist(resJson.updated.bookmarks);
+                      done()
+                  })
+
+          })
+  })
   })
 
 })

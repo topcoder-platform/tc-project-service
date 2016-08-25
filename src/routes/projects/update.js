@@ -39,6 +39,10 @@ const updateProjectValdiations = {
         type: Joi.any().valid('github', 'jira', 'asana', 'other'),
         data: Joi.string().max(300) // TODO - restrict length
       }).allow(null),
+      bookmarks: Joi.array().items(Joi.object().keys({
+        title: Joi.string(),
+        address: Joi.string()
+      })).optional().allow(null),
       type: Joi.any().valid(_.values(PROJECT_TYPE)),
       details: Joi.any(),
       memers: Joi.any(),

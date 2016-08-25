@@ -10,6 +10,7 @@ module.exports = function(sequelize, DataTypes) {
     name: { type: DataTypes.STRING, allowNull: false },
     description: DataTypes.TEXT,
     external: DataTypes.JSON,
+    bookmarks: DataTypes.JSON,
     utm: { type: DataTypes.JSON, allowNull: true },
     estimatedPrice: { type: DataTypes.DECIMAL(10,2), allowNull: true },
     actualPrice: { type: DataTypes.DECIMAL(10,2), allowNull: true},
