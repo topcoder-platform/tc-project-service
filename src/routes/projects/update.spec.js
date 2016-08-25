@@ -322,9 +322,9 @@ describe('Project', () => {
               }
               var resJson = res.body.result.content
               should.exist(resJson)
-              resJson.updated.bookmarks.should.have.lengthOf(1)
-              resJson.updated.bookmarks[0].title.should.be.eql('title1')
-              resJson.updated.bookmarks[0].address.should.be.eql('address1')
+              resJson.bookmarks.should.have.lengthOf(1)
+              resJson.bookmarks[0].title.should.be.eql('title1')
+              resJson.bookmarks[0].address.should.be.eql('address1')
               request(server)
                   .patch("/v4/projects/" + project1.id)
                   .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
@@ -341,7 +341,7 @@ describe('Project', () => {
                       }
                       resJson = res.body.result.content
                       should.exist(resJson)
-                      should.not.exist(resJson.updated.bookmarks);
+                      should.not.exist(resJson.bookmarks);
                       done()
                   })
 
