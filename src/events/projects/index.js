@@ -1,16 +1,17 @@
 'use strict'
 
 import _ from 'lodash'
+import { EVENT } from '../../constants'
 
 module.exports = (app, logger) => {
 
   // Handle internal events
   const internalEvents = [
-    'internal.project.draft-created',
-    'internal.project.launched',
-    'internal.project.updated',
-    'internal.project.cancelled',
-    'internal.project.completed'
+    EVENT.INTERNAL.PROJECT_DRAFT_CREATED,
+    EVENT.INTERNAL.PROJECT_LAUNCHED,
+    EVENT.INTERNAL.PROJECT_UPDATED,
+    EVENT.INTERNAL.PROJECT_CANCELLED,
+    EVENT.INTERNAL.PROJECT_COMPLETED
   ]
 
   // Publish messages to the queue
@@ -22,10 +23,10 @@ module.exports = (app, logger) => {
     })
   })
 
-  app.on('external.project.draft-created', (msg, next) => {
+  app.on(EVENT.EXTERNAL.PROJECT_DRAFT_CREATED, (msg, next) => {
     let project = JSON.parse(msg.content.toString())
     logger.debug('received msg \'project.draft-created\'', project)
-
+    // TODO insert into elasticsearch
     // callback to acknowledge the message (return Error to reject message)
     next()
   })

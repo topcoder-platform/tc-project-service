@@ -58,7 +58,7 @@ module.exports = [
         })
         // check if attachments field was requested
         if (!req.query.fields || _.indexOf(req.query.fields, 'attachments') > -1) {
-          return models.ProjectAttachment.getActiveProjectAttachments(project.id)
+          return util.getProjectAttachments(req, project.id)
         }
         else {
           // return null if attachments were not requested.
@@ -71,19 +71,7 @@ module.exports = [
           project.attachments = attachments
         }
         req.log.debug('attachment', project.attachments)
-        let promises = []
-        _.each(project.attachments, (a) => {
-          promises.push(util.getFileDownloadUrl(req, a.filePath))
-        })
-        return Promise.all(promises)
-      })
-      .then((result) => {
-        // result is an array of 'tuples' => [[path, url], [path,url]]
-        // convert it to a map for easy lookup
-        let urls = _.fromPairs(result)
-        _.each(project.attachments, (a) => {
-          a.downloadUrl = urls[a.filePath]
-        })
+
         req.log.debug('project', JSON.stringify(project, null, 2))
         res.status(200).json(util.wrapResponse(req.id, project))
       })

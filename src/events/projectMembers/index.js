@@ -1,13 +1,14 @@
 'use strict'
 
 import _ from 'lodash'
+import { EVENT } from '../../constants'
 
 module.exports = (app, logger) => {
 
   // Handle internal events
   const internalEvents = [
-    'internal.project.member.added',
-    'internal.project.member.removed'
+    EVENT.INTERNAL.PROJECT_MEMBER_ADDED,
+    EVENT.INTERNAL.PROJECT_MEMBER_REMOVED
   ]
 
   // Publish messages to the queue

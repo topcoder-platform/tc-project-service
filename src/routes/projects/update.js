@@ -3,7 +3,7 @@ import validate from 'express-validation'
 import _ from 'lodash'
 import Joi from 'joi'
 import models from '../../models'
-import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../../constants'
+import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE, EVENT } from '../../constants'
 import util from '../../util'
 import directProject from '../../services/directProject'
 import { middleware as tcMiddleware } from 'tc-core-library-js'
@@ -161,10 +161,17 @@ module.exports = [
             req.log.debug('updated project', project)
             previousValue =  _.omit(previousValue, ['deletedAt'])
             // emit original and updated project information
-            req.app.emit('internal.project.updated', {
+            req.app.emit(EVENT.INTERNAL.PROJECT_UPDATED, {
               original: previousValue,
               updated: project
             })
+            // check context for project members
+            project.members = req.context.currentProjectMembers
+            // get attachments
+            return util.getProjectAttachments(req, project.id)
+          })
+          .then((attachments) => {
+            project.attachments = attachments
             res.json(util.wrapResponse(req.id, project))
           })
           .catch((err) => next(err))

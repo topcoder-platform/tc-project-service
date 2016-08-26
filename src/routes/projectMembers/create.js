@@ -8,13 +8,12 @@ import util from '../../util'
 import { PROJECT_MEMBER_ROLE } from '../../constants'
 import directProject from '../../services/directProject'
 import { middleware as tcMiddleware} from 'tc-core-library-js'
-
+import { EVENT } from '../../constants'
 
 /**
  * API to add a project member.
  *
  */
-
 const permissions = tcMiddleware.permissions
 
 const addMemberValidations = {
@@ -69,7 +68,7 @@ module.exports = [
             // Add co-pilot when a co-pilot is added to a project
             return models.Project.getDirectProjectId(projectId)
                 .then(directProjectId => {
-                  if(directProjectId){
+                  if (directProjectId){
                     return  directProject.addCopilot(req, directProjectId, {
                       copilotUserId: newMember.userId
                     })
@@ -82,8 +81,8 @@ module.exports = [
           }
         })
         .then(() => {
-          // TODO fire event
-          req.app.emit('internal.project.member-registered', newMember)
+          // fire event
+          req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_ADDED, newMember)
           res.status(201).json(util.wrapResponse(req.id, newMember))
         })
         .catch((err) => {

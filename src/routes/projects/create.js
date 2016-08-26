@@ -5,7 +5,7 @@ import _ from 'lodash'
 import Joi from 'joi'
 
 import models from '../../models'
-import {PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE } from '../../constants'
+import {PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT } from '../../constants'
 import util from '../../util'
 import directProject from '../../services/directProject'
 
@@ -124,7 +124,7 @@ module.exports = [
             newProject = _.omit(newProject, ['deletedAt', 'utm'])
             // add an empty attachments array
             newProject.attachments = []
-            req.app.emit('internal.project.draft-created', newProject)
+            req.app.emit(EVENT.INTERNAL.PROJECT_DRAFT_CREATED, newProject)
             res.status(201).json(util.wrapResponse(req.id, newProject))
           })
           .catch((err) => {

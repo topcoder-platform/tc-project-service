@@ -7,12 +7,12 @@ import models from '../../models'
 import directProject from '../../services/directProject'
 import { PROJECT_MEMBER_ROLE } from '../../constants'
 import { middleware as tcMiddleware } from 'tc-core-library-js'
+import { EVENT } from '../../constants'
 
 /**
  * API to delete a project member.
  *
  */
-
 const permissions = tcMiddleware.permissions
 
 module.exports = [
@@ -35,6 +35,9 @@ module.exports = [
             return member.destroy()
           })
           .then((member) => {
+            // fire event
+            req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_REMOVED, member)
+
             if(member.role === PROJECT_MEMBER_ROLE.COPILOT) {
               return models.Project.getDirectProjectId(projectId)
                   .then(directProjectId => {
