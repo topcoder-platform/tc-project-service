@@ -43,7 +43,7 @@ describe('Project Members', () => {
                 billingAccountId: 1,
                 name: 'test2',
                 description: 'test project2',
-                status: 'draft',
+                status: 'active',
                 details: {},
                 createdBy: 1,
                 updatedBy: 1
@@ -96,11 +96,11 @@ describe('Project Members', () => {
           })
     })
 
-    it('should return 201 and register copilot member for project with direct project id', done =>  {
+    it('should return 201 and register copilot member for project', done =>  {
       request(server)
           .post('/v4/projects/' + project2.id + '/members/')
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.admin
+            'Authorization': 'Bearer ' + testUtil.jwts.copilot
           })
           .send({ param: {userId: 1, role: 'copilot'}})
           .expect('Content-Type', /json/)

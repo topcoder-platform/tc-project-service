@@ -141,7 +141,7 @@ describe('LIST Project', () => {
       request(server)
           .get('/v4/projects')
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.copilotUser
+            'Authorization': 'Bearer ' + testUtil.jwts.copilot
           })
           .expect('Content-Type', /json/)
           .expect(200)

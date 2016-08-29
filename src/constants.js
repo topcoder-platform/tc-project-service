@@ -24,7 +24,7 @@ export const PROJECT_MEMBER_ROLE = {
 
 export const USER_ROLE = {
   TOPCODER_ADMIN: 'administrator',
-  MANAGER: 'Manager',
+  MANAGER: 'Connect Manager',
   COPILOT: 'Connect Copilot'
 }
 

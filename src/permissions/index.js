@@ -7,9 +7,9 @@ module.exports = () => {
 
   // anyone can create a project
   Authorizer.setPolicy('project.create', true)
-  Authorizer.setPolicy('project.view', require('./project.edit'))
+  Authorizer.setPolicy('project.view', require('./project.view'))
   Authorizer.setPolicy('project.edit', require('./project.edit'))
-  Authorizer.setPolicy('project.addMember', require('./project.edit'))
+  Authorizer.setPolicy('project.addMember', require('./project.view'))
   Authorizer.setPolicy('project.removeMember', require('./project.edit'))
   Authorizer.setPolicy('project.addAttachment', require('./project.edit'))
   Authorizer.setPolicy('project.updateAttachment', require('./project.edit'))
