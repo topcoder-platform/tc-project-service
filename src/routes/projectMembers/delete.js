@@ -1,11 +1,8 @@
 'use strict'
 
-// import validate from 'express-validation'
 import _ from 'lodash'
 
 import models from '../../models'
-import directProject from '../../services/directProject'
-import { PROJECT_MEMBER_ROLE } from '../../constants'
 import { middleware as tcMiddleware } from 'tc-core-library-js'
 import { EVENT } from '../../constants'
 
@@ -37,24 +34,9 @@ module.exports = [
           .then((member) => {
             // fire event
             req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_REMOVED, member)
-
-            if(member.role === PROJECT_MEMBER_ROLE.COPILOT) {
-              return models.Project.getDirectProjectId(projectId)
-                  .then(directProjectId => {
-                    if(directProjectId){
-                      return  directProject.deleteCopilot(req, directProjectId, {
-                        copilotUserId: member.userId
-                      })
-                    } else {
-                      return Promise.resolve()
-                    }
-                  })
-            } else {
-              return Promise.resolve()
-            }
+            res.status(204).json({})
           })
-          .then(() => res.status(204).json({}))
-          .catch((err) => next(err))
+          .catch(err => next(err))
     })
   }
 ]

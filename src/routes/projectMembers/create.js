@@ -6,7 +6,6 @@ import Joi from 'joi'
 import models from '../../models'
 import util from '../../util'
 import { PROJECT_MEMBER_ROLE } from '../../constants'
-import directProject from '../../services/directProject'
 import { middleware as tcMiddleware} from 'tc-core-library-js'
 import { EVENT } from '../../constants'
 
@@ -62,33 +61,15 @@ module.exports = [
     let newMember = null
     // register member
     return models.ProjectMember.create(member)
-        .then((_newMember) => {
-          newMember = _newMember.get({plain: true})
-          if(newMember.role === PROJECT_MEMBER_ROLE.COPILOT) {
-            // Add co-pilot when a co-pilot is added to a project
-            return models.Project.getDirectProjectId(projectId)
-                .then(directProjectId => {
-                  if (directProjectId){
-                    return  directProject.addCopilot(req, directProjectId, {
-                      copilotUserId: newMember.userId
-                    })
-                  } else {
-                    return Promise.resolve()
-                  }
-                })
-          } else {
-            return Promise.resolve()
-          }
-        })
-        .then(() => {
-          // fire event
-          req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_ADDED, newMember)
-          res.status(201).json(util.wrapResponse(req.id, newMember))
-        })
-        .catch((err) => {
-          req.log.error('Unable to register ', err)
-          next(err)
-        })
-
+      .then(_newMember => {
+        newMember = _newMember.get({plain: true})
+        // fire event
+        req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_ADDED, newMember)
+        res.status(201).json(util.wrapResponse(req.id, newMember))
+      })
+      .catch((err) => {
+        req.log.error('Unable to register ', err)
+        next(err)
+      })
   }
 ]

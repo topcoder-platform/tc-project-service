@@ -142,7 +142,10 @@ describe('Project Members', () => {
           })
     })
 
-    it('should return 500 if error to add copilot', done =>  {
+    /*
+    // TODO this test is no logner valid since updating direct is async
+    // we should convert this test to async msg handler test
+    it.skip('should return 500 if error to add copilot', done =>  {
       var mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.reject(new Error('error message'))
       })
@@ -166,7 +169,8 @@ describe('Project Members', () => {
             done()
           })
     })
-
+    */
+   
     it('should return 201 and register copilot member', done =>  {
       var mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({

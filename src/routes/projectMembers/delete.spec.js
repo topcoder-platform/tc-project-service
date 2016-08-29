@@ -125,6 +125,9 @@ describe('Project', () => {
           })
     })
 
+    /*
+    // TODO this test is no logner valid since updating direct is async
+    // we should convert this test to async msg handler test
     it('should return 500 if error to remove copilot from direct project', done =>  {
       var mockHttpClient = _.merge(testUtil.mockHttpClient, {
         delete: () => Promise.reject(new Error('error message'))
@@ -150,7 +153,8 @@ describe('Project', () => {
             done()
           })
     })
-
+    */
+   
     it('should return 204 if not copilot user has access to the project', done =>  {
       request(server)
           .delete('/v4/projects/' + project1.id + '/members/' + member2.id)

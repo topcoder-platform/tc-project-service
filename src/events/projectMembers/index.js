@@ -1,7 +1,9 @@
 'use strict'
 
 import _ from 'lodash'
-import { EVENT } from '../../constants'
+import { EVENT, PROJECT_MEMBER_ROLE, SYSTEM_USER } from '../../constants'
+import models from '../../models'
+import directProject from '../../services/directProject'
 
 module.exports = (app, logger) => {
 
@@ -20,4 +22,63 @@ module.exports = (app, logger) => {
     })
   })
 
+
+  // EXTERNAL events
+  app.on(EVENT.EXTERNAL.PROJECT_MEMBER_ADDED, (msg, next) => {
+    let newMember = JSON.parse(msg.content.toString())
+    logger.debug(`received msg '${EVENT.EXTERNAL.PROJECT_MEMBER_ADDED}'`, newMember)
+
+    if (newMember.role === PROJECT_MEMBER_ROLE.COPILOT) {
+      // Add co-pilot when a co-pilot is added to a project
+      const req = {
+        log: logger,
+        headers: { authorization: SYSTEM_USER }
+      }
+      return models.Project.getDirectProjectId(newMember.projectId)
+        .then(directProjectId => {
+          if (directProjectId) {
+            return  directProject.addCopilot(req, directProjectId, {
+              copilotUserId: newMember.userId
+            })
+            .catch((err) => {
+              req.log.error('Error caught while adding co-pilot from direct', err)
+              return next(err)
+            })
+          }
+        })
+        .catch(err => next(err))
+    } else {
+      // nothing to do
+      next()
+    }
+  })
+
+  app.on(EVENT.EXTERNAL.PROJECT_MEMBER_REMOVED, (msg, next) => {
+    const member = JSON.parse(msg.content.toString())
+    logger.debug(`received msg '${EVENT.EXTERNAL.PROJECT_MEMBER_REMOVED}'`, member)
+
+    if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
+      // Add co-pilot when a co-pilot is added to a project
+      const req = {
+        log: logger,
+        headers: { authorization: SYSTEM_USER }
+      }
+      return models.Project.getDirectProjectId(member.projectId)
+        .then(directProjectId => {
+          if (directProjectId) {
+            return  directProject.deleteCopilot(req, directProjectId, {
+              copilotUserId: member.userId
+            })
+            .catch((err) => {
+              req.log.error('Error caught while removing co-pilot from direct', err)
+              return next(err)
+            })
+          }
+        })
+        .catch(err => next(err))
+    } else {
+      // nothing to do
+      next()
+    }
+  })
 }
