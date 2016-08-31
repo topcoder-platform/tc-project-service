@@ -9,10 +9,13 @@
   "pubsubQueueName": "project.service",
   "pubsubExchangeName": "projects",
   "fileServiceEndpoint": "",
+  "identityServiceEndpoint": "",
   "directProjectServiceEndpoint": "",
   "attachmentsS3Bucket": "topcoder-prod-media",
   "projectAttachmentPathPrefix": "projects",
   "projectAttachmentPathSuffix": "attachments",
+  "systemUserClientId": "",
+  "systemUserClientSecret": "",
   "dbConfig": {
     "masterUrl": "",
     "maxPoolSize": 50,

@@ -130,7 +130,10 @@ module.exports = [
     }
     req.log.debug(criteria)
 
-    if (!memberOnly && (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) || util.hasRole(req, USER_ROLE.MANAGER))) {
+    if (!memberOnly
+      && (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)
+          || util.hasRole(req, USER_ROLE.MANAGER)))
+    {
       // admins & topcoder managers can see all projects
       return _retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => {
@@ -138,10 +141,13 @@ module.exports = [
         })
         .catch(err => next(err))
     } else {
-      // determine if user has access to the project being retreived
-      var getProjectIds = util.hasRole(req, USER_ROLE.COPILOT) ?
-          models.Project.getProjectIdsForCopilot(req.authUser.userId) :
-          models.ProjectMember.getProjectIdsForUser(req.authUser.userId)
+      // If user requested projects where he/she is a member or
+      // if they are not a copilot then return projects that they are members in.
+      // Copilots can view projects that they are members in or they have
+      //
+      var getProjectIds = !memberOnly && util.hasRole(req, USER_ROLE.COPILOT) ?
+        models.Project.getProjectIdsForCopilot(req.authUser.userId) :
+        models.ProjectMember.getProjectIdsForUser(req.authUser.userId)
       return getProjectIds
         .then(accessibleProjectIds => {
           // filter based on accessible

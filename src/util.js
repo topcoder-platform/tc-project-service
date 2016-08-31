@@ -192,6 +192,23 @@ _.assignIn(util, {
           })
           return attachments
         })
+    },
+
+    getSystemUserToken: (logger, id='system') => {
+      const httpClient = util.getHttpClient({id: id, log: logger})
+      const url = `${config.get('identityServiceEndpoint')}authorizations`
+      return httpClient.post(url, {
+        headers: {
+          'Content-Type': 'x-www-form-urlencoded'
+        },
+        params: {
+          clientId: config.get('systemUserClientId'),
+          secret: config.get('systemUserClientSecret')
+        }
+      })
+      .then(res => {
+        return res.result.content.token
+      })
     }
 })
 

@@ -1,12 +1,13 @@
 'use strict'
 
 import _ from 'lodash'
-import { EVENT, PROJECT_MEMBER_ROLE, SYSTEM_USER } from '../../constants'
+import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants'
+import util from '../../util'
 import models from '../../models'
 import directProject from '../../services/directProject'
 
-module.exports = (app, logger) => {
 
+module.exports = (app, logger) => {
   // Handle internal events
   const internalEvents = [
     EVENT.INTERNAL.PROJECT_MEMBER_ADDED,
@@ -30,20 +31,26 @@ module.exports = (app, logger) => {
 
     if (newMember.role === PROJECT_MEMBER_ROLE.COPILOT) {
       // Add co-pilot when a co-pilot is added to a project
-      const req = {
-        log: logger,
-        headers: { authorization: SYSTEM_USER }
-      }
       return models.Project.getDirectProjectId(newMember.projectId)
         .then(directProjectId => {
           if (directProjectId) {
-            return  directProject.addCopilot(req, directProjectId, {
-              copilotUserId: newMember.userId
-            })
-            .catch((err) => {
-              req.log.error('Error caught while adding co-pilot from direct', err)
-              return next(err)
-            })
+            // retrieve system user token
+            return util.getSystemUserToken(logger)
+              .then(token => {
+                const req = {
+                  log: logger,
+                  headers: { authorization: `Bearer ${token}` }
+                }
+                return  directProject.addCopilot(req, directProjectId, {
+                  copilotUserId: newMember.userId
+                })
+              })
+              .catch(err => {
+                logger.error('Error caught while adding co-pilot from direct', err)
+                return next(err)
+              })
+          } else {
+            next()
           }
         })
         .catch(err => next(err))
@@ -59,20 +66,27 @@ module.exports = (app, logger) => {
 
     if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
       // Add co-pilot when a co-pilot is added to a project
-      const req = {
-        log: logger,
-        headers: { authorization: SYSTEM_USER }
-      }
       return models.Project.getDirectProjectId(member.projectId)
         .then(directProjectId => {
           if (directProjectId) {
-            return  directProject.deleteCopilot(req, directProjectId, {
-              copilotUserId: member.userId
-            })
-            .catch((err) => {
-              req.log.error('Error caught while removing co-pilot from direct', err)
-              return next(err)
-            })
+            // retrieve system user token
+            return util.getSystemUserToken(logger)
+              .then(token => {
+                const req = {
+                  log: logger,
+                  headers: { authorization: `Bearer ${token}` }
+                }
+                return  directProject.deleteCopilot(req, directProjectId, {
+                  copilotUserId: member.userId
+                })
+              })
+              .catch(err => {
+                logger.error('Error caught while removing co-pilot from direct', err)
+                return next(err)
+              })
+          } else {
+            // nothing to do
+            next()
           }
         })
         .catch(err => next(err))
