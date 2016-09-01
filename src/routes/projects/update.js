@@ -99,82 +99,83 @@ module.exports = [
         where: { id: projectId },
         lock: { of: models.Project }
       })
-          .then((_prj) => {
-            project = _prj
-            if (!project) {
-              // handle 404
-              let err = new Error(`project not found for id ${projectId}`)
-              err.status = 404
-              return Promise.reject(err)
-            }
-            previousValue = _.clone(project.get({plain: true}))
-            // run additional validations
-            let validationErrors = validateUpdates(previousValue, updatedProps)
-            if(validationErrors.length > 0) {
-              let err = new Error('Unable to update project')
-              _.assign(err, {
-                details: JSON.stringify(validationErrors),
-                status: 400
-              })
-              return Promise.reject(err)
-            }
-            // Only project manager (user with manager role assigned) should be allowed to transition project status to 'active'.
-            const members = req.context.currentProjectMembers
-            const validRoles = [PROJECT_MEMBER_ROLE.MANAGER,  PROJECT_MEMBER_ROLE.MANAGER].map(x => x.toLowerCase())
-            const matchRole = (role) => _.indexOf(validRoles, role.toLowerCase()) >= 0
-            if(updatedProps.status === PROJECT_STATUS.ACTIVE &&
-                _.isUndefined(_.find(members, (m) => m.userId === req.authUser.userId && matchRole(m.role)))) {
-              let err = new Error('Only assigned topcoder-managers should be allowed to launch a project')
-              err.status = 403
-              return Promise.reject(err)
-            }
-
-            // no updates if same
-            if (_.isMatch(previousValue, updatedProps)) {
-              return Promise.resolve()
-            }
-            updatedProps.updatedBy = req.authUser.userId
-            const newValues = _.mergeWith({}, previousValue, updatedProps, mergeCustomizer)
-            project.set(newValues)
-            return project.save()
-          })
-          .then(() => {
-            if (updatedProps.billingAccountId && (previousValue.billingAccountId !== updatedProps.billingAccountId)) {
-              if(!previousValue.directProjectId){
-                return Promise.resolve()
-              } else {
-                // if billing account is updated and exist direct project id we should invoke direct project service
-                return directProject.addBillingAccount(req, previousValue.directProjectId, {
-                  billingAccountId: updatedProps.billingAccountId
-                })
-              }
-            } else {
-              return Promise.resolve()
-            }
-          })
-          .then(() => {
-            return project.reload(project.id)
-          })
-          .then(() => {
-            project = project.get({plain: true})
-            project = _.omit(project, ['deletedAt'])
-            req.log.debug('updated project', project)
-            previousValue =  _.omit(previousValue, ['deletedAt'])
-            // emit original and updated project information
-            req.app.emit(EVENT.INTERNAL.PROJECT_UPDATED, {
-              original: previousValue,
-              updated: project
+        .then((_prj) => {
+          project = _prj
+          if (!project) {
+            // handle 404
+            let err = new Error(`project not found for id ${projectId}`)
+            err.status = 404
+            return Promise.reject(err)
+          }
+          previousValue = _.clone(project.get({plain: true}))
+          // run additional validations
+          let validationErrors = validateUpdates(previousValue, updatedProps)
+          if(validationErrors.length > 0) {
+            let err = new Error('Unable to update project')
+            _.assign(err, {
+              details: JSON.stringify(validationErrors),
+              status: 400
             })
-            // check context for project members
-            project.members = req.context.currentProjectMembers
-            // get attachments
-            return util.getProjectAttachments(req, project.id)
+            return Promise.reject(err)
+          }
+          // Only project manager (user with manager role assigned) should be allowed to transition project status to 'active'.
+          const members = req.context.currentProjectMembers
+          const validRoles = [PROJECT_MEMBER_ROLE.MANAGER,  PROJECT_MEMBER_ROLE.MANAGER].map(x => x.toLowerCase())
+          const matchRole = (role) => _.indexOf(validRoles, role.toLowerCase()) >= 0
+          if(updatedProps.status === PROJECT_STATUS.ACTIVE &&
+              _.isUndefined(_.find(members, (m) => m.userId === req.authUser.userId && matchRole(m.role)))) {
+            let err = new Error('Only assigned topcoder-managers should be allowed to launch a project')
+            err.status = 403
+            return Promise.reject(err)
+          }
+
+          // no updates if same
+
+          if (_.isEqual(previousValue, updatedProps)) {
+            return Promise.resolve()
+          }
+          updatedProps.updatedBy = req.authUser.userId
+          const newValues = _.mergeWith({}, previousValue, updatedProps, mergeCustomizer)
+          project.set(newValues)
+          return project.save()
+        })
+        .then(() => {
+          if (updatedProps.billingAccountId && (previousValue.billingAccountId !== updatedProps.billingAccountId)) {
+            if(!previousValue.directProjectId){
+              return Promise.resolve()
+            } else {
+              // if billing account is updated and exist direct project id we should invoke direct project service
+              return directProject.addBillingAccount(req, previousValue.directProjectId, {
+                billingAccountId: updatedProps.billingAccountId
+              })
+            }
+          } else {
+            return Promise.resolve()
+          }
+        })
+        .then(() => {
+          return project.reload(project.id)
+        })
+        .then(() => {
+          project = project.get({plain: true})
+          project = _.omit(project, ['deletedAt'])
+          req.log.debug('updated project', project)
+          previousValue =  _.omit(previousValue, ['deletedAt'])
+          // emit original and updated project information
+          req.app.emit(EVENT.INTERNAL.PROJECT_UPDATED, {
+            original: previousValue,
+            updated: project
           })
-          .then((attachments) => {
-            project.attachments = attachments
-            res.json(util.wrapResponse(req.id, project))
-          })
-          .catch((err) => next(err))
+          // check context for project members
+          project.members = req.context.currentProjectMembers
+          // get attachments
+          return util.getProjectAttachments(req, project.id)
+        })
+        .then((attachments) => {
+          project.attachments = attachments
+          res.json(util.wrapResponse(req.id, project))
+        })
+        .catch((err) => next(err))
     })
   }
 ]
