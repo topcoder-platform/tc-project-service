@@ -71,6 +71,7 @@ module.exports = [
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       challengeEligibility: [],
+      bookmarks: [],
       external: null,
       utm: null
     })
