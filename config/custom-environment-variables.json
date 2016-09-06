@@ -7,6 +7,11 @@
   "logentriesToken": "LOGENTRIES_TOKEN",
   "esUrl": "PROJECTS_ES_URL",
   "rabbitmqURL": "RABBITMQ_URL",
+  "directProjectServiceEndpoint": "DIRECT_PROJECT_SERVICE_ENDPOINT",
+  "fileServiceEndpoint": "FILE_SERVICE_ENDPOINT",
+  "identityServiceEndpoint": "IDENTITY_SERVICE_ENDPOINT",
+  "systemUserClientId": "SYSTEM_USER_CLIENT_ID",
+  "systemUserClientSecret": "SYSTEM_USER_CLIENT_SECRET",
   "dbConfig": {
     "masterUrl": "DB_MASTER_URL",
     "maxPoolSize": "DB_MAX_POOL_SIZE",

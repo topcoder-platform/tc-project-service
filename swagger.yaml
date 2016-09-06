@@ -45,8 +45,10 @@ paths:
           in: query
           description: |
             Url encoded list of Supported filters
-             - domain
+             - type
              - status
+             - memberOnly
+             - name
         - name: sort
           required: false
           description: |
@@ -109,9 +111,9 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
         '200':
-          description: Successfully updated project. Returns entire project object
+          description: Successfully updated project. Returns original and updated project object
           schema:
-            $ref: "#/definitions/ProjectResponse"
+            $ref: "#/definitions/UpdateProjectResponse"
         '422':
           description: Invalid input
           schema:
@@ -128,40 +130,78 @@ paths:
           schema:
             $ref: "#/definitions/ProjectBodyParam"
 
+  /projects/{projectId}/attachments:
+    post:
+      description: add a new project attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProjectAttachmentBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project
+          schema:
+            $ref: "#/definitions/NewProjectAttachmentResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
 
-  # /projects/{projectId}/estimates:
-  #   get:
-  #     description: Retrieve project estimates
-  #     responses:
-  #       "200":
-  #         description: Retrieve project estimates
-  #     parameters:
-  #       - $ref: "#/parameters/projectIdParam"
-  #   post:
-  #     description: add a new project estimate
-  #     responses:
-  #       "201":
-  #         description: create a new project estimate
-  #     parameters:
-  #       - $ref: "#/parameters/projectIdParam"
-
-  # /projects/{projectId}/estimates/{estimateId}:
-  #   get:
-  #     description: Retrieve project estimates
-  #     responses:
-  #       "200":
-  #         description: Retrieve project estimates
-  #     parameters:
-  #       - $ref: "#/parameters/projectIdParam"
-  #       - $ref: "#/parameters/projectEstimateIdParam"
-  #   put:
-  #     description: add a new project estimate
-  #     responses:
-  #       "201":
-  #         description: create a new project estimate
-  #     parameters:
-  #       - $ref: "#/parameters/projectIdParam"
-  #       - $ref: "#/parameters/projectEstimateIdParam"
+  /projects/{projectId}/attachments/{id}:
+    patch:
+      description: Update an existing attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - in: path
+          name: id
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProjectAttachmentBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project
+          schema:
+            $ref: "#/definitions/NewProjectAttachmentResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    delete:
+      description: remove an existing attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - in: path
+          name: id
+          required: true
+          type: integer
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Attachment successfully removed
 
   /projects/{projectId}/members:
     post:
@@ -183,7 +223,7 @@ paths:
         '201':
           description: Returns the newly created project
           schema:
-            $ref: "#/definitions/ProjectResponse"
+            $ref: "#/definitions/NewProjectMemberResponse"
         '422':
           description: Invalid input
           schema:
@@ -208,6 +248,42 @@ paths:
             $ref: "#/definitions/ErrorModel"
         '204':
           description: Member successfully removed
+    patch:
+        security:
+          - Bearer: []
+        description: Support editing project member roles & primary option.
+        responses:
+          '403':
+            description: No permission or wrong token
+            schema:
+              $ref: "#/definitions/ErrorModel"
+          '404':
+            description: Not found
+            schema:
+              $ref: "#/definitions/ErrorModel"
+          '200':
+            description: Successfully updated project member. Returns entire project member object
+            schema:
+              $ref: "#/definitions/UpdateProjectMemberResponse"
+          '422':
+            description: Invalid input
+            schema:
+              $ref: "#/definitions/ErrorModel"
+          default:
+            description: error payload
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        parameters:
+          - $ref: "#/parameters/projectIdParam"
+          - in: path
+            name: id
+            required: true
+            type: integer
+          - name: body
+            in: body
+            required: true
+            schema:
+              $ref: "#/definitions/UpdateProjectMemberBodyParam"
 
 
 parameters:
@@ -232,13 +308,6 @@ parameters:
     required: false
     type: integer
     format: int32
-  projectEstimateIdParam:
-    name: estimateId
-    description: unique identifier for project estimate
-    in: path
-    required: true
-    type: integer
-
 
 definitions:
   ResponseMetadata:
@@ -272,6 +341,15 @@ definitions:
           content:
             type: object
 
+  ProjectBookMark:
+    title: Project bookmark
+    type: object
+    properties:
+      title:
+        type: string
+      address:
+        type: string
+
   ProjectBodyParam:
     type: object
     properties:
@@ -281,11 +359,11 @@ definitions:
   NewProject:
     type: object
     required:
-       - title
+       - name
        - description
        - type
     properties:
-      title:
+      name:
         type: string
         description: project name
       description:
@@ -308,7 +386,11 @@ definitions:
       type:
         type: string
         description: project type
-        enum: ["generic", "design", "design+dev", "...from product offerings..."]
+        enum: ["generic", "visual_design", "visual_prototype", "app_dev"]
+      bookmarks:
+        type: array
+        items:
+          $ref: "#/definitions/ProjectBookMark"
       challengeEligibility:
         description: List of eligibility criteria (one entry per role)
         type: array
@@ -362,7 +444,7 @@ definitions:
         description: unique identifier in direct
         type: integer
         format: int64
-      title:
+      name:
         type: string
         description: project name
       description:
@@ -401,6 +483,10 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/ChallengeEligibility"
+      bookmarks:
+        type: array
+        items:
+          $ref: "#/definitions/ProjectBookMark"
       members:
         description: |
           READ-ONLY. List of project members.
@@ -408,6 +494,13 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/ProjectMember"
+      attachments:
+        description: |
+          READ-ONLY. List of project attachmens.
+          Use project attachment api to add/remove attachments
+        type: array
+        items:
+          $ref: "#/definitions/ProjectAttachment"
       details:
         $ref: "#/definitions/ProjectDetails"
 
@@ -475,6 +568,112 @@ definitions:
       param:
         $ref: "#/definitions/NewProjectMember"
 
+  UpdateProjectMember:
+      title: Project Member object
+      type: object
+      required:
+        - role
+      properties:
+        isPrimary:
+          type: boolean
+          description: primary option
+        role:
+          type: string
+          description: member role on specified project
+          enum: ["customer", "manager", "copilot"]
+
+  UpdateProjectMemberBodyParam:
+    type: object
+    properties:
+      param:
+        $ref: "#/definitions/UpdateProjectMember"
+
+  NewProjectAttachment:
+    title: Project attachment request
+    type: object
+    required:
+      - filePath
+      - contentType
+    properties:
+      filePath:
+        type: string
+        description: path where file is stored
+      contentType:
+        type: string
+        description: Uploaded file content type
+      title:
+        type: string
+        description: Name of the attachment
+      description:
+        type: string
+        description: Optional description for the attached file.
+
+  NewProjectAttachmentBodyParam:
+    type: object
+    properties:
+      param:
+        $ref: "#/definitions/NewProjectAttachment"
+
+  NewProjectAttachmentResponse:
+    title: Project member object response
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            $ref: "#/definitions/ProjectAttachment"
+
+  ProjectAttachment:
+    title: Project attachment
+    type: object
+    properties:
+      id:
+        type: number
+        description: unique id for the attachment
+      filePath:
+        type: string
+        description: path where file is stored
+      contentType:
+        type: string
+        description: Uploaded file content type
+      title:
+        type: string
+        description: Name of the attachment
+      description:
+        type: string
+        description: Optional description for the attached file.
+      downloadUrl:
+        type: string
+        description: download link for the attachment.
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
 
   ProjectMember:
     title: Project Member object
@@ -514,7 +713,29 @@ definitions:
         description: READ-ONLY. User that last updated this task
         readOnly: true
 
+
+
   NewProjectMemberResponse:
+    title: Project member object response
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            $ref: "#/definitions/ProjectMember"
+
+  UpdateProjectMemberResponse:
     title: Project member object response
     type: object
     properties:
@@ -554,6 +775,31 @@ definitions:
             description: http status code
           content:
             $ref: "#/definitions/Project"
+
+  UpdateProjectResponse:
+    title: response with original and updated project object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            type: object
+            properties:
+              original:
+                $ref: "#/definitions/Project"
+              updated:
+                 $ref: "#/definitions/Project"
 
   ProjectListResponse:
     title: List response
