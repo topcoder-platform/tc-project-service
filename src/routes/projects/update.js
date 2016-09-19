@@ -66,14 +66,15 @@ var validateUpdates = (existingProject, updatedProject) => {
     case PROJECT_STATUS.CANCELLED:
       errors.push(`cannot update a project that is in ${existingProject.status}' state`)
       break
-    case PROJECT_STATUS.DRAFT:
-      if (_.get(updatedProject, 'status', '') === 'active') {
-        // attempting to launch the project make sure certain
-        // properties are set
-        if (!updatedProject.billingAccountId && !existingProject.billingAccountId) {
-          errors.push('\'billingAccountId\' must be set before activating the project')
-        }
-      }
+    // disabling this check for now.
+    // case PROJECT_STATUS.DRAFT:
+    //   if (_.get(updatedProject, 'status', '') === 'active') {
+    //     // attempting to launch the project make sure certain
+    //     // properties are set
+    //     if (!updatedProject.billingAccountId && !existingProject.billingAccountId) {
+    //       errors.push('\'billingAccountId\' must be set before activating the project')
+    //     }
+    //   }
   }
   return errors
 }

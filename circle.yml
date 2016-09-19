@@ -22,6 +22,11 @@ deployment:
     commands:
       - ./ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
 
+  production:
+    branch: master
+    commands:
+      - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_BUILD_NUM
+
 general:
   artifacts:
     - ./coverage
