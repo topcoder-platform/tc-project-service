@@ -39,7 +39,7 @@ describe('Project', () => {
             }).then((pm) => {
               member1 = pm
               return models.ProjectMember.create({
-                userId: 40051333,
+                userId: 40051334,
                 projectId: project1.id,
                 role: 'manager',
                 isPrimary: true,
@@ -154,7 +154,7 @@ describe('Project', () => {
           })
     })
     */
-   
+
     it('should return 204 if not copilot user has access to the project', done =>  {
       request(server)
           .delete('/v4/projects/' + project1.id + '/members/' + member2.id)

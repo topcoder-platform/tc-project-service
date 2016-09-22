@@ -29,7 +29,7 @@ describe('Project', () => {
                     project1 = p
                     // create members
                     models.ProjectMember.create({
-                        userId: 40051332,
+                        userId: 40051334,
                         projectId: project1.id,
                         role: 'manager',
                         isPrimary: false,

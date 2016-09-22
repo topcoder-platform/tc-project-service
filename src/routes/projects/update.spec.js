@@ -80,7 +80,7 @@ describe('Project', () => {
             },{
               projectId: project1.id,
               role: 'manager',
-              userId: 40051333,
+              userId: 40051334,
               createdBy: 1,
               updatedBy: 1
             }, {
