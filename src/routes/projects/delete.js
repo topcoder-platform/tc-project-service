@@ -32,7 +32,7 @@ module.exports = [
             err.status = 404
             next(err)
           } else {
-            res.status(204).json({}))
+            res.status(204).json({})
           }
         })
         .catch((err) => next(err))
