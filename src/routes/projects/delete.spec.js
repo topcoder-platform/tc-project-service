@@ -82,7 +82,7 @@ describe('Project', () => {
     testUtil.clearDb(done)
   })
 
-  describe.only('DELETE /projects/{id}/', () => {
+  describe('DELETE /projects/{id}/', () => {
 
     it('should return 404 if copilot tries to delete the project', done =>  {
       request(server)

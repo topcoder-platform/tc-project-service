@@ -110,11 +110,9 @@ module.exports = [
             if(newProject.billingAccountId){
               body.billingAccountId = newProject.billingAccountId
             }
-            // return directProject.createDirectProject(req, body)
-            return Promise.resolve({data: { result: { content: { projectId: 111 } }}})
+            return directProject.createDirectProject(req, body)
           })
           .then((resp) => {
-            console.log('updating directProjectId: ', resp.data.result.content.projectId)
             newProject.directProjectId = resp.data.result.content.projectId
             return newProject.save()
           })
@@ -123,7 +121,6 @@ module.exports = [
           })
           .then(() => {
             newProject = newProject.get({plain: true})
-            console.log(newProject)
             // remove utm details & deletedAt field
             newProject = _.omit(newProject, ['deletedAt', 'utm'])
             // add an empty attachments array

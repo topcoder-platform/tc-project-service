@@ -197,17 +197,15 @@ _.assignIn(util, {
     getSystemUserToken: (logger, id='system') => {
       const httpClient = util.getHttpClient({id: id, log: logger})
       const url = `${config.get('identityServiceEndpoint')}authorizations`
-      return httpClient.post(url, {
-        headers: {
-          'Content-Type': 'x-www-form-urlencoded'
-        },
-        params: {
-          clientId: config.get('systemUserClientId'),
-          secret: config.get('systemUserClientSecret')
+      const formData = `clientId=${config.get('systemUserClientId')}&secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`
+      return httpClient.post(url, formData,
+        {
+          timeout: 4000,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         }
-      })
+      )
       .then(res => {
-        return res.result.content.token
+        return res.data.result.content.token
       })
     }
 })

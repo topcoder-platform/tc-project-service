@@ -78,6 +78,7 @@ app.routerRef = router
 // Register events handler
 // =======================
 require('./events/projects')(app, logger)
+require('./events/projectMembers')(app, logger)
 
 // =======================
 // Initialize services

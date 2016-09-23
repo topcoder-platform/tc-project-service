@@ -38,6 +38,7 @@ module.exports = (app, logger) => {
             return util.getSystemUserToken(logger)
               .then(token => {
                 const req = {
+                  id: 1,
                   log: logger,
                   headers: { authorization: `Bearer ${token}` }
                 }

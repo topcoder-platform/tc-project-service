@@ -16,9 +16,10 @@ const ROUTING_KEYS = [
 
 module.exports = class RabbitMQService extends EventEmitter{
 
-  constructor(logger) {
+  constructor(app, logger) {
     super()
     EventEmitter.call(this)
+    this._app = app
     this.logger = logger
     this._subConn = null
     this._pubConn = null
@@ -97,7 +98,7 @@ module.exports = class RabbitMQService extends EventEmitter{
           let key = "external." + msg.fields.routingKey
           self.logger.debug('Received Message', key, msg.fields)
           // emit an event with the key and the message and a callback to acknowledge to reject the message
-          self.emit(key, msg, (err) => {
+          this._app.emit(key, msg, (err) => {
             if (err) {
               self.logger.error(err)
               // not requeuing it right now - send to dead letter exchange
