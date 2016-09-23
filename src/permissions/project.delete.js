@@ -3,7 +3,7 @@
 
 import util from '../util'
 import models from '../models'
-import { USER_ROLE } from '../constants'
+import { USER_ROLE, PROJECT_MEMBER_ROLE } from '../constants'
 import _ from 'lodash'
 
 /**
