@@ -84,23 +84,13 @@ describe('Project', () => {
 
   describe('DELETE /projects/{id}/', () => {
 
-    it('should return 404 if copilot tries to delete the project', done =>  {
+    it('should return 403 if copilot tries to delete the project', done =>  {
       request(server)
         .delete('/v4/projects/' + project1.id)
         .set({
           'Authorization': 'Bearer ' + testUtil.jwts.copilot
         })
-        .expect(404, done)
-    })
-
-
-    it('should return 404 if attachment was not found', done =>  {
-      request(server)
-          .delete('/v4/projects/8888888')
-          .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.member
-          })
-          .expect(404, done)
+        .expect(403, done)
     })
 
     it('should return 204 if attachment was successfully removed', done =>  {

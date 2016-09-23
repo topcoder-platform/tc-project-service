@@ -31,6 +31,7 @@ router.route('/v4/projects')
 router.route('/v4/projects/:projectId(\\d+)')
   .get(require('./projects/get'))
   .patch(require('./projects/update'))
+  .delete(require('./projects/delete'))
 
 router.route('/v4/projects/:projectId(\\d+)/members')
     .post(require('./projectMembers/create'))
