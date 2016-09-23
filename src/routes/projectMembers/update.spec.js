@@ -40,7 +40,7 @@ describe('Project', () => {
                     }).then((pm) => {
                         member1 = pm
                         models.ProjectMember.create({
-                            userId: 40051333,
+                            userId: 40051332,
                             projectId: project1.id,
                             role: 'copilot',
                             isPrimary: true,

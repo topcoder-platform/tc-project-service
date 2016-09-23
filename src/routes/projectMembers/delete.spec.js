@@ -116,7 +116,7 @@ describe('Project', () => {
             }
             deleteSpy.should.have.been.calledOnce
             models.ProjectMember
-                .count({})
+                .count({where: { projectId: project1.id }})
                 .then(count=>{
                   count.should.equal(1)
                   done()

@@ -145,7 +145,7 @@ describe('Project', () => {
     it('should return 200 if topcoder manager user will launch a project', done => {
       request(server)
           .patch(`/v4/projects/${project1.id}`)
-          .set({"Authorization": "Bearer " + testUtil.jwts.admin})
+          .set({"Authorization": "Bearer " + testUtil.jwts.manager})
           .send({
             param: {
               status: 'active'
