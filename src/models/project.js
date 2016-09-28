@@ -57,7 +57,7 @@ module.exports = function(sequelize, DataTypes) {
       /*
        * @Co-pilots should be able to view projects any of the following conditions are met:
        * a. they are registered active project members on the project
-       * b. any project that is in 'active' state AND does not yet have a co-pilot assigned
+       * b. any project that is in 'reviewed' state AND does not yet have a co-pilot assigned
        * @param userId the id of user
        */
       getProjectIdsForCopilot: function(userId) {
@@ -66,7 +66,7 @@ module.exports = function(sequelize, DataTypes) {
             $or: [
               ['EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" IS NULL AND "projectId" = "Project".id AND "userId" = ? )', userId],
               ['"Project".status=? AND NOT EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" IS NULL AND "projectId" = "Project".id AND "role" = ? )',
-                PROJECT_STATUS.ACTIVE,  PROJECT_MEMBER_ROLE.COPILOT]
+                PROJECT_STATUS.REVIEWED,  PROJECT_MEMBER_ROLE.COPILOT]
             ]
           },
           attributes:['id'],

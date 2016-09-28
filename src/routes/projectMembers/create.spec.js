@@ -43,7 +43,7 @@ describe('Project Members', () => {
                 billingAccountId: 1,
                 name: 'test2',
                 description: 'test project2',
-                status: 'active',
+                status: 'reviewed',
                 details: {},
                 createdBy: 1,
                 updatedBy: 1
@@ -170,7 +170,7 @@ describe('Project Members', () => {
           })
     })
     */
-   
+
     it('should return 201 and register copilot member', done =>  {
       var mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({

@@ -79,7 +79,7 @@ describe('LIST Project', () => {
             billingAccountId: 1,
             name: 'test2',
             description: 'test project3',
-            status: 'active',
+            status: 'reviewed',
             details: {},
             createdBy: 1,
             updatedBy: 1
@@ -137,7 +137,7 @@ describe('LIST Project', () => {
           })
     })
 
-    it('should return the project when project that is in active state AND does not yet have a co-pilot assigned', done =>  {
+    it('should return the project when project that is in reviewed state AND does not yet have a co-pilot assigned', done =>  {
       request(server)
           .get('/v4/projects')
           .set({
