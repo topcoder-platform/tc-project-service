@@ -29,9 +29,13 @@ module.exports = [
               err.status = 404
               return Promise.reject(err)
             }
-            return member.destroy()
+            return member.destroy({logging: console.log})
           })
-          .then((member) => {
+          .then(member => {
+            return member.save()
+          })
+          .then(member => {
+            console.log('deleted row', JSON.stringify(member, null, 2))
             // fire event
             req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_REMOVED, member)
             res.status(204).json({})

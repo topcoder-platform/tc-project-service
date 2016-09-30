@@ -11,7 +11,7 @@ module.exports = () => {
   Authorizer.setPolicy('project.edit', require('./project.edit'))
   Authorizer.setPolicy('project.delete', require('./project.delete'))
   Authorizer.setPolicy('project.addMember', require('./project.view'))
-  Authorizer.setPolicy('project.removeMember', require('./project.edit'))
+  Authorizer.setPolicy('project.removeMember', require('./ProjectMember.delete'))
   Authorizer.setPolicy('project.addAttachment', require('./project.edit'))
   Authorizer.setPolicy('project.updateAttachment', require('./project.edit'))
   Authorizer.setPolicy('project.removeAttachment', require('./project.edit'))

@@ -16,7 +16,7 @@ module.exports = function(sequelize, DataTypes) {
     updatedBy: { type: DataTypes.INTEGER, allowNull: false }
   }, {
     tableName: 'project_attachments',
-    paranoid: true,
+    paranoid: false,
     timestamps: true,
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
