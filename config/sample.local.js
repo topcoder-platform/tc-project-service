@@ -11,6 +11,7 @@ if (process.env.ENVIRONMENT === 'test') {
       "logentriesToken": "",
       "rabbitmqURL": "amqp://dockerhost:5672",
       "fileServiceEndpoint": "https://api.topcoder-dev.com/v3/files/",
+      "topicServiceEndpoint": "https://api.topcoder-dev.com/v4/topics/",
       "directProjectServiceEndpoint": "https://api.topcoder-dev.com/v3/direct",
       "dbConfig": {
           "masterUrl": "postgres://coder:mysecretpassword@dockerhost:5432/projectsdb",
