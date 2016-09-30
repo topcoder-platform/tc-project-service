@@ -9,6 +9,7 @@
   "pubsubQueueName": "project.service",
   "pubsubExchangeName": "projects",
   "fileServiceEndpoint": "",
+  "topicServiceEndpoint": "",
   "identityServiceEndpoint": "",
   "directProjectServiceEndpoint": "",
   "attachmentsS3Bucket": "topcoder-prod-media",

@@ -1,9 +1,8 @@
 'use strict'
-
 import _ from 'lodash'
-import util from '../../util'
 import { EVENT } from '../../constants'
-import directService from '../../services/directProject'
+import createEventHandler from './create.event'
+
 module.exports = (app, logger) => {
 
   // Handle internal events
@@ -29,50 +28,8 @@ module.exports = (app, logger) => {
     logger.debug('received msg \'project.draft-created\'', project.id)
 
     // TODO insert into elasticsearch
-    next()
-
-    // // create project in direct
-    // if (!project.directProectId) {
-    //   logger.debug('creating direct project')
-    //   createDirectProject(project, logger)
-    //     .then(resp => {
-    //       return models.Project.update(
-    //         { directProjectId: resp.data.result.content.projectId },
-    //         { where: { id: project.id } }
-    //       )
-    //       .then(() => next() )
-    //       .catch(err => next(err))
-    //     })
-    // } else {
-    //   console.log(project.directProjectId)
-    //   next()
-    // }
+    createEventHandler(logger, project)
+      .then(() => next() )
+      .catch(err => {console.log('error handling event', err); next(err) })
   })
-
-
-  const createDirectProject = (project, logger) => {
-    console.log('retrieving system user token')
-    return util.getSystemUserToken(logger)
-      .then(token => {
-        const req = {
-          id: 1,
-          log: logger,
-          headers: { authorization: `Bearer ${token}` }
-        }
-        // create direct project with name and description
-        var body = {
-          projectName: project.name,
-          projectDescription: project.description
-        }
-        // billingAccountId is optional field
-        if(project.billingAccountId){
-          body.billingAccountId = project.billingAccountId
-        }
-        return directService.createDirectProject(req, body)
-      })
-      .catch((err) => {
-        console.log(err)
-        return Promise.reject(err)
-      })
-  }
 }
