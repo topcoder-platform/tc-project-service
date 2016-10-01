@@ -66,7 +66,6 @@ const addProjectStatus = (req, logger, project) => {
   ]
   let postPromises = []
   _.forEach(topics, t => {
-    console.log(t)
     postPromises.push(topicService.createTopic(req, project.id, t.title, t.body))
   })
 
