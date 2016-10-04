@@ -111,6 +111,8 @@ module.exports = [
     }
     const sortableProps = [
       'createdAt', 'createdAt asc', 'createdAt desc',
+      'updatedAt', 'updatedAt asc', 'updatedAt desc',
+      'id', 'id asc', 'id desc',
       'status', 'status asc', 'status desc',
       'name', 'name asc', 'name desc',
       'type', 'type asc', 'type desc'
