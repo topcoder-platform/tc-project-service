@@ -59,6 +59,7 @@ const updateProjectValdiations = {
   }
 }
 
+// NOTE- decided to disable all additional checks for now.
 var validateUpdates = (existingProject, updatedProject) => {
   var errors = []
   switch (existingProject.status) {
@@ -81,7 +82,7 @@ var validateUpdates = (existingProject, updatedProject) => {
 
 module.exports = [
   // handles request validations
-  validate(updateProjectValdiations),
+  // validate(updateProjectValdiations),
   permissions('project.edit'),
   /**
    * POST projects/
