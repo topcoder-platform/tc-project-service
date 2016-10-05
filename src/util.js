@@ -115,8 +115,8 @@ _.assignIn(util, {
     return new Promise((resolve, reject) => {
       var cmdStr = _.join([
         'aws s3 mv',
-        source,
-        dest,
+        `"${source}"`,
+        `"${dest}"`,
         '--region us-east-1'
       ], ' ')
 
