@@ -64,13 +64,14 @@ const addProjectStatus = (req, logger, project) => {
         with specification, verify it against our checklist and upload it.</p>`
     }
   ]
-  let postPromises = []
-  _.forEach(topics, t => {
-    postPromises.push(topicService.createTopic(req, project.id, t.title, t.body))
-  })
-
-  return Promise.all(postPromises)
-    .then(val => console.log(val))
+  // NOTE: running these in sequence cos we want topic[0] to be created first
+  // firing these events in parallel doesn't ensure that topic[0] is created first
+  return topicService.createTopic(req, project.id, topics[0].title, topics[0].body)
+    .then(() => topicService.createTopic(req, project.id, topics[1].title, topics[1].body))
+    .then(() => {
+      logger.debug('post-project creation messages posted')
+      return true
+    })
 }
 
 

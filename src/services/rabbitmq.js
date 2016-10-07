@@ -2,17 +2,11 @@
 /* globals Promise */
 import _ from 'lodash'
 import events from 'events'
+import { EVENT } from '../constants'
+
 const EventEmitter = events.EventEmitter
 
-const ROUTING_KEYS = [
-  'project.draft-created',
-  'project.launched',
-  'project.updated',
-  'project.cancelled',
-  'project.completed',
-  'project.member.registered',
-  'project.member.unregistered',
-]
+const ROUTING_KEYS = _.values(EVENT.ROUTING_KEY)
 
 module.exports = class RabbitMQService extends EventEmitter{
 

@@ -17,7 +17,7 @@ module.exports = (app, logger) => {
   // Publish messages to the queue
   _.map(internalEvents, (evt) => {
     app.on(evt, (member) => {
-      logger.debug('handling ' + evt)
+      logger.debug('handling ', evt)
       let key = evt.substring(evt.indexOf('.') + 1)
       return app.services.pubsub.publish(key, member)
     })

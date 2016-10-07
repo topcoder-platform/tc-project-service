@@ -35,9 +35,8 @@ module.exports = [
             return member.save()
           })
           .then(member => {
-            console.log('deleted row', JSON.stringify(member, null, 2))
             // fire event
-            req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_REMOVED, member)
+            req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_REMOVED, member.get({plain:true}))
             res.status(204).json({})
           })
           .catch(err => next(err))

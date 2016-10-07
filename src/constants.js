@@ -1,4 +1,5 @@
 
+import _ from 'lodash'
 export const PROJECT_TYPE = {
   APP_DEV          : 'app_dev',
   GENERIC          : 'generic',
@@ -30,26 +31,16 @@ export const USER_ROLE = {
 
 
 export const EVENT = {
-  INTERNAL: {
-    PROJECT_MEMBER_ADDED: 'internal.project.member.added',
-    PROJECT_MEMBER_REMOVED: 'internal.project.member.removed',
+  ROUTING_KEY: {
+    PROJECT_MEMBER_ADDED: 'project.member.added',
+    PROJECT_MEMBER_REMOVED: 'project.member.removed',
 
-    PROJECT_DRAFT_CREATED: 'internal.project.draft-created',
-    PROJECT_LAUNCHED: 'internal.project.launched',
-    PROJECT_UPDATED: 'internal.project.updated',
-    PROJECT_CANCELLED: 'internal.project.cancelled',
-    PROJECT_COMPLETED: 'internal.project.completed'
-  },
-
-  EXTERNAL: {
-    PROJECT_MEMBER_ADDED: 'external.project.member.added',
-    PROJECT_MEMBER_REMOVED: 'external.project.member.removed',
-
-    PROJECT_DRAFT_CREATED: 'external.project.draft-created',
-    PROJECT_LAUNCHED: 'external.project.launched',
-    PROJECT_UPDATED: 'external.project.updated',
-    PROJECT_CANCELLED: 'external.project.cancelled',
-    PROJECT_COMPLETED: 'external.project.completed'
-  },
-
+    PROJECT_DRAFT_CREATED: 'project.draft-created',
+    PROJECT_LAUNCHED: 'project.launched',
+    PROJECT_UPDATED: 'project.updated',
+    PROJECT_CANCELLED: 'project.cancelled',
+    PROJECT_COMPLETED: 'project.completed'
+  }
 }
+EVENT.INTERNAL = _.mapValues(EVENT.ROUTING_KEY, (a) => { return `internal.${a}` })
+EVENT.EXTERNAL = _.mapValues(EVENT.ROUTING_KEY, (a) => { return `external.${a}` })
