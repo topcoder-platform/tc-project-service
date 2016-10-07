@@ -18,7 +18,7 @@ function _getHttpClient(req){
     httpClient.defaults.baseURL = config.get('directProjectServiceEndpoint')
     httpClient.defaults.timeout = 4000
     httpClient.interceptors.response.use((resp) => {
-        req.log.debug('resp: ', JSON.stringify(resp.data, null, 2))
+        // req.log.debug('resp: ', JSON.stringify(resp.data, null, 2))
         if (resp.status !== 200 || resp.data.result.status !== 200) {
           req.log.error('error resp: ', JSON.stringify(resp.data, null, 2))
           return Promise.reject(new Error(resp.data.result.content.message))

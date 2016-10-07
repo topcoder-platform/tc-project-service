@@ -81,6 +81,7 @@ module.exports = [
           return Promise.all(operations)
         })
         .then(() => {
+          // TODO move this to an event
           // if copilot role is added or removed should invoke related direct project service
           if(previousValue.role !== newValue.role && (previousValue.role === PROJECT_MEMBER_ROLE.COPILOT
               || newValue.role === PROJECT_MEMBER_ROLE.COPILOT)) {

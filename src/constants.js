@@ -39,7 +39,8 @@ export const EVENT = {
     PROJECT_LAUNCHED: 'project.launched',
     PROJECT_UPDATED: 'project.updated',
     PROJECT_CANCELLED: 'project.cancelled',
-    PROJECT_COMPLETED: 'project.completed'
+    PROJECT_COMPLETED: 'project.completed',
+    PROJECT_DELETED: 'project.deleted'
   }
 }
 EVENT.INTERNAL = _.mapValues(EVENT.ROUTING_KEY, (a) => { return `internal.${a}` })

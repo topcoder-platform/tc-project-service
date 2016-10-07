@@ -138,7 +138,7 @@ module.exports = class RabbitMQService extends EventEmitter{
    * @param  {string} key     routing key
    * @param  {object} payload message payload
    */
-  publish(key, payload) {
+  publish(key, payload, props={}) {
     var channel = null
     var self = this
       // first create a channel - this is a lightweight connection
@@ -151,9 +151,12 @@ module.exports = class RabbitMQService extends EventEmitter{
         })
       }).then(() => {
         // publish the message
-        channel.publish(self.exchangeName, key,
+        props = _.defaults(props, { contentType: 'application/json'})
+        channel.publish(
+          self.exchangeName,
+          key,
           new Buffer(JSON.stringify(payload)),
-          { contentType: 'application/json'}
+          props
         )
         self.logger.debug('Sent %s: %s', self.exchangeName, payload)
         return channel.close()

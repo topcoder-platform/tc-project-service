@@ -32,6 +32,10 @@ module.exports = [
             err.status = 404
             next(err)
           } else {
+            req.app.emit(EVENT.INTERNAL.PROJECT_DELETED, {
+              payload: { id: projectId },
+              props: { correlationId: req.id }
+            })
             res.status(204).json({})
           }
         })

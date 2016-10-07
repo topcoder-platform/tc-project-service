@@ -64,7 +64,10 @@ module.exports = [
       .then(_newMember => {
         newMember = _newMember.get({plain: true})
         // fire event
-        req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_ADDED, newMember)
+        req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_ADDED, {
+          payload: newMember,
+          props: { correlationId: req.id }
+        })
         res.status(201).json(util.wrapResponse(req.id, newMember))
       })
       .catch((err) => {

@@ -125,7 +125,10 @@ module.exports = [
             newProject = _.omit(newProject, ['deletedAt', 'utm'])
             // add an empty attachments array
             newProject.attachments = []
-            req.app.emit(EVENT.INTERNAL.PROJECT_DRAFT_CREATED, newProject)
+            req.app.emit(EVENT.INTERNAL.PROJECT_DRAFT_CREATED, {
+              payload: newProject,
+              props: { correlationId: req.id }
+            })
             res.status(201).json(util.wrapResponse(req.id, newProject))
           })
           .catch((err) => {

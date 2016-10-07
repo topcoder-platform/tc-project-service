@@ -16,16 +16,18 @@ module.exports = (app, logger) => {
 
   // Publish messages to the queue
   _.map(internalEvents, (evt) => {
-    app.on(evt, (member) => {
+    app.on(evt, ({payload, props}) => {
       logger.debug('handling ', evt)
       let key = evt.substring(evt.indexOf('.') + 1)
-      return app.services.pubsub.publish(key, member)
+      return app.services.pubsub.publish(key, payload, props)
     })
   })
 
 
   // EXTERNAL events
   app.on(EVENT.EXTERNAL.PROJECT_MEMBER_ADDED, (msg, next) => {
+    const origRequestId = msg.properties.correlationId
+    logger = logger.child({requestId: origRequestId})
     let newMember = JSON.parse(msg.content.toString())
     logger.debug(`received msg '${EVENT.EXTERNAL.PROJECT_MEMBER_ADDED}'`, newMember)
 
@@ -38,13 +40,16 @@ module.exports = (app, logger) => {
             return util.getSystemUserToken(logger)
               .then(token => {
                 const req = {
-                  id: 1,
+                  id: origRequestId,
                   log: logger,
                   headers: { authorization: `Bearer ${token}` }
                 }
                 return  directProject.addCopilot(req, directProjectId, {
                   copilotUserId: newMember.userId
                 })
+                  .then((resp) => {
+                    next()
+                  })
               })
               .catch(err => {
                 logger.error('Error caught while adding co-pilot from direct', err)
@@ -62,7 +67,9 @@ module.exports = (app, logger) => {
   })
 
   app.on(EVENT.EXTERNAL.PROJECT_MEMBER_REMOVED, (msg, next) => {
+    const origRequestId = msg.properties.correlationId
     const member = JSON.parse(msg.content.toString())
+    logger = logger.child({requestId: origRequestId})
     logger.debug(`received msg '${EVENT.EXTERNAL.PROJECT_MEMBER_REMOVED}'`, member)
 
     if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
@@ -74,6 +81,7 @@ module.exports = (app, logger) => {
             return util.getSystemUserToken(logger)
               .then(token => {
                 const req = {
+                  id: origRequestId,
                   log: logger,
                   headers: { authorization: `Bearer ${token}` }
                 }
