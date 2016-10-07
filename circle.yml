@@ -22,11 +22,28 @@ deployment:
     commands:
       - ./ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
 
+
   production:
-    branch: master
+    # branch: master
+    # commands:
+    #   - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_BUILD_NUM
+
+    tag: /v[0-9]+(\.[0-9]+)*/
+    owner: appirio-tech
     commands:
-      - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_BUILD_NUM
+      - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_TAG
 
 general:
   artifacts:
     - ./coverage
+
+notify:
+  webhooks:
+    # slack - product-dev
+    - url: https://hooks.slack.com/services/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
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
