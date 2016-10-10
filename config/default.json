@@ -12,6 +12,7 @@
   "topicServiceEndpoint": "",
   "identityServiceEndpoint": "",
   "directProjectServiceEndpoint": "",
+  "directProjectServiceTimeout": 5000,
   "attachmentsS3Bucket": "topcoder-prod-media",
   "projectAttachmentPathPrefix": "projects",
   "projectAttachmentPathSuffix": "attachments",

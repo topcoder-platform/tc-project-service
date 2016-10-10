@@ -8,6 +8,7 @@
   "esUrl": "PROJECTS_ES_URL",
   "rabbitmqURL": "RABBITMQ_URL",
   "directProjectServiceEndpoint": "DIRECT_PROJECT_SERVICE_ENDPOINT",
+  "directProjectServiceTimeout": "DIRECT_PROJECT_SERVICE_TIMEOUt",
   "fileServiceEndpoint": "FILE_SERVICE_ENDPOINT",
   "identityServiceEndpoint": "IDENTITY_SERVICE_ENDPOINT",
   "topicServiceEndpoint": "TOPIC_SERVICE_ENDPOINT",
