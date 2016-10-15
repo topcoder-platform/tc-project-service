@@ -14,7 +14,7 @@ var should = chai.should()
 sinon.stub(RabbitMQService.prototype, 'init', ()=> {})
 sinon.stub(RabbitMQService.prototype, 'publish', ()=> {console.log('publish called')})
 
-describe('Project', () => {
+describe('Project create', () => {
     before(done =>  {
         testUtil.clearDb(done)
     })

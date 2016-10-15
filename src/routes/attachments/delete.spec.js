@@ -10,7 +10,7 @@ import server from '../../app'
 import testUtil from '../../tests/util'
 
 
-describe('Project', () => {
+describe('Project Attachments delete', () => {
   var project1, member1, attachment
   beforeEach(done =>  {
     testUtil.clearDb()

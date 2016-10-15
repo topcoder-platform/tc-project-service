@@ -1,5 +1,6 @@
 'use strict'
 import util from '../util'
+import _ from 'lodash'
 import config from 'config'
 /**
  * Service methods to handle direct project.

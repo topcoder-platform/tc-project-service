@@ -11,7 +11,7 @@ import testUtil from '../../tests/util'
 
 var should = chai.should()
 
-describe('Project Members', () => {
+describe('Project Members create', () => {
   var project1, project2
   before(done =>  {
     testUtil.clearDb()

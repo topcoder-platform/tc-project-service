@@ -56,8 +56,7 @@ module.exports = [
       config.get('projectAttachmentPathPrefix'),
       fileName
     ], '/')
-    var destinationUri = null,
-        newAttachment = null
+    var newAttachment = null
 
     // get presigned Url
     var httpClient = util.getHttpClient(req)
@@ -75,64 +74,60 @@ module.exports = [
         isPublic: false
       }
     })
-        .then((resp) => {
-          req.log.debug('Presigned Url resp: ', JSON.stringify(resp.data, null, 2))
-          if (resp.status !== 200 || resp.data.result.status !== 200) {
-            return Promise.reject(new Error(resp.data.result.message))
-          }
-          // store deistination path & url
-          destinationUri = _.join([
-            's3:/',
-            config.get('attachmentsS3Bucket'),
-            filePath
-          ], '/')
-          let sourceUri = 's3://' + data.s3Bucket +  '/' + data.filePath
-          req.log.debug('Moving s3 file')
-          return util.s3FileTransfer(req, sourceUri, destinationUri)
-        })
-        .then(() => {
-          // file copied to final destination, create DB record
-          req.log.debug('creating db record')
-          return models.ProjectAttachment
-              .create({
-                projectId: projectId,
-                createdBy: req.authUser.userId,
-                updatedBy: req.authUser.userId,
-                title: data.title,
-                size: data.size,
-                category: data.category || null,
-                description: data.description,
-                contentType: data.contentType,
-                filePath: filePath
-              })
-        })
-        .then((_newAttachment) => {
-          newAttachment = _newAttachment.get({plain: true})
-          req.log.debug('New Attachment record: ', newAttachment)
-          // retrieve download url for the response
-          req.log.debug('retrieving download url')
-          return httpClient.post(fileServiceUrl + 'downloadurl', {
-            param: {
-              filePath: filePath
-            }
+    .then((resp) => {
+      req.log.debug('Presigned Url resp: ', JSON.stringify(resp.data, null, 2))
+      if (resp.status !== 200 || resp.data.result.status !== 200) {
+        return Promise.reject(new Error(resp.data.result.message))
+      }
+      // store deistination path & url
+      const destinationUri = `s3://${config.get('attachmentsS3Bucket')}/${filePath}`
+      const sourceUri = `s3://${data.s3Bucket}/${data.filePath}`
+      req.log.debug('Moving s3 file')
+      return util.s3FileTransfer(req, sourceUri, destinationUri)
+    })
+    .then(() => {
+      // file copied to final destination, create DB record
+      req.log.debug('creating db record')
+      return models.ProjectAttachment
+          .create({
+            projectId: projectId,
+            createdBy: req.authUser.userId,
+            updatedBy: req.authUser.userId,
+            title: data.title,
+            size: data.size,
+            category: data.category || null,
+            description: data.description,
+            contentType: data.contentType,
+            filePath: filePath
           })
-        })
-        .then((resp) => {
-          req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2))
-          if (resp.status !== 200 || resp.data.result.status !== 200) {
-            return Promise.reject(new Error("Unable to fetch pre-signed url"))
-          }
-          let response = _.cloneDeep(newAttachment)
-          response = _.omit(response, ['filePath', 'deletedAt'])
+    })
+    .then((_newAttachment) => {
+      newAttachment = _newAttachment.get({plain: true})
+      req.log.debug('New Attachment record: ', newAttachment)
+      // retrieve download url for the response
+      req.log.debug('retrieving download url')
+      return httpClient.post(fileServiceUrl + 'downloadurl', {
+        param: {
+          filePath: filePath
+        }
+      })
+    })
+    .then((resp) => {
+      req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2))
+      if (resp.status !== 200 || resp.data.result.status !== 200) {
+        return Promise.reject(new Error("Unable to fetch pre-signed url"))
+      }
+      let response = _.cloneDeep(newAttachment)
+      response = _.omit(response, ['filePath', 'deletedAt'])
 
-          response.url = resp.data.result.content.preSignedURL
-          res.status(201).json(util.wrapResponse(req.id, response))
-        })
-        .catch(function(err) {
-          req.log.error("Error adding attachment", err)
-          err.status = err.status || 500
-          next(err)
-        })
+      response.url = resp.data.result.content.preSignedURL
+      res.status(201).json(util.wrapResponse(req.id, response))
+    })
+    .catch(function(err) {
+      req.log.error("Error adding attachment", err)
+      err.status = err.status || 500
+      next(err)
+    })
 
   }
 ]

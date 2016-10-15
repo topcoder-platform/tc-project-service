@@ -10,7 +10,7 @@ import testUtil from '../../tests/util'
 
 var should = chai.should()
 
-describe('Project', () => {
+describe('Project Attachments update', () => {
   var project1, member1, attachment
   beforeEach(done =>  {
     testUtil.clearDb()

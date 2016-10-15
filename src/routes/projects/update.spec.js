@@ -302,7 +302,7 @@ describe('Project', () => {
           })
     })
 
-   it('should return 200 and update bookmarks', done =>  {
+   it.skip('should return 200 and update bookmarks', done =>  {
       request(server)
           .patch("/v4/projects/" + project1.id)
           .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
