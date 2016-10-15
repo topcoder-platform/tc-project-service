@@ -71,7 +71,7 @@ router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 
   // dvalidateelopment error handler
   // will print stacktrace
-  if (_.indexOf(['development', 'test', 'qa'], process.env.ENVIRONMENT) > -1) {
+  if (_.indexOf(['development', 'test', 'qa'], process.env.NODE_ENV) > -1) {
     body.result.debug = err.stack
     if (err.details) {
       body.result.details = err.details

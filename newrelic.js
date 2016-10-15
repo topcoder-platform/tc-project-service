@@ -7,9 +7,9 @@
  * description of configuration variables and their potential values.
  */
 var appName = "tc-projects-service"
-if (process.env.ENVIRONMENT === 'development') {
+if (process.env.NODE_ENV === 'development') {
   appName += "-dev"
-} else if (process.env.ENVIRONMENT === 'qa') {
+} else if (process.env.NODE_ENV === 'qa') {
   appName += "-qa"
 } else {
   appName += '-prod'

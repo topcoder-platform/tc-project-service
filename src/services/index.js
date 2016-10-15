@@ -9,7 +9,7 @@ import RabbitMQService from './rabbitmq'
  */
 module.exports = (app, logger) => {
   app.services = app.service || {}
-  if (process.env.ENVIRONMENT.toLowerCase() === 'test') {
+  if (process.env.NODE_ENV.toLowerCase() === 'test') {
     require('../tests/serviceMocks')(app)
   } else {
     // RabbitMQ Initialization
@@ -37,7 +37,7 @@ module.exports = (app, logger) => {
     //   hosts: config.get('esUrl'),
     //   apiVersion: '1.5'
     // }
-    // if (process.env.ENVIRONMENT.toLowerCase() !== 'local') {
+    // if (process.env.NODE_ENV.toLowerCase() !== 'local') {
     //   _.assign(esConfig, {
     //     connectionClass: require('http-aws-es'),
     //     amazonES: {

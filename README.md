@@ -15,14 +15,14 @@ Microservice to manage CRUD operations for all things Projects.
 ~/Projects/tc-projects-service/local
 > docker-compose up
 ```
-Copy config/sample.local.js as config/local.js, update the properties and according to your env setup 
+Copy config/sample.local.js as config/local.js, update the properties and according to your env setup
 
 #### Database
 Once you start your PostgreSQL database through docker, it will create a projectsDB.
 *To create tables - note this will drop tables if they already exist*
 ```
-npm run -s build 
-> ENVIRONMENT=development node -e "require('./dist/models').default.sequelize.sync({force: true}).then((res)=> console.log('Success: ', res)).catch((err)=> console.log('Failed: ', err));"
+npm run -s build
+> NODE_ENV=development node -e "require('./dist/models').default.sequelize.sync({force: true}).then((res)=> console.log('Success: ', res)).catch((err)=> console.log('Failed: ', err));"
 ```
 
 #### Redis

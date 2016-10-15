@@ -1,7 +1,7 @@
 'use strict'
 
 // include newrelic
-if (process.env.ENVIRONMENT !== 'test' && process.env.ENVIRONMENT !== 'local') {
+if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'local') {
   require('newrelic')
 }
 

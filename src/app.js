@@ -32,7 +32,7 @@ app.use(addRequestId)
 // Loger =========
 // =======================
 let appName = 'tc-projects-service'
-switch (process.env.ENVIRONMENT.toLowerCase()) {
+switch (process.env.NODE_ENV.toLowerCase()) {
   case 'development':
     appName += "-dev"
     break

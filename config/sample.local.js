@@ -1,7 +1,7 @@
 // force using test.json for unit tests
 
 var config
-if (process.env.ENVIRONMENT === 'test') {
+if (process.env.NODE_ENV === 'test') {
   config = require('./test.json')
 } else {
   config = {
