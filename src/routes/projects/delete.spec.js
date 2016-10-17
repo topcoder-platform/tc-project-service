@@ -10,7 +10,7 @@ import server from '../../app'
 import testUtil from '../../tests/util'
 
 
-describe('Project', () => {
+describe('Project delete test', () => {
   var project1, owner, teamMember, manager, copilot
   beforeEach(done =>  {
     testUtil.clearDb()
