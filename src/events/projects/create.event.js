@@ -53,7 +53,7 @@ const addProjectStatus = (req, logger, project) => {
     {
       title: 'Hello, Coder here! Your project has been created successfully',
       body: 'It took almost 245ms for me to create it, but all is good now.\
-        That\'s a lot of hard for a robot, you know!'
+        That\'s a lot of hard work for a robot, you know!'
     },
     {
       title: 'Hey there, I\'m ready with the next steps for your project!',
