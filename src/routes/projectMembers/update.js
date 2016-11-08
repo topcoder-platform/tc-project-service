@@ -5,7 +5,7 @@ import Joi from 'joi'
 
 import models from '../../models'
 import util from '../../util'
-import { PROJECT_MEMBER_ROLE } from '../../constants'
+import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants'
 import { middleware as tcMiddleware } from 'tc-core-library-js'
 import directProject from '../../services/directProject'
 
@@ -115,6 +115,11 @@ module.exports = [
         .then(() => {
           projectMember = projectMember.get({plain: true})
           projectMember = _.omit(projectMember, ['deletedAt'])
+          // emit original and updated project information
+          req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_UPDATED, {
+            payload: { original: previousValue, updated: projectMember },
+            props: { correlationId: req.id }
+          })
           req.log.debug('updated project member', projectMember)
           res.json(util.wrapResponse(req.id, projectMember))
         })
