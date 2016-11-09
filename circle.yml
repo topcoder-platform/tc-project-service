@@ -14,7 +14,7 @@ dependencies:
   pre:
     - pip install awsebcli
   override:
-    - npm install --only=dev
+    - npm install
 
 deployment:
   development:
