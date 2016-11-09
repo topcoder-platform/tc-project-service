@@ -1,7 +1,7 @@
 machine:
 
   node:
-    version: 5.9
+    version: v5.7.0
   environment:
     DB_MASTER_URL: postgres://ubuntu:@127.0.0.1:5432/circle_test
     #RABBITMQ_URL: amqp://localhost:5672
@@ -14,7 +14,7 @@ dependencies:
   pre:
     - pip install awsebcli
   override:
-    - npm install --only=dev
+    - npm install
 
 deployment:
   development:

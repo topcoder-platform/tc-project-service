@@ -34,6 +34,7 @@ export const EVENT = {
   ROUTING_KEY: {
     PROJECT_MEMBER_ADDED: 'project.member.added',
     PROJECT_MEMBER_REMOVED: 'project.member.removed',
+    PROJECT_MEMBER_UPDATED: 'project.member.updated',
 
     PROJECT_DRAFT_CREATED: 'project.draft-created',
     PROJECT_LAUNCHED: 'project.launched',

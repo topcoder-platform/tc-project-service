@@ -120,7 +120,7 @@ module.exports = [
       let response = _.cloneDeep(newAttachment)
       response = _.omit(response, ['filePath', 'deletedAt'])
 
-      response.url = resp.data.result.content.preSignedURL
+      response.downloadUrl = resp.data.result.content.preSignedURL
       res.status(201).json(util.wrapResponse(req.id, response))
     })
     .catch(function(err) {

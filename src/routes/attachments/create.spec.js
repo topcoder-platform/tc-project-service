@@ -134,10 +134,9 @@ describe('Project Attachments', () => {
             getSpy.should.have.been.calledOnce
             stub.restore()
             console.log(JSON.stringify(resJson, null, 2))
-            // resJson.role.should.equal('customer')
-            // resJson.isPrimary.should.be.truthy
-            // resJson.projectId.should.equal(project1.id)
-            // resJson.userId.should.equal(1)
+            resJson.title.should.equal('Spec.pdf')
+            resJson.downloadUrl.should.exist
+            resJson.projectId.should.equal(project1.id)
             done()
           })
     })
