@@ -20,7 +20,11 @@ describe('LIST Project', () => {
             name: 'test1',
             description: 'test project1',
             status: 'active',
-            details: {},
+            details: {
+              utm: {
+                code: 'code1'
+              }
+            },
             createdBy: 1,
             updatedBy: 1
           }).then(p => {
@@ -172,6 +176,85 @@ describe('LIST Project', () => {
             var resJson = res.body.result.content
             should.exist(resJson)
             resJson.should.have.lengthOf(3)
+            done()
+          })
+    })
+
+    it('should return the project when filtering by keyword, which matches the name', done => {
+      request(server)
+          .get('/v4/projects/?filter=keyword%3D1')
+          .set({
+            'Authorization': 'Bearer ' + testUtil.jwts.admin
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.should.have.lengthOf(1)
+            resJson[0].name.should.equal('test1')
+            done()
+          })
+    })
+
+    it('should return the project when filtering by keyword, which matches the description', done => {
+      request(server)
+          .get('/v4/projects/?filter=keyword%3Dproject')
+          .set({
+            'Authorization': 'Bearer ' + testUtil.jwts.admin
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.should.have.lengthOf(3)
+            done()
+          })
+    })
+
+    it('should return the project when filtering by keyword, which matches the details', done => {
+      request(server)
+          .get('/v4/projects/?filter=keyword%3Dcode')
+          .set({
+            'Authorization': 'Bearer ' + testUtil.jwts.admin
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.should.have.lengthOf(1)
+            resJson[0].name.should.equal('test1')
+            done()
+          })
+    })
+
+    it('should return the project when filtering by name and keyword', done => {
+      request(server)
+          .get('/v4/projects/?filter=name%3Dtest%26keyword%3Dcode')
+          .set({
+            'Authorization': 'Bearer ' + testUtil.jwts.admin
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function(err, res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.should.have.lengthOf(1)
+            resJson[0].name.should.equal('test1')
             done()
           })
     })

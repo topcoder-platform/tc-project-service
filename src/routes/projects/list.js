@@ -41,10 +41,28 @@ var _retrieveProjects = (req, criteria, sort, fields) => {
   let retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1
   let retrieveMembers = !req.query.fields || !!fields.project_members.length
 
-
-  // special handling for name filter
-  if (_.has(criteria.filters, 'name')) {
-    criteria.filters.name = { ilike: `%${criteria.filters.name}%`}
+  // special handling for keyword filter
+  if (_.has(criteria.filters, 'keyword')) {
+    criteria.filters.$or = [
+      {
+        name: {
+          $ilike: `%${criteria.filters.keyword}%`
+        },
+      }, {
+        description: {
+          $ilike: `%${criteria.filters.keyword}%`
+        },
+      }, {
+        details: {
+          utm: {
+            code: {
+              $ilike: `%${criteria.filters.keyword}%`
+            }
+          }
+        }
+      }
+    ]
+    delete criteria.filters.keyword
   }
 
   return models.Project.findAndCountAll({
@@ -117,7 +135,7 @@ module.exports = [
       'name', 'name asc', 'name desc',
       'type', 'type asc', 'type desc'
     ]
-    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'name']) ||
+    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'keyword']) ||
       (sort && _.indexOf(sortableProps, sort) < 0)) {
       util.handleError('Invalid filters or sort', null, req, next)
     }
