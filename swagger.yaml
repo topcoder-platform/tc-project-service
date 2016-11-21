@@ -48,7 +48,7 @@ paths:
              - type
              - status
              - memberOnly
-             - name
+             - keyword
         - name: sort
           required: false
           description: |
