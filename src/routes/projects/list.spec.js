@@ -13,6 +13,7 @@ describe('LIST Project', () => {
   var project1, project2
   before(done => {
     testUtil.clearDb()
+        .then(() => models.Project.addFullTextIndex())
         .then(() => {
           var p1 = models.Project.create({
             type: 'generic',
@@ -258,5 +259,5 @@ describe('LIST Project', () => {
           })
     })
   })
-  
+
 })

@@ -1,5 +1,6 @@
 import models from '../models'
 models.sequelize.sync({force: true})
+    .then(() => models.Project.addFullTextIndex())
     .then(() =>
         models.Project.bulkCreate([{
             type: 'generic',

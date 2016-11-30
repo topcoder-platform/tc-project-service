@@ -41,39 +41,13 @@ var _retrieveProjects = (req, criteria, sort, fields) => {
   let retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1
   let retrieveMembers = !req.query.fields || !!fields.project_members.length
 
-  // special handling for keyword filter
-  if (_.has(criteria.filters, 'keyword')) {
-    criteria.filters.$or = [
-      {
-        name: {
-          $ilike: `%${criteria.filters.keyword}%`
-        },
-      }, {
-        description: {
-          $ilike: `%${criteria.filters.keyword}%`
-        },
-      }, {
-        details: {
-          utm: {
-            code: {
-              $ilike: `%${criteria.filters.keyword}%`
-            }
-          }
-        }
-      }
-    ]
-    delete criteria.filters.keyword
-  }
-
-  return models.Project.findAndCountAll({
-    logging: (str) => { req.log.debug(str)},
-    where: criteria.filters,
-    order,
-    limit : criteria.limit,
-    offset: criteria.offset,
-    attributes: _.get(fields, 'projects', null),
-    raw: true,
-  })
+  return models.Project.searchText({
+      filters: criteria.filters,
+      order,
+      limit : criteria.limit,
+      offset: criteria.offset,
+      attributes: _.get(fields, 'projects', null)
+    }, req.log)
   .then( ({rows, count}) => {
     const projectIds = _.map(rows, 'id')
     const promises = []
