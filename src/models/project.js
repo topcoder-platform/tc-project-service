@@ -92,6 +92,61 @@ module.exports = function(sequelize, DataTypes) {
       associate: (models) => {
         Project.hasMany(models.ProjectMember, { as : 'members', foreignKey: 'projectId' })
         Project.hasMany(models.ProjectAttachment, { as : 'attachments', foreignKey: 'projectId' })
+      },
+      /**
+       * Search keyword in name, description, details.utm.code
+       * @param parameters the parameters
+       *          - filters: the filters contains keyword
+       *          - order: the order
+       *          - limit: the limit
+       *          - offset: the offset
+       *          - attributes: the attributes to get
+       * @param log the request log
+       * @return the result rows and count
+       */
+      searchText: function(parameters, log) {
+        // special handling for keyword filter
+        var query = '1=1 ';
+        if (_.has(parameters.filters, 'id')) {
+          if (_.isObject(parameters.filters.id)) {
+            if (parameters.filters.id['$in'].length === 0) {
+              parameters.filters.id['$in'].push(-1)
+            }
+            query += `AND id IN (${parameters.filters.id['$in']}) `;
+          } else if(_.isString(parameters.filters.id) || _.isNumber(parameters.filters.id)){
+            query += `AND id = ${parameters.filters.id} `;
+          }
+        }
+        if (_.has(parameters.filters, 'status')) {
+          query += `AND status = '${parameters.filters.status}' `;
+        }
+        if (_.has(parameters.filters, 'type')) {
+          query += `AND type = '${parameters.filters.type}' `;
+        }
+        if (_.has(parameters.filters, 'keyword')) {
+          query += `AND "projectFullText" ~ lower('${parameters.filters.keyword}')`;
+        }
+
+        let attributesStr = '"' + parameters.attributes.join('","') + '"';
+        let orderStr = '"' + parameters.order[0][0] + '" ' + parameters.order[0][1];
+
+        // select count of projects
+        return sequelize.query(`SELECT COUNT(1) FROM projects WHERE ${query}`,
+          { type: sequelize.QueryTypes.SELECT,
+            logging: (str) => { log.debug(str); },
+            raw: true
+          })
+          .then(function(count) {
+            // select project attributes
+            return sequelize.query(`SELECT ${attributesStr} FROM projects WHERE ${query} ORDER BY ${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
+              { type: sequelize.QueryTypes.SELECT,
+                logging: (str) => { log.debug(str); },
+                raw: true
+              })
+              .then(function(projects) {
+                return {rows: projects, count: count.count};
+          });
+        });
       }
     }
   })
