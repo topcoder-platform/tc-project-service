@@ -9,13 +9,6 @@ if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'local') {
 
 const app = require('./app')
 
-// Add full text index for Projects
-models.sequelize.sync()
-  .done(function() {
-    models.Project.addFullTextIndex()
-  })
-
-
 /**
  * Handle server shutdown gracefully
  */

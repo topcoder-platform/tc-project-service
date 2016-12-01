@@ -94,47 +94,6 @@ module.exports = function(sequelize, DataTypes) {
         Project.hasMany(models.ProjectAttachment, { as : 'attachments', foreignKey: 'projectId' })
       },
       /**
-       * Add full text index for projects.
-       */
-      addFullTextIndex: function() {
-        if(sequelize.options.dialect !== 'postgres') {
-            console.log('Not creating search index, must be using POSTGRES to do this');
-            return;
-        }
-
-        return sequelize
-            .query('ALTER TABLE projects ADD COLUMN "projectFullText" text;')
-            .then(function() {
-              return sequelize
-                .query('UPDATE projects SET "projectFullText" = lower(' +
-                  'name || \' \' || coalesce(description, \'\') || \' \' || coalesce(details#>>\'{utm, code}\', \'\'));');
-            }).then(function() {
-              return sequelize
-                .query('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
-            }).then(function() {
-              return sequelize
-                .query('CREATE INDEX project_text_search_idx ON projects USING GIN("projectFullText" gin_trgm_ops);');
-            }).then(function() {
-              return sequelize
-                .query('CREATE OR REPLACE FUNCTION project_text_update_trigger() RETURNS trigger AS $$ ' +
-                  'begin ' +
-                    'new."projectFullText" := ' +
-                    'lower(new.name || \' \' || coalesce(new.description, \'\') || \' \' || coalesce(new.details#>>\'{utm, code}\', \'\')); ' +
-                    'return new; ' +
-                  'end ' +
-                  '$$ LANGUAGE plpgsql;');
-            }).then(function() {
-              return sequelize
-                .query('DROP TRIGGER IF EXISTS project_text_update ON projects;');
-            }).then(function() {
-              return sequelize
-                .query('CREATE TRIGGER project_text_update BEFORE INSERT OR UPDATE ON projects' +
-                  ' FOR EACH ROW EXECUTE PROCEDURE project_text_update_trigger();');
-            }).catch(function(err){
-              console.log('Failed: ', err);
-            });
-      },
-      /**
        * Search keyword in name, description, details.utm.code
        * @param parameters the parameters
        *          - filters: the filters contains keyword
