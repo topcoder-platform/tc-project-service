@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import util from '../../util'
+import config from 'config'
 import topicService from '../../services/topicService'
+import querystring from 'querystring'
 
 /*
  NOTE: Use this code segment if you wish to create direct projects async
@@ -74,16 +76,54 @@ const addProjectStatus = (req, logger, project) => {
     })
 }
 
+/**
+ * Creates a lead in salesforce for the connect project.
+ *
+ * @param token JWT token of the admin user which would be used to fetch user info
+ * @param logger logger to be used for logging
+ * @param project connect project for which lead is to be created
+ *
+ * @return promise which resolves to the HTML content where salesforce web to lead form redirects
+ */
+const addSalesforceLead = (token, logger, project) => {
+  logger.debug('Getting topcoder user with userId: ', project.createdBy)
+  return util.getTopcoderUser(project.createdBy, token, logger)
+  .then((userInfo) => {
+    var httpClient = util.getHttpClient({id: 2,log : logger})
+    httpClient.defaults.timeout = 3000
+    httpClient.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
+    var data = {
+      oid: config.get('salesforceLead.orgId'),
+      first_name: userInfo.firstName,
+      last_name: userInfo.lastName,
+      email: userInfo.email
+    }
+    data[config.get('salesforceLead.projectIdFieldId')] = project.id
+    data[config.get('salesforceLead.projectNameFieldId')] = project.name
+    data[config.get('salesforceLead.projectDescFieldId')] = project.description
+    data[config.get('salesforceLead.projectLinkFieldId')] = config.get('connectProjectsUrl') + project.id
+    var body =  querystring.stringify(data)
+    var webToLeadUrl = config.get('salesforceLead.webToLeadUrl')
+    logger.debug('initiaiting salesforce web to lead call for project: ', project.id)
+    return httpClient.post(webToLeadUrl, body)
+  })
+}
+
 
 const createEventHandler = (logger, project) => {
+  logger.debug('Getting system user token....')
   return util.getSystemUserToken(logger)
     .then(token => {
+      logger.debug('received system user token....', token)
       const req = {
         id: 1,
         log: logger,
         headers: { authorization: `Bearer ${token}` }
       }
-      return addProjectStatus(req, logger, project)
+      return Promise.all([
+        addProjectStatus(req, logger, project),
+        addSalesforceLead(token, logger, project).then((resp)=> logger.debug('lead response:', resp))
+      ]);
     })
 }
 

@@ -207,6 +207,30 @@ _.assignIn(util, {
       .then(res => {
         return res.data.result.content.token
       })
+    },
+
+    /**
+     * Fetches the topcoder user details using the given JWT token.
+     *
+     * @param userId id of the user to be fetched
+     * @param jwtToken JWT token of the admin user or JWT token of the user to be fecthed
+     * @param logger logger to be used for logging purposes
+     *
+     * @return promise which resolves to the user's information
+     */
+    getTopcoderUser: (userId, jwtToken, logger) => {
+      var httpClient = util.getHttpClient({id: 'userService_' + userId, log : logger});
+      httpClient.defaults.timeout = 3000
+      httpClient.defaults.headers.common['Accept'] = 'application/json'
+      httpClient.defaults.headers.common['Content-Type'] = 'application/json'
+      httpClient.defaults.headers.common['Authorization'] = 'Bearer ' + jwtToken
+      return httpClient.get(config.userServiceUrl + '/' + userId).then((response) => {
+        if (response.data && response.data.result
+          && response.data.result.status == 200 && response.data.result.content) {
+          return response.data.result.content;
+        }
+        return null;
+      });
     }
 })
 
