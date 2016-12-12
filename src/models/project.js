@@ -137,6 +137,7 @@ module.exports = function(sequelize, DataTypes) {
             raw: true
           })
           .then(function(count) {
+            count = count[0].count
             // select project attributes
             return sequelize.query(`SELECT ${attributesStr} FROM projects WHERE ${query} ORDER BY ${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
               { type: sequelize.QueryTypes.SELECT,
@@ -144,7 +145,7 @@ module.exports = function(sequelize, DataTypes) {
                 raw: true
               })
               .then(function(projects) {
-                return {rows: projects, count: count.count};
+                return {rows: projects, count: count};
           });
         });
       }
