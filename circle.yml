@@ -24,14 +24,14 @@ deployment:
 
 
   production:
-    # branch: master
-    # commands:
-    #   - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_BUILD_NUM
-
-    tag: /v[0-9]+(\.[0-9]+)*/
-    owner: appirio-tech
+    branch: master
     commands:
-      - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_TAG
+      - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_BUILD_NUM
+
+    # tag: /v[0-9]+(\.[0-9]+)*/
+    # owner: appirio-tech
+    # commands:
+      # - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_TAG
 
 general:
   artifacts:
