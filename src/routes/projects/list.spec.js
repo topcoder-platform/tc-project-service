@@ -9,10 +9,53 @@ import testUtil from '../../tests/util'
 
 var should = chai.should()
 
+/**
+ * Add full text index for projects.
+ */
+function addFullTextIndex() {
+  if(models.sequelize.options.dialect !== 'postgres') {
+      console.log('Not creating search index, must be using POSTGRES to do this');
+      return;
+  }
+
+  return models.sequelize
+      .query('ALTER TABLE projects ADD COLUMN "projectFullText" text;')
+      .then(function() {
+        return models.sequelize
+          .query('UPDATE projects SET "projectFullText" = lower(' +
+            'name || \' \' || coalesce(description, \'\') || \' \' || coalesce(details#>>\'{utm, code}\', \'\'));');
+      }).then(function() {
+        return models.sequelize
+          .query('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
+      }).then(function() {
+        return models.sequelize
+          .query('CREATE INDEX project_text_search_idx ON projects USING GIN("projectFullText" gin_trgm_ops);');
+      }).then(function() {
+        return models.sequelize
+          .query('CREATE OR REPLACE FUNCTION project_text_update_trigger() RETURNS trigger AS $$ ' +
+            'begin ' +
+              'new."projectFullText" := ' +
+              'lower(new.name || \' \' || coalesce(new.description, \'\') || \' \' || coalesce(new.details#>>\'{utm, code}\', \'\')); ' +
+              'return new; ' +
+            'end ' +
+            '$$ LANGUAGE plpgsql;');
+      }).then(function() {
+        return models.sequelize
+          .query('DROP TRIGGER IF EXISTS project_text_update ON projects;');
+      }).then(function() {
+        return models.sequelize
+          .query('CREATE TRIGGER project_text_update BEFORE INSERT OR UPDATE ON projects' +
+            ' FOR EACH ROW EXECUTE PROCEDURE project_text_update_trigger();');
+      }).catch(function(err){
+        console.log('Failed: ', err);
+      });
+}
+
 describe('LIST Project', () => {
   var project1, project2
   before(done => {
     testUtil.clearDb()
+        .then(() => addFullTextIndex())
         .then(() => {
           var p1 = models.Project.create({
             type: 'generic',
@@ -258,5 +301,5 @@ describe('LIST Project', () => {
           })
     })
   })
-  
+
 })

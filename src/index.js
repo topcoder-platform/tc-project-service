@@ -1,12 +1,13 @@
 'use strict'
 
+import models from './models'
+
 // include newrelic
 if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'local') {
   require('newrelic')
 }
 
 const app = require('./app')
-
 
 /**
  * Handle server shutdown gracefully
