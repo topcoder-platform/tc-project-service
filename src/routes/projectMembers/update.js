@@ -73,6 +73,7 @@ module.exports = [
             operations.push(models.ProjectMember.update({ isPrimary: false, updatedBy: req.authUser.userId },
                 {
                   where: {
+                    projectId,
                     isPrimary: true,
                     role: updatedProps.role,
                     id: {
