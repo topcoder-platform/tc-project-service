@@ -37,7 +37,6 @@ module.exports = [
    * Add project attachment
    */
   (req, res, next) => {
-    console.log('here1')
     var data = req.body.param
     // default values
     var projectId = req.params.projectId
