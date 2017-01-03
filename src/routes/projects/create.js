@@ -111,13 +111,18 @@ module.exports = [
               body.billingAccountId = newProject.billingAccountId
             }
             return directProject.createDirectProject(req, body)
-          })
-          .then((resp) => {
-            newProject.directProjectId = resp.data.result.content.projectId
-            return newProject.save()
-          })
-          .then(() => {
-            return newProject.reload(newProject.id)
+              .then((resp) => {
+                newProject.directProjectId = resp.data.result.content.projectId
+                return newProject.save()
+              })
+              .then(() => {
+                return newProject.reload(newProject.id)
+              })
+              .catch(err => {
+                // log the error and continue
+                req.log.error('Error creating direct project')
+                req.log.error(err)
+              })
           })
           .then(() => {
             newProject = newProject.get({plain: true})

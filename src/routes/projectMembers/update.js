@@ -56,8 +56,6 @@ module.exports = [
           _.assign(projectMember, updatedProps)
           newValue = projectMember.get({plain: true})
 
-          console.log('Prev Value:', previousValue)
-          console.log('New Value:', newValue)
           // no updates if no change
           if(updatedProps.role === previousValue.role &&
               (_.isUndefined(updatedProps.isPrimary) || updatedProps.isPrimary === previousValue.isPrimary)) {
