@@ -64,7 +64,7 @@ describe('Project create', () => {
                 .expect(422,done)
         })
 
-        it('should return 500 if error to create direct project', done =>  {
+        it('should return 201 if error to create direct project', done =>  {
             var mockHttpClient = _.merge(testUtil.mockHttpClient, {
                 post: () => Promise.reject(new Error('error message'))
             })
@@ -74,15 +74,14 @@ describe('Project create', () => {
                 .set({"Authorization": "Bearer " + testUtil.jwts.member})
                 .send(body)
                 .expect('Content-Type', /json/)
-                .expect(500)
+                .expect(201)
                 .end(function (err,res) {
                     if (err) {
                         return done(err)
                     }
                     const result = res.body.result
-                    result.success.should.be.false
-                    result.status.should.equal(500)
-                    result.content.message.should.equal('Error creating project')
+                    result.success.should.be.truthy
+                    result.status.should.equal(201)
                     done()
                 })
         })
