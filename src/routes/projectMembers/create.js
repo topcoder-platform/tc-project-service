@@ -68,7 +68,7 @@ module.exports = [
           payload: newMember,
           props: { correlationId: req.id }
         })
-        res.status(201).json(util.wrapResponse(req.id, newMember))
+        res.status(201).json(util.wrapResponse(req.id, newMember, 1, 201))
       })
       .catch((err) => {
         req.log.error('Unable to register ', err)

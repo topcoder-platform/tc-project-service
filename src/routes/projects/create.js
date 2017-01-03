@@ -134,7 +134,7 @@ module.exports = [
               payload: newProject,
               props: { correlationId: req.id }
             })
-            res.status(201).json(util.wrapResponse(req.id, newProject))
+            res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201))
           })
           .catch((err) => {
             util.handleError('Error creating project', err, req, next)
