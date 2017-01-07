@@ -5,7 +5,9 @@ import Joi from 'joi'
 
 import models from '../../models'
 import util from '../../util'
-import { middleware as tcMiddleware } from 'tc-core-library-js'
+import {
+  middleware as tcMiddleware
+} from 'tc-core-library-js'
 
 /**
  * API to update a project member.
@@ -36,7 +38,10 @@ module.exports = [
 
     models.sequelize.transaction(() => {
       return models.ProjectAttachment.update(updatedProps, {
-          where: { id: attachmentId, projectId: projectId },
+          where: {
+            id: attachmentId,
+            projectId: projectId
+          },
           returning: true
         })
         .then(resp => {

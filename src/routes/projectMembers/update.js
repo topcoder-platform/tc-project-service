@@ -115,10 +115,11 @@ module.exports = [
           projectMember = projectMember.get({plain: true})
           projectMember = _.omit(projectMember, ['deletedAt'])
           // emit original and updated project information
-          req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_UPDATED, {
-            payload: { original: previousValue, updated: projectMember },
-            props: { correlationId: req.id }
-          })
+          req.app.services.pubsub.publish(
+            EVENT.INTERNAL.PROJECT_MEMBER_UPDATED,
+            { original: previousValue, updated: projectMember },
+            { correlationId: req.id }
+          )
           req.log.debug('updated project member', projectMember)
           res.json(util.wrapResponse(req.id, projectMember))
         })

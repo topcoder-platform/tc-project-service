@@ -163,11 +163,12 @@ module.exports = [
           project = _.omit(project, ['deletedAt'])
           req.log.debug('updated project', project)
           previousValue =  _.omit(previousValue, ['deletedAt'])
-          // emit original and updated project information
-          req.app.emit(EVENT.INTERNAL.PROJECT_UPDATED, {
-            payload: { original: previousValue, updated: project },
-            props: { correlationId: req.id }
-          })
+          // publish original and updated project data
+          req.app.services.pubsub.publish(
+            EVENT.INTERNAL.PROJECT_UPDATED, 
+            { original: previousValue, updated: project },
+            { correlationId: req.id }
+          )
           // check context for project members
           project.members = req.context.currentProjectMembers
           // get attachments
