@@ -68,7 +68,7 @@ const projectCreatedHandler = (logger, msg, channel) => {
       return _addProjectStatus(req, logger, project)
     })
     .then(() => {
-      channel.ack(msg, true)
+      channel.ack(msg)
     })
     .catch(err => {
       // don't requeue for now
