@@ -111,13 +111,18 @@ module.exports = [
               body.billingAccountId = newProject.billingAccountId
             }
             return directProject.createDirectProject(req, body)
-          })
-          .then((resp) => {
-            newProject.directProjectId = resp.data.result.content.projectId
-            return newProject.save()
-          })
-          .then(() => {
-            return newProject.reload(newProject.id)
+              .then((resp) => {
+                newProject.directProjectId = resp.data.result.content.projectId
+                return newProject.save()
+              })
+              .then(() => {
+                return newProject.reload(newProject.id)
+              })
+              .catch(err => {
+                // log the error and continue
+                req.log.error('Error creating direct project')
+                req.log.error(err)
+              })
           })
           .then(() => {
             newProject = newProject.get({plain: true})
@@ -125,11 +130,11 @@ module.exports = [
             newProject = _.omit(newProject, ['deletedAt', 'utm'])
             // add an empty attachments array
             newProject.attachments = []
-            req.app.emit(EVENT.INTERNAL.PROJECT_DRAFT_CREATED, {
-              payload: newProject,
-              props: { correlationId: req.id }
-            })
-            res.status(201).json(util.wrapResponse(req.id, newProject))
+            req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
+              newProject,
+              { correlationId: req.id }
+            )
+            res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201))
           })
           .catch((err) => {
             util.handleError('Error creating project', err, req, next)

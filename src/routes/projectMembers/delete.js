@@ -36,10 +36,11 @@ module.exports = [
           })
           .then(member => {
             // fire event
-            req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_REMOVED, {
-              payload: member.get({plain:true}),
-              props: { correlationId: req.id }
-            })
+            req.app.services.pubsub.publish(
+              EVENT.INTERNAL.PROJECT_MEMBER_REMOVED,
+              member.get({plain:true}),
+              { correlationId: req.id }
+            )
             res.status(204).json({})
           })
           .catch(err => next(err))

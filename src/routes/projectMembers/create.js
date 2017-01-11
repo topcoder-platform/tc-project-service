@@ -63,12 +63,13 @@ module.exports = [
     return models.ProjectMember.create(member)
       .then(_newMember => {
         newMember = _newMember.get({plain: true})
-        // fire event
-        req.app.emit(EVENT.INTERNAL.PROJECT_MEMBER_ADDED, {
-          payload: newMember,
-          props: { correlationId: req.id }
-        })
-        res.status(201).json(util.wrapResponse(req.id, newMember))
+        // publish event
+        req.app.services.pubsub.publish(
+          EVENT.INTERNAL.PROJECT_MEMBER_ADDED,
+          newMember,
+          { correlationId: req.id }
+        )
+        res.status(201).json(util.wrapResponse(req.id, newMember, 1, 201))
       })
       .catch((err) => {
         req.log.error('Unable to register ', err)

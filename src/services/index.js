@@ -13,9 +13,6 @@ module.exports = (app, logger) => {
     require('../tests/serviceMocks')(app)
   } else {
     // RabbitMQ Initialization
-    // NOTE: Handlers must be registered before init the service, else
-    // those events will be fired before listeners are setup
-    // var RabbitMQService = require('./rabbitmq')
     app.services.pubsub = new RabbitMQService(app, logger)
 
     // initialize RabbitMQ

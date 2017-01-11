@@ -42,7 +42,7 @@ module.exports = function(sequelize, DataTypes) {
           raw: true
         })
         .then((res) => {
-          return _.map(res, 'projectId')
+          return  _.without(_.map(res, 'projectId'), null)
         })
       },
       getActiveProjectMembers: function(projectId) {

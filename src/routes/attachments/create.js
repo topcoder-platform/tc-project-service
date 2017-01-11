@@ -37,7 +37,6 @@ module.exports = [
    * Add project attachment
    */
   (req, res, next) => {
-    console.log('here1')
     var data = req.body.param
     // default values
     var projectId = req.params.projectId
@@ -121,7 +120,7 @@ module.exports = [
       response = _.omit(response, ['filePath', 'deletedAt'])
 
       response.downloadUrl = resp.data.result.content.preSignedURL
-      res.status(201).json(util.wrapResponse(req.id, response))
+      res.status(201).json(util.wrapResponse(req.id, response, 1, 201))
     })
     .catch(function(err) {
       req.log.error("Error adding attachment", err)

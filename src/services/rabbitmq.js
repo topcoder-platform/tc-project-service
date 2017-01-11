@@ -1,14 +1,20 @@
 'use strict'
 /* globals Promise */
 import _ from 'lodash'
-import events from 'events'
-import { EVENT } from '../constants'
+import {
+  EventEmitter
+} from 'events'
+import {
+  handlers as msgHandlers
+} from '../events'
+import {
+  EVENT
+} from '../constants'
 
-const EventEmitter = events.EventEmitter
+// console.log(events)
+// const EventEmitter = EventEmitter
 
-const ROUTING_KEYS = _.values(EVENT.ROUTING_KEY)
-
-module.exports = class RabbitMQService extends EventEmitter{
+module.exports = class RabbitMQService extends EventEmitter {
 
   constructor(app, logger) {
     super()
@@ -57,7 +63,7 @@ module.exports = class RabbitMQService extends EventEmitter{
    * Helper function to handle initializing subscribers
    * @return {promise} resolved promise
    */
-  _initSubscriber() {
+  _initSubscriber(handlers) {
     var self = this
     var channel = null
       // create channel to setup exchanges + queues + bindings
@@ -72,7 +78,7 @@ module.exports = class RabbitMQService extends EventEmitter{
         })
       }).then(() => {
         // create queue
-        // a single queue for challenge service will suffice
+        // a single queue for project service will suffice
         self.logger.debug('Exchange created')
           // with default params - exclusive:false, durable: true, autoDelete: false
         return channel.assertQueue(self.queueName)
@@ -81,27 +87,28 @@ module.exports = class RabbitMQService extends EventEmitter{
         self._subQueue = qok.queue
           // bindings for the queue
           // all these keys/bindings should be routed to the same queue
-        self.logger.debug('Adding bindings: ', ROUTING_KEYS)
-        var bindingPromises = _.map(ROUTING_KEYS, (rk) => {
+        const bindings = _.keys(msgHandlers)
+        self.logger.debug('Adding bindings: ', bindings)
+        var bindingPromises = _.map(bindings, (rk) => {
           return channel.bindQueue(self._subQueue, self.exchangeName, rk)
         })
         return Promise.all(bindingPromises)
       }).then(() => {
         self._subChannel = channel
         return channel.consume(self._subQueue, (msg) => {
-          let key = "external." + msg.fields.routingKey
-          self.logger.debug('Received Message', key, msg.fields)
-          // emit an event with the key and the message and a callback to acknowledge to reject the message
-          this._app.emit(key, msg, (err) => {
-            if (err) {
-              self.logger.error(err)
-              // not requeuing it right now - send to dead letter exchange
-              channel.nack(msg, false, false)
-              return
-            }
-            channel.ack(msg, false)
-            return
+          const key = msg.fields.routingKey
+            // create a child logger so we can trace with original request id
+          const _childLogger = self.logger.child({
+            requestId: msg.properties.correlationId
           })
+          _childLogger.debug('Received Message', key, msg.fields)
+          const handler = msgHandlers[key]
+          if (!_.isFunction(handler)) {
+            _childLogger.error(`Unknown message type: ${key}, NACKing... `)
+              // channel.nack(msg, false, false)
+          } else {
+            handler(_childLogger, msg, channel)
+          }
         })
       }).then(() => {
         self.logger.info('Waiting for messages .... ')
@@ -110,6 +117,7 @@ module.exports = class RabbitMQService extends EventEmitter{
         self.logger.error(err)
       })
   }
+
 
   /**
    * gracefully shutdown any open connections
@@ -138,7 +146,7 @@ module.exports = class RabbitMQService extends EventEmitter{
    * @param  {string} key     routing key
    * @param  {object} payload message payload
    */
-  publish(key, payload, props={}) {
+  publish(key, payload, props = {}) {
     var channel = null
     var self = this
       // first create a channel - this is a lightweight connection
@@ -151,7 +159,9 @@ module.exports = class RabbitMQService extends EventEmitter{
         })
       }).then(() => {
         // publish the message
-        props = _.defaults(props, { contentType: 'application/json'})
+        props = _.defaults(props, {
+          contentType: 'application/json'
+        })
         channel.publish(
           self.exchangeName,
           key,
