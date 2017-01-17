@@ -15,7 +15,7 @@
   "systemUserClientId": "SYSTEM_USER_CLIENT_ID",
   "systemUserClientSecret": "SYSTEM_USER_CLIENT_SECRET",
   "userServiceUrl": "USER_SERVICE_URL",
-  "connectProjectsUrl": "CONNECT_PROJECT_URL",
+  "connectProjectsUrl": "CONNECT_PROJECTS_URL",
   "salesforceLead" : {
     "webToLeadUrl": "SALESFORCE_WEB_TO_LEAD_URL",
     "orgId" : "SALESFORCE_ORG_ID",
