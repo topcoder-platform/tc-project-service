@@ -104,7 +104,7 @@ const projectCreatedHandler = (logger, msg, channel) => {
       }
       return Promise.all([
         _addProjectStatus(req, logger, project),
-        _addSalesforceLead(token, logger, project).then((resp)=> logger.debug('lead response:', resp))
+        _addSalesforceLead(token, logger, project).then((resp)=> logger.debug('web to lead response:', resp.status))
       ]);
     })
     .then(() => {
