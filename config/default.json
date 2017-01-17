@@ -18,6 +18,16 @@
   "projectAttachmentPathSuffix": "attachments",
   "systemUserClientId": "",
   "systemUserClientSecret": "",
+  "userServiceUrl": "",
+  "connectProjectUrl":"",
+  "salesforceLead" : {
+    "webToLeadUrl": "https://www.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8",
+    "orgId": "",
+    "projectNameFieldId": "",
+    "projectDescFieldId": "",
+    "projectLinkFieldId": "",
+    "projectIdFieldId"  : ""
+  },
   "dbConfig": {
     "masterUrl": "",
     "maxPoolSize": 50,

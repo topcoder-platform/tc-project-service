@@ -5,7 +5,7 @@ postgres:
   environment:
     - POSTGRES_PASSWORD=mysecretpassword
     - POSTGRES_USER=coder
-    - POSTGRES_DB=tagsdb
+    - POSTGRES_DB=projectsdb
 elasticsearch:
   image: "elasticsearch:1.5.2"
   ports:
