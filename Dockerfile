@@ -6,12 +6,13 @@ RUN apt-get update && \
     apt-get upgrade -y
 
 # install aws
-#RUN apt-get install -y \
-#    ssh \
-#    python \
-#    python-pip
+RUN apt-get install -y \
+    ssh \
+    python \
+    python-dev \
+    python-pip
 
-#RUN pip install awscli
+RUN pip install awscli
 
 RUN apt-get install libpq-dev
 # Create app directory
