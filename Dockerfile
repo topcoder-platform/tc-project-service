@@ -9,6 +9,7 @@ RUN apt-get update && \
 RUN apt-get install -y \
     ssh \
     python \
+    python-dev \
     python-pip
 
 RUN pip install awscli
