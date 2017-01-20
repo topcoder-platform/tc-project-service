@@ -5,25 +5,6 @@ import {
 import util from '../../util'
 import topicService from '../../services/topicService'
 
-//
-// // Handle internal events
-// const internalEvents = [
-//   EVENT.INTERNAL.PROJECT_DRAFT_CREATED,
-//   EVENT.INTERNAL.PROJECT_LAUNCHED,
-//   EVENT.INTERNAL.PROJECT_UPDATED,
-//   EVENT.INTERNAL.PROJECT_CANCELLED,
-//   EVENT.INTERNAL.PROJECT_COMPLETED,
-//   EVENT.INTERNAL.PROJECT_DELETED
-// ]
-//
-// // Publish messages to the queue
-// _.map(internalEvents, (evt) => {
-//   app.on(evt, ({payload, props}) => {
-//     logger.debug('handling ' + evt)
-//     let key = evt.substring(evt.indexOf('.') + 1)
-//     return app.services.pubsub.publish(key, payload, props)
-//   })
-// })
 const _addProjectStatus = (req, logger, project) => {
   const topics = [
     {

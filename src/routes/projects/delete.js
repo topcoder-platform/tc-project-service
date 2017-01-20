@@ -33,7 +33,7 @@ module.exports = [
             next(err)
           } else {
             req.app.services.pubsub.publish(
-              EVENT.INTERNAL.PROJECT_DELETED,
+              EVENT.ROUTING_KEY.PROJECT_DELETED,
               { id: projectId },
               { correlationId: req.id }
             )
