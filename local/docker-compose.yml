@@ -6,11 +6,11 @@ postgres:
     - POSTGRES_PASSWORD=mysecretpassword
     - POSTGRES_USER=coder
     - POSTGRES_DB=projectsdb
-elasticsearch:
-  image: "elasticsearch:1.5.2"
-  ports:
-    - "9200:9200"
-    - "9300:9300"
+#elasticsearch:
+#  image: "elasticsearch:2"
+#  ports:
+#    - "9200:9200"
+#    - "9300:9300"
 redis:
   image: redis:2.8
   ports:
