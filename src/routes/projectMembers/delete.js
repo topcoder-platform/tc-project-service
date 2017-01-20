@@ -37,7 +37,7 @@ module.exports = [
           .then(member => {
             // fire event
             req.app.services.pubsub.publish(
-              EVENT.INTERNAL.PROJECT_MEMBER_REMOVED,
+              EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
               member.get({plain:true}),
               { correlationId: req.id }
             )

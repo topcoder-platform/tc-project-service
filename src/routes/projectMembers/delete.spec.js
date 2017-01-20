@@ -98,6 +98,13 @@ describe('Project members delete', () => {
             if (err) {
               return done(err)
             }
+            var removedMember = {
+              projectId: project1.id,
+              userId: 40051332,
+              role: 'copilot',
+              isPrimary: true
+            }
+            server.services.pubsub.publish.calledWith('project.member.removed', sinon.match(removedMember)).should.be.true
             done()
             // models.ProjectMember
             //     .count({where: { projectId: project1.id, deletedAt: { $eq: null } }})
