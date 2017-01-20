@@ -88,6 +88,7 @@ describe('Project create', () => {
           const result = res.body.result
           result.success.should.be.truthy
           result.status.should.equal(201)
+          server.services.pubsub.publish.calledWith('project.draft-created').should.be.true
           done()
         })
     })
@@ -137,6 +138,7 @@ describe('Project create', () => {
           resJson.bookmarks.should.have.lengthOf(1)
           resJson.bookmarks[0].title.should.be.eql('title1')
           resJson.bookmarks[0].address.should.be.eql('address1')
+          server.services.pubsub.publish.calledWith('project.draft-created').should.be.true
           done()
         })
     })

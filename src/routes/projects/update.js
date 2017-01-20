@@ -165,7 +165,7 @@ module.exports = [
           previousValue =  _.omit(previousValue, ['deletedAt'])
           // publish original and updated project data
           req.app.services.pubsub.publish(
-            EVENT.INTERNAL.PROJECT_UPDATED, 
+            EVENT.ROUTING_KEY.PROJECT_UPDATED, 
             { original: previousValue, updated: project },
             { correlationId: req.id }
           )

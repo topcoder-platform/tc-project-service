@@ -115,6 +115,7 @@ describe('Project Members create', () => {
             resJson.isPrimary.should.be.truthy
             resJson.projectId.should.equal(project2.id)
             resJson.userId.should.equal(1)
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true
             done()
           })
     })
@@ -138,6 +139,7 @@ describe('Project Members create', () => {
             resJson.isPrimary.should.be.truthy
             resJson.projectId.should.equal(project1.id)
             resJson.userId.should.equal(1)
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true
             done()
           })
     })
@@ -189,6 +191,7 @@ describe('Project Members create', () => {
         })
       })
       var postSpy = sinon.spy(mockHttpClient, 'post')
+      // var amqPubSpy = sinon.spy(server.services.pubsub, 'publish')
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient )
       request(server)
           .post('/v4/projects/' + project1.id + '/members/')
@@ -209,6 +212,7 @@ describe('Project Members create', () => {
             resJson.projectId.should.equal(project1.id)
             resJson.userId.should.equal(3)
             postSpy.should.have.been.calledOnce
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true
             done()
           })
     })

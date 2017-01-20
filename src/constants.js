@@ -44,5 +44,3 @@ export const EVENT = {
     PROJECT_DELETED: 'project.deleted'
   }
 }
-EVENT.INTERNAL = _.mapValues(EVENT.ROUTING_KEY, (a) => { return `internal.${a}` })
-EVENT.EXTERNAL = _.mapValues(EVENT.ROUTING_KEY, (a) => { return `external.${a}` })
