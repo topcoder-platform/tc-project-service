@@ -93,13 +93,20 @@ describe('Project delete test', () => {
         .expect(403, done)
     })
 
-    it('should return 204 if attachment was successfully removed', done =>  {
+    it('should return 204 if project was successfully removed', done =>  {
       request(server)
         .delete('/v4/projects/' + project1.id)
         .set({
           'Authorization': 'Bearer ' + testUtil.jwts.member
         })
-        .expect(204, done())
+        .expect(204)
+        .end(function(err, resp) {
+          if (err) {
+            return done(err)
+          }
+          server.services.pubsub.publish.calledWith('project.deleted').should.be.true
+          done()
+        })
     })
   })
 })

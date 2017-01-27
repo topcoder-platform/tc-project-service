@@ -13,6 +13,6 @@ module.exports = (app) => {
       index: () => {}
     }
   })
-  sinon.stub(app.services.pubsub, 'publish', ()=>{ return Promise.resolve(true) })
-  sinon.stub(app.services.es, 'index', ()=>{ return Promise.resolve(true) })
+  sinon.stub(app.services.pubsub, 'publish', ()=> Promise.resolve(true) )
+  sinon.stub(app.services.es, 'index', ()=> Promise.resolve(true) )
 }

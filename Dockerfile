@@ -1,4 +1,4 @@
-FROM node:5.10.1
+FROM node:6.9.4
 LABEL version="1.0"
 LABEL description="Projects microservice"
 
@@ -9,6 +9,7 @@ RUN apt-get update && \
 RUN apt-get install -y \
     ssh \
     python \
+    python-dev \
     python-pip
 
 RUN pip install awscli
@@ -22,7 +23,6 @@ WORKDIR /usr/src/app
 COPY . /usr/src/app
 # Install app dependencies
 RUN npm install
-
 
 EXPOSE 3000
 
