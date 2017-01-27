@@ -116,7 +116,7 @@ module.exports = [
           projectMember = _.omit(projectMember, ['deletedAt'])
           // emit original and updated project information
           req.app.services.pubsub.publish(
-            EVENT.INTERNAL.PROJECT_MEMBER_UPDATED,
+            EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
             { original: previousValue, updated: projectMember },
             { correlationId: req.id }
           )
