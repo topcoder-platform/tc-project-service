@@ -168,7 +168,7 @@ module.exports = class RabbitMQService extends EventEmitter {
           new Buffer(JSON.stringify(payload)),
           props
         )
-        self.logger.debug('Sent %s: %s', self.exchangeName, payload)
+        self.logger.debug('Published msg to exchange %s with key: %s', self.exchangeName, key)
         return channel.close()
       })
       .catch((err) => {
