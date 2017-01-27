@@ -161,6 +161,7 @@ describe('Project', () => {
             result.success.should.be.true
             result.status.should.equal(200)
             result.content.status.should.equal('active')
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
             done()
           })
     })
@@ -181,6 +182,7 @@ describe('Project', () => {
             resJson.name.should.equal('updatedProject name')
             resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
             resJson.updatedBy.should.equal(40051332)
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
             done()
           })
     })
@@ -251,6 +253,7 @@ describe('Project', () => {
             resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
             resJson.updatedBy.should.equal(40051332)
             postSpy.should.have.been.calledOnce
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
             done()
           })
     })
@@ -274,6 +277,7 @@ describe('Project', () => {
             should.exist(resJson)
             resJson.billingAccountId.should.equal(1)
             resJson.billingAccountId.should.equal(1)
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
             done()
           })
     })
@@ -298,6 +302,7 @@ describe('Project', () => {
             resJson.billingAccountId.should.equal(1)
             resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
             resJson.updatedBy.should.equal(40051333)
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
             done()
           })
     })
@@ -342,6 +347,7 @@ describe('Project', () => {
                       resJson = res.body.result.content
                       should.exist(resJson)
                       should.not.exist(resJson.bookmarks);
+                      server.services.pubsub.publish.calledWith('project.updated').should.be.true
                       done()
                   })
 

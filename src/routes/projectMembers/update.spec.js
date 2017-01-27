@@ -155,7 +155,7 @@ describe('Project members update', () => {
                 })
                 .send({
                     param: {
-                        "role": "copilot"
+                        "role": "customer"
                     }
                 })
                 .expect('Content-Type', /json/)
@@ -166,10 +166,11 @@ describe('Project members update', () => {
                     }
                     const resJson = res.body.result.content
                     should.exist(resJson)
-                    resJson.role.should.equal('copilot')
+                    resJson.role.should.equal('customer')
                     resJson.isPrimary.should.be.true
                     new Date(resJson.updatedAt).valueOf().should.be.equal(new Date(member2.updatedAt).valueOf())
-                    resJson.updatedBy.should.equal(1)
+                    resJson.updatedBy.should.equal(40051332)
+                    server.services.pubsub.publish.calledWith('project.member.updated').should.be.true
                     done()
                 })
 
@@ -195,6 +196,7 @@ describe('Project members update', () => {
                             resJson.role.should.equal(body.param.role)
                             resJson.isPrimary.should.be.false
                             resJson.updatedBy.should.equal(40051332)
+                            server.services.pubsub.publish.calledWith('project.member.updated').should.be.true
                             done()
                         })
                     }
@@ -237,6 +239,7 @@ describe('Project members update', () => {
                     resJson.isPrimary.should.be.false
                     resJson.updatedBy.should.equal(40051332)
                     deleteSpy.should.have.been.calledOnce
+                    server.services.pubsub.publish.calledWith('project.member.removed').should.be.true
                     done()
                 })
         })

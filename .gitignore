@@ -6,6 +6,7 @@ config/local.js
 logs
 *.log
 npm-debug.log*
+.DS_Store
 
 dist/
 
@@ -42,3 +43,4 @@ jspm_packages
 !.elasticbeanstalk/config.yml
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+.DS_Store
