@@ -65,7 +65,7 @@ module.exports = [
         newMember = _newMember.get({plain: true})
         // publish event
         req.app.services.pubsub.publish(
-          EVENT.INTERNAL.PROJECT_MEMBER_ADDED,
+          EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
           newMember,
           { correlationId: req.id }
         )
