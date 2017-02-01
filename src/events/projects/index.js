@@ -47,28 +47,31 @@ const _addSalesforceLead = (token, logger, project) => {
  * @param  {[type]} channel channel to ack, nack
  */
 const projectCreatedHandler = (logger, msg, channel) => {
-  let project = JSON.parse(msg.content)
-  return util.getSystemUserToken(logger)
-    .then(token => {
-      const req = {
-        id: 1,
-        log: logger,
-        headers: {
-          authorization: `Bearer ${token}`
-        }
-      }
-      return Promise.all([
-        _addSalesforceLead(token, logger, project).then((resp)=> logger.debug('web to lead response:', resp.status))
-      ]);
-    })
-    .then(() => {
-      channel.ack(msg)
-    })
-    .catch(err => {
-      // don't requeue for now
-      logger.error('Error processing', msg, err)
-      channel.nack(msg, false, false)
-    })
+  // disabling salesforce integration for now,
+  // see https://github.com/topcoder-platform/tc-project-service/issues/38
+  return channel.ack(msg)
+  // let project = JSON.parse(msg.content)
+  // return util.getSystemUserToken(logger)
+  //   .then(token => {
+  //     const req = {
+  //       id: 1,
+  //       log: logger,
+  //       headers: {
+  //         authorization: `Bearer ${token}`
+  //       }
+  //     }
+  //     return Promise.all([
+  //       _addSalesforceLead(token, logger, project).then((resp)=> logger.debug('web to lead response:', resp.status))
+  //     ]);
+  //   })
+  //   .then(() => {
+  //     channel.ack(msg)
+  //   })
+  //   .catch(err => {
+  //     // don't requeue for now
+  //     logger.error('Error processing', msg, err)
+  //     channel.nack(msg, false, false)
+  //   })
 }
 
 module.exports = {
