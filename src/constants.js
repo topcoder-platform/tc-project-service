@@ -1,5 +1,4 @@
 
-import _ from 'lodash'
 export const PROJECT_TYPE = {
   APP_DEV          : 'app_dev',
   GENERIC          : 'generic',
@@ -37,10 +36,7 @@ export const EVENT = {
     PROJECT_MEMBER_UPDATED: 'project.member.updated',
 
     PROJECT_DRAFT_CREATED: 'project.draft-created',
-    PROJECT_LAUNCHED: 'project.launched',
     PROJECT_UPDATED: 'project.updated',
-    PROJECT_CANCELLED: 'project.cancelled',
-    PROJECT_COMPLETED: 'project.completed',
     PROJECT_DELETED: 'project.deleted'
   }
 }

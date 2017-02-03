@@ -61,7 +61,7 @@ module.exports = [
    * POST projects/
    * Create a project if the user has access
    */
-      (req, res, next) => {
+  (req, res, next) => {
     var project = req.body.param
     const userRole = util.hasRole(req, USER_ROLE.MANAGER)
         ? PROJECT_MEMBER_ROLE.MANAGER
@@ -122,6 +122,7 @@ module.exports = [
                 // log the error and continue
                 req.log.error('Error creating direct project')
                 req.log.error(err)
+                return Promise.resolve()
               })
           })
           .then(() => {
@@ -134,6 +135,8 @@ module.exports = [
               newProject,
               { correlationId: req.id }
             )
+            // emit event
+            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, {req, project: newProject })
             res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201))
           })
           .catch((err) => {

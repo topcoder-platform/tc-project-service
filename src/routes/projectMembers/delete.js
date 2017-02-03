@@ -36,11 +36,13 @@ module.exports = [
           })
           .then(member => {
             // fire event
+            member = member.get({plain:true})
             req.app.services.pubsub.publish(
               EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
-              member.get({plain:true}),
+              member,
               { correlationId: req.id }
             )
+            req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, { req, member })
             res.status(204).json({})
           })
           .catch(err => next(err))

@@ -69,6 +69,7 @@ module.exports = [
           newMember,
           { correlationId: req.id }
         )
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, { req, member: newMember })
         res.status(201).json(util.wrapResponse(req.id, newMember, 1, 201))
       })
       .catch((err) => {
