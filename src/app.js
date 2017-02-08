@@ -60,6 +60,12 @@ app.logger = logger
 // =======================
 logger.info('Registering models ... ', !!models)
 
+// =======================
+// Analytics
+// =======================
+const analyticsKey = config.get('analyticsKey')
+if (!_.isEmpty(analyticsKey))
+  require('./events/analytics')(analyticsKey, app, logger)
 
 // ========================
 // Permissions
@@ -78,5 +84,7 @@ app.routerRef = router
 // Initialize services
 // =======================
 require('./services')(app, logger)
+
+
 
 module.exports = app

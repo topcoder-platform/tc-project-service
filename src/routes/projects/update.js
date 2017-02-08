@@ -165,10 +165,15 @@ module.exports = [
           previousValue =  _.omit(previousValue, ['deletedAt'])
           // publish original and updated project data
           req.app.services.pubsub.publish(
-            EVENT.ROUTING_KEY.PROJECT_UPDATED, 
+            EVENT.ROUTING_KEY.PROJECT_UPDATED,
             { original: previousValue, updated: project },
             { correlationId: req.id }
           )
+          req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
+            req,
+            original: previousValue,
+            updated: project
+          })
           // check context for project members
           project.members = req.context.currentProjectMembers
           // get attachments

@@ -37,6 +37,8 @@ module.exports = [
               { id: projectId },
               { correlationId: req.id }
             )
+            // emit event
+            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED, {req, id: projectId })
             res.status(204).json({})
           }
         })
