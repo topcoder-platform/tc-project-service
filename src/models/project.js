@@ -118,7 +118,15 @@ module.exports = function(sequelize, DataTypes) {
           }
         }
         if (_.has(parameters.filters, 'status')) {
-          query += `AND status = '${parameters.filters.status}' `;
+          var statusFilter = parameters.filters.status
+          if (_.isObject(statusFilter)) {
+            if (statusFilter['$in'].length === 0) {
+              statusFilter['$in'].push(-1)
+            }
+            query += `AND status IN (${statusFilter['$in']}) `;
+          } else if(_.isString(statusFilter)){
+            query += `AND status = ${statusFilter} `;
+          }
         }
         if (_.has(parameters.filters, 'type')) {
           query += `AND type = '${parameters.filters.type}' `;
