@@ -120,12 +120,10 @@ module.exports = function(sequelize, DataTypes) {
         if (_.has(parameters.filters, 'status')) {
           var statusFilter = parameters.filters.status
           if (_.isObject(statusFilter)) {
-            if (statusFilter['$in'].length === 0) {
-              statusFilter['$in'].push(-1)
-            }
-            query += `AND status IN (${statusFilter['$in']}) `;
+            var statuses = statusFilter['$in'].join("','");
+            query += `AND status IN ('${statuses}') `;
           } else if(_.isString(statusFilter)){
-            query += `AND status = ${statusFilter} `;
+            query += `AND status ='${statusFilter}'`;
           }
         }
         if (_.has(parameters.filters, 'type')) {
