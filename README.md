@@ -4,7 +4,7 @@ Microservice to manage CRUD operations for all things Projects.
 
 ### Local Development
 * We use docker-compose for running dependencies locally. Instructions for Docker compose setup - https://docs.docker.com/compose/install/
-* Nodejs 5.10.1 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
+* Nodejs 6.9.4 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
 * Install [libpg](https://www.npmjs.com/package/pg-native)
 * Install node dependencies
 `npm install | ./node_modules/.bin/bunyan`
