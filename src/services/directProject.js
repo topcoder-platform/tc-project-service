@@ -64,4 +64,14 @@ export default {
    */
   addBillingAccount: (req, directProjectId, body) => _getHttpClient(req)
     .post(`/projects/${directProjectId}/billingaccount`, body),
+
+  /**
+   * Add/remove direct project permissions
+   * This can be used to add/remove direct project manager
+   * @param req the request
+   * @param directProjectId the id of direct project
+   * @param body the body contains permissions information
+   */
+  editProjectPermissions: (req, directProjectId, body) => _getHttpClient(req)
+    .post(`/projects/${directProjectId}/permissions`, body),
 }
