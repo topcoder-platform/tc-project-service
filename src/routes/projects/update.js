@@ -54,7 +54,13 @@ const updateProjectValdiations = {
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
         users: Joi.array().items(Joi.number().positive()),
         groups: Joi.array().items(Joi.number().positive())
-      })).allow(null)
+      })).allow(null),
+      // cancel reason is mandatory when project status is cancelled
+      cancelReason: Joi.when('status', {
+        is: PROJECT_STATUS.CANCELLED,
+        then: Joi.string().required(),
+        otherwise: Joi.string().optional()
+      })
     })
   }
 }
