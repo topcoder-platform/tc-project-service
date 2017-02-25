@@ -96,6 +96,17 @@ router.route('/v3/direct/projects/:projectId(\\d+)/copilot')
         }
     })
 
+router.route('/v3/direct/projects/:projectId(\\d+)/permissions')
+    .post((req, res)=>{
+        const projectId = req.params.projectId
+        app.logger.info({body: req.body, projectId: projectId }, 'add permissions to Project')
+        if(projects[projectId]) {
+            res.json()
+        } else {
+            res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${projectId}`))
+        }
+    })
+
 app.use(router)
 
 // =======================
