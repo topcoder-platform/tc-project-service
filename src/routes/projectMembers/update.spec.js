@@ -7,11 +7,12 @@ import models from '../../models'
 import server from '../../app'
 import util from '../../util'
 import testUtil from '../../tests/util'
+import moment from 'moment'
 
 const should = chai.should()
 
 describe('Project members update', () => {
-    let project1, member1, member2
+    let project1, member1, member2, member3
     beforeEach(done => {
         testUtil.clearDb()
             .then(() => {
@@ -38,7 +39,7 @@ describe('Project members update', () => {
                         createdAt: "2016-06-30 00:33:07+00",
                         updatedAt: "2016-06-30 00:33:07+00"
                     }).then((pm) => {
-                        member1 = pm
+                        member1 = pm.get({ plain: true })
                         models.ProjectMember.create({
                             userId: 40051332,
                             projectId: project1.id,
@@ -48,10 +49,21 @@ describe('Project members update', () => {
                             updatedBy: 1,
                             createdAt: "2016-06-30 00:33:07+00",
                             updatedAt: "2016-06-30 00:33:07+00"
-                        }).then((pm2) => pm2.reload())
-                          .then((pm2) => {
+                        }).then((pm2) => {
                             member2 = pm2.get({plain: true})
-                            done()
+                            models.ProjectMember.create({
+                                userId: 40051330,
+                                projectId: project1.id,
+                                role: 'copilot',
+                                isPrimary: false,
+                                createdBy: 1,
+                                updatedBy: 1,
+                                createdAt: "2016-06-30 00:33:07+00",
+                                updatedAt: "2016-06-30 00:33:07+00"
+                            }).then((pm3) => {
+                                member3 = pm3.get({ plain: true })
+                                done()
+                            })
                         })
                     })
                 })
@@ -168,7 +180,8 @@ describe('Project members update', () => {
                     should.exist(resJson)
                     resJson.role.should.equal('customer')
                     resJson.isPrimary.should.be.true
-                    new Date(resJson.updatedAt).valueOf().should.be.equal(new Date(member2.updatedAt).valueOf())
+                    const updatedAtSame = moment(resJson.updatedAt).isSame(moment(member2.updatedAt))
+                    updatedAtSame.should.equal(true)
                     resJson.updatedBy.should.equal(40051332)
                     server.services.pubsub.publish.calledWith('project.member.updated').should.be.true
                     done()
@@ -268,6 +281,99 @@ describe('Project members update', () => {
                     result.content.message.should.equal('error message')
                     deleteSpy.should.have.been.calledOnce
                     done()
+                })
+        })
+
+        it('should return 200 if valid user(become manager) and data', done => {
+            var mockHttpClient = _.merge(testUtil.mockHttpClient, {
+                post: () => Promise.resolve({
+                    status: 200,
+                    data: {
+                        id: 'requesterId',
+                        version: 'v3',
+                        result: {
+                            success: true,
+                            status: 200,
+                            content: { }
+                        }
+                    }
+                })
+            })
+            var postSpy = sinon.spy(mockHttpClient, 'post')
+            sandbox.stub(util, 'getHttpClient', () => mockHttpClient)
+            request(server)
+                .patch('/v4/projects/' + project1.id + '/members/' + member3.id)
+                .set({
+                    'Authorization': 'Bearer ' + testUtil.jwts.manager
+                })
+                .send({
+                    param: {
+                        "role": "manager",
+                        "isPrimary": false
+                    }
+                })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err)
+                    }
+                    const resJson = res.body.result.content
+                    should.exist(resJson)
+                    resJson.role.should.equal('manager')
+                    resJson.isPrimary.should.be.false
+                    resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+                    resJson.updatedBy.should.equal(40051334)
+                    postSpy.should.have.been.calledOnce
+                    done()
+                })
+        })
+
+        it('should return 200 if valid user(become manager) and data (without directProjectId)', done => {
+            models.Project.update({ directProjectId: null}, {where: {id: project1.id}})
+                .then(() => {
+                    var mockHttpClient = _.merge(testUtil.mockHttpClient, {
+                        post: () => Promise.resolve({
+                            status: 200,
+                            data: {
+                                id: 'requesterId',
+                                version: 'v3',
+                                result: {
+                                    success: true,
+                                    status: 200,
+                                    content: { }
+                                }
+                            }
+                        })
+                    })
+                    var postSpy = sinon.spy(mockHttpClient, 'post')
+                    sandbox.stub(util, 'getHttpClient', () => mockHttpClient)
+                    request(server)
+                        .patch('/v4/projects/' + project1.id + '/members/' + member3.id)
+                        .set({
+                            'Authorization': 'Bearer ' + testUtil.jwts.manager
+                        })
+                        .send({
+                            param: {
+                                "role": "manager",
+                                "isPrimary": false
+                            }
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect(200)
+                        .end(function (err, res) {
+                            if (err) {
+                                return done(err)
+                            }
+                            const resJson = res.body.result.content
+                            should.exist(resJson)
+                            resJson.role.should.equal('manager')
+                            resJson.isPrimary.should.be.false
+                            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+                            resJson.updatedBy.should.equal(40051334)
+                            postSpy.should.not.have.been.calledOnce
+                            done()
+                        })
                 })
         })
 

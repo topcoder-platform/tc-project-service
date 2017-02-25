@@ -8,6 +8,7 @@ import models from '../../models'
 import server from '../../app'
 import testUtil from '../../tests/util'
 import util from '../../util'
+import { PROJECT_STATUS } from '../../constants'
 
 var should = chai.should()
 
@@ -97,7 +98,7 @@ describe('Project', () => {
       request(server)
           .patch("/v4/projects/" + project1.id)
           .send(body)
-          .expect(403,done)
+          .expect(403, done)
     })
 
     it('should return 400 if update completed project', done => {
@@ -137,7 +138,8 @@ describe('Project', () => {
             var result = res.body.result
             result.success.should.be.false
             result.status.should.equal(403)
-            result.content.message.should.equal('Only assigned topcoder-managers should be allowed to launch a project')
+            result.content.message.should.equal('Only assigned topcoder-managers or topcoder admins' +
+              ' should be allowed to launch a project')
             done()
           })
     })
@@ -184,6 +186,250 @@ describe('Project', () => {
             resJson.updatedBy.should.equal(40051332)
             server.services.pubsub.publish.calledWith('project.updated').should.be.true
             done()
+          })
+    })
+
+    it('should return 200 and project history should be updated (status is not set)', done => {
+      const sbody = _.cloneDeep(body)
+      // set project status to be updated
+      sbody.param.status = PROJECT_STATUS.IN_REVIEW
+      request(server)
+          .patch("/v4/projects/" + project1.id)
+          .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+          .send(sbody)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function (err,res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.name.should.equal('updatedProject name')
+            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+            resJson.updatedBy.should.equal(40051332)
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
+            // validate that project history is updated
+            models.ProjectHistory.findAll({
+              limit: 1,
+              where: { projectId: project1.id },
+              order: [['createdAt', 'DESC']]
+            }).then((histories) => {
+              should.exist(histories)
+              histories.length.should.equal(1)
+              const history = histories[0].get({ plain: true })
+              history.status.should.equal(PROJECT_STATUS.IN_REVIEW)
+              history.projectId.should.equal(project1.id)
+              done()
+            })
+          })
+    })
+
+    it('should return 200 and project history should not be updated (status is not updated)', done => {
+      const sbody = _.cloneDeep(body)
+      sbody.param.status = PROJECT_STATUS.DRAFT
+      request(server)
+          .patch("/v4/projects/" + project1.id)
+          .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+          .send(sbody)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function (err,res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.name.should.equal('updatedProject name')
+            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+            resJson.updatedBy.should.equal(40051332)
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
+            // validate that project history is not updated
+            models.ProjectHistory.findAll({
+              where: { projectId: project1.id }
+            }).then((histories) => {
+              should.exist(histories)
+              histories.length.should.equal(0)
+              done()
+            })
+          })
+    })
+
+    it('should return 422 as cancel reason is mandatory if project status is cancelled', done => {
+      const sbody = _.cloneDeep(body)
+      sbody.param.status = PROJECT_STATUS.CANCELLED
+      request(server)
+          .patch("/v4/projects/" + project1.id)
+          .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+          .send(sbody)
+          .expect('Content-Type', /json/)
+          .expect(422)
+          .end(function (err,res) {
+            if (err) {
+              return done(err)
+            }
+            const result = res.body.result
+            result.success.should.be.false
+            result.status.should.equal(422)
+            done()
+          })
+    })
+
+    it('should return 200 and project history should be updated for cancelled project', done => {
+      const sbody = _.cloneDeep(body)
+      sbody.param.status = PROJECT_STATUS.CANCELLED
+      sbody.param.cancelReason = 'price/cost'
+      request(server)
+          .patch("/v4/projects/" + project1.id)
+          .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+          .send(sbody)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function (err,res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.name.should.equal('updatedProject name')
+            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+            resJson.updatedBy.should.equal(40051332)
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
+            // validate that project history is updated
+            models.ProjectHistory.findAll({
+              where: { projectId: project1.id }
+            }).then((histories) => {
+              should.exist(histories)
+              histories.length.should.equal(1)
+              const history = histories[0].get({ plain: true })
+              history.status.should.equal(PROJECT_STATUS.CANCELLED)
+              history.projectId.should.equal(project1.id)
+              history.cancelReason.should.equal('price/cost')
+              done()
+            })
+          })
+    })
+
+    it('should return 200, manager is allowed to transition project out of cancel status', done => {
+      models.Project.update({ status: PROJECT_STATUS.CANCELLED}, {where: {id: project1.id}})
+        .then(() => {
+          const sbody = _.cloneDeep(body)
+          sbody.param.status = PROJECT_STATUS.ACTIVE
+          request(server)
+            .patch("/v4/projects/" + project1.id)
+            .set({"Authorization": "Bearer " + testUtil.jwts.manager})
+            .send(sbody)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(function (err,res) {
+              if (err) {
+                return done(err)
+              }
+              var resJson = res.body.result.content
+              should.exist(resJson)
+              resJson.name.should.equal('updatedProject name')
+              resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+              resJson.updatedBy.should.equal(40051334)
+              server.services.pubsub.publish.calledWith('project.updated').should.be.true
+              // validate that project history is updated
+              models.ProjectHistory.findAll({
+                where: { projectId: project1.id }
+              }).then((histories) => {
+                should.exist(histories)
+                histories.length.should.equal(1)
+                const history = histories[0].get({ plain: true })
+                history.status.should.equal(PROJECT_STATUS.ACTIVE)
+                history.projectId.should.equal(project1.id)
+                done()
+              })
+            })
+        })
+    })
+
+    it('should return 200, admin is allowed to transition project out of cancel status', done => {
+      models.Project.update({ status: PROJECT_STATUS.CANCELLED}, {where: {id: project1.id}})
+        .then(() => {
+          const sbody = _.cloneDeep(body)
+          sbody.param.status = PROJECT_STATUS.ACTIVE
+          request(server)
+            .patch("/v4/projects/" + project1.id)
+            .set({"Authorization": "Bearer " + testUtil.jwts.admin})
+            .send(sbody)
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(function (err,res) {
+              if (err) {
+                return done(err)
+              }
+              var resJson = res.body.result.content
+              should.exist(resJson)
+              resJson.name.should.equal('updatedProject name')
+              resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+              resJson.updatedBy.should.equal(40051333)
+              server.services.pubsub.publish.calledWith('project.updated').should.be.true
+              // validate that project history is updated
+              models.ProjectHistory.findAll({
+                where: { projectId: project1.id }
+              }).then((histories) => {
+                should.exist(histories)
+                histories.length.should.equal(1)
+                const history = histories[0].get({ plain: true })
+                history.status.should.equal(PROJECT_STATUS.ACTIVE)
+                history.projectId.should.equal(project1.id)
+                done()
+              })
+            })
+        })
+    })
+
+    it('should return 403, copilot is not allowed to transition project out of cancel status', done => {
+      models.Project.update({ status: PROJECT_STATUS.CANCELLED}, {where: {id: project1.id}})
+        .then(() => {
+          const sbody = _.cloneDeep(body)
+          sbody.param.status = PROJECT_STATUS.ACTIVE
+          request(server)
+            .patch("/v4/projects/" + project1.id)
+            .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+            .send(sbody)
+            .expect('Content-Type', /json/)
+            .expect(403)
+            .end(function (err,res) {
+              if (err) {
+                return done(err)
+              }
+              const result = res.body.result
+              result.success.should.be.false
+              result.status.should.equal(403)
+              done()
+            })
+        })
+    })
+
+    it('should return 200 and project history should not be updated', done => {
+      request(server)
+          .patch("/v4/projects/" + project1.id)
+          .set({"Authorization": "Bearer " + testUtil.jwts.copilot})
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(function (err,res) {
+            if (err) {
+              return done(err)
+            }
+            var resJson = res.body.result.content
+            should.exist(resJson)
+            resJson.name.should.equal('updatedProject name')
+            resJson.updatedAt.should.not.equal("2016-06-30 00:33:07+00")
+            resJson.updatedBy.should.equal(40051332)
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true
+            // validate that project history is not updated
+            models.ProjectHistory.findAll({
+              where: { projectId: project1.id }
+            }).then((histories) => {
+              should.exist(histories)
+              histories.length.should.equal(0)
+              done()
+            })
           })
     })
 
