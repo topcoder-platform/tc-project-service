@@ -110,7 +110,7 @@ const projectMemberRemovedHandler = (logger, msg, channel) => {
   const member = JSON.parse(msg.content.toString())
 
   if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
-    // Add co-pilot when a co-pilot is added to a project
+    // Delete co-pilot when a co-pilot is deleted from a project
     return models.Project.getDirectProjectId(member.projectId)
       .then(directProjectId => {
         if (directProjectId) {

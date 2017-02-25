@@ -5,7 +5,6 @@ import {
 import util from '../../util'
 import config from 'config'
 import querystring from 'querystring'
-import models from '../../models'
 
 /**
  * Creates a lead in salesforce for the connect project.
@@ -75,39 +74,6 @@ const projectCreatedHandler = (logger, msg, channel) => {
   //   })
 }
 
-/**
- * Handler for project updation event
- * @param  {[type]} logger  logger to log along with trace id
- * @param  {[type]} msg     event payload
- * @param  {[type]} channel channel to ack, nack
- */
-const projectUpdatedHandler = (logger, msg, channel) => {
-  const payload = JSON.parse(msg.content.toString())
-  // we only update the project history table if project status is actually updated
-  if (payload.original.status !== payload.updated.status) {
-    models.ProjectHistory.create({
-      projectId: payload.updated.id,
-      // keep the updated status here
-      status: payload.updated.status,
-      cancelReason: payload.updated.cancelReason,
-      // the user who updated the project is also responsible for updating project history
-      updatedBy: payload.updated.updatedBy
-    }).then(() => {
-      logger.info('project history updated')
-      // ack message as success
-      channel.ack(msg)
-    }).catch((error) => {
-      // if failed to process message than try again
-      logger.error('Error caught while updating project history', error)
-      channel.nack(msg, false, false)
-    });
-  } else {
-    // nothing to do, ack message
-    channel.ack(msg)
-  }
-}
-
 module.exports = {
-  projectCreatedHandler,
-  projectUpdatedHandler
+  projectCreatedHandler
 }

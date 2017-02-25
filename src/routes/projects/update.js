@@ -164,6 +164,20 @@ module.exports = [
         .then(() => {
           return project.reload(project.id)
         })
+        // update project history
+        .then(() => {
+          // we only want to have project history when project status is updated
+          if (updatedProps.status !== previousValue.status) {
+            return models.ProjectHistory.create({
+              projectId: project.id,
+              status: updatedProps.status,
+              cancelReason: updatedProps.cancelReason,
+              updatedBy: req.authUser.userId
+            });
+          } else {
+            return Promise.resolve();
+          }
+        })
         .then(() => {
           project = project.get({plain: true})
           project = _.omit(project, ['deletedAt'])
