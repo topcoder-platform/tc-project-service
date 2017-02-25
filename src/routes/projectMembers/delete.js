@@ -4,7 +4,7 @@ import _ from 'lodash'
 
 import models from '../../models'
 import { middleware as tcMiddleware } from 'tc-core-library-js'
-import { EVENT } from '../../constants'
+import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants'
 
 /**
  * API to delete a project member.
@@ -33,6 +33,40 @@ module.exports = [
           })
           .then(member => {
             return member.save()
+          })
+          // if primary co-pilot is removed promote the next co-pilot to primary #43
+          .then((member) => {
+            if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
+              // find the next copilot
+              models.ProjectMember.findAll({
+                limit: 1,
+                // return only non-deleted records
+                paranoid: true,
+                where: {
+                  projectId: projectId
+                },
+                order: [['createdAt', 'ASC']]
+              }).then((members) => {
+                if (members && members.length > 0) {
+                  // mark the copilot as primary
+                  const nextMember = members[0]
+                  nextMember.set({ isPrimary: true })
+                  nextMember.save().then(() => {
+                    return Promise.resolve(member)
+                  }).catch((err) => {
+                    return Promise.reject(err)
+                  })
+                } else {
+                  // no copilot found nothing to do
+                  Promise.resolve(member)
+                }
+              }).catch((err) => {
+                return Promise.reject(err)
+              })
+            } else {
+              // nothing to do
+              return Promise.resolve(member)
+            }
           })
           .then(member => {
             // fire event
