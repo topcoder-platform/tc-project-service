@@ -202,7 +202,6 @@ module.exports = [
           // get attachments
           return util.getProjectAttachments(req, project.id)
         })
-        .catch((err) => next(err))
     }).then((attachments) => {
       // make sure we only send response after transaction is committed
       project.attachments = attachments

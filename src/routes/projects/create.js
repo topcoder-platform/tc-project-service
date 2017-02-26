@@ -42,14 +42,14 @@ const createProjectValdiations = {
         data: Joi.string().max(300) // TODO - restrict length
       }).allow(null),
       // TODO - add more types
-      type: Joi.any().valid(_.values(PROJECT_TYPE)),
+      type: Joi.any().valid(_.values(PROJECT_TYPE)).required(),
       details: Joi.any(),
       challengeEligibility: Joi.array().items(Joi.object().keys({
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
         users: Joi.array().items(Joi.number().positive()),
         groups: Joi.array().items(Joi.number().positive())
       })).allow(null)
-    })
+    }).required()
   }
 }
 

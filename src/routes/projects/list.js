@@ -111,7 +111,7 @@ module.exports = [
     ]
     if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'keyword']) ||
       (sort && _.indexOf(sortableProps, sort) < 0)) {
-      util.handleError('Invalid filters or sort', null, req, next)
+      return util.handleError('Invalid filters or sort', null, req, next)
     }
     // check if user only wants to retrieve projects where he/she is a member
     const memberOnly = _.get(filters, 'memberOnly', false)
