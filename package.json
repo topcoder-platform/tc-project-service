@@ -62,7 +62,6 @@
     "express-validation": "^0.6.0",
     "joi": "^8.0.5",
     "lodash": "^4.16.4",
-    "moment": "^2.17.1",
     "newrelic": "^1.27.2",
     "pg": "^4.5.5",
     "pg-native": "^1.10.0",

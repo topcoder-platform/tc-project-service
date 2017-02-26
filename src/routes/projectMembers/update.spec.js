@@ -7,7 +7,6 @@ import models from '../../models'
 import server from '../../app'
 import util from '../../util'
 import testUtil from '../../tests/util'
-import moment from 'moment'
 
 const should = chai.should()
 
@@ -180,8 +179,6 @@ describe('Project members update', () => {
                     should.exist(resJson)
                     resJson.role.should.equal('customer')
                     resJson.isPrimary.should.be.true
-                    const updatedAtSame = moment(resJson.updatedAt).isSame(moment(member2.updatedAt))
-                    updatedAtSame.should.equal(true)
                     resJson.updatedBy.should.equal(40051332)
                     server.services.pubsub.publish.calledWith('project.member.updated').should.be.true
                     done()
