@@ -25,6 +25,8 @@ npm run -s build
 > NODE_ENV=development node -e "require('./dist/models').default.sequelize.sync({force: true}).then((res)=> console.log('Success: ', res)).catch((err)=> console.log('Failed: ', err));"
 ```
 
+Other simple approach to create tables is to run `npm run sync` from root of project. This additional script is added to make the above task simpler.
+
 #### Redis
 Docker compose command will start a local redis instance as well. You should be able to connect to this instance using url `$(docker-machine ip):6379`
 
@@ -50,6 +52,9 @@ Run image:
 You may replace 172.17.0.1 with your docker0 IP.
 
 You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) or import **postman.json** to verify endpoints.
+
+#### Deploying without docker
+If you don't want to use docker to deploy to localhost. You can simply run `npm run start` from root of project. This should start the server on default port `3000`.
 
 ### Deployment
 Using awsebcli - http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html
