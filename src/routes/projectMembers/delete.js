@@ -44,7 +44,8 @@ module.exports = [
               // return only non-deleted records
               paranoid: true,
               where: {
-                projectId: projectId
+                projectId: projectId,
+                role: PROJECT_MEMBER_ROLE.COPILOT
               },
               order: [['createdAt', 'ASC']]
             }).then((members) => {
