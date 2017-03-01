@@ -26,10 +26,16 @@ paths:
       tags:
         - project
       operationId: findProjects
+      security:
+        - Bearer: []
       description: Retreive projects that match the filter
       responses:
         '422':
           description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
           schema:
             $ref: "#/definitions/ErrorModel"
         '200':
@@ -45,14 +51,15 @@ paths:
           in: query
           description: |
             Url encoded list of Supported filters
-             - type
+             - id
              - status
+             - type
              - memberOnly
              - keyword
         - name: sort
           required: false
           description: |
-            sort projects by status, name
+            sort projects by status, name, type, createdAt, updatedAt. Default is createdAt asc
           in: query
           type: string
     post:
@@ -83,9 +90,15 @@ paths:
   /projects/{projectId}:
     get:
       description: Retrieve project by id
+      security:
+        - Bearer: []
       responses:
         '404':
           description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
           schema:
             $ref: "#/definitions/ErrorModel"
         '200':
@@ -94,13 +107,21 @@ paths:
             $ref: "#/definitions/ProjectResponse"
       parameters:
         - $ref: "#/parameters/projectIdParam"
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: |
+            Comma separated list of project fields to return.
+            Can also specify project_members, attachments to get project members and project attachments.
+            Sub fields of project members and project attachments are also allowed.
       operationId: getProject
 
     patch:
       operationId: updateProject
       security:
         - Bearer: []
-      description: Update a project that user has access to.
+      description: Update a project that user has access to. Managers and admin are able to pull out a project from cancelled state.
       responses:
         '403':
           description: No permission or wrong token
@@ -127,8 +148,27 @@ paths:
         - name: body
           in: body
           required: true
+          description: Only specify those properties that needs to be updated. `cancelReason` is mandatory if status is cancelled
           schema:
             $ref: "#/definitions/ProjectBodyParam"
+
+    delete:
+      description: remove an existing project
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If project is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Project successfully removed
 
   /projects/{projectId}/attachments:
     post:
@@ -148,7 +188,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
         '201':
-          description: Returns the newly created project
+          description: Returns the newly created project attachment
           schema:
             $ref: "#/definitions/NewProjectAttachmentResponse"
         '422':
@@ -166,10 +206,12 @@ paths:
         - in: path
           name: id
           required: true
+          description: The id of attachment to update
           type: integer
         - in: body
           name: body
           required: true
+          description: Specify only those properties that needs to be updated
           schema:
             $ref: '#/definitions/NewProjectAttachmentBodyParam'
       responses:
@@ -181,6 +223,10 @@ paths:
           description: Returns the newly created project
           schema:
             $ref: "#/definitions/NewProjectAttachmentResponse"
+        '404':
+          description: If project attachment is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
         '422':
           description: Invalid input
           schema:
@@ -194,10 +240,15 @@ paths:
         - in: path
           name: id
           required: true
+          description: The id of attachment to delete
           type: integer
       responses:
         '403':
           description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If attachment is not found
           schema:
             $ref: "#/definitions/ErrorModel"
         '204':
@@ -231,7 +282,7 @@ paths:
 
   /projects/{projectId}/members/{id}:
     delete:
-      description: add a new project member
+      description: Delete a project member
       security:
         - Bearer: []
       parameters:
@@ -303,7 +354,7 @@ parameters:
     format: int32
   limitParam:
     name: limit
-    description: "max records to return. Defaults to 10"
+    description: "max records to return. Defaults to 20"
     in: query
     required: false
     type: integer
@@ -369,6 +420,19 @@ definitions:
       description:
         type: string
         description: Project description
+      billingAccountId:
+        type: number
+        format: long
+        description: the customer billing account id
+      estimatedPrice:
+        type: number
+        format: float
+        description: The estimated price of the project
+      terms:
+        type: array
+        items:
+          type: number
+          format: integer
       external:
         type: object
         description: READ-ONLY, OPTIONAL. Refernce to external task/issue.
@@ -382,7 +446,7 @@ definitions:
             enum: [ "github", "jira", "asana", "other"]
           data:
             type: string
-            description: "250 Char length text blob for customer provided data"
+            description: "300 Char length text blob for customer provided data"
       type:
         type: string
         description: project type
@@ -404,6 +468,8 @@ definitions:
         properties:
           campaign:
             type: string
+          medium:
+            type: string
           source:
             type: string
 
@@ -420,7 +486,7 @@ definitions:
     properties:
         role:
           type: string
-          enum: ["submitter", "reviewer", "copilot", "observer"]
+          enum: ["submitter", "reviewer", "copilot"]
         users:
           type: array
           items:
@@ -444,6 +510,33 @@ definitions:
         description: unique identifier in direct
         type: integer
         format: int64
+      billingAccountId:
+        type: integer
+        format: int64
+        description: The customer billing account id
+      utm:
+        description: READ-ONLY. Used for tracking
+        type: object
+        properties:
+          campaign:
+            type: string
+          medium:
+            type: string
+          source:
+            type: string
+      estimatedPrice:
+        type: number
+        format: float
+        description: The estimated price of the project
+      actualPrice:
+        type: number
+        format: float
+        description: The actual price of the project
+      terms:
+        type: array
+        items:
+          type: number
+          format: integer
       name:
         type: string
         description: project name
@@ -464,20 +557,18 @@ definitions:
             enum: [ "github", "jira", "asana", "other"]
           data:
             type: string
-            description: "250 Char length text blob for customer provided data"
+            description: "300 Char length text blob for customer provided data"
       type:
         type: string
         description: project type
-        enum: ["design", "code", "...from product offerings..."]
-      tags:
-        description: Array of tags associated with this project.
-        type: array
-        items:
-          type: integer
+        enum: ["app_dev", "generic", "visual_prototype", "visual_design"]
       status:
         type: string
         description: current state of the task
-        enum: ["draft", "active", "paused", "cancelled", "completed"]
+        enum: ["draft", "in_review", "reviewed", "active", "paused", "cancelled", "completed"]
+      cancelReason:
+        type: string
+        description: If a project is cancelled, define the reason of cancellation
       challengeEligibility:
         description: List of eligibility criteria (one entry per role)
         type: array
@@ -557,6 +648,9 @@ definitions:
         type: number
         format: int64
         description: user identifier
+      isPrimary:
+        type: boolean
+        description: Flag to indicate this member is primary for specified role
       role:
         type: string
         description: member role on specified project
@@ -593,11 +687,16 @@ definitions:
     type: object
     required:
       - filePath
+      - s3Bucket
+      - title
       - contentType
     properties:
       filePath:
         type: string
         description: path where file is stored
+      s3Bucket:
+        type: string
+        description: The s3 bucket of attachment
       contentType:
         type: string
         description: Uploaded file content type
@@ -607,6 +706,13 @@ definitions:
       description:
         type: string
         description: Optional description for the attached file.
+      category:
+        type: string
+        description: Category of attachment
+      size:
+        type: number
+        format: float
+        description: The size of attachment
 
   NewProjectAttachmentBodyParam:
     type: object
@@ -615,7 +721,7 @@ definitions:
         $ref: "#/definitions/NewProjectAttachment"
 
   NewProjectAttachmentResponse:
-    title: Project member object response
+    title: Project attachment object response
     type: object
     properties:
       id:
@@ -641,9 +747,13 @@ definitions:
       id:
         type: number
         description: unique id for the attachment
-      filePath:
+      size:
+        type: number
+        format: float
+        description: The size of attachment
+      category:
         type: string
-        description: path where file is stored
+        description: The category of attachment
       contentType:
         type: string
         description: Uploaded file content type
@@ -686,6 +796,9 @@ definitions:
         type: number
         format: int64
         description: user identifier
+      isPrimary:
+        type: boolean
+        description: Flag to indicate this member is primary for specified role
       projectId:
         type: number
         format: int64

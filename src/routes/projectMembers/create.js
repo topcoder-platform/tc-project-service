@@ -21,7 +21,7 @@ const addMemberValidations = {
       userId: Joi.number().required(),
       isPrimary: Joi.boolean(),
       role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.COPILOT).required()
-    })
+    }).required()
   }
 }
 

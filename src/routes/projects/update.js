@@ -3,7 +3,7 @@ import validate from 'express-validation'
 import _ from 'lodash'
 import Joi from 'joi'
 import models from '../../models'
-import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE, EVENT } from '../../constants'
+import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE, EVENT, USER_ROLE } from '../../constants'
 import util from '../../util'
 import directProject from '../../services/directProject'
 import { middleware as tcMiddleware } from 'tc-core-library-js'
@@ -54,7 +54,13 @@ const updateProjectValdiations = {
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
         users: Joi.array().items(Joi.number().positive()),
         groups: Joi.array().items(Joi.number().positive())
-      })).allow(null)
+      })).allow(null),
+      // cancel reason is mandatory when project status is cancelled
+      cancelReason: Joi.when('status', {
+        is: PROJECT_STATUS.CANCELLED,
+        then: Joi.string().required(),
+        otherwise: Joi.string().optional()
+      })
     })
   }
 }
@@ -64,7 +70,6 @@ var validateUpdates = (existingProject, updatedProject) => {
   var errors = []
   switch (existingProject.status) {
     case PROJECT_STATUS.COMPLETED:
-    case PROJECT_STATUS.CANCELLED:
       errors.push(`cannot update a project that is in ${existingProject.status}' state`)
       break
     // disabling this check for now.
@@ -82,7 +87,7 @@ var validateUpdates = (existingProject, updatedProject) => {
 
 module.exports = [
   // handles request validations
-  // validate(updateProjectValdiations),
+  validate(updateProjectValdiations),
   permissions('project.edit'),
   /**
    * POST projects/
@@ -120,13 +125,15 @@ module.exports = [
             })
             return Promise.reject(err)
           }
-          // Only project manager (user with manager role assigned) should be allowed to transition project status to 'active'.
+          // Only project manager (user with manager role assigned) or topcoder admin should be allowed
+          // to transition project status to 'active'.
           const members = req.context.currentProjectMembers
           const validRoles = [PROJECT_MEMBER_ROLE.MANAGER,  PROJECT_MEMBER_ROLE.MANAGER].map(x => x.toLowerCase())
           const matchRole = (role) => _.indexOf(validRoles, role.toLowerCase()) >= 0
-          if(updatedProps.status === PROJECT_STATUS.ACTIVE &&
+          if (updatedProps.status === PROJECT_STATUS.ACTIVE &&
+            !util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) &&
               _.isUndefined(_.find(members, (m) => m.userId === req.authUser.userId && matchRole(m.role)))) {
-            let err = new Error('Only assigned topcoder-managers should be allowed to launch a project')
+            let err = new Error('Only assigned topcoder-managers or topcoder admins should be allowed to launch a project')
             err.status = 403
             return Promise.reject(err)
           }
@@ -158,6 +165,22 @@ module.exports = [
         .then(() => {
           return project.reload(project.id)
         })
+        // update project history
+        .then(() => {
+          return new Promise((accept, reject) => {
+            // we only want to have project history when project status is updated
+            if (updatedProps.status && (updatedProps.status !== previousValue.status)) {
+              models.ProjectHistory.create({
+                projectId: project.id,
+                status: updatedProps.status,
+                cancelReason: updatedProps.cancelReason,
+                updatedBy: req.authUser.userId
+              }).then(() => accept()).catch((err) => reject(err))
+            } else {
+              accept()
+            }
+          })
+        })
         .then(() => {
           project = project.get({plain: true})
           project = _.omit(project, ['deletedAt'])
@@ -179,11 +202,10 @@ module.exports = [
           // get attachments
           return util.getProjectAttachments(req, project.id)
         })
-        .then((attachments) => {
-          project.attachments = attachments
-          res.json(util.wrapResponse(req.id, project))
-        })
-        .catch((err) => next(err))
-    })
+    }).then((attachments) => {
+      // make sure we only send response after transaction is committed
+      project.attachments = attachments
+      res.json(util.wrapResponse(req.id, project))
+    }).catch((err) => next(err))
   }
 ]

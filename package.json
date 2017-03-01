@@ -15,6 +15,7 @@
     "prestart": "npm run -s build",
     "seed": "babel-node src/tests/seed.js --presets es2015",
     "direct": "babel-node src/mocks/direct.js --presets es2015",
+    "sync": "node sync.js",
     "lint": "./node_modules/.bin/eslint src"
   },
   "repository": {
