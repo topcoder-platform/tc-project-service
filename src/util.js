@@ -15,15 +15,13 @@ import querystring from 'querystring';
 import config from 'config';
 
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
-
 _.assignIn(util, {
   /**
    * Handle error
-   * @param   {String}    msg               the default error message
-   * @param   {Error}     err               the err
-   * @param   {Object}    req               the request
-   * @param   {Function}  next              the next function
-   * @returns {Function}                    next function with error
+   * @param defaultMessage the default error message
+   * @param err the err
+   * @param next the next function
+   * @returns next function with error
    */
   handleError: (msg, err, req, next) => {
     req.log.error({
@@ -39,9 +37,9 @@ _.assignIn(util, {
   },
   /**
    * Validates if filters are valid
-   * @param  {object}   filters         object with filters
-   * @param  {array}    validValues     valid filter values
-   * @return {boolean}                  true if filters are valid otherwise false
+   * @param  {object} filters    object with filters
+   * @param  {array} validValues valid filter values
+   * @return {boolean}
    */
   isValidFilter: (filters, validValues) => {
     let valid = true;
@@ -66,9 +64,8 @@ _.assignIn(util, {
 
   /**
    * Parses query fields and groups them per table
-   * @param  {array}      queryFields     list of query fields
-   * @param  {Object}     allowedFields   the allowed fields
-   * @return {object}                     the parsed fields
+   * @param  {array} queryFields list of query fields
+   * @return {object}
    */
   parseFields: (queryFields, allowedFields) => {
     const fields = _.cloneDeep(allowedFields);
@@ -88,9 +85,9 @@ _.assignIn(util, {
   },
 
   /**
-   * Parse the query filters
-   * @param  {String}   queryFilter         the query filter string
-   * @return {Object}                       the parsed array
+   * [description]
+   * @param  {[type]} queryFilter [description]
+   * @return {[type]}             [description]
    */
   parseQueryFilter: (queryFilter) => {
     queryFilter = querystring.parse(queryFilter);
@@ -137,9 +134,9 @@ _.assignIn(util, {
 
   /**
    * retrieve download urls for all attachments
-   * @param  {Object}     req         original request
-   * @param  {String}     filePath    the file path
-   * @return {String}                 the download url
+   * @param  {[type]} req         original request
+   * @param  {[type]} attachments list of attachments to retrieve urls for
+   * @return {[type]}             [description]
    */
   getFileDownloadUrl: (req, filePath) => {
     if (!filePath) {
@@ -198,8 +195,7 @@ _.assignIn(util, {
   getSystemUserToken: (logger, id = 'system') => {
     const httpClient = util.getHttpClient({ id, log: logger });
     const url = `${config.get('identityServiceEndpoint')}authorizations`;
-    const formData = `clientId=${config.get('systemUserClientId')}&` +
-      `secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`;
+    const formData = `clientId=${config.get('systemUserClientId')}&secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`;
     return httpClient.post(url, formData,
       {
         timeout: 4000,
@@ -212,11 +208,11 @@ _.assignIn(util, {
     /**
      * Fetches the topcoder user details using the given JWT token.
      *
-     * @param {Number}  userId        id of the user to be fetched
-     * @param {String}  jwtToken      JWT token of the admin user or JWT token of the user to be fecthed
-     * @param {Object}  logger        logger to be used for logging purposes
+     * @param userId id of the user to be fetched
+     * @param jwtToken JWT token of the admin user or JWT token of the user to be fecthed
+     * @param logger logger to be used for logging purposes
      *
-     * @return {Promise}              promise which resolves to the user's information
+     * @return promise which resolves to the user's information
      */
   getTopcoderUser: (userId, jwtToken, logger) => {
     const httpClient = util.getHttpClient({ id: `userService_${userId}`, log: logger });
@@ -226,7 +222,7 @@ _.assignIn(util, {
     httpClient.defaults.headers.common.Authorization = `Bearer ${jwtToken}`;
     return httpClient.get(`${config.userServiceUrl}/${userId}`).then((response) => {
       if (response.data && response.data.result
-          && response.data.result.status === 200 && response.data.result.content) {
+          && response.data.result.status == 200 && response.data.result.content) {
         return response.data.result.content;
       }
       return null;

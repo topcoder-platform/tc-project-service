@@ -9,8 +9,7 @@
   "scripts": {
     "build": "babel src -d dist --presets es2015",
     "sync": "node migrations/sync.js",
-    "lint": "./node_modules/.bin/eslint .",
-    "lint:fix": "./node_modules/.bin/eslint . --fix || true",
+    "lint": "./node_modules/.bin/eslint src",
     "prestart": "npm run -s build",
     "start": "node dist",
     "start:dev": "NODE_ENV=local PORT=8001 nodemon -w src --exec \"babel-node src --presets es2015\" | ./node_modules/.bin/bunyan",
@@ -48,8 +47,7 @@
     "pg": "^4.5.5",
     "pg-native": "^1.10.0",
     "sequelize": "^3.23.0",
-    "tc-core-library-js": "^1.0.8",
-    "winston": "^2.3.1"
+    "tc-core-library-js": "^1.0.8"
   },
   "devDependencies": {
     "babel-cli": "^6.9.0",

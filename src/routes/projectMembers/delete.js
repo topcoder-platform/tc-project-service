@@ -1,9 +1,9 @@
 
 
 import _ from 'lodash';
-import winston from 'winston';
-import { middleware as tcMiddleware } from 'tc-core-library-js';
+
 import models from '../../models';
+import { middleware as tcMiddleware } from 'tc-core-library-js';
 import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants';
 
 /**
@@ -29,7 +29,7 @@ module.exports = [
           err.status = 404;
           return Promise.reject(err);
         }
-        return member.destroy({ logging: winston.info });
+        return member.destroy({ logging: console.log });
       })
       .then(member => member.save())
       // if primary co-pilot is removed promote the next co-pilot to primary #43

@@ -8,9 +8,10 @@ import _ from 'lodash';
 import config from 'config';
 import Joi from 'joi';
 import path from 'path';
-import { middleware as tcMiddleware } from 'tc-core-library-js';
+
 import models from '../../models';
 import util from '../../util';
+import { middleware as tcMiddleware } from 'tc-core-library-js';
 
 const permissions = tcMiddleware.permissions;
 

@@ -11,8 +11,8 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 describe('GET Project', () => {
-  let project1;
-  let project2;
+  let project1,
+    project2;
   before((done) => {
     testUtil.clearDb()
         .then(() => {

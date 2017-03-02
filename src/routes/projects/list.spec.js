@@ -2,7 +2,6 @@
 
 import chai from 'chai';
 import request from 'supertest';
-import winston from 'winston';
 
 import models from '../../models';
 import server from '../../app';
@@ -12,11 +11,10 @@ const should = chai.should();
 
 /**
  * Add full text index for projects.
- * @return {Promise}        returns the promise
  */
 function addFullTextIndex() {
   if (models.sequelize.options.dialect !== 'postgres') {
-    winston.info('Not creating search index, must be using POSTGRES to do this');
+    console.log('Not creating search index, must be using POSTGRES to do this');
     return;
   }
 
@@ -24,29 +22,26 @@ function addFullTextIndex() {
       .query('ALTER TABLE projects ADD COLUMN "projectFullText" text;')
       .then(() => models.sequelize
           .query('UPDATE projects SET "projectFullText" = lower(' +
-            'name || \' \' || coalesce(description, \'\') || \' \' || coalesce(details#>>\'{utm, code}\', \'\'));'))
-              .then(() => models.sequelize
+            'name || \' \' || coalesce(description, \'\') || \' \' || coalesce(details#>>\'{utm, code}\', \'\'));')).then(() => models.sequelize
           .query('CREATE EXTENSION IF NOT EXISTS pg_trgm;')).then(() => models.sequelize
-          .query('CREATE INDEX project_text_search_idx ON projects USING GIN("projectFullText" gin_trgm_ops);'))
-              .then(() => models.sequelize
+          .query('CREATE INDEX project_text_search_idx ON projects USING GIN("projectFullText" gin_trgm_ops);')).then(() => models.sequelize
           .query('CREATE OR REPLACE FUNCTION project_text_update_trigger() RETURNS trigger AS $$ ' +
             'begin ' +
               'new."projectFullText" := ' +
-              'lower(new.name || \' \' || coalesce(new.description, \'\') || \' \' || ' +
-              ' coalesce(new.details#>>\'{utm, code}\', \'\')); ' +
+              'lower(new.name || \' \' || coalesce(new.description, \'\') || \' \' || coalesce(new.details#>>\'{utm, code}\', \'\')); ' +
               'return new; ' +
             'end ' +
             '$$ LANGUAGE plpgsql;')).then(() => models.sequelize
           .query('DROP TRIGGER IF EXISTS project_text_update ON projects;')).then(() => models.sequelize
           .query('CREATE TRIGGER project_text_update BEFORE INSERT OR UPDATE ON projects' +
             ' FOR EACH ROW EXECUTE PROCEDURE project_text_update_trigger();')).catch((err) => {
-              winston.error('Failed: ', err);
+              console.log('Failed: ', err);
             });
 }
 
 describe('LIST Project', () => {
-  let project1;
-  let project2;
+  let project1,
+    project2;
   before((done) => {
     testUtil.clearDb()
         .then(() => addFullTextIndex())
@@ -178,8 +173,7 @@ describe('LIST Project', () => {
           });
     });
 
-    it('should return the project when project that is in reviewed state AND does not yet' +
-        'have a co-pilot assigned', (done) => {
+    it('should return the project when project that is in reviewed state AND does not yet have a co-pilot assigned', (done) => {
       request(server)
           .get('/v4/projects')
           .set({

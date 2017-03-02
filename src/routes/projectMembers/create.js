@@ -3,10 +3,11 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
-import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, EVENT } from '../../constants';
+import { PROJECT_MEMBER_ROLE } from '../../constants';
+import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { EVENT } from '../../constants';
 
 /**
  * API to add a project member.
@@ -19,8 +20,7 @@ const addMemberValidations = {
     param: Joi.object().keys({
       userId: Joi.number().required(),
       isPrimary: Joi.boolean(),
-      role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER,
-        PROJECT_MEMBER_ROLE.COPILOT).required(),
+      role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.COPILOT).required(),
     }).required(),
   },
 };

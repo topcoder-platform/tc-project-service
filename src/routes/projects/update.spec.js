@@ -13,9 +13,9 @@ import { PROJECT_STATUS } from '../../constants';
 const should = chai.should();
 
 describe('Project', () => {
-  let project1;
-  let project2;
-  let project3;
+  let project1,
+    project2,
+    project3;
   beforeEach((done) => {
     testUtil.clearDb(done);
   });
@@ -588,11 +588,11 @@ describe('Project', () => {
                   })
                   .expect('Content-Type', /json/)
                   .expect(200)
-                  .end((error, resp) => {
-                    if (error) {
-                      return done(error);
+                  .end((err, res) => {
+                    if (err) {
+                      return done(err);
                     }
-                    resJson = resp.body.result.content;
+                    resJson = res.body.result.content;
                     should.exist(resJson);
                     should.not.exist(resJson.bookmarks);
                     server.services.pubsub.publish.calledWith('project.updated').should.be.true;
