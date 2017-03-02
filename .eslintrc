@@ -1,5 +1,5 @@
 {
-  "extends": "airbnb",
+  "extends": "airbnb-base",
   "parser": "babel-eslint",
   "env": {
     "browser": false,
@@ -8,6 +8,7 @@
     "mocha": true
   },
   "rules": {
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.js", "**/*.spec.js"]}],
     "valid-jsdoc": ["error", {
       "requireReturn": true,
       "requireReturnType": true,

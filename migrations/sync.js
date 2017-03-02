@@ -1,4 +1,4 @@
-'use strict'
+
 
 /**
  * Sync the database models to db tables.
@@ -12,9 +12,9 @@
 
 require('./dist/models').default.sequelize.sync({ force: true })
   .then(() => {
-    console.log('Database synced successfully')
-    process.exit()
+    console.log('Database synced successfully');
+    process.exit();
   }).catch((err) => {
-    console.error('Error syncing database', err)
-    process.exit(1)
-  })
+    console.error('Error syncing database', err);
+    process.exit(1);
+  });

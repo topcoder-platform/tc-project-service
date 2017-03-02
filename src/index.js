@@ -1,16 +1,11 @@
 
-
-import models from './models';
-
-// include newrelic
-if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'local') {
-  require('newrelic');
-}
-
 const app = require('./app');
+const coreLib = require('tc-core-library-js');
+const expressListRoutes = require('express-list-routes');
 
 /**
  * Handle server shutdown gracefully
+ * @returns {undefined}
  */
 function gracefulShutdown() {
   app.services.pubsub.disconnect()
@@ -36,9 +31,9 @@ const port = process.env.PORT || 3000; // used to create, sign, and verify token
 
 const server = app.listen(port, () => {
   app.logger.info('Starting server on PORT: %d', port);
-  const authz = require('tc-core-library-js').Authorizer;
+  const authz = coreLib.Authorizer;
   app.logger.info('Registered Policies', authz.getRegisteredPolicies());
-  require('express-list-routes')({ prefix: '', spacer: 7 }, 'APIs:', app.routerRef);
+  expressListRoutes({ prefix: '', spacer: 7 }, 'APIs:', app.routerRef);
 });
 
 module.exports = server;
