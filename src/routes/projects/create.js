@@ -1,13 +1,13 @@
-'use strict'
 
-import validate from 'express-validation'
-import _ from 'lodash'
-import Joi from 'joi'
 
-import models from '../../models'
-import {PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT } from '../../constants'
-import util from '../../util'
-import directProject from '../../services/directProject'
+import validate from 'express-validation';
+import _ from 'lodash';
+import Joi from 'joi';
+
+import models from '../../models';
+import { PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT } from '../../constants';
+import util from '../../util';
+import directProject from '../../services/directProject';
 
 /**
  * API to handle creating a new project.
@@ -17,7 +17,7 @@ import directProject from '../../services/directProject'
  * All Topcoder users are allowed to create a project.
  *
  */
-var  permissions = require('tc-core-library-js').middleware.permissions
+const permissions = require('tc-core-library-js').middleware.permissions;
 
 const createProjectValdiations = {
   body: {
@@ -28,18 +28,18 @@ const createProjectValdiations = {
       utm: Joi.object().keys({
         source: Joi.string().allow(null),
         medium: Joi.string().allow(null),
-        campaign: Joi.string().allow(null)
+        campaign: Joi.string().allow(null),
       }).allow(null),
       bookmarks: Joi.array().items(Joi.object().keys({
         title: Joi.string(),
-        address: Joi.string()
+        address: Joi.string(),
       })).optional().allow(null),
       estimatedPrice: Joi.number().precision(2).positive().optional().allow(null),
       terms: Joi.array().items(Joi.number().positive()).optional(),
       external: Joi.object().keys({
         id: Joi.string(),
         type: Joi.any().valid('github', 'jira', 'asana', 'other'),
-        data: Joi.string().max(300) // TODO - restrict length
+        data: Joi.string().max(300), // TODO - restrict length
       }).allow(null),
       // TODO - add more types
       type: Joi.any().valid(_.values(PROJECT_TYPE)).required(),
@@ -47,11 +47,11 @@ const createProjectValdiations = {
       challengeEligibility: Joi.array().items(Joi.object().keys({
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
         users: Joi.array().items(Joi.number().positive()),
-        groups: Joi.array().items(Joi.number().positive())
-      })).allow(null)
-    }).required()
-  }
-}
+        groups: Joi.array().items(Joi.number().positive()),
+      })).allow(null),
+    }).required(),
+  },
+};
 
 module.exports = [
   // handles request validations
@@ -62,10 +62,10 @@ module.exports = [
    * Create a project if the user has access
    */
   (req, res, next) => {
-    var project = req.body.param
+    const project = req.body.param;
     const userRole = util.hasRole(req, USER_ROLE.MANAGER)
         ? PROJECT_MEMBER_ROLE.MANAGER
-        : PROJECT_MEMBER_ROLE.CUSTOMER
+        : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults
     _.defaults(project, {
       createdBy: req.authUser.userId,
@@ -73,8 +73,8 @@ module.exports = [
       challengeEligibility: [],
       bookmarks: [],
       external: null,
-      utm: null
-    })
+      utm: null,
+    });
     // override values
     _.assign(project, {
       status: PROJECT_STATUS.DRAFT,
@@ -86,62 +86,60 @@ module.exports = [
         userId: req.authUser.userId,
         updatedBy: req.authUser.userId,
         createdBy: req.authUser.userId,
-      }]
-    })
+      }],
+    });
     models.sequelize.transaction(() => {
-      var newProject = null
+      let newProject = null;
       return models.Project
           .create(project, {
             include: [{
               model: models.ProjectMember,
-              as: 'members'
-            }]
+              as: 'members',
+            }],
           })
           .then((_newProject) => {
-            newProject = _newProject
+            newProject = _newProject;
             req.log.debug('new project created (id# %d, name: %s)',
-                newProject.id, newProject.name)
+                newProject.id, newProject.name);
             // create direct project with name and description
-            var body = {
+            const body = {
               projectName: newProject.name,
-              projectDescription: newProject.description
-            }
+              projectDescription: newProject.description,
+            };
             // billingAccountId is optional field
-            if(newProject.billingAccountId){
-              body.billingAccountId = newProject.billingAccountId
+            if (newProject.billingAccountId) {
+              body.billingAccountId = newProject.billingAccountId;
             }
             return directProject.createDirectProject(req, body)
               .then((resp) => {
-                newProject.directProjectId = resp.data.result.content.projectId
-                return newProject.save()
+                newProject.directProjectId = resp.data.result.content.projectId;
+                return newProject.save();
               })
-              .then(() => {
-                return newProject.reload(newProject.id)
-              })
-              .catch(err => {
+              .then(() => newProject.reload(newProject.id))
+              .catch((err) => {
                 // log the error and continue
-                req.log.error('Error creating direct project')
-                req.log.error(err)
-                return Promise.resolve()
-              })
+                req.log.error('Error creating direct project');
+                req.log.error(err);
+                return Promise.resolve();
+              });
           })
           .then(() => {
-            newProject = newProject.get({plain: true})
+            newProject = newProject.get({ plain: true });
             // remove utm details & deletedAt field
-            newProject = _.omit(newProject, ['deletedAt', 'utm'])
+            newProject = _.omit(newProject, ['deletedAt', 'utm']);
             // add an empty attachments array
-            newProject.attachments = []
+            newProject.attachments = [];
             req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
               newProject,
-              { correlationId: req.id }
-            )
+              { correlationId: req.id },
+            );
             // emit event
-            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, {req, project: newProject })
-            res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201))
+            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
+            res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
           })
           .catch((err) => {
-            util.handleError('Error creating project', err, req, next)
-          })
-    })
-  }
-]
+            util.handleError('Error creating project', err, req, next);
+          });
+    });
+  },
+];

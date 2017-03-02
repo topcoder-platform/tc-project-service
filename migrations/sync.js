@@ -8,7 +8,7 @@
  * Make sure we are in development mode
  * @type {String}
  */
-process.env.NODE_ENV = 'development'
+// process.env.NODE_ENV = 'development'
 
 require('./dist/models').default.sequelize.sync({ force: true })
   .then(() => {

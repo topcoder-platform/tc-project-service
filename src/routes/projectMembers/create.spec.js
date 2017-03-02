@@ -1,19 +1,20 @@
-'use strict'
-import _ from 'lodash'
-import chai from 'chai'
-import sinon from 'sinon'
-import request from 'supertest'
 
-import models from '../../models'
-import util from '../../util'
-import server from '../../app'
-import testUtil from '../../tests/util'
+import _ from 'lodash';
+import chai from 'chai';
+import sinon from 'sinon';
+import request from 'supertest';
 
-var should = chai.should()
+import models from '../../models';
+import util from '../../util';
+import server from '../../app';
+import testUtil from '../../tests/util';
+
+const should = chai.should();
 
 describe('Project Members create', () => {
-  var project1, project2
-  before(done =>  {
+  let project1,
+    project2;
+  before((done) => {
     testUtil.clearDb()
         .then(() => {
           models.Project.create({
@@ -25,9 +26,9 @@ describe('Project Members create', () => {
             status: 'draft',
             details: {},
             createdBy: 1,
-            updatedBy: 1
-          }).then(p => {
-            project1 = p
+            updatedBy: 1,
+          }).then((p) => {
+            project1 = p;
             // create members
             models.ProjectMember.create({
               userId: 40051332,
@@ -35,8 +36,8 @@ describe('Project Members create', () => {
               role: 'copilot',
               isPrimary: true,
               createdBy: 1,
-              updatedBy: 1
-            })
+              updatedBy: 1,
+            });
           }).then(() =>
               models.Project.create({
                 type: 'generic',
@@ -46,103 +47,103 @@ describe('Project Members create', () => {
                 status: 'reviewed',
                 details: {},
                 createdBy: 1,
-                updatedBy: 1
-              }).then(p2 => {
-                project2 = p2
-                done()
-              }))
-        })
-  })
+                updatedBy: 1,
+              }).then((p2) => {
+                project2 = p2;
+                done();
+              }));
+        });
+  });
 
-  after(done =>  {
-    testUtil.clearDb(done)
-  })
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /projects/{id}/members/', () => {
-    var sandbox
+    let sandbox;
     beforeEach(() => {
-      sandbox = sinon.sandbox.create()
-    })
+      sandbox = sinon.sandbox.create();
+    });
     afterEach(() => {
-      sandbox.restore()
-    })
+      sandbox.restore();
+    });
 
-    it('should return 403 if user does not have permissions', done =>  {
+    it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .post('/v4/projects/' + project1.id + '/members/')
+          .post(`/v4/projects/${project1.id}/members/`)
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.member
+            Authorization: `Bearer ${testUtil.jwts.member}`,
           })
-          .send({ param: {userId: 1, role: 'customer'}})
+          .send({ param: { userId: 1, role: 'customer' } })
           .expect('Content-Type', /json/)
-          .expect(403, done)
-    })
+          .expect(403, done);
+    });
 
-    it('should return 400 if user is already registered', done =>  {
+    it('should return 400 if user is already registered', (done) => {
       request(server)
-          .post('/v4/projects/' + project1.id + '/members/')
+          .post(`/v4/projects/${project1.id}/members/`)
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.admin
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .send({ param: {userId: 40051332, role: 'customer'}})
+          .send({ param: { userId: 40051332, role: 'customer' } })
           .expect('Content-Type', /json/)
           .expect(400)
           .end((err, res) => {
             if (err) {
-              return done(err)
+              return done(err);
             }
-            res.body.result.status.should.equal(400)
-            done()
-          })
-    })
+            res.body.result.status.should.equal(400);
+            done();
+          });
+    });
 
-    it('should return 201 and register copilot member for project', done =>  {
+    it('should return 201 and register copilot member for project', (done) => {
       request(server)
-          .post('/v4/projects/' + project2.id + '/members/')
+          .post(`/v4/projects/${project2.id}/members/`)
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.copilot
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
-          .send({ param: {userId: 1, role: 'copilot'}})
+          .send({ param: { userId: 1, role: 'copilot' } })
           .expect('Content-Type', /json/)
           .expect(201)
-          .end(function(err, res) {
+          .end((err, res) => {
             if (err) {
-              return done(err)
+              return done(err);
             }
-            var resJson = res.body.result.content
-            should.exist(resJson)
-            resJson.role.should.equal('copilot')
-            resJson.isPrimary.should.be.truthy
-            resJson.projectId.should.equal(project2.id)
-            resJson.userId.should.equal(1)
-            server.services.pubsub.publish.calledWith('project.member.added').should.be.true
-            done()
-          })
-    })
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.role.should.equal('copilot');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project2.id);
+            resJson.userId.should.equal(1);
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          });
+    });
 
-    it('should return 201 and register customer member', done =>  {
+    it('should return 201 and register customer member', (done) => {
       request(server)
-          .post('/v4/projects/' + project1.id + '/members/')
+          .post(`/v4/projects/${project1.id}/members/`)
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.copilot
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
-          .send({ param: {userId: 1, role: 'customer'}})
+          .send({ param: { userId: 1, role: 'customer' } })
           .expect('Content-Type', /json/)
           .expect(201)
-          .end(function(err, res) {
+          .end((err, res) => {
             if (err) {
-              return done(err)
+              return done(err);
             }
-            var resJson = res.body.result.content
-            should.exist(resJson)
-            resJson.role.should.equal('customer')
-            resJson.isPrimary.should.be.truthy
-            resJson.projectId.should.equal(project1.id)
-            resJson.userId.should.equal(1)
-            server.services.pubsub.publish.calledWith('project.member.added').should.be.true
-            done()
-          })
-    })
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.role.should.equal('customer');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(1);
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          });
+    });
 
     /*
     // TODO this test is no logner valid since updating direct is async
@@ -173,8 +174,8 @@ describe('Project Members create', () => {
     })
     */
 
-    it('should return 201 and register copilot member', done =>  {
-      var mockHttpClient = _.merge(testUtil.mockHttpClient, {
+    it('should return 201 and register copilot member', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
           data: {
@@ -184,37 +185,37 @@ describe('Project Members create', () => {
               success: true,
               status: 200,
               content: {
-                copilotProjectId: 2
-              }
-            }
-          }
-        })
-      })
-      var postSpy = sinon.spy(mockHttpClient, 'post')
+                copilotProjectId: 2,
+              },
+            },
+          },
+        }),
+      });
+      const postSpy = sinon.spy(mockHttpClient, 'post');
       // var amqPubSpy = sinon.spy(server.services.pubsub, 'publish')
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient )
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-          .post('/v4/projects/' + project1.id + '/members/')
+          .post(`/v4/projects/${project1.id}/members/`)
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.copilot
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
-          .send({ param: {userId: 3, role: 'copilot'}})
+          .send({ param: { userId: 3, role: 'copilot' } })
           .expect('Content-Type', /json/)
           .expect(201)
-          .end(function(err, res) {
+          .end((err, res) => {
             if (err) {
-              return done(err)
+              return done(err);
             }
-            var resJson = res.body.result.content
-            should.exist(resJson)
-            resJson.role.should.equal('copilot')
-            resJson.isPrimary.should.be.truthy
-            resJson.projectId.should.equal(project1.id)
-            resJson.userId.should.equal(3)
-            postSpy.should.have.been.calledOnce
-            server.services.pubsub.publish.calledWith('project.member.added').should.be.true
-            done()
-          })
-    })
-  })
-})
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.role.should.equal('copilot');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(3);
+            postSpy.should.have.been.calledOnce;
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          });
+    });
+  });
+});
