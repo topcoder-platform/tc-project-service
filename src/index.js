@@ -1,7 +1,5 @@
 
 
-import models from './models';
-
 // include newrelic
 if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'local') {
   require('newrelic');
@@ -11,6 +9,7 @@ const app = require('./app');
 
 /**
  * Handle server shutdown gracefully
+ * @return {Void}         This function returns void
  */
 function gracefulShutdown() {
   app.services.pubsub.disconnect()

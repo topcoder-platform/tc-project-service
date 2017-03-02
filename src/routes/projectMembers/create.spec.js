@@ -12,8 +12,8 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 describe('Project Members create', () => {
-  let project1,
-    project2;
+  let project1;
+  let project2;
   before((done) => {
     testUtil.clearDb()
         .then(() => {

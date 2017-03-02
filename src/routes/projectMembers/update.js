@@ -2,12 +2,10 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
-
+import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants';
-import { middleware as tcMiddleware } from 'tc-core-library-js';
-import directProject from '../../services/directProject';
 
 /**
  * API to update a project member.
@@ -18,7 +16,8 @@ const updateProjectMemberValdiations = {
   body: {
     param: Joi.object().keys({
       isPrimary: Joi.boolean(),
-      role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.COPILOT).required(),
+      role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.COPILOT).required(),
     }),
   },
 };
@@ -31,21 +30,22 @@ module.exports = [
    * Update a projectMember if the user has access
    */
   (req, res, next) => {
-    let projectMember,
-      updatedProps = req.body.param;
+    let projectMember;
+    let updatedProps = req.body.param;
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
     updatedProps = _.pick(updatedProps, ['isPrimary', 'role']);
 
     let previousValue;
-    let newValue;
+    // let newValue;
     models.sequelize.transaction(() => models.ProjectMember.findOne({
       where: { id: memberRecordId, projectId },
     })
         .then((_member) => {
           if (!_member) {
             // handle 404
-            const err = new Error(`project member not found for project id ${projectId} and member id ${memberRecordId}`);
+            const err = new Error(`project member not found for project id ${projectId} ` +
+              `and member id ${memberRecordId}`);
             err.status = 404;
             return Promise.reject(err);
           }
@@ -53,7 +53,7 @@ module.exports = [
           projectMember = _member;
           previousValue = _.clone(projectMember.get({ plain: true }));
           _.assign(projectMember, updatedProps);
-          newValue = projectMember.get({ plain: true });
+          // newValue = projectMember.get({ plain: true });
 
           // no updates if no change
           if (updatedProps.role === previousValue.role &&

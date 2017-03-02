@@ -3,6 +3,7 @@ import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
+import winston from 'winston';
 
 import util from '../../util';
 import server from '../../app';
@@ -13,7 +14,7 @@ const should = chai.should();
 
 sinon.stub(RabbitMQService.prototype, 'init', () => {});
 sinon.stub(RabbitMQService.prototype, 'publish', () => {
-  console.log('publish called');
+  winston.info('publish called');
 });
 
 describe('Project create', () => {

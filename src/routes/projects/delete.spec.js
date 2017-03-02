@@ -1,21 +1,13 @@
 
-import _ from 'lodash';
-import chai from 'chai';
-import sinon from 'sinon';
 import request from 'supertest';
 
 import models from '../../models';
-import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
 
 describe('Project delete test', () => {
-  let project1,
-    owner,
-    teamMember,
-    manager,
-    copilot;
+  let project1;
   beforeEach((done) => {
     testUtil.clearDb()
         .then(() => {
@@ -71,11 +63,7 @@ describe('Project delete test', () => {
               }),
             ];
             Promise.all(promises)
-            .then((res) => {
-              owner = res[0];
-              manager = res[2];
-              copilot = res[3];
-              teamMember = res[4];
+            .then(() => {
               done();
             });
           });
@@ -103,7 +91,7 @@ describe('Project delete test', () => {
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .expect(204)
-        .end((err, resp) => {
+        .end((err) => {
           if (err) {
             return done(err);
           }

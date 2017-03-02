@@ -21,6 +21,7 @@ router.get('/_health', (req, res) => {
 
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
+
 router.all('/v4/projects*', jwtAuth());
 
 // Register all the routes

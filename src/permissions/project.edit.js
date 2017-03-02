@@ -1,14 +1,15 @@
 
-/* globals Promise */
 
+import _ from 'lodash';
 import util from '../util';
 import models from '../models';
 import { USER_ROLE } from '../constants';
-import _ from 'lodash';
 
 /**
  * Super admin, Topcoder Managers are allowed to edit any project
  * Rest can add members only if they are currently part of the project team.
+ * @param {Object}    req         the express request instance
+ * @return {Promise}              Returns a promise
  */
 module.exports = req => new Promise((resolve, reject) => {
   const projectId = _.parseInt(req.params.projectId);

@@ -1,4 +1,6 @@
+import winston from 'winston';
 import models from '../models';
+
 models.sequelize.sync({ force: true })
     .then(() =>
         models.Project.bulkCreate([{
@@ -102,7 +104,7 @@ models.sequelize.sync({ force: true })
       return Promise.all(operations);
     })
     .then(() => {
-      console.log('Success');
+      winston.info('Success');
       process.exit(0);
     })
-    .catch(err => console.log('Failed: ', err));
+    .catch(err => winston.error('Failed: ', err));

@@ -1,15 +1,15 @@
 
-/* globals Promise */
-
+import _ from 'lodash';
 import util from '../util';
 import models from '../models';
 import { USER_ROLE } from '../constants';
-import _ from 'lodash';
 
 /**
  * Super admin, Topcoder Managers are allowed to view any projects
  * Co-pilots can view projects they are part of or if no other co-pilot has been
  * assigned. Others can only view projcets that they are part of.
+ * @param {Object}    req         the express request instance
+ * @return {Promise}              Returns a promise
  */
 module.exports = req => new Promise((resolve, reject) => {
   const projectId = _.parseInt(req.params.projectId);
