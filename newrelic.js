@@ -1,4 +1,4 @@
-'use strict'
+
 
 /**
  * New Relic agent configuration.
@@ -6,13 +6,13 @@
  * See lib/config.defaults.js in the agent distribution for a more complete
  * description of configuration variables and their potential values.
  */
-var appName = "tc-projects-service"
+let appName = 'tc-projects-service';
 if (process.env.NODE_ENV === 'development') {
-  appName += "-dev"
+  appName += '-dev';
 } else if (process.env.NODE_ENV === 'qa') {
-  appName += "-qa"
+  appName += '-qa';
 } else {
-  appName += '-prod'
+  appName += '-prod';
 }
 
 exports.config = {
@@ -30,6 +30,6 @@ exports.config = {
      * issues with the agent, 'info' and higher will impose the least overhead on
      * production applications.
      */
-    level: 'info'
-  }
-}
+    level: 'info',
+  },
+};

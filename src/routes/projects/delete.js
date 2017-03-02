@@ -1,11 +1,8 @@
 
-
-// import validate from 'express-validation'
 import _ from 'lodash';
-import { EVENT } from '../../constants.js';
-import models from '../../models';
-import fileService from '../../services/fileService';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { EVENT } from '../../constants';
+import models from '../../models';
 
 /**
  * API to delete a project member.

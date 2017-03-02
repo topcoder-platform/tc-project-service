@@ -6,6 +6,11 @@ import RabbitMQService from './rabbitmq';
 /**
  * Responsible for establishing connections to all external services
  * Also has a hook to load mock services for unit testing.
+ *
+ * @param   {Object}        app       the app object
+ * @param   {Object}        logger    the logger to use
+ *
+ * @return  {Void}                    the function returns void
  */
 module.exports = (app, logger) => {
   app.services = app.service || {};

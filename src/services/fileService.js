@@ -1,14 +1,14 @@
-
-import util from '../util';
-import config from 'config';
 /**
  * Service methods to handle direct project.
  */
 
+import config from 'config';
+import util from '../util';
+
 /**
  * Build custom http client for request
- * @param req request
- * @returns custom http client
+ * @param   {Object}    req       request
+ * @return  {Object}              custom http client
  * @private
  */
 function _getHttpClient(req) {
@@ -31,6 +31,10 @@ function _getHttpClient(req) {
 export default {
   /**
    * Delete file from S3 using fileservice
+   *
+   * @param   {Object}      req         the request
+   * @param   {String}      filePath    the file path
+   * @return  {Void}                    the function returns void
    */
   deleteFile(req, filePath) {
     _getHttpClient(req).delete('', { params: { filter: `filePath%3D${filePath}` } });

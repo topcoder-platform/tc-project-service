@@ -1,8 +1,8 @@
-'use strict'
-
 /**
  * Sync the database models to db tables.
  */
+
+import winston from 'winston';
 
 /**
  * Make sure we are in development mode
@@ -10,11 +10,11 @@
  */
 // process.env.NODE_ENV = 'development'
 
-require('./dist/models').default.sequelize.sync({ force: true })
+require('../dist/models').default.sequelize.sync({ force: true })
   .then(() => {
-    console.log('Database synced successfully')
-    process.exit()
+    winston.info('Database synced successfully');
+    process.exit();
   }).catch((err) => {
-    console.error('Error syncing database', err)
-    process.exit(1)
-  })
+    winston.error('Error syncing database', err);
+    process.exit(1);
+  });

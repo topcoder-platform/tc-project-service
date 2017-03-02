@@ -12,9 +12,9 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 describe('Project members delete', () => {
-  let project1,
-    member1,
-    member2;
+  let project1;
+  let member1;
+  let member2;
   beforeEach((done) => {
     testUtil.clearDb()
         .then(() => {
@@ -106,7 +106,8 @@ describe('Project members delete', () => {
               role: 'copilot',
               isPrimary: true,
             };
-            server.services.pubsub.publish.calledWith('project.member.removed', sinon.match(removedMember)).should.be.true;
+            server.services.pubsub.publish.calledWith('project.member.removed',
+              sinon.match(removedMember)).should.be.true;
             done();
             // models.ProjectMember
             //     .count({where: { projectId: project1.id, deletedAt: { $eq: null } }})
@@ -164,9 +165,13 @@ describe('Project members delete', () => {
               role: 'copilot',
               isPrimary: true,
             };
-            server.services.pubsub.publish.calledWith('project.member.removed', sinon.match(removedMember)).should.be.true;
+            server.services.pubsub.publish.calledWith('project.member.removed',
+              sinon.match(removedMember)).should.be.true;
             // validate the primary copilot
-            models.ProjectMember.findAll({ paranoid: true, where: { projectId: project1.id, role: 'copilot', isPrimary: true } })
+            models.ProjectMember.findAll({ paranoid: true,
+              where: { projectId: project1.id,
+                role: 'copilot',
+                isPrimary: true } })
               .then((members) => {
                 should.exist(members);
                 members.length.should.equal(1);
@@ -213,7 +218,8 @@ describe('Project members delete', () => {
               role: 'manager',
               isPrimary: true,
             };
-            server.services.pubsub.publish.calledWith('project.member.removed', sinon.match(removedMember)).should.be.true;
+            server.services.pubsub.publish.calledWith('project.member.removed',
+              sinon.match(removedMember)).should.be.true;
             postSpy.should.have.been.calledOnce;
             done();
           });
@@ -254,7 +260,8 @@ describe('Project members delete', () => {
                 role: 'manager',
                 isPrimary: true,
               };
-              server.services.pubsub.publish.calledWith('project.member.removed', sinon.match(removedMember)).should.be.true;
+              server.services.pubsub.publish.calledWith('project.member.removed',
+                sinon.match(removedMember)).should.be.true;
               postSpy.should.not.have.been.calledOnce;
               done();
             });

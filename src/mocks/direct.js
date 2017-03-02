@@ -1,17 +1,20 @@
 
 
-import express from 'express';
+import express, { Router } from 'express';
 import _ from 'lodash';
 import bodyParser from 'body-parser';
 import config from 'config';
 import coreLib from 'tc-core-library-js';
 import expressRequestId from 'express-request-id';
-import Router from 'express';
 import https from 'https';
 import path from 'path';
 import fs from 'fs';
-config.version = 'v3';
+
 const util = require('tc-core-library-js').util(config);
+const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
+
+config.version = 'v3';
+
 const app = express();
 app.use(bodyParser.urlencoded({
   extended: false,
@@ -33,10 +36,9 @@ app.use(coreLib.middleware.logger(null, logger));
 app.logger = logger;
 
 const router = Router();
-const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 router.all('/v3/direct/projects*', jwtAuth());
 
-let projectId = 2;
+const projectId = 2;
 const projects = {
   1: {
     projectName: 'test direct project1',
@@ -55,7 +57,7 @@ router.route('/v3/direct/projects')
     })
     .post((req, res) => {
       app.logger.info({ body: req.body }, 'create direct project');
-      const newId = projectId++;
+      const newId = projectId + 1;
       req.body.id = newId;
       projects[newId] = req.body;
       res.json(util.wrapResponse(req.id, { projectId: newId }));
@@ -63,47 +65,48 @@ router.route('/v3/direct/projects')
 
 router.route('/v3/direct/projects/:projectId(\\d+)/billingaccount')
     .post((req, res) => {
-      const projectId = req.params.projectId;
-      app.logger.info({ body: req.body, projectId }, 'add billingaccount to Project');
-      if (projects[projectId]) {
-        projects[projectId] = _.merge(projects[projectId], req.body);
-        res.json(util.wrapResponse(req.id, { billingAccountName: `mock account name for ${req.body.billingAccountId}` }));
+      const pId = req.params.projectId;
+      app.logger.info({ body: req.body, pId }, 'add billingaccount to Project');
+      if (projects[pId]) {
+        projects[pId] = _.merge(projects[pId], req.body);
+        res.json(util.wrapResponse(req.id, { billingAccountName: 'mock account name for ' +
+          `${req.body.billingAccountId}` }));
       } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${projectId}`));
+        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
       }
     });
 
 
 router.route('/v3/direct/projects/:projectId(\\d+)/copilot')
     .post((req, res) => {
-      const projectId = req.params.projectId;
-      app.logger.info({ body: req.body, projectId }, 'add copilot to Project');
-      if (projects[projectId]) {
-        projects[projectId] = _.merge(projects[projectId], req.body);
-        res.json(util.wrapResponse(req.id, { copilotProjectId: projectId }));
+      const pId = req.params.projectId;
+      app.logger.info({ body: req.body, pId }, 'add copilot to Project');
+      if (projects[pId]) {
+        projects[pId] = _.merge(projects[pId], req.body);
+        res.json(util.wrapResponse(req.id, { copilotProjectId: pId }));
       } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${projectId}`));
+        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
       }
     })
     .delete((req, res) => {
-      const projectId = req.params.projectId;
-      app.logger.info({ body: req.body, projectId }, 'remove copilot from Project');
-      if (projects[projectId]) {
-        projects[projectId] = _.omit(projects[projectId], 'copilotUserId');
+      const pId = req.params.projectId;
+      app.logger.info({ body: req.body, pId }, 'remove copilot from Project');
+      if (projects[pId]) {
+        projects[pId] = _.omit(projects[pId], 'copilotUserId');
         res.json(util.wrapResponse(req.id, true));
       } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${projectId}`));
+        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
       }
     });
 
 router.route('/v3/direct/projects/:projectId(\\d+)/permissions')
     .post((req, res) => {
-      const projectId = req.params.projectId;
-      app.logger.info({ body: req.body, projectId }, 'add permissions to Project');
-      if (projects[projectId]) {
+      const pId = req.params.projectId;
+      app.logger.info({ body: req.body, pId }, 'add permissions to Project');
+      if (projects[pId]) {
         res.json();
       } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${projectId}`));
+        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
       }
     });
 

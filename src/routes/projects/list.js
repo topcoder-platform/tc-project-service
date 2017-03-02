@@ -98,7 +98,7 @@ module.exports = [
     // handle filters
     let filters = util.parseQueryFilter(req.query.filter);
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt';
-    if (sort && sort.indexOf(' ') == -1) {
+    if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
     const sortableProps = [

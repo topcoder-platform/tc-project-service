@@ -1,9 +1,10 @@
+/* eslint-disable valid-jsdoc */
 
-import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 import _ from 'lodash';
+import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 
 module.exports = function (sequelize, DataTypes) {
-  var Project = sequelize.define('Project', {
+  const Project = sequelize.define('Project', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     directProjectId: DataTypes.BIGINT,
     billingAccountId: DataTypes.BIGINT,
@@ -65,15 +66,17 @@ module.exports = function (sequelize, DataTypes) {
         return this.findAll({
           where: {
             $or: [
-              ['EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" IS NULL AND "projectId" = "Project".id AND "userId" = ? )', userId],
-              ['"Project".status=? AND NOT EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" IS NULL AND "projectId" = "Project".id AND "role" = ? )',
+              ['EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" ' +
+                'IS NULL AND "projectId" = "Project".id AND "userId" = ? )', userId],
+              ['"Project".status=? AND NOT EXISTS(SELECT * FROM "project_members" WHERE ' +
+                  ' "deletedAt" IS NULL AND "projectId" = "Project".id AND "role" = ? )',
                 PROJECT_STATUS.REVIEWED, PROJECT_MEMBER_ROLE.COPILOT],
             ],
           },
           attributes: ['id'],
           raw: true,
         })
-            .then(res => _.map(res, 'id'));
+        .then(res => _.map(res, 'id'));
       },
       /**
        * Get direct project id
@@ -142,7 +145,8 @@ module.exports = function (sequelize, DataTypes) {
           .then((count) => {
             count = count[0].count;
             // select project attributes
-            return sequelize.query(`SELECT ${attributesStr} FROM projects WHERE ${query} ORDER BY ${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
+            return sequelize.query(`SELECT ${attributesStr} FROM projects WHERE ${query} ORDER BY ` +
+              ` ${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
               { type: sequelize.QueryTypes.SELECT,
                 logging: (str) => { log.debug(str); },
                 raw: true,

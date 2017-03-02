@@ -112,7 +112,8 @@ module.exports = [
     let updatedProps = req.body.param;
     const projectId = _.parseInt(req.params.projectId);
     // prune any fields that cannot be updated directly
-    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id', 'directProjectId']);
+    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt',
+      'id', 'directProjectId']);
 
     let previousValue;
     models.sequelize.transaction(() => models.Project.findOne({
@@ -153,7 +154,8 @@ module.exports = [
           _.isUndefined(_.find(members,
             m => m.userId === req.authUser.userId && matchRole(m.role)))
         ) {
-          const err = new Error('Only assigned topcoder-managers or topcoder admins should be allowed to launch a project');
+          const err = new Error('Only assigned topcoder-managers or topcoder admins should be allowed ' +
+            'to launch a project');
           err.status = 403;
           return Promise.reject(err);
         }

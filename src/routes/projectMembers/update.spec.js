@@ -11,10 +11,10 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 describe('Project members update', () => {
-  let project1,
-    member1,
-    member2,
-    member3;
+  let project1;
+  let member1;
+  let member2;
+  let member3;
   beforeEach((done) => {
     testUtil.clearDb()
             .then(() => {
@@ -156,7 +156,8 @@ describe('Project members update', () => {
                   const result = res.body.result;
                   result.success.should.be.false;
                   result.status.should.equal(404);
-                  result.content.message.should.equal(`project member not found for project id ${project1.id} and member id 999999`);
+                  result.content.message.should.equal('project member not found for project id' +
+                    ` ${project1.id} and member id 999999`);
                   done();
                 });
     });
