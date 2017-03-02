@@ -2,7 +2,7 @@
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
-import winston from 'winston';
+
 import server from '../../app';
 import models from '../../models';
 import util from '../../util';
@@ -100,7 +100,7 @@ describe('Project Attachments', () => {
       const stub = sinon.stub(util, 'getHttpClient', () => mockHttpClient);
       // mock util s3FileTransfer
       util.s3FileTransfer = (req, source, dest) => {
-        winston.info(`source is ${source}, dest is ${dest}`);
+        console.log(source, dest);
         return Promise.resolve(true);
       };
       request(server)
@@ -113,15 +113,18 @@ describe('Project Attachments', () => {
           .expect(201)
           .end((err, res) => {
             if (err) {
-              winston.error('unexpected error', err);
+              console.log(err);
               return done(err);
             }
 
             const resJson = res.body.result.content;
             should.exist(resJson);
+
+
             postSpy.should.have.been.calledOnce;
             getSpy.should.have.been.calledOnce;
             stub.restore();
+            console.log(JSON.stringify(resJson, null, 2));
             resJson.title.should.equal('Spec.pdf');
             resJson.downloadUrl.should.exist;
             resJson.projectId.should.equal(project1.id);

@@ -1,6 +1,3 @@
-/* eslint-disable max-len */
-import winston from 'winston';
-
 const http = require('https');
 
 const options = {
@@ -26,7 +23,7 @@ const req = http.request(options, (res) => {
 
   res.on('end', () => {
     const body = Buffer.concat(chunks);
-    winston.info(body.toString());
+    console.log(body.toString());
   });
 });
 req.write('{\n "billingAccountId": 123456789\n}');

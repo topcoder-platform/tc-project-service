@@ -1,5 +1,6 @@
 
 import _ from 'lodash';
+import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
 
@@ -10,8 +11,9 @@ import testUtil from '../../tests/util';
 
 
 describe('Project Attachments delete', () => {
-  let project1;
-  let attachment;
+  let project1,
+    member1,
+    attachment;
   beforeEach((done) => {
     testUtil.clearDb()
         .then(() => {
@@ -35,20 +37,23 @@ describe('Project Attachments delete', () => {
               isPrimary: true,
               createdBy: 1,
               updatedBy: 1,
-            }).then(() => models.ProjectAttachment.create({
-              projectId: project1.id,
-              title: 'test.txt',
-              description: 'blah',
-              contentType: 'application/unknown',
-              size: 12312,
-              category: null,
-              filePath: 'https://media.topcoder.com/projects/1/test.txt',
-              createdBy: 1,
-              updatedBy: 1,
-            }).then((a1) => {
-              attachment = a1;
-              done();
-            }));
+            }).then((pm) => {
+              member1 = pm;
+              return models.ProjectAttachment.create({
+                projectId: project1.id,
+                title: 'test.txt',
+                description: 'blah',
+                contentType: 'application/unknown',
+                size: 12312,
+                category: null,
+                filePath: 'https://media.topcoder.com/projects/1/test.txt',
+                createdBy: 1,
+                updatedBy: 1,
+              }).then((a1) => {
+                attachment = a1;
+                done();
+              });
+            });
           });
         });
   });
