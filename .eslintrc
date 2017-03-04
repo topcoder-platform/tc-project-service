@@ -1,5 +1,5 @@
 {
-  "extends": "airbnb",
+  "extends": "airbnb-base",
   "parser": "babel-eslint",
   "env": {
     "browser": false,
@@ -8,21 +8,8 @@
     "mocha": true
   },
   "rules": {
-    "no-param-reassign": 0,
-    "global-require": 0,
-    "func-names": 0,
-    "no-mixed-operators": 0,
-    "consistent-return": 0,
-    "no-unused-expressions": 0,
-    "newline-per-chained-call": 0,
-    "no-underscore-dangle": 0,
-    "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": false, "peerDependencies": false}],
-    "max-len": ["error", {
-      "code": 120,
-      "ignoreComments": true,
-      "ignoreTrailingComments": true,
-      "tabWidth": 2
-    }],
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.js", "**/*.spec.js", "**/serviceMocks.js"]}],
+    max-len: ["error", { "ignoreComments": true, code: 120 }],
     "valid-jsdoc": ["error", {
       "requireReturn": true,
       "requireReturnType": true,

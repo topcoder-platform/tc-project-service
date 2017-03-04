@@ -55,7 +55,8 @@ router.route('/v3/direct/projects')
       app.logger.info('get direct projects');
       res.json(util.wrapResponse(req.id, { projects }));
     })
-    .post((req, res) => {
+    .post((freq, res) => {
+      const req = freq;
       app.logger.info({ body: req.body }, 'create direct project');
       const newId = projectId + 1;
       req.body.id = newId;

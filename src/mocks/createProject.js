@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
-import winston from 'winston';
 
 const http = require('https');
+const _ = require('lodash');
 
 const options = {
   method: 'POST',
@@ -24,10 +24,7 @@ const req = http.request(options, (res) => {
     chunks.push(chunk);
   });
 
-  res.on('end', () => {
-    const body = Buffer.concat(chunks);
-    winston.info(body.toString());
-  });
+  res.on('end', _.noop);
 });
 
 req.write('{\n "projectName": "Tony Test 1",\n "projectDescription": "test 1 description"\n}');

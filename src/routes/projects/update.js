@@ -33,6 +33,7 @@ const mergeCustomizer = (objValue, srcValue) => {
   if (_.isArray(objValue)) {
     return srcValue;
   }
+  return undefined;
 };
 
 const updateProjectValdiations = {

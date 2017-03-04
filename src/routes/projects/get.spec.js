@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-expressions */
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
@@ -103,16 +103,17 @@ describe('GET Project', () => {
           .expect(200)
           .end((err, res) => {
             if (err) {
-              return done(err);
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              should.not.exist(resJson.deletedAt);
+              should.not.exist(resJson.billingAccountId);
+              should.exist(resJson.name);
+              resJson.status.should.be.eql('draft');
+              resJson.members.should.have.lengthOf(2);
+              done();
             }
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-            should.not.exist(resJson.deletedAt);
-            should.not.exist(resJson.billingAccountId);
-            should.exist(resJson.name);
-            resJson.status.should.be.eql('draft');
-            resJson.members.should.have.lengthOf(2);
-            done();
           });
     });
 
@@ -126,11 +127,12 @@ describe('GET Project', () => {
           .expect(200)
           .end((err, res) => {
             if (err) {
-              return done(err);
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              done();
             }
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-            done();
           });
     });
 
@@ -171,16 +173,17 @@ describe('GET Project', () => {
             .expect(200)
             .end((err, res) => {
               if (err) {
-                return done(err);
+                done(err);
+              } else {
+                const resJson = res.body.result.content;
+                should.exist(resJson);
+                spy.should.have.been.calledOnce;
+                resJson.attachments.should.have.lengthOf(1);
+                resJson.attachments[0].filePath.should.equal(attachment.filePath);
+                resJson.attachments[0].downloadUrl.should.exist;
+                stub.restore();
+                done();
               }
-              const resJson = res.body.result.content;
-              should.exist(resJson);
-              spy.should.have.been.calledOnce;
-              resJson.attachments.should.have.lengthOf(1);
-              resJson.attachments[0].filePath.should.equal(attachment.filePath);
-              resJson.attachments[0].downloadUrl.should.exist;
-              stub.restore();
-              done();
             });
       });
     });

@@ -1,9 +1,8 @@
-
+/* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
-import winston from 'winston';
 
 import util from '../../util';
 import server from '../../app';
@@ -13,9 +12,7 @@ import RabbitMQService from '../../services/rabbitmq';
 const should = chai.should();
 
 sinon.stub(RabbitMQService.prototype, 'init', () => {});
-sinon.stub(RabbitMQService.prototype, 'publish', () => {
-  winston.info('publish called');
-});
+sinon.stub(RabbitMQService.prototype, 'publish', () => {});
 
 describe('Project create', () => {
   before((done) => {
@@ -84,13 +81,14 @@ describe('Project create', () => {
         .expect(201)
         .end((err, res) => {
           if (err) {
-            return done(err);
+            done(err);
+          } else {
+            const result = res.body.result;
+            result.success.should.be.truthy;
+            result.status.should.equal(201);
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            done();
           }
-          const result = res.body.result;
-          result.success.should.be.truthy;
-          result.status.should.equal(201);
-          server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
-          done();
         });
     });
 
@@ -122,25 +120,26 @@ describe('Project create', () => {
         .expect(201)
         .end((err, res) => {
           if (err) {
-            return done(err);
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.directProjectId.should.be.eql(128);
+            resJson.status.should.be.eql('draft');
+            resJson.type.should.be.eql(body.param.type);
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('address1');
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            done();
           }
-          const resJson = res.body.result.content;
-          should.exist(resJson);
-          should.exist(resJson.billingAccountId);
-          should.exist(resJson.name);
-          resJson.directProjectId.should.be.eql(128);
-          resJson.status.should.be.eql('draft');
-          resJson.type.should.be.eql(body.param.type);
-          resJson.members.should.have.lengthOf(1);
-          resJson.members[0].role.should.be.eql('customer');
-          resJson.members[0].userId.should.be.eql(40051331);
-          resJson.members[0].projectId.should.be.eql(resJson.id);
-          resJson.members[0].isPrimary.should.be.truthy;
-          resJson.bookmarks.should.have.lengthOf(1);
-          resJson.bookmarks[0].title.should.be.eql('title1');
-          resJson.bookmarks[0].address.should.be.eql('address1');
-          server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
-          done();
         });
     });
   });

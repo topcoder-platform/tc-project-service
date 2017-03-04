@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-expressions */
 import request from 'supertest';
 
 import models from '../../models';
@@ -93,10 +93,11 @@ describe('Project delete test', () => {
         .expect(204)
         .end((err) => {
           if (err) {
-            return done(err);
+            done(err);
+          } else {
+            server.services.pubsub.publish.calledWith('project.deleted').should.be.true;
+            done();
           }
-          server.services.pubsub.publish.calledWith('project.deleted').should.be.true;
-          done();
         });
     });
   });

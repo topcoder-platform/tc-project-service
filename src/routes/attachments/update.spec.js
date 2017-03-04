@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-expressions */
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
@@ -96,13 +96,14 @@ describe('Project Attachments update', () => {
         .expect(200)
         .end((err, res) => {
           if (err) {
-            return done(err);
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.title.should.equal('updated title');
+            resJson.description.should.equal('updated description');
+            done();
           }
-          const resJson = res.body.result.content;
-          should.exist(resJson);
-          resJson.title.should.equal('updated title');
-          resJson.description.should.equal('updated description');
-          done();
         });
     });
   });

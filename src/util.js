@@ -14,6 +14,9 @@ import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
 
+const exec = require('child_process').exec;
+const models = require('./models').default;
+
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
 
 _.assignIn(util, {
@@ -89,11 +92,11 @@ _.assignIn(util, {
 
   /**
    * Parse the query filters
-   * @param  {String}   queryFilter         the query filter string
+   * @param  {String}   fqueryFilter        the query filter string
    * @return {Object}                       the parsed array
    */
-  parseQueryFilter: (queryFilter) => {
-    queryFilter = querystring.parse(queryFilter);
+  parseQueryFilter: (fqueryFilter) => {
+    let queryFilter = querystring.parse(fqueryFilter);
     // convert in to array
     queryFilter = _.mapValues(queryFilter, (val) => {
       if (val.indexOf('in(') > -1) {
@@ -121,8 +124,6 @@ _.assignIn(util, {
       `"${dest}"`,
       '--region us-east-1',
     ], ' ');
-
-    const exec = require('child_process').exec;
     exec(cmdStr, (error, stdout, stderr) => {
       req.log.debug(`s3FileTransfer: stdout: ${stdout}`);
       req.log.debug(`s3FileTransfer: stderr: ${stderr}`);
@@ -167,7 +168,6 @@ _.assignIn(util, {
       });
   },
   getProjectAttachments: (req, projectId) => {
-    const models = require('./models').default;
     let attachments = [];
     return models.ProjectAttachment.getActiveProjectAttachments(projectId)
         .then((_attachments) => {
@@ -188,7 +188,8 @@ _.assignIn(util, {
           // result is an array of 'tuples' => [[path, url], [path,url]]
           // convert it to a map for easy lookup
           const urls = _.fromPairs(result);
-          _.each(attachments, (a) => {
+          _.each(attachments, (at) => {
+            const a = at;
             a.downloadUrl = urls[a.filePath];
           });
           return attachments;

@@ -1,6 +1,6 @@
 
 
-module.exports = function (sequelize, DataTypes) {
+module.exports = function defineProjectHistory(sequelize, DataTypes) {
   const ProjectHistory = sequelize.define('ProjectHistory', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     projectId: { type: DataTypes.BIGINT, allowNull: false },

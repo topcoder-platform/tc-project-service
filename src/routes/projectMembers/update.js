@@ -57,7 +57,8 @@ module.exports = [
 
           // no updates if no change
           if (updatedProps.role === previousValue.role &&
-              (_.isUndefined(updatedProps.isPrimary) || updatedProps.isPrimary === previousValue.isPrimary)) {
+              (_.isUndefined(updatedProps.isPrimary) ||
+                updatedProps.isPrimary === previousValue.isPrimary)) {
             return Promise.resolve();
           }
 
@@ -67,7 +68,8 @@ module.exports = [
 
           if (updatedProps.isPrimary) {
             // if set as primary, other users with same role should no longer be primary
-            operations.push(models.ProjectMember.update({ isPrimary: false, updatedBy: req.authUser.userId },
+            operations.push(models.ProjectMember.update({ isPrimary: false,
+              updatedBy: req.authUser.userId },
               {
                 where: {
                   projectId,

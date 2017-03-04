@@ -42,20 +42,21 @@ module.exports = [
       },
       returning: true,
     })
-        .then((resp) => {
-          const affectedCount = resp.shift();
-          if (affectedCount === 0) {
-            // handle 404
-            const err = new Error('project attachment not found for project id ' +
-              `${projectId} and member id ${attachmentId}`);
-            err.status = 404;
-            return Promise.reject(err);
-          }
-
-          const attachment = resp.shift()[0];
-          req.log.debug('updated project attachment', JSON.stringify(attachment, null, 2));
-          res.json(util.wrapResponse(req.id, attachment));
-        })
-        .catch(err => next(err)));
+    .then(resp => new Promise((accept, reject) => {
+      const affectedCount = resp.shift();
+      if (affectedCount === 0) {
+          // handle 404
+        const err = new Error('project attachment not found for project id ' +
+            `${projectId} and member id ${attachmentId}`);
+        err.status = 404;
+        reject(err);
+      } else {
+        const attachment = resp.shift()[0];
+        req.log.debug('updated project attachment', JSON.stringify(attachment, null, 2));
+        res.json(util.wrapResponse(req.id, attachment));
+        accept();
+      }
+    }))
+    .catch(err => next(err)));
   },
 ];

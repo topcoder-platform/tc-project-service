@@ -1,4 +1,3 @@
-import winston from 'winston';
 import models from '../models';
 
 models.sequelize.sync({ force: true })
@@ -104,7 +103,6 @@ models.sequelize.sync({ force: true })
       return Promise.all(operations);
     })
     .then(() => {
-      winston.info('Success');
       process.exit(0);
     })
-    .catch(err => winston.error('Failed: ', err));
+    .catch(() => process.exit(1));

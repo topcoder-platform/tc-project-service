@@ -11,7 +11,7 @@ import util from '../util';
  * @return  {Object}              custom http client
  * @private
  */
-function _getHttpClient(req) {
+function getHttpClient(req) {
   const httpClient = util.getHttpClient(req);
   httpClient.defaults.headers.common.Authorization = req.headers.authorization;
   httpClient.defaults.baseURL = config.get('fileServiceEndpoint');
@@ -37,6 +37,6 @@ export default {
    * @return  {Void}                    the function returns void
    */
   deleteFile(req, filePath) {
-    _getHttpClient(req).delete('', { params: { filter: `filePath%3D${filePath}` } });
+    getHttpClient(req).delete('', { params: { filter: `filePath%3D${filePath}` } });
   },
 };

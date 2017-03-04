@@ -1,6 +1,6 @@
 
 
-module.exports = function (sequelize, DataTypes) {
+module.exports = function defineProjectAttachment(sequelize, DataTypes) {
   const ProjectAttachment = sequelize.define('ProjectAttachment', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     title: { type: DataTypes.STRING, allowNull: true },

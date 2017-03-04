@@ -27,10 +27,10 @@ const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
   'deletedAt',
 
 );
-const _retrieveProjects = (req, criteria, sort, fields) => {
+const retrieveProjects = (req, criteria, sort, ffields) => {
   // order by
   const order = sort ? [sort.split(' ')] : [['createdAt', 'asc']];
-  fields = fields ? fields.split(',') : [];
+  let fields = ffields ? ffields.split(',') : [];
     // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
@@ -75,7 +75,8 @@ const _retrieveProjects = (req, criteria, sort, fields) => {
       .then((values) => {
         const allMembers = retrieveMembers ? values.shift() : [];
         const allAttachments = retrieveAttachments ? values.shift() : [];
-        _.forEach(rows, (p) => {
+        _.forEach(rows, (fp) => {
+          const p = fp;
           // if values length is 1 it could be either attachments or members
           if (retrieveMembers) {
             p.members = _.filter(allMembers, m => m.projectId === p.id);
@@ -128,7 +129,7 @@ module.exports = [
       && (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)
           || util.hasRole(req, USER_ROLE.MANAGER))) {
       // admins & topcoder managers can see all projects
-      return _retrieveProjects(req, criteria, sort, req.query.fields)
+      return retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
         .catch(err => next(err));
     }
@@ -150,7 +151,7 @@ module.exports = [
           } else {
             criteria.filters.id = { $in: accessibleProjectIds };
           }
-          return _retrieveProjects(req, criteria, sort, req.query.fields);
+          return retrieveProjects(req, criteria, sort, req.query.fields);
         })
         .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
         .catch(err => next(err));

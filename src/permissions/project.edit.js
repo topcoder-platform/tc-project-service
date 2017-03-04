@@ -8,13 +8,14 @@ import { USER_ROLE } from '../constants';
 /**
  * Super admin, Topcoder Managers are allowed to edit any project
  * Rest can add members only if they are currently part of the project team.
- * @param {Object}    req         the express request instance
+ * @param {Object}    freq        the express request instance
  * @return {Promise}              Returns a promise
  */
-module.exports = req => new Promise((resolve, reject) => {
-  const projectId = _.parseInt(req.params.projectId);
+module.exports = freq => new Promise((resolve, reject) => {
+  const projectId = _.parseInt(freq.params.projectId);
   return models.ProjectMember.getActiveProjectMembers(projectId)
       .then((members) => {
+        const req = freq;
         req.context = req.context || {};
         req.context.currentProjectMembers = members;
         // check if auth user has acecss to this project

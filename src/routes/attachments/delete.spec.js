@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import sinon from 'sinon';
 import request from 'supertest';
@@ -111,17 +111,11 @@ describe('Project Attachments delete', () => {
           .expect(204)
           .end((err) => {
             if (err) {
-              return done(err);
+              done(err);
+            } else {
+              deleteSpy.should.have.been.calledOnce;
+              done();
             }
-            deleteSpy.should.have.been.calledOnce;
-            done();
-            // models.ProjectAttachment
-            //     .count({})
-            //     .then(count=>{
-            //       count.should.equal(0)
-            //       done()
-            //     })
-            //     .catch(err => done(err))
           });
     });
   });

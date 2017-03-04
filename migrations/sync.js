@@ -1,8 +1,9 @@
+
+
+/* eslint-disable no-console */
 /**
  * Sync the database models to db tables.
  */
-
-import winston from 'winston';
 
 /**
  * Make sure we are in development mode
@@ -12,9 +13,9 @@ import winston from 'winston';
 
 require('../dist/models').default.sequelize.sync({ force: true })
   .then(() => {
-    winston.info('Database synced successfully');
+    console.log('Database synced successfully');
     process.exit();
   }).catch((err) => {
-    winston.error('Error syncing database', err);
+    console.error('Error syncing database', err);
     process.exit(1);
   });

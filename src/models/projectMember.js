@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import { PROJECT_MEMBER_ROLE } from '../constants';
 
-module.exports = function (sequelize, DataTypes) {
+module.exports = function defineProjectMember(sequelize, DataTypes) {
   const ProjectMember = sequelize.define('ProjectMember', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     userId: DataTypes.BIGINT,

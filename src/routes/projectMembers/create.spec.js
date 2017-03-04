@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
@@ -16,43 +16,43 @@ describe('Project Members create', () => {
   let project2;
   before((done) => {
     testUtil.clearDb()
-        .then(() => {
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          directProjectId: 1,
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+        }).then((p) => {
+          project1 = p;
+          // create members
+          models.ProjectMember.create({
+            userId: 40051332,
+            projectId: project1.id,
+            role: 'copilot',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          });
+        }).then(() =>
           models.Project.create({
             type: 'generic',
-            directProjectId: 1,
             billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
+            name: 'test2',
+            description: 'test project2',
+            status: 'reviewed',
             details: {},
             createdBy: 1,
             updatedBy: 1,
-          }).then((p) => {
-            project1 = p;
-            // create members
-            models.ProjectMember.create({
-              userId: 40051332,
-              projectId: project1.id,
-              role: 'copilot',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            });
-          }).then(() =>
-              models.Project.create({
-                type: 'generic',
-                billingAccountId: 1,
-                name: 'test2',
-                description: 'test project2',
-                status: 'reviewed',
-                details: {},
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((p2) => {
-                project2 = p2;
-                done();
-              }));
-        });
+          }).then((p2) => {
+            project2 = p2;
+            done();
+          }));
+      });
   });
 
   after((done) => {
@@ -70,46 +70,62 @@ describe('Project Members create', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .post(`/v4/projects/${project1.id}/members/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member}`,
-          })
-          .send({ param: { userId: 1, role: 'customer' } })
-          .expect('Content-Type', /json/)
-          .expect(403, done);
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send({
+          param: {
+            userId: 1,
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(403, done);
     });
 
     it('should return 400 if user is already registered', (done) => {
       request(server)
-          .post(`/v4/projects/${project1.id}/members/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .send({ param: { userId: 40051332, role: 'customer' } })
-          .expect('Content-Type', /json/)
-          .expect(400)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            userId: 40051332,
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
             res.body.result.status.should.equal(400);
             done();
-          });
+          }
+        });
     });
 
     it('should return 201 and register copilot member for project', (done) => {
       request(server)
-          .post(`/v4/projects/${project2.id}/members/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send({ param: { userId: 1, role: 'copilot' } })
-          .expect('Content-Type', /json/)
-          .expect(201)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
+        .post(`/v4/projects/${project2.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            userId: 1,
+            role: 'copilot',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
             const resJson = res.body.result.content;
             should.exist(resJson);
             resJson.role.should.equal('copilot');
@@ -118,22 +134,28 @@ describe('Project Members create', () => {
             resJson.userId.should.equal(1);
             server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
-          });
+          }
+        });
     });
 
     it('should return 201 and register customer member', (done) => {
       request(server)
-          .post(`/v4/projects/${project1.id}/members/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send({ param: { userId: 1, role: 'customer' } })
-          .expect('Content-Type', /json/)
-          .expect(201)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            userId: 1,
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
             const resJson = res.body.result.content;
             should.exist(resJson);
             resJson.role.should.equal('customer');
@@ -142,7 +164,8 @@ describe('Project Members create', () => {
             resJson.userId.should.equal(1);
             server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
-          });
+          }
+        });
     });
 
     /*
@@ -195,17 +218,22 @@ describe('Project Members create', () => {
       // var amqPubSpy = sinon.spy(server.services.pubsub, 'publish')
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-          .post(`/v4/projects/${project1.id}/members/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send({ param: { userId: 3, role: 'copilot' } })
-          .expect('Content-Type', /json/)
-          .expect(201)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: 'copilot',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
             const resJson = res.body.result.content;
             should.exist(resJson);
             resJson.role.should.equal('copilot');
@@ -215,7 +243,8 @@ describe('Project Members create', () => {
             postSpy.should.have.been.calledOnce;
             server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
-          });
+          }
+        });
     });
   });
 });

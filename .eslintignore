@@ -1,3 +1,5 @@
+config/local.js
+config/sample.local.js
 node_modules
 dist
 .ebextensions

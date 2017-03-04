@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 
-module.exports = function (sequelize, DataTypes) {
+module.exports = function defineProject(sequelize, DataTypes) {
   const Project = sequelize.define('Project', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     directProjectId: DataTypes.BIGINT,
@@ -142,8 +142,8 @@ module.exports = function (sequelize, DataTypes) {
             logging: (str) => { log.debug(str); },
             raw: true,
           })
-          .then((count) => {
-            count = count[0].count;
+          .then((fcount) => {
+            const count = fcount[0].count;
             // select project attributes
             return sequelize.query(`SELECT ${attributesStr} FROM projects WHERE ${query} ORDER BY ` +
               ` ${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,

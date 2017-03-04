@@ -78,11 +78,10 @@ router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
       body.result.details = err.details;
     }
   }
-  err.status = err.status || 500;
-  req.log.error(err);
-  res
-    .status(err.status)
-    .send(body);
+  const rerr = err;
+  rerr.status = rerr.status || 500;
+  req.log.error(rerr);
+  res.status(rerr.status).send(body);
 });
 
 // catch 404 and forward to error handler
