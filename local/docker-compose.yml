@@ -1,22 +1,24 @@
-postgres:
-  image: "postgres:9.4"
-  ports:
-    - "5432:5432"
-  environment:
-    - POSTGRES_PASSWORD=mysecretpassword
-    - POSTGRES_USER=coder
-    - POSTGRES_DB=projectsdb
-#elasticsearch:
-#  image: "elasticsearch:2"
-#  ports:
-#    - "9200:9200"
-#    - "9300:9300"
-redis:
-  image: redis:2.8
-  ports:
-    - "6379:6379"
-rabbitmq:
-  image: rabbitmq:3
-  restart: always
-  ports:
-  - 5672:5672
+version: '2'
+services:
+  jsonserver:
+    build: 'mock-services'
+    ports:
+      - 3001
+  postgres:
+    image: "postgres:9.5"
+    ports:
+      - 5432
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=coder
+      - POSTGRES_DB=projectsdb
+  elasticsearch:
+    image: "elasticsearch:2.3"
+    ports:
+      - 9200
+      - 9300
+  rabbitmq:
+    image: rabbitmq:3
+    restart: always
+    ports:
+      - 5672
