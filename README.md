@@ -4,10 +4,10 @@ Microservice to manage CRUD operations for all things Projects.
 
 ### Local Development
 * We use docker-compose for running dependencies locally. Instructions for Docker compose setup - https://docs.docker.com/compose/install/
-* Nodejs 5.10.1 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
+* Nodejs 6.9.4 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
 * Install [libpg](https://www.npmjs.com/package/pg-native)
 * Install node dependencies
-`npm install | ./node_modules/.bin/bunyan`
+`npm install`
 
 * Start local services
 ```~/Projects/tc-projects-service
@@ -21,8 +21,7 @@ Copy config/sample.local.js as config/local.js, update the properties and accord
 Once you start your PostgreSQL database through docker, it will create a projectsDB.
 *To create tables - note this will drop tables if they already exist*
 ```
-npm run -s build
-> NODE_ENV=development node -e "require('./dist/models').default.sequelize.sync({force: true}).then((res)=> console.log('Success: ', res)).catch((err)=> console.log('Failed: ', err));"
+NODE_ENV=local npm run sync
 ```
 
 #### Redis
@@ -51,5 +50,5 @@ You may replace 172.17.0.1 with your docker0 IP.
 
 You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) or import **postman.json** to verify endpoints.
 
-### Deployment
-Using awsebcli - http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html
+#### Deploying without docker
+If you don't want to use docker to deploy to localhost. You can simply run `npm run start` from root of project. This should start the server on default port `3000`.

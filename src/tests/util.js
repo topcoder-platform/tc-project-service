@@ -1,13 +1,12 @@
+/* eslint-disable max-len */
 
-import models from '../models'
+import models from '../models';
 
 export default {
-  clearDb: done =>  {
-    return models.sequelize.sync({force: true})
+  clearDb: done => models.sequelize.sync({ force: true })
       .then(() => {
-        if (done) done()
-      })
-  },
+        if (done) done();
+      }),
   mockHttpClient: {
     defaults: { headers: { common: {} } },
     interceptors: { response: { use: () => {} } },
@@ -22,6 +21,6 @@ export default {
     // userId = 40051334, roles: [ 'Manager', 'Topcoder User' ],handle: 'test1',email: 'test@topcoder.com'
     manager: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiQ29ubmVjdCBNYW5hZ2VyIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6InRlc3QxIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzNCIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.amNzJ6PknW8V1ZDrVxJAd-SxcyfYhTf80IBc1sH-vF8',
     // userId = 40051335, [ 'Topcoder User' ],handle: 'member2',email: 'test@topcoder.com'
-    member2: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6Im1lbWJlcjIiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzM1IiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.2euj7ZV0jWLbMv25USDDySMjdi9N7SomPriGWJdyhUc'
-  }
-}
+    member2: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLmNvbSIsImhhbmRsZSI6Im1lbWJlcjIiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzM1IiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.2euj7ZV0jWLbMv25USDDySMjdi9N7SomPriGWJdyhUc',
+  },
+};

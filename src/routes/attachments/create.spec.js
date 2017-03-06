@@ -1,26 +1,25 @@
-'use strict'
-import chai from 'chai'
-import sinon from 'sinon'
-import request from 'supertest'
+/* eslint-disable no-unused-expressions */
+import chai from 'chai';
+import sinon from 'sinon';
+import request from 'supertest';
+import server from '../../app';
+import models from '../../models';
+import util from '../../util';
+import testUtil from '../../tests/util';
 
-import server from '../../app'
-import models from '../../models'
-import util from '../../util'
-import testUtil from '../../tests/util'
+const should = chai.should();
 
-var should = chai.should()
-
-var body = {
-  title: "Spec.pdf",
-  description: "",
+const body = {
+  title: 'Spec.pdf',
+  description: '',
   category: 'appDefinition',
-  filePath: "projects/1/spec.pdf",
-  s3Bucket: "submissions-staging-dev",
-  contentType: "application/pdf"
-}
+  filePath: 'projects/1/spec.pdf',
+  s3Bucket: 'submissions-staging-dev',
+  contentType: 'application/pdf',
+};
 describe('Project Attachments', () => {
-  var project1
-  before(done =>  {
+  let project1;
+  before((done) => {
     // mocks
     testUtil.clearDb()
         .then(() => {
@@ -32,9 +31,9 @@ describe('Project Attachments', () => {
             status: 'draft',
             details: {},
             createdBy: 1,
-            updatedBy: 1
-          }).then(p => {
-            project1 = p
+            updatedBy: 1,
+          }).then((p) => {
+            project1 = p;
             // create members
             models.ProjectMember.create({
               userId: 40051332,
@@ -42,103 +41,87 @@ describe('Project Attachments', () => {
               role: 'copilot',
               isPrimary: true,
               createdBy: 1,
-              updatedBy: 1
-            }).then(() => done())
+              updatedBy: 1,
+            }).then(() => done());
+          });
+        });
+  });
 
-          })
-        })
-  })
-
-  after(done =>  {
-    testUtil.clearDb(done)
-  })
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /projects/{id}/attachments/', () => {
-    it('should return 403 if user does not have permissions', done =>  {
+    it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .post('/v4/projects/' + project1.id + '/attachments/')
+          .post(`/v4/projects/${project1.id}/attachments/`)
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.member
+            Authorization: `Bearer ${testUtil.jwts.member}`,
           })
           .send({ param: body })
           .expect('Content-Type', /json/)
-          .expect(403, done)
-    })
+          .expect(403, done);
+    });
 
-    it('should return 201 return attachment record', done =>  {
-      var mockHttpClient = {
+    it('should return 201 return attachment record', (done) => {
+      const mockHttpClient = {
         defaults: { headers: { common: {} } },
-        post: () => {
-          return new Promise((resolve) => {
-            return resolve({
+        post: () => new Promise(resolve => resolve({
+          status: 200,
+          data: {
+            status: 200,
+            result: {
+              success: true,
               status: 200,
-              data: {
-                status: 200,
-                result: {
-                  success: true,
-                  status: 200,
-                  content: {
-                    filePath: "tmp/spec.pdf",
-                    preSignedURL: "www.topcoder.com/media/spec.pdf"
-                  }
-                }
-              }
-            })
-          })
-        },
-        get: () => {
-          return new Promise((resolve) => {
-            return resolve({
+              content: {
+                filePath: 'tmp/spec.pdf',
+                preSignedURL: 'www.topcoder.com/media/spec.pdf',
+              },
+            },
+          },
+        })),
+        get: () => new Promise(resolve => resolve({
+          status: 200,
+          data: {
+            result: {
+              success: true,
               status: 200,
-              data: {
-                result: {
-                  success: true,
-                  status: 200,
-                  content: {
-                    filePath: "tmp/spec.pdf",
-                    preSignedURL: "http://topcoder-media.s3.amazon.com/projects/1/spec.pdf"
-                  }
-                }
-              }
-            })
-          })
-        }
-      }
-      var postSpy = sinon.spy(mockHttpClient, 'post')
-      var getSpy = sinon.spy(mockHttpClient, 'get')
-      var stub = sinon.stub(util, 'getHttpClient', () => { return mockHttpClient } )
+              content: {
+                filePath: 'tmp/spec.pdf',
+                preSignedURL: 'http://topcoder-media.s3.amazon.com/projects/1/spec.pdf',
+              },
+            },
+          },
+        })),
+      };
+      const postSpy = sinon.spy(mockHttpClient, 'post');
+      const getSpy = sinon.spy(mockHttpClient, 'get');
+      const stub = sinon.stub(util, 'getHttpClient', () => mockHttpClient);
       // mock util s3FileTransfer
-      util.s3FileTransfer = (req, source, dest) => {
-        console.log(source, dest)
-        return Promise.resolve(true)
-      }
+      util.s3FileTransfer = () => Promise.resolve(true);
       request(server)
-          .post('/v4/projects/' + project1.id + '/attachments/')
+          .post(`/v4/projects/${project1.id}/attachments/`)
           .set({
-            'Authorization': 'Bearer ' + testUtil.jwts.copilot
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({ param: body })
           .expect('Content-Type', /json/)
           .expect(201)
-          .end(function(err, res) {
+          .end((err, res) => {
             if (err) {
-              console.log(err)
-              return done(err)
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              postSpy.should.have.been.calledOnce;
+              getSpy.should.have.been.calledOnce;
+              stub.restore();
+              resJson.title.should.equal('Spec.pdf');
+              resJson.downloadUrl.should.exist;
+              resJson.projectId.should.equal(project1.id);
+              done();
             }
-
-            var resJson = res.body.result.content
-            should.exist(resJson)
-
-
-            postSpy.should.have.been.calledOnce
-            getSpy.should.have.been.calledOnce
-            stub.restore()
-            console.log(JSON.stringify(resJson, null, 2))
-            resJson.title.should.equal('Spec.pdf')
-            resJson.downloadUrl.should.exist
-            resJson.projectId.should.equal(project1.id)
-            done()
-          })
-    })
-  })
-})
+          });
+    });
+  });
+});
