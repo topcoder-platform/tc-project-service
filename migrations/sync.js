@@ -1,5 +1,6 @@
 
 
+/* eslint-disable no-console */
 /**
  * Sync the database models to db tables.
  */
@@ -10,7 +11,7 @@
  */
 // process.env.NODE_ENV = 'development'
 
-require('./dist/models').default.sequelize.sync({ force: true })
+require('../dist/models').default.sequelize.sync({ force: true })
   .then(() => {
     console.log('Database synced successfully');
     process.exit();

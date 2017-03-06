@@ -8,10 +8,9 @@ import _ from 'lodash';
 import config from 'config';
 import Joi from 'joi';
 import path from 'path';
-
+import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { middleware as tcMiddleware } from 'tc-core-library-js';
 
 const permissions = tcMiddleware.permissions;
 
@@ -113,19 +112,24 @@ module.exports = [
     })
     .then((resp) => {
       req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
-      if (resp.status !== 200 || resp.data.result.status !== 200) {
-        return Promise.reject(new Error('Unable to fetch pre-signed url'));
-      }
-      let response = _.cloneDeep(newAttachment);
-      response = _.omit(response, ['filePath', 'deletedAt']);
+      return new Promise((accept, reject) => {
+        if (resp.status !== 200 || resp.data.result.status !== 200) {
+          reject(new Error('Unable to fetch pre-signed url'));
+        } else {
+          let response = _.cloneDeep(newAttachment);
+          response = _.omit(response, ['filePath', 'deletedAt']);
 
-      response.downloadUrl = resp.data.result.content.preSignedURL;
-      res.status(201).json(util.wrapResponse(req.id, response, 1, 201));
+          response.downloadUrl = resp.data.result.content.preSignedURL;
+          res.status(201).json(util.wrapResponse(req.id, response, 1, 201));
+          accept();
+        }
+      });
     })
     .catch((err) => {
       req.log.error('Error adding attachment', err);
-      err.status = err.status || 500;
-      next(err);
+      const rerr = err;
+      rerr.status = rerr.status || 500;
+      next(rerr);
     });
   },
 ];

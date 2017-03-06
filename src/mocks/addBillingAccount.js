@@ -1,4 +1,7 @@
+/* eslint-disable max-len */
+
 const http = require('https');
+const _ = require('lodash');
 
 const options = {
   method: 'POST',
@@ -21,10 +24,7 @@ const req = http.request(options, (res) => {
     chunks.push(chunk);
   });
 
-  res.on('end', () => {
-    const body = Buffer.concat(chunks);
-    console.log(body.toString());
-  });
+  res.on('end', _.noop);
 });
 req.write('{\n "billingAccountId": 123456789\n}');
 req.end();

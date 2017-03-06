@@ -1,4 +1,5 @@
 import models from '../models';
+
 models.sequelize.sync({ force: true })
     .then(() =>
         models.Project.bulkCreate([{
@@ -102,7 +103,6 @@ models.sequelize.sync({ force: true })
       return Promise.all(operations);
     })
     .then(() => {
-      console.log('Success');
       process.exit(0);
     })
-    .catch(err => console.log('Failed: ', err));
+    .catch(() => process.exit(1));

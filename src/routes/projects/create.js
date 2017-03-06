@@ -34,7 +34,8 @@ const createProjectValdiations = {
         title: Joi.string(),
         address: Joi.string(),
       })).optional().allow(null),
-      estimatedPrice: Joi.number().precision(2).positive().optional().allow(null),
+      estimatedPrice: Joi.number().precision(2).positive().optional()
+        .allow(null),
       terms: Joi.array().items(Joi.number().positive()).optional(),
       external: Joi.object().keys({
         id: Joi.string(),

@@ -1,8 +1,7 @@
-
+/* eslint-disable no-unused-expressions */
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
-
 import server from '../../app';
 import models from '../../models';
 import util from '../../util';
@@ -99,10 +98,7 @@ describe('Project Attachments', () => {
       const getSpy = sinon.spy(mockHttpClient, 'get');
       const stub = sinon.stub(util, 'getHttpClient', () => mockHttpClient);
       // mock util s3FileTransfer
-      util.s3FileTransfer = (req, source, dest) => {
-        console.log(source, dest);
-        return Promise.resolve(true);
-      };
+      util.s3FileTransfer = () => Promise.resolve(true);
       request(server)
           .post(`/v4/projects/${project1.id}/attachments/`)
           .set({
@@ -113,22 +109,18 @@ describe('Project Attachments', () => {
           .expect(201)
           .end((err, res) => {
             if (err) {
-              console.log(err);
-              return done(err);
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              postSpy.should.have.been.calledOnce;
+              getSpy.should.have.been.calledOnce;
+              stub.restore();
+              resJson.title.should.equal('Spec.pdf');
+              resJson.downloadUrl.should.exist;
+              resJson.projectId.should.equal(project1.id);
+              done();
             }
-
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-
-
-            postSpy.should.have.been.calledOnce;
-            getSpy.should.have.been.calledOnce;
-            stub.restore();
-            console.log(JSON.stringify(resJson, null, 2));
-            resJson.title.should.equal('Spec.pdf');
-            resJson.downloadUrl.should.exist;
-            resJson.projectId.should.equal(project1.id);
-            done();
           });
     });
   });

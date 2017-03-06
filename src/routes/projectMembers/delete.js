@@ -1,9 +1,8 @@
 
 
 import _ from 'lodash';
-
-import models from '../../models';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import models from '../../models';
 import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants';
 
 /**
@@ -29,7 +28,7 @@ module.exports = [
           err.status = 404;
           return Promise.reject(err);
         }
-        return member.destroy({ logging: console.log });
+        return member.destroy({ logging: console.log });        // eslint-disable-line no-console
       })
       .then(member => member.save())
       // if primary co-pilot is removed promote the next co-pilot to primary #43
@@ -67,15 +66,15 @@ module.exports = [
           accept(member);
         }
       }))).then((member) => {
-      // only return the response after transaction is committed
-      // fire event
-        member = member.get({ plain: true });
+        // only return the response after transaction is committed
+        // fire event
+        const pmember = member.get({ plain: true });
         req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
-        member,
-        { correlationId: req.id },
-      );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, { req, member });
+          EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
+          pmember,
+          { correlationId: req.id },
+        );
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, { req, pmember });
         res.status(204).json({});
       }).catch(err => next(err));
   },
