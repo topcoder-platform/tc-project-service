@@ -9,7 +9,7 @@
   },
   "rules": {
     "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.js", "**/*.spec.js", "**/serviceMocks.js"]}],
-    max-len: ["error", { "ignoreComments": true, code: 120 }],
+    "max-len": ["error", { "ignoreComments": true, "code": 120 }],
     "valid-jsdoc": ["error", {
       "requireReturn": true,
       "requireReturnType": true,
