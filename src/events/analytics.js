@@ -1,10 +1,7 @@
 import Analytics from 'analytics-node';
 import _ from 'lodash';
 import 'config';
-import {
-  EVENT,
-  PROJECT_STATUS,
-} from '../constants';
+import { EVENT, PROJECT_STATUS } from '../constants';
 
 const PROJECT_CREATED = 'Project Created';
 const PROJECT_SUBMITTED = 'Project Submitted';

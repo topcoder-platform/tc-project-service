@@ -1,10 +1,9 @@
 /* globals Promise */
 import _ from 'lodash';
 import amqplib from 'amqplib';
-import { EventEmitter } from 'events';
-import { handlers as msgHandlers } from '../events';
+import handlers from '../events';
 
-module.exports = class RabbitMQService extends EventEmitter {
+module.exports = class RabbitMQService {
 
   /**
    * constructor
@@ -12,8 +11,6 @@ module.exports = class RabbitMQService extends EventEmitter {
    * @param {Object} logger logger object
    */
   constructor(app, logger) {
-    super();
-    EventEmitter.call(this);
     this.app = app;
     this.logger = logger;
     this.subscriberCxn = null;
@@ -87,7 +84,7 @@ module.exports = class RabbitMQService extends EventEmitter {
         self.subscriberQ = qok.queue;
         // bindings for the queue
         // all these keys/bindings should be routed to the same queue
-        const bindings = _.keys(msgHandlers);
+        const bindings = _.keys(handlers);
         self.logger.debug('Adding bindings: ', bindings);
         const bindingPromises = _.map(bindings, rk =>
           channel.bindQueue(self.subscriberQ, self.exchangeName, rk));
@@ -101,7 +98,7 @@ module.exports = class RabbitMQService extends EventEmitter {
             requestId: msg.properties.correlationId,
           });
           cLogger.debug('Received Message', key, msg.fields);
-          const handler = msgHandlers[key];
+          const handler = handlers[key];
           if (!_.isFunction(handler)) {
             cLogger.error(`Unknown message type: ${key}, NACKing... `);
             // channel.nack(msg, false, false)
