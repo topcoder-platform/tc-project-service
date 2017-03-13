@@ -416,7 +416,7 @@ definitions:
     properties:
       name:
         type: string
-        description: project name
+        description: project name (required)
       description:
         type: string
         description: Project description

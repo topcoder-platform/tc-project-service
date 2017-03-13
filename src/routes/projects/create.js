@@ -23,7 +23,7 @@ const createProjectValdiations = {
   body: {
     param: Joi.object().keys({
       name: Joi.string().required(),
-      description: Joi.string().required(),
+      description: Joi.string().allow(null),
       billingAccountId: Joi.number().positive(),
       utm: Joi.object().keys({
         source: Joi.string().allow(null),
