@@ -1,21 +1,22 @@
 {
   "name": "tc-projects-service",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Projects microservice",
   "main": "index.js",
   "engines": {
     "node": ">=6.9"
   },
   "scripts": {
-    "test": "NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register $(find src -path '*spec.js*')",
-    "live-test": "NODE_ENV=test ./node_modules/.bin/mocha -w --compilers js:babel-core/register $(find src -path '*spec.js*')",
-    "dev": "NODE_ENV=local PORT=8001 nodemon -w src --exec \"babel-node src --presets es2015\" | ./node_modules/.bin/bunyan",
+    "lint": "./node_modules/.bin/eslint .",
+    "lint:fix": "./node_modules/.bin/eslint . --fix || true",
     "build": "babel src -d dist --presets es2015",
-    "start": "node dist",
+    "sync": "node migrations/sync.js",
     "prestart": "npm run -s build",
-    "seed": "babel-node src/tests/seed.js --presets es2015",
-    "direct": "babel-node src/mocks/direct.js --presets es2015",
-    "lint": "./node_modules/.bin/eslint src"
+    "start": "node dist",
+    "start:dev": "NODE_ENV=local PORT=8001 nodemon -w src --exec \"babel-node src --presets es2015\" | ./node_modules/.bin/bunyan",
+    "test": "npm run lint && NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register $(find src -path '*spec.js*')",
+    "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha -w --compilers js:babel-core/register $(find src -path '*spec.js*')",
+    "seed": "babel-node src/tests/seed.js --presets es2015"
   },
   "repository": {
     "type": "git",
@@ -27,25 +28,6 @@
     "url": "https://github.com/appirio-tech/tc-projects-service/issues"
   },
   "homepage": "https://github.com/appirio-tech/tc-projects-service#readme",
-  "eslintConfig": {
-    "plugins": [],
-    "extends": "eslint:recommended",
-    "parserOptions": {
-      "ecmaVersion": 7,
-      "sourceType": "module"
-    },
-    "env": {
-      "node": true,
-      "mocha": true
-    },
-    "globals": {
-      "Promise": true
-    },
-    "rules": {
-      "no-console": 0,
-      "no-unused-vars": 1
-    }
-  },
   "dependencies": {
     "amqplib": "^0.5.1",
     "analytics-node": "^2.1.1",
@@ -61,7 +43,6 @@
     "express-validation": "^0.6.0",
     "joi": "^8.0.5",
     "lodash": "^4.16.4",
-    "newrelic": "^1.27.2",
     "pg": "^4.5.5",
     "pg-native": "^1.10.0",
     "sequelize": "^3.23.0",
@@ -70,12 +51,14 @@
   "devDependencies": {
     "babel-cli": "^6.9.0",
     "babel-core": "^6.11.4",
+    "babel-eslint": "^7.1.1",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-es2015": "^6.9.0",
     "bunyan": "^1.8.1",
     "chai": "^3.5.0",
-    "eslint": "^3.2.2",
-    "eslint-plugin-import": "^1.12.0",
+    "eslint": "^3.16.1",
+    "eslint-config-airbnb-base": "^11.1.0",
+    "eslint-plugin-import": "^2.2.0",
     "istanbul": "^1.0.0-alpha.2",
     "mocha": "^2.5.3",
     "nodemon": "^1.9.1",

@@ -1,18 +1,14 @@
-'use strict'
-import _ from 'lodash'
-import chai from 'chai'
-import sinon from 'sinon'
-import request from 'supertest'
+/* eslint-disable no-unused-expressions */
+import request from 'supertest';
 
-import models from '../../models'
-import util from '../../util'
-import server from '../../app'
-import testUtil from '../../tests/util'
+import models from '../../models';
+import server from '../../app';
+import testUtil from '../../tests/util';
 
 
 describe('Project delete test', () => {
-  var project1, owner, teamMember, manager, copilot
-  beforeEach(done =>  {
+  let project1;
+  beforeEach((done) => {
     testUtil.clearDb()
         .then(() => {
           models.Project.create({
@@ -24,11 +20,11 @@ describe('Project delete test', () => {
             status: 'draft',
             details: {},
             createdBy: 1,
-            updatedBy: 1
-          }).then(p => {
-            project1 = p
+            updatedBy: 1,
+          }).then((p) => {
+            project1 = p;
             // create members
-            let promises = [
+            const promises = [
               // owner
               models.ProjectMember.create({
                 userId: 40051331,
@@ -36,7 +32,7 @@ describe('Project delete test', () => {
                 role: 'customer',
                 isPrimary: true,
                 createdBy: 1,
-                updatedBy: 1
+                updatedBy: 1,
               }),
               // manager
               models.ProjectMember.create({
@@ -45,7 +41,7 @@ describe('Project delete test', () => {
                 role: 'manager',
                 isPrimary: true,
                 createdBy: 1,
-                updatedBy: 1
+                updatedBy: 1,
               }),
               // copilot
               models.ProjectMember.create({
@@ -54,7 +50,7 @@ describe('Project delete test', () => {
                 role: 'copilot',
                 isPrimary: true,
                 createdBy: 1,
-                updatedBy: 1
+                updatedBy: 1,
               }),
               // team member
               models.ProjectMember.create({
@@ -63,50 +59,46 @@ describe('Project delete test', () => {
                 role: 'customer',
                 isPrimary: false,
                 createdBy: 1,
-                updatedBy: 1
-              })
-            ]
+                updatedBy: 1,
+              }),
+            ];
             Promise.all(promises)
-            .then((res) => {
-              owner = res[0]
-              manager = res[2]
-              copilot = res[3]
-              teamMember = res[4]
-              done()
-            })
-          })
-        })
-  })
+            .then(() => {
+              done();
+            });
+          });
+        });
+  });
 
-  after(done =>  {
-    testUtil.clearDb(done)
-  })
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /projects/{id}/', () => {
-
-    it('should return 403 if copilot tries to delete the project', done =>  {
+    it('should return 403 if copilot tries to delete the project', (done) => {
       request(server)
-        .delete('/v4/projects/' + project1.id)
+        .delete(`/v4/projects/${project1.id}`)
         .set({
-          'Authorization': 'Bearer ' + testUtil.jwts.copilot
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .expect(403, done)
-    })
+        .expect(403, done);
+    });
 
-    it('should return 204 if project was successfully removed', done =>  {
+    it('should return 204 if project was successfully removed', (done) => {
       request(server)
-        .delete('/v4/projects/' + project1.id)
+        .delete(`/v4/projects/${project1.id}`)
         .set({
-          'Authorization': 'Bearer ' + testUtil.jwts.member
+          Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .expect(204)
-        .end(function(err, resp) {
+        .end((err) => {
           if (err) {
-            return done(err)
+            done(err);
+          } else {
+            server.services.pubsub.publish.calledWith('project.deleted').should.be.true;
+            done();
           }
-          server.services.pubsub.publish.calledWith('project.deleted').should.be.true
-          done()
-        })
-    })
-  })
-})
+        });
+    });
+  });
+});

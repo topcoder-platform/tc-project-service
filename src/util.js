@@ -1,4 +1,4 @@
-'use strict'
+
 /* globals Promise */
 /*
  * Copyright (C) 2016 TopCoder Inc., All Rights Reserved.
@@ -10,45 +10,50 @@
  */
 
 
-import _ from 'lodash'
-import querystring from 'querystring'
-import config from 'config'
+import _ from 'lodash';
+import querystring from 'querystring';
+import config from 'config';
 
-let util = _.cloneDeep(require('tc-core-library-js').util(config))
+const exec = require('child_process').exec;
+const models = require('./models').default;
+
+const util = _.cloneDeep(require('tc-core-library-js').util(config));
+
 _.assignIn(util, {
   /**
    * Handle error
-   * @param defaultMessage the default error message
-   * @param err the err
-   * @param next the next function
-   * @returns next function with error
+   * @param   {String}    msg               the default error message
+   * @param   {Error}     err               the err
+   * @param   {Object}    req               the request
+   * @param   {Function}  next              the next function
+   * @returns {Function}                    next function with error
    */
   handleError: (msg, err, req, next) => {
     req.log.error({
       message: msg,
-      error: err
-    })
-    let apiErr = new Error(msg)
+      error: err,
+    });
+    const apiErr = new Error(msg);
     _.assign(apiErr, {
       status: _.get(err, 'status', 500),
-      details: _.get(err, 'details', msg)
-    })
-    return next(apiErr)
+      details: _.get(err, 'details', msg),
+    });
+    return next(apiErr);
   },
   /**
    * Validates if filters are valid
-   * @param  {object} filters    object with filters
-   * @param  {array} validValues valid filter values
-   * @return {boolean}
+   * @param  {object}   filters         object with filters
+   * @param  {array}    validValues     valid filter values
+   * @return {boolean}                  true if filters are valid otherwise false
    */
   isValidFilter: (filters, validValues) => {
-    var valid = true
+    let valid = true;
     _.each(_.keys(filters), (k) => {
       if (valid && _.indexOf(validValues, k) < 0) {
-        valid = false
+        valid = false;
       }
-    })
-    return valid
+    });
+    return valid;
   },
   /**
    * Helper funtion to verify if user has specified role
@@ -57,51 +62,52 @@ _.assignIn(util, {
    * @return {boolean}      true/false
    */
   hasRole: (req, role) => {
-    let roles = _.get(req, 'authUser.roles', [])
-    roles = roles.map(s => s.toLowerCase())
-    return _.indexOf(roles, role.toLowerCase()) >= 0
+    let roles = _.get(req, 'authUser.roles', []);
+    roles = roles.map(s => s.toLowerCase());
+    return _.indexOf(roles, role.toLowerCase()) >= 0;
   },
 
   /**
    * Parses query fields and groups them per table
-   * @param  {array} queryFields list of query fields
-   * @return {object}
+   * @param  {array}      queryFields     list of query fields
+   * @param  {Object}     allowedFields   the allowed fields
+   * @return {object}                     the parsed fields
    */
   parseFields: (queryFields, allowedFields) => {
-    var fields = _.cloneDeep(allowedFields)
+    const fields = _.cloneDeep(allowedFields);
     if (queryFields.length) {
       // remove any inavlid fields
-      fields['projects'] = _.intersection(queryFields, allowedFields['projects'])
-      fields['project_members'] = _.filter(queryFields, (f) => { return f.indexOf('members.') === 0})
+      fields.projects = _.intersection(queryFields, allowedFields.projects);
+      fields.project_members = _.filter(queryFields, f => f.indexOf('members.') === 0);
       // remove members. prefix
-      fields['project_members'] = _.map(fields['project_members'], (f) => { return f.substring(8) })
+      fields.project_members = _.map(fields.project_members, f => f.substring(8));
       // remove any errorneous fields
-      fields['project_members'] = _.intersection(fields['project_members'], allowedFields['project_members'])
-      if (fields['project_members'].length === 0 && _.indexOf(queryFields, 'members') > -1) {
-        fields['project_members'] = allowedFields['project_members']
+      fields.project_members = _.intersection(fields.project_members, allowedFields.project_members);
+      if (fields.project_members.length === 0 && _.indexOf(queryFields, 'members') > -1) {
+        fields.project_members = allowedFields.project_members;
       }
     }
-    return fields
+    return fields;
   },
 
   /**
-   * [description]
-   * @param  {[type]} queryFilter [description]
-   * @return {[type]}             [description]
+   * Parse the query filters
+   * @param  {String}   fqueryFilter        the query filter string
+   * @return {Object}                       the parsed array
    */
-  parseQueryFilter: (queryFilter) => {
-    queryFilter = querystring.parse(queryFilter)
+  parseQueryFilter: (fqueryFilter) => {
+    let queryFilter = querystring.parse(fqueryFilter);
     // convert in to array
     queryFilter = _.mapValues(queryFilter, (val) => {
       if (val.indexOf('in(') > -1) {
-        return { $in: val.substring(3, val.length-1).split(',') }
+        return { $in: val.substring(3, val.length - 1).split(',') };
       }
-      return val
-    })
+      return val;
+    });
     if (queryFilter.id) {
-      queryFilter.id['$in'] = _.map(queryFilter.id['$in'], _.parseInt)
+      queryFilter.id.$in = _.map(queryFilter.id.$in, _.parseInt);
     }
-    return queryFilter
+    return queryFilter;
   },
 
   /**
@@ -111,127 +117,122 @@ _.assignIn(util, {
    * @param  {string} dest   destination url
    * @return {promise}       promise
    */
-  s3FileTransfer: (req, source, dest) => {
-    return new Promise((resolve, reject) => {
-      var cmdStr = _.join([
-        'aws s3 mv',
-        `"${source}"`,
-        `"${dest}"`,
-        '--region us-east-1'
-      ], ' ')
-
-      const exec = require('child_process').exec
-      exec(cmdStr, (error, stdout, stderr) => {
-        req.log.debug(`s3FileTransfer: stdout: ${stdout}`)
-        req.log.debug(`s3FileTransfer: stderr: ${stderr}`)
-        if (error !== null) {
-          req.log.error(`exec error: ${error}`)
-          return reject(error)
-        }
-        return resolve({success: true})
-      })
-    })
-  },
+  s3FileTransfer: (req, source, dest) => new Promise((resolve, reject) => {
+    const cmdStr = _.join([
+      'aws s3 mv',
+      `"${source}"`,
+      `"${dest}"`,
+      '--region us-east-1',
+    ], ' ');
+    exec(cmdStr, (error, stdout, stderr) => {
+      req.log.debug(`s3FileTransfer: stdout: ${stdout}`);
+      req.log.debug(`s3FileTransfer: stderr: ${stderr}`);
+      if (error !== null) {
+        req.log.error(`exec error: ${error}`);
+        return reject(error);
+      }
+      return resolve({ success: true });
+    });
+  }),
 
 
   /**
    * retrieve download urls for all attachments
-   * @param  {[type]} req         original request
-   * @param  {[type]} attachments list of attachments to retrieve urls for
-   * @return {[type]}             [description]
+   * @param  {Object}     req         original request
+   * @param  {String}     filePath    the file path
+   * @return {String}                 the download url
    */
   getFileDownloadUrl: (req, filePath) => {
     if (!filePath) {
-      return Promise.reject( new Error('file path empty'))
+      return Promise.reject(new Error('file path empty'));
     }
-    let fileServiceUrl = config.get('fileServiceEndpoint')
-    if (fileServiceUrl.substr(-1) !== '/') fileServiceUrl += '/'
+    let fileServiceUrl = config.get('fileServiceEndpoint');
+    if (fileServiceUrl.substr(-1) !== '/') fileServiceUrl += '/';
     // get presigned Url
-    var httpClient = util.getHttpClient(req)
-    httpClient.defaults.headers.common['Authorization'] = req.headers.authorization
-    return httpClient.post(fileServiceUrl + 'downloadurl', {
-        param: {
-          filePath: filePath
-        }
-      })
+    const httpClient = util.getHttpClient(req);
+    httpClient.defaults.headers.common.Authorization = req.headers.authorization;
+    return httpClient.post(`${fileServiceUrl}downloadurl`, {
+      param: {
+        filePath,
+      },
+    })
       .then((resp) => {
-        req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2))
+        req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
         if (resp.status !== 200 || resp.data.result.status !== 200) {
-          return Promise.reject(new Error("Unable to fetch pre-signed url"))
+          return Promise.reject(new Error('Unable to fetch pre-signed url'));
         }
         return [
           filePath,
-          resp.data.result.content.preSignedURL
-        ]
-      })
-    },
-    getProjectAttachments: (req, projectId) => {
-      const models = require('./models').default
-      let attachments = []
-      return models.ProjectAttachment.getActiveProjectAttachments(projectId)
+          resp.data.result.content.preSignedURL,
+        ];
+      });
+  },
+  getProjectAttachments: (req, projectId) => {
+    let attachments = [];
+    return models.ProjectAttachment.getActiveProjectAttachments(projectId)
         .then((_attachments) => {
           // if attachments were requested
           if (attachments) {
-            attachments = _attachments
+            attachments = _attachments;
           } else {
-            return attachments
+            return attachments;
           }
           // TODO consider using redis to cache attachments urls
-          let promises = []
+          const promises = [];
           _.each(attachments, (a) => {
-            promises.push(util.getFileDownloadUrl(req, a.filePath))
-          })
-          return Promise.all(promises)
+            promises.push(util.getFileDownloadUrl(req, a.filePath));
+          });
+          return Promise.all(promises);
         })
         .then((result) => {
           // result is an array of 'tuples' => [[path, url], [path,url]]
           // convert it to a map for easy lookup
-          let urls = _.fromPairs(result)
-          _.each(attachments, (a) => {
-            a.downloadUrl = urls[a.filePath]
-          })
-          return attachments
-        })
-    },
+          const urls = _.fromPairs(result);
+          _.each(attachments, (at) => {
+            const a = at;
+            a.downloadUrl = urls[a.filePath];
+          });
+          return attachments;
+        });
+  },
 
-    getSystemUserToken: (logger, id='system') => {
-      const httpClient = util.getHttpClient({id: id, log: logger})
-      const url = `${config.get('identityServiceEndpoint')}authorizations`
-      const formData = `clientId=${config.get('systemUserClientId')}&secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`
-      return httpClient.post(url, formData,
-        {
-          timeout: 4000,
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }
+  getSystemUserToken: (logger, id = 'system') => {
+    const httpClient = util.getHttpClient({ id, log: logger });
+    const url = `${config.get('identityServiceEndpoint')}authorizations`;
+    const formData = `clientId=${config.get('systemUserClientId')}&` +
+      `secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`;
+    return httpClient.post(url, formData,
+      {
+        timeout: 4000,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
       )
-      .then(res => {
-        return res.data.result.content.token
-      })
-    },
+      .then(res => res.data.result.content.token);
+  },
 
     /**
      * Fetches the topcoder user details using the given JWT token.
      *
-     * @param userId id of the user to be fetched
-     * @param jwtToken JWT token of the admin user or JWT token of the user to be fecthed
-     * @param logger logger to be used for logging purposes
+     * @param {Number}  userId        id of the user to be fetched
+     * @param {String}  jwtToken      JWT token of the admin user or JWT token of the user to be fecthed
+     * @param {Object}  logger        logger to be used for logging purposes
      *
-     * @return promise which resolves to the user's information
+     * @return {Promise}              promise which resolves to the user's information
      */
-    getTopcoderUser: (userId, jwtToken, logger) => {
-      var httpClient = util.getHttpClient({id: 'userService_' + userId, log : logger});
-      httpClient.defaults.timeout = 3000
-      httpClient.defaults.headers.common['Accept'] = 'application/json'
-      httpClient.defaults.headers.common['Content-Type'] = 'application/json'
-      httpClient.defaults.headers.common['Authorization'] = 'Bearer ' + jwtToken
-      return httpClient.get(config.userServiceUrl + '/' + userId).then((response) => {
-        if (response.data && response.data.result
-          && response.data.result.status == 200 && response.data.result.content) {
-          return response.data.result.content;
-        }
-        return null;
-      });
-    }
-})
+  getTopcoderUser: (userId, jwtToken, logger) => {
+    const httpClient = util.getHttpClient({ id: `userService_${userId}`, log: logger });
+    httpClient.defaults.timeout = 3000;
+    httpClient.defaults.headers.common.Accept = 'application/json';
+    httpClient.defaults.headers.common['Content-Type'] = 'application/json';
+    httpClient.defaults.headers.common.Authorization = `Bearer ${jwtToken}`;
+    return httpClient.get(`${config.userServiceUrl}/${userId}`).then((response) => {
+      if (response.data && response.data.result
+          && response.data.result.status === 200 && response.data.result.content) {
+        return response.data.result.content;
+      }
+      return null;
+    });
+  },
+});
 
-export default util
+export default util;

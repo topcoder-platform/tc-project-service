@@ -1,15 +1,15 @@
-'use strict'
+import express from 'express';
+import _ from 'lodash';
+import bodyParser from 'body-parser';
+import config from 'config';
+import coreLib from 'tc-core-library-js';
+import expressRequestId from 'express-request-id';
+import router from './routes';
+import permissions from './permissions';
+import models from './models';
+import analytics from './events/analytics';
 
-import express from 'express'
-import _ from 'lodash'
-import bodyParser from 'body-parser'
-import config from 'config'
-import router from './routes'
-import permissions from './permissions'
-import coreLib from 'tc-core-library-js'
-import expressRequestId from 'express-request-id'
-import models from './models'
-var app = express()
+const app = express();
 
 // =======================
 // configuration =========
@@ -17,74 +17,73 @@ var app = express()
 // instantiate core library
 // var coreLib = require('tc-core-library-js')
 
-
 // use body parser so we can get info from POST and/or URL parameters
 app.use(bodyParser.urlencoded({
-  extended: false
-}))
-app.use(bodyParser.json())
+  extended: false,
+}));
+app.use(bodyParser.json());
 
 // add request Id
-var addRequestId = expressRequestId()
-app.use(addRequestId)
+const addRequestId = expressRequestId();
+app.use(addRequestId);
 
 // =======================
 // Loger =========
 // =======================
-let appName = 'tc-projects-service'
+let appName = 'tc-projects-service';
 switch (process.env.NODE_ENV.toLowerCase()) {
   case 'development':
-    appName += "-dev"
-    break
+    appName += '-dev';
+    break;
   case 'qa':
-    appName += "-qa"
-    break
+    appName += '-qa';
+    break;
   case 'production':
   default:
-    appName += '-prod'
-    break
+    appName += '-prod';
+    break;
 }
 // init logger
 
-var logger = coreLib.logger({
+const logger = coreLib.logger({
   name: appName,
-  level: _.get(config, "logLevel", 'debug').toLowerCase(),
+  level: _.get(config, 'logLevel', 'debug').toLowerCase(),
   captureLogs: config.get('captureLogs'),
-  logentriesToken: _.get(config, 'logentriesToken', null)
-})
-app.use(coreLib.middleware.logger(null, logger))
-app.logger = logger
+  logentriesToken: _.get(config, 'logentriesToken', null),
+});
+app.use(coreLib.middleware.logger(null, logger));
+app.logger = logger;
 
 // =======================
 // Database =========
 // =======================
-logger.info('Registering models ... ', !!models)
+logger.info('Registering models ... ', !!models);
 
 // =======================
 // Analytics
 // =======================
-const analyticsKey = config.get('analyticsKey')
-if (!_.isEmpty(analyticsKey))
-  require('./events/analytics')(analyticsKey, app, logger)
+const analyticsKey = config.get('analyticsKey');
+if (!_.isEmpty(analyticsKey)) {
+  analytics(analyticsKey, app, logger);
+}
 
 // ========================
 // Permissions
 // ========================
 // require('app/permissions')()
-permissions()
+permissions();
 
 // ========================
 // Routes
 // ========================
 
-app.use(router)
-app.routerRef = router
+app.use(router);
+app.routerRef = router;
 
 // =======================
 // Initialize services
 // =======================
-require('./services')(app, logger)
+require('./services')(app, logger);
 
 
-
-module.exports = app
+module.exports = app;
