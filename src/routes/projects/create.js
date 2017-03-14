@@ -23,7 +23,7 @@ const createProjectValdiations = {
   body: {
     param: Joi.object().keys({
       name: Joi.string().required(),
-      description: Joi.string().allow(null),
+      description: Joi.string().allow(null).allow('').optional(),
       billingAccountId: Joi.number().positive(),
       utm: Joi.object().keys({
         source: Joi.string().allow(null),
@@ -69,6 +69,7 @@ module.exports = [
         : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults
     _.defaults(project, {
+      description: '',
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       challengeEligibility: [],
