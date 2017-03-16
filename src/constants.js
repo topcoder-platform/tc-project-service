@@ -40,3 +40,7 @@ export const EVENT = {
     PROJECT_DELETED: 'project.deleted',
   },
 };
+
+export const ELASTICSEARCH_INDICES = {
+  TC_PROJECT_SERVICE: 'tc_projects',
+};
