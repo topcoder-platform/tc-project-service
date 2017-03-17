@@ -19,11 +19,12 @@ const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig)
  */
 const projectCreatedHandler = (logger, msg, channel) => {
   const data = JSON.parse(msg.content.toString());
+
   eClient.create({
     index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
     type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
     id: data.id,
-    body: _.omit(data, 'id'),
+    body: data,
   }).then((resp) => {
     logger.info('project indexed successfully', resp);
     channel.ack(msg);
@@ -49,8 +50,7 @@ const projectUpdatedHandler = (logger, msg, channel) => {
     type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
     id: data.original.id,
   }).then((doc) => {
-    // merge the document with updated props and omit id
-    const merged = _.merge(doc._source, _.omit(data.updated, 'id'));        // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, data.updated);        // eslint-disable-line no-underscore-dangle
     // update the merged document
     eClient.update({
       index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,

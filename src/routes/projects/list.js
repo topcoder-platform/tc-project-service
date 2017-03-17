@@ -2,15 +2,10 @@
 /* globals Promise */
 
 import _ from 'lodash';
-import config from 'config';
-import elasticsearch from 'elasticsearch';
 
 import models from '../../models';
 import { USER_ROLE, ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
 import util from '../../util';
-
-// the client modifies the config object, so always passed the cloned object
-const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
 
 /**
  * API to handle retrieving projects
@@ -114,17 +109,35 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   if (_.has(criteria, 'filters.keyword')) {
     // keyword is a full text search
     fullTextQuery = {
-      multi_match: {
-        query: criteria.filters.keyword,
-        fields: ['name', 'description', 'type', 'members.email', 'members.handle',
-          'members.firstName', 'members.lastName'],
+      bool: {
+        should: [
+          {
+            query_string: {
+              query: `*${criteria.filters.keyword}*`,
+              analyze_wildcard: true,
+              fields: ['name', 'description', 'type'],
+            },
+          },
+          {
+            nested: {
+              path: 'members',
+              query: {
+                query_string: {
+                  query: `*${criteria.filters.keyword}*`,
+                  analyze_wildcard: true,
+                  fields: ['members.email', 'members.handle', 'members.firstName', 'members.lastName'],
+                },
+              }
+            },
+          }
+        ],
       },
     };
   }
   const body = { query: { } };
   if (boolQuery.length > 0) {
     body.query.bool = {
-      should: boolQuery,
+      must: boolQuery,
     };
   }
   if (fullTextQuery) {
@@ -136,7 +149,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   }
 
   return new Promise((accept, reject) => {
-    eClient.search(searchCriteria).then((docs) => {
+    req.app.services.es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
       accept({ rows, count: docs.hits.total });
     }).catch(reject);
