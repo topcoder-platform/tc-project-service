@@ -93,9 +93,9 @@ const projectMemberAddedHandler = (logger, msg, channel) => {
   const httpClient = util.getHttpClient({ id: msg.properties.correlationId });
 
   const updateESPromise = new Promise((accept, reject) => {
-    const userIds = [urlencode(`userId&${newMember.userId}`, 'uft8')];
+    const userIds = [urlencode(`userId&${newMember.userId}`, 'utf8')];
     // fetch the member information
-    httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'uft8'))}`)
+    httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'utf8'))}`)
       .then((memberDetails) => {
         const payload = _.merge(newMember, _.pick(memberDetails.result.content,
           'handle', 'firstName', 'lastName', 'email'));
@@ -270,9 +270,9 @@ const projectMemberRemovedHandler = (logger, msg, channel) => {
 const projectMemberUpdatedHandler = (logger, msg, channel) => {
   const data = JSON.parse(msg.content.toString());
   const httpClient = util.getHttpClient({ id: msg.properties.correlationId });
-  const userIds = [urlencode(`userId&${data.original.userId}`, 'uft8')];
+  const userIds = [urlencode(`userId&${data.original.userId}`, 'utf8')];
   // get member information
-  httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'uft8'))}`)
+  httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'utf8'))}`)
     .then((memberDetails) => {
       const payload = _.merge(data.updated, _.pick(memberDetails.result.content,
         'handle', 'firstName', 'lastName', 'email'));

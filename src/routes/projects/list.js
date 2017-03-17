@@ -2,10 +2,15 @@
 /* globals Promise */
 
 import _ from 'lodash';
+import config from 'config';
+import elasticsearch from 'elasticsearch';
 
 import models from '../../models';
-import { USER_ROLE } from '../../constants';
+import { USER_ROLE, ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
 import util from '../../util';
+
+// the client modifies the config object, so always passed the cloned object
+const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
 
 /**
  * API to handle retrieving projects
@@ -29,7 +34,7 @@ const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
 );
 const retrieveProjects = (req, criteria, sort, ffields) => {
   // order by
-  const order = sort ? [sort.split(' ')] : [['createdAt', 'asc']];
+  const order = sort ? sort.split(' ') : ['createdAt', 'asc'];
   let fields = ffields ? ffields.split(',') : [];
     // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
@@ -37,56 +42,104 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     project_members: PROJECT_MEMBER_ATTRIBUTES,
   });
   // make sure project.id is part of fields
-  if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
-  const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
-  const retrieveMembers = !req.query.fields || !!fields.project_members.length;
+  if (_.indexOf(fields.projects, 'id') < 0) {
+    fields.projects.push('id');
+  }
+  const searchCriteria = {
+    index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
+    type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+    size: criteria.limit,
+    from: criteria.offset,
+    sort: `${order[0]}:${order[1]}`,
+  };
+  let sourceInclude;
 
-  return models.Project.searchText({
-    filters: criteria.filters,
-    order,
-    limit: criteria.limit,
-    offset: criteria.offset,
-    attributes: _.get(fields, 'projects', null),
-  }, req.log)
-  .then(({ rows, count }) => {
-    const projectIds = _.map(rows, 'id');
-    const promises = [];
-    // retrieve members
-    if (projectIds.length && retrieveMembers) {
-      promises.push(
-        models.ProjectMember.findAll({
-          attributes: _.get(fields, 'ProjectMembers'),
-          where: { projectId: { in: projectIds } },
-          raw: true,
-        }),
-      );
-    }
-    if (projectIds.length && retrieveAttachments) {
-      promises.push(
-        models.ProjectAttachment.findAll({
-          attributes: PROJECT_ATTACHMENT_ATTRIBUTES,
-          where: { projectId: { in: projectIds } },
-          raw: true,
-        }),
-      );
-    }
-    // return results after promise(s) have resolved
-    return Promise.all(promises)
-      .then((values) => {
-        const allMembers = retrieveMembers ? values.shift() : [];
-        const allAttachments = retrieveAttachments ? values.shift() : [];
-        _.forEach(rows, (fp) => {
-          const p = fp;
-          // if values length is 1 it could be either attachments or members
-          if (retrieveMembers) {
-            p.members = _.filter(allMembers, m => m.projectId === p.id);
-          }
-          if (retrieveAttachments) {
-            p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
-          }
-        });
-        return { rows, count };
-      });
+
+  if (_.get(fields, 'projects', null)) {
+    sourceInclude = _.get(fields, 'projects');
+  }
+  if (_.get(fields, 'project_members', null)) {
+    const memberFields = _.get(fields, 'project_members');
+    sourceInclude = sourceInclude.concat(_.map(memberFields, single => `members.${single}`));
+  }
+  sourceInclude = sourceInclude.concat(_.map(PROJECT_ATTACHMENT_ATTRIBUTES, single => `attachments.${single}`));
+
+  if (sourceInclude) {
+    searchCriteria._sourceInclude = sourceInclude;        // eslint-disable-line no-underscore-dangle
+  }
+
+  // prepare the elasticsearch filter criteria
+  const boolQuery = [];
+  let fullTextQuery;
+  if (_.has(criteria, 'filters.id.$in')) {
+    boolQuery.push({
+      ids: {
+        values: criteria.filters.id.$in,
+      },
+    });
+  }
+
+  if (_.has(criteria, 'filters.status.$in')) {
+    // status is an array
+    boolQuery.push({
+      terms: {
+        status: criteria.filters.status.$in,
+      },
+    });
+  } else if (_.has(criteria, 'filters.status')) {
+    // status is simple string
+    boolQuery.push({
+      term: {
+        status: criteria.filters.status,
+      },
+    });
+  }
+
+  if (_.has(criteria, 'filters.type.$in')) {
+    // type is an array
+    boolQuery.push({
+      terms: {
+        type: criteria.filters.type.$in,
+      },
+    });
+  } else if (_.has(criteria, 'filters.type')) {
+    // type is simple string
+    boolQuery.push({
+      term: {
+        type: criteria.filters.type,
+      },
+    });
+  }
+
+  if (_.has(criteria, 'filters.keyword')) {
+    // keyword is a full text search
+    fullTextQuery = {
+      multi_match: {
+        query: criteria.filters.keyword,
+        fields: ['name', 'description', 'type', 'members.email', 'members.handle',
+          'members.firstName', 'members.lastName'],
+      },
+    };
+  }
+  const body = { query: { } };
+  if (boolQuery.length > 0) {
+    body.query.bool = {
+      should: boolQuery,
+    };
+  }
+  if (fullTextQuery) {
+    body.query = _.merge(body.query, fullTextQuery);
+  }
+
+  if (fullTextQuery || boolQuery.length > 0) {
+    searchCriteria.body = body;
+  }
+
+  return new Promise((accept, reject) => {
+    eClient.search(searchCriteria).then((docs) => {
+      const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      accept({ rows, count: docs.hits.total });
+    }).catch(reject);
   });
 };
 

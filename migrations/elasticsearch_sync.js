@@ -32,6 +32,7 @@ function getRequestBody(indexName) {
   const projectMapping = {
     _all: { enabled: false },
     properties: {
+      id: { type: 'long' },
       directProjectId: { type: 'long' },
       billingAccountId: { type: 'long' },
       name: { type: 'string' },
@@ -85,9 +86,14 @@ function getRequestBody(indexName) {
       members: {
         type: 'nested',
         properties: {
+          id: { type: 'long' },
           userId: { type: 'long' },
           projectId: { type: 'long' },
           role: { type: 'string', index: 'not_analyzed' },
+          firstName: { type: 'string' },
+          lastName: { type: 'string' },
+          email: { type: 'string', index: 'not_analyzed' },
+          handle: { type: 'string', index: 'not_analyzed' },
           isPrimary: { type: 'boolean' },
           createdAt: { type: 'date' },
           updatedAt: { type: 'date' },
@@ -99,6 +105,7 @@ function getRequestBody(indexName) {
       attachments: {
         type: 'nested',
         properties: {
+          id: { type: 'long' },
           title: { type: 'string' },
           size: { type: 'double' },
           category: { type: 'string', index: 'not_analyzed' },
