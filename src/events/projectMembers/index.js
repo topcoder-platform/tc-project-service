@@ -97,8 +97,11 @@ const projectMemberAddedHandler = (logger, msg, channel) => {
     // fetch the member information
     httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'utf8'))}`)
       .then((memberDetails) => {
-        const payload = _.merge(newMember, _.pick(memberDetails.result.content,
-          'handle', 'firstName', 'lastName', 'email'));
+        let payload = newMember;
+        if (_.has(memberDetails, 'result.content')) {
+          payload = _.merge(newMember, _.pick(memberDetails.result.content,
+            'handle', 'firstName', 'lastName', 'email'));
+        }
         // first fetch the existing project
         eClient.get({
           index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
@@ -274,8 +277,11 @@ const projectMemberUpdatedHandler = (logger, msg, channel) => {
   // get member information
   httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'utf8'))}`)
     .then((memberDetails) => {
-      const payload = _.merge(data.updated, _.pick(memberDetails.result.content,
-        'handle', 'firstName', 'lastName', 'email'));
+      let payload = data.updated;
+      if (_.has(memberDetails, 'result.content')) {
+        payload = _.merge(data.updated, _.pick(memberDetails.result.content,
+          'handle', 'firstName', 'lastName', 'email'));
+      }
       eClient.get({
         index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
         type: ELASTICSEARCH_INDICES_TYPES.PROJECT,

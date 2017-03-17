@@ -59,7 +59,7 @@ const projectAttachmentUpdatedHandler = (logger, msg, channel) => {
   eClient.get({
     index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
     type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
-    id: data.projectId,
+    id: data.original.projectId,
   }).then((doc) => {
     const attachments = _.map(doc._source.attachments, (single) => {   // eslint-disable-line no-underscore-dangle
       if (single.id === data.original.id) {
@@ -71,11 +71,14 @@ const projectAttachmentUpdatedHandler = (logger, msg, channel) => {
     eClient.update({
       index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
       type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
-      id: data.projectId,
+      id: data.original.projectId,
       body: {
         doc: merged,
       },
-    }).then(() => channel.ack(msg)).catch((error) => {
+    }).then(() => {
+      logger.debug('elasticsearch index updated, project attachment updated successfully');
+      // channel.ack(msg);
+    }).catch((error) => {
       logger.error('failed to remove project attachment from project document', error);
       channel.nack(msg, false, !msg.fields.redelivered);
     });
