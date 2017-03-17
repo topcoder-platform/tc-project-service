@@ -10,7 +10,7 @@
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix || true",
     "build": "babel src -d dist --presets es2015",
-    "sync": "node migrations/sync.js",
+    "sync": "npm run build && node migrations/sync.js",
     "elasticsearch:sync": "babel-node migrations/elasticsearch_sync.js",
     "prestart": "npm run -s build",
     "start": "node dist",

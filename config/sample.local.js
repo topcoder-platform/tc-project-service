@@ -1,5 +1,4 @@
 // force using test.json for unit tests
-import bluebird from 'bluebird';
 
 let config;
 if (process.env.NODE_ENV === 'test') {
@@ -34,11 +33,6 @@ if (process.env.NODE_ENV === 'test') {
       host: 'dockerhost:9200',
       // target elasticsearch 2.3 version
       apiVersion: '2.3',
-      // use bluebird for promises
-      defer: () => {
-        return bluebird.defer();
-      },
-      log: 'info',
     },
   };
 }

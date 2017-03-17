@@ -5,21 +5,20 @@
  * that following indices are created in elasticsearch before running the application
  *
  * 1. projects: Index for projects. Logically corresponds to project model
- *              and serves as parent for other indices
+ *              and serves as root.
+ *              members and attachments will be stored as nested objects to parent document
  *
- * 2. project_members: Index for project members. Logically corresponds to projectMember model.
- *
- * 3. project_attachments: Index for project attachments. Logically corresponds to projectAttachment model.
  */
 
 import elasticsearch from 'elasticsearch';
 import config from 'config';
 import co from 'co';
 import _ from 'lodash';
-import { ELASTICSEARCH_INDICES } from '../src/constants';
+import { ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../src/constants';
 
 // create new elasticsearch client
-const eClient = new elasticsearch.Client(config.elasticsearchConfig);
+// the client modifies the config object, so always passed the cloned object
+const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
 
 /**
  * Get the request body for the specified index name
@@ -30,60 +29,101 @@ const eClient = new elasticsearch.Client(config.elasticsearchConfig);
  */
 function getRequestBody(indexName) {
   let result;
+  const projectMapping = {
+    _all: { enabled: false },
+    properties: {
+      directProjectId: { type: 'long' },
+      billingAccountId: { type: 'long' },
+      name: { type: 'string' },
+      description: { type: 'string' },
+      external: { type: 'object',
+        properties: {
+          id: { type: 'string', index: 'not_analyzed' },
+          type: { type: 'string', index: 'not_analyzed' },
+          data: { type: 'string' },
+        } },
+      bookmarks: { type: 'nested',
+        properties: {
+          title: { type: 'string' },
+          address: { type: 'string' },
+        } },
+      utm: { type: 'object',
+        properties: {
+          campaign: { type: 'string' },
+          medium: { type: 'string' },
+          source: { type: 'string' },
+        } },
+      estimatedPrice: { type: 'double' },
+      actualPrice: { type: 'double' },
+      terms: { type: 'integer' },
+      type: { type: 'string', index: 'not_analyzed' },
+      status: { type: 'string', index: 'not_analyzed' },
+      details: { type: 'nested',
+        properties: {
+          summary: { type: 'string' },
+          TBD_usageDescription: { type: 'string' },
+          TBD_features: { type: 'nested',
+            properties: {
+              id: { type: 'integer' },
+              title: { type: 'string' },
+              description: { type: 'string' },
+              isCustom: { type: 'boolean' },
+            } },
+        } },
+      challengeEligibility: { type: 'nested',
+        properties: {
+          role: { type: 'string', index: 'not_analyzed' },
+          users: { type: 'long' },
+          groups: { type: 'long' },
+        } },
+      cancelReason: { type: 'string' },
+      createdAt: { type: 'date' },
+      updatedAt: { type: 'date' },
+      createdBy: { type: 'integer' },
+      updatedBy: { type: 'integer' },
+      // project members nested data type
+      members: {
+        type: 'nested',
+        properties: {
+          userId: { type: 'long' },
+          projectId: { type: 'long' },
+          role: { type: 'string', index: 'not_analyzed' },
+          isPrimary: { type: 'boolean' },
+          createdAt: { type: 'date' },
+          updatedAt: { type: 'date' },
+          createdBy: { type: 'integer' },
+          updatedBy: { type: 'integer' },
+        },
+      },
+      // project attachments nested data type
+      attachments: {
+        type: 'nested',
+        properties: {
+          title: { type: 'string' },
+          size: { type: 'double' },
+          category: { type: 'string', index: 'not_analyzed' },
+          description: { type: 'string' },
+          filePath: { type: 'string' },
+          projectId: { type: 'long' },
+          contentType: { type: 'string', index: 'not_analyzed' },
+          createdAt: { type: 'date' },
+          updatedAt: { type: 'date' },
+          createdBy: { type: 'integer' },
+          updatedBy: { type: 'integer' },
+        },
+      },
+    },
+  };
   switch (indexName) {
     case ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE:
       result = {
         index: indexName,
         updateAllTypes: true,
         body: {
-          mappings: {
-            projects: {
-              _all: { enabled: false },
-              properties: {
-                directProjectId: { type: 'long' },
-                billingAccountId: { type: 'long' },
-                name: { type: 'string' },
-                description: { type: 'string' },
-                external: { type: 'object' },
-                bookmarks: { type: 'nested' },
-                utm: { type: 'object' },
-                estimatedPrice: { type: 'double' },
-                actualPrice: { type: 'double' },
-                type: { type: 'string', index: 'not_analyzed' },
-                status: { type: 'string', index: 'not_analyzed' },
-                details: { type: 'object' },
-                challengeEligibility: { type: 'nested' },
-                cancelReason: { type: 'string' },
-              },
-            },
-            members: {
-              _parent: {
-                type: 'projects',
-              },
-              _all: { enabled: false },
-              properties: {
-                userId: { type: 'long' },
-                role: { type: 'string', index: 'not_analyzed' },
-                isPrimary: { type: 'boolean' },
-              },
-            },
-            attachments: {
-              _parent: {
-                type: 'projects',
-              },
-              _all: { enabled: false },
-              properties: {
-                title: { type: 'string' },
-                size: { type: 'double' },
-                category: { type: 'string', index: 'not_analyzed' },
-                description: { type: 'string' },
-                filePath: { type: 'string' },
-                contentType: { type: 'string', index: 'not_analyzed' },
-              },
-            },
-          },
+          mappings: { },
         },
       };
+      result.body.mappings[ELASTICSEARCH_INDICES_TYPES.PROJECT] = projectMapping;
       break;
     default:
       throw new Error('Invalid index name');
