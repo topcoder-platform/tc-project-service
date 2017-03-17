@@ -1,6 +1,7 @@
 import config from 'config';
 import _ from 'lodash';
 import elasticsearch from 'elasticsearch';
+import urlencode from 'urlencode';
 import { PROJECT_MEMBER_ROLE, ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
 import util from '../../util';
 import models from '../../models';
@@ -89,29 +90,38 @@ const projectMemberAddedHandler = (logger, msg, channel) => {
     });
   }
 
+  const httpClient = util.getHttpClient({ id: msg.properties.correlationId });
+
   const updateESPromise = new Promise((accept, reject) => {
-    // first fetch the existing project
-    eClient.get({
-      index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-      type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
-      id: newMember.projectId,
-    }).then((doc) => {
-      // now merge the updated changes and reindex the document
-      const members = _.isArray(doc._source.members) ? doc._source.members : [];      // eslint-disable-line no-underscore-dangle
-      members.push(newMember);
-      const merged = _.merge(doc._source, { members });   // eslint-disable-line no-underscore-dangle
-      // update the merged document
-      eClient.update({
-        index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-        type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
-        id: newMember.projectId,
-        body: {
-          doc: merged,
-        },
-      }).then(() => {
-        logger.debug('elasticsearch project document updated, new member added successfully');
+    const userIds = [urlencode(`userId&${newMember.userId}`, 'uft8')];
+    // fetch the member information
+    httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'uft8'))}`)
+      .then((memberDetails) => {
+        const payload = _.merge(newMember, _.pick(memberDetails.result.content,
+          'handle', 'firstName', 'lastName', 'email'));
+        // first fetch the existing project
+        eClient.get({
+          index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
+          type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+          id: newMember.projectId,
+        }).then((doc) => {
+          // now merge the updated changes and reindex the document
+          const members = _.isArray(doc._source.members) ? doc._source.members : [];      // eslint-disable-line no-underscore-dangle
+          members.push(payload);
+          const merged = _.merge(doc._source, { members });   // eslint-disable-line no-underscore-dangle
+          // update the merged document
+          eClient.update({
+            index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
+            type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+            id: newMember.projectId,
+            body: {
+              doc: merged,
+            },
+          }).then(() => {
+            logger.debug('elasticsearch project document updated, new member added successfully');
+          }).catch(reject);
+        }).catch(reject);
       }).catch(reject);
-    }).catch(reject);
   });
 
   const allPromises = [updateESPromise];
@@ -259,38 +269,48 @@ const projectMemberRemovedHandler = (logger, msg, channel) => {
  */
 const projectMemberUpdatedHandler = (logger, msg, channel) => {
   const data = JSON.parse(msg.content.toString());
-  eClient.get({
-    index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-    type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
-    id: data.original.projectId,
-  }).then((doc) => {
-    // merge the changes and update the elasticsearch index
-    const members = _.map(doc._source.members, (single) => {   // eslint-disable-line no-underscore-dangle
-      if (single.id === data.original.id) {
-        return _.merge(single, data.updated);
-      }
-      return single;
-    });
-    const merged = _.merge(doc._source, { members });     // eslint-disable-line no-underscore-dangle
-    // update the merged document
-    eClient.update({
-      index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-      type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
-      id: data.original.projectId,
-      body: {
-        doc: merged,
-      },
-    }).then(() => {
-      logger.debug('elasticsearch project document updated, member updated successfully');
+  const httpClient = util.getHttpClient({ id: msg.properties.correlationId });
+  const userIds = [urlencode(`userId&${data.original.userId}`, 'uft8')];
+  // get member information
+  httpClient.get(`${config.membersServiceEndpoint}/_search?query=${userIds.join(urlencode(' OR ', 'uft8'))}`)
+    .then((memberDetails) => {
+      const payload = _.merge(data.updated, _.pick(memberDetails.result.content,
+        'handle', 'firstName', 'lastName', 'email'));
+      eClient.get({
+        index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
+        type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+        id: data.original.projectId,
+      }).then((doc) => {
+        // merge the changes and update the elasticsearch index
+        const members = _.map(doc._source.members, (single) => {   // eslint-disable-line no-underscore-dangle
+          if (single.id === data.original.id) {
+            return _.merge(single, payload);
+          }
+          return single;
+        });
+        const merged = _.merge(doc._source, { members });     // eslint-disable-line no-underscore-dangle
+        // update the merged document
+        eClient.update({
+          index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
+          type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+          id: data.original.projectId,
+          body: {
+            doc: merged,
+          },
+        }).then(() => {
+          logger.debug('elasticsearch project document updated, member updated successfully');
+        }).catch((error) => {
+          logger.error('Error updating project document in elasticsearch', error);
+          channel.nack(msg, false, !msg.fields.redelivered);
+        });
+      }).catch((error) => {
+        logger.error('Error fetching project document from elasticsearch', error);
+        channel.nack(msg, false, !msg.fields.redelivered);
+      });
     }).catch((error) => {
-      logger.error('Error updating project document in elasticsearch', error);
+      logger.error('Error fetching project document from elasticsearch', error);
       channel.nack(msg, false, !msg.fields.redelivered);
     });
-  }).catch((error) => {
-    logger.error('Error fetching project document from elasticsearch', error);
-    channel.nack(msg, false, !msg.fields.redelivered);
-  });
-  channel.ack(msg);
 };
 
 module.exports = {

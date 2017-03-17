@@ -2,12 +2,13 @@ FROM node
 
 WORKDIR /json-server
 
-RUN npm install -g json-server
-
 COPY services.json /json-server/
-
+COPY package.json /json-server/
+COPY server.js /json-server/
 COPY authMiddleware.js /json-server/
 
-CMD ["json-server", "-p 3001", "services.json", "-m", "authMiddleware.js"]
+RUN npm install
+
+CMD ["npm", "run", "start"]
 
 EXPOSE 3001
