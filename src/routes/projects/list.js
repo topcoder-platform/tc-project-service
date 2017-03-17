@@ -127,9 +127,9 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
                   analyze_wildcard: true,
                   fields: ['members.email', 'members.handle', 'members.firstName', 'members.lastName'],
                 },
-              }
+              },
             },
-          }
+          },
         ],
       },
     };
