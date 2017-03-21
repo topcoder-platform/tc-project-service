@@ -5,7 +5,7 @@
     "logentriesToken": "",
     "elasticsearchConfig": {
       "host": "dockerhost:9200",
-      "apiVersion": "2.3",
+      "apiVersion": "2.3"
     },
     "rabbitmqUrl": "amqp://localhost:5672",
     "dbConfig": {
