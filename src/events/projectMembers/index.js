@@ -1,15 +1,15 @@
-import config from 'config';
+/**
+ * Event handlers for project members create, update and delete
+ */
 import _ from 'lodash';
-import elasticsearch from 'elasticsearch';
+import config from 'config';
 import urlencode from 'urlencode';
 import { PROJECT_MEMBER_ROLE, ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
 import util from '../../util';
 import models from '../../models';
 import directProject from '../../services/directProject';
 
-// create new elasticsearch client
-// the client modifies the config object, so always passed the cloned object
-const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
+const eClient = util.getElasticSearchClient();
 
 /**
  * Project member added event handler
@@ -21,7 +21,7 @@ const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig)
 const projectMemberAddedHandler = (logger, msg, channel) => {
   const origRequestId = msg.properties.correlationId;
   const newMember = JSON.parse(msg.content.toString());
-
+  // add copilot/update manager permissions operation promise
   let addCMPromise;
   if (newMember.role === PROJECT_MEMBER_ROLE.COPILOT) {
     addCMPromise = new Promise((accept, reject) => {
@@ -133,7 +133,7 @@ const projectMemberAddedHandler = (logger, msg, channel) => {
   }
 
   Promise.all(allPromises).then(() => {
-    logger.info('elasticsearch index updated successfully and co-pilot/manager updated in direct project');
+    logger.debug('elasticsearch index updated successfully and co-pilot/manager updated in direct project');
     channel.ack(msg);
   }).catch((error) => {
     logger.error('failed to consume message, unexpected error', error);
@@ -152,7 +152,7 @@ const projectMemberAddedHandler = (logger, msg, channel) => {
 const projectMemberRemovedHandler = (logger, msg, channel) => {
   const origRequestId = msg.properties.correlationId;
   const member = JSON.parse(msg.content.toString());
-
+  // remove copilot/manager operation promise
   let removeCMPromise;
 
   if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
@@ -254,7 +254,7 @@ const projectMemberRemovedHandler = (logger, msg, channel) => {
   }
 
   Promise.all(allPromises).then(() => {
-    logger.info('elasticsearch index updated successfully and co-pilot/manager removed in direct project');
+    logger.debug('elasticsearch index updated successfully and co-pilot/manager removed in direct project');
     channel.ack(msg);
   }).catch((error) => {
     logger.error('failed to consume message, unexpected error', error);
@@ -305,6 +305,7 @@ const projectMemberUpdatedHandler = (logger, msg, channel) => {
           },
         }).then(() => {
           logger.debug('elasticsearch project document updated, member updated successfully');
+          channel.ack(msg);
         }).catch((error) => {
           logger.error('Error updating project document in elasticsearch', error);
           channel.nack(msg, false, !msg.fields.redelivered);
@@ -314,7 +315,7 @@ const projectMemberUpdatedHandler = (logger, msg, channel) => {
         channel.nack(msg, false, !msg.fields.redelivered);
       });
     }).catch((error) => {
-      logger.error('Error fetching project document from elasticsearch', error);
+      logger.error('Error fetching member details from member service', error);
       channel.nack(msg, false, !msg.fields.redelivered);
     });
 };

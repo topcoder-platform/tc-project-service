@@ -1,14 +1,11 @@
 /**
  * Event handlers for project create, update and delete
- * Current functionality just updates the elasticsearch indexes.
  */
-import config from 'config';
 import _ from 'lodash';
-import elasticsearch from 'elasticsearch';
+import util from '../../util';
 import { ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
 
-// the client modifies the config object, so always passed the cloned object
-const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
+const eClient = util.getElasticSearchClient();
 
 /**
  * Handler for project creation event
@@ -26,7 +23,7 @@ const projectCreatedHandler = (logger, msg, channel) => {
     id: data.id,
     body: data,
   }).then((resp) => {
-    logger.info('project indexed successfully', resp);
+    logger.debug('project indexed successfully', resp);
     channel.ack(msg);
   }).catch((error) => {
     logger.error('failed to index project', error);
@@ -59,7 +56,10 @@ const projectUpdatedHandler = (logger, msg, channel) => {
       body: {
         doc: merged,
       },
-    }).then(() => channel.ack(msg)).catch((error) => {
+    }).then(() => {
+      logger.debug('project updated successfully in elasticsearh index');
+      channel.ack(msg);
+    }).catch((error) => {
       logger.error('failed to update project document', error);
       channel.nack(msg, false, !msg.fields.redelivered);
     });
@@ -83,6 +83,7 @@ const projectDeletedHandler = (logger, msg, channel) => {
     type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
     id: data.id,
   }).then(() => {
+    logger.debug('project deleted successfully from elasticsearh index');
     channel.ack(msg);
   }).catch((error) => {
     logger.error('failed to delete project document', error);

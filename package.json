@@ -48,7 +48,6 @@
     "pg": "^4.5.5",
     "pg-native": "^1.10.0",
     "sequelize": "^3.23.0",
-    "sleep": "^5.1.0",
     "tc-core-library-js": "^1.0.8",
     "urlencode": "^1.1.0"
   },
@@ -70,6 +69,7 @@
     "sequelize-cli": "^2.4.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
+    "sleep": "^5.1.0",
     "supertest": "^2.0.0"
   }
 }

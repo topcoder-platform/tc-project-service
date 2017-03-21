@@ -140,7 +140,7 @@ function getRequestBody(indexName) {
 
 co(function* wrapped() {
   const indices = _.values(ELASTICSEARCH_INDICES);
-  // using for loop as yield is not accisible inside forEach, each callback functions
+  // using for loop as yield is not accessible inside forEach, each callback functions
   for (let i = 0; i < indices.length; i += 1) {
     // first delete the index if already present
     yield eClient.indices.delete({

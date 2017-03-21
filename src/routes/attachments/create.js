@@ -35,6 +35,7 @@ module.exports = [
   permissions('project.addAttachment'),
   /**
    * Add project attachment
+   * In development mode we have to mock the ec2 file transfer and file service calls
    */
   (req, res, next) => {
     const data = req.body.param;
@@ -65,7 +66,6 @@ module.exports = [
       fileServiceUrl += '/';
     }
 
-    // in development mode we have to mock the ec2 file transfer and file service calls
     const fileTransferPromise = new Promise((accept, reject) => {
       if (process.env.NODE_ENV !== 'development') {
         // get pre-signed Url

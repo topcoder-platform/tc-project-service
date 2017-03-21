@@ -2,13 +2,11 @@
  * Event handlers for project attachment create, update and delete
  * Current functionality just updates the elasticsearch indexes.
  */
-import config from 'config';
 import _ from 'lodash';
-import elasticsearch from 'elasticsearch';
+import util from '../../util';
 import { ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
 
-// the client modifies the config object, so always passed the cloned object
-const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
+const eClient = util.getElasticSearchClient();
 
 /**
  * Handler for project attachment creation event
@@ -35,7 +33,10 @@ const projectAttachmentAddedHandler = (logger, msg, channel) => {
       body: {
         doc: merged,
       },
-    }).then(() => channel.ack(msg)).catch((error) => {
+    }).then(() => {
+      logger.debug('project attachment added to project document successfully');
+      channel.ack(msg);
+    }).catch((error) => {
       logger.error('failed to add project attachment to project document', error);
       channel.nack(msg, false, !msg.fields.redelivered);
     });
@@ -77,9 +78,9 @@ const projectAttachmentUpdatedHandler = (logger, msg, channel) => {
       },
     }).then(() => {
       logger.debug('elasticsearch index updated, project attachment updated successfully');
-      // channel.ack(msg);
+      channel.ack(msg);
     }).catch((error) => {
-      logger.error('failed to remove project attachment from project document', error);
+      logger.error('failed to update project attachment for project document', error);
       channel.nack(msg, false, !msg.fields.redelivered);
     });
   }).catch((error) => {
@@ -87,8 +88,6 @@ const projectAttachmentUpdatedHandler = (logger, msg, channel) => {
     // if the message has been redelivered dont attempt to reprocess it
     channel.nack(msg, false, !msg.fields.redelivered);
   });
-
-  channel.ack(msg);
 };
 
 /**
@@ -114,7 +113,10 @@ const projectAttachmentRemovedHandler = (logger, msg, channel) => {
       body: {
         doc: merged,
       },
-    }).then(() => channel.ack(msg)).catch((error) => {
+    }).then(() => {
+      logger.debug('project attachment removed from project document successfully');
+      channel.ack(msg);
+    }).catch((error) => {
       logger.error('failed to remove project attachment from project document', error);
       channel.nack(msg, false, !msg.fields.redelivered);
     });
