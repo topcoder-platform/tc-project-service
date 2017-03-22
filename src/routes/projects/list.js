@@ -25,21 +25,17 @@ const PROJECT_MEMBER_ATTRIBUTES = _.without(
 const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
   _.keys(models.ProjectAttachment.rawAttributes),
   'deletedAt',
-
 );
-const retrieveProjects = (req, criteria, sort, ffields) => {
-  // order by
-  const order = sort ? sort.split(' ') : ['createdAt', 'asc'];
-  let fields = ffields ? ffields.split(',') : [];
-    // parse the fields string to determine what fields are to be returned
-  fields = util.parseFields(fields, {
-    projects: PROJECT_ATTRIBUTES,
-    project_members: PROJECT_MEMBER_ATTRIBUTES,
-  });
-  // make sure project.id is part of fields
-  if (_.indexOf(fields.projects, 'id') < 0) {
-    fields.projects.push('id');
-  }
+
+/**
+ * Parse the ES search criteria and prepare search request body
+ *
+ * @param  {Object}     criteria          the filter criteria parsed from client request
+ * @param  {Object}     fields            the fields to return
+ * @param  {Array}      order             the sort order
+ * @return {Object}                       search request body that can be passed to .search api call
+ */
+const parseElasticSearchCriteria = (criteria, fields, order) => {
   const searchCriteria = {
     index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
     type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
@@ -62,7 +58,6 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   if (sourceInclude) {
     searchCriteria._sourceInclude = sourceInclude;        // eslint-disable-line no-underscore-dangle
   }
-
   // prepare the elasticsearch filter criteria
   const boolQuery = [];
   let fullTextQuery;
@@ -147,6 +142,26 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   if (fullTextQuery || boolQuery.length > 0) {
     searchCriteria.body = body;
   }
+
+  return searchCriteria;
+};
+
+
+const retrieveProjects = (req, criteria, sort, ffields) => {
+  // order by
+  const order = sort ? sort.split(' ') : ['createdAt', 'asc'];
+  let fields = ffields ? ffields.split(',') : [];
+    // parse the fields string to determine what fields are to be returned
+  fields = util.parseFields(fields, {
+    projects: PROJECT_ATTRIBUTES,
+    project_members: PROJECT_MEMBER_ATTRIBUTES,
+  });
+  // make sure project.id is part of fields
+  if (_.indexOf(fields.projects, 'id') < 0) {
+    fields.projects.push('id');
+  }
+
+  const searchCriteria = parseElasticSearchCriteria(criteria, fields, order);
 
   return new Promise((accept, reject) => {
     req.app.services.es.search(searchCriteria).then((docs) => {

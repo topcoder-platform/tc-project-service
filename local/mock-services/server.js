@@ -7,6 +7,7 @@ const jsonServer = require('json-server');
 const _ = require('lodash');
 const isSubset = require('is-subset');
 const winston = require('winston');
+const jsprim = require('jsprim');
 
 const server = jsonServer.create();
 const router = jsonServer.router('services.json');
@@ -27,23 +28,29 @@ server.get('/members/_search', (req, res) => {
   const criteria = _.map(filter, (single) => {
     const ret = { };
     const splitted = single.split('&');
-    ret[splitted[0]] = splitted[1];
+    // if the result can be parsed successfully
+    const parsed = jsprim.parseInteger(splitted[1], { allowTrailing: true, trimWhitespace: true });
+    if (parsed instanceof Error) {
+      ret[splitted[0]] = splitted[1];
+    } else {
+      ret[splitted[0]] = parsed;
+    }
     return ret;
   });
-
-  const response = _.map(_.cloneDeep(members), (single) => {
-    const subset = isSubset(single.result.content, criteria);
+  const cloned = _.cloneDeep(members);
+  const response = _.map(criteria, (item) => {
+    let found = _.find(cloned, single => isSubset(single.result.content, item));
+    if (_.isUndefined(found)) {
+      found = cloned[0];
+    }
+    found.result.content = _.merge(found.result.content, item);
     if (fields.length > 0) {
-      single.result.content = _.pick(single.result.content, fields);
+      found.result.content = _.pick(found.result.content, fields);
     }
-    // since this is mock so always return something
-    if (subset) {
-      return single;
-    }
-    return single;
+    return found;
   });
 
-  res.status(200).json(response[0]);
+  res.status(200).json(response);
 });
 
 server.use(router);
