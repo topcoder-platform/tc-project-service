@@ -1,24 +1,24 @@
 version: '2'
 services:
+  rabbit:
+    image: rabbitmq:3
+    ports:
+      - 5672:5672
+    restart: always
   jsonserver:
     build: 'mock-services'
     ports:
-      - 3001
-  postgres:
+      - 3001:3001
+  db:
     image: "postgres:9.5"
     ports:
-      - 5432
+      - 5432:5432
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
       - POSTGRES_USER=coder
       - POSTGRES_DB=projectsdb
-  elasticsearch:
+  esearch:
     image: "elasticsearch:2.3"
     ports:
-      - 9200
-      - 9300
-  rabbitmq:
-    image: rabbitmq:3
-    restart: always
-    ports:
-      - 5672
+      - 9200:9200
+      - 9300:9300
