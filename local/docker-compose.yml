@@ -1,13 +1,13 @@
-version: '2'
+version: "2"
 services:
   jsonserver:
-    build: 'mock-services'
+    build: "mock-services"
     ports:
-      - 3001
+      - "3001:3001"
   postgres:
     image: "postgres:9.5"
     ports:
-      - 5432
+      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
       - POSTGRES_USER=coder
@@ -15,10 +15,10 @@ services:
   elasticsearch:
     image: "elasticsearch:2.3"
     ports:
-      - 9200
-      - 9300
+      - "9200:9200"
+      - "9300:9300"
   rabbitmq:
     image: rabbitmq:3
     restart: always
     ports:
-      - 5672
+      - "5672:5672"

@@ -15,6 +15,7 @@ if (process.env.NODE_ENV === 'test') {
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
     userServiceUrl: 'https://api.topcoder-dev.com/v3/users',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',
+    membersServiceEndpoint: 'http://dockerhost:3001/members',
     salesforceLead: {
       webToLeadUrl: 'https://www.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8',
       orgId: '00D2C0000000dO6',
@@ -28,6 +29,11 @@ if (process.env.NODE_ENV === 'test') {
       maxPoolSize: 50,
       minPoolSize: 4,
       idleTimeout: 1000,
+    },
+    elasticsearchConfig: {
+      host: 'dockerhost:9200',
+      // target elasticsearch 2.3 version
+      apiVersion: '2.3',
     },
   };
 }
