@@ -11,7 +11,7 @@
  */
 // process.env.NODE_ENV = 'development'
 
-require('../src/models').default.sequelize.sync({ force: true })
+require('../dist/models').default.sequelize.sync({ force: true })
   .then(() => {
     console.log('Database synced successfully');
     process.exit();

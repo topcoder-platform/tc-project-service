@@ -35,8 +35,21 @@ export const EVENT = {
     PROJECT_MEMBER_REMOVED: 'project.member.removed',
     PROJECT_MEMBER_UPDATED: 'project.member.updated',
 
+    PROJECT_ATTACHMENT_ADDED: 'project.attachment.added',
+    PROJECT_ATTACHMENT_REMOVED: 'project.attachment.removed',
+    PROJECT_ATTACHMENT_UPDATED: 'project.attachment.updated',
+
     PROJECT_DRAFT_CREATED: 'project.draft-created',
     PROJECT_UPDATED: 'project.updated',
     PROJECT_DELETED: 'project.deleted',
   },
 };
+
+export const ELASTICSEARCH_INDICES = {
+  TC_PROJECT_SERVICE: 'tc_projects',
+};
+
+export const ELASTICSEARCH_INDICES_TYPES = {
+  PROJECT: 'projects',
+};
+

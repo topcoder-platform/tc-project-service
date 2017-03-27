@@ -1,6 +1,8 @@
 
 
 import config from 'config';
+import elasticsearch from 'elasticsearch';
+import _ from 'lodash';
 import RabbitMQService from './rabbitmq';
 
 /**
@@ -27,29 +29,16 @@ module.exports = (fapp, logger) => {
       config.get('pubsubExchangeName'),
       config.get('pubsubQueueName'),
     )
-      .then(() => {
-        logger.info('RabbitMQ service initialized');
-      })
-      .catch((err) => {
-        logger.error('Error initializing services', err);
-        // gracefulShutdown()
-      });
+    .then(() => {
+      logger.info('RabbitMQ service initialized');
+    })
+    .catch((err) => {
+      logger.error('Error initializing services', err);
+      // gracefulShutdown()
+    });
 
-    // // elasticsearch
-    // var esConfig = {
-    //   hosts: config.get('esUrl'),
-    //   apiVersion: '1.5'
-    // }
-    // if (process.env.NODE_ENV.toLowerCase() !== 'local') {
-    //   _.assign(esConfig, {
-    //     connectionClass: require('http-aws-es'),
-    //     amazonES: {
-    //       region: "us-east-1",
-    //       accessKey: config.get('awsAccessKey'),
-    //       secretKey: config.get('awsAccessSecret')
-    //     }
-    //   })
-    // }
-    // app.services.es = require('elasticsearch').Client(esConfig)
+    // init elasticsearch service
+    // the client modifies the config object, so always passed the cloned object
+    app.services.es = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
   }
 };

@@ -2,11 +2,92 @@
 	"variables": [],
 	"info": {
 		"name": "tc-project-service ",
-		"_postman_id": "c83bc278-c7e5-9c70-4a25-3e07a4311fc4",
+		"_postman_id": "50ca5c4a-6999-510e-4cfb-54ccfa1ec1f1",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "Project Attachments",
+			"description": "",
+			"item": [
+				{
+					"name": "POST /v4/projects/5/attachments",
+					"request": {
+						"url": "{{api-url}}/v4/projects/5/attachments",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\"\n\t}\n}"
+						},
+						"description": "Create an project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH /v4/projects/5/attachments/6",
+					"request": {
+						"url": "{{api-url}}/v4/projects/5/attachments/6",
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\"\n\t}\n}"
+						},
+						"description": "Update project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /v4/projects/5/attachments/6",
+					"request": {
+						"url": "{{api-url}}/v4/projects/5/attachments/6",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "Delete a project attachment"
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "Project Members",
 			"description": "",

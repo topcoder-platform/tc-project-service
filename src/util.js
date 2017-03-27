@@ -13,11 +13,15 @@
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
+import elasticsearch from 'elasticsearch';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
 
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
+
+// the client modifies the config object, so always passed the cloned object
+const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
 
 _.assignIn(util, {
   /**
@@ -233,6 +237,12 @@ _.assignIn(util, {
       return null;
     });
   },
+
+  /**
+   * Return the initialized elastic search client
+   * @return {Object}           the elasticsearch client instance
+   */
+  getElasticSearchClient: () => eClient,
 });
 
 export default util;
