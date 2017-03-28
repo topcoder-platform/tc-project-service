@@ -15,7 +15,7 @@
     "prestart": "npm run -s build",
     "start": "node dist",
     "start:dev": "NODE_ENV=local PORT=8001 nodemon -w src --exec \"babel-node src --presets es2015\" | ./node_modules/.bin/bunyan",
-    "test": "NODE_ENV=test npm run lint && NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register $(find src -path '*spec.js*')",
+    "test": "NODE_ENV=test npm run lint && NODE_ENV=test npm run sync:es && NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register $(find src -path '*spec.js*')",
     "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha -w --compilers js:babel-core/register $(find src -path '*spec.js*')",
     "seed": "babel-node src/tests/seed.js --presets es2015"
   },

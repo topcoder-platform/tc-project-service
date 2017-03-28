@@ -12,7 +12,6 @@
 
 
 import config from 'config';
-import co from 'co';
 import util from '../src/util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -140,21 +139,17 @@ function getRequestBody(indexName) {
   return result;
 }
 
-co(function* wrapped() {
-  const indices = [ES_PROJECT_INDEX];
-  // using for loop as yield is not accessible inside forEach, each callback functions
-  for (let i = 0; i < indices.length; i += 1) {
     // first delete the index if already present
-    yield esClient.indices.delete({
-      index: indices[i],
-      // we would want to ignore no such index error
-      ignore: [404],
-    });
-    // create a new index
-    yield esClient.indices.create(getRequestBody(indices[i]));
-  }
-}).then(() => {
+esClient.indices.delete({
+  index: ES_PROJECT_INDEX,
+  // we would want to ignore no such index error
+  ignore: [404],
+})
+.then(() => esClient.indices.create(getRequestBody(ES_PROJECT_INDEX)))
+.then(() => {
   console.log('elasticsearch indices synced successfully');
+  process.exit();
 }).catch((err) => {
   console.error('elasticsearch indices sync failed', err);
+  process.exit();
 });
