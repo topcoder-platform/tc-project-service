@@ -10,8 +10,9 @@
  * @type {String}
  */
 // process.env.NODE_ENV = 'development'
+import models from '../src/models';
 
-require('../dist/models').default.sequelize.sync({ force: true })
+models.sequelize.sync({ force: true })
   .then(() => {
     console.log('Database synced successfully');
     process.exit();
