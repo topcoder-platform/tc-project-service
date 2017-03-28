@@ -5,7 +5,12 @@
   "version": "APP_VERSION",
   "captureLogs": "CAPTURE_LOGS",
   "logentriesToken": "LOGENTRIES_TOKEN",
-  "esUrl": "PROJECTS_ES_URL",
+  "elasticsearchConfig": {
+    "host": "PROJECTS_ES_URL",
+    "apiVersion": "2.3",
+    "indexName": "PROJECTS_ES_INDEX_NAME",
+    "docType": "projectV4"
+  },
   "rabbitmqURL": "RABBITMQ_URL",
   "directProjectServiceEndpoint": "DIRECT_PROJECT_SERVICE_ENDPOINT",
   "directProjectServiceTimeout": "DIRECT_PROJECT_SERVICE_TIMEOUt",

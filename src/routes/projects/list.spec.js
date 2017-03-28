@@ -2,10 +2,14 @@
 import chai from 'chai';
 import request from 'supertest';
 import sleep from 'sleep';
+import config from 'config';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
+
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const should = chai.should();
 // test data for 3 projects
@@ -180,23 +184,23 @@ describe('LIST Project', () => {
         });
 
         return Promise.all([p1, p2, p3]).then(() => {
-          const esp1 = server.services.es.create({
-            index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-            type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+          const esp1 = server.services.es.index({
+            index: ES_PROJECT_INDEX,
+            type: ES_PROJECT_TYPE,
             id: project1.id,
             body: data[0],
           });
 
-          const esp2 = server.services.es.create({
-            index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-            type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+          const esp2 = server.services.es.index({
+            index: ES_PROJECT_INDEX,
+            type: ES_PROJECT_TYPE,
             id: project2.id,
             body: data[1],
           });
 
-          const esp3 = server.services.es.create({
-            index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-            type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+          const esp3 = server.services.es.index({
+            index: ES_PROJECT_INDEX,
+            type: ES_PROJECT_TYPE,
             id: project3.id,
             body: data[2],
           });

@@ -2,11 +2,14 @@
 /* globals Promise */
 
 import _ from 'lodash';
+import config from 'config';
 
 import models from '../../models';
-import { USER_ROLE, ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
+import { USER_ROLE } from '../../constants';
 import util from '../../util';
 
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 /**
  * API to handle retrieving projects
  *
@@ -37,8 +40,8 @@ const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
  */
 const parseElasticSearchCriteria = (criteria, fields, order) => {
   const searchCriteria = {
-    index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-    type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+    index: ES_PROJECT_INDEX,
+    type: ES_PROJECT_TYPE,
     size: criteria.limit,
     from: criteria.offset,
     sort: `${order[0]}:${order[1]}`,

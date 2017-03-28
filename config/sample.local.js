@@ -13,9 +13,8 @@ if (process.env.NODE_ENV === 'test') {
     fileServiceEndpoint: 'https://api.topcoder-dev.com/v3/files/',
     topicServiceEndpoint: 'https://api.topcoder-dev.com/v4/topics/',
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
-    userServiceUrl: 'https://api.topcoder-dev.com/v3/users',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',
-    membersServiceEndpoint: 'http://dockerhost:3001/members',
+    memberServiceEndpoint: 'http://dockerhost:3001/members',
     salesforceLead: {
       webToLeadUrl: 'https://www.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8',
       orgId: '00D2C0000000dO6',
@@ -34,6 +33,8 @@ if (process.env.NODE_ENV === 'test') {
       host: 'dockerhost:9200',
       // target elasticsearch 2.3 version
       apiVersion: '2.3',
+      indexName: 'projects',
+      docType: 'projectV4'
     },
   };
 }

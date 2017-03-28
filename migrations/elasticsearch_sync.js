@@ -10,15 +10,17 @@
  *
  */
 
-import elasticsearch from 'elasticsearch';
+
 import config from 'config';
 import co from 'co';
-import _ from 'lodash';
-import { ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../src/constants';
+import util from '../src/util';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 // create new elasticsearch client
 // the client modifies the config object, so always passed the cloned object
-const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
+const esClient = util.getElasticSearchClient();
 
 /**
  * Get the request body for the specified index name
@@ -122,7 +124,7 @@ function getRequestBody(indexName) {
     },
   };
   switch (indexName) {
-    case ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE:
+    case ES_PROJECT_INDEX:
       result = {
         index: indexName,
         updateAllTypes: true,
@@ -130,26 +132,26 @@ function getRequestBody(indexName) {
           mappings: { },
         },
       };
-      result.body.mappings[ELASTICSEARCH_INDICES_TYPES.PROJECT] = projectMapping;
+      result.body.mappings[ES_PROJECT_TYPE] = projectMapping;
       break;
     default:
-      throw new Error('Invalid index name');
+      throw new Error(`Invalid index name '${indexName}'`);
   }
   return result;
 }
 
 co(function* wrapped() {
-  const indices = _.values(ELASTICSEARCH_INDICES);
+  const indices = [ES_PROJECT_INDEX];
   // using for loop as yield is not accessible inside forEach, each callback functions
   for (let i = 0; i < indices.length; i += 1) {
     // first delete the index if already present
-    yield eClient.indices.delete({
+    yield esClient.indices.delete({
       index: indices[i],
       // we would want to ignore no such index error
       ignore: [404],
     });
     // create a new index
-    yield eClient.indices.create(getRequestBody(indices[i]));
+    yield esClient.indices.create(getRequestBody(indices[i]));
   }
 }).then(() => {
   console.log('elasticsearch indices synced successfully');

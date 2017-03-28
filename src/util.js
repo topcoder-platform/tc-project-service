@@ -13,7 +13,10 @@
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
+import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
+import Promise from 'bluebird';
+import AWS from 'aws-sdk';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -21,7 +24,7 @@ const models = require('./models').default;
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
 
 // the client modifies the config object, so always passed the cloned object
-const eClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
+let esClient = null;
 
 _.assignIn(util, {
   /**
@@ -242,7 +245,46 @@ _.assignIn(util, {
    * Return the initialized elastic search client
    * @return {Object}           the elasticsearch client instance
    */
-  getElasticSearchClient: () => eClient,
+  getElasticSearchClient: () => {
+    if (esClient) return esClient;
+    const esHost = config.get('elasticsearchConfig.host');
+    if (/.*amazonaws.*/.test(esHost)) {
+      esClient = elasticsearch.Client({
+        apiVersion: config.get('elasticsearchConfig.apiVersion'),
+        hosts: esHost,
+        connectionClass: require('http-aws-es'), // eslint-disable-line global-require
+        amazonES: {
+          region: 'us-east-1',
+          credentials: new AWS.EnvironmentCredentials('AWS'),
+        },
+      });
+    } else {
+      esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
+    }
+    return esClient;
+  },
+
+  /**
+   * Retrieve member details from userIds
+   */
+  getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getSystemUserToken(logger);
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
+        params: {
+          query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
+          fields: 'userId,handle,firstName,lastName,email',
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(res => _.get(res, 'data.result.content', null));
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
 });
 
 export default util;

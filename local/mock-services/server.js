@@ -5,7 +5,6 @@
 const PORT = 3001;
 const jsonServer = require('json-server');
 const _ = require('lodash');
-const isSubset = require('is-subset');
 const winston = require('winston');
 const jsprim = require('jsprim');
 
@@ -22,12 +21,12 @@ server.use(jsonServer.bodyParser);
 server.use(authMiddleware);
 
 // add additional search route for project members
-server.get('/members/_search', (req, res) => {
+server.get('/v3/members/_search', (req, res) => {
   const fields = _.isString(req.query.fields) ? req.query.fields.split(',') : [];
   const filter = _.isString(req.query.query) ? req.query.query.split(' OR ') : [];
   const criteria = _.map(filter, (single) => {
     const ret = { };
-    const splitted = single.split('&');
+    const splitted = single.split(':');
     // if the result can be parsed successfully
     const parsed = jsprim.parseInteger(splitted[1], { allowTrailing: true, trimWhitespace: true });
     if (parsed instanceof Error) {
@@ -37,19 +36,26 @@ server.get('/members/_search', (req, res) => {
     }
     return ret;
   });
+  const userIds = _.map(criteria, 'userId');
   const cloned = _.cloneDeep(members);
-  const response = _.map(criteria, (item) => {
-    let found = _.find(cloned, single => isSubset(single.result.content, item));
-    if (_.isUndefined(found)) {
-      found = cloned[0];
+  const response = {
+    id: 'res1',
+    result: {
+      success: true,
+      status: 200,
+    },
+  };
+  response.result.content = _.map(cloned, (single) => {
+    if (_.indexOf(userIds, single.result.content.userId) > -1) {
+      let found = single.result.content;
+      if (fields.length > 0) {
+        found = _.pick(found, fields);
+      }
+      return found;
     }
-    found.result.content = _.merge(found.result.content, item);
-    if (fields.length > 0) {
-      found.result.content = _.pick(found.result.content, fields);
-    }
-    return found;
-  });
-
+    return null;
+  }).filter(_.identity);
+  response.result.metadata = { totalCount: response.result.content.length };
   res.status(200).json(response);
 });
 

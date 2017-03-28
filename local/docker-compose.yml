@@ -1,10 +1,5 @@
 version: "2"
 services:
-  rabbit:
-    image: rabbitmq:3
-    ports:
-      - 5672:5672
-    restart: always
   jsonserver:
     build: "mock-services"
     ports:
@@ -23,7 +18,8 @@ services:
       - "9200:9200"
       - "9300:9300"
   queue:
-    image: rabbitmq:3
+    image: "rabbitmq:3-management"
     restart: always
     ports:
       - "5672:5672"
+      - "15672:15672"

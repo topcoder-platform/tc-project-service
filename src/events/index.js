@@ -7,6 +7,7 @@ import { projectAttachmentAddedHandler, projectAttachmentRemovedHandler,
   projectAttachmentUpdatedHandler } from './projectAttachments';
 
 export default {
+  'project.initial': projectCreatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED]: projectCreatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_UPDATED]: projectUpdatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_DELETED]: projectDeletedHandler,

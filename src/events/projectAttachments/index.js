@@ -2,9 +2,13 @@
  * Event handlers for project attachment create, update and delete
  * Current functionality just updates the elasticsearch indexes.
  */
+
+import config from 'config';
 import _ from 'lodash';
 import util from '../../util';
-import { ELASTICSEARCH_INDICES, ELASTICSEARCH_INDICES_TYPES } from '../../constants';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const eClient = util.getElasticSearchClient();
 
@@ -19,16 +23,16 @@ const projectAttachmentAddedHandler = (logger, msg, channel) => {
   const data = JSON.parse(msg.content.toString());
 
   eClient.get({
-    index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-    type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+    index: ES_PROJECT_INDEX,
+    type: ES_PROJECT_TYPE,
     id: data.projectId,
   }).then((doc) => {
     const attachments = _.isArray(doc._source.attachments) ? doc._source.attachments : [];    // eslint-disable-line no-underscore-dangle
     attachments.push(data);
     const merged = _.merge(doc._source, { attachments });       // eslint-disable-line no-underscore-dangle
     eClient.update({
-      index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-      type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
       id: data.projectId,
       body: {
         doc: merged,
@@ -58,8 +62,8 @@ const projectAttachmentUpdatedHandler = (logger, msg, channel) => {
   const data = JSON.parse(msg.content.toString());
 
   eClient.get({
-    index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-    type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+    index: ES_PROJECT_INDEX,
+    type: ES_PROJECT_TYPE,
     id: data.original.projectId,
   }).then((doc) => {
     const attachments = _.map(doc._source.attachments, (single) => {   // eslint-disable-line no-underscore-dangle
@@ -70,8 +74,8 @@ const projectAttachmentUpdatedHandler = (logger, msg, channel) => {
     });
     const merged = _.merge(doc._source, { attachments });       // eslint-disable-line no-underscore-dangle
     eClient.update({
-      index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-      type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
       id: data.original.projectId,
       body: {
         doc: merged,
@@ -100,15 +104,15 @@ const projectAttachmentUpdatedHandler = (logger, msg, channel) => {
 const projectAttachmentRemovedHandler = (logger, msg, channel) => {
   const data = JSON.parse(msg.content.toString());
   eClient.get({
-    index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-    type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+    index: ES_PROJECT_INDEX,
+    type: ES_PROJECT_TYPE,
     id: data.projectId,
   }).then((doc) => {
     const attachments = _.filter(doc._source.attachments, single => single.id !== data.id);     // eslint-disable-line no-underscore-dangle
     const merged = _.merge(doc._source, { attachments });       // eslint-disable-line no-underscore-dangle
     eClient.update({
-      index: ELASTICSEARCH_INDICES.TC_PROJECT_SERVICE,
-      type: ELASTICSEARCH_INDICES_TYPES.PROJECT,
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
       id: data.projectId,
       body: {
         doc: merged,
