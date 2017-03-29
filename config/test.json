@@ -4,7 +4,7 @@
     "captureLogs": "false",
     "logentriesToken": "",
     "elasticsearchConfig": {
-      "host": "dockerhost:9200",
+      "host": "http://localhost:9200",
       "apiVersion": "2.3",
       "indexName": "projects_test",
       "docType": "projectV4"
