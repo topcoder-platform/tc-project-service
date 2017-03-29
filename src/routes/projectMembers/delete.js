@@ -69,12 +69,13 @@ module.exports = [
         // only return the response after transaction is committed
         // fire event
         const pmember = member.get({ plain: true });
+        req.log.debug(pmember);
         req.app.services.pubsub.publish(
           EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
           pmember,
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, { req, pmember });
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, { req, member: pmember });
         res.status(204).json({});
       }).catch(err => next(err));
   },
