@@ -19,6 +19,7 @@ router.get('/_health', (req, res) => {
   });
 });
 
+
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
@@ -28,6 +29,9 @@ router.all('/v4/projects*', jwtAuth());
 router.route('/v4/projects')
   .post(require('./projects/create'))
   .get(require('./projects/list'));
+
+// temporarily adding es based list endpoint
+router.get('/v4/projects/es', require('./projects/list-es'));
 
 router.route('/v4/projects/:projectId(\\d+)')
   .get(require('./projects/get'))
