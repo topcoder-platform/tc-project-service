@@ -1,5 +1,0 @@
-{
-  "pubsubQueueName": "qa.project.service",
-  "pubsubExchangeName": "qa.projects",
-  "attachmentsS3Bucket": "topcoder-qa-media",
-}

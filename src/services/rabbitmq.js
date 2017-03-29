@@ -7,11 +7,9 @@ module.exports = class RabbitMQService {
 
   /**
    * constructor
-   * @param {Object} app express app Object
    * @param {Object} logger logger object
    */
-  constructor(app, logger) {
-    this.app = app;
+  constructor(logger) {
     this.logger = logger;
     this.subscriberCxn = null;
     this.publisherCxn = null;

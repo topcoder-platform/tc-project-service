@@ -5,7 +5,6 @@
   "captureLogs": "false",
   "logentriesToken": "",
   "rabbitmqURL": "",
-  "esUrl": "",
   "pubsubQueueName": "project.service",
   "pubsubExchangeName": "projects",
   "fileServiceEndpoint": "",
@@ -16,6 +15,12 @@
   "attachmentsS3Bucket": "topcoder-prod-media",
   "projectAttachmentPathPrefix": "projects",
   "projectAttachmentPathSuffix": "attachments",
+  "elasticsearchConfig": {
+    "host": "",
+    "apiVersion": "2.3",
+    "indexName": "projects",
+    "docType": "projectV4"
+  },
   "systemUserClientId": "",
   "systemUserClientSecret": "",
   "userServiceUrl": "",

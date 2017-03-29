@@ -1,4 +1,4 @@
-#Topcoder Projects Service
+# Topcoder Projects Service
 
 Microservice to manage CRUD operations for all things Projects.
 
@@ -21,7 +21,7 @@ Copy config/sample.local.js as config/local.js, update the properties and accord
 Once you start your PostgreSQL database through docker, it will create a projectsDB.
 *To create tables - note this will drop tables if they already exist*
 ```
-NODE_ENV=local npm run sync
+NODE_ENV=development npm run sync
 ```
 
 #### Redis
@@ -29,10 +29,33 @@ Docker compose command will start a local redis instance as well. You should be 
 
 #### Elasticsearch
 Docker compose includes elasticsearch instance as well. It will open ports 9200 & 9300 (kibana)
-When creating the projects index, use the mapping provided in the local folder 'projects-es-mappings.json'
-`curl -XPUT --data @./local/projects-es-mappings.json http://dockerhost:9200/projects/`
+
+#### Sync indices and mappings
+
+There is a helper script to sync the indices and mappings with the elasticsearch.
+
+Run `npm run elasticsearch:sync` from the root of project to execute the script.
+
+> NOTE: This will first clear all the indices and than recreate them. So use with caution.
 
 **NOTE**: In production these dependencies / services are hosted & managed outside tc-projects-service.
+
+### Test
+
+Each of the individual modules/services are unit tested.
+
+To run unit tests run `npm run test` from root of project.
+
+While tests are being executed the `NODE_ENV` environment variable has a value `test` and `config/test.js` configuration is loaded. The default test configuration refers to `projectsdb_test` postgres database. So make sure that this database exists before running the tests. Since we are using docker-compose for local deployment change `local/docker-compose.yaml` postgres service with updated database name and re-create the containers.
+
+```
+// stop already executing containers if any
+docker-compose stop -t 1
+// clear the containers
+docker-compose rm -f
+// re-run the services with build flag
+docker-compose up --build
+```
 
 #### JWT Authentication
 Authentication is handled via Authorization (Bearer) token header field. Token is a JWT token. Here is a sample token that is valid for a very long time for a user with administrator role.
