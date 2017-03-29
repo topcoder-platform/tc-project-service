@@ -12,6 +12,7 @@
   "fileServiceEndpoint": "FILE_SERVICE_ENDPOINT",
   "identityServiceEndpoint": "IDENTITY_SERVICE_ENDPOINT",
   "topicServiceEndpoint": "TOPIC_SERVICE_ENDPOINT",
+  "memberServiceEndpoint": "MEMBER_SERVICE_ENDPOINT",
   "systemUserClientId": "SYSTEM_USER_CLIENT_ID",
   "systemUserClientSecret": "SYSTEM_USER_CLIENT_SECRET",
   "userServiceUrl": "USER_SERVICE_URL",
