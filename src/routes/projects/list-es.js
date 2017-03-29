@@ -167,7 +167,8 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   const searchCriteria = parseElasticSearchCriteria(criteria, fields, order);
 
   return new Promise((accept, reject) => {
-    req.app.services.es.search(searchCriteria).then((docs) => {
+    const es = util.getElasticSearchClient();
+    es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
       accept({ rows, count: docs.hits.total });
     }).catch(reject);

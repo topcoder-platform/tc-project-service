@@ -1,8 +1,6 @@
 
 
 import config from 'config';
-import elasticsearch from 'elasticsearch';
-import _ from 'lodash';
 import RabbitMQService from './rabbitmq';
 
 /**
@@ -36,9 +34,5 @@ module.exports = (fapp, logger) => {
       logger.error('Error initializing services', err);
       // gracefulShutdown()
     });
-
-    // init elasticsearch service
-    // the client modifies the config object, so always passed the cloned object
-    app.services.es = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
   }
 };
