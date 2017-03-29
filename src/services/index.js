@@ -21,7 +21,7 @@ module.exports = (fapp, logger) => {
     require('../tests/serviceMocks')(app);                       // eslint-disable-line global-require
   } else {
     // RabbitMQ Initialization
-    app.services.pubsub = new RabbitMQService(app, logger);
+    app.services.pubsub = new RabbitMQService(logger);
 
     // initialize RabbitMQ
     app.services.pubsub.init(
