@@ -3,7 +3,12 @@
     "logLevel": "debug",
     "captureLogs": "false",
     "logentriesToken": "",
-    "esUrl": "//localhost:9200",
+    "elasticsearchConfig": {
+      "host": "http://localhost:9200",
+      "apiVersion": "2.3",
+      "indexName": "projects_test",
+      "docType": "projectV4"
+    },
     "rabbitmqUrl": "amqp://localhost:5672",
     "dbConfig": {
         "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",

@@ -1,0 +1,21 @@
+{
+  "name": "mock-services",
+  "version": "1.0.0",
+  "description": "Topcoder projects member mock services",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "TCSCODER",
+  "dependencies": {
+    "json-server": "^0.9.6",
+    "jsprim": "^1.4.0",
+    "lodash": "^4.17.4",
+    "winston": "2.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "license": "ISC"
+}

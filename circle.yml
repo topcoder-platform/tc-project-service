@@ -1,7 +1,7 @@
 machine:
 
   node:
-    version: v5.7.0
+    version: v6.9.4
   environment:
     DB_MASTER_URL: postgres://ubuntu:@127.0.0.1:5432/circle_test
     #RABBITMQ_URL: amqp://localhost:5672
@@ -15,6 +15,12 @@ dependencies:
     - pip install awsebcli
   override:
     - npm install
+    - wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.3.5/elasticsearch-2.3.5.tar.gz
+    - tar -xvf elasticsearch-2.3.5.tar.gz
+    - elasticsearch-2.3.5/bin/elasticsearch: {background: true}
+    # Make sure that Elasticsearch is up before running tests:
+    - sleep 10 && wget --waitretry=5 --retry-connrefused -v http://127.0.0.1:9200/
+
 
 deployment:
   development:

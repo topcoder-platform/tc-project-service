@@ -1,8 +1,5 @@
-
-/* globals Promise */
-
 import _ from 'lodash';
-
+import Promise from 'bluebird';
 import models from '../../models';
 import { USER_ROLE } from '../../constants';
 import util from '../../util';

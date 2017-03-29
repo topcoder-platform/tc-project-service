@@ -56,7 +56,7 @@ module.exports = (analyticsKey, app) => {
       id: project.id,
       name: project.name,
       type: project.type,
-      products: _.get(project, 'products', []),
+      products: _.get(project, 'details.products', []),
     });
   });
 
@@ -79,7 +79,7 @@ module.exports = (analyticsKey, app) => {
         id: updated.id,
         name: updated.name,
         type: updated.type,
-        products: _.get(updated, 'products', []),
+        products: _.get(updated, 'details.products', []),
       });
     }
   });
