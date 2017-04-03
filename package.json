@@ -1,6 +1,6 @@
 {
   "name": "tc-projects-service",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Projects microservice",
   "main": "index.js",
   "engines": {
