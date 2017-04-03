@@ -35,17 +35,17 @@ const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel)
       return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
     });
     // add the record to the index
-    const result = yield eClient.create({
+    const result = yield eClient.index({
       index: ES_PROJECT_INDEX,
       type: ES_PROJECT_TYPE,
       id: data.id,
       body: data,
     });
-    logger.debug('project indexed successfully', result);
+    logger.debug(`project indexed successfully (projectId: ${data.id})`, result);
     channel.ack(msg);
     return undefined;
   } catch (error) {
-    logger.error('Error proecessing event', error);
+    logger.error(`Error proecessing event (projectId: ${data.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;
   }
@@ -77,11 +77,11 @@ const projectUpdatedHandler = Promise.coroutine(function* (logger, msg, channel)
         doc: merged,
       },
     });
-    logger.debug('project updated successfully in elasticsearh index');
+    logger.debug(`project updated successfully in elasticsearh index, (projectId: ${data.id})`);
     channel.ack(msg);
     return undefined;
   } catch (error) {
-    logger.error('failed to get project document', error);
+    logger.error(`failed to get project document, (projectId: ${data.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;
   }
@@ -102,16 +102,15 @@ const projectDeletedHandler = Promise.coroutine(function* (logger, msg, channel)
       type: ES_PROJECT_TYPE,
       id: data.id,
     });
-    logger.debug('project deleted successfully from elasticsearh index');
+    logger.debug(`project deleted successfully from elasticsearh index (projectId: ${data.id})`);
     channel.ack(msg);
     return undefined;
   } catch (error) {
-    logger.error('failed to delete project document', error);
+    logger.error(`failed to delete project document (projectId: ${data.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;
   }
 });
-
 
 module.exports = {
   projectCreatedHandler,
