@@ -1,109 +1,52 @@
 /* eslint-disable no-unused-expressions */
 import chai from 'chai';
 import request from 'supertest';
-import sleep from 'sleep';
-import config from 'config';
+
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
-
 const should = chai.should();
-// test data for 3 projects
-const data = [
-  {
-    id: 1,
-    type: 'generic',
-    billingAccountId: 1,
-    name: 'test1',
-    description: 'test project1',
-    status: 'active',
-    details: {
-      utm: {
-        code: 'code1',
-      },
-    },
-    createdBy: 1,
-    updatedBy: 1,
-    members: [
-      {
-        id: 1,
-        userId: 40051331,
-        projectId: 1,
-        role: 'customer',
-        handle: 'test_tourist_handle',
-        isPrimary: true,
-        createdBy: 1,
-        updatedBy: 1,
-      },
-      {
-        id: 2,
-        userId: 40051332,
-        projectId: 1,
-        role: 'copilot',
-        isPrimary: true,
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ],
-    attachments: [
-      {
-        id: 1,
-        title: 'Spec',
-        projectId: 1,
-        description: 'specification',
-        filePath: 'projects/1/spec.pdf',
-        contentType: 'application/pdf',
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ],
-  },
-  {
-    id: 2,
-    type: 'visual_design',
-    billingAccountId: 1,
-    name: 'test2',
-    description: 'test project2',
-    status: 'draft',
-    details: {},
-    createdBy: 1,
-    updatedBy: 1,
-    members: [
-      {
-        id: 1,
-        userId: 40051332,
-        projectId: 2,
-        role: 'copilot',
-        isPrimary: true,
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ],
-  },
-  {
-    id: 3,
-    type: 'visual_design',
-    billingAccountId: 1,
-    name: 'test2',
-    description: 'test project3',
-    status: 'reviewed',
-    details: {},
-    createdBy: 1,
-    updatedBy: 1,
-  },
-];
 
-describe('LIST Project', () => {
+/**
+ * Add full text index for projects.
+ * @return {Promise}        returns the promise
+ */
+function addFullTextIndex() {
+  if (models.sequelize.options.dialect !== 'postgres') {
+    return null;
+  }
+
+  return models.sequelize
+    .query('ALTER TABLE projects ADD COLUMN "projectFullText" text;')
+    .then(() => models.sequelize
+      .query('UPDATE projects SET "projectFullText" = lower(' +
+        'name || \' \' || coalesce(description, \'\') || \' \' || coalesce(details#>>\'{utm, code}\', \'\'));'))
+    .then(() => models.sequelize
+      .query('CREATE EXTENSION IF NOT EXISTS pg_trgm;')).then(() => models.sequelize
+      .query('CREATE INDEX project_text_search_idx ON projects USING GIN("projectFullText" gin_trgm_ops);'))
+    .then(() => models.sequelize
+      .query('CREATE OR REPLACE FUNCTION project_text_update_trigger() RETURNS trigger AS $$ ' +
+        'begin ' +
+        'new."projectFullText" := ' +
+        'lower(new.name || \' \' || coalesce(new.description, \'\') || \' \' || ' +
+        ' coalesce(new.details#>>\'{utm, code}\', \'\')); ' +
+        'return new; ' +
+        'end ' +
+        '$$ LANGUAGE plpgsql;'))
+    .then(() => models.sequelize
+      .query('DROP TRIGGER IF EXISTS project_text_update ON projects;'))
+      .then(() => models.sequelize
+        .query('CREATE TRIGGER project_text_update BEFORE INSERT OR UPDATE ON projects' +
+          ' FOR EACH ROW EXECUTE PROCEDURE project_text_update_trigger();'));
+}
+
+describe('LIST Project db', () => {
   let project1;
   let project2;
-  let project3;
-  before(function inner(done) {
-    this.timeout(10000);
+  before((done) => {
     testUtil.clearDb()
+      .then(() => addFullTextIndex())
       .then(() => {
         const p1 = models.Project.create({
           type: 'generic',
@@ -178,38 +121,9 @@ describe('LIST Project', () => {
           details: {},
           createdBy: 1,
           updatedBy: 1,
-        }).then((p) => {
-          project3 = p;
-          return Promise.resolve();
         });
-
-        return Promise.all([p1, p2, p3]).then(() => {
-          const esp1 = server.services.es.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project1.id,
-            body: data[0],
-          });
-
-          const esp2 = server.services.es.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project2.id,
-            body: data[1],
-          });
-
-          const esp3 = server.services.es.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project3.id,
-            body: data[2],
-          });
-          return Promise.all([esp1, esp2, esp3]);
-        }).then(() => {
-          // sleep for some time, let elasticsearch indices be settled
-          sleep.sleep(5);
-          done();
-        });
+        return Promise.all([p1, p2, p3])
+          .then(() => done());
       });
   });
 
@@ -217,16 +131,16 @@ describe('LIST Project', () => {
     testUtil.clearDb(done);
   });
 
-  describe('GET All /projects/es/', () => {
+  describe('GET All /projects/', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/projects/es/')
+        .get('/v4/projects/db/')
         .expect(403, done);
     });
 
     it('should return 200 and no projects if user does not have access', (done) => {
       request(server)
-        .get(`/v4/projects/es/?filter=id%3Din%28${project2.id}%29`)
+        .get(`/v4/projects/db/?filter=id%3Din%28${project2.id}%29`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -243,7 +157,7 @@ describe('LIST Project', () => {
 
     it('should return the project when registerd member attempts to access the project', (done) => {
       request(server)
-        .get('/v4/projects/es/?filter=status%3Ddraft')
+        .get('/v4/projects/db/?filter=status%3Ddraft')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -257,17 +171,16 @@ describe('LIST Project', () => {
             res.body.result.metadata.totalCount.should.equal(1);
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
-            // since project 2 is indexed with id 2
-            resJson[0].id.should.equal(2);
+            resJson[0].id.should.equal(project2.id);
             done();
           }
         });
     });
 
-    it('should return the project when project that is in reviewed state AND does not yet ' +
+    it('should return the project when project that is in reviewed state AND does not yet' +
       'have a co-pilot assigned', (done) => {
       request(server)
-          .get('/v4/projects')
+          .get('/v4/projects/db/')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -288,7 +201,7 @@ describe('LIST Project', () => {
 
     it('should return the project for administrator ', (done) => {
       request(server)
-        .get('/v4/projects/es/?fields=id%2Cmembers.id')
+        .get('/v4/projects/db/?fields=id%2Cmembers.id')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -308,7 +221,7 @@ describe('LIST Project', () => {
 
     it('should return all projects that match when filtering by name', (done) => {
       request(server)
-        .get('/v4/projects/es/?filter=keyword%3Dtest')
+        .get('/v4/projects/db/?filter=keyword%3Dtest')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -328,7 +241,7 @@ describe('LIST Project', () => {
 
     it('should return the project when filtering by keyword, which matches the name', (done) => {
       request(server)
-        .get('/v4/projects/es/?filter=keyword%3D1')
+        .get('/v4/projects/db/?filter=keyword%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -349,7 +262,7 @@ describe('LIST Project', () => {
 
     it('should return the project when filtering by keyword, which matches the description', (done) => {
       request(server)
-        .get('/v4/projects/es/?filter=keyword%3Dproject')
+        .get('/v4/projects/db/?filter=keyword%3Dproject')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -367,9 +280,9 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return the project when filtering by keyword, which matches the member handle', (done) => {
+    it('should return the project when filtering by keyword, which matches the details', (done) => {
       request(server)
-        .get('/v4/projects/es/?filter=keyword%3Dtourist')
+        .get('/v4/projects/db/?filter=keyword%3Dcode')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
