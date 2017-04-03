@@ -30,8 +30,8 @@ router.route('/v4/projects')
   .post(require('./projects/create'))
   .get(require('./projects/list'));
 
-// temporarily adding es based list endpoint
-router.get('/v4/projects/es', require('./projects/list-es'));
+router.route('/v4/projects/db')
+  .get(require('./projects/list-db'));
 
 router.route('/v4/projects/:projectId(\\d+)')
   .get(require('./projects/get'))
