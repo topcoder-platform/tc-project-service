@@ -112,6 +112,13 @@ module.exports = [
             if (newProject.billingAccountId) {
               body.billingAccountId = newProject.billingAccountId;
             }
+            // add to project history
+            models.ProjectHistory.create({
+              projectId: _newProject.id,
+              status: PROJECT_STATUS.DRAFT,
+              cancelReason: null,
+              updatedBy: req.authUser.userId,
+            });
             return directProject.createDirectProject(req, body)
               .then((resp) => {
                 newProject.directProjectId = resp.data.result.content.projectId;
@@ -125,6 +132,7 @@ module.exports = [
                 return Promise.resolve();
               });
           })
+
           .then(() => {
             newProject = newProject.get({ plain: true });
             // remove utm details & deletedAt field

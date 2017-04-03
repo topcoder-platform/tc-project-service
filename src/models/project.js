@@ -93,8 +93,9 @@ module.exports = function defineProject(sequelize, DataTypes) {
         Project.hasMany(models.ProjectMember, { as: 'members', foreignKey: 'projectId' });
         Project.hasMany(models.ProjectAttachment, { as: 'attachments', foreignKey: 'projectId' });
       },
+
       /**
-       * Search keyword in name, description, details.utm.code
+       * Search keyword in name, description, details.utm.code (To be deprecated)
        * @param parameters the parameters
        *          - filters: the filters contains keyword
        *          - order: the order
