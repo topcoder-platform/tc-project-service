@@ -19,7 +19,7 @@ const eClient = util.getElasticSearchClient();
  */
 const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   const data = JSON.parse(msg.content.toString());
-  const userIds = data.members.map(single => `userId:${single.userId}`);
+  const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
   try {
     // retrieve member details
     const memberDetails = yield util.getMemberDetailsByUserIds(userIds, msg.properties.correlationId, logger);
@@ -45,7 +45,7 @@ const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel)
     channel.ack(msg);
     return undefined;
   } catch (error) {
-    logger.error(`Error proecessing event (projectId: ${data.id})`, error);
+    logger.error(`Error processing event (projectId: ${data.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;
   }
