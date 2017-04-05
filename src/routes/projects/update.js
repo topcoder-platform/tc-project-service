@@ -43,6 +43,7 @@ const updateProjectValdiations = {
       name: Joi.string(),
       description: Joi.string().allow(null).allow('').optional(),
       billingAccountId: Joi.number().positive(),
+      directProjectId: Joi.number().positive().allow(null),
       status: Joi.any().valid(_.values(PROJECT_STATUS)),
       estimatedPrice: Joi.number().precision(2).positive().allow(null),
       actualPrice: Joi.number().precision(2).positive(),
@@ -79,7 +80,7 @@ const updateProjectValdiations = {
 };
 
 // NOTE- decided to disable all additional checks for now.
-const validateUpdates = (existingProject) => {
+const validateUpdates = (existingProject, updatedProps, authUser) => {
   const errors = [];
   switch (existingProject.status) {
     case PROJECT_STATUS.COMPLETED:
@@ -97,6 +98,12 @@ const validateUpdates = (existingProject) => {
       //     }
       //   }
   }
+  console.log(_.intersection(authUser.roles, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN]));
+  if (_.has(updatedProps, 'directProjectId') &&
+  _.intersection(authUser.roles, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN]).length === 0) {
+    errors.push('Don\'t have permission to update \'directProjectId\' property');
+  }
+
   return errors;
 };
 
@@ -113,8 +120,7 @@ module.exports = [
     let updatedProps = req.body.param;
     const projectId = _.parseInt(req.params.projectId);
     // prune any fields that cannot be updated directly
-    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt',
-      'id', 'directProjectId']);
+    updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
 
     let previousValue;
     models.sequelize.transaction(() => models.Project.findOne({
@@ -133,7 +139,7 @@ module.exports = [
         }
         previousValue = _.clone(project.get({ plain: true }));
         // run additional validations
-        const validationErrors = validateUpdates(previousValue, updatedProps);
+        const validationErrors = validateUpdates(previousValue, updatedProps, req.authUser);
         if (validationErrors.length > 0) {
           const err = new Error('Unable to update project');
           _.assign(err, {
