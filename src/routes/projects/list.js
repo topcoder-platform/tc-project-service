@@ -30,6 +30,8 @@ const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
   'deletedAt',
 );
 
+
+const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
 /**
  * Parse the ES search criteria and prepare search request body
  *
@@ -44,11 +46,13 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     type: ES_PROJECT_TYPE,
     size: criteria.limit,
     from: criteria.offset,
-    sort: `${order[0]}:${order[1]}`,
   };
+  // best match / relevancy is the default sort w/ elasticsearch
+  if (order[0].toLowerCase() !== 'best match') {
+    searchCriteria.sort = `${order[0]}:${order[1]}`;
+  }
+
   let sourceInclude;
-
-
   if (_.get(fields, 'projects', null)) {
     sourceInclude = _.get(fields, 'projects');
   }
@@ -103,17 +107,18 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
       },
     });
   }
-
   if (_.has(criteria, 'filters.keyword')) {
     // keyword is a full text search
+    // escape special fields from keyword search
+    const keyword = escapeEsKeyword(criteria.filters.keyword);
     fullTextQuery = {
       bool: {
         should: [
           {
             query_string: {
-              query: `*${criteria.filters.keyword}*`,
+              query: `*${keyword}*`,
               analyze_wildcard: true,
-              fields: ['name', 'description', 'type'],
+              fields: ['name^3', 'description', 'type'], // boost name field
             },
           },
           {
@@ -121,7 +126,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
               path: 'members',
               query: {
                 query_string: {
-                  query: `*${criteria.filters.keyword}*`,
+                  query: `*${keyword}*`,
                   analyze_wildcard: true,
                   fields: ['members.email', 'members.handle', 'members.firstName', 'members.lastName'],
                 },
@@ -188,6 +193,7 @@ module.exports = [
       sort += ' asc';
     }
     const sortableProps = [
+      'best match',
       'createdAt', 'createdAt asc', 'createdAt desc',
       'updatedAt', 'updatedAt asc', 'updatedAt desc',
       'id', 'id asc', 'id desc',
