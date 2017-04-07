@@ -62,11 +62,7 @@ const projectUpdatedHandler = Promise.coroutine(function* (logger, msg, channel)
   const data = JSON.parse(msg.content.toString());
   try {
     // first get the existing document and than merge the updated changes and save the new document
-    const doc = yield eClient.get({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: data.original.id,
-    });
+    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.id });
     const merged = _.merge(doc._source, data.updated);        // eslint-disable-line no-underscore-dangle
     // update the merged document
     yield eClient.update({
@@ -97,11 +93,7 @@ const projectUpdatedHandler = Promise.coroutine(function* (logger, msg, channel)
 const projectDeletedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   const data = JSON.parse(msg.content.toString());
   try {
-    yield eClient.delete({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: data.id,
-    });
+    yield eClient.delete({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.id });
     logger.debug(`project deleted successfully from elasticsearh index (projectId: ${data.id})`);
     channel.ack(msg);
     return undefined;
