@@ -44,21 +44,24 @@ export default {
    * Add direct project copilot
    * @param {Object} req request
    * @param {Object} directProjectId the id of direct project
-   * @param {Object} body the body contains project copilot information
+   * @param {Integer} copilotUserId copilot user idenitifier
    * @returns {Promise} add pilot promise
    */
-  addCopilot: (req, directProjectId, body) => getHttpClient(req)
-    .post(`/projects/${directProjectId}/copilot`, body),
+  addCopilot: (req, directProjectId, copilotUserId) => getHttpClient(req)
+    .post(`/projects/${directProjectId}/copilot`, { copilotUserId }),
 
   /**
    * Remove direct project copilot
    * @param {Object} req the request
    * @param {Integer} directProjectId the id of direct project
-   * @param {Object} body the body contains project copilot information
+   * @param {Integer} copilotUserId copilot user idenitifier
    * @returns {Promise} response promise
    */
-  deleteCopilot: (req, directProjectId, body) => getHttpClient(req)
-    .delete(`/projects/${directProjectId}/copilot`, body),
+  deleteCopilot: (req, directProjectId, copilotUserId) => getHttpClient(req).request({
+    method: 'delete',
+    url: `/projects/${directProjectId}/copilot`,
+    data: { copilotUserId },
+  }),
 
   /**
    * Add billing account for direct project
@@ -80,4 +83,42 @@ export default {
    */
   editProjectPermissions: (req, directProjectId, body) => getHttpClient(req)
     .post(`/projects/${directProjectId}/permissions`, body),
+
+  /**
+   * Add direct project manager
+   * @param {Object} req request
+   * @param {Object} directProjectId the id of direct project
+   * @param {Object} userId user idenitifier
+   * @returns {Promise} add pilot promise
+   */
+  addManager: (req, directProjectId, userId) => getHttpClient(req)
+    .post(`/projects/${directProjectId}/permissions`, {
+      permissions: [{
+        userId,
+        permissionType: {
+          permissionTypeId: 3,
+          name: 'project_full',
+        },
+        studio: false,
+      }],
+    }),
+
+  /**
+   * Remove direct project manager
+   * @param {Object} req the request
+   * @param {Integer} directProjectId the id of direct project
+   * @param {Object} userId user idenitifier
+   * @returns {Promise} response promise
+   */
+  deleteManager: (req, directProjectId, userId) => getHttpClient(req)
+    .post(`/projects/${directProjectId}/permissions`, {
+      permissions: [{
+        userId,
+        permissionType: {
+          permissionTypeId: '',
+          name: 'project_full',
+        },
+        studio: false,
+      }],
+    }),
 };

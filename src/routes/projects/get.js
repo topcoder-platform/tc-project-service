@@ -64,9 +64,6 @@ module.exports = [
         if (attachments) {
           project.attachments = attachments;
         }
-        req.log.debug('attachment', project.attachments);
-
-        req.log.debug('project', JSON.stringify(project, null, 2));
         res.status(200).json(util.wrapResponse(req.id, project));
       })
       .catch(err => next(err));
