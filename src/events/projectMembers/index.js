@@ -2,6 +2,7 @@
  * Event handlers for project members create, update and delete
  */
 import _ from 'lodash';
+import Promise from 'bluebird';
 import config from 'config';
 import { PROJECT_MEMBER_ROLE } from '../../constants';
 import util from '../../util';
@@ -12,6 +13,24 @@ const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
+
+const updateESPromise = Promise.coroutine(function* a(logger, requestId, projectId, updateDocHandler) {
+  try {
+    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: projectId });
+    const updatedDoc = yield updateDocHandler(doc);
+    return eClient.update({
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
+      id: projectId,
+      body: { doc: updatedDoc },
+    })
+    .then(() => logger.debug('elasticsearch project document updated, member updated successfully'));
+  } catch (error) {
+    logger.error('Error caught updating ES document', error);
+    return Promise.reject(error);
+  }
+});
+
 /**
  * Project member added event handler
  * @param  {Object} logger  logger
@@ -19,128 +38,65 @@ const eClient = util.getElasticSearchClient();
  * @param  {Object} channel channel to ack / nack
  * @return {undefined}
  */
-const projectMemberAddedHandler = (logger, msg, channel) => {
-  const origRequestId = msg.properties.correlationId;
-  const newMember = JSON.parse(msg.content.toString());
-  // add copilot/update manager permissions operation promise
-  let addCMPromise;
-  if (newMember.role === PROJECT_MEMBER_ROLE.COPILOT) {
-    addCMPromise = new Promise((accept, reject) => {
-      models.Project.getDirectProjectId(newMember.projectId)
-        .then((directProjectId) => {
-          if (directProjectId) {
-            util.getSystemUserToken(logger)
-              .then((token) => {
-                const req = {
-                  id: origRequestId,
-                  log: logger,
-                  headers: {
-                    authorization: `Bearer ${token}`,
-                  },
-                };
-                // add copilot to direct project
-                directProject.addCopilot(req, directProjectId, {
-                  copilotUserId: newMember.userId,
-                }).then(() => {
-                  logger.debug('added copilot to direct');
-                  accept();
-                }).catch(reject);
-              }).catch(reject);
-          } else {
-            logger.info('project not associated with a direct project, skipping');
-            accept();
-          }
-        }).catch(reject);
-    });
-  } else if (newMember.role === PROJECT_MEMBER_ROLE.MANAGER) {
-    addCMPromise = new Promise((accept, reject) => {
-      models.Project.getDirectProjectId(newMember.projectId)
-        .then((directProjectId) => {
-          if (directProjectId) {
-            util.getSystemUserToken(logger)
-              .then((token) => {
-                const req = {
-                  id: origRequestId,
-                  log: logger,
-                  headers: {
-                    authorization: `Bearer ${token}`,
-                  },
-                };
-                // update direct project permissions
-                directProject.editProjectPermissions(req, directProjectId, {
-                  permissions: [
-                    {
-                      userId: newMember.userId,
-                      permissionType: {
-                        permissionTypeId: 3,
-                        name: 'project_full',
-                      },
-                      studio: false,
-                    },
-                  ],
-                }).then(() => {
-                  logger.debug('added manager to direct');
-                  accept();
-                }).catch(reject);
-              }).catch(reject);
-          } else {
-            logger.info('project not associated with a direct project, skipping');
-            accept();
-          }
-        }).catch(reject);
-    });
-  }
-
-  const updateESPromise = new Promise((accept, reject) => {
-    const userIds = [newMember.userId];
-    // fetch the member information
-    return util.getMemberDetailsByUserIds(userIds)
-      .then((memberDetails) => {
-        if (!_.isArray(memberDetails) || memberDetails.length === 0) {
-          logger.error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
-          channel.nack(msg, false, !msg.fields.redelivered);
-          return undefined;
-        }
-        const payload = _.merge(newMember, _.pick(memberDetails[0], 'handle', 'firstName', 'lastName', 'email'));
-        // first fetch the existing project
-        return eClient.get({
-          index: ES_PROJECT_INDEX,
-          type: ES_PROJECT_TYPE,
-          id: newMember.projectId,
-        }).then((doc) => {
-          // now merge the updated changes and reindex the document
-          const members = _.isArray(doc._source.members) ? doc._source.members : [];      // eslint-disable-line no-underscore-dangle
-          members.push(payload);
-          const merged = _.merge(doc._source, { members });   // eslint-disable-line no-underscore-dangle
-          // update the merged document
-          return eClient.update({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: newMember.projectId,
-            body: {
-              doc: merged,
+const projectMemberAddedHandler = Promise.coroutine(function* a(logger, msg, channel) {
+  try {
+    const origRequestId = msg.properties.correlationId;
+    const newMember = JSON.parse(msg.content.toString());
+    const projectId = newMember.projectId;
+    const directUpdatePromise = Promise.coroutine(function* () { // eslint-disable-line func-names
+      if (_.indexOf([PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.MANAGER], newMember.role) > -1) {
+        // add copilot/update manager permissions operation promise
+        const directProjectId = yield models.Project.getDirectProjectId(projectId);
+        if (directProjectId) {
+          const token = yield util.getSystemUserToken(logger);
+          const req = {
+            id: origRequestId,
+            log: logger,
+            headers: {
+              authorization: `Bearer ${token}`,
             },
-          }).then(() => {
-            logger.debug('elasticsearch project document updated, new member added successfully');
-          }).catch(reject);
-        }).catch(reject);
-      }).catch(reject);
-  });
-
-  const allPromises = [updateESPromise];
-  if (addCMPromise) {
-    allPromises.push(addCMPromise);
-  }
-
-  Promise.all(allPromises).then(() => {
+          };
+          if (newMember.role === PROJECT_MEMBER_ROLE.COPILOT) {
+            // add copilot to direct project
+            try {
+              yield directProject.addCopilot(req, directProjectId, newMember.userId);
+              logger.info('added copilot to direct');
+            } catch (err) {
+              logger.error('Failed to add copilot, continue..', _.pick(err, ['config', 'data']));
+            }
+          } else {
+            // update direct project permissions
+            try {
+              yield directProject.addManager(req, directProjectId, newMember.userId);
+              logger.info('added manager to direct');
+            } catch (err) {
+              logger.error('Failed to add manager, continue..', _.pick(err, ['config', 'data']));
+            }
+          }
+        } else {
+          logger.debug(`Project# ${projectId} not associated with a Direct project, skipping`);
+        }
+      }
+    });
+    // handle ES Update
+    // fetch the member information
+    const updateDocPromise = Promise.coroutine(function* (doc) { // eslint-disable-line func-names
+      const memberDetails = yield util.getMemberDetailsByUserIds([newMember.userId], logger, origRequestId);
+      const payload = _.merge(newMember, _.pick(memberDetails[0], 'handle', 'firstName', 'lastName', 'email'));
+      // now merge the updated changes and reindex the document
+      const members = _.isArray(doc._source.members) ? doc._source.members : []; // eslint-disable-line no-underscore-dangle
+      members.push(payload);
+      return _.merge(doc._source, { members }); // eslint-disable-line no-underscore-dangle
+    });
+    yield Promise.all([directUpdatePromise(), updateESPromise(logger, origRequestId, projectId, updateDocPromise)]);
     logger.debug('elasticsearch index updated successfully and co-pilot/manager updated in direct project');
     channel.ack(msg);
-  }).catch((error) => {
-    logger.error('failed to consume message, unexpected error', error);
+  } catch (error) {
+    logger.error('Error handling projectMemberAdded Event', error);
     // if the message has been redelivered dont attempt to reprocess it
     channel.nack(msg, false, !msg.fields.redelivered);
-  });
-};
+  }
+});
 
 /**
  * Project member removed event handler
@@ -149,119 +105,63 @@ const projectMemberAddedHandler = (logger, msg, channel) => {
  * @param  {Object} channel channel to ack / nack
  * @return {undefined}
  */
-const projectMemberRemovedHandler = (logger, msg, channel) => {
-  const origRequestId = msg.properties.correlationId;
-  const member = JSON.parse(msg.content.toString());
-  // remove copilot/manager operation promise
-  let removeCMPromise;
-
-  if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
-    // Delete co-pilot when a co-pilot is deleted from a project
-    removeCMPromise = new Promise((accept, reject) => {
-      models.Project.getDirectProjectId(member.projectId)
-        .then((directProjectId) => {
-          if (directProjectId) {
-            util.getSystemUserToken(logger)
-              .then((token) => {
-                const req = {
-                  id: origRequestId,
-                  log: logger,
-                  headers: {
-                    authorization: `Bearer ${token}`,
-                  },
-                };
-                directProject.deleteCopilot(req, directProjectId, {
-                  copilotUserId: member.userId,
-                }).then(() => {
-                  logger.debug('removed copilot from direct');
-                  accept();
-                }).catch(reject);
-              }).catch(reject);
+const projectMemberRemovedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+  try {
+    const origRequestId = msg.properties.correlationId;
+    const member = JSON.parse(msg.content.toString());
+    const projectId = member.projectId;
+    // remove copilot/manager operation promise
+    const updateDirectProjectPromise = Promise.coroutine(function* () { // eslint-disable-line func-names
+      if (_.indexOf([PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.MANAGER], member.role) > -1) {
+        const directProjectId = yield models.Project.getDirectProjectId(projectId);
+        if (directProjectId) {
+          const token = yield util.getSystemUserToken(logger);
+          const req = {
+            id: origRequestId,
+            log: logger,
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          };
+          if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
+            // remove copilot to direct project
+            try {
+              yield directProject.deleteCopilot(req, directProjectId, member.userId);
+              logger.info('removed copilot to direct');
+            } catch (err) {
+              logger.error('Failed to remove copilot, continue..', _.pick(err, ['config', 'data']));
+            }
           } else {
-            logger.info('project not associated with a direct project, skipping');
-            accept();
+            // remove manager from direct
+            try {
+              yield directProject.removeManager(req, directProjectId, member.userId);
+              logger.info('removed manager to direct');
+            } catch (err) {
+              logger.error('Failed to remove manager, continue..', _.pick(err, ['config', 'data']));
+            }
           }
-        }).catch(reject);
+        } else {
+          logger.info(`Project# ${projectId} not associated with a Direct project, skipping`);
+        }
+      }
     });
-  } else if (member.role === PROJECT_MEMBER_ROLE.MANAGER) {
-    // when a manager is removed from direct project we have to remove manager from direct
-    removeCMPromise = new Promise((accept, reject) => {
-      models.Project.getDirectProjectId(member.projectId)
-        .then((directProjectId) => {
-          if (directProjectId) {
-            util.getSystemUserToken(logger)
-              .then((token) => {
-                const req = {
-                  id: origRequestId,
-                  log: logger,
-                  headers: {
-                    authorization: `Bearer ${token}`,
-                  },
-                };
-                // update direct project permissions
-                directProject.editProjectPermissions(req, directProjectId, {
-                  permissions: [
-                    {
-                      userId: member.userId,
-                      resourceId: directProjectId,
-                      permissionType: {
-                        permissionTypeId: '',
-                        name: 'project_full',
-                      },
-                      studio: false,
-                    },
-                  ],
-                }).then(() => {
-                  logger.debug('removed manager from direct');
-                  accept();
-                }).catch(reject);
-              }).catch(reject);
-          } else {
-            logger.info('project not associated with a direct project, skipping');
-            accept();
-          }
-        }).catch(reject);
-    });
-  }
 
-  const updateESPromise = new Promise((accept, reject) => {
-    // first fetch the existing project
-    eClient.get({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: member.projectId,
-    }).then((doc) => {
-      // now merge the updated changes and reindex the document
+    const updateDocPromise = (doc) => {
       const members = _.filter(doc._source.members, single => single.id !== member.id);   // eslint-disable-line no-underscore-dangle
-      const merged = _.merge(doc._source, { members });    // eslint-disable-line no-underscore-dangle
-      // update the merged document
-      eClient.update({
-        index: ES_PROJECT_INDEX,
-        type: ES_PROJECT_TYPE,
-        id: member.projectId,
-        body: {
-          doc: merged,
-        },
-      }).then(() => {
-        logger.debug('elasticsearch project document updated, member removed successfully');
-      }).catch(reject);
-    }).catch(reject);
-  });
-
-  const allPromises = [updateESPromise];
-  if (removeCMPromise) {
-    allPromises.push(removeCMPromise);
-  }
-
-  Promise.all(allPromises).then(() => {
-    logger.debug('elasticsearch index updated successfully and co-pilot/manager removed in direct project');
+      return Promise.resolve(_.merge(doc._source, { members }));    // eslint-disable-line no-underscore-dangle
+    };
+    yield Promise.all([
+      updateDirectProjectPromise(),
+      updateESPromise(logger, origRequestId, projectId, updateDocPromise),
+    ]);
+    logger.info('elasticsearch index updated successfully and co-pilot/manager removed in direct project');
     channel.ack(msg);
-  }).catch((error) => {
+  } catch (error) {
     logger.error('failed to consume message, unexpected error', error);
     // if the message has been redelivered dont attempt to reprocess it
     channel.nack(msg, false, !msg.fields.redelivered);
-  });
-};
+  }
+});
 
 /**
  * Project member updated event handler
@@ -270,49 +170,36 @@ const projectMemberRemovedHandler = (logger, msg, channel) => {
  * @param  {Object} channel channel to ack / nack
  * @return {undefined}
  */
-const projectMemberUpdatedHandler = (logger, msg, channel) => {
-  const data = JSON.parse(msg.content.toString());
-  // get member information
-  return util.getMemberDetailsByUserIds[data.original.userId]
-    .then((memberDetails) => {
-      const payload = _.merge(data.updated, _.pick(memberDetails[0], 'handle', 'firstName', 'lastName', 'email'));
-      return eClient.get({
-        index: ES_PROJECT_INDEX,
-        type: ES_PROJECT_TYPE,
-        id: data.original.projectId,
-      }).then((doc) => {
-        // merge the changes and update the elasticsearch index
-        const members = _.map(doc._source.members, (single) => {   // eslint-disable-line no-underscore-dangle
-          if (single.id === data.original.id) {
-            return _.merge(single, payload);
-          }
-          return single;
-        });
-        const merged = _.merge(doc._source, { members });     // eslint-disable-line no-underscore-dangle
-        // update the merged document
-        return eClient.update({
-          index: ES_PROJECT_INDEX,
-          type: ES_PROJECT_TYPE,
-          id: data.original.projectId,
-          body: {
-            doc: merged,
-          },
-        }).then(() => {
-          logger.debug('elasticsearch project document updated, member updated successfully');
-          channel.ack(msg);
-        }).catch((error) => {
-          logger.error('Error updating project document in elasticsearch', error);
-          channel.nack(msg, false, !msg.fields.redelivered);
-        });
-      }).catch((error) => {
-        logger.error('Error fetching project document from elasticsearch', error);
-        channel.nack(msg, false, !msg.fields.redelivered);
-      });
-    }).catch((error) => {
-      logger.error('Error fetching member details from member service', error);
-      channel.nack(msg, false, !msg.fields.redelivered);
+const projectMemberUpdatedHandler = Promise.coroutine(function* a(logger, msg, channel) {
+  try {
+    const data = JSON.parse(msg.content.toString());
+    // get member information
+    const memberDetails = yield util.getMemberDetailsByUserIds[data.original.userId];
+    const payload = _.merge(data.updated, _.pick(memberDetails[0], 'handle', 'firstName', 'lastName', 'email'));
+    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.projectId });
+
+    // merge the changes and update the elasticsearch index
+    const members = _.map(doc._source.members, (single) => {   // eslint-disable-line no-underscore-dangle
+      if (single.id === data.original.id) {
+        return _.merge(single, payload);
+      }
+      return single;
     });
-};
+    const merged = _.merge(doc._source, { members });     // eslint-disable-line no-underscore-dangle
+    // update the merged document
+    yield eClient.update({
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
+      id: data.original.projectId,
+      body: { doc: merged },
+    });
+    logger.debug('elasticsearch project document updated, member updated successfully');
+    channel.ack(msg);
+  } catch (err) {
+    logger.error('Unhandled error', err);
+    channel.nack(msg, false, !msg.fields.redelivered);
+  }
+});
 
 module.exports = {
   projectMemberAddedHandler,

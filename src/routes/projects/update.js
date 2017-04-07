@@ -98,7 +98,6 @@ const validateUpdates = (existingProject, updatedProps, authUser) => {
       //     }
       //   }
   }
-  console.log(_.intersection(authUser.roles, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN]));
   if (_.has(updatedProps, 'directProjectId') &&
   _.intersection(authUser.roles, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN]).length === 0) {
     errors.push('Don\'t have permission to update \'directProjectId\' property');
