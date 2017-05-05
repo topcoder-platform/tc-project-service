@@ -1,4 +1,5 @@
 {
+  "authDomain": "topcoder-dev.com",
   "pubsubQueueName": "dev.project.service",
   "pubsubExchangeName": "dev.projects",
   "attachmentsS3Bucket": "topcoder-dev-media"

@@ -51,7 +51,7 @@
     "pg": "^4.5.5",
     "pg-native": "^1.10.0",
     "sequelize": "^3.23.0",
-    "tc-core-library-js": "^1.0.8",
+    "tc-core-library-js": "^1.0.9",
     "urlencode": "^1.1.0"
   },
   "devDependencies": {

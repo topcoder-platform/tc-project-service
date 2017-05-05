@@ -6,6 +6,7 @@ if (process.env.NODE_ENV === 'test') {
 } else {
   config = {
     authSecret: 'secret',
+    authDomain: 'topcoder-dev.com',
     logLevel: 'debug',
     captureLogs: 'false',
     logentriesToken: '',
