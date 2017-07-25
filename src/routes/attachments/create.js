@@ -116,6 +116,7 @@ module.exports = [
         return httpClient.post(`${fileServiceUrl}downloadurl`, {
           param: {
             filePath,
+            expiryTime : config.get('fileDownloadUrlExpiryTime')
           },
         });
       }
