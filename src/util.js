@@ -161,7 +161,7 @@ _.assignIn(util, {
     return httpClient.post(`${fileServiceUrl}downloadurl`, {
       param: {
         filePath,
-        expiryTime : config.get('fileDownloadUrlExpiryTime')
+        expiryTime: config.get('fileDownloadUrlExpiryTime'),
       },
     })
       .then((resp) => {
