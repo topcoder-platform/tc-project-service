@@ -228,7 +228,7 @@ _.assignIn(util, {
      */
   getTopcoderUser: (userId, jwtToken, logger) => {
     const httpClient = util.getHttpClient({ id: `userService_${userId}`, log: logger });
-    httpClient.defaults.timeout = 3000;
+    httpClient.defaults.timeout = 10000;
     httpClient.defaults.headers.common.Accept = 'application/json';
     httpClient.defaults.headers.common['Content-Type'] = 'application/json';
     httpClient.defaults.headers.common.Authorization = `Bearer ${jwtToken}`;

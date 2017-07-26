@@ -15,7 +15,7 @@ function getHttpClient(req) {
   const httpClient = util.getHttpClient(req);
   httpClient.defaults.headers.common.Authorization = req.headers.authorization;
   httpClient.defaults.baseURL = config.get('fileServiceEndpoint');
-  httpClient.defaults.timeout = 3000;
+  httpClient.defaults.timeout = 10000;
   httpClient.interceptors.response.use((resp) => {
     req.log.debug('resp: ', JSON.stringify(resp.data, null, 2));
     if (resp.status !== 200 || resp.data.result.status !== 200) {
