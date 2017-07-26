@@ -30,7 +30,7 @@ deployment:
 
 
   production:
-    branch: master
+    branch: ["master", "hotfix/increase-timeouts"]
     commands:
       - ./ebs_deploy.sh tc-project-service PROD $CIRCLE_BUILD_NUM
 
