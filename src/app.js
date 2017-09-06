@@ -1,5 +1,5 @@
 import express from 'express';
-import methodOverride from 'method-override'
+import methodOverride from 'method-override';
 import _ from 'lodash';
 import bodyParser from 'body-parser';
 import config from 'config';
@@ -15,7 +15,7 @@ const app = express();
 // allows overriding HTTP Method
 // both arguments to the methodOverride are optional because they are the default
 // values, but we are specifying them to avoid any future change in defaults
-app.use(methodOverride('X-HTTP-Method-Override', {methods : ['POST'] }))
+app.use(methodOverride('X-HTTP-Method-Override', { methods: ['POST'] }));
 
 // =======================
 // configuration =========
