@@ -1,4 +1,5 @@
 import express from 'express';
+import methodOverride from 'method-override'
 import _ from 'lodash';
 import bodyParser from 'body-parser';
 import config from 'config';
@@ -10,6 +11,9 @@ import models from './models';
 import analytics from './events/analytics';
 
 const app = express();
+
+// allows overriding HTTP Method
+app.use(methodOverride('X-HTTP-Method-Override'))
 
 // =======================
 // configuration =========
