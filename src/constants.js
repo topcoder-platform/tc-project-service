@@ -7,7 +7,7 @@ export const PROJECT_TYPE = {
   WEBSITE: 'website',
   APP: 'app',
   QUALITY_ASSURANCE: 'quality_assurance',
-  CHATBOT: 'chatbot',
+  CHATBOT: 'all-chatbots',
 };
 
 export const PROJECT_STATUS = {
