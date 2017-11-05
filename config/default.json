@@ -41,5 +41,7 @@
     "minPoolSize": 4,
     "idleTimeout": 1000
   },
-  "analyticsKey": ""
+  "analyticsKey": "",
+  "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
+  "jwksUri": ""
 }
