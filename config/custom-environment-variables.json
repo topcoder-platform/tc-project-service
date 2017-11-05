@@ -1,7 +1,6 @@
 {
   "authSecret": "AUTH_SECRET",
   "logLevel": "LOG_LEVEL",
-  "authDomain": "AUTH_DOMAIN",
   "version": "APP_VERSION",
   "captureLogs": "CAPTURE_LOGS",
   "logentriesToken": "LOGENTRIES_TOKEN",
@@ -35,5 +34,7 @@
     "maxPoolSize": "DB_MAX_POOL_SIZE",
     "minPoolSize": "DB_MIN_POOL_SIZE"
   },
-  "analyticsKey": "ANALYTICS_KEY"
+  "analyticsKey": "ANALYTICS_KEY",
+  "validIssuers": "VALID_ISSUERS",
+  "jwksUri": "JWKS_URI"
 }
