@@ -69,7 +69,7 @@ _.assignIn(util, {
    * @return {boolean}      true/false
    */
   hasRole: (req, role) => {
-    let roles = req.authUser ? util.getRoles(req.authUser) : [];
+    let roles = _.get(req, 'authUser.roles', []);
     roles = roles.map(s => s.toLowerCase());
     return _.indexOf(roles, role.toLowerCase()) >= 0;
   },
