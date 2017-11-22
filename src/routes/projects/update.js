@@ -122,8 +122,8 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     // prune any fields that cannot be updated directly
     updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
-    traverse(updatedProps).forEach((x) => {
-      if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+    traverse(updatedProps).forEach(function(x) {
+      if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     let previousValue;
     models.sequelize.transaction(() => models.Project.findOne({

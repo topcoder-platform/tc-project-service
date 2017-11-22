@@ -79,7 +79,7 @@ module.exports = [
       external: null,
       utm: null,
     });
-    traverse(project).forEach((x) => {
+    traverse(project).forEach(function(x) {
       if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     // override values
