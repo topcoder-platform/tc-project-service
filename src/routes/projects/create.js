@@ -79,8 +79,8 @@ module.exports = [
       external: null,
       utm: null,
     });
-    traverse(project).forEach(function (x) {
-      if (this.isLeaf) this.update(req.sanitize(x));
+    traverse(project).forEach((x) => {
+      if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     // override values
     _.assign(project, {
