@@ -9,6 +9,8 @@ import { PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT } f
 import util from '../../util';
 import directProject from '../../services/directProject';
 
+const traverse = require('traverse');
+
 /**
  * API to handle creating a new project.
  * Also creates a direct project for legacy syste
@@ -76,6 +78,9 @@ module.exports = [
       bookmarks: [],
       external: null,
       utm: null,
+    });
+    traverse(project).forEach(function (x) {
+      if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     // override values
     _.assign(project, {

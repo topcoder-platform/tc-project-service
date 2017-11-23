@@ -2,6 +2,7 @@ import express from 'express';
 import methodOverride from 'method-override';
 import _ from 'lodash';
 import bodyParser from 'body-parser';
+import expressSanitizer from 'express-sanitizer';
 import config from 'config';
 import coreLib from 'tc-core-library-js';
 import expressRequestId from 'express-request-id';
@@ -28,6 +29,7 @@ app.use(bodyParser.urlencoded({
   extended: false,
 }));
 app.use(bodyParser.json());
+app.use(expressSanitizer());
 
 // add request Id
 const addRequestId = expressRequestId();
