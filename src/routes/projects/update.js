@@ -160,7 +160,7 @@ module.exports = [
         ].map(x => x.toLowerCase());
         const matchRole = role => _.indexOf(validRoles, role.toLowerCase()) >= 0;
         if (updatedProps.status === PROJECT_STATUS.ACTIVE &&
-          !util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) &&
+          (!util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) || !util.hasRole(req, USER_ROLE.CONNECT_ADMIN)) &&
           _.isUndefined(_.find(members,
             m => m.userId === req.authUser.userId && matchRole(m.role)))
         ) {

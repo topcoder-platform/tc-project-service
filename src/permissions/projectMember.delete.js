@@ -26,6 +26,7 @@ module.exports = freq => new Promise((resolve, reject) => {
       const memberToBeRemoved = _.find(members, m => m.id === prjMemberId);
       // check if auth user has acecss to this project
       const hasAccess = util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)
+        || util.hasRole(req, USER_ROLE.CONNECT_ADMIN)
         || (authMember && memberToBeRemoved && (authMember.role === PROJECT_MEMBER_ROLE.MANAGER ||
           (authMember.role === PROJECT_MEMBER_ROLE.CUSTOMER && authMember.isPrimary &&
             memberToBeRemoved.role === PROJECT_MEMBER_ROLE.CUSTOMER) ||

@@ -21,6 +21,7 @@ module.exports = freq => new Promise((resolve, reject) => {
         req.context.currentProjectMembers = members;
         // check if auth user has acecss to this project
         const hasAccess = util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) ||
+          util.hasRole(req, USER_ROLE.CONNECT_ADMIN) ||
           !_.isUndefined(_.find(members, m => m.userId === req.authUser.userId &&
             ((m.role === PROJECT_MEMBER_ROLE.CUSTOMER && m.isPrimary) ||
               m.role === PROJECT_MEMBER_ROLE.MANAGER)));
