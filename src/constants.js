@@ -27,10 +27,10 @@ export const PROJECT_MEMBER_ROLE = {
 };
 
 export const USER_ROLE = {
-  TOPCODER_ADMIN : 'administrator',
-  MANAGER        : 'Connect Manager',
-  COPILOT        : 'Connect Copilot',
-  CONNECT_ADMIN  : 'Connect Admin'
+  TOPCODER_ADMIN: 'administrator',
+  MANAGER: 'Connect Manager',
+  COPILOT: 'Connect Copilot',
+  CONNECT_ADMIN: 'Connect Admin',
 };
 
 
