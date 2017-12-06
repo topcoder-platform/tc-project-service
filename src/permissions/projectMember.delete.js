@@ -2,7 +2,6 @@ import _ from 'lodash';
 import util from '../util';
 import models from '../models';
 import {
-  USER_ROLE,
   PROJECT_MEMBER_ROLE,
 } from '../constants';
 
@@ -25,8 +24,7 @@ module.exports = freq => new Promise((resolve, reject) => {
       const prjMemberId = _.parseInt(req.params.id);
       const memberToBeRemoved = _.find(members, m => m.id === prjMemberId);
       // check if auth user has acecss to this project
-      const hasAccess = util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)
-        || util.hasRole(req, USER_ROLE.CONNECT_ADMIN)
+      const hasAccess = util.hasAdminRole(req)
         || (authMember && memberToBeRemoved && (authMember.role === PROJECT_MEMBER_ROLE.MANAGER ||
           (authMember.role === PROJECT_MEMBER_ROLE.CUSTOMER && authMember.isPrimary &&
             memberToBeRemoved.role === PROJECT_MEMBER_ROLE.CUSTOMER) ||

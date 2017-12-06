@@ -33,6 +33,8 @@ export const USER_ROLE = {
   CONNECT_ADMIN: 'Connect Admin',
 };
 
+export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
+
 
 export const EVENT = {
   ROUTING_KEY: {

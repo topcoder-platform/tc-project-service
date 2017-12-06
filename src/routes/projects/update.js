@@ -82,7 +82,7 @@ const updateProjectValdiations = {
 };
 
 // NOTE- decided to disable all additional checks for now.
-const validateUpdates = (existingProject, updatedProps, authUser) => {
+const validateUpdates = (existingProject, updatedProps, req) => {
   const errors = [];
   switch (existingProject.status) {
     case PROJECT_STATUS.COMPLETED:
@@ -101,7 +101,7 @@ const validateUpdates = (existingProject, updatedProps, authUser) => {
       //   }
   }
   if (_.has(updatedProps, 'directProjectId') &&
-  _.intersection(authUser.roles, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN]).length === 0) {
+    !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
     errors.push('Don\'t have permission to update \'directProjectId\' property');
   }
 
@@ -142,7 +142,7 @@ module.exports = [
         }
         previousValue = _.clone(project.get({ plain: true }));
         // run additional validations
-        const validationErrors = validateUpdates(previousValue, updatedProps, req.authUser);
+        const validationErrors = validateUpdates(previousValue, updatedProps, req);
         if (validationErrors.length > 0) {
           const err = new Error('Unable to update project');
           _.assign(err, {
@@ -160,7 +160,7 @@ module.exports = [
         ].map(x => x.toLowerCase());
         const matchRole = role => _.indexOf(validRoles, role.toLowerCase()) >= 0;
         if (updatedProps.status === PROJECT_STATUS.ACTIVE &&
-          (!util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) || !util.hasRole(req, USER_ROLE.CONNECT_ADMIN)) &&
+          !util.hasAdminRole(req) &&
           _.isUndefined(_.find(members,
             m => m.userId === req.authUser.userId && matchRole(m.role)))
         ) {

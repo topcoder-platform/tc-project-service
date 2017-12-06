@@ -17,6 +17,7 @@ import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 import AWS from 'aws-sdk';
+import { ADMIN_ROLES } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -72,6 +73,27 @@ _.assignIn(util, {
     let roles = _.get(req, 'authUser.roles', []);
     roles = roles.map(s => s.toLowerCase());
     return _.indexOf(roles, role.toLowerCase()) >= 0;
+  },
+  /**
+   * Helper funtion to verify if user has specified roles
+   * @param  {object} req  Request object that should contain authUser
+   * @param  {Array} roles specified roles
+   * @return {boolean}      true/false
+   */
+  hasRoles: (req, roles) => {
+    let authRoles = _.get(req, 'authUser.roles', []);
+    authRoles = authRoles.map(s => s.toLowerCase());
+    return _.intersection(authRoles, roles.map(r => r.toLowerCase())).length > 0;
+  },
+  /**
+   * Helper funtion to verify if user has admin roles
+   * @param  {object} req  Request object that should contain authUser
+   * @return {boolean}      true/false
+   */
+  hasAdminRole: (req) => {
+    let roles = _.get(req, 'authUser.roles', []);
+    roles = roles.map(s => s.toLowerCase());
+    return _.intersection(roles, ADMIN_ROLES.map(r => r.toLowerCase())).length > 0;
   },
 
   /**
@@ -206,6 +228,7 @@ _.assignIn(util, {
   getSystemUserToken: (logger, id = 'system') => {
     const httpClient = util.getHttpClient({ id, log: logger });
     const url = `${config.get('identityServiceEndpoint')}authorizations`;
+    console.log(url, 'url');
     const formData = `clientId=${config.get('systemUserClientId')}&` +
       `secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`;
     return httpClient.post(url, formData,
@@ -269,8 +292,11 @@ _.assignIn(util, {
    */
   getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
     try {
-      const token = yield this.getSystemUserToken(logger);
+      console.log('getMemberDetailsByUserIds');
+      const token = yield 'farzi';// this.getSystemUserToken(logger);
+      console.log('token', token);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      console.log(config.memberServiceEndpoint, 'config.memberServiceEndpoint');
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
           query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
