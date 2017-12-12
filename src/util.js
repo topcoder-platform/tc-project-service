@@ -291,7 +291,7 @@ _.assignIn(util, {
    */
   getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
     try {
-      const token = this.getSystemUserToken(logger);
+      const token = yield this.getSystemUserToken(logger);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
