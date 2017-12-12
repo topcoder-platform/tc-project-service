@@ -228,7 +228,6 @@ _.assignIn(util, {
   getSystemUserToken: (logger, id = 'system') => {
     const httpClient = util.getHttpClient({ id, log: logger });
     const url = `${config.get('identityServiceEndpoint')}authorizations`;
-    console.log(url, 'url');
     const formData = `clientId=${config.get('systemUserClientId')}&` +
       `secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`;
     return httpClient.post(url, formData,
@@ -292,11 +291,8 @@ _.assignIn(util, {
    */
   getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
     try {
-      console.log('getMemberDetailsByUserIds');
-      const token = yield 'farzi';// this.getSystemUserToken(logger);
-      console.log('token', token);
+      const token = this.getSystemUserToken(logger);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
-      console.log(config.memberServiceEndpoint, 'config.memberServiceEndpoint');
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
           query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
