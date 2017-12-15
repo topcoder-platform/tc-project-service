@@ -36,5 +36,7 @@
   },
   "analyticsKey": "ANALYTICS_KEY",
   "validIssuers": "VALID_ISSUERS",
-  "jwksUri": "JWKS_URI"
+  "jwksUri": "JWKS_URI",
+  "busApiUrl": "BUS_API_URL",
+  "busApiToken": "BUS_API_TOKEN"
 }

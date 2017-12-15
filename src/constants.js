@@ -48,3 +48,23 @@ export const EVENT = {
     PROJECT_DELETED: 'project.deleted',
   },
 };
+
+export const BUS_API_EVENT = {
+  PROJECT_CREATED: 'connect.project.created',
+  PROJECT_SUBMITTED_FOR_REVIEW: 'connect.project.submittedForReview',
+  PROJECT_APPROVED: 'connect.project.approved',
+  PROJECT_PAUSED: 'connect.project.paused',
+  PROJECT_COMPLETED: 'connect.project.completed',
+  PROJECT_CANCELED: 'connect.project.canceled',
+
+  MEMBER_JOINED: 'connect.project.member.joined',
+  MEMBER_LEFT: 'connect.project.member.left',
+  MEMBER_REMOVED: 'connect.project.member.removed',
+  MEMBER_ASSIGNED_AS_OWNER: 'connect.project.member.assignedAsOwner',
+  MEMBER_JOINED_COPILOT: 'connect.project.member.copilotJoined',
+  MEMBER_JOINED_MANAGER: 'connect.project.member.managerJoined',
+
+  PROJECT_LINK_CREATED: 'connect.project.linkCreated',
+  PROJECT_FILE_UPLOADED: 'connect.project.fileUploaded',
+  PROJECT_SPECIFICATION_MODIFIED: 'connect.project.specificationModified',
+};

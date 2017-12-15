@@ -1,87 +1,79 @@
 {
-	"variables": [],
 	"info": {
 		"name": "tc-project-service ",
-		"_postman_id": "50ca5c4a-6999-510e-4cfb-54ccfa1ec1f1",
+		"_postman_id": "8f323d9c-63bd-5f2c-87f1-1e99083786f3",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Project Attachments",
-			"description": "",
 			"item": [
 				{
-					"name": "POST /v4/projects/5/attachments",
+					"name": "Upload attachment",
 					"request": {
-						"url": "{{api-url}}/v4/projects/5/attachments",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\"\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/7/attachments",
 						"description": "Create an project attachment"
 					},
 					"response": []
 				},
 				{
-					"name": "PATCH /v4/projects/5/attachments/6",
+					"name": "Update attachment",
 					"request": {
-						"url": "{{api-url}}/v4/projects/5/attachments/6",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\"\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/7/attachments/2",
 						"description": "Update project attachment"
 					},
 					"response": []
 				},
 				{
-					"name": "DELETE /v4/projects/5/attachments/6",
+					"name": "Delete attachment",
 					"request": {
-						"url": "{{api-url}}/v4/projects/5/attachments/6",
 						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
+						"url": "{{api-url}}/v4/projects/7/attachments/2",
 						"description": "Delete a project attachment"
 					},
 					"response": []
@@ -90,79 +82,72 @@
 		},
 		{
 			"name": "Project Members",
-			"description": "",
 			"item": [
 				{
 					"name": "Create project member with no payload",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
+						"url": "{{api-url}}/v4/projects/1/members",
 						"description": "Request payload is mandatory while creating project. If no request payload is specified this should result in 422 status code."
 					},
 					"response": []
 				},
 				{
-					"name": "Create project member with invalid userId",
+					"name": "Create project copilot with invalid userId",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"role\": \"copilot\"\n}"
 						},
+						"url": "{{api-url}}/v4/projects/1/members",
 						"description": "Certain fields are mandatory while creating project. If invalid fields are specified this should result in 422 status code."
 					},
 					"response": []
 				},
 				{
-					"name": "Create project member with valid values",
+					"name": "Create project copilot with valid values",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"userId\": 40051331,\n\t\t\"isPrimary\": true\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/7/members",
 						"description": "If the request payload is valid, than project member should be created."
 					},
 					"response": []
@@ -170,24 +155,22 @@
 				{
 					"name": "Create project member, if user already registered",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"userId\": 40051331,\n\t\t\"isPrimary\": true\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/1/members",
 						"description": "If the request payload is valid and user is already registered with the specified role than this should result in 400."
 					},
 					"response": []
@@ -195,49 +178,91 @@
 				{
 					"name": "Create project manager with valid values",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"manager\",\n\t\t\"userId\": 40051330,\n\t\t\"isPrimary\": true\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/7/members",
 						"description": "If the request payload is valid, than project manager should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project customer with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"customer\",\n\t\t\"userId\": 40051332,\n\t\t\"isPrimary\": true\n\t}\n}"
+						},
+						"url": "{{api-url}}/v4/projects/7/members",
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
 					},
 					"response": []
 				},
 				{
 					"name": "Update project member",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": true\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/7/members/16",
+						"description": "Update a project's member."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project member with isPrimary False",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": false\n\t}\n}"
+						},
+						"url": "{{api-url}}/v4/projects/7/members/16",
 						"description": "Update a project's member."
 					},
 					"response": []
@@ -245,24 +270,22 @@
 				{
 					"name": "Delete project member",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2/members/2",
 						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
+						"url": "{{api-url}}/v4/projects/7/members/15",
 						"description": "Delete a project's member"
 					},
 					"response": []
@@ -276,24 +299,22 @@
 				{
 					"name": "Create project without payload",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\n}"
 						},
+						"url": "{{api-url}}/v4/projects",
 						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
 					},
 					"response": []
@@ -301,24 +322,22 @@
 				{
 					"name": "Create project without valid name",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects",
 						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
 					},
 					"response": []
@@ -326,24 +345,22 @@
 				{
 					"name": "Create project with valid values",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects",
 						"description": "Valid request body. Project should be created successfully."
 					},
 					"response": []
@@ -351,19 +368,18 @@
 				{
 					"name": "Get project by id",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
+						"url": "{{api-url}}/v4/projects/7",
 						"description": "Get a project by id. project members and attachments should also be returned."
 					},
 					"response": []
@@ -371,18 +387,33 @@
 				{
 					"name": "Get project by id and request specific fields",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1?fields=id,name,description,members.id,members.projectId",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1?fields=id,name,description,members.id,members.projectId",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,name,description,members.id,members.projectId"
+								}
+							]
 						},
 						"description": "Get a project by id. project members and attachments should also be returned. Only those fields which are specified should be returned."
 					},
@@ -391,19 +422,18 @@
 				{
 					"name": "List projects",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
+						"url": "{{api-url}}/v4/projects",
 						"description": "List all the project with no filter. Default sort and limits are applied."
 					},
 					"response": []
@@ -411,18 +441,36 @@
 				{
 					"name": "List projects with limit and offset",
 					"request": {
-						"url": "{{api-url}}/v4/projects?limit=1&offset=1",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects?limit=1&offset=1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								},
+								{
+									"key": "offset",
+									"value": "1"
+								}
+							]
 						},
 						"description": "List all the project with no filter. Limit of 1 and offset of 1 is applied"
 					},
@@ -431,18 +479,32 @@
 				{
 					"name": "List projects with filters applied",
 					"request": {
-						"url": "{{api-url}}/v4/projects?filter=type%3Dgeneric",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects?filter=type%3Dgeneric",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "type%3Dgeneric"
+								}
+							]
 						},
 						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
 					},
@@ -451,18 +513,32 @@
 				{
 					"name": "List projects with sort applied",
 					"request": {
-						"url": "{{api-url}}/v4/projects?sort=type%20desc",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects?sort=type%20desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "type%20desc"
+								}
+							]
 						},
 						"description": "List all the project with custom sort and no filter. Default sort and limits are applied. The sort string has to be url encoded. Sort is of type `key asc|desc`"
 					},
@@ -471,18 +547,32 @@
 				{
 					"name": "List projects and return specific fields",
 					"request": {
-						"url": "{{api-url}}/v4/projects?fields=id,name,description",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects?fields=id,name,description",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,name,description"
+								}
+							]
 						},
 						"description": "List all the project with no filter. Default sort and limits are applied. The fields to return is specified as comma separated list. Only those fields should be returned."
 					},
@@ -491,19 +581,18 @@
 				{
 					"name": "DELETE project by id",
 					"request": {
-						"url": "{{api-url}}/v4/projects/3",
 						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
+						"url": "{{api-url}}/v4/projects/3",
 						"description": "Delete a project by id"
 					},
 					"response": []
@@ -511,24 +600,22 @@
 				{
 					"name": "Update project",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"project name updated\"\n\t}\n}"
+							"raw": "{\n  \"param\": {\n    \"name\": \"project name updated\"\n  }\n}"
 						},
+						"url": "{{api-url}}/v4/projects/13",
 						"description": "Update the project name. Name should be updated successfully."
 					},
 					"response": []
@@ -536,24 +623,22 @@
 				{
 					"name": "Update project 403",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"project name updated\"\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/2",
 						"description": "Update the project name. If user don't have permission to the project than it should return 403."
 					},
 					"response": []
@@ -561,99 +646,183 @@
 				{
 					"name": "Update project 404",
 					"request": {
-						"url": "{{api-url}}/v4/projects/10",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"project name updated\"\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/10",
 						"description": "Update the project name. If project is not found than this result in 404 status code."
 					},
 					"response": []
 				},
 				{
-					"name": "Update project status to cancelled",
+					"name": "Update project status to in review",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"status\": \"cancelled\"\n\t}\n}"
+							"raw": "{\n  \"param\": {\n    \"status\": \"in_review\"\n  }\n}"
 						},
-						"description": "Update the project status. While cancelling the project `cancelReason` is mandatory. If no `cancelReason` is supplied this should result in 422 status code."
+						"url": "{{api-url}}/v4/projects/7",
+						"description": "Update the project status."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project status to reviewed",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"status\": \"reviewed\"\n  }\n}"
+						},
+						"url": "{{api-url}}/v4/projects/7",
+						"description": "Update the project status."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project status to paused",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"status\": \"paused\"\n  }\n}"
+						},
+						"url": "{{api-url}}/v4/projects/7",
+						"description": "Update the project status."
 					},
 					"response": []
 				},
 				{
 					"name": "Update project status to cancelled with cancelReason",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"status\": \"cancelled\",\n\t\t\"cancelReason\": \"price/cost\"\n\t}\n}"
+							"raw": "{\n  \"param\": {\n    \"status\": \"cancelled\",\n    \"cancelReason\": \"price/cost\"\n  }\n}"
 						},
+						"url": "{{api-url}}/v4/projects/7",
 						"description": "Update the project status. While cancelling the project `cancelReason` is mandatory."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project status to cancelled",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"status\": \"cancelled\"\n\t}\n}"
+						},
+						"url": "{{api-url}}/v4/projects/1",
+						"description": "Update the project status. While cancelling the project `cancelReason` is mandatory. If no `cancelReason` is supplied this should result in 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project status to completed",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"status\": \"completed\"\n  }\n}"
+						},
+						"url": "{{api-url}}/v4/projects/7",
+						"description": "Update the project status."
 					},
 					"response": []
 				},
 				{
 					"name": "Move project out of cancel state.",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"status\": \"active\"\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/1",
 						"description": "Move a project out of cancel state. Only admin and manager is allowed to do so."
 					},
 					"response": []
@@ -661,25 +830,69 @@
 				{
 					"name": "Move project out of cancel state 403",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"status\": \"active\"\n\t}\n}"
 						},
+						"url": "{{api-url}}/v4/projects/1",
 						"description": "Move a project out of cancel state. Only admin and manager is allowed to do so."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project details",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"details\": {\n      \"summary\": \"project name updated\"\n    }\n  }\n}"
+						},
+						"url": "{{api-url}}/v4/projects/8",
+						"description": "Update the project details. This should fire specification modified event"
+					},
+					"response": []
+				},
+				{
+					"name": "Update project bookmarks",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"bookmarks\": [\n      {\n        \"title\": \"test\",\n        \"address\": \"http://topcoder.com\"\n      }\n    \n    ]\n  }\n}"
+						},
+						"url": "{{api-url}}/v4/projects/8",
+						"description": "Update the project bookmarks. This should fire project link created event"
 					},
 					"response": []
 				}
@@ -687,200 +900,176 @@
 		},
 		{
 			"name": "bookmarks",
-			"description": "",
 			"item": [
 				{
 					"name": " Create project without bookmarks",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects"
 					},
 					"response": []
 				},
 				{
 					"name": " Create project with valid bookmarks",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects"
 					},
 					"response": []
 				},
 				{
 					"name": " Create project with invalid bookmarks",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"invalid\":3,\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects"
 					},
 					"response": []
 				},
 				{
 					"name": "get  project",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2"
 					},
 					"response": []
 				},
 				{
 					"name": "Update project with bookmarks",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\",\n         \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }]\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2"
 					},
 					"response": []
 				},
 				{
 					"name": "Delete project all bookmarks null",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":null\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2"
 					},
 					"response": []
 				},
 				{
 					"name": "Update  project with invalid bookmarks",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":3\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2"
 					},
 					"response": []
 				},
 				{
 					"name": "get projects with admin token",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects"
 					},
 					"response": []
 				}
@@ -888,25 +1077,22 @@
 		},
 		{
 			"name": "issue1",
-			"description": "",
 			"item": [
 				{
 					"name": "get projects with copilot token",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects"
 					},
 					"response": []
 				}
@@ -914,55 +1100,48 @@
 		},
 		{
 			"name": "issue10",
-			"description": "",
 			"item": [
 				{
 					"name": "wrong role",
 					"request": {
-						"url": "{{api-url}}/v4/projects/3/members/5",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": " {\n \"param\": {\n    \"role\": \"wrong\"\n   }\n } "
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/3/members/5"
 					},
 					"response": []
 				},
 				{
 					"name": "editing project member roles & primary option",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": " {\n \"param\": {\n    \"role\": \"manager\",\n    \"isPrimary\": true\n   }\n } "
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/1/members/1"
 					},
 					"response": []
 				}
@@ -970,80 +1149,70 @@
 		},
 		{
 			"name": "issue5",
-			"description": "",
 			"item": [
 				{
 					"name": "launch a project by topcoder managers ",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \n    \"param\":{\n        \"name\": \"updatedProject name\",\n         \"status\": \"active\"\n    }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/1"
 					},
 					"response": []
 				},
 				{
 					"name": "launch a project by member",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \n    \"param\":{\n        \"name\": \"updatedProject name\",\n         \"status\": \"active\"\n    }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/1"
 					},
 					"response": []
 				},
 				{
 					"name": "launch a project by copilot",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \n    \"param\":{\n        \"name\": \"updatedProject name\",\n         \"status\": \"active\"\n    }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/1"
 					},
 					"response": []
 				}
@@ -1051,180 +1220,158 @@
 		},
 		{
 			"name": "issue8",
-			"description": "",
 			"item": [
 				{
 					"name": "mock direct projects",
 					"request": {
-						"url": "https://localhost:8443/v3/direct/projects",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": " {\n \"param\": {\n    \"role\": \"copilot\",\n    \"isPrimary\": true\n   }\n } "
 						},
-						"description": ""
+						"url": "https://localhost:8443/v3/direct/projects"
 					},
 					"response": []
 				},
 				{
 					"name": " Create direct project when a new project is successfully created",
 					"request": {
-						"url": "{{api-url}}/v4/projects",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects"
 					},
 					"response": []
 				},
 				{
 					"name": "Response error from direct project service",
 					"request": {
-						"url": "{{api-url}}/v4/projects/1/members",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"userId\": 2, \n        \"role\": \"copilot\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/1/members"
 					},
 					"response": []
 				},
 				{
 					"name": " Add co-pilot when a co-pilot is added to a project",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2/members",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"userId\": 2, \n        \"role\": \"copilot\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2/members"
 					},
 					"response": []
 				},
 				{
 					"name": "remove copilot from direct project when editing project member role",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2/members/4",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": " {\n \"param\": {\n    \"role\": \"customer\",\n    \"isPrimary\": true\n   }\n } "
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2/members/4"
 					},
 					"response": []
 				},
 				{
 					"name": " Sync billing account id with direct",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\"\n      }\n}"
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2"
 					},
 					"response": []
 				},
 				{
 					"name": "Delete co-pilot when a co-pilot is removed from  a project",
 					"request": {
-						"url": "{{api-url}}/v4/projects/2/members/4",
 						"method": "DELETE",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
-						"description": ""
+						"url": "{{api-url}}/v4/projects/2/members/4"
 					},
 					"response": []
 				}

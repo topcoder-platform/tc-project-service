@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import methodOverride from 'method-override';
 import _ from 'lodash';
 import bodyParser from 'body-parser';
@@ -10,6 +11,7 @@ import router from './routes';
 import permissions from './permissions';
 import models from './models';
 import analytics from './events/analytics';
+import busApi from './events/busApi';
 
 const app = express();
 
@@ -41,6 +43,7 @@ app.use(addRequestId);
 let appName = 'tc-projects-service';
 switch (process.env.NODE_ENV.toLowerCase()) {
   case 'development':
+    app.use(cors());
     appName += '-dev';
     break;
   case 'qa':
@@ -74,6 +77,11 @@ const analyticsKey = config.get('analyticsKey');
 if (!_.isEmpty(analyticsKey)) {
   analytics(analyticsKey, app, logger);
 }
+
+// =======================
+// Event listener for Bus Api
+// =======================
+busApi(app, logger);
 
 // ========================
 // Permissions
