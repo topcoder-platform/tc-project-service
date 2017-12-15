@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import methodOverride from 'method-override';
 import _ from 'lodash';
 import bodyParser from 'body-parser';
@@ -43,7 +42,6 @@ app.use(addRequestId);
 let appName = 'tc-projects-service';
 switch (process.env.NODE_ENV.toLowerCase()) {
   case 'development':
-    app.use(cors());
     appName += '-dev';
     break;
   case 'qa':
