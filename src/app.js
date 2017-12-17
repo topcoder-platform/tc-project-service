@@ -92,9 +92,8 @@ permissions();
 // ========================
 
 app.use(router);
-app.use('/v4/projects/debug',(req,res)=>{
- 
-  res.status(200).json({ history: {}, env:process.env});  
+app.use('/v4/projects/debug', (req, res) => {
+  res.status(200).json({ history: {}, env: process.env });
 });
 app.routerRef = router;
 
