@@ -6,6 +6,7 @@ import expressSanitizer from 'express-sanitizer';
 import config from 'config';
 import coreLib from 'tc-core-library-js';
 import expressRequestId from 'express-request-id';
+import router from './routes';
 import permissions from './permissions';
 import models from './models';
 import analytics from './events/analytics';
@@ -90,11 +91,8 @@ permissions();
 // Routes
 // ========================
 
-// app.use(router);
-app.use('/v4/projects/debug', (req, res) => {
-  res.status(200).json({ history: {}, env: process.env });
-});
-// app.routerRef = router;
+app.use(router);
+app.routerRef = router;
 
 // =======================
 // Initialize services
