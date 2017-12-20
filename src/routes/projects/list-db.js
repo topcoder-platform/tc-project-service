@@ -123,7 +123,7 @@ module.exports = [
     req.log.debug(criteria);
 
     if (!memberOnly
-      && (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)
+      && (util.hasAdminRole(req)
           || util.hasRole(req, USER_ROLE.MANAGER))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)

@@ -4,7 +4,7 @@
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
-import { USER_ROLE, PROJECT_MEMBER_ROLE } from '../constants';
+import { PROJECT_MEMBER_ROLE } from '../constants';
 
 /**
  * Super admin, Topcoder Managers are allowed to edit any project
@@ -20,7 +20,7 @@ module.exports = freq => new Promise((resolve, reject) => {
         req.context = req.context || {};
         req.context.currentProjectMembers = members;
         // check if auth user has acecss to this project
-        const hasAccess = util.hasRole(req, USER_ROLE.TOPCODER_ADMIN) ||
+        const hasAccess = util.hasAdminRole(req) ||
           !_.isUndefined(_.find(members, m => m.userId === req.authUser.userId &&
             ((m.role === PROJECT_MEMBER_ROLE.CUSTOMER && m.isPrimary) ||
               m.role === PROJECT_MEMBER_ROLE.MANAGER)));

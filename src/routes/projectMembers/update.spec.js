@@ -267,7 +267,7 @@ describe('Project members update', () => {
             resJson.isPrimary.should.be.false;
             resJson.updatedBy.should.equal(40051332);
             deleteSpy.should.have.been.calledOnce;
-            server.services.pubsub.publish.calledWith('project.member.removed').should.be.true;
+            server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
             done();
           }
         });

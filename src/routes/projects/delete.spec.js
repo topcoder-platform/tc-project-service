@@ -100,5 +100,39 @@ describe('Project delete test', () => {
           }
         });
     });
+
+    it('should return 204, for connect admin, if project was successfully removed', (done) => {
+      request(server)
+        .delete(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            server.services.pubsub.publish.calledWith('project.deleted').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 204, for connect admin, if project was successfully removed', (done) => {
+      request(server)
+        .delete(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            server.services.pubsub.publish.calledWith('project.deleted').should.be.true;
+            done();
+          }
+        });
+    });
   });
 });
