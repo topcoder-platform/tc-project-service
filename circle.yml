@@ -24,7 +24,7 @@ dependencies:
 
 deployment:
   development:
-    branch: [dev, 'feature/connect-admin-role']
+    branch: dev
     commands:
       - ./ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
 
