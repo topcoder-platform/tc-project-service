@@ -20,13 +20,14 @@ module.exports = (app, logger) => {
   /**
    * PROJECT_DRAFT_CREATED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, ({ project }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, ({ req, project }) => {
     logger.debug('receive PROJECT_DRAFT_CREATED event');
 
     // send event to bus api
     createEvent(BUS_API_EVENT.PROJECT_CREATED, {
       projectId: project.id,
       projectName: project.name,
+      userId: req.authUser.userId
     });
   });
 
@@ -41,6 +42,7 @@ module.exports = (app, logger) => {
       createEvent(mapEventTypes[updated.status], {
         projectId: updated.id,
         projectName: updated.name,
+        userId: req.authUser.userId,
       });
     } else if (
       !_.isEqual(original.details, updated.details) ||
