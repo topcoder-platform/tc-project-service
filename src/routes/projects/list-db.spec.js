@@ -300,5 +300,109 @@ describe('LIST Project db', () => {
           }
         });
     });
+
+    describe('for connect admin ', () => {
+      it('should return the project ', (done) => {
+        request(server)
+          .get('/v4/projects/db/?fields=id%2Cmembers.id')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(3);
+              done();
+            }
+          });
+      });
+
+      it('should return all projects that match when filtering by name', (done) => {
+        request(server)
+          .get('/v4/projects/db/?filter=keyword%3Dtest')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(3);
+              done();
+            }
+          });
+      });
+
+      it('should return the project when filtering by keyword, which matches the name', (done) => {
+        request(server)
+          .get('/v4/projects/db/?filter=keyword%3D1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              resJson[0].name.should.equal('test1');
+              done();
+            }
+          });
+      });
+
+      it('should return the project when filtering by keyword, which matches the description', (done) => {
+        request(server)
+          .get('/v4/projects/db/?filter=keyword%3Dproject')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(3);
+              done();
+            }
+          });
+      });
+
+      it('should return the project when filtering by keyword, which matches the details', (done) => {
+        request(server)
+          .get('/v4/projects/db/?filter=keyword%3Dcode')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              resJson[0].name.should.equal('test1');
+              done();
+            }
+          });
+      });
+    });
   });
 });

@@ -214,10 +214,10 @@ module.exports = [
       limit: Math.min(req.query.limit || 20, 20),
       offset: req.query.offset || 0,
     };
-    req.log.debug(criteria);
+    req.log.info(criteria);
 
     if (!memberOnly
-      && (util.hasRole(req, USER_ROLE.TOPCODER_ADMIN)
+      && (util.hasAdminRole(req)
           || util.hasRole(req, USER_ROLE.MANAGER))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)

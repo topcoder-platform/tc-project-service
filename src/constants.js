@@ -30,7 +30,10 @@ export const USER_ROLE = {
   TOPCODER_ADMIN: 'administrator',
   MANAGER: 'Connect Manager',
   COPILOT: 'Connect Copilot',
+  CONNECT_ADMIN: 'Connect Admin',
 };
+
+export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
 
 
 export const EVENT = {

@@ -66,7 +66,8 @@ module.exports = [
    */
   (req, res, next) => {
     const project = req.body.param;
-    const userRole = util.hasRole(req, USER_ROLE.MANAGER)
+    // by default connect admin and managers joins projects as manager
+    const userRole = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.MANAGER])
         ? PROJECT_MEMBER_ROLE.MANAGER
         : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults
@@ -136,6 +137,7 @@ module.exports = [
                 req.log.error(err);
                 return Promise.resolve();
               });
+            // return Promise.resolve();
           })
 
           .then(() => {

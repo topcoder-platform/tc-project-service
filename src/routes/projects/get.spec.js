@@ -136,6 +136,25 @@ describe('GET Project', () => {
           });
     });
 
+    it('should return the project for connect admin ', (done) => {
+      request(server)
+          .get(`/v4/projects/${project1.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              done();
+            }
+          });
+    });
+
     it('should return attachment with downloadUrl', (done) => {
       models.ProjectAttachment.create({
         projectId: project1.id,
@@ -172,6 +191,7 @@ describe('GET Project', () => {
             .expect('Content-Type', /json/)
             .expect(200)
             .end((err, res) => {
+              stub.restore();
               if (err) {
                 done(err);
               } else {
@@ -181,7 +201,6 @@ describe('GET Project', () => {
                 resJson.attachments.should.have.lengthOf(1);
                 resJson.attachments[0].filePath.should.equal(attachment.filePath);
                 resJson.attachments[0].downloadUrl.should.exist;
-                stub.restore();
                 done();
               }
             });

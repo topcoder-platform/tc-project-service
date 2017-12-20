@@ -127,7 +127,7 @@ describe('Project', () => {
         });
     });
 
-    it('should return 403 if invalid user will launch a project', (done) => {
+    it('should return 403 if invalid user will update a project', (done) => {
       request(server)
         .patch(`/v4/projects/${project1.id}`)
         .set({
@@ -154,7 +154,7 @@ describe('Project', () => {
         });
     });
 
-    it('should return 200 if topcoder manager user will launch a project', (done) => {
+    it('should return 200 if topcoder manager user will update a project', (done) => {
       request(server)
         .patch(`/v4/projects/${project1.id}`)
         .set({
@@ -722,6 +722,61 @@ describe('Project', () => {
               });
           }
         });
+    });
+
+    xdescribe('for connect admin, ', () => {
+      it('should return 200, connect admin is allowed to transition project out of cancel status', (done) => {
+        models.Project.update({
+          status: PROJECT_STATUS.CANCELLED,
+        }, {
+          where: {
+            id: project1.id,
+          },
+        })
+          .then(() => {
+            const mbody = {
+              param: {
+                name: 'updatedProject name',
+                status: PROJECT_STATUS.ACTIVE,
+              },
+            };
+            request(server)
+              .patch(`/v4/projects/${project1.id}`)
+              .set({
+                Authorization: `Bearer ${testUtil.jwts.admin}`,
+              })
+              .send(mbody)
+              .expect('Content-Type', /json/)
+              .expect(200)
+              .end((err, res) => {
+                if (err) {
+                  done(err);
+                } else {
+                  const resJson = res.body.result.content;
+                  should.exist(resJson);
+                  resJson.name.should.equal('updatedProject name');
+                  resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
+                  resJson.updatedBy.should.equal(40051333);
+                  server.services.pubsub.publish.calledWith('project.updated').should.be.true;
+                  // validate that project history is updated
+                  models.ProjectHistory.findAll({
+                    where: {
+                      projectId: project1.id,
+                    },
+                  }).then((histories) => {
+                    should.exist(histories);
+                    histories.length.should.equal(1);
+                    const history = histories[0].get({
+                      plain: true,
+                    });
+                    history.status.should.equal(PROJECT_STATUS.ACTIVE);
+                    history.projectId.should.equal(project1.id);
+                    done();
+                  });
+                }
+              });
+          });
+      });
     });
   });
 });
