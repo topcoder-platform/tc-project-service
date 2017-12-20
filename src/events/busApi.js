@@ -27,7 +27,7 @@ module.exports = (app, logger) => {
     createEvent(BUS_API_EVENT.PROJECT_CREATED, {
       projectId: project.id,
       projectName: project.name,
-      userId: req.authUser.userId
+      userId: req.authUser.userId,
     });
   });
 
