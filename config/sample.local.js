@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === 'test') {
       projectIdFieldId: '00N2C000000Vxxx',
     },
     dbConfig: {
-      masterUrl: 'postgres://coder:mysecretpassword@dockerhost:5432/projectsdb',
+      masterUrl: 'postgres://coder:mysecretpassword@dockerhost:54321/projectsdb',
       maxPoolSize: 50,
       minPoolSize: 4,
       idleTimeout: 1000,
