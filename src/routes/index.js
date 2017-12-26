@@ -25,10 +25,6 @@ const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
 router.all('/v4/projects*', jwtAuth());
 
-router.get('/v4/projects/debug', (req, res) => {
-  res.status(200).json({ history: {}, env: process.env });
-});
-
 // Register all the routes
 router.route('/v4/projects')
   .post(require('./projects/create'))
