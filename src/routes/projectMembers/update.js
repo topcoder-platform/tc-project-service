@@ -121,6 +121,8 @@ module.exports = [
             { original: previousValue, updated: projectMember },
             { correlationId: req.id },
           );
+          req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
+            { req, original: previousValue, updated: projectMember });
           req.log.debug('updated project member', projectMember);
           res.json(util.wrapResponse(req.id, projectMember));
         })

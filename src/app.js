@@ -10,6 +10,7 @@ import router from './routes';
 import permissions from './permissions';
 import models from './models';
 import analytics from './events/analytics';
+import busApi from './events/busApi';
 
 const app = express();
 
@@ -74,6 +75,11 @@ const analyticsKey = config.get('analyticsKey');
 if (!_.isEmpty(analyticsKey)) {
   analytics(analyticsKey, app, logger);
 }
+
+// =======================
+// Event listener for Bus Api
+// =======================
+busApi(app, logger);
 
 // ========================
 // Permissions

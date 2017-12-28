@@ -21,7 +21,7 @@ Copy config/sample.local.js as config/local.js, update the properties and accord
 Once you start your PostgreSQL database through docker, it will create a projectsDB.
 *To create tables - note this will drop tables if they already exist*
 ```
-NODE_ENV=development npm run sync
+NODE_ENV=development npm run sync:db
 ```
 
 #### Redis
@@ -34,7 +34,7 @@ Docker compose includes elasticsearch instance as well. It will open ports 9200 
 
 There is a helper script to sync the indices and mappings with the elasticsearch.
 
-Run `npm run elasticsearch:sync` from the root of project to execute the script.
+Run `npm run sync:es` from the root of project to execute the script.
 
 > NOTE: This will first clear all the indices and than recreate them. So use with caution.
 

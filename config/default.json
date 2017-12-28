@@ -43,5 +43,7 @@
   },
   "analyticsKey": "",
   "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
-  "jwksUri": ""
+  "jwksUri": "",
+  "busApiUrl": "http://api.topcoder-dev.com",
+  "busApiToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoicHJvamVjdC1zZXJ2aWNlIiwiaWF0IjoxNTEyNzQ3MDgyLCJleHAiOjE1MjEzODcwODJ9.PHuNcFDaotGAL8RhQXQMdpL8yOKXxjB5DbBIodmt7RE"
 }
