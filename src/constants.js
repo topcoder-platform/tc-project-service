@@ -71,3 +71,7 @@ export const BUS_API_EVENT = {
   PROJECT_FILE_UPLOADED: 'connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'connect.project.specificationModified',
 };
+
+export const REGEX = {
+  URL: /^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=]*)?$/,
+};

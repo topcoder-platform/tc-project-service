@@ -11,6 +11,7 @@ import {
   PROJECT_MEMBER_ROLE,
   EVENT,
   USER_ROLE,
+  REGEX,
 } from '../../constants';
 import util from '../../util';
 import directProject from '../../services/directProject';
@@ -57,7 +58,7 @@ const updateProjectValdiations = {
       }).allow(null),
       bookmarks: Joi.array().items(Joi.object().keys({
         title: Joi.string(),
-        address: Joi.string().regex(/^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=]*)?$/),
+        address: Joi.string().regex(REGEX.URL),
       })).optional().allow(null),
       type: Joi.any().valid(_.values(PROJECT_TYPE)),
       details: Joi.any(),
