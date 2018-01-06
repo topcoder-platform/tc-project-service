@@ -57,7 +57,7 @@ const updateProjectValdiations = {
       }).allow(null),
       bookmarks: Joi.array().items(Joi.object().keys({
         title: Joi.string(),
-        address: Joi.string(),
+        address: Joi.string().regex(/^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=]*)?$/),
       })).optional().allow(null),
       type: Joi.any().valid(_.values(PROJECT_TYPE)),
       details: Joi.any(),
