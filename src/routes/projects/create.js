@@ -5,7 +5,7 @@ import _ from 'lodash';
 import Joi from 'joi';
 
 import models from '../../models';
-import { PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT } from '../../constants';
+import { PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
 import util from '../../util';
 import directProject from '../../services/directProject';
 
@@ -34,7 +34,7 @@ const createProjectValdiations = {
       }).allow(null),
       bookmarks: Joi.array().items(Joi.object().keys({
         title: Joi.string(),
-        address: Joi.string(),
+        address: Joi.string().regex(REGEX.URL),
       })).optional().allow(null),
       estimatedPrice: Joi.number().precision(2).positive().optional()
         .allow(null),
