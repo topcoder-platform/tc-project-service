@@ -118,7 +118,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
             query_string: {
               query: `*${keyword}*`,
               analyze_wildcard: true,
-              fields: ['name^3', 'description', 'type'], // boost name field
+              fields: ['name^3', 'description', 'type', 'details.utm.code'], // boost name field
             },
           },
           {
