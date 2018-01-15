@@ -65,7 +65,7 @@ function getRequestBody(indexName) {
           summary: { type: 'string' },
           utm: { type: 'nested',
             properties: {
-              code: { type: 'string' }
+              code: { type: 'string' },
             } },
           TBD_usageDescription: { type: 'string' },
           TBD_features: { type: 'nested',
