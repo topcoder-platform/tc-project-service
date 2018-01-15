@@ -134,7 +134,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
                       fields: ['details.utm.code'],
                     },
                   },
-                }
+                },
               },
             },
           },
