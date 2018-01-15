@@ -33,7 +33,7 @@ describe('Project create', () => {
         name: 'test project1',
         bookmarks: [{
           title: 'title1',
-          address: 'address1',
+          address: 'http://www.address.com',
         }],
       },
     };
