@@ -324,6 +324,7 @@ _.assignIn(util, {
   getUserRoles: Promise.coroutine(function* (userId, logger, requestId) { // eslint-disable-line func-names
     try {
       const token = yield this.getSystemUserToken(logger);
+      console.log("token", token);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       return httpClient.get(`${config.identityServiceEndpoint}/roles`, {
         params: {
