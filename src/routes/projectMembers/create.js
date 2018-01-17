@@ -56,25 +56,19 @@ module.exports = [
     let promise = Promise.resolve();
     if (member.role === PROJECT_MEMBER_ROLE.MANAGER) {
       promise = util.getUserRoles(member.userId, req.log, req.id);
-      console.log('after getting promise for getUserRoles');
     }
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
     return promise.then((memberRoles) => {
-      console.log('memberRoles', memberRoles);
-      console.log('member.role', member.role);
       if (member.role === PROJECT_MEMBER_ROLE.MANAGER
         && (!memberRoles || !util.hasIntersection(MANAGER_ROLES, memberRoles))) {
-        console.log('Should throw error');
         const err = new Error('This user can\'t be added as a Manager to the project');
         err.status = 400;
         return next(err);
       }
-      console.log('All good');
       return models.ProjectMember.create(member)
       .then((_newMember) => {
-        console.log(_newMember, '_newMember');
         newMember = _newMember.get({ plain: true });
         // publish event
         req.app.services.pubsub.publish(
