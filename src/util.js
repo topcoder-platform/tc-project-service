@@ -326,6 +326,7 @@ _.assignIn(util, {
       const token = yield this.getSystemUserToken(logger);
       console.log('token', token);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      console.log(`${config.identityServiceEndpoint}/roles`);
       return httpClient.get(`${config.identityServiceEndpoint}/roles`, {
         params: {
           filter: `subjectID=${userId}`,
@@ -334,7 +335,8 @@ _.assignIn(util, {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', []).map(r => r.roleName));
+      }).then(res => _.get(res, 'data.result.content', []).map(r => r.roleName))
+      .catch( (e) => return Promise.reject(e));
     } catch (err) {
       return Promise.reject(err);
     }
