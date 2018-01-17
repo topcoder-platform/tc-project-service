@@ -258,9 +258,9 @@ describe('Project Members create', () => {
             result: {
               success: true,
               status: 200,
-              content: {
-                roles: ['Topcoder User'],
-              },
+              content: [{
+                roleName: 'Topcoder User',
+              }],
             },
           },
         }),
@@ -302,9 +302,9 @@ describe('Project Members create', () => {
             result: {
               success: true,
               status: 200,
-              content: {
-                roles: [USER_ROLE.COPILOT],
-              },
+              content: [{
+                roleName: USER_ROLE.COPILOT,
+              }],
             },
           },
         }),
@@ -344,9 +344,9 @@ describe('Project Members create', () => {
             result: {
               success: true,
               status: 200,
-              content: {
-                roles: [USER_ROLE.MANAGER],
-              },
+              content: [{
+                roleName: USER_ROLE.MANAGER,
+              }],
             },
           },
         }),
@@ -391,9 +391,9 @@ describe('Project Members create', () => {
             result: {
               success: true,
               status: 200,
-              content: {
-                roles: [USER_ROLE.CONNECT_ADMIN],
-              },
+              content: [{
+                roleName: USER_ROLE.CONNECT_ADMIN,
+              }],
             },
           },
         }),
@@ -438,9 +438,9 @@ describe('Project Members create', () => {
             result: {
               success: true,
               status: 200,
-              content: {
-                roles: [USER_ROLE.TOPCODER_ADMIN],
-              },
+              content: [{
+                roleName: USER_ROLE.TOPCODER_ADMIN,
+              }],
             },
           },
         }),

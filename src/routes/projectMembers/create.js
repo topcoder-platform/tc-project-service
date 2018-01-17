@@ -55,14 +55,14 @@ module.exports = [
     }
     let promise = Promise.resolve();
     if (member.role === PROJECT_MEMBER_ROLE.MANAGER) {
-      promise = util.getUser(member.userId);
+      promise = util.getUserRoles(member.userId);
     }
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
-    return promise.then((memberUser) => {
+    return promise.then((memberRoles) => {
       if (member.role === PROJECT_MEMBER_ROLE.MANAGER
-        && (!memberUser || !memberUser.roles || !util.hasIntersection(MANAGER_ROLES, memberUser.roles))) {
+        && (!memberRoles || !util.hasIntersection(MANAGER_ROLES, memberRoles))) {
         const err = new Error('This user can\'t be added as a Manager to the project');
         err.status = 400;
         return next(err);

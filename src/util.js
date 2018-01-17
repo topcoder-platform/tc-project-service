@@ -321,19 +321,19 @@ _.assignIn(util, {
   /**
    * Retrieve member details from userIds
    */
-  getUser: Promise.coroutine(function* (userId, logger, requestId) { // eslint-disable-line func-names
+  getUserRoles: Promise.coroutine(function* (userId, logger, requestId) { // eslint-disable-line func-names
     try {
       const token = yield this.getSystemUserToken(logger);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
-      return httpClient.get(`${config.identityServiceEndpoint}/users/${userId}`, {
+      return httpClient.get(`${config.identityServiceEndpoint}/roles`, {
         params: {
-          fields: 'id,roles',
+          filter: `subjectID=${userId}`,
         },
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', null));
+      }).then(res => _.get(res, 'data.result.content', []).map(r => r.roleName));
     } catch (err) {
       return Promise.reject(err);
     }
