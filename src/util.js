@@ -326,8 +326,8 @@ _.assignIn(util, {
       const token = yield this.getSystemUserToken(logger);
       console.log('token', token);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
-      console.log(`${config.identityServiceEndpoint}/roles`);
-      return httpClient.get(`${config.identityServiceEndpoint}/roles`, {
+      console.log(`${config.identityServiceEndpoint}roles`);
+      return httpClient.get(`${config.identityServiceEndpoint}roles`, {
         params: {
           filter: `subjectID=${userId}`,
         },
