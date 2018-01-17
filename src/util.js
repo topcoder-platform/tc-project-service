@@ -335,8 +335,7 @@ _.assignIn(util, {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', []).map(r => r.roleName))
-      .catch( (e) => return Promise.reject(e));
+      }).then(res => _.get(res, 'data.result.content', []).map(r => r.roleName));
     } catch (err) {
       return Promise.reject(err);
     }
