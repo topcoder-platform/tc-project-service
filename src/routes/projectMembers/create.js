@@ -55,7 +55,7 @@ module.exports = [
     }
     let promise = Promise.resolve();
     if (member.role === PROJECT_MEMBER_ROLE.MANAGER) {
-      promise = util.getUserRoles(member.userId);
+      promise = util.getUserRoles(member.userId, req.log, req.id);
       console.log('after getting promise for getUserRoles');
     }
     req.log.debug('creating member', member);
