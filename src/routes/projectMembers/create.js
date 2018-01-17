@@ -6,7 +6,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, EVENT } from '../../constants';
+import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, EVENT } from '../../constants';
 
 /**
  * API to add a project member.
@@ -53,10 +53,21 @@ module.exports = [
     if (_.isUndefined(member.isPrimary)) {
       member.isPrimary = _.isUndefined(_.find(members, m => m.isPrimary && m.role === member.role));
     }
+    let promise = Promise.resolve();
+    if (member.role === PROJECT_MEMBER_ROLE.MANAGER) {
+      promise = util.getUser(member.userId);
+    }
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
-    return models.ProjectMember.create(member)
+    return promise.then((memberUser) => {
+      if (member.role === PROJECT_MEMBER_ROLE.MANAGER
+        && (!memberUser || !memberUser.roles || !util.hasIntersection(MANAGER_ROLES, memberUser.roles))) {
+        const err = new Error('This user can\'t be added as a Manager to the project');
+        err.status = 400;
+        return next(err);
+      }
+      return models.ProjectMember.create(member)
       .then((_newMember) => {
         newMember = _newMember.get({ plain: true });
         // publish event
@@ -72,5 +83,6 @@ module.exports = [
         req.log.error('Unable to register ', err);
         next(err);
       });
+    });
   },
 ];

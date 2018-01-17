@@ -86,6 +86,16 @@ _.assignIn(util, {
     return _.intersection(authRoles, roles.map(r => r.toLowerCase())).length > 0;
   },
   /**
+   * Helper funtion to find intersection (case insensitive) between two arrays
+   * @param  {Array} array1 first array of strings
+   * @param  {Array} array2 second array of strings
+   * @return {boolean}      true/false
+   */
+  hasIntersection: (array1, array2) => {
+    const lowercased = array1.map(s => s.toLowerCase());
+    return _.intersection(lowercased, array2.map(r => r.toLowerCase())).length > 0;
+  },
+  /**
    * Helper funtion to verify if user has admin roles
    * @param  {object} req  Request object that should contain authUser
    * @return {boolean}      true/false
@@ -297,6 +307,27 @@ _.assignIn(util, {
         params: {
           query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
           fields: 'userId,handle,firstName,lastName,email',
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(res => _.get(res, 'data.result.content', null));
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
+
+  /**
+   * Retrieve member details from userIds
+   */
+  getUser: Promise.coroutine(function* (userId, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getSystemUserToken(logger);
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      return httpClient.get(`${config.identityServiceEndpoint}/users/${userId}`, {
+        params: {
+          fields: 'id,roles',
         },
         headers: {
           'Content-Type': 'application/json',
