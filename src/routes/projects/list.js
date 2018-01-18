@@ -121,6 +121,23 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
               fields: ['name^3', 'description', 'type'], // boost name field
             },
           },
+           {
+            nested: {
+              path: 'details',
+              query: {
+                nested: {
+                  path: 'details.utm',
+                  query: {
+                    query_string: {
+                      query: `*${keyword}*`,
+                      analyze_wildcard: true,
+                      fields: ['details.utm.code'],
+                    },
+                  },
+                },
+              },
+            },
+          },
           {
             nested: {
               path: 'members',
