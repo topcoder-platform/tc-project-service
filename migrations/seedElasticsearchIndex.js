@@ -52,13 +52,29 @@ Promise.coroutine(function* wrapped() {
     logger.info(`Retrieved #${members.length} members`);
     members = _.groupBy(members, 'projectId');
 
-    const promises = [];
-    _.forEach(projects, (p) => {
-      p.members = members[p.id];
-      logger.debug(`Processing Project #${p.id}`);
-      promises.push(rabbit.publish('project.initial', p, {}));
+    const chunks = _.chunk(projects, 100);
+
+    Promise.each(chunks, (pprojects) => {
+      const promises = [];
+      _.forEach(pprojects, (p) => {
+        p.members = members[p.id];
+        logger.debug(`Processing Project #${p.id}`);
+        promises.push(rabbit.publish('project.initial', p, {}));
+      });
+      return Promise.all(promises)
+      .then(() => {
+        logger.info(`Published ${promises.length} msgs`);
+      })
+      .delay(1000);
+    })
+    .then(() => {
+      logger.info('Published all msgs');
+      setTimeout(() => { process.exit(); }, 60000);
+    })
+    .catch((err) => {
+      logger.error(err);
+      setTimeout(() => { process.exit(); }, 50000);
     });
-    setTimeout(() => { process.exit(); }, 60000);
   } catch (err) {
     logger.error(err);
     setTimeout(() => { process.exit(); }, 40000);
