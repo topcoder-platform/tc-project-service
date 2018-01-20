@@ -17,6 +17,8 @@ const { exec } = require('child_process');
 
 const app = express();
 
+const fs = require('fs');
+
 // allows overriding HTTP Method
 // both arguments to the methodOverride are optional because they are the default
 // values, but we are specifying them to avoid any future change in defaults
@@ -101,6 +103,12 @@ app.get('/v4/projects/index', (req, res) => {
         erro1: `stderr: ${stderr1}`,
         errs1: JSON.stringify(err1) });
     });
+  });
+});
+
+app.get('/v4/projects/eslog', (req, res) => {
+  fs.readFile('/tmp/fs.tmp', (err, buf) => {
+    res.send(buf);
   });
 });
 

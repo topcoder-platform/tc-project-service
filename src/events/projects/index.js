@@ -9,6 +9,7 @@ import util from '../../util';
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
+const fs = require('fs');
 
 /**
  * Handler for project creation event
@@ -42,10 +43,13 @@ const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel)
       body: data,
     });
     logger.debug(`project indexed successfully (projectId: ${data.id})`, result);
+    fs.appendFile('/tmp/fs.tmp', 'project indexed successfully', () => {});
     channel.ack(msg);
     return undefined;
   } catch (error) {
     logger.error(`Error processing event (projectId: ${data.id})`, error);
+
+    fs.appendFile('/tmp/fs.tmp', JSON.stringify({ err: error, data }), () => {});
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;
   }
