@@ -33,266 +33,266 @@ function getRequestBody(indexName) {
   const projectMapping = {
     _all: { enabled: false },
     properties: {
-      "actualPrice": {
-        "type": "double"
+      actualPrice: {
+        type: 'double',
       },
-      "attachments": {
-        "type": "nested",
-        "properties": {
-          "category": {
-            "type": "string",
-            "index": "not_analyzed"
+      attachments: {
+        type: 'nested',
+        properties: {
+          category: {
+            type: 'string',
+            index: 'not_analyzed',
           },
-          "contentType": {
-            "type": "string",
-            "index": "not_analyzed"
+          contentType: {
+            type: 'string',
+            index: 'not_analyzed',
           },
-          "createdAt": {
-            "type": "date",
-            "format": "strict_date_optional_time||epoch_millis"
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
           },
-          "createdBy": {
-            "type": "integer"
+          createdBy: {
+            type: 'integer',
           },
-          "description": {
-            "type": "string"
+          description: {
+            type: 'string',
           },
-          "filePath": {
-            "type": "string"
+          filePath: {
+            type: 'string',
           },
-          "id": {
-            "type": "long"
+          id: {
+            type: 'long',
           },
-          "projectId": {
-            "type": "long"
+          projectId: {
+            type: 'long',
           },
-          "size": {
-            "type": "double"
+          size: {
+            type: 'double',
           },
-          "title": {
-            "type": "string"
+          title: {
+            type: 'string',
           },
-          "updatedAt": {
-            "type": "date",
-            "format": "strict_date_optional_time||epoch_millis"
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
           },
-          "updatedBy": {
-            "type": "integer"
-          }
-        }
+          updatedBy: {
+            type: 'integer',
+          },
+        },
       },
-      "billingAccountId": {
-        "type": "long"
+      billingAccountId: {
+        type: 'long',
       },
-      "bookmarks": {
-        "type": "nested",
-        "properties": {
-          "address": {
-            "type": "string"
+      bookmarks: {
+        type: 'nested',
+        properties: {
+          address: {
+            type: 'string',
           },
-          "title": {
-            "type": "string"
-          }
-        }
-      },
-      "cancelReason": {
-        "type": "string"
-      },
-      "challengeEligibility": {
-        "type": "nested",
-        "properties": {
-          "groups": {
-            "type": "long"
+          title: {
+            type: 'string',
           },
-          "role": {
-            "type": "string",
-            "index": "not_analyzed"
+        },
+      },
+      cancelReason: {
+        type: 'string',
+      },
+      challengeEligibility: {
+        type: 'nested',
+        properties: {
+          groups: {
+            type: 'long',
           },
-          "users": {
-            "type": "long"
-          }
-        }
+          role: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          users: {
+            type: 'long',
+          },
+        },
       },
-      "createdAt": {
-        "type": "date",
-        "format": "strict_date_optional_time||epoch_millis"
+      createdAt: {
+        type: 'date',
+        format: 'strict_date_optional_time||epoch_millis',
       },
-      "createdBy": {
-        "type": "integer"
+      createdBy: {
+        type: 'integer',
       },
-      "description": {
-        "type": "string"
+      description: {
+        type: 'string',
       },
-      "details": {
-        "type": "nested",
-        "properties": {
-          "TBD_features": {
-            "type": "nested",
-            "properties": {
-              "description": {
-                "type": "string"
+      details: {
+        type: 'nested',
+        properties: {
+          TBD_features: {
+            type: 'nested',
+            properties: {
+              description: {
+                type: 'string',
               },
-              "id": {
-                "type": "integer"
+              id: {
+                type: 'integer',
               },
-              "isCustom": {
-                "type": "boolean"
+              isCustom: {
+                type: 'boolean',
               },
-              "title": {
-                "type": "string"
-              }
-            }
-          },
-          "TBD_usageDescription": {
-            "type": "string"
-          },
-          "appDefinition": {
-            "properties": {
-              "goal": {
-                "properties": {
-                  "value": {
-                    "type": "string"
-                  }
-                }
+              title: {
+                type: 'string',
               },
-              "primaryTarget": {
-                "type": "string"
+            },
+          },
+          TBD_usageDescription: {
+            type: 'string',
+          },
+          appDefinition: {
+            properties: {
+              goal: {
+                properties: {
+                  value: {
+                    type: 'string',
+                  },
+                },
               },
-              "users": {
-                "properties": {
-                  "value": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
+              primaryTarget: {
+                type: 'string',
+              },
+              users: {
+                properties: {
+                  value: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
           },
-          "hideDiscussions": {
-            "type": "boolean"
+          hideDiscussions: {
+            type: 'boolean',
           },
-          "products": {
-            "type": "string"
+          products: {
+            type: 'string',
           },
-          "summary": {
-            "type": "string"
+          summary: {
+            type: 'string',
           },
-          "utm": {
-            "type": "nested",
-            "properties": {
-              "code": {
-                "type": "string"
-              }
-            }
-          }
-        }
+          utm: {
+            type: 'nested',
+            properties: {
+              code: {
+                type: 'string',
+              },
+            },
+          },
+        },
       },
-      "directProjectId": {
-        "type": "long"
+      directProjectId: {
+        type: 'long',
       },
-      "estimatedPrice": {
-        "type": "double"
+      estimatedPrice: {
+        type: 'double',
       },
-      "external": {
-        "properties": {
-          "data": {
-            "type": "string"
+      external: {
+        properties: {
+          data: {
+            type: 'string',
           },
-          "id": {
-            "type": "string",
-            "index": "not_analyzed"
+          id: {
+            type: 'string',
+            index: 'not_analyzed',
           },
-          "type": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
+          type: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+        },
       },
-      "id": {
-        "type": "long"
+      id: {
+        type: 'long',
       },
-      "members": {
-        "type": "nested",
-        "properties": {
-          "createdAt": {
-            "type": "date",
-            "format": "strict_date_optional_time||epoch_millis"
+      members: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
           },
-          "createdBy": {
-            "type": "integer"
+          createdBy: {
+            type: 'integer',
           },
-          "email": {
-            "type": "string",
-            "index": "not_analyzed"
+          email: {
+            type: 'string',
+            index: 'not_analyzed',
           },
-          "firstName": {
-            "type": "string"
+          firstName: {
+            type: 'string',
           },
-          "handle": {
-            "type": "string",
-            "index": "not_analyzed"
+          handle: {
+            type: 'string',
+            index: 'not_analyzed',
           },
-          "id": {
-            "type": "long"
+          id: {
+            type: 'long',
           },
-          "isPrimary": {
-            "type": "boolean"
+          isPrimary: {
+            type: 'boolean',
           },
-          "lastName": {
-            "type": "string"
+          lastName: {
+            type: 'string',
           },
-          "projectId": {
-            "type": "long"
+          projectId: {
+            type: 'long',
           },
-          "role": {
-            "type": "string",
-            "index": "not_analyzed"
+          role: {
+            type: 'string',
+            index: 'not_analyzed',
           },
-          "updatedAt": {
-            "type": "date",
-            "format": "strict_date_optional_time||epoch_millis"
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
           },
-          "updatedBy": {
-            "type": "integer"
+          updatedBy: {
+            type: 'integer',
           },
-          "userId": {
-            "type": "long"
-          }
-        }
+          userId: {
+            type: 'long',
+          },
+        },
       },
-      "name": {
-        "type": "string"
+      name: {
+        type: 'string',
       },
-      "status": {
-        "type": "string",
-        "index": "not_analyzed"
+      status: {
+        type: 'string',
+        index: 'not_analyzed',
       },
-      "terms": {
-        "type": "integer"
+      terms: {
+        type: 'integer',
       },
-      "type": {
-        "type": "string",
-        "index": "not_analyzed"
+      type: {
+        type: 'string',
+        index: 'not_analyzed',
       },
-      "updatedAt": {
-        "type": "date",
-        "format": "strict_date_optional_time||epoch_millis"
+      updatedAt: {
+        type: 'date',
+        format: 'strict_date_optional_time||epoch_millis',
       },
-      "updatedBy": {
-        "type": "integer"
+      updatedBy: {
+        type: 'integer',
       },
-      "utm": {
-        "properties": {
-          "campaign": {
-            "type": "string"
+      utm: {
+        properties: {
+          campaign: {
+            type: 'string',
           },
-          "medium": {
-            "type": "string"
+          medium: {
+            type: 'string',
           },
-          "source": {
-            "type": "string"
-          }
-        }
-      }
+          source: {
+            type: 'string',
+          },
+        },
+      },
     },
   };
   switch (indexName) {
