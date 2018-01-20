@@ -52,6 +52,8 @@ Promise.coroutine(function* wrapped() {
     });
     logger.info(`Retrieved #${members.length} members`);
     members = _.groupBy(members, 'projectId');
+    logger.info(members);
+    process.exit();
 
     const chunks = _.chunk(projects, 1);
 
@@ -81,3 +83,4 @@ Promise.coroutine(function* wrapped() {
     setTimeout(() => { process.exit(); }, 40000);
   }
 })();
+
