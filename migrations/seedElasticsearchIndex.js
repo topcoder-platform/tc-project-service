@@ -61,7 +61,7 @@ Promise.coroutine(function* wrapped() {
     Promise.all(promises)
     .then(() => {
       logger.info(`Published ${promises.length} msgs`);
-      process.exit();
+      setTimeout(function(){process.exit();},60000);
     })
     .catch((err) => {
       logger.error(err);
