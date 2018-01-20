@@ -41,6 +41,7 @@ Promise.coroutine(function* wrapped() {
       raw: true,
     });
     logger.info(`Retrieved #${projects.length} projects`);
+    logger.info(projects);
 
     const memberWhereClause = (projectIds.length > 0)
       ? { projectId: { $in: projectIds } }
