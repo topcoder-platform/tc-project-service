@@ -65,10 +65,10 @@ Promise.coroutine(function* wrapped() {
     })
     .catch((err) => {
       logger.error(err);
-      process.exit();
+      setTimeout(() => { process.exit(); }, 50000);
     });
   } catch (err) {
     logger.error(err);
-    process.exit();
+    setTimeout(() => { process.exit(); }, 40000);
   }
 })();
