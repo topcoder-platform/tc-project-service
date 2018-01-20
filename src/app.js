@@ -6,11 +6,14 @@ import expressSanitizer from 'express-sanitizer';
 import config from 'config';
 import coreLib from 'tc-core-library-js';
 import expressRequestId from 'express-request-id';
+import cors from 'cors';
 import router from './routes';
 import permissions from './permissions';
 import models from './models';
 import analytics from './events/analytics';
 import busApi from './events/busApi';
+
+const { exec } = require('child_process');
 
 const app = express();
 
@@ -35,7 +38,7 @@ app.use(expressSanitizer());
 // add request Id
 const addRequestId = expressRequestId();
 app.use(addRequestId);
-
+app.use(cors());
 // =======================
 // Loger =========
 // =======================
@@ -86,6 +89,20 @@ busApi(app, logger);
 // ========================
 // require('app/permissions')()
 permissions();
+
+app.get('/v4/projects/index', (req, res) => {
+  exec('npm run sync:es', (err, stdout, stderr) => {
+    exec('npm run migrate:es', (err1, stdout1, stderr1) => {
+      // the *entire* stdout and stderr (buffered)
+      res.send({ out: `stdout: ${stdout}`,
+        erro: `stderr: ${stderr}`,
+        errs: JSON.stringify(err),
+        out1: `stdout: ${stdout1}`,
+        erro1: `stderr: ${stderr1}`,
+        errs1: JSON.stringify(err1) });
+    });
+  });
+});
 
 // ========================
 // Routes
