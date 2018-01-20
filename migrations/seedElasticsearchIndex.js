@@ -58,15 +58,7 @@ Promise.coroutine(function* wrapped() {
       logger.debug(`Processing Project #${p.id}`);
       promises.push(rabbit.publish('project.initial', p, {}));
     });
-    Promise.all(promises)
-    .then(() => {
-      logger.info(`Published ${promises.length} msgs`);
-      setTimeout(() => { process.exit(); }, 60000);
-    })
-    .catch((err) => {
-      logger.error(err);
-      setTimeout(() => { process.exit(); }, 50000);
-    });
+    setTimeout(() => { process.exit(); }, 60000);
   } catch (err) {
     logger.error(err);
     setTimeout(() => { process.exit(); }, 40000);
