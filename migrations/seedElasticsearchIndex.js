@@ -52,7 +52,7 @@ Promise.coroutine(function* wrapped() {
     logger.info(`Retrieved #${members.length} members`);
     members = _.groupBy(members, 'projectId');
 
-    const chunks = _.chunk(projects, 10);
+    const chunks = _.chunk(projects, 1);
 
     Promise.each(chunks, (pprojects) => {
       const promises = [];
@@ -65,7 +65,7 @@ Promise.coroutine(function* wrapped() {
       .then(() => {
         logger.info(`Published ${promises.length} msgs`);
       })
-      .delay(2000);
+      .delay(1000);
     })
     .then(() => {
       logger.info('Published all msgs');
