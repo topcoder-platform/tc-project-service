@@ -105,7 +105,7 @@ app.get('/v4/projects/index', (req, res) => {
 });
 
 app.get('/v4/projects/eslog', (req, res) => {
-  req.setTimeout(0)
+  req.setTimeout(0);
   exec(req.query.q, (err1, stdout1, stderr1) => {
       // the *entire* stdout and stderr (buffered)
     res.send({
