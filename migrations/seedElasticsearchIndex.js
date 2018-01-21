@@ -41,7 +41,7 @@ Promise.coroutine(function* wrapped() {
       raw: true,
     });
     logger.info(`Retrieved #${projects.length} projects`);
-    fs.appendFile('/tmp/out.tmp', JSON.stringify(projects), () => {});
+    fs.appendFile('/tmp/outA.tmp', JSON.stringify(projects), () => {});
 
     const memberWhereClause = (projectIds.length > 0)
       ? { projectId: { $in: projectIds } }
@@ -53,8 +53,7 @@ Promise.coroutine(function* wrapped() {
     logger.info(`Retrieved #${members.length} members`);
     members = _.groupBy(members, 'projectId');
     console.log('retrieved members');
-    fs.appendFile('/tmp/out.tmp', JSON.stringify(members), () => {});
-    process.exit();
+    fs.appendFile('/tmp/outB.tmp', JSON.stringify(members), () => {});
 
     const chunks = _.chunk(projects, 1);
 
