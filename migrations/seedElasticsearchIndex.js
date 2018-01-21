@@ -8,7 +8,7 @@ import models from '../src/models';
 import RabbitMQService from '../src/services/rabbitmq';
 
 const logger = bunyan.createLogger({ name: 'init-es', level: config.get('logLevel') });
-
+const fs = require('fs');
 
 /**
  * Retrieve project ids from cli if provided
@@ -41,7 +41,7 @@ Promise.coroutine(function* wrapped() {
       raw: true,
     });
     logger.info(`Retrieved #${projects.length} projects`);
-    console.log(JSON.stringify(projects));
+    fs.appendFile('/tmp/out.tmp', JSON.stringify(projects), () => {});
 
     const memberWhereClause = (projectIds.length > 0)
       ? { projectId: { $in: projectIds } }
@@ -53,7 +53,7 @@ Promise.coroutine(function* wrapped() {
     logger.info(`Retrieved #${members.length} members`);
     members = _.groupBy(members, 'projectId');
     console.log('retrieved members');
-    console.log(JSON.stringify(members));
+    fs.appendFile('/tmp/out.tmp', JSON.stringify(members), () => {});
     process.exit();
 
     const chunks = _.chunk(projects, 1);
