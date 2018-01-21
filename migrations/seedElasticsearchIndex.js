@@ -41,7 +41,7 @@ Promise.coroutine(function* wrapped() {
       raw: true,
     });
     logger.info(`Retrieved #${projects.length} projects`);
-    logger.info(projects);
+    logger.info(JSON.stringify(projects));
 
     const memberWhereClause = (projectIds.length > 0)
       ? { projectId: { $in: projectIds } }
@@ -52,7 +52,7 @@ Promise.coroutine(function* wrapped() {
     });
     logger.info(`Retrieved #${members.length} members`);
     members = _.groupBy(members, 'projectId');
-    logger.info(members);
+    logger.info(JSON.stringify(members));
     process.exit();
 
     const chunks = _.chunk(projects, 1);
