@@ -35,6 +35,7 @@ export const USER_ROLE = {
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
 
+export const MANAGER_ROLES = [...ADMIN_ROLES, USER_ROLE.MANAGER];
 
 export const EVENT = {
   ROUTING_KEY: {

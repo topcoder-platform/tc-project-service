@@ -8,13 +8,14 @@ import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import { USER_ROLE } from '../../constants';
 
 const should = chai.should();
 
 describe('Project Members create', () => {
   let project1;
   let project2;
-  before((done) => {
+  beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {
         models.Project.create({
@@ -241,6 +242,233 @@ describe('Project Members create', () => {
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(3);
             postSpy.should.have.been.calledOnce;
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 400 for trying to add customers as manager', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: 'Topcoder User',
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: 'manager',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            const errorMessage = _.get(resJson, 'message', '');
+            sinon.assert.match(errorMessage, /.*can't be added as a Manager/);
+            done();
+          }
+        });
+    });
+
+    it('should return 400 for trying to add copilot as manager', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.COPILOT,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: 'manager',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            done();
+          }
+        });
+    });
+
+    it('should return 201 and register Connect Manager as manager', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.MANAGER,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: 'manager',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.role.should.equal('manager');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(3);
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 201 and register Connect Admin as manager', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.CONNECT_ADMIN,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: 'manager',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.role.should.equal('manager');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(3);
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 201 and register Topcoder Admin as manager', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.TOPCODER_ADMIN,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: 'manager',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.role.should.equal('manager');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(3);
             server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
           }
