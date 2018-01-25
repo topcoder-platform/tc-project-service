@@ -24,7 +24,7 @@ dependencies:
 
 deployment:
   development:
-    branch: [dev, 'feature/allow_managers_to_be_added']
+    branch: dev
     commands:
       - ./ebs_deploy.sh tc-project-service DEV $CIRCLE_BUILD_NUM
 
