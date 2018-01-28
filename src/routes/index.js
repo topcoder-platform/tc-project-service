@@ -48,6 +48,7 @@ router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
 router.route('/v4/projects/:projectId(\\d+)/attachments')
     .post(require('./attachments/create'));
 router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
+    .get(require('./attachments/download'))
     .patch(require('./attachments/update'))
     .delete(require('./attachments/delete'));
 
