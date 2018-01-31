@@ -28,7 +28,7 @@ module.exports = (app, logger) => {
       projectId: project.id,
       projectName: project.name,
       initiatorUserId: req.authUser.userId,
-    });
+    }, logger);
   });
 
   /**
@@ -43,7 +43,7 @@ module.exports = (app, logger) => {
         projectId: updated.id,
         projectName: updated.name,
         initiatorUserId: req.authUser.userId,
-      });
+      }, logger);
     } else if (
       !_.isEqual(original.details, updated.details) ||
       !_.isEqual(original.name, updated.name) ||
@@ -53,14 +53,14 @@ module.exports = (app, logger) => {
         projectId: updated.id,
         projectName: updated.name,
         initiatorUserId: req.authUser.userId,
-      });
+      }, logger);
     } else if (!_.isEqual(original.bookmarks, updated.bookmarks)) {
       logger.debug('project bookmarks is updated');
       createEvent(BUS_API_EVENT.PROJECT_LINK_CREATED, {
         projectId: updated.id,
         projectName: updated.name,
         initiatorUserId: req.authUser.userId,
-      });
+      }, logger);
     }
   });
 
@@ -93,7 +93,7 @@ module.exports = (app, logger) => {
         projectName: project.name,
         userId: member.userId,
         initiatorUserId: req.authUser.userId,
-      });
+      }, logger);
     }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
@@ -121,7 +121,7 @@ module.exports = (app, logger) => {
           projectName: project.name,
           userId: member.userId,
           initiatorUserId: req.authUser.userId,
-        });
+        }, logger);
       }
     }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -144,7 +144,7 @@ module.exports = (app, logger) => {
             projectName: project.name,
             userId: updated.userId,
             initiatorUserId: req.authUser.userId,
-          });
+          }, logger);
         }
       }).catch(err => null);    // eslint-disable-line no-unused-vars
     }
@@ -167,7 +167,7 @@ module.exports = (app, logger) => {
         projectName: project.name,
         fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
         initiatorUserId: req.authUser.userId,
-      });
+      }, logger);
     }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 };
