@@ -35,6 +35,7 @@ export const USER_ROLE = {
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
 
+export const MANAGER_ROLES = [...ADMIN_ROLES, USER_ROLE.MANAGER];
 
 export const EVENT = {
   ROUTING_KEY: {
@@ -70,4 +71,8 @@ export const BUS_API_EVENT = {
   PROJECT_LINK_CREATED: 'connect.project.linkCreated',
   PROJECT_FILE_UPLOADED: 'connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'connect.project.specificationModified',
+};
+
+export const REGEX = {
+  URL: /^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=]*)?$/, // eslint-disable-line
 };

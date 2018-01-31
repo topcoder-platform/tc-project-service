@@ -33,91 +33,264 @@ function getRequestBody(indexName) {
   const projectMapping = {
     _all: { enabled: false },
     properties: {
-      id: { type: 'long' },
-      directProjectId: { type: 'long' },
-      billingAccountId: { type: 'long' },
-      name: { type: 'string' },
-      description: { type: 'string' },
-      external: { type: 'object',
-        properties: {
-          id: { type: 'string', index: 'not_analyzed' },
-          type: { type: 'string', index: 'not_analyzed' },
-          data: { type: 'string' },
-        } },
-      bookmarks: { type: 'nested',
-        properties: {
-          title: { type: 'string' },
-          address: { type: 'string' },
-        } },
-      utm: { type: 'object',
-        properties: {
-          campaign: { type: 'string' },
-          medium: { type: 'string' },
-          source: { type: 'string' },
-        } },
-      estimatedPrice: { type: 'double' },
-      actualPrice: { type: 'double' },
-      terms: { type: 'integer' },
-      type: { type: 'string', index: 'not_analyzed' },
-      status: { type: 'string', index: 'not_analyzed' },
-      details: { type: 'nested',
-        properties: {
-          summary: { type: 'string' },
-          TBD_usageDescription: { type: 'string' },
-          TBD_features: { type: 'nested',
-            properties: {
-              id: { type: 'integer' },
-              title: { type: 'string' },
-              description: { type: 'string' },
-              isCustom: { type: 'boolean' },
-            } },
-        } },
-      challengeEligibility: { type: 'nested',
-        properties: {
-          role: { type: 'string', index: 'not_analyzed' },
-          users: { type: 'long' },
-          groups: { type: 'long' },
-        } },
-      cancelReason: { type: 'string' },
-      createdAt: { type: 'date' },
-      updatedAt: { type: 'date' },
-      createdBy: { type: 'integer' },
-      updatedBy: { type: 'integer' },
-      // project members nested data type
-      members: {
-        type: 'nested',
-        properties: {
-          id: { type: 'long' },
-          userId: { type: 'long' },
-          projectId: { type: 'long' },
-          role: { type: 'string', index: 'not_analyzed' },
-          firstName: { type: 'string' },
-          lastName: { type: 'string' },
-          email: { type: 'string', index: 'not_analyzed' },
-          handle: { type: 'string', index: 'not_analyzed' },
-          isPrimary: { type: 'boolean' },
-          createdAt: { type: 'date' },
-          updatedAt: { type: 'date' },
-          createdBy: { type: 'integer' },
-          updatedBy: { type: 'integer' },
-        },
+      actualPrice: {
+        type: 'double',
       },
-      // project attachments nested data type
       attachments: {
         type: 'nested',
         properties: {
-          id: { type: 'long' },
-          title: { type: 'string' },
-          size: { type: 'double' },
-          category: { type: 'string', index: 'not_analyzed' },
-          description: { type: 'string' },
-          filePath: { type: 'string' },
-          projectId: { type: 'long' },
-          contentType: { type: 'string', index: 'not_analyzed' },
-          createdAt: { type: 'date' },
-          updatedAt: { type: 'date' },
-          createdBy: { type: 'integer' },
-          updatedBy: { type: 'integer' },
+          category: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          contentType: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          description: {
+            type: 'string',
+          },
+          filePath: {
+            type: 'string',
+          },
+          id: {
+            type: 'long',
+          },
+          projectId: {
+            type: 'long',
+          },
+          size: {
+            type: 'double',
+          },
+          title: {
+            type: 'string',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+      billingAccountId: {
+        type: 'long',
+      },
+      bookmarks: {
+        type: 'nested',
+        properties: {
+          address: {
+            type: 'string',
+          },
+          title: {
+            type: 'string',
+          },
+        },
+      },
+      cancelReason: {
+        type: 'string',
+      },
+      challengeEligibility: {
+        type: 'nested',
+        properties: {
+          groups: {
+            type: 'long',
+          },
+          role: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          users: {
+            type: 'long',
+          },
+        },
+      },
+      createdAt: {
+        type: 'date',
+        format: 'strict_date_optional_time||epoch_millis',
+      },
+      createdBy: {
+        type: 'integer',
+      },
+      description: {
+        type: 'string',
+      },
+      details: {
+        type: 'nested',
+        properties: {
+          TBD_features: {
+            type: 'nested',
+            properties: {
+              description: {
+                type: 'string',
+              },
+              id: {
+                type: 'integer',
+              },
+              isCustom: {
+                type: 'boolean',
+              },
+              title: {
+                type: 'string',
+              },
+            },
+          },
+          TBD_usageDescription: {
+            type: 'string',
+          },
+          appDefinition: {
+            properties: {
+              goal: {
+                properties: {
+                  value: {
+                    type: 'string',
+                  },
+                },
+              },
+              primaryTarget: {
+                type: 'string',
+              },
+              users: {
+                properties: {
+                  value: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+          hideDiscussions: {
+            type: 'boolean',
+          },
+          products: {
+            type: 'string',
+          },
+          summary: {
+            type: 'string',
+          },
+          utm: {
+            type: 'nested',
+            properties: {
+              code: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+      directProjectId: {
+        type: 'long',
+      },
+      estimatedPrice: {
+        type: 'double',
+      },
+      external: {
+        properties: {
+          data: {
+            type: 'string',
+          },
+          id: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          type: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+        },
+      },
+      id: {
+        type: 'long',
+      },
+      members: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          email: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          firstName: {
+            type: 'string',
+          },
+          handle: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          isPrimary: {
+            type: 'boolean',
+          },
+          lastName: {
+            type: 'string',
+          },
+          projectId: {
+            type: 'long',
+          },
+          role: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+          userId: {
+            type: 'long',
+          },
+        },
+      },
+      name: {
+        type: 'string',
+      },
+      status: {
+        type: 'string',
+        index: 'not_analyzed',
+      },
+      terms: {
+        type: 'integer',
+      },
+      type: {
+        type: 'string',
+        index: 'not_analyzed',
+      },
+      updatedAt: {
+        type: 'date',
+        format: 'strict_date_optional_time||epoch_millis',
+      },
+      updatedBy: {
+        type: 'integer',
+      },
+      utm: {
+        properties: {
+          campaign: {
+            type: 'string',
+          },
+          medium: {
+            type: 'string',
+          },
+          source: {
+            type: 'string',
+          },
         },
       },
     },

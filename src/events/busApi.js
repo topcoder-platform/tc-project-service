@@ -27,8 +27,8 @@ module.exports = (app, logger) => {
     createEvent(BUS_API_EVENT.PROJECT_CREATED, {
       projectId: project.id,
       projectName: project.name,
-      userId: req.authUser.userId,
-    });
+      initiatorUserId: req.authUser.userId,
+    }, logger);
   });
 
   /**
@@ -42,8 +42,8 @@ module.exports = (app, logger) => {
       createEvent(mapEventTypes[updated.status], {
         projectId: updated.id,
         projectName: updated.name,
-        userId: req.authUser.userId,
-      });
+        initiatorUserId: req.authUser.userId,
+      }, logger);
     } else if (
       !_.isEqual(original.details, updated.details) ||
       !_.isEqual(original.name, updated.name) ||
@@ -52,15 +52,15 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED, {
         projectId: updated.id,
         projectName: updated.name,
-        userId: req.authUser.userId,
-      });
+        initiatorUserId: req.authUser.userId,
+      }, logger);
     } else if (!_.isEqual(original.bookmarks, updated.bookmarks)) {
       logger.debug('project bookmarks is updated');
       createEvent(BUS_API_EVENT.PROJECT_LINK_CREATED, {
         projectId: updated.id,
         projectName: updated.name,
-        userId: req.authUser.userId,
-      });
+        initiatorUserId: req.authUser.userId,
+      }, logger);
     }
   });
 
@@ -92,7 +92,8 @@ module.exports = (app, logger) => {
         projectId,
         projectName: project.name,
         userId: member.userId,
-      });
+        initiatorUserId: req.authUser.userId,
+      }, logger);
     }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
@@ -119,7 +120,8 @@ module.exports = (app, logger) => {
           projectId,
           projectName: project.name,
           userId: member.userId,
-        });
+          initiatorUserId: req.authUser.userId,
+        }, logger);
       }
     }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -141,7 +143,8 @@ module.exports = (app, logger) => {
             projectId,
             projectName: project.name,
             userId: updated.userId,
-          });
+            initiatorUserId: req.authUser.userId,
+          }, logger);
         }
       }).catch(err => null);    // eslint-disable-line no-unused-vars
     }
@@ -163,8 +166,8 @@ module.exports = (app, logger) => {
         projectId,
         projectName: project.name,
         fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
-        userId: req.authUser.userId,
-      });
+        initiatorUserId: req.authUser.userId,
+      }, logger);
     }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 };

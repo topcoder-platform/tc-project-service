@@ -33,7 +33,7 @@ describe('Project create', () => {
         name: 'test project1',
         bookmarks: [{
           title: 'title1',
-          address: 'address1',
+          address: 'http://www.address.com',
         }],
       },
     };
@@ -136,7 +136,7 @@ describe('Project create', () => {
             resJson.members[0].isPrimary.should.be.truthy;
             resJson.bookmarks.should.have.lengthOf(1);
             resJson.bookmarks[0].title.should.be.eql('title1');
-            resJson.bookmarks[0].address.should.be.eql('address1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
             server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }

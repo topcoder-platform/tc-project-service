@@ -36,16 +36,27 @@ function getClient() {
  * Any errors will be simply ignored
  * @param {String} type the event type, should be a dot separated fully qualitied name
  * @param {Object} message the message, should be a JSON object
+ * @param {Object} logger object
  * @return {Promise} new event promise
  */
-function createEvent(type, message) {
+function createEvent(type, message, logger) {
   const body = JSON.stringify(message);
+  logger.debug(`Sending message: ${JSON.stringify(message)}`);
   return getClient().post('/eventbus/events', {
     type,
     message: body,
   })
-  .then(resp => resp)
-  .catch(error => Promise.resolve());    // eslint-disable-line
+  .then((resp) => {
+    logger.debug('Sent event to bus-api');
+    logger.debug(`Sent event to bus-api [data]: ${resp.data}`);
+    logger.debug(`Sent event to bus-api [status]: ${resp.status}`);
+  })
+  .catch((error) => {
+    logger.debug('Error sending event to bus-api');
+    logger.debug(`Error sending event to bus-api [message]: ${error.message}`);
+    logger.debug(`Error sending event to bus-api [detail]: ${error.response.data.message}`);
+    Promise.resolve();     // eslint-disable-line
+  });
 }
 
 
