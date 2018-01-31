@@ -53,8 +53,23 @@ function createEvent(type, message, logger) {
   })
   .catch((error) => {
     logger.debug('Error sending event to bus-api');
-    logger.debug(`Error sending event to bus-api [message]: ${error.message}`);
-    logger.debug(`Error sending event to bus-api [detail]: ${error.response.data.message}`);
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      logger.debug(error.response.data);
+      logger.debug(error.response.status);
+      logger.debug(error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      logger.debug(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      logger.debug(error.message);
+    }
+    logger.debug(error.config);
+
     Promise.resolve();     // eslint-disable-line
   });
 }
