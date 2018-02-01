@@ -26,7 +26,7 @@ module.exports = freq => new Promise((resolve, reject) => {
 
         // if user is co-pilot and the project doesn't have any copilots then
         // user can access the project
-        if (util.hasRole(req, USER_ROLE.COPILOT)) {
+        if (!hasAccess && util.hasRole(req, USER_ROLE.COPILOT)) {
           return models.Project.getProjectIdsForCopilot(currentUserId)
             .then((ids) => {
               req.context.accessibleProjectIds = ids;
