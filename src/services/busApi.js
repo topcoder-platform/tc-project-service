@@ -41,9 +41,10 @@ function getClient() {
  */
 function createEvent(type, message, logger) {
   const body = JSON.stringify(message);
+  const topicPrefix = config.get('busTopicPrefix');
   logger.debug(`Sending message: ${JSON.stringify(message)}`);
   return getClient().post('/eventbus/events', {
-    type,
+    type: topicPrefix + type,
     message: body,
   })
   .then((resp) => {
