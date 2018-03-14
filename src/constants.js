@@ -60,6 +60,7 @@ export const BUS_API_EVENT = {
   PROJECT_PAUSED: 'notifications.connect.project.paused',
   PROJECT_COMPLETED: 'notifications.connect.project.completed',
   PROJECT_CANCELED: 'notifications.connect.project.canceled',
+  PROJECT_ACTIVE: 'notifications.connect.project.active',
 
   MEMBER_JOINED: 'notifications.connect.project.member.joined',
   MEMBER_LEFT: 'notifications.connect.project.member.left',
