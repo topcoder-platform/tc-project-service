@@ -14,6 +14,7 @@ const mapEventTypes = {
   [PROJECT_STATUS.COMPLETED]: BUS_API_EVENT.PROJECT_COMPLETED,
   [PROJECT_STATUS.CANCELLED]: BUS_API_EVENT.PROJECT_CANCELED,
   [PROJECT_STATUS.PAUSED]: BUS_API_EVENT.PROJECT_PAUSED,
+  [PROJECT_STATUS.ACTIVE]: BUS_API_EVENT.PROJECT_ACTIVE,
 };
 
 module.exports = (app, logger) => {
@@ -27,6 +28,7 @@ module.exports = (app, logger) => {
     createEvent(BUS_API_EVENT.PROJECT_CREATED, {
       projectId: project.id,
       projectName: project.name,
+      userId: req.authUser.userId,
       initiatorUserId: req.authUser.userId,
     }, logger);
   });
@@ -42,6 +44,7 @@ module.exports = (app, logger) => {
       createEvent(mapEventTypes[updated.status], {
         projectId: updated.id,
         projectName: updated.name,
+        userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
     } else if (
@@ -52,6 +55,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED, {
         projectId: updated.id,
         projectName: updated.name,
+        userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
     } else if (!_.isEqual(original.bookmarks, updated.bookmarks)) {
@@ -59,6 +63,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_LINK_CREATED, {
         projectId: updated.id,
         projectName: updated.name,
+        userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
     }
@@ -166,6 +171,7 @@ module.exports = (app, logger) => {
         projectId,
         projectName: project.name,
         fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
+        userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
     }).catch(err => null);    // eslint-disable-line no-unused-vars
