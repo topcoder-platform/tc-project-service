@@ -12,7 +12,7 @@ validate.options({
 });
 
 // health check
-router.get('/_health', (req, res) => {
+router.get('/v5/projects/health', (req, res) => {
   // TODO more checks
   res.status(200).send({
     message: 'All-is-well',
@@ -23,31 +23,31 @@ router.get('/_health', (req, res) => {
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
-router.all('/v4/projects*', jwtAuth());
+router.all('/v5/projects*', jwtAuth());
 
 // Register all the routes
-router.route('/v4/projects')
+router.route('/v5/projects')
   .post(require('./projects/create'))
   .get(require('./projects/list'));
 
-router.route('/v4/projects/db')
+router.route('/v5/projects/db')
   .get(require('./projects/list-db'));
 
-router.route('/v4/projects/:projectId(\\d+)')
+router.route('/v5/projects/:projectId(\\d+)')
   .get(require('./projects/get'))
   .patch(require('./projects/update'))
   .delete(require('./projects/delete'));
 
-router.route('/v4/projects/:projectId(\\d+)/members')
+router.route('/v5/projects/:projectId(\\d+)/members')
     .post(require('./projectMembers/create'));
 
-router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
+router.route('/v5/projects/:projectId(\\d+)/members/:id(\\d+)')
     .delete(require('./projectMembers/delete'))
     .patch(require('./projectMembers/update'));
 
-router.route('/v4/projects/:projectId(\\d+)/attachments')
+router.route('/v5/projects/:projectId(\\d+)/attachments')
     .post(require('./attachments/create'));
-router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
+router.route('/v5/projects/:projectId(\\d+)/attachments/:id(\\d+)')
     .get(require('./attachments/download'))
     .patch(require('./attachments/update'))
     .delete(require('./attachments/delete'));
