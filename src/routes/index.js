@@ -33,6 +33,15 @@ router.route('/v4/projects')
 router.route('/v4/projects/db')
   .get(require('./projects/list-db'));
 
+router.route('/v4/projects/admin/es/project/createIndex')
+  .post(require('./admin/project-create-index'));
+router.route('/v4/projects/admin/es/project/deleteIndex')
+  .delete(require('./admin/project-delete-index'));
+router.route('/v4/projects/admin/es/project/index')
+  .post(require('./admin/project-index-create'));
+router.route('/v4/projects/admin/es/project/remove')
+  .delete(require('./admin/project-index-delete'));
+
 router.route('/v4/projects/:projectId(\\d+)')
   .get(require('./projects/get'))
   .patch(require('./projects/update'))
