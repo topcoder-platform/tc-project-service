@@ -98,7 +98,7 @@ module.exports = [
         }
 
         res.status(200).json(util.wrapResponse(req.id, {
-          message: `Reindex request successfully submitted for ${body.length / 2} projects`
+          message: `Reindex request successfully submitted for ${body.length / 2} projects`,
         }));
         // bulk index
         eClient.bulk({
@@ -111,7 +111,9 @@ module.exports = [
           logger.error(`Error in indexing project (projectId: ${projectIdStart}-${projectIdEnd})`, error);
         });
       }).catch((error) => {
-        logger.error(`Error in getting project details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`, error);
+        logger.error(
+          `Error in getting project details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`,
+        error);
       });
     })
     .catch(err => next(err));
