@@ -83,6 +83,7 @@ module.exports = [
           // dummy return
           return p;
         });
+        logger.debug(body, 'body');
         // bulk index
         eClient.bulk({
           body,
