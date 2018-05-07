@@ -3,10 +3,10 @@
 
 import _ from 'lodash';
 import config from 'config';
+import Promise from 'bluebird';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import Promise from 'bluebird';
 
 /**
 /**
