@@ -11,6 +11,8 @@
     "docType": "projectV4"
   },
   "rabbitmqURL": "RABBITMQ_URL",
+  "pubsubQueueName": "PUBSUB_QUEUE_NAME",
+  "pubsubExchangeName": "PUBSUB_EXCHANGE_NAME",
   "directProjectServiceEndpoint": "DIRECT_PROJECT_SERVICE_ENDPOINT",
   "directProjectServiceTimeout": "DIRECT_PROJECT_SERVICE_TIMEOUt",
   "fileServiceEndpoint": "FILE_SERVICE_ENDPOINT",
