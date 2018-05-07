@@ -70,7 +70,15 @@ module.exports = [
               return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
             });
             return project;
+          })
+          .catch((error) => {
+            logger.error(`Error in getting project member details for (projectId: ${project.id})`, error);
+            return null;
           });
+        })
+        .catch((error) => {
+          logger.error(`Error in getting project active members (projectId: ${project.id})`, error);
+          return null;
         });
       });
       Promise.all(projects).then((projectResponses) => {
@@ -88,6 +96,10 @@ module.exports = [
           logger.trace('body[0]', body[0]);
           logger.trace('body[length-1]', body[body.length - 1]);
         }
+
+        res.status(200).json(util.wrapResponse(req.id, {
+          message: `Reindex request successfully submitted for ${body.length / 2} projects`
+        }));
         // bulk index
         eClient.bulk({
           body,
@@ -98,8 +110,9 @@ module.exports = [
         .catch((error) => {
           logger.error(`Error in indexing project (projectId: ${projectIdStart}-${projectIdEnd})`, error);
         });
+      }).catch((error) => {
+        logger.error(`Error in getting project details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`, error);
       });
-      res.status(200).json(util.wrapResponse(req.id, { message: 'Reindex request successfully submitted' }));
     })
     .catch(err => next(err));
   },
