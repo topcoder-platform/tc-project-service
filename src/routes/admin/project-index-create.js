@@ -83,7 +83,11 @@ module.exports = [
           // dummy return
           return p;
         });
-        logger.debug(body, 'body');
+        logger.debug('body.length', body.length);
+        if (body.length > 0) {
+          logger.trace('body[0]', body[0]);
+          logger.trace('body[length-1]', body[body.length - 1]);
+        }
         // bulk index
         eClient.bulk({
           body,
