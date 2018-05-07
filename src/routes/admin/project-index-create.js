@@ -6,6 +6,7 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import Promise from 'bluebird';
 
 /**
 /**
@@ -69,7 +70,7 @@ module.exports = [
               const detail = _.find(memberDetails, md => md.userId === single.userId);
               return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
             });
-            return project;
+            return Promise.delay(500).return(project);
           })
           .catch((error) => {
             logger.error(`Error in getting project member details for (projectId: ${project.id})`, error);
