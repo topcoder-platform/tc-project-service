@@ -70,7 +70,7 @@ module.exports = [
               const detail = _.find(memberDetails, md => md.userId === single.userId);
               return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
             });
-            return Promise.delay(500).return(project);
+            return Promise.delay(1000).return(project);
           })
           .catch((error) => {
             logger.error(`Error in getting project member details for (projectId: ${project.id})`, error);
