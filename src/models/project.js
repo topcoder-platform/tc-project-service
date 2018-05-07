@@ -155,6 +155,13 @@ module.exports = function defineProject(sequelize, DataTypes) {
               .then(projects => ({ rows: projects, count }));
           });
       },
+      findProjectRange(startId, endId, fields) {
+        return this.findAll({
+          where: { id: { $between: [startId, endId] } },
+          attributes: _.get(fields, 'projects', null),
+          raw: true,
+        });
+      },
     },
   });
 
