@@ -6,6 +6,7 @@ JQ="jq --raw-output --exit-status"
 ENV=$1
 COUNTER_LIMIT=20
 ACCOUNT_ID=$(eval "echo \$${ENV}_AWS_ACCOUNT_ID")
+AWS_REGION=$(eval "echo \$${ENV}_AWS_REGION")
 AWS_ECS_CONTAINER_NAME="tc-project-service"
 AWS_REPOSITORY=$(eval "echo \$${ENV}_AWS_REPOSITORY")
 AWS_ECS_CLUSTER=$(eval "echo \$${ENV}_AWS_ECS_CLUSTER")
