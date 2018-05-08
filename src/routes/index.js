@@ -26,7 +26,7 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
-router.all(RegExp(`\\/${apiVersion}\\/projects\\/(?!health).*`), jwtAuth());
+router.all(RegExp(`\\/${apiVersion}\\/projects(?!\\/health).*`), jwtAuth());
 
 // Register all the routes
 router.route('/v4/projects')
