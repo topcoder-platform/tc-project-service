@@ -7,6 +7,7 @@ jobs:
         environment:
         - POSTGRES_USER: circle_test
         - POSTGRES_DB: circle_test
+      - image: elasticsearch:2.3
     environment:
       DB_MASTER_URL: postgres://circle_test:@127.0.0.1:5432/circle_test
       AUTH_SECRET: secret
@@ -22,14 +23,6 @@ jobs:
           key: test-node-modules-{{ checksum "package.json" }}
           paths:
             - node_modules
-      - run:
-          name: Installing Elastic Search
-          command: |
-          wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.3.5/elasticsearch-2.3.5.tar.gz
-          tar -xvf elasticsearch-2.3.5.tar.gz
-          elasticsearch-2.3.5/bin/elasticsearch: {background: true}
-          # Make sure that Elasticsearch is up before running tests:
-          sleep 10 && wget --waitretry=5 --retry-connrefused -v http://127.0.0.1:9200/
       - run: npm run lint
       - run: npm run test
       - run: npm run build
