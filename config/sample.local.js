@@ -12,18 +12,9 @@ if (process.env.NODE_ENV === 'test') {
     logentriesToken: '',
     rabbitmqURL: 'amqp://dockerhost:5672',
     fileServiceEndpoint: 'https://api.topcoder-dev.com/v3/files/',
-    topicServiceEndpoint: 'https://api.topcoder-dev.com/v4/topics/',
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',
     memberServiceEndpoint: 'http://dockerhost:3001/members',
-    salesforceLead: {
-      webToLeadUrl: 'https://www.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8',
-      orgId: '00D2C0000000dO6',
-      projectNameFieldId: 'title',
-      projectDescFieldId: 'description',
-      projectLinkFieldId: 'URL',
-      projectIdFieldId: '00N2C000000Vxxx',
-    },
     dbConfig: {
       masterUrl: 'postgres://coder:mysecretpassword@dockerhost:54321/projectsdb',
       maxPoolSize: 50,
