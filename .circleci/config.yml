@@ -1,0 +1,85 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/node:8.9.4
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+        - POSTGRES_USER: circle_test
+        - POSTGRES_DB: circle_test
+      - image: elasticsearch:2.3
+    environment:
+      DB_MASTER_URL: postgres://circle_test:@127.0.0.1:5432/circle_test
+      AUTH_SECRET: secret
+      AUTH_DOMAIN: topcoder-dev.com
+      LOG_LEVEL: debug
+      APP_VERSION: v4
+    steps:
+      - checkout
+      - restore_cache:
+          key: test-node-modules-{{ checksum "package.json" }}
+      - run: npm install
+      - save_cache:
+          key: test-node-modules-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+  deployDev:
+    docker:
+      - image: docker:17.06.1-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Installation of build dependencies.
+          command: apk add --no-cache bash
+      - attach_workspace:
+          at: ./workspace
+      - run:
+          name: Installing AWS client
+          command: |
+            apk add --no-cache jq py-pip sudo
+            sudo pip install awscli --upgrade
+      - run: ./build.sh DEV
+      - run: ./deploy.sh DEV
+  deployProd:
+    docker:
+      - image: docker:17.06.1-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Installation of build dependencies.
+          command: apk add --no-cache bash
+      - attach_workspace:
+          at: ./workspace
+      - run:
+          name: Installing AWS client
+          command: |
+            apk add --no-cache jq py-pip sudo
+            sudo pip install awscli --upgrade
+      - run: ./build.sh PROD
+      - run: ./deploy.sh PROD
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test
+      - deployDev:
+          requires:
+            - test
+          filters:
+            branches:
+              only: dev
+      - deployProd:
+          requires:
+            - test
+          filters:
+            branches:
+              only: 'master'
