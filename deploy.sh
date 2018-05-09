@@ -239,5 +239,5 @@ check_service_status() {
 
 configure_aws_cli
 push_ecr_image
-deploy_cluster
-check_service_status
+#deploy_cluster
+#check_service_status
