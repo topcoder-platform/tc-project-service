@@ -145,8 +145,8 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
                       analyze_wildcard: true,
                       fields: ['details.utm.code'],
                     },
-                  }
-                }
+                  },
+                },
               },
             },
           },
