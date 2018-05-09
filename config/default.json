@@ -1,5 +1,6 @@
 {
-  "AUTH_SECRET": "secret",
+  "authSecret": "secret",
+  "authDomain": "topcoder-dev.com",
   "logLevel": "info",
   "version": "v4",
   "captureLogs": "false",
@@ -41,7 +42,8 @@
     "idleTimeout": 1000
   },
   "analyticsKey": "",
-  "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
+  "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
+  "jwksUri": "",
   "busApiUrl": "http://api.topcoder-dev.com",
   "busApiToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoicHJvamVjdC1zZXJ2aWNlIiwiaWF0IjoxNTEyNzQ3MDgyLCJleHAiOjE1MjEzODcwODJ9.PHuNcFDaotGAL8RhQXQMdpL8yOKXxjB5DbBIodmt7RE"
 }
