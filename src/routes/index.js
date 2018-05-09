@@ -94,7 +94,7 @@ router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   }
   const rerr = err;
   rerr.status = rerr.status || 500;
-  req.log.error(rerr);
+  //req.log.error(rerr);
   res.status(rerr.status).send(body);
 });
 
