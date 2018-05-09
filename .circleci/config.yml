@@ -76,4 +76,10 @@ workflows:
             - test
           filters:
             branches:
-              only: [dev, 'feature/circleci-ecs-upgrade']
+              only: dev
+      - deployProd:
+          requires:
+            - test
+          filters:
+            branches:
+              only: 'master'
