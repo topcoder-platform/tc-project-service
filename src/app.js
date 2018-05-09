@@ -4,6 +4,7 @@ import _ from 'lodash';
 import bodyParser from 'body-parser';
 import expressSanitizer from 'express-sanitizer';
 import config from 'config';
+import cors from 'cors';
 import coreLib from 'tc-core-library-js';
 import expressRequestId from 'express-request-id';
 import router from './routes';
@@ -62,6 +63,20 @@ const logger = coreLib.logger({
 });
 app.use(coreLib.middleware.logger(null, logger));
 app.logger = logger;
+
+// =======================
+// CORS ================
+// =======================
+// const whitelist = [`*.${domain}`];
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     const originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+//     callback(null, originIsWhitelisted);
+//   },
+// };
+// app.use(cors(corsOptions));
+// app.options('*', cors());
+app.use(cors());
 
 // =======================
 // Database =========

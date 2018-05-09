@@ -1,9 +1,12 @@
 
 import _ from 'lodash';
+import config from 'config';
 import validate from 'express-validation';
 import { Router } from 'express';
 
 const router = Router();
+
+const apiVersion = config.apiVersion;
 
 validate.options({
   status: 422,
@@ -12,7 +15,7 @@ validate.options({
 });
 
 // health check
-router.get('/_health', (req, res) => {
+router.get(`/${apiVersion}/projects/health`, (req, res) => {
   // TODO more checks
   res.status(200).send({
     message: 'All-is-well',
@@ -23,7 +26,7 @@ router.get('/_health', (req, res) => {
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
-router.all('/v4/projects*', jwtAuth());
+router.all(RegExp(`\\/${apiVersion}\\/projects(?!\\/health).*`), jwtAuth());
 
 // Register all the routes
 router.route('/v4/projects')
