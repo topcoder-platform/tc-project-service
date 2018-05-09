@@ -70,7 +70,7 @@ _.assignIn(util, {
    * @return {boolean}      true/false
    */
   hasRole: (req, role) => {
-    let isMachineToken = _.get(req, 'authUser.isMachine', false);
+    const isMachineToken = _.get(req, 'authUser.isMachine', false);
     if (isMachineToken) return true;
     let roles = _.get(req, 'authUser.roles', []);
     roles = roles.map(s => s.toLowerCase());
@@ -83,7 +83,7 @@ _.assignIn(util, {
    * @return {boolean}      true/false
    */
   hasRoles: (req, roles) => {
-    let isMachineToken = _.get(req, 'authUser.isMachine', false);
+    const isMachineToken = _.get(req, 'authUser.isMachine', false);
     if (isMachineToken) return true;
     let authRoles = _.get(req, 'authUser.roles', []);
     authRoles = authRoles.map(s => s.toLowerCase());
@@ -105,7 +105,7 @@ _.assignIn(util, {
    * @return {boolean}      true/false
    */
   hasAdminRole: (req) => {
-    let isMachineToken = _.get(req, 'authUser.isMachine', false);
+    const isMachineToken = _.get(req, 'authUser.isMachine', false);
     if (isMachineToken) return true;
     let roles = _.get(req, 'authUser.roles', []);
     roles = roles.map(s => s.toLowerCase());
