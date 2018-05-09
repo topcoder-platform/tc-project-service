@@ -1,5 +1,5 @@
 {
-  "authSecret": "AUTH_SECRET",
+  "AUTH_SECRET": "AUTH_SECRET",
   "logLevel": "LOG_LEVEL",
   "version": "APP_VERSION",
   "captureLogs": "CAPTURE_LOGS",
@@ -37,7 +37,7 @@
     "minPoolSize": "DB_MIN_POOL_SIZE"
   },
   "analyticsKey": "ANALYTICS_KEY",
-  "validIssuers": "VALID_ISSUERS",
+  "VALID_ISSUERS": "VALID_ISSUERS",
   "jwksUri": "JWKS_URI",
   "busApiUrl": "BUS_API_URL",
   "busApiToken": "BUS_API_TOKEN"
