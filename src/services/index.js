@@ -19,20 +19,20 @@ module.exports = (fapp, logger) => {
     require('../tests/serviceMocks')(app);                       // eslint-disable-line global-require
   } else {
     // RabbitMQ Initialization
-    app.services.pubsub = new RabbitMQService(logger);
+    // app.services.pubsub = new RabbitMQService(logger);
 
-    // initialize RabbitMQ
-    app.services.pubsub.init(
-      config.get('rabbitmqURL'),
-      config.get('pubsubExchangeName'),
-      config.get('pubsubQueueName'),
-    )
-    .then(() => {
-      logger.info('RabbitMQ service initialized');
-    })
-    .catch((err) => {
-      logger.error('Error initializing services', err);
-      // gracefulShutdown()
-    });
+    // // initialize RabbitMQ
+    // app.services.pubsub.init(
+    //   config.get('rabbitmqURL'),
+    //   config.get('pubsubExchangeName'),
+    //   config.get('pubsubQueueName'),
+    // )
+    // .then(() => {
+    //   logger.info('RabbitMQ service initialized');
+    // })
+    // .catch((err) => {
+    //   logger.error('Error initializing services', err);
+    //   // gracefulShutdown()
+    // });
   }
 };
