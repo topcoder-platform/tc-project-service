@@ -1,7 +1,7 @@
 
 
-import config from 'config';
-import RabbitMQService from './rabbitmq';
+// import config from 'config';
+// import RabbitMQService from './rabbitmq';
 
 /**
  * Responsible for establishing connections to all external services
@@ -18,6 +18,7 @@ module.exports = (fapp, logger) => {
   if (process.env.NODE_ENV.toLowerCase() === 'test') {
     require('../tests/serviceMocks')(app);                       // eslint-disable-line global-require
   } else {
+    logger.info('initializing RabbitMQ service');
     // RabbitMQ Initialization
     // app.services.pubsub = new RabbitMQService(logger);
 
