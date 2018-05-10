@@ -1,7 +1,7 @@
 
 
-// import config from 'config';
-// import RabbitMQService from './rabbitmq';
+import config from 'config';
+import RabbitMQService from './rabbitmq';
 
 /**
  * Responsible for establishing connections to all external services
