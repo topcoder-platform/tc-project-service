@@ -1,7 +1,6 @@
 {
   "apiVersion": "v4",
-  "authSecret": "secret",
-  "authDomain": "topcoder-dev.com",
+  "AUTH_SECRET": "secret",
   "logLevel": "info",
   "version": "v4",
   "captureLogs": "false",
