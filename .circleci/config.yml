@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: dev
+              only: [dev, 'feature/db-lock-issue']
       - deployProd:
           requires:
             - test

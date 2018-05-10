@@ -125,7 +125,8 @@ module.exports = [
               status: PROJECT_STATUS.DRAFT,
               cancelReason: null,
               updatedBy: req.authUser.userId,
-            });
+            }).then(() => req.log.debug('project history created for project %d', newProject.id))
+            .catch(error => req.log.error('project history failed for project %d', newProject.id));
             req.log.debug('creating direct project for project %d', newProject.id);
             return directProject.createDirectProject(req, body)
               .then((resp) => {
