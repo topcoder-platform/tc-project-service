@@ -13,7 +13,7 @@ delete pg.native;
 Sequelize.cls = cls.createNamespace('tc.micro.service');
 
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
-  logging: false,
+  logging: true,
   dialectOptions: {
     ssl: false,
   },
