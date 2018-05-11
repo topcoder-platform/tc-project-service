@@ -42,7 +42,7 @@ function getClient() {
 function createEvent(type, message, logger) {
   const body = JSON.stringify(message);
   logger.debug(`Sending message: ${JSON.stringify(message)}`);
-  return getClient().post('/v5/bus/events', {
+  return getClient().post('/bus/events', {
     type,
     message: body,
   })
