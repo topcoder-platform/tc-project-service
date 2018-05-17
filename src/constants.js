@@ -79,5 +79,5 @@ export const REGEX = {
 };
 
 export const TOKEN_SCOPES = {
-  CONNECT_PROJECT_ADMIN: "all:connect_project"
+  CONNECT_PROJECT_ADMIN: 'all:connect_project',
 };
