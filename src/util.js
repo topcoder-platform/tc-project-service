@@ -17,7 +17,7 @@ import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 import AWS from 'aws-sdk';
-import { ADMIN_ROLES } from './constants';
+import { ADMIN_ROLES, TOKEN_SCOPES } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -71,7 +71,11 @@ _.assignIn(util, {
    */
   hasRole: (req, role) => {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
-    if (isMachineToken) return true;
+    const tokenScopes = _.get(req, 'authUser.scopes', []);
+    if (isMachineToken) {
+      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      return false;
+    }
     let roles = _.get(req, 'authUser.roles', []);
     roles = roles.map(s => s.toLowerCase());
     return _.indexOf(roles, role.toLowerCase()) >= 0;
@@ -84,7 +88,11 @@ _.assignIn(util, {
    */
   hasRoles: (req, roles) => {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
-    if (isMachineToken) return true;
+    const tokenScopes = _.get(req, 'authUser.scopes', []);
+    if (isMachineToken) {
+      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      return false;
+    }
     let authRoles = _.get(req, 'authUser.roles', []);
     authRoles = authRoles.map(s => s.toLowerCase());
     return _.intersection(authRoles, roles.map(r => r.toLowerCase())).length > 0;
@@ -106,7 +114,11 @@ _.assignIn(util, {
    */
   hasAdminRole: (req) => {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
-    if (isMachineToken) return true;
+    const tokenScopes = _.get(req, 'authUser.scopes', []);
+    if (isMachineToken) {
+      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      return false;
+    }
     let roles = _.get(req, 'authUser.roles', []);
     roles = roles.map(s => s.toLowerCase());
     return _.intersection(roles, ADMIN_ROLES.map(r => r.toLowerCase())).length > 0;

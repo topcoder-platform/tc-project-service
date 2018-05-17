@@ -77,3 +77,7 @@ export const BUS_API_EVENT = {
 export const REGEX = {
   URL: /^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=;]*)?$/, // eslint-disable-line
 };
+
+export const TOKEN_SCOPES = {
+  CONNECT_PROJECT_ADMIN: "all:connect_project"
+};
