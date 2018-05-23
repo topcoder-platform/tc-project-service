@@ -1,6 +1,5 @@
 {
-    "authSecret": "secret",
-    "authDomain": "topcoder-dev.com",
+    "AUTH_SECRET": "secret",
     "logLevel": "debug",
     "captureLogs": "false",
     "logentriesToken": "",
