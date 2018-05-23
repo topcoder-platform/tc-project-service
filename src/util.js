@@ -117,7 +117,7 @@ _.assignIn(util, {
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
       if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
-      return true;
+      return false;
     }
     let roles = _.get(req, 'authUser.roles', []);
     roles = roles.map(s => s.toLowerCase());
