@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: 'feature/m2m-support'
+              only: 'dev'
       - deployProd:
           requires:
             - test
