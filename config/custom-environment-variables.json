@@ -1,6 +1,6 @@
 {
   "apiVersion": "API_VERSION",
-  "authSecret": "AUTH_SECRET",
+  "AUTH_SECRET": "AUTH_SECRET",
   "logLevel": "LOG_LEVEL",
   "version": "APP_VERSION",
   "captureLogs": "CAPTURE_LOGS",
@@ -28,8 +28,12 @@
     "minPoolSize": "DB_MIN_POOL_SIZE"
   },
   "analyticsKey": "SEGMENT_ANALYTICS_KEY",
-  "validIssuers": "VALID_ISSUERS",
+  "VALID_ISSUERS": "VALID_ISSUERS",
   "jwksUri": "JWKS_URI",
   "busApiUrl": "BUS_API_URL",
-  "busApiToken": "BUS_API_TOKEN"
+  "AUTH0_URL" : "AUTH0_URL",
+  "AUTH0_CLIENT_ID": "AUTH0_CLIENT_ID",
+  "AUTH0_CLIENT_SECRET": "AUTH0_CLIENT_SECRET",
+  "AUTH0_AUDIENCE": "AUTH0_AUDIENCE",
+  "TOKEN_CACHE_TIME" : "TOKEN_CACHE_TIME"
 }
