@@ -37,5 +37,6 @@
   "jwksUri": "",
   "busApiUrl": "http://api.topcoder-dev.com",
   "busApiToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoicHJvamVjdC1zZXJ2aWNlIiwiaWF0IjoxNTEyNzQ3MDgyLCJleHAiOjE1MjEzODcwODJ9.PHuNcFDaotGAL8RhQXQMdpL8yOKXxjB5DbBIodmt7RE",
-  "HEALTH_CHECK_URL": "_health"
+  "HEALTH_CHECK_URL": "_health",
+  "maxPhaseProductCount": 1
 }

@@ -23,4 +23,10 @@ module.exports = () => {
   Authorizer.setPolicy('project.downloadAttachment', projectView);
   Authorizer.setPolicy('project.updateMember', projectEdit);
   Authorizer.setPolicy('project.admin', projectAdmin);
+  Authorizer.setPolicy('project.addProjectPhase', projectEdit);
+  Authorizer.setPolicy('project.updateProjectPhase', projectEdit);
+  Authorizer.setPolicy('project.deleteProjectPhase', projectEdit);
+  Authorizer.setPolicy('project.addPhaseProduct', projectEdit);
+  Authorizer.setPolicy('project.updatePhaseProduct', projectEdit);
+  Authorizer.setPolicy('project.deletePhaseProduct', projectEdit);
 };
