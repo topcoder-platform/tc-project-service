@@ -6,6 +6,7 @@ import Joi from 'joi';
 
 import models from '../../models';
 import util from '../../util';
+import { EVENT } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -44,7 +45,7 @@ module.exports = [
       where: { id: projectId, deletedAt: { $eq: null } },
       raw: true,
     }).then((existingProject) => {
-        // make sure project exists
+      // make sure project exists
       if (!existingProject) {
         const err = new Error(`project not found for project id ${projectId}`);
         err.status = 404;
@@ -61,10 +62,10 @@ module.exports = [
         raw: true,
       });
     }).then((existingPhase) => {
-        // make sure phase exists
+      // make sure phase exists
       if (!existingPhase) {
         const err = new Error(`project phase not found for project id ${projectId}` +
-            ` and phase id ${phaseId}`);
+          ` and phase id ${phaseId}`);
         err.status = 404;
         throw err;
       }
@@ -81,10 +82,10 @@ module.exports = [
         raw: true,
       });
     }).then((productCount) => {
-        // make sure number of products of per phase <= max value
+      // make sure number of products of per phase <= max value
       if (productCount >= config.maxPhaseProductCount) {
         const err = new Error('the number of products per phase cannot exceed ' +
-            `${config.maxPhaseProductCount}`);
+          `${config.maxPhaseProductCount}`);
         err.status = 400;
         throw err;
       }
@@ -93,9 +94,19 @@ module.exports = [
       .then((_newPhaseProduct) => {
         newPhaseProduct = _.cloneDeep(_newPhaseProduct);
         req.log.debug('new phase product created (id# %d, name: %s)',
-                newPhaseProduct.id, newPhaseProduct.name);
+          newPhaseProduct.id, newPhaseProduct.name);
         newPhaseProduct = newPhaseProduct.get({ plain: true });
         newPhaseProduct = _.omit(newPhaseProduct, ['deletedAt', 'utm']);
+
+        // Send events to buses
+        req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
+          newPhaseProduct,
+          { correlationId: req.id },
+        );
+        req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, { req, created: newPhaseProduct });
+
         res.status(201).json(util.wrapResponse(req.id, newPhaseProduct, 1, 201));
       })).catch((err) => { next(err); });
   },

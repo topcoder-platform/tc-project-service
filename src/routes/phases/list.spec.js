@@ -1,9 +1,17 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
+import config from 'config';
+import sleep from 'sleep';
+import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+
+const should = chai.should();
 
 const body = {
   name: 'test project phase',
@@ -21,35 +29,51 @@ const body = {
 
 describe('Project Phases', () => {
   let projectId;
-  before((done) => {
+  let project;
+  before(function beforeHook(done) {
+    this.timeout(10000);
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+        }).then((p) => {
+          projectId = p.id;
+          project = p.toJSON();
+          // create members
+          models.ProjectMember.create({
+            userId: 40051332,
+            projectId,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.create({
-              userId: 40051332,
-              projectId,
-              role: 'copilot',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
+          }).then(() => {
+            _.assign(body, { projectId });
+            return models.ProjectPhase.create(body);
+          }).then((phase) => {
+            // Index to ES
+            project.phases = [phase];
+            return server.services.es.index({
+              index: ES_PROJECT_INDEX,
+              type: ES_PROJECT_TYPE,
+              id: projectId,
+              body: project,
             }).then(() => {
-              _.assign(body, { projectId });
-              models.ProjectPhase.create(body).then(() => done());
+              // sleep for some time, let elasticsearch indices be settled
+              sleep.sleep(5);
+              done();
             });
           });
         });
+      });
   });
 
   after((done) => {
@@ -93,6 +117,7 @@ describe('Project Phases', () => {
             done(err);
           } else {
             const resJson = res.body.result.content;
+            should.exist(resJson);
             resJson.should.have.lengthOf(1);
             done();
           }

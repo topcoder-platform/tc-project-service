@@ -4,6 +4,7 @@ import Joi from 'joi';
 
 import models from '../../models';
 import util from '../../util';
+import { EVENT } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -58,6 +59,16 @@ module.exports = [
 
             newProjectPhase = newProjectPhase.get({ plain: true });
             newProjectPhase = _.omit(newProjectPhase, ['deletedAt', 'deletedBy', 'utm']);
+
+            // Send events to buses
+            req.log.debug('Sending event to RabbitMQ bus for project phase %d', newProjectPhase.id);
+            req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
+              newProjectPhase,
+              { correlationId: req.id },
+            );
+            req.log.debug('Sending event to Kafka bus for project phase %d', newProjectPhase.id);
+            req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: newProjectPhase });
+
             res.status(201).json(util.wrapResponse(req.id, newProjectPhase, 1, 201));
           });
       }).catch((err) => {

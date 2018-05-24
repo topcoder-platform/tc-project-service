@@ -12,7 +12,7 @@ module.exports = function definePhaseProduct(sequelize, DataTypes) {
     type: { type: DataTypes.STRING, allowNull: true },
     estimatedPrice: { type: DataTypes.DOUBLE, defaultValue: 0.0 },
     actualPrice: { type: DataTypes.DOUBLE, defaultValue: 0.0 },
-    details: { type: DataTypes.JSON, defaultValue: '' },
+    details: { type: DataTypes.JSON, defaultValue: {} },
 
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

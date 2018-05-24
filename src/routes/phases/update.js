@@ -5,6 +5,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { EVENT } from '../../constants';
 
 
 const permissions = tcMiddleware.permissions;
@@ -37,6 +38,8 @@ module.exports = [
     const updatedProps = req.body.param;
     updatedProps.updatedBy = req.authUser.userId;
 
+    let previousValue;
+
     models.sequelize.transaction(() => models.ProjectPhase.findOne({
       where: {
         id: phaseId,
@@ -45,12 +48,14 @@ module.exports = [
       },
     }).then(existing => new Promise((accept, reject) => {
       if (!existing) {
-          // handle 404
+        // handle 404
         const err = new Error('No active project phase found for project id ' +
-              `${projectId} and phase id ${phaseId}`);
+          `${projectId} and phase id ${phaseId}`);
         err.status = 404;
         reject(err);
       } else {
+        previousValue = _.clone(existing.get({ plain: true }));
+
         // make sure startDate < endDate
         let startDate;
         let endDate;
@@ -77,6 +82,16 @@ module.exports = [
       }
     })).then((updated) => {
       req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
+
+      // emit original and updated project phase information
+      req.app.services.pubsub.publish(
+        EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+        { original: previousValue, updated },
+        { correlationId: req.id },
+      );
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+        { req, original: previousValue, updated });
+
       res.json(util.wrapResponse(req.id, updated));
     }).catch(err => next(err)));
   },

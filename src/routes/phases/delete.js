@@ -3,6 +3,7 @@
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
+import { EVENT } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -26,7 +27,7 @@ module.exports = [
         if (!existing) {
           // handle 404
           const err = new Error('no active project phase found for project id ' +
-              `${projectId} and phase id ${phaseId}`);
+            `${projectId} and phase id ${phaseId}`);
           err.status = 404;
           reject(err);
         } else {
@@ -35,6 +36,15 @@ module.exports = [
         }
       })).then((deleted) => {
         req.log.debug('deleted project phase', JSON.stringify(deleted, null, 2));
+
+        // Send events to buses
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED,
+          deleted,
+          { correlationId: req.id },
+        );
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, { req, deleted });
+
         res.status(204).json({});
       }).catch(err => next(err)));
   },

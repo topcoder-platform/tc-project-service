@@ -1,9 +1,17 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
+import sleep from 'sleep';
+import chai from 'chai';
+import config from 'config';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+
+const should = chai.should();
 
 const body = {
   name: 'test phase product',
@@ -20,52 +28,71 @@ const body = {
 describe('Phase Products', () => {
   let projectId;
   let phaseId;
-  before((done) => {
+  let project;
+  before(function beforeHook(done) {
+    this.timeout(10000);
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+        }).then((p) => {
+          projectId = p.id;
+          project = p.toJSON();
+          // create members
+          models.ProjectMember.create({
+            userId: 40051332,
+            projectId,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.create({
-              userId: 40051332,
-              projectId,
-              role: 'copilot',
-              isPrimary: true,
+          }).then(() => {
+            models.ProjectPhase.create({
+              name: 'test project phase',
+              status: 'active',
+              startDate: '2018-05-15T00:00:00Z',
+              endDate: '2018-05-15T12:00:00Z',
+              budget: 20.0,
+              progress: 1.23456,
+              details: {
+                message: 'This can be any json',
+              },
               createdBy: 1,
               updatedBy: 1,
-            }).then(() => {
-              models.ProjectPhase.create({
-                name: 'test project phase',
-                status: 'active',
-                startDate: '2018-05-15T00:00:00Z',
-                endDate: '2018-05-15T12:00:00Z',
-                budget: 20.0,
-                progress: 1.23456,
-                details: {
-                  message: 'This can be any json',
-                },
-                createdBy: 1,
-                updatedBy: 1,
-                projectId,
-              }).then((phase) => {
-                phaseId = phase.id;
-                _.assign(body, { phaseId, projectId });
+              projectId,
+            }).then((phase) => {
+              phaseId = phase.id;
+              _.assign(body, { phaseId, projectId });
 
-                models.PhaseProduct.create(body).then(() => done());
+              project.phases = [phase.toJSON()];
+
+              models.PhaseProduct.create(body).then((product) => {
+                project.phases[0].products = [product.toJSON()];
+
+                // Index to ES
+                return server.services.es.index({
+                  index: ES_PROJECT_INDEX,
+                  type: ES_PROJECT_TYPE,
+                  id: projectId,
+                  body: project,
+                }).then(() => {
+                  // sleep for some time, let elasticsearch indices be settled
+                  sleep.sleep(5);
+                  done();
+                });
               });
             });
           });
         });
+      });
   });
 
   after((done) => {
@@ -120,6 +147,7 @@ describe('Phase Products', () => {
             done(err);
           } else {
             const resJson = res.body.result.content;
+            should.exist(resJson);
             resJson.should.have.lengthOf(1);
             done();
           }
