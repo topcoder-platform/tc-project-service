@@ -23,9 +23,10 @@ server.use(authMiddleware);
 // add additional search route for project members
 server.get('/v3/members/_search', (req, res) => {
   const fields = _.isString(req.query.fields) ? req.query.fields.split(',') : [];
-  const filter = _.isString(req.query.query) ? req.query.query.split(' OR ') : [];
+  const filter = _.isString(req.query.query) ?
+    req.query.query.replace('%2520', ' ').replace('%20', ' ').split(' OR ') : [];
   const criteria = _.map(filter, (single) => {
-    const ret = { };
+    const ret = {};
     const splitted = single.split(':');
     // if the result can be parsed successfully
     const parsed = jsprim.parseInteger(splitted[1], { allowTrailing: true, trimWhitespace: true });

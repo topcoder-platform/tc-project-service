@@ -337,6 +337,283 @@ paths:
               $ref: "#/definitions/UpdateProjectMemberBodyParam"
 
 
+
+  /projects/{projectId}/phases:
+    parameters:
+      - $ref: "#/parameters/projectIdParam"
+    get:
+      tags:
+        - phase
+      operationId: findProjectPhases
+      security:
+        - Bearer: []
+      description: Retreive all project phases. All users who can edit project can access this endpoint.
+      parameters:
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: |
+            Comma separated list of project phase fields to return.
+        - name: sort
+          required: false
+          description: |
+            sort project phases by startDate, endDate, status. Default is startDate asc
+          in: query
+          type: string
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of project phases
+          schema:
+            $ref: "#/definitions/ProjectPhaseListResponse"
+    post:
+      tags:
+        - phase
+      operationId: addProjectPhase
+      security:
+        - Bearer: []
+      description: Create a project phase
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectPhaseBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project phase
+          schema:
+            $ref: "#/definitions/ProjectPhaseResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projects/{projectId}/phases/{phaseId}:
+    parameters:
+      - $ref: "#/parameters/projectIdParam"
+      - $ref: "#/parameters/phaseIdParam"
+    get:
+      tags:
+        - phase
+      description: Retrieve project phase by id. All users who can edit project can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a project phase
+          schema:
+            $ref: "#/definitions/ProjectPhaseResponse"
+      parameters:
+        - $ref: "#/parameters/phaseIdParam"
+      operationId: getProjectPhase
+
+    patch:
+      tags:
+        - phase
+      operationId: updateProjectPhase
+      security:
+        - Bearer: []
+      description: Update a project phase. All users who can edit project can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated project phase.
+          schema:
+            $ref: "#/definitions/ProjectPhaseResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/phaseIdParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ProjectPhaseBodyParam"
+
+    delete:
+      tags:
+        - phase
+      description: Remove an existing project phase. All users who can edit project can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/phaseIdParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If project is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Project phase successfully removed
+
+
+
+  /projects/{projectId}/phases/{phaseId}/products:
+    parameters:
+      - $ref: "#/parameters/projectIdParam"
+      - $ref: "#/parameters/phaseIdParam"
+    get:
+      tags:
+        - phase product
+      operationId: findPhaseProducts
+      security:
+        - Bearer: []
+      description: Retreive all phase products. All users who can edit project can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of phase products
+          schema:
+            $ref: "#/definitions/PhaseProductListResponse"
+    post:
+      tags:
+        - phase product
+      operationId: addPhaseProduct
+      security:
+        - Bearer: []
+      description: Create a phase product
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created phase product
+          schema:
+            $ref: "#/definitions/PhaseProductResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projects/{projectId}/phases/{phaseId}/products/{productId}:
+    parameters:
+      - $ref: "#/parameters/projectIdParam"
+      - $ref: "#/parameters/phaseIdParam"
+      - $ref: "#/parameters/productIdParam"
+    get:
+      tags:
+        - phase product
+      description: Retrieve phase product by id. All users who can edit project can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a phase product
+          schema:
+            $ref: "#/definitions/PhaseProductResponse"
+      parameters:
+        - $ref: "#/parameters/phaseIdParam"
+      operationId: getPhaseProduct
+
+    patch:
+      tags:
+        - phase product
+      operationId: updatePhaseProduct
+      security:
+        - Bearer: []
+      description: Update a phase product. All users who can edit project can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated phase product.
+          schema:
+            $ref: "#/definitions/PhaseProductResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/phaseIdParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/PhaseProductBodyParam"
+
+    delete:
+      tags:
+        - phase product
+      description: Remove an existing phase product. All users who can edit project can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/phaseIdParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If project is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Project phase successfully removed
+
+
 parameters:
   projectIdParam:
     name: projectId
@@ -345,6 +622,22 @@ parameters:
     required: true
     type: integer
     format: int64
+  phaseIdParam:
+    name: phaseId
+    in: path
+    description: project phase identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  productIdParam:
+    name: productId
+    in: path
+    description: project phase product identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
   offsetParam:
     name: offset
     description: "number of items to skip. Defaults to 0"
@@ -938,3 +1231,254 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/Project"
+
+
+
+
+  ProjectPhaseRequest:
+    title: Project phase request object
+    type: object
+    required:
+      - name
+      - status
+      - startDate
+      - endDate
+    properties:
+      name:
+        type: string
+        description: the project phase name
+      status:
+        type: string
+        description: the project phase status
+      startDate:
+        type: string
+        format: date
+        description: the project phase start date
+      endDate:
+        type: string
+        format: date
+        description: the project phase end date
+      budget:
+        type: number
+        description: the project phase budget
+      progress:
+        type: number
+        description: the project phase progress
+      details:
+        type: object
+        description: the project phase details
+
+  ProjectPhaseBodyParam:
+    title: Project phase body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/ProjectPhaseRequest"
+
+  ProjectPhase:
+    title: Project phase object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/ProjectPhaseRequest"
+
+
+  ProjectPhaseResponse:
+    title: Single project phase response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/ProjectPhase"
+
+  ProjectPhaseListResponse:
+    title: Project phase list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/ProjectPhase"
+
+
+  PhaseProductRequest:
+    title: Phase product request object
+    type: object
+    properties:
+      name:
+        type: string
+        description: the phase product name
+      directProjectId:
+        type: number
+        description: the phase product direct project id
+      billingAccountId:
+        type: number
+        description: the phase product billing account Id
+      templateId:
+        type: number
+        description: the phase product template id
+      type:
+        type: string
+        description: the phase product type
+      estimatedPrice:
+        type: number
+        description: the phase product estimated price
+      actualPrice:
+        type: number
+        description: the phase product actual price
+      details:
+        type: object
+        description: the phase product details
+
+  PhaseProductBodyParam:
+    title: Phase product body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/PhaseProductRequest"
+
+  PhaseProduct:
+    title: Phase product object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/PhaseProductRequest"
+
+
+  PhaseProductResponse:
+    title: Single phase product response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/PhaseProduct"
+
+  PhaseProductListResponse:
+    title: Phase product list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/PhaseProduct"
+              
