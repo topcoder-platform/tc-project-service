@@ -33,14 +33,20 @@ Promise.coroutine(function* wrapped() {
       config.get('pubsubQueueName'),
     );
 
-
     const projectIds = getProjectIds();
     const projectWhereClause = (projectIds.length > 0) ? { id: { $in: projectIds } } : { deletedAt: { $eq: null } };
-    const projects = yield models.Project.findAll({
+    let projects = yield models.Project.findAll({
       where: projectWhereClause,
-      raw: true,
+      include: [{
+        model: models.ProjectPhase,
+        as: 'phases',
+        include: [{ model: models.PhaseProduct, as: 'products' }],
+      }],
     });
     logger.info(`Retrieved #${projects.length} projects`);
+
+    // Convert to raw json
+    projects = _.map(projects, project => project.toJSON());
 
     const memberWhereClause = (projectIds.length > 0)
       ? { projectId: { $in: projectIds } }
@@ -59,14 +65,14 @@ Promise.coroutine(function* wrapped() {
       promises.push(rabbit.publish('project.initial', p, {}));
     });
     Promise.all(promises)
-    .then(() => {
-      logger.info(`Published ${promises.length} msgs`);
-      process.exit();
-    })
-    .catch((err) => {
-      logger.error(err);
-      process.exit();
-    });
+      .then(() => {
+        logger.info(`Published ${promises.length} msgs`);
+        process.exit();
+      })
+      .catch((err) => {
+        logger.error(err);
+        process.exit();
+      });
   } catch (err) {
     logger.error(err);
     process.exit();

@@ -64,6 +64,23 @@ router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
     .patch(require('./attachments/update'))
     .delete(require('./attachments/delete'));
 
+router.route('/v4/projects/:projectId(\\d+)/phases')
+    .get(require('./phases/list'))
+    .post(require('./phases/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
+    .get(require('./phases/get'))
+    .patch(require('./phases/update'))
+    .delete(require('./phases/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products')
+    .get(require('./phaseProducts/list'))
+    .post(require('./phaseProducts/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/:productId(\\d+)')
+    .get(require('./phaseProducts/get'))
+    .patch(require('./phaseProducts/update'))
+    .delete(require('./phaseProducts/delete'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
