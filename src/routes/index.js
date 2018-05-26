@@ -26,7 +26,9 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
-router.all(RegExp(`\\/${apiVersion}\\/projects(?!\\/health).*`), jwtAuth());
+router.all(
+  RegExp(`\\/${apiVersion}\\/(projects|projectTemplates|productTemplates)(?!\\/health).*`),
+  jwtAuth());
 
 // Register all the routes
 router.route('/v4/projects')
@@ -51,18 +53,37 @@ router.route('/v4/projects/:projectId(\\d+)')
   .delete(require('./projects/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/members')
-    .post(require('./projectMembers/create'));
+  .post(require('./projectMembers/create'));
 
 router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
-    .delete(require('./projectMembers/delete'))
-    .patch(require('./projectMembers/update'));
+  .delete(require('./projectMembers/delete'))
+  .patch(require('./projectMembers/update'));
 
 router.route('/v4/projects/:projectId(\\d+)/attachments')
-    .post(require('./attachments/create'));
+  .post(require('./attachments/create'));
+
 router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
-    .get(require('./attachments/download'))
-    .patch(require('./attachments/update'))
-    .delete(require('./attachments/delete'));
+  .get(require('./attachments/download'))
+  .patch(require('./attachments/update'))
+  .delete(require('./attachments/delete'));
+
+router.route('/v4/projectTemplates')
+  .post(require('./projectTemplates/create'))
+  .get(require('./projectTemplates/list'));
+
+router.route('/v4/projectTemplates/:templateId(\\d+)')
+  .get(require('./projectTemplates/get'))
+  .patch(require('./projectTemplates/update'))
+  .delete(require('./projectTemplates/delete'));
+
+router.route('/v4/productTemplates')
+  .post(require('./productTemplates/create'))
+  .get(require('./productTemplates/list'));
+
+router.route('/v4/productTemplates/:templateId(\\d+)')
+  .get(require('./productTemplates/get'))
+  .patch(require('./productTemplates/update'))
+  .delete(require('./productTemplates/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/phases')
     .get(require('./phases/list'))
