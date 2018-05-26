@@ -336,6 +336,256 @@ paths:
             schema:
               $ref: "#/definitions/UpdateProjectMemberBodyParam"
 
+  /projectTemplates:
+    get:
+      tags:
+        - projectTemplate
+      operationId: findProjectTemplates
+      security:
+        - Bearer: []
+      description: Retreive all project templates. All user roles can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of project templates
+          schema:
+            $ref: "#/definitions/ProjectTemplateListResponse"
+    post:
+      tags:
+        - projectTemplate
+      operationId: addProjectTemplate
+      security:
+        - Bearer: []
+      description: Create a project template
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTemplateBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project template
+          schema:
+            $ref: "#/definitions/ProjectTemplateResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projectTemplates/{templateId}:
+    get:
+      tags:
+        - projectTemplate
+      description: Retrieve project template by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a project template
+          schema:
+            $ref: "#/definitions/ProjectTemplateResponse"
+      parameters:
+        - $ref: "#/parameters/templateIdParam"
+      operationId: getProjectTemplate
+
+    patch:
+      tags:
+        - projectTemplate
+      operationId: updateProjectTemplate
+      security:
+        - Bearer: []
+      description: Update a project template. Only connect manager, connect admin, and admin can access this endpoint.
+        For attributes with JSON object type, it would overwrite the existing fields, or add new if the fields don't exist in the JSON object.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated project template.
+          schema:
+            $ref: "#/definitions/ProjectTemplateResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/templateIdParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ProjectTemplateBodyParam"
+
+    delete:
+      tags:
+        - projectTemplate
+      description: Remove an existing project template. Only connect manager, connect admin, and admin can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/templateIdParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If project is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Project template successfully removed
+
+
+  /productTemplates:
+    get:
+      tags:
+        - productTemplate
+      operationId: findProductTemplates
+      security:
+        - Bearer: []
+      description: Retreive all product templates. All user roles can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of product templates
+          schema:
+            $ref: "#/definitions/ProductTemplateListResponse"
+    post:
+      tags:
+        - productTemplate
+      operationId: addProductTemplate
+      security:
+        - Bearer: []
+      description: Create a product template
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProductTemplateBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created product template
+          schema:
+            $ref: "#/definitions/ProductTemplateResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /productTemplates/{templateId}:
+    get:
+      tags:
+        - productTemplate
+      description: Retrieve product template by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a product template
+          schema:
+            $ref: "#/definitions/ProductTemplateResponse"
+      parameters:
+        - $ref: "#/parameters/templateIdParam"
+      operationId: getProductTemplate
+
+    patch:
+      tags:
+        - productTemplate
+      operationId: updateProductTemplate
+      security:
+        - Bearer: []
+      description: Update a product template. Only connect manager, connect admin, and admin can access this endpoint.
+        For attributes with JSON object type, it would overwrite the existing fields, or add new if the fields don't exist in the JSON object.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated product template.
+          schema:
+            $ref: "#/definitions/ProductTemplateResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/templateIdParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ProductTemplateBodyParam"
+
+    delete:
+      tags:
+        - productTemplate
+      description: Remove an existing product template. Only connect manager, connect admin, and admin can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/templateIdParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If product is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Product template successfully removed
 
 parameters:
   projectIdParam:
@@ -345,6 +595,14 @@ parameters:
     required: true
     type: integer
     format: int64
+  templateIdParam:
+    name: templateId
+    in: path
+    description: template identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
   offsetParam:
     name: offset
     description: "number of items to skip. Defaults to 0"
@@ -938,3 +1196,245 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/Project"
+
+  ProjectTemplateRequest:
+    title: Project template request object
+    type: object
+    required:
+      - name
+      - key
+      - category
+      - scope
+      - phases
+    properties:
+      name:
+        type: string
+        description: the project template name
+      key:
+        type: string
+        description: the project template key
+      category:
+        type: string
+        description: the project template category
+      scope:
+        type: object
+        description: the project template scope
+      phases:
+        type: object
+        description: the project template phases
+
+  ProjectTemplateBodyParam:
+    title: Project template body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/ProjectTemplateRequest"
+
+  ProjectTemplate:
+    title: Project template object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/ProjectTemplateRequest"
+
+
+  ProjectTemplateResponse:
+    title: Single project template response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/ProjectTemplate"
+
+  ProjectTemplateListResponse:
+    title: Project template list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/ProjectTemplate"
+              
+  ProductTemplateRequest:
+    title: Product template request object
+    type: object
+    required:
+      - name
+      - key
+      - category
+      - scope
+      - phases
+    properties:
+      name:
+        type: string
+        description: the product template name
+      productKey:
+        type: string
+        description: the product template key
+      icon:
+        type: string
+        description: the product template icon
+      brief:
+        type: string
+        description: the product template brief
+      details:
+        type: string
+        description: the product template details
+      aliases:
+        type: object
+        description: the product template aliases
+      template:
+        type: object
+        description: the product template template
+
+  ProductTemplateBodyParam:
+    title: Product template body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/ProductTemplateRequest"
+
+  ProductTemplate:
+    title: Product template object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/ProductTemplateRequest"
+
+
+  ProductTemplateResponse:
+    title: Single product template response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/ProductTemplate"
+
+  ProductTemplateListResponse:
+    title: Product template list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/ProductTemplate"

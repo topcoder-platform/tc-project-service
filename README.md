@@ -71,7 +71,7 @@ Run image:
 `docker run -p 3000:3000 -i -t -e DB_HOST=172.17.0.1 tc_projects_services`
 You may replace 172.17.0.1 with your docker0 IP.
 
-You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) or import **postman.json** to verify endpoints.
+You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) or import **postman.json** and **postman_environment.json** to verify endpoints.
 
 #### Deploying without docker
 If you don't want to use docker to deploy to localhost. You can simply run `npm run start` from root of project. This should start the server on default port `3000`.
