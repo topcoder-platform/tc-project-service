@@ -5,6 +5,10 @@ import { projectMemberAddedHandler, projectMemberRemovedHandler,
   projectMemberUpdatedHandler } from './projectMembers';
 import { projectAttachmentAddedHandler, projectAttachmentRemovedHandler,
   projectAttachmentUpdatedHandler } from './projectAttachments';
+import { projectPhaseAddedHandler, projectPhaseRemovedHandler,
+  projectPhaseUpdatedHandler } from './projectPhases';
+import { phaseProductAddedHandler, phaseProductRemovedHandler,
+  phaseProductUpdatedHandler } from './phaseProducts';
 
 export default {
   'project.initial': projectCreatedHandler,
@@ -17,4 +21,13 @@ export default {
   [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED]: projectAttachmentAddedHandler,
   [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED]: projectAttachmentRemovedHandler,
   [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED]: projectAttachmentUpdatedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED]: projectPhaseAddedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED]: projectPhaseRemovedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED]: projectPhaseUpdatedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED]: projectPhaseAddedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED]: projectPhaseRemovedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED]: projectPhaseUpdatedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED]: phaseProductAddedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED]: phaseProductRemovedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED]: phaseProductUpdatedHandler,
 };
