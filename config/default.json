@@ -1,7 +1,6 @@
 {
   "apiVersion": "v4",
-  "authSecret": "secret",
-  "authDomain": "topcoder-dev.com",
+  "AUTH_SECRET": "secret",
   "logLevel": "info",
   "version": "v4",
   "captureLogs": "false",
@@ -33,9 +32,16 @@
     "idleTimeout": 1000
   },
   "analyticsKey": "",
+  "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
   "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
   "jwksUri": "",
-  "busApiUrl": "http://api.topcoder-dev.com",
+  "busApiUrl": "http://api.topcoder-dev.com/v5",
   "busApiToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoicHJvamVjdC1zZXJ2aWNlIiwiaWF0IjoxNTEyNzQ3MDgyLCJleHAiOjE1MjEzODcwODJ9.PHuNcFDaotGAL8RhQXQMdpL8yOKXxjB5DbBIodmt7RE",
-  "HEALTH_CHECK_URL": "_health"
+  "HEALTH_CHECK_URL": "_health",
+  "maxPhaseProductCount": 1,
+  "AUTH0_CLIENT_ID": "",
+  "AUTH0_CLIENT_SECRET": "",
+  "AUTH0_AUDIENCE": "",
+  "AUTH0_URL": "",
+  "TOKEN_CACHE_TIME": ""
 }

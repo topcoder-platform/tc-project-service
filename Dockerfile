@@ -1,4 +1,4 @@
-FROM node:6.9.4
+FROM node:8.2.1
 LABEL version="1.0"
 LABEL description="Projects microservice"
 

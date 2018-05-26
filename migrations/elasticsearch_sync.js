@@ -293,6 +293,10 @@ function getRequestBody(indexName) {
           },
         },
       },
+      phases: {
+        type: 'nested',
+        dynamic: true,
+      },
     },
   };
   switch (indexName) {

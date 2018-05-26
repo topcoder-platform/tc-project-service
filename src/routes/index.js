@@ -61,6 +61,7 @@ router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
 
 router.route('/v4/projects/:projectId(\\d+)/attachments')
   .post(require('./attachments/create'));
+
 router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
   .get(require('./attachments/download'))
   .patch(require('./attachments/update'))
@@ -69,6 +70,7 @@ router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
 router.route('/v4/projectTemplates')
   .post(require('./projectTemplates/create'))
   .get(require('./projectTemplates/list'));
+
 router.route('/v4/projectTemplates/:templateId(\\d+)')
   .get(require('./projectTemplates/get'))
   .patch(require('./projectTemplates/update'))
@@ -77,10 +79,29 @@ router.route('/v4/projectTemplates/:templateId(\\d+)')
 router.route('/v4/productTemplates')
   .post(require('./productTemplates/create'))
   .get(require('./productTemplates/list'));
+
 router.route('/v4/productTemplates/:templateId(\\d+)')
   .get(require('./productTemplates/get'))
   .patch(require('./productTemplates/update'))
   .delete(require('./productTemplates/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases')
+    .get(require('./phases/list'))
+    .post(require('./phases/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
+    .get(require('./phases/get'))
+    .patch(require('./phases/update'))
+    .delete(require('./phases/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products')
+    .get(require('./phaseProducts/list'))
+    .post(require('./phaseProducts/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/:productId(\\d+)')
+    .get(require('./phaseProducts/get'))
+    .patch(require('./phaseProducts/update'))
+    .delete(require('./phaseProducts/delete'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

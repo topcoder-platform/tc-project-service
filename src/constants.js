@@ -50,6 +50,14 @@ export const EVENT = {
     PROJECT_DRAFT_CREATED: 'project.draft-created',
     PROJECT_UPDATED: 'project.updated',
     PROJECT_DELETED: 'project.deleted',
+
+    PROJECT_PHASE_ADDED: 'project.phase.added',
+    PROJECT_PHASE_UPDATED: 'project.phase.updated',
+    PROJECT_PHASE_REMOVED: 'project.phase.removed',
+
+    PROJECT_PHASE_PRODUCT_ADDED: 'project.phase.product.added',
+    PROJECT_PHASE_PRODUCT_UPDATED: 'project.phase.product.updated',
+    PROJECT_PHASE_PRODUCT_REMOVED: 'project.phase.product.removed',
   },
 };
 
@@ -72,8 +80,20 @@ export const BUS_API_EVENT = {
   PROJECT_LINK_CREATED: 'notifications.connect.project.linkCreated',
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
+
+  // When phase is added/updated/deleted from the project,
+  // When product is added/deleted from a phase
+  // When product is updated on any field other than specification
+  PROJECT_PLAN_MODIFIED: 'notifications.connect.project.planModified',
+
+  // When specification of a product is modified
+  PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
 };
 
 export const REGEX = {
   URL: /^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=;]*)?$/, // eslint-disable-line
+};
+
+export const TOKEN_SCOPES = {
+  CONNECT_PROJECT_ADMIN: 'all:connect_project',
 };

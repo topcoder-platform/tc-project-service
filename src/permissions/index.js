@@ -34,4 +34,11 @@ module.exports = () => {
   Authorizer.setPolicy('productTemplate.edit', connectManagerOrAdmin);
   Authorizer.setPolicy('productTemplate.delete', connectManagerOrAdmin);
   Authorizer.setPolicy('productTemplate.view', true);
+
+  Authorizer.setPolicy('project.addProjectPhase', projectEdit);
+  Authorizer.setPolicy('project.updateProjectPhase', projectEdit);
+  Authorizer.setPolicy('project.deleteProjectPhase', projectEdit);
+  Authorizer.setPolicy('project.addPhaseProduct', projectEdit);
+  Authorizer.setPolicy('project.updatePhaseProduct', projectEdit);
+  Authorizer.setPolicy('project.deletePhaseProduct', projectEdit);
 };
