@@ -19,7 +19,7 @@ const schema = {
       icon: Joi.string().max(255).required(),
       brief: Joi.string().max(45).required(),
       details: Joi.string().max(255).required(),
-      aliases: Joi.object().required(),
+      aliases: Joi.array().required(),
       template: Joi.object().required(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
