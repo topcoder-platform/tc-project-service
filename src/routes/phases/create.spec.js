@@ -92,32 +92,6 @@ describe('Project Phases', () => {
         .expect(422, done);
     });
 
-    it('should return 422 when startDate not provided', (done) => {
-      const reqBody = _.cloneDeep(body);
-      delete reqBody.startDate;
-      request(server)
-        .post(`/v4/projects/${projectId}/phases/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({ param: reqBody })
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 when endDate not provided', (done) => {
-      const reqBody = _.cloneDeep(body);
-      delete reqBody.endDate;
-      request(server)
-        .post(`/v4/projects/${projectId}/phases/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({ param: reqBody })
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
     it('should return 422 when startDate > endDate', (done) => {
       const reqBody = _.cloneDeep(body);
       reqBody.startDate = '2018-05-16T12:00:00';
