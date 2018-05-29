@@ -17,6 +17,7 @@ const schema = {
       name: Joi.string().max(255).required(),
       key: Joi.string().max(45).required(),
       category: Joi.string().max(45).required(),
+      aliases: Joi.array().required(),
       scope: Joi.object().required(),
       phases: Joi.object().required(),
       createdAt: Joi.any().strip(),

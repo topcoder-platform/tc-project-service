@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     name: { type: DataTypes.STRING(255), allowNull: false },
     key: { type: DataTypes.STRING(45), allowNull: false },
     category: { type: DataTypes.STRING(45), allowNull: false },
+    aliases: { type: DataTypes.JSON, allowNull: false },
     scope: { type: DataTypes.JSON, allowNull: false },
     phases: { type: DataTypes.JSON, allowNull: false },
     deletedAt: DataTypes.DATE,
