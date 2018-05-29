@@ -14,8 +14,8 @@ const addProjectPhaseValidations = {
     param: Joi.object().keys({
       name: Joi.string().required(),
       status: Joi.string().required(),
-      startDate: Joi.date().max(Joi.ref('endDate')).required(),
-      endDate: Joi.date().required(),
+      startDate: Joi.date().max(Joi.ref('endDate')).optional(),
+      endDate: Joi.date().optional(),
       budget: Joi.number().positive().optional(),
       progress: Joi.number().positive().optional(),
       details: Joi.any().optional(),
