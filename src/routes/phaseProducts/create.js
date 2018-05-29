@@ -15,7 +15,9 @@ const addPhaseProductValidations = {
     param: Joi.object().keys({
       name: Joi.string().required(),
       type: Joi.string().required(),
-      templateId: Joi.number().optional(),
+      templateId: Joi.number().positive().optional(),
+      directProjectId: Joi.number().positive().optional(),
+      billingAccountId: Joi.number().positive().optional(),
       estimatedPrice: Joi.number().positive().optional(),
       actualPrice: Joi.number().positive().optional(),
       details: Joi.any().optional(),

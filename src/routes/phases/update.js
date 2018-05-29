@@ -62,16 +62,16 @@ module.exports = [
         if (updatedProps.startDate) {
           startDate = new Date(updatedProps.startDate);
         } else {
-          startDate = new Date(existing.startDate);
+          startDate = existing.startDate !== null ? new Date(existing.startDate) : null;
         }
 
         if (updatedProps.endDate) {
           endDate = new Date(updatedProps.endDate);
         } else {
-          endDate = new Date(existing.endDate);
+          endDate = existing.endDate !== null ? new Date(existing.endDate) : null;
         }
 
-        if (startDate >= endDate) {
+        if (startDate !== null && endDate !== null && startDate >= endDate) {
           const err = new Error('startDate must be before endDate.');
           err.status = 400;
           reject(err);

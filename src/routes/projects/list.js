@@ -29,6 +29,14 @@ const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
   _.keys(models.ProjectAttachment.rawAttributes),
   'deletedAt',
 );
+const PROJECT_PHASE_ATTRIBUTES = _.without(
+  _.keys(models.ProjectPhase.rawAttributes),
+  'deletedAt',
+);
+const PROJECT_PHASE_PRODUCTS_ATTRIBUTES = _.without(
+  _.keys(models.PhaseProduct.rawAttributes),
+  'deletedAt',
+);
 
 
 const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
@@ -59,6 +67,14 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   if (_.get(fields, 'project_members', null)) {
     const memberFields = _.get(fields, 'project_members');
     sourceInclude = sourceInclude.concat(_.map(memberFields, single => `members.${single}`));
+  }
+  if (_.get(fields, 'project_phases', null)) {
+    const phaseFields = _.get(fields, 'project_phases');
+    sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `phases.${single}`));
+  }
+  if (_.get(fields, 'project_phases_products', null)) {
+    const phaseFields = _.get(fields, 'project_phases_products');
+    sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `phases.products.${single}`));
   }
   sourceInclude = sourceInclude.concat(_.map(PROJECT_ATTACHMENT_ATTRIBUTES, single => `attachments.${single}`));
 
@@ -180,6 +196,8 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
     project_members: PROJECT_MEMBER_ATTRIBUTES,
+    project_phases: PROJECT_PHASE_ATTRIBUTES,
+    project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
   });
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) {
