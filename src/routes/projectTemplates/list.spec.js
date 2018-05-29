@@ -16,6 +16,10 @@ describe('LIST project templates', () => {
       name: 'template 1',
       key: 'key 1',
       category: 'category 1',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: ['key-1', 'key_1'],
       scope: {
         scope1: {
           subScope1A: 1,
@@ -46,6 +50,10 @@ describe('LIST project templates', () => {
       name: 'template 2',
       key: 'key 2',
       category: 'category 2',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 2',
+      info: 'info 2',
+      aliases: ['key-2', 'key_2'],
       scope: {},
       phases: {},
       createdBy: 1,

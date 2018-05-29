@@ -18,13 +18,7 @@ describe('DELETE product template', () => {
       icon: 'http://example.com/icon1.ico',
       brief: 'brief 1',
       details: 'details 1',
-      aliases: {
-        alias1: {
-          subAlias1A: 1,
-          subAlias1B: 2,
-        },
-        alias2: [1, 2, 3],
-      },
+      aliases: ['product key 1', 'product_key_1'],
       template: {
         template1: {
           name: 'template 1',
