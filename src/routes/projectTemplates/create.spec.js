@@ -16,6 +16,7 @@ describe('CREATE project template', () => {
         name: 'template 1',
         key: 'key 1',
         category: 'category 1',
+        aliases: ['key-1', 'key_1'],
         scope: {
           scope1: {
             subScope1A: 1,
