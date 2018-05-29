@@ -52,6 +52,8 @@ const createProjectValdiations = {
         users: Joi.array().items(Joi.number().positive()),
         groups: Joi.array().items(Joi.number().positive()),
       })).allow(null),
+      templateId: Joi.number().positive(),
+      version: Joi.string(),
     }).required(),
   },
 };
