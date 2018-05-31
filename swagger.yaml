@@ -610,6 +610,44 @@ paths:
         '204':
           description: Project phase successfully removed
 
+  /projects/{projectId}/upgrade:
+    post:
+      tags:
+        - project
+      operationId: upgradeProject
+      security:
+        - Bearer: []
+      description: Migrates a project to a target version. Only users with "administrator" or "Connect admin" roles can access to this endpoint
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - name: body
+          in: body
+          required: true
+          description: Project upgrade body
+          schema:
+            $ref: "#/definitions/ProjectUpgradeBodyParam"
+      responses:
+        '400':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Project not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Project migrated successfully
+          schema:
+            $ref: "#/definitions/ProjectUpgradeResponse"
+
   /projectTemplates:
     get:
       tags:
@@ -1089,6 +1127,12 @@ definitions:
       param:
         $ref: "#/definitions/Project"
 
+  ProjectUpgradeBodyParam:
+    type: object
+    properties:
+      param:
+        $ref: "#/definitions/ProjectUpgrade"
+
   NewProject:
     type: object
     required:
@@ -1324,6 +1368,23 @@ definitions:
           isCustom:
             type: boolean
 
+  ProjectUpgrade:
+    title: Project Upgrade object
+    type: object
+    required:
+      - targetVersion
+      - defaultProductTemplateId
+    properties:
+      targetVersion:
+        type: string
+        description: Version identifier
+      defaultProductTemplateId:
+        type: number
+        format: int64
+        description: Default product template id, used when the associated project template is not found, or there's no matching phase with the project's product id
+      phaseName:
+        type: string
+        description: This value will be used instead of the product template's name for the created ProjectPhase
 
   NewProjectMember:
     title: Project Member object
@@ -1821,6 +1882,25 @@ definitions:
             readOnly: true
       - $ref: "#/definitions/ProductTemplateRequest"
 
+  ProjectUpgradeResponse:
+    title: Project upgrade response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
 
   ProductTemplateResponse:
     title: Single product template response object

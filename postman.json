@@ -2905,6 +2905,104 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Project upgrade",
+			"description": "Request to migrate projects.",
+			"item": [
+				{
+					"name": "Migrate project",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3\n\t}\n}"
+						},
+						"url": "{{api-url}}/v4/projects/6/upgrade",
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Migrate project (completed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3\n\t}\n}"
+						},
+						"url": "{{api-url}}/v4/projects/7/upgrade",
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Migrate project with phase name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3,\n\t\t\"phaseName\": \"Custom phase name\"\n\t}\n}"
+						},
+						"url": "{{api-url}}/v4/projects/6/upgrade",
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Migrate project with phase name (completed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3,\n\t\t\"phaseName\": \"Custom phase name\"\n\t}\n}"
+						},
+						"url": "{{api-url}}/v4/projects/7/upgrade",
+						"description": ""
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

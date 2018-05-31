@@ -29,6 +29,17 @@ let esClient = null;
 
 _.assignIn(util, {
   /**
+   * Build API error
+   * @param {string} message the API error message
+   * @param {number} status the API status code
+   * @returns {Error} the built API error
+   */
+  buildApiError: (message, status) => {
+    const apiErr = new Error(message);
+    apiErr.status = status || 500;
+    return apiErr;
+  },
+  /**
    * Handle error
    * @param   {String}    msg               the default error message
    * @param   {Error}     err               the err

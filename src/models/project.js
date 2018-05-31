@@ -41,6 +41,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     createdBy: { type: DataTypes.INTEGER, allowNull: false },
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
+    version: { type: DataTypes.STRING(3), allowNull: false, defaultValue: 'v3' },
   }, {
     tableName: 'projects',
     timestamps: true,

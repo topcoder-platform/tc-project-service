@@ -67,6 +67,9 @@ router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
   .patch(require('./attachments/update'))
   .delete(require('./attachments/delete'));
 
+router.route('/v4/projects/:projectId(\\d+)/upgrade')
+  .post(require('./projectUpgrade/create'));
+
 router.route('/v4/projectTemplates')
   .post(require('./projectTemplates/create'))
   .get(require('./projectTemplates/list'));

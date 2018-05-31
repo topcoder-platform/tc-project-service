@@ -49,11 +49,58 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+    }, {
+      type: 'generic',
+      billingAccountId: 5,
+      name: 'test2',
+      description: 'Ongoing project',
+      status: 'active',
+      details: {
+        name: 'a specific name',
+        products: ['application_development', 'website_development'],
+        appDefinition: { budget: 10000 },
+        sampleKey1: {
+          sampleSubKey1: 'a specific value',
+        },
+        sampleKey2: {
+          sampleSubKey2: 'a specific value',
+        },
+      },
+      createdBy: 1,
+      updatedBy: 1,
+      version: 'v2',
+      directProjectId: 123,
+      estimatedPrice: 15000,
+      actualPrice: 18000,
+    }, {
+      type: 'generic',
+      billingAccountId: 5,
+      name: 'test2',
+      description: 'Completed project',
+      status: 'completed',
+      details: {
+        name: 'a specific name',
+        products: ['application_development', 'website_development'],
+        appDefinition: { budget: 10000 },
+        sampleKey1: {
+          sampleSubKey1: 'a specific value',
+        },
+        sampleKey2: {
+          sampleSubKey2: 'a specific value',
+        },
+      },
+      createdBy: 1,
+      updatedBy: 1,
+      version: 'v2',
+      directProjectId: 123,
+      estimatedPrice: 15000,
+      actualPrice: 18000,
     }]))
   .then(() => models.Project.findAll())
   .then((projects) => {
     const project1 = projects[0];
     const project2 = projects[1];
+    const project7 = projects[6];
     const operations = [];
     operations.push(models.ProjectMember.bulkCreate([{
       userId: 40051331,
@@ -100,6 +147,23 @@ models.sequelize.sync({ force: true })
       createdBy: 1,
       updatedBy: 1,
     }));
+    const dbNow = Math.floor(Date.now() / 1000) * 1000;
+    const millisInADay = 1000 * 60 * 60 * 24;
+    const yesterday = new Date(dbNow - millisInADay);
+    operations.push(models.ProjectHistory.bulkCreate([{
+      projectId: project7.id,
+      status: 'completed',
+      createdAt: yesterday,
+      createdBy: 1,
+      updatedBy: 1,
+    }, {
+      projectId: project7.id,
+      status: 'completed',
+      // 10 days ago
+      createdAt: new Date(dbNow - (millisInADay * 10)),
+      createdBy: 1,
+      updatedBy: 1,
+    }]));
     return Promise.all(operations);
   })
   .then(() => models.ProjectTemplate.bulkCreate([
@@ -196,6 +260,47 @@ models.sequelize.sync({ force: true })
       createdBy: 1,
       updatedBy: 2,
     },
+    {
+      name: 'template 1',
+      key: 'generic',
+      category: 'category 1',
+      scope: {
+        scope1: {
+          subScope1A: 1,
+          subScope1B: 2,
+        },
+        scope2: [1, 2, 3],
+      },
+      phases: {
+        // for all tests, use a project template that maps to a product template by productKey
+        phase1: {
+          name: 'phase 1',
+          products: [{
+            productKey: 'application_development',
+          }, {
+            productKey: 'product_key_2',
+          }],
+          details: {
+            anyDetails: 'any details 1',
+          },
+          others: ['others 11', 'others 12'],
+        },
+        phase2: {
+          name: 'phase 2',
+          products: [{
+            productKey: 'website_development',
+          }, {
+            productKey: 'product_key_4',
+          }],
+          details: {
+            anyDetails: 'any details 2',
+          },
+          others: ['others 21', 'others 22'],
+        },
+      },
+      createdBy: 1,
+      updatedBy: 1,
+    },
   ]))
   .then(() => models.ProductTemplate.bulkCreate([
     {
@@ -240,6 +345,81 @@ models.sequelize.sync({ force: true })
       template: {},
       createdBy: 3,
       updatedBy: 4,
+    },
+    {
+      name: 'Generic work',
+      productKey: 'generic_work',
+      icon: 'http://example.com/icon1.ico',
+      brief: 'brief 1',
+      details: 'details 1',
+      aliases: {
+        alias1: {
+          subAlias1A: 1,
+          subAlias1B: 2,
+        },
+        alias2: [1, 2, 3],
+      },
+      template: {
+        name: 'a template name',
+        sampleKey1: {
+          sampleSubKey1: 'a value',
+        },
+        sampleKey2: {
+          sampleSubKey2: 'a value',
+        },
+      },
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'Website product',
+      productKey: 'website_development',
+      icon: 'http://example.com/icon1.ico',
+      brief: 'brief 1',
+      details: 'details 1',
+      aliases: {
+        alias1: {
+          subAlias1A: 1,
+          subAlias1B: 2,
+        },
+        alias2: [1, 2, 3],
+      },
+      template: {
+        name: 'a template name',
+        sampleKey1: {
+          sampleSubKey1: 'a value',
+        },
+        sampleKey2: {
+          sampleSubKey2: 'a value',
+        },
+      },
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'Application product',
+      productKey: 'application_development',
+      icon: 'http://example.com/icon1.ico',
+      brief: 'brief 1',
+      details: 'details 1',
+      aliases: {
+        alias1: {
+          subAlias1A: 1,
+          subAlias1B: 2,
+        },
+        alias2: [1, 2, 3],
+      },
+      template: {
+        name: 'a template name',
+        sampleKey1: {
+          sampleSubKey1: 'a value',
+        },
+        sampleKey2: {
+          sampleSubKey2: 'a value',
+        },
+      },
+      createdBy: 1,
+      updatedBy: 2,
     },
   ]))
   .then(() => models.ProjectType.bulkCreate([
