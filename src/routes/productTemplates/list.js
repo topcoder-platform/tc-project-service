@@ -9,15 +9,23 @@ const permissions = tcMiddleware.permissions;
 
 module.exports = [
   permissions('productTemplate.view'),
-  (req, res, next) => models.ProductTemplate.findAll({
-    where: {
-      deletedAt: { $eq: null },
-    },
-    attributes: { exclude: ['deletedAt', 'deletedBy'] },
-    raw: true,
-  })
+  (req, res, next) => {
+    const filters = util.parseQueryFilter(req.query.filter);
+    if (!util.isValidFilter(filters, ['productKey'])) {
+      return util.handleError('Invalid filters', null, req, next);
+    }
+    const where = { deletedAt: { $eq: null } };
+    if (filters.productKey) {
+      where.productKey = { $eq: filters.productKey };
+    }
+    return models.ProductTemplate.findAll({
+      where,
+      attributes: { exclude: ['deletedAt', 'deletedBy'] },
+      raw: true,
+    })
     .then((productTemplates) => {
       res.json(util.wrapResponse(req.id, productTemplates));
     })
-    .catch(next),
+    .catch(next);
+  },
 ];

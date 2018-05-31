@@ -1,20 +1,38 @@
 /**
  * Tests for list.js
  */
-import chai from 'chai';
+// import chai from 'chai';
 import request from 'supertest';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
-const should = chai.should();
+// const should = chai.should();
+
+const validateProductTemplates = (count, resJson, expectedTemplates) => {
+  resJson.should.have.length(count);
+  resJson.forEach((pt, idx) => {
+    pt.should.have.all.keys('id', 'name', 'productKey', 'icon', 'brief', 'details', 'aliases',
+    'template', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
+    pt.should.not.have.all.keys('deletedAt', 'deletedBy');
+    pt.name.should.be.eql(expectedTemplates[idx].name);
+    pt.productKey.should.be.eql(expectedTemplates[idx].productKey);
+    pt.icon.should.be.eql(expectedTemplates[idx].icon);
+    pt.brief.should.be.eql(expectedTemplates[idx].brief);
+    pt.details.should.be.eql(expectedTemplates[idx].details);
+    pt.aliases.should.be.eql(expectedTemplates[idx].aliases);
+    pt.template.should.be.eql(expectedTemplates[idx].template);
+    pt.createdBy.should.be.eql(expectedTemplates[idx].createdBy);
+    pt.updatedBy.should.be.eql(expectedTemplates[idx].updatedBy);
+  });
+};
 
 describe('LIST product templates', () => {
   const templates = [
     {
       name: 'name 1',
-      productKey: 'productKey 1',
+      productKey: 'productKey-1',
       icon: 'http://example.com/icon1.ico',
       brief: 'brief 1',
       details: 'details 1',
@@ -46,7 +64,7 @@ describe('LIST product templates', () => {
     },
     {
       name: 'template 2',
-      productKey: 'productKey 2',
+      productKey: 'productKey-2',
       icon: 'http://example.com/icon2.ico',
       brief: 'brief 2',
       details: 'details 2',
@@ -83,26 +101,9 @@ describe('LIST product templates', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const template = templates[0];
-
           const resJson = res.body.result.content;
-          resJson.should.have.length(2);
+          validateProductTemplates(2, resJson, templates);
           resJson[0].id.should.be.eql(templateId);
-          resJson[0].name.should.be.eql(template.name);
-          resJson[0].productKey.should.be.eql(template.productKey);
-          resJson[0].icon.should.be.eql(template.icon);
-          resJson[0].brief.should.be.eql(template.brief);
-          resJson[0].details.should.be.eql(template.details);
-          resJson[0].aliases.should.be.eql(template.aliases);
-          resJson[0].template.should.be.eql(template.template);
-
-          resJson[0].createdBy.should.be.eql(template.createdBy);
-          should.exist(resJson[0].createdAt);
-          resJson[0].updatedBy.should.be.eql(template.updatedBy);
-          should.exist(resJson[0].updatedAt);
-          should.not.exist(resJson[0].deletedBy);
-          should.not.exist(resJson[0].deletedAt);
-
           done();
         });
     });
@@ -114,7 +115,12 @@ describe('LIST product templates', () => {
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(200)
-        .end(done);
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          validateProductTemplates(2, resJson, templates);
+          resJson[0].id.should.be.eql(templateId);
+          done();
+        });
     });
 
     it('should return 200 for connect manager', (done) => {
@@ -124,7 +130,12 @@ describe('LIST product templates', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(200)
-        .end(done);
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          validateProductTemplates(2, resJson, templates);
+          resJson[0].id.should.be.eql(templateId);
+          done();
+        });
     });
 
     it('should return 200 for member', (done) => {
@@ -133,7 +144,12 @@ describe('LIST product templates', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .expect(200, done);
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          validateProductTemplates(2, resJson, templates);
+          resJson[0].id.should.be.eql(templateId);
+          done();
+        });
     });
 
     it('should return 200 for copilot', (done) => {
@@ -142,7 +158,26 @@ describe('LIST product templates', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .expect(200, done);
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          validateProductTemplates(2, resJson, templates);
+          resJson[0].id.should.be.eql(templateId);
+          done();
+        });
+    });
+
+    it('should return filtered templates', (done) => {
+      request(server)
+        .get('/v4/productTemplates?filter=productKey%3DproductKey-2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          validateProductTemplates(1, resJson, [templates[1]]);
+          done();
+        });
     });
   });
 });
