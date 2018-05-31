@@ -2837,6 +2837,74 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "issue86 (create project with projectTemplateId)",
+			"description": "",
+			"item": [
+				{
+					"name": "Create project with projectTemplateId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with projectTemplateId\",\n\t\t\"description\": \"Hello I am a test project with projectTemplateId\",\n\t\t\"type\": \"generic\",\n\t\t\"projectTemplateId\": 3\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project with projectTemplateId (not existed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with projectTemplateId\",\n\t\t\"description\": \"Hello I am a test project with projectTemplateId\",\n\t\t\"type\": \"generic\",\n\t\t\"projectTemplateId\": 3000\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

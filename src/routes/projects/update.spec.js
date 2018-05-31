@@ -26,7 +26,7 @@ describe('Project', () => {
           displayName: 'Generic',
           createdBy: 1,
           updatedBy: 1,
-        }
+        },
       ]))
       .then(() => done());
   });
@@ -38,6 +38,7 @@ describe('Project', () => {
     const body = {
       param: {
         name: 'updatedProject name',
+        type: 'generic',
       },
     };
     let sandbox;
@@ -331,7 +332,7 @@ describe('Project', () => {
     it('should return 422 if project type does not exist', (done) => {
       const mbody = {
         param: {
-          type: 'not_exist'
+          type: 'not_exist',
         },
       };
       request(server)
@@ -394,10 +395,10 @@ describe('Project', () => {
       models.Project.update({
         status: PROJECT_STATUS.CANCELLED,
       }, {
-          where: {
-            id: project1.id,
-          },
-        })
+        where: {
+          id: project1.id,
+        },
+      })
         .then(() => {
           const mbody = {
             param: {
@@ -447,10 +448,10 @@ describe('Project', () => {
       models.Project.update({
         status: PROJECT_STATUS.CANCELLED,
       }, {
-          where: {
-            id: project1.id,
-          },
-        })
+        where: {
+          id: project1.id,
+        },
+      })
         .then(() => {
           const mbody = {
             param: {
@@ -500,10 +501,10 @@ describe('Project', () => {
       models.Project.update({
         status: PROJECT_STATUS.CANCELLED,
       }, {
-          where: {
-            id: project1.id,
-          },
-        })
+        where: {
+          id: project1.id,
+        },
+      })
         .then(() => {
           const mbody = {
             param: {
@@ -754,10 +755,10 @@ describe('Project', () => {
         models.Project.update({
           status: PROJECT_STATUS.CANCELLED,
         }, {
-            where: {
-              id: project1.id,
-            },
-          })
+          where: {
+            id: project1.id,
+          },
+        })
           .then(() => {
             const mbody = {
               param: {

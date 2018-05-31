@@ -1,15 +1,4 @@
 
-export const PROJECT_TYPE = {
-  APP_DEV: 'app_dev',
-  GENERIC: 'generic',
-  VISUAL_PROTOTYPE: 'visual_prototype',
-  VISUAL_DESIGN: 'visual_design',
-  WEBSITE: 'website',
-  APP: 'app',
-  QUALITY_ASSURANCE: 'quality_assurance',
-  CHATBOT: 'chatbot',
-};
-
 export const PROJECT_STATUS = {
   DRAFT: 'draft',
   IN_REVIEW: 'in_review',

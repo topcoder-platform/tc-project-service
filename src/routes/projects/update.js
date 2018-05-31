@@ -6,7 +6,6 @@ import {
 } from 'tc-core-library-js';
 import models from '../../models';
 import {
-  PROJECT_TYPE,
   PROJECT_STATUS,
   PROJECT_MEMBER_ROLE,
   EVENT,
@@ -63,6 +62,7 @@ const updateProjectValdiations = {
       type: Joi.string().max(45),
       details: Joi.any(),
       memers: Joi.any(),
+      projectTemplateId: Joi.any().strip(), // ignore the project template id
       createdBy: Joi.any(),
       createdAt: Joi.any(),
       updatedBy: Joi.any(),
@@ -127,7 +127,7 @@ module.exports = [
             err.status = 422;
             next(err);
           }
-        })
+        });
     } else {
       next();
     }
@@ -142,7 +142,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     // prune any fields that cannot be updated directly
     updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
-    traverse(updatedProps).forEach(function (x) {
+    traverse(updatedProps).forEach(function (x) { // eslint-disable-line func-names
       if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     let previousValue;

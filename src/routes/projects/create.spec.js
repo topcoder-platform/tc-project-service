@@ -12,8 +12,8 @@ import models from '../../models';
 
 const should = chai.should();
 
-sinon.stub(RabbitMQService.prototype, 'init', () => {});
-sinon.stub(RabbitMQService.prototype, 'publish', () => {});
+sinon.stub(RabbitMQService.prototype, 'init', () => { });
+sinon.stub(RabbitMQService.prototype, 'publish', () => { });
 
 describe('Project create', () => {
   before((done) => {
@@ -24,7 +24,86 @@ describe('Project create', () => {
           displayName: 'Generic',
           createdBy: 1,
           updatedBy: 1,
-        }
+        },
+      ]))
+      .then(() => models.ProjectTemplate.bulkCreate([
+        {
+          id: 1,
+          name: 'template 1',
+          key: 'key 1',
+          category: 'category 1',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: [],
+          scope: {},
+          phases: {
+            phase1: {
+              name: 'phase 1',
+              products: [
+                {
+                  id: 21,
+                  name: 'product 1',
+                  productKey: 'visual_design_prod1',
+                },
+                {
+                  id: 22,
+                  name: 'product 2',
+                  productKey: 'visual_design_prod2',
+                },
+              ],
+            },
+          },
+          createdBy: 1,
+          updatedBy: 1,
+        },
+        {
+          id: 3,
+          name: 'template 3',
+          key: 'key 3',
+          category: 'category 3',
+          icon: 'http://example.com/icon3.ico',
+          question: 'question 3',
+          info: 'info 3',
+          aliases: [],
+          scope: {},
+          phases: {
+            1: {
+              name: 'Design Stage',
+              status: 'open',
+              details: {
+                description: 'detailed description',
+              },
+              products: [
+                {
+                  id: 21,
+                  name: 'product 1',
+                  productKey: 'visual_design_prod',
+                },
+              ],
+            },
+            2: {
+              name: 'Development Stage',
+              status: 'open',
+              products: [
+                {
+                  id: 23,
+                  name: 'product 2',
+                  details: {
+                    subDetails: 'subDetails 2',
+                  },
+                  productKey: 'website_development',
+                },
+              ],
+            },
+            3: {
+              name: 'QA Stage',
+              status: 'open',
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        },
       ]))
       .then(() => done());
   });
@@ -92,6 +171,32 @@ describe('Project create', () => {
     it('should return 422 if project type does not exist', (done) => {
       const invalidBody = _.cloneDeep(body);
       invalidBody.param.type = 'not_exist';
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if projectTemplateId does not exist', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.projectTemplateId = 3000;
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if phaseProduct count exceeds max value', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.projectTemplateId = 1;
       request(server)
         .post('/v4/projects')
         .set({
@@ -173,6 +278,65 @@ describe('Project create', () => {
             resJson.bookmarks.should.have.lengthOf(1);
             resJson.bookmarks[0].title.should.be.eql('title1');
             resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 201 if valid user and data (with projectTemplateId)', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(_.merge({ param: { projectTemplateId: 3 } }, body))
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.directProjectId.should.be.eql(128);
+            resJson.status.should.be.eql('draft');
+            resJson.type.should.be.eql(body.param.type);
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            resJson.phases.should.have.lengthOf(3);
+            const phases = _.sortBy(resJson.phases, p => p.name);
+            phases[0].name.should.be.eql('Design Stage');
+            phases[0].status.should.be.eql('open');
+            phases[0].details.should.be.eql({ description: 'detailed description' });
+            phases[0].products.should.have.lengthOf(1);
+            phases[0].products[0].name.should.be.eql('product 1');
+            phases[0].products[0].templateId.should.be.eql(21);
             server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }

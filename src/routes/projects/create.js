@@ -3,9 +3,10 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import config from 'config';
 
 import models from '../../models';
-import { PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
+import { PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
 import util from '../../util';
 import directProject from '../../services/directProject';
 
@@ -52,6 +53,7 @@ const createProjectValdiations = {
         groups: Joi.array().items(Joi.number().positive()),
       })).allow(null),
       templateId: Joi.number().positive(),
+      projectTemplateId: Joi.number().integer().positive(),
       version: Joi.string(),
     }).required(),
   },
@@ -81,7 +83,7 @@ module.exports = [
       external: null,
       utm: null,
     });
-    traverse(project).forEach(function (x) {
+    traverse(project).forEach(function (x) { // eslint-disable-line func-names
       if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     // override values
@@ -99,12 +101,9 @@ module.exports = [
     });
     models.sequelize.transaction(() => {
       let newProject = null;
+      let projectTemplate;
       // Validate the project type
-      return models.ProjectType.findOne({
-        where: {
-          key: project.type,
-        }
-      })
+      return models.ProjectType.findOne({ where: { key: project.type } })
         .then((projectType) => {
           if (!projectType) {
             // Not found
@@ -113,15 +112,35 @@ module.exports = [
             return Promise.reject(apiErr);
           }
 
+          return Promise.resolve();
+        })
+        // Validate the projectTemplateId
+        .then(() => {
+          if (project.projectTemplateId) {
+            return models.ProjectTemplate.findById(project.projectTemplateId)
+              .then((existingProjectTemplate) => {
+                if (!existingProjectTemplate) {
+                  // Not found
+                  const apiErr = new Error(`Project template not found for id ${project.projectTemplateId}`);
+                  apiErr.status = 422;
+                  return Promise.reject(apiErr);
+                }
+
+                projectTemplate = existingProjectTemplate;
+                return Promise.resolve();
+              });
+          }
+          return Promise.resolve();
+        })
+        .then(() =>
           // Create project
-          return models.Project
+          models.Project
             .create(project, {
               include: [{
                 model: models.ProjectMember,
                 as: 'members',
               }],
-            });
-        })
+            }))
         .then((_newProject) => {
           newProject = _newProject;
           req.log.debug('new project created (id# %d, name: %s)',
@@ -165,6 +184,59 @@ module.exports = [
           newProject = _.omit(newProject, ['deletedAt', 'utm']);
           // add an empty attachments array
           newProject.attachments = [];
+          // add an empty phases array
+          newProject.phases = [];
+
+          // Create phases and products
+          if (!projectTemplate) {
+            return Promise.resolve();
+          }
+
+          const phases = _.values(projectTemplate.phases);
+          return Promise.all(_.map(phases, phase =>
+            // Create phase
+            models.ProjectPhase.create(
+              _.assign(
+                _.omit(phase, 'products'),
+                {
+                  projectId: newProject.id,
+                  updatedBy: req.authUser.userId,
+                  createdBy: req.authUser.userId,
+                },
+              ),
+            )
+              .then((newPhase) => {
+                // Make sure number of products of per phase <= max value
+                const productCount = _.isArray(phase.products) ? phase.products.length : 0;
+                if (productCount > config.maxPhaseProductCount) {
+                  const err = new Error('the number of products per phase cannot exceed ' +
+                    `${config.maxPhaseProductCount}`);
+                  err.status = 422;
+                  throw err;
+                }
+
+                // Create products
+                return models.PhaseProduct.bulkCreate(_.map(phase.products, product =>
+                  // productKey is just used for the JSON to be more human readable
+                  // id need to map to templateId
+                  _.assign(_.omit(product, ['id', 'productKey']), {
+                    phaseId: newPhase.id,
+                    projectId: newProject.id,
+                    templateId: product.id,
+                    updatedBy: req.authUser.userId,
+                    createdBy: req.authUser.userId,
+                  })), { returning: true })
+                  .then((products) => {
+                    // Add phases and products to the project JSON, so they can be stored to ES later
+                    const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
+                    newPhaseJson.products = _.map(products, product =>
+                      _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
+                    newProject.phases.push(newPhaseJson);
+                    return Promise.resolve();
+                  });
+              })));
+        })
+        .then(() => {
           req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
           req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
             newProject,
@@ -176,6 +248,7 @@ module.exports = [
           res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
         })
         .catch((err) => {
+          req.log.error(err.message);
           util.handleError('Error creating project', err, req, next);
         });
     });
