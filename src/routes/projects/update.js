@@ -60,7 +60,7 @@ const updateProjectValdiations = {
         title: Joi.string(),
         address: Joi.string().regex(REGEX.URL),
       })).optional().allow(null),
-      type: Joi.any().valid(_.values(PROJECT_TYPE)),
+      type: Joi.string().max(45),
       details: Joi.any(),
       memers: Joi.any(),
       createdBy: Joi.any(),
@@ -91,15 +91,15 @@ const validateUpdates = (existingProject, updatedProps, req) => {
       break;
     default:
       break;
-      // disabling this check for now.
-      // case PROJECT_STATUS.DRAFT:
-      //   if (_.get(updatedProject, 'status', '') === 'active') {
-      //     // attempting to launch the project make sure certain
-      //     // properties are set
-      //     if (!updatedProject.billingAccountId && !existingProject.billingAccountId) {
-      //       errors.push('\'billingAccountId\' must be set before activating the project')
-      //     }
-      //   }
+    // disabling this check for now.
+    // case PROJECT_STATUS.DRAFT:
+    //   if (_.get(updatedProject, 'status', '') === 'active') {
+    //     // attempting to launch the project make sure certain
+    //     // properties are set
+    //     if (!updatedProject.billingAccountId && !existingProject.billingAccountId) {
+    //       errors.push('\'billingAccountId\' must be set before activating the project')
+    //     }
+    //   }
   }
   if (_.has(updatedProps, 'directProjectId') &&
     !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
@@ -113,6 +113,25 @@ module.exports = [
   // handles request validations
   validate(updateProjectValdiations),
   permissions('project.edit'),
+  /**
+   * Validate project type to be existed.
+   */
+  (req, res, next) => {
+    if (req.body.param.type) {
+      models.ProjectType.findOne({ where: { key: req.body.param.type } })
+        .then((projectType) => {
+          if (projectType) {
+            next();
+          } else {
+            const err = new Error(`Project type not found for key ${req.body.param.type}`);
+            err.status = 422;
+            next(err);
+          }
+        })
+    } else {
+      next();
+    }
+  },
   /**
    * POST projects/
    * Create a project if the user has access

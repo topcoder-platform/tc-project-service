@@ -8,6 +8,7 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import RabbitMQService from '../../services/rabbitmq';
+import models from '../../models';
 
 const should = chai.should();
 
@@ -16,7 +17,16 @@ sinon.stub(RabbitMQService.prototype, 'publish', () => {});
 
 describe('Project create', () => {
   before((done) => {
-    testUtil.clearDb(done);
+    testUtil.clearDb()
+      .then(() => models.ProjectType.bulkCreate([
+        {
+          key: 'generic',
+          displayName: 'Generic',
+          createdBy: 1,
+          updatedBy: 1,
+        }
+      ]))
+      .then(() => done());
   });
 
   after((done) => {
@@ -56,6 +66,32 @@ describe('Project create', () => {
     it('should return 422 if validations dont pass', (done) => {
       const invalidBody = _.cloneDeep(body);
       delete invalidBody.param.name;
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if project type is missing', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.type = null;
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if project type does not exist', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.type = 'not_exist';
       request(server)
         .post('/v4/projects')
         .set({

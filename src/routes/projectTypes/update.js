@@ -1,0 +1,61 @@
+/**
+ * API to update a project type
+ */
+import validate from 'express-validation';
+import _ from 'lodash';
+import Joi from 'joi';
+import { middleware as tcMiddleware } from 'tc-core-library-js';
+import util from '../../util';
+import models from '../../models';
+
+const permissions = tcMiddleware.permissions;
+
+const schema = {
+  params: {
+    key: Joi.string().max(45).required(),
+  },
+  body: {
+    param: Joi.object().keys({
+      key: Joi.any().strip(),
+      displayName: Joi.string().max(255).required(),
+      createdAt: Joi.any().strip(),
+      updatedAt: Joi.any().strip(),
+      deletedAt: Joi.any().strip(),
+      createdBy: Joi.any().strip(),
+      updatedBy: Joi.any().strip(),
+      deletedBy: Joi.any().strip(),
+    }).required(),
+  },
+};
+
+module.exports = [
+  validate(schema),
+  permissions('projectType.edit'),
+  (req, res, next) => {
+    const entityToUpdate = _.assign(req.body.param, {
+      updatedBy: req.authUser.userId,
+    });
+
+    return models.ProjectType.findOne({
+      where: {
+        key: req.params.key,
+      },
+      attributes: { exclude: ['deletedAt', 'deletedBy'] },
+    })
+      .then((projectType) => {
+        // Not found
+        if (!projectType) {
+          const apiErr = new Error(`Project type not found for key ${req.params.key}`);
+          apiErr.status = 404;
+          return Promise.reject(apiErr);
+        }
+
+        return projectType.update(entityToUpdate);
+      })
+      .then((projectType) => {
+        res.json(util.wrapResponse(req.id, projectType));
+        return Promise.resolve();
+      })
+      .catch(next);
+  },
+];

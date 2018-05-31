@@ -44,8 +44,7 @@ const createProjectValdiations = {
         type: Joi.any().valid('github', 'jira', 'asana', 'other'),
         data: Joi.string().max(300), // TODO - restrict length
       }).allow(null),
-      // TODO - add more types
-      type: Joi.any().valid(_.values(PROJECT_TYPE)).required(),
+      type: Joi.string().max(45).required(),
       details: Joi.any(),
       challengeEligibility: Joi.array().items(Joi.object().keys({
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
@@ -70,8 +69,8 @@ module.exports = [
     const project = req.body.param;
     // by default connect admin and managers joins projects as manager
     const userRole = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.MANAGER])
-        ? PROJECT_MEMBER_ROLE.MANAGER
-        : PROJECT_MEMBER_ROLE.CUSTOMER;
+      ? PROJECT_MEMBER_ROLE.MANAGER
+      : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults
     _.defaults(project, {
       description: '',
@@ -100,69 +99,85 @@ module.exports = [
     });
     models.sequelize.transaction(() => {
       let newProject = null;
-      return models.Project
-          .create(project, {
-            include: [{
-              model: models.ProjectMember,
-              as: 'members',
-            }],
-          })
-          .then((_newProject) => {
-            newProject = _newProject;
-            req.log.debug('new project created (id# %d, name: %s)',
-                newProject.id, newProject.name);
-            // create direct project with name and description
-            const body = {
-              projectName: newProject.name,
-              projectDescription: newProject.description,
-            };
-            // billingAccountId is optional field
-            if (newProject.billingAccountId) {
-              body.billingAccountId = newProject.billingAccountId;
-            }
-            req.log.debug('creating project history for project %d', newProject.id);
-            // add to project history
-            models.ProjectHistory.create({
-              projectId: _newProject.id,
-              status: PROJECT_STATUS.DRAFT,
-              cancelReason: null,
-              updatedBy: req.authUser.userId,
-            }).then(() => req.log.debug('project history created for project %d', newProject.id))
+      // Validate the project type
+      return models.ProjectType.findOne({
+        where: {
+          key: project.type,
+        }
+      })
+        .then((projectType) => {
+          if (!projectType) {
+            // Not found
+            const apiErr = new Error(`Project type not found for key ${project.type}`);
+            apiErr.status = 422;
+            return Promise.reject(apiErr);
+          }
+
+          // Create project
+          return models.Project
+            .create(project, {
+              include: [{
+                model: models.ProjectMember,
+                as: 'members',
+              }],
+            });
+        })
+        .then((_newProject) => {
+          newProject = _newProject;
+          req.log.debug('new project created (id# %d, name: %s)',
+            newProject.id, newProject.name);
+          // create direct project with name and description
+          const body = {
+            projectName: newProject.name,
+            projectDescription: newProject.description,
+          };
+          // billingAccountId is optional field
+          if (newProject.billingAccountId) {
+            body.billingAccountId = newProject.billingAccountId;
+          }
+          req.log.debug('creating project history for project %d', newProject.id);
+          // add to project history
+          models.ProjectHistory.create({
+            projectId: _newProject.id,
+            status: PROJECT_STATUS.DRAFT,
+            cancelReason: null,
+            updatedBy: req.authUser.userId,
+          }).then(() => req.log.debug('project history created for project %d', newProject.id))
             .catch(() => req.log.error('project history failed for project %d', newProject.id));
-            req.log.debug('creating direct project for project %d', newProject.id);
-            return directProject.createDirectProject(req, body)
-              .then((resp) => {
-                newProject.directProjectId = resp.data.result.content.projectId;
-                return newProject.save();
-              })
-              .then(() => newProject.reload(newProject.id))
-              .catch((err) => {
-                // log the error and continue
-                req.log.error('Error creating direct project');
-                req.log.error(err);
-                return Promise.resolve();
-              });
-            // return Promise.resolve();
-          })
-          .then(() => {
-            newProject = newProject.get({ plain: true });
-            // remove utm details & deletedAt field
-            newProject = _.omit(newProject, ['deletedAt', 'utm']);
-            // add an empty attachments array
-            newProject.attachments = [];
-            req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
-            req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
-              newProject,
-              { correlationId: req.id },
-            );
-            req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
-            // emit event
-            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
-            res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
-          })
-          .catch((err) => {
-            util.handleError('Error creating project', err, req, next);
-          });
+          req.log.debug('creating direct project for project %d', newProject.id);
+          return directProject.createDirectProject(req, body)
+            .then((resp) => {
+              newProject.directProjectId = resp.data.result.content.projectId;
+              return newProject.save();
+            })
+            .then(() => newProject.reload(newProject.id))
+            .catch((err) => {
+              // log the error and continue
+              req.log.error('Error creating direct project');
+              req.log.error(err);
+              return Promise.resolve();
+            });
+          // return Promise.resolve();
+        })
+        .then(() => {
+          newProject = newProject.get({ plain: true });
+          // remove utm details & deletedAt field
+          newProject = _.omit(newProject, ['deletedAt', 'utm']);
+          // add an empty attachments array
+          newProject.attachments = [];
+          req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
+          req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
+            newProject,
+            { correlationId: req.id },
+          );
+          req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
+          // emit event
+          req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
+          res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
+        })
+        .catch((err) => {
+          util.handleError('Error creating project', err, req, next);
+        });
     });
   },
 ];

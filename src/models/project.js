@@ -23,9 +23,6 @@ module.exports = function defineProject(sequelize, DataTypes) {
     type: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        isIn: [_.values(PROJECT_TYPE)],
-      },
     },
     status: {
       type: DataTypes.STRING,
