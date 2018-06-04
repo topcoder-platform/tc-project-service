@@ -62,7 +62,7 @@ const updateProjectValdiations = {
       type: Joi.string().max(45),
       details: Joi.any(),
       memers: Joi.any(),
-      projectTemplateId: Joi.any().strip(), // ignore the project template id
+      templateId: Joi.any().strip(), // ignore the template id
       createdBy: Joi.any(),
       createdAt: Joi.any(),
       updatedBy: Joi.any(),

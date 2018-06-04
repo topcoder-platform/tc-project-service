@@ -52,8 +52,7 @@ const createProjectValdiations = {
         users: Joi.array().items(Joi.number().positive()),
         groups: Joi.array().items(Joi.number().positive()),
       })).allow(null),
-      templateId: Joi.number().positive(),
-      projectTemplateId: Joi.number().integer().positive(),
+      templateId: Joi.number().integer().positive(),
       version: Joi.string(),
     }).required(),
   },
@@ -102,6 +101,7 @@ module.exports = [
     models.sequelize.transaction(() => {
       let newProject = null;
       let projectTemplate;
+      const newPhases = [];
       // Validate the project type
       return models.ProjectType.findOne({ where: { key: project.type } })
         .then((projectType) => {
@@ -114,14 +114,14 @@ module.exports = [
 
           return Promise.resolve();
         })
-        // Validate the projectTemplateId
+        // Validate the templateId
         .then(() => {
-          if (project.projectTemplateId) {
-            return models.ProjectTemplate.findById(project.projectTemplateId)
+          if (project.templateId) {
+            return models.ProjectTemplate.findById(project.templateId)
               .then((existingProjectTemplate) => {
                 if (!existingProjectTemplate) {
                   // Not found
-                  const apiErr = new Error(`Project template not found for id ${project.projectTemplateId}`);
+                  const apiErr = new Error(`Project template not found for id ${project.templateId}`);
                   apiErr.status = 422;
                   return Promise.reject(apiErr);
                 }
@@ -143,51 +143,9 @@ module.exports = [
             }))
         .then((_newProject) => {
           newProject = _newProject;
-          req.log.debug('new project created (id# %d, name: %s)',
-            newProject.id, newProject.name);
-          // create direct project with name and description
-          const body = {
-            projectName: newProject.name,
-            projectDescription: newProject.description,
-          };
-          // billingAccountId is optional field
-          if (newProject.billingAccountId) {
-            body.billingAccountId = newProject.billingAccountId;
-          }
-          req.log.debug('creating project history for project %d', newProject.id);
-          // add to project history
-          models.ProjectHistory.create({
-            projectId: _newProject.id,
-            status: PROJECT_STATUS.DRAFT,
-            cancelReason: null,
-            updatedBy: req.authUser.userId,
-          }).then(() => req.log.debug('project history created for project %d', newProject.id))
-            .catch(() => req.log.error('project history failed for project %d', newProject.id));
-          req.log.debug('creating direct project for project %d', newProject.id);
-          return directProject.createDirectProject(req, body)
-            .then((resp) => {
-              newProject.directProjectId = resp.data.result.content.projectId;
-              return newProject.save();
-            })
-            .then(() => newProject.reload(newProject.id))
-            .catch((err) => {
-              // log the error and continue
-              req.log.error('Error creating direct project');
-              req.log.error(err);
-              return Promise.resolve();
-            });
-          // return Promise.resolve();
-        })
-        .then(() => {
-          newProject = newProject.get({ plain: true });
-          // remove utm details & deletedAt field
-          newProject = _.omit(newProject, ['deletedAt', 'utm']);
-          // add an empty attachments array
-          newProject.attachments = [];
-          // add an empty phases array
-          newProject.phases = [];
 
           // Create phases and products
+          // This needs to be done before creating direct project
           if (!projectTemplate) {
             return Promise.resolve();
           }
@@ -231,12 +189,56 @@ module.exports = [
                     const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
                     newPhaseJson.products = _.map(products, product =>
                       _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
-                    newProject.phases.push(newPhaseJson);
+                    newPhases.push(newPhaseJson);
                     return Promise.resolve();
                   });
               })));
         })
         .then(() => {
+          req.log.debug('new project created (id# %d, name: %s)',
+            newProject.id, newProject.name);
+          // create direct project with name and description
+          const body = {
+            projectName: newProject.name,
+            projectDescription: newProject.description,
+          };
+          // billingAccountId is optional field
+          if (newProject.billingAccountId) {
+            body.billingAccountId = newProject.billingAccountId;
+          }
+          req.log.debug('creating project history for project %d', newProject.id);
+          // add to project history
+          models.ProjectHistory.create({
+            projectId: newProject.id,
+            status: PROJECT_STATUS.DRAFT,
+            cancelReason: null,
+            updatedBy: req.authUser.userId,
+          }).then(() => req.log.debug('project history created for project %d', newProject.id))
+            .catch(() => req.log.error('project history failed for project %d', newProject.id));
+          req.log.debug('creating direct project for project %d', newProject.id);
+          return directProject.createDirectProject(req, body)
+            .then((resp) => {
+              newProject.directProjectId = resp.data.result.content.projectId;
+              return newProject.save();
+            })
+            .then(() => newProject.reload(newProject.id))
+            .catch((err) => {
+              // log the error and continue
+              req.log.error('Error creating direct project');
+              req.log.error(err);
+              return Promise.resolve();
+            });
+          // return Promise.resolve();
+        })
+        .then(() => {
+          newProject = newProject.get({ plain: true });
+          // remove utm details & deletedAt field
+          newProject = _.omit(newProject, ['deletedAt', 'utm']);
+          // add an empty attachments array
+          newProject.attachments = [];
+          // set phases array
+          newProject.phases = newPhases;
+
           req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
           req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
             newProject,

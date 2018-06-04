@@ -1153,7 +1153,7 @@ definitions:
             type: string
           source:
             type: string
-      projectTemplateId:
+      templateId:
         description: the project template identifier
         type: number
         format: long
@@ -1278,7 +1278,7 @@ definitions:
           $ref: "#/definitions/ProjectAttachment"
       details:
         $ref: "#/definitions/ProjectDetails"
-      projectTemplateId:
+      templateId:
         description: the project template identifier
         type: number
         format: long

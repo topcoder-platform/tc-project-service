@@ -36,7 +36,6 @@ module.exports = function defineProject(sequelize, DataTypes) {
     cancelReason: DataTypes.STRING,
     version: DataTypes.STRING(15),
     templateId: DataTypes.BIGINT,
-    projectTemplateId: DataTypes.BIGINT,
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

@@ -2839,11 +2839,11 @@
 			]
 		},
 		{
-			"name": "issue86 (create project with projectTemplateId)",
+			"name": "issue86 (create project with templateId)",
 			"description": "",
 			"item": [
 				{
-					"name": "Create project with projectTemplateId",
+					"name": "Create project with templateId",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2858,7 +2858,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with projectTemplateId\",\n\t\t\"description\": \"Hello I am a test project with projectTemplateId\",\n\t\t\"type\": \"generic\",\n\t\t\"projectTemplateId\": 3\n\t}\n}"
+							"raw": "{\n  \"param\": {\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": 3\n  }\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",
@@ -2874,7 +2874,7 @@
 					"response": []
 				},
 				{
-					"name": "Create project with projectTemplateId (not existed)",
+					"name": "Create project with templateId (not existed)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2889,7 +2889,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with projectTemplateId\",\n\t\t\"description\": \"Hello I am a test project with projectTemplateId\",\n\t\t\"type\": \"generic\",\n\t\t\"projectTemplateId\": 3000\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with templateId\",\n\t\t\"description\": \"Hello I am a test project with templateId\",\n\t\t\"type\": \"generic\",\n\t\t\"templateId\": 3000\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",

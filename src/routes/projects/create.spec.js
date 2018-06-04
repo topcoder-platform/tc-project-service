@@ -181,9 +181,9 @@ describe('Project create', () => {
         .expect(422, done);
     });
 
-    it('should return 422 if projectTemplateId does not exist', (done) => {
+    it('should return 422 if templateId does not exist', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.projectTemplateId = 3000;
+      invalidBody.param.templateId = 3000;
       request(server)
         .post('/v4/projects')
         .set({
@@ -196,7 +196,7 @@ describe('Project create', () => {
 
     it('should return 422 if phaseProduct count exceeds max value', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.projectTemplateId = 1;
+      invalidBody.param.templateId = 1;
       request(server)
         .post('/v4/projects')
         .set({
@@ -284,7 +284,7 @@ describe('Project create', () => {
         });
     });
 
-    it('should return 201 if valid user and data (with projectTemplateId)', (done) => {
+    it('should return 201 if valid user and data (with templateId)', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
@@ -307,7 +307,7 @@ describe('Project create', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send(_.merge({ param: { projectTemplateId: 3 } }, body))
+        .send(_.merge({ param: { templateId: 3 } }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
