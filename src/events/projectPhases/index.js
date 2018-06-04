@@ -7,11 +7,61 @@ import config from 'config';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import util from '../../util';
+import messageService from '../../services/messageService';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const eClient = util.getElasticSearchClient();
+
+/**
+ * Indexes the project phase in the elastic search.
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload
+ * @returns {undefined}
+ */
+const indexProjectPhase = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+  try {
+    const data = JSON.parse(msg.content.toString());
+    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
+    const phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
+    phases.push(_.omit(data, ['deletedAt', 'deletedBy']));
+    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
+    yield eClient.update({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId, body: { doc: merged } });
+    logger.debug('project phase added to project document successfully');
+  } catch (error) {
+    logger.error('Error handling indexing the project phase', error);
+    // throw the error back to nack the bus
+    throw error;
+  }
+});
+
+/**
+ * Creates a new phase topic in message api.
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload
+ * @returns {undefined}
+ */
+const createPhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+  try {
+    const phase = JSON.parse(msg.content.toString());
+    const topic = yield messageService.createTopic({
+      reference: 'project',
+      referenceId: `${phase.projectId}`,
+      tag: `phase#${phase.id}`,
+      title: phase.name,
+      body: 'Welcome!!! Please use this channel for communication around the phase.',
+    }, logger);
+    logger.debug('topic for the phase created successfully');
+    logger.debug(topic);
+  } catch (error) {
+    logger.error('Error in creating topic for the project phase', error);
+    // don't throw the error back to nack the bus, because we don't want to get multiple topics per phase
+    // we can create topic for a phase manually, if somehow it fails
+  }
+});
 
 /**
  * Handler for project phase creation event
@@ -22,13 +72,8 @@ const eClient = util.getElasticSearchClient();
  */
 const projectPhaseAddedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   try {
-    const data = JSON.parse(msg.content.toString());
-    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
-    const phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
-    phases.push(_.omit(data, ['deletedAt', 'deletedBy']));
-    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
-    yield eClient.update({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId, body: { doc: merged } });
-    logger.debug('project phase added to project document successfully');
+    yield indexProjectPhase(logger, msg, channel);
+    yield createPhaseTopic(logger, msg);
     channel.ack(msg);
   } catch (error) {
     logger.error('Error handling project.phase.added event', error);
@@ -73,13 +118,13 @@ const projectPhaseUpdatedHandler = Promise.coroutine(function* (logger, msg, cha
 });
 
 /**
- * Handler for project phase deleted event
+ * Removes the project phase from the elastic search.
+ *
  * @param  {Object} logger  logger to log along with trace id
  * @param  {Object} msg     event payload
- * @param  {Object} channel channel to ack, nack
  * @returns {undefined}
  */
-const projectPhaseRemovedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+const removePhaseFromIndex = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
@@ -94,6 +139,45 @@ const projectPhaseRemovedHandler = Promise.coroutine(function* (logger, msg, cha
       },
     });
     logger.debug('project phase removed from project document successfully');
+  } catch (error) {
+    logger.error('Error in removing project phase from index', error);
+    // throw the error back to nack the bus
+    throw error;
+  }
+});
+
+/**
+ * Removes the phase topic from the message api.
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload
+ * @returns {undefined}
+ */
+const removePhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+  try {
+    const phase = JSON.parse(msg.content.toString());
+    const phaseTopic = yield messageService.getPhaseTopic(phase.projectId, phase.id, logger);
+    yield messageService.deletePosts(phaseTopic.id, phaseTopic.postIds, logger);
+    yield messageService.deleteTopic(phaseTopic.id, logger);
+    logger.debug('topic for the phase removed successfully');
+  } catch (error) {
+    logger.error('Error in removing topic for the project phase', error);
+    // don't throw the error back to nack the bus
+    // we can delete topic for a phase manually, if somehow it fails
+  }
+});
+
+/**
+ * Handler for project phase deleted event
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload
+ * @param  {Object} channel channel to ack, nack
+ * @returns {undefined}
+ */
+const projectPhaseRemovedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+  try {
+    yield removePhaseFromIndex(logger, msg, channel);
+    yield removePhaseTopic(logger, msg);
     channel.ack(msg);
   } catch (error) {
     logger.error('Error fetching project document from elasticsearch', error);

@@ -257,6 +257,7 @@ module.exports = (app, logger) => {
           projectName: project.name,
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
+          phase: created,
         }, logger);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
