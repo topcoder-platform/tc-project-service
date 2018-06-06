@@ -115,7 +115,7 @@ function createProjectAndPhases(req, project, projectTemplate) {
               _.assign(_.omit(product, ['id', 'productKey']), {
                 phaseId: newPhase.id,
                 projectId: newProject.id,
-                templateId: Integer.parseInt(product.id),
+                templateId: parseInt(product.id, 10),
                 updatedBy: req.authUser.userId,
                 createdBy: req.authUser.userId,
               })), { returning: true })

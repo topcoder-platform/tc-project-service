@@ -11,10 +11,14 @@ const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
-
-
-
-const indexProject = Promise.coroutine(function* (logger, msg) {
+/**
+ * Indexes the project in the elastic search.
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload which is essentially a project in JSON format
+ * @returns {undefined}
+ */
+const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
   const data = JSON.parse(msg.content.toString());
   const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
   try {
@@ -23,8 +27,7 @@ const indexProject = Promise.coroutine(function* (logger, msg) {
     // if no members are returned than this should result in nack
     if (!_.isArray(memberDetails) || memberDetails.length === 0) {
       logger.error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
-      channel.nack(msg, false, !msg.fields.redelivered);
-      return undefined;
+      throw new Error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
     }
     // update project member record with details
     data.members = data.members.map((single) => {
@@ -39,7 +42,6 @@ const indexProject = Promise.coroutine(function* (logger, msg) {
       body: data,
     });
     logger.debug(`project indexed successfully (projectId: ${data.id})`, result);
-    return undefined;
   } catch (error) {
     logger.error(`Error indexing project (projectId: ${data.id})`, error);
     throw error;
@@ -54,14 +56,14 @@ const indexProject = Promise.coroutine(function* (logger, msg) {
  * @returns {undefined}
  */
 const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+  const project = JSON.parse(msg.content.toString());
   try {
-    indexProject(logger, msg);
-    createPhaseTopic(logger, msg);
+    yield indexProject(logger, msg);
+    yield createPhaseTopic(logger, msg);
     channel.ack(msg);
-  } catch(error) {
-    logger.error(`Error processing event (projectId: ${data.id})`, error);
+  } catch (error) {
+    logger.error(`Error processing event (projectId: ${project.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
-    return undefined;
   }
 });
 
