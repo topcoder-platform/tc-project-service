@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "0d2b00c1-bd90-40ab-ba13-e730e4ddfcf4",
-		"name": "tc-project-service ",
+		"_postman_id": "1791b330-5331-4768-a265-f1cb5e6b4492",
+		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -2348,7 +2348,7 @@
 		},
 		{
 			"name": "Project Templates",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "Create project template",
@@ -2368,7 +2368,16 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/projectTemplates"
+						"url": {
+							"raw": "{{api-url}}/v4/projectTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTemplates"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2390,7 +2399,16 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/projectTemplates"
+						"url": {
+							"raw": "{{api-url}}/v4/projectTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTemplates"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2412,7 +2430,17 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/projectTemplates/1"
+						"url": {
+							"raw": "{{api-url}}/v4/projectTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTemplates",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2434,7 +2462,17 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/projectTemplates/1"
+						"url": {
+							"raw": "{{api-url}}/v4/projectTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTemplates",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2456,7 +2494,17 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/projectTemplates/1"
+						"url": {
+							"raw": "{{api-url}}/v4/projectTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTemplates",
+								"1"
+							]
+						}
 					},
 					"response": []
 				}
@@ -2464,7 +2512,7 @@
 		},
 		{
 			"name": "Product Templates",
-			"description": "",
+			"description": null,
 			"item": [
 				{
 					"name": "Create product template",
@@ -2484,7 +2532,16 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"alias 1\"\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\"\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/productTemplates"
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2506,7 +2563,16 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/productTemplates"
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2528,7 +2594,17 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/productTemplates/1"
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2550,7 +2626,17 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"scope 1\",\r\n      \"alias2\": [\"a\"]\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\",\r\n      \"template2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/productTemplates/1"
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2572,7 +2658,249 @@
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
-						"url": "{{api-url}}/v4/productTemplates/1"
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Project Type",
+			"description": null,
+			"item": [
+				{
+					"name": "Create project type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projectTypes",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project types",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projectTypes",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTypes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get project type",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projectTypes/generic",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTypes",
+								"generic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project type",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"displayName\": \"Chatbot-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projectTypes/chatbot",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTypes",
+								"chatbot"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete project type",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projectTypes/chatbot",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projectTypes",
+								"chatbot"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "issue86 (create project with templateId)",
+			"description": "",
+			"item": [
+				{
+					"name": "Create project with templateId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": 3\n  }\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project with templateId (not existed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with templateId\",\n\t\t\"description\": \"Hello I am a test project with templateId\",\n\t\t\"type\": \"generic\",\n\t\t\"templateId\": 3000\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
 					},
 					"response": []
 				}

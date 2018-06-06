@@ -1,7 +1,7 @@
 /* eslint-disable valid-jsdoc */
 
 import _ from 'lodash';
-import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
+import { PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 
 module.exports = function defineProject(sequelize, DataTypes) {
   const Project = sequelize.define('Project', {
@@ -23,9 +23,6 @@ module.exports = function defineProject(sequelize, DataTypes) {
     type: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        isIn: [_.values(PROJECT_TYPE)],
-      },
     },
     status: {
       type: DataTypes.STRING,

@@ -27,7 +27,7 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/(projects|projectTemplates|productTemplates)(?!\\/health).*`),
+  RegExp(`\\/${apiVersion}\\/(projects|projectTemplates|productTemplates|projectTypes)(?!\\/health).*`),
   jwtAuth());
 
 // Register all the routes
@@ -86,22 +86,31 @@ router.route('/v4/productTemplates/:templateId(\\d+)')
   .delete(require('./productTemplates/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/phases')
-    .get(require('./phases/list'))
-    .post(require('./phases/create'));
+  .get(require('./phases/list'))
+  .post(require('./phases/create'));
 
 router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
-    .get(require('./phases/get'))
-    .patch(require('./phases/update'))
-    .delete(require('./phases/delete'));
+  .get(require('./phases/get'))
+  .patch(require('./phases/update'))
+  .delete(require('./phases/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products')
-    .get(require('./phaseProducts/list'))
-    .post(require('./phaseProducts/create'));
+  .get(require('./phaseProducts/list'))
+  .post(require('./phaseProducts/create'));
 
 router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/:productId(\\d+)')
-    .get(require('./phaseProducts/get'))
-    .patch(require('./phaseProducts/update'))
-    .delete(require('./phaseProducts/delete'));
+  .get(require('./phaseProducts/get'))
+  .patch(require('./phaseProducts/update'))
+  .delete(require('./phaseProducts/delete'));
+
+router.route('/v4/projectTypes')
+  .post(require('./projectTypes/create'))
+  .get(require('./projectTypes/list'));
+
+router.route('/v4/projectTypes/:key')
+  .get(require('./projectTypes/get'))
+  .patch(require('./projectTypes/update'))
+  .delete(require('./projectTypes/delete'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

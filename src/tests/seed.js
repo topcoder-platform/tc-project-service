@@ -107,6 +107,10 @@ models.sequelize.sync({ force: true })
       name: 'template 1',
       key: 'key 1',
       category: 'category 1',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: [],
       scope: {
         scope1: {
           subScope1A: 1,
@@ -137,8 +141,58 @@ models.sequelize.sync({ force: true })
       name: 'template 2',
       key: 'key 2',
       category: 'category 2',
+      icon: 'http://example.com/icon1.ico',
+      info: 'info 2',
+      aliases: [],
       scope: {},
       phases: {},
+      question: 'question 2',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'template 3',
+      key: 'key 3',
+      category: 'category 3',
+      icon: 'http://example.com/icon3.ico',
+      question: 'question 3',
+      info: 'info 3',
+      aliases: [],
+      scope: {},
+      phases: {
+        1: {
+          name: 'Design Stage',
+          status: 'open',
+          details: {
+            description: 'detailed description',
+          },
+          products: [
+            {
+              id: 21,
+              name: 'product 1',
+              productKey: 'visual_design_prod',
+            },
+          ],
+        },
+        2: {
+          name: 'Development Stage',
+          status: 'open',
+          products: [
+            {
+              id: 23,
+              name: 'product 2',
+              details: {
+                subDetails: 'subDetails 2',
+              },
+              productKey: 'website_development',
+            },
+          ],
+        },
+        3: {
+          name: 'QA Stage',
+          status: 'open',
+        },
+      },
       createdBy: 1,
       updatedBy: 2,
     },
@@ -188,7 +242,60 @@ models.sequelize.sync({ force: true })
       updatedBy: 4,
     },
   ]))
+  .then(() => models.ProjectType.bulkCreate([
+    {
+      key: 'app_dev',
+      displayName: 'Application development',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      key: 'generic',
+      displayName: 'Generic',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      key: 'visual_prototype',
+      displayName: 'Visual Prototype',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      key: 'visual_design',
+      displayName: 'Visual Design',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      key: 'website',
+      displayName: 'Website',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      key: 'app',
+      displayName: 'Application',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      key: 'quality_assurance',
+      displayName: 'Quality Assurance',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      key: 'chatbot',
+      displayName: 'Chatbot',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+  ]))
   .then(() => {
     process.exit(0);
   })
-  .catch(() => process.exit(1));
+  .catch((err) => {
+    console.log(err); // eslint-disable-line no-console
+    process.exit(1);
+  });

@@ -3,9 +3,10 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import config from 'config';
 
 import models from '../../models';
-import { PROJECT_TYPE, PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
+import { PROJECT_MEMBER_ROLE, PROJECT_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
 import util from '../../util';
 import directProject from '../../services/directProject';
 
@@ -44,19 +45,92 @@ const createProjectValdiations = {
         type: Joi.any().valid('github', 'jira', 'asana', 'other'),
         data: Joi.string().max(300), // TODO - restrict length
       }).allow(null),
-      // TODO - add more types
-      type: Joi.any().valid(_.values(PROJECT_TYPE)).required(),
+      type: Joi.string().max(45).required(),
       details: Joi.any(),
       challengeEligibility: Joi.array().items(Joi.object().keys({
         role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
         users: Joi.array().items(Joi.number().positive()),
         groups: Joi.array().items(Joi.number().positive()),
       })).allow(null),
-      templateId: Joi.number().positive(),
+      templateId: Joi.number().integer().positive(),
       version: Joi.string(),
     }).required(),
   },
 };
+
+/**
+ * Create the project, project phases and products. This needs to be done before creating direct project.
+ * @param {Object} req the request
+ * @param {Object} project the project
+ * @param {Object} projectTemplate the project template
+ * @returns {Promise} the promise that resolves to the created project and phases
+ */
+function createProjectAndPhases(req, project, projectTemplate) {
+  const result = {
+    newProject: null,
+    newPhases: [],
+  };
+
+  // Create project
+  return models.Project.create(project, {
+    include: [{
+      model: models.ProjectMember,
+      as: 'members',
+    }],
+  })
+    .then((newProject) => {
+      result.newProject = newProject;
+
+      if (!projectTemplate) {
+        return Promise.resolve(result);
+      }
+
+      const phases = _.values(projectTemplate.phases);
+      return Promise.all(_.map(phases, phase =>
+        // Create phase
+        models.ProjectPhase.create(
+          _.assign(
+            _.omit(phase, 'products'),
+            {
+              projectId: project.id,
+              updatedBy: req.authUser.userId,
+              createdBy: req.authUser.userId,
+            },
+          ),
+        )
+          .then((newPhase) => {
+            // Make sure number of products of per phase <= max value
+            const productCount = _.isArray(phase.products) ? phase.products.length : 0;
+            if (productCount > config.maxPhaseProductCount) {
+              const err = new Error('the number of products per phase cannot exceed ' +
+                `${config.maxPhaseProductCount}`);
+              err.status = 422;
+              throw err;
+            }
+
+            // Create products
+            return models.PhaseProduct.bulkCreate(_.map(phase.products, product =>
+              // productKey is just used for the JSON to be more human readable
+              // id need to map to templateId
+              _.assign(_.omit(product, ['id', 'productKey']), {
+                phaseId: newPhase.id,
+                projectId: project.id,
+                templateId: product.id,
+                updatedBy: req.authUser.userId,
+                createdBy: req.authUser.userId,
+              })), { returning: true })
+              .then((products) => {
+                // Add phases and products to the project JSON, so they can be stored to ES later
+                const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
+                newPhaseJson.products = _.map(products, product =>
+                  _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
+                result.newPhases.push(newPhaseJson);
+                return Promise.resolve();
+              });
+          })));
+    })
+    .then(() => Promise.resolve(result));
+}
 
 module.exports = [
   // handles request validations
@@ -70,8 +144,8 @@ module.exports = [
     const project = req.body.param;
     // by default connect admin and managers joins projects as manager
     const userRole = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.MANAGER])
-        ? PROJECT_MEMBER_ROLE.MANAGER
-        : PROJECT_MEMBER_ROLE.CUSTOMER;
+      ? PROJECT_MEMBER_ROLE.MANAGER
+      : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults
     _.defaults(project, {
       description: '',
@@ -82,7 +156,7 @@ module.exports = [
       external: null,
       utm: null,
     });
-    traverse(project).forEach(function (x) {
+    traverse(project).forEach(function (x) { // eslint-disable-line func-names
       if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     // override values
@@ -100,69 +174,102 @@ module.exports = [
     });
     models.sequelize.transaction(() => {
       let newProject = null;
-      return models.Project
-          .create(project, {
-            include: [{
-              model: models.ProjectMember,
-              as: 'members',
-            }],
-          })
-          .then((_newProject) => {
-            newProject = _newProject;
-            req.log.debug('new project created (id# %d, name: %s)',
-                newProject.id, newProject.name);
-            // create direct project with name and description
-            const body = {
-              projectName: newProject.name,
-              projectDescription: newProject.description,
-            };
-            // billingAccountId is optional field
-            if (newProject.billingAccountId) {
-              body.billingAccountId = newProject.billingAccountId;
-            }
-            req.log.debug('creating project history for project %d', newProject.id);
-            // add to project history
-            models.ProjectHistory.create({
-              projectId: _newProject.id,
-              status: PROJECT_STATUS.DRAFT,
-              cancelReason: null,
-              updatedBy: req.authUser.userId,
-            }).then(() => req.log.debug('project history created for project %d', newProject.id))
-            .catch(() => req.log.error('project history failed for project %d', newProject.id));
-            req.log.debug('creating direct project for project %d', newProject.id);
-            return directProject.createDirectProject(req, body)
-              .then((resp) => {
-                newProject.directProjectId = resp.data.result.content.projectId;
-                return newProject.save();
-              })
-              .then(() => newProject.reload(newProject.id))
-              .catch((err) => {
-                // log the error and continue
-                req.log.error('Error creating direct project');
-                req.log.error(err);
+      let projectTemplate;
+      let newPhases;
+      // Validate the project type
+      return models.ProjectType.findOne({ where: { key: project.type } })
+        .then((projectType) => {
+          if (!projectType) {
+            // Not found
+            const apiErr = new Error(`Project type not found for key ${project.type}`);
+            apiErr.status = 422;
+            return Promise.reject(apiErr);
+          }
+
+          return Promise.resolve();
+        })
+        // Validate the templateId
+        .then(() => {
+          if (project.templateId) {
+            return models.ProjectTemplate.findById(project.templateId)
+              .then((existingProjectTemplate) => {
+                if (!existingProjectTemplate) {
+                  // Not found
+                  const apiErr = new Error(`Project template not found for id ${project.templateId}`);
+                  apiErr.status = 422;
+                  return Promise.reject(apiErr);
+                }
+
+                projectTemplate = existingProjectTemplate;
                 return Promise.resolve();
               });
-            // return Promise.resolve();
-          })
-          .then(() => {
-            newProject = newProject.get({ plain: true });
-            // remove utm details & deletedAt field
-            newProject = _.omit(newProject, ['deletedAt', 'utm']);
-            // add an empty attachments array
-            newProject.attachments = [];
-            req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
-            req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
-              newProject,
-              { correlationId: req.id },
-            );
-            req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
-            // emit event
-            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
-            res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
-          })
-          .catch((err) => {
-            util.handleError('Error creating project', err, req, next);
-          });
+          }
+          return Promise.resolve();
+        })
+        // Create project and phases
+        .then(() => createProjectAndPhases(req, project, projectTemplate))
+        .then((createdProjectAndPhases) => {
+          newProject = createdProjectAndPhases.newProject;
+          newPhases = createdProjectAndPhases.newPhases;
+
+          req.log.debug('new project created (id# %d, name: %s)',
+            newProject.id, newProject.name);
+          // create direct project with name and description
+          const body = {
+            projectName: newProject.name,
+            projectDescription: newProject.description,
+          };
+          // billingAccountId is optional field
+          if (newProject.billingAccountId) {
+            body.billingAccountId = newProject.billingAccountId;
+          }
+          req.log.debug('creating project history for project %d', newProject.id);
+          // add to project history
+          models.ProjectHistory.create({
+            projectId: newProject.id,
+            status: PROJECT_STATUS.DRAFT,
+            cancelReason: null,
+            updatedBy: req.authUser.userId,
+          }).then(() => req.log.debug('project history created for project %d', newProject.id))
+            .catch(() => req.log.error('project history failed for project %d', newProject.id));
+          req.log.debug('creating direct project for project %d', newProject.id);
+          return directProject.createDirectProject(req, body)
+            .then((resp) => {
+              newProject.directProjectId = resp.data.result.content.projectId;
+              return newProject.save();
+            })
+            .then(() => newProject.reload(newProject.id))
+            .catch((err) => {
+              // log the error and continue
+              req.log.error('Error creating direct project');
+              req.log.error(err);
+              return Promise.resolve();
+            });
+          // return Promise.resolve();
+        })
+        .then(() => {
+          newProject = newProject.get({ plain: true });
+          // remove utm details & deletedAt field
+          newProject = _.omit(newProject, ['deletedAt', 'utm']);
+          // add an empty attachments array
+          newProject.attachments = [];
+          // set phases array
+          newProject.phases = newPhases;
+
+          req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
+          req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
+            newProject,
+            { correlationId: req.id },
+          );
+          req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
+          // emit event
+          req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
+          res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
+        })
+        .catch((err) => {
+          req.log.error(err.message);
+          util.handleError('Error creating project', err, req, next);
+        });
     });
   },
 ];

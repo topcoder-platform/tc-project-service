@@ -862,6 +862,133 @@ paths:
           description: Product template successfully removed
 
 
+  /projectTypes:
+    get:
+      tags:
+        - projectType
+      operationId: findProjectTypes
+      security:
+        - Bearer: []
+      description: Retreive all project types. All user roles can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of project types
+          schema:
+            $ref: "#/definitions/ProjectTypeListResponse"
+    post:
+      tags:
+        - projectType
+      operationId: addProjectType
+      security:
+        - Bearer: []
+      description: Create a project type. Only admin or connect admin can access this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTypeCreateBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created project type
+          schema:
+            $ref: "#/definitions/ProjectTypeResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projectTypes/{key}:
+    get:
+      tags:
+        - projectType
+      description: Retrieve project type by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a project type
+          schema:
+            $ref: "#/definitions/ProjectTypeResponse"
+      parameters:
+        - $ref: "#/parameters/keyParam"
+      operationId: getProjectType
+
+    patch:
+      tags:
+        - projectType
+      operationId: updateProjectType
+      security:
+        - Bearer: []
+      description: Update a project type. Only admin or connect admin can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated project type.
+          schema:
+            $ref: "#/definitions/ProjectTypeResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/keyParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/ProjectTypeBodyParam"
+
+    delete:
+      tags:
+        - projectType
+      description: Remove an existing project type. Only admin or connect admin can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/keyParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If project is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Project type successfully removed
+
+
+
+
 parameters:
   projectIdParam:
     name: projectId
@@ -894,6 +1021,12 @@ parameters:
     type: integer
     format: int64
     minimum: 1
+  keyParam:
+    name: key
+    in: path
+    description: project type key
+    required: true
+    type: string
   offsetParam:
     name: offset
     description: "number of items to skip. Defaults to 0"
@@ -999,7 +1132,6 @@ definitions:
       type:
         type: string
         description: project type
-        enum: ["generic", "visual_design", "visual_prototype", "app_dev"]
       bookmarks:
         type: array
         items:
@@ -1021,6 +1153,10 @@ definitions:
             type: string
           source:
             type: string
+      templateId:
+        description: the project template identifier
+        type: number
+        format: long
 
 
   NewProjectBodyParam:
@@ -1110,7 +1246,6 @@ definitions:
       type:
         type: string
         description: project type
-        enum: ["app_dev", "generic", "visual_prototype", "visual_design"]
       status:
         type: string
         description: current state of the task
@@ -1143,6 +1278,10 @@ definitions:
           $ref: "#/definitions/ProjectAttachment"
       details:
         $ref: "#/definitions/ProjectDetails"
+      templateId:
+        description: the project template identifier
+        type: number
+        format: long
 
       createdAt:
         type: string
@@ -1976,3 +2115,127 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/PhaseProduct"
+              
+              
+              
+  ProjectTypeRequest:
+    title: Project type request object
+    type: object
+    required:
+      - displayName
+    properties:
+      displayName:
+        type: string
+        description: the project type display name
+
+  ProjectTypeBodyParam:
+    title: Project type body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/ProjectTypeRequest"
+
+  ProjectTypeCreateRequest:
+    title: Project type creation request object
+    type: object
+    allOf:
+      - type: object
+        required:
+          - key
+        properties:
+          key:
+            type: string
+            description: the project type key
+      - $ref: "#/definitions/ProjectTypeRequest"
+
+  ProjectTypeCreateBodyParam:
+    title: Project type creation body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/ProjectTypeCreateRequest"
+
+  ProjectType:
+    title: Project type object
+    allOf:
+      - type: object
+        required:
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          key:
+            type: string
+            description: the project type key
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/ProjectTypeCreateRequest"
+
+
+  ProjectTypeResponse:
+    title: Single project type response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/ProjectType"
+
+  ProjectTypeListResponse:
+    title: Project type list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/ProjectType"

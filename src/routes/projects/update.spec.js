@@ -19,7 +19,16 @@ describe('Project', () => {
   let project2;
   let project3;
   beforeEach((done) => {
-    testUtil.clearDb(done);
+    testUtil.clearDb()
+      .then(() => models.ProjectType.bulkCreate([
+        {
+          key: 'generic',
+          displayName: 'Generic',
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      ]))
+      .then(() => done());
   });
 
   after((done) => {
@@ -29,6 +38,7 @@ describe('Project', () => {
     const body = {
       param: {
         name: 'updatedProject name',
+        type: 'generic',
       },
     };
     let sandbox;
@@ -317,6 +327,22 @@ describe('Project', () => {
             done();
           }
         });
+    });
+
+    it('should return 422 if project type does not exist', (done) => {
+      const mbody = {
+        param: {
+          type: 'not_exist',
+        },
+      };
+      request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send(mbody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
     });
 
     it('should return 200 and project history should be updated for cancelled project', (done) => {

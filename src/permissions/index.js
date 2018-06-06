@@ -41,4 +41,9 @@ module.exports = () => {
   Authorizer.setPolicy('project.addPhaseProduct', projectEdit);
   Authorizer.setPolicy('project.updatePhaseProduct', projectEdit);
   Authorizer.setPolicy('project.deletePhaseProduct', projectEdit);
+
+  Authorizer.setPolicy('projectType.create', projectAdmin);
+  Authorizer.setPolicy('projectType.edit', projectAdmin);
+  Authorizer.setPolicy('projectType.delete', projectAdmin);
+  Authorizer.setPolicy('projectType.view', true); // anyone can view project types
 };
