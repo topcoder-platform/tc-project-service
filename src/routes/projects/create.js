@@ -59,63 +59,77 @@ const createProjectValdiations = {
 };
 
 /**
- * Create project phases and products. This needs to be done before creating direct project.
+ * Create the project, project phases and products. This needs to be done before creating direct project.
  * @param {Object} req the request
  * @param {Object} project the project
  * @param {Object} projectTemplate the project template
- * @returns {Promise} the promise that resolves to the created phases
+ * @returns {Promise} the promise that resolves to the created project and phases
  */
-function createPhases(req, project, projectTemplate) {
-  const newPhases = [];
+function createProjectAndPhases(req, project, projectTemplate) {
+  const result = {
+    newProject: null,
+    newPhases: [],
+  };
 
-  if (!projectTemplate) {
-    return Promise.resolve(newPhases);
-  }
+  // Create project
+  return models.Project.create(project, {
+    include: [{
+      model: models.ProjectMember,
+      as: 'members',
+    }],
+  })
+    .then((newProject) => {
+      result.newProject = newProject;
 
-  const phases = _.values(projectTemplate.phases);
-  return Promise.all(_.map(phases, phase =>
-    // Create phase
-    models.ProjectPhase.create(
-      _.assign(
-        _.omit(phase, 'products'),
-        {
-          projectId: project.id,
-          updatedBy: req.authUser.userId,
-          createdBy: req.authUser.userId,
-        },
-      ),
-    )
-      .then((newPhase) => {
-        // Make sure number of products of per phase <= max value
-        const productCount = _.isArray(phase.products) ? phase.products.length : 0;
-        if (productCount > config.maxPhaseProductCount) {
-          const err = new Error('the number of products per phase cannot exceed ' +
-            `${config.maxPhaseProductCount}`);
-          err.status = 422;
-          throw err;
-        }
+      if (!projectTemplate) {
+        return Promise.resolve(result);
+      }
 
-        // Create products
-        return models.PhaseProduct.bulkCreate(_.map(phase.products, product =>
-          // productKey is just used for the JSON to be more human readable
-          // id need to map to templateId
-          _.assign(_.omit(product, ['id', 'productKey']), {
-            phaseId: newPhase.id,
-            projectId: project.id,
-            templateId: product.id,
-            updatedBy: req.authUser.userId,
-            createdBy: req.authUser.userId,
-          })), { returning: true })
-          .then((products) => {
-            // Add phases and products to the project JSON, so they can be stored to ES later
-            const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
-            newPhaseJson.products = _.map(products, product =>
-              _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
-            newPhases.push(newPhaseJson);
-            return Promise.resolve();
-          });
-      })))
-    .then(() => Promise.resolve(newPhases));
+      const phases = _.values(projectTemplate.phases);
+      return Promise.all(_.map(phases, phase =>
+        // Create phase
+        models.ProjectPhase.create(
+          _.assign(
+            _.omit(phase, 'products'),
+            {
+              projectId: project.id,
+              updatedBy: req.authUser.userId,
+              createdBy: req.authUser.userId,
+            },
+          ),
+        )
+          .then((newPhase) => {
+            // Make sure number of products of per phase <= max value
+            const productCount = _.isArray(phase.products) ? phase.products.length : 0;
+            if (productCount > config.maxPhaseProductCount) {
+              const err = new Error('the number of products per phase cannot exceed ' +
+                `${config.maxPhaseProductCount}`);
+              err.status = 422;
+              throw err;
+            }
+
+            // Create products
+            return models.PhaseProduct.bulkCreate(_.map(phase.products, product =>
+              // productKey is just used for the JSON to be more human readable
+              // id need to map to templateId
+              _.assign(_.omit(product, ['id', 'productKey']), {
+                phaseId: newPhase.id,
+                projectId: project.id,
+                templateId: product.id,
+                updatedBy: req.authUser.userId,
+                createdBy: req.authUser.userId,
+              })), { returning: true })
+              .then((products) => {
+                // Add phases and products to the project JSON, so they can be stored to ES later
+                const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
+                newPhaseJson.products = _.map(products, product =>
+                  _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
+                result.newPhases.push(newPhaseJson);
+                return Promise.resolve();
+              });
+          })));
+    })
+    .then(() => Promise.resolve(result));
 }
 
 module.exports = [
@@ -192,21 +206,11 @@ module.exports = [
           }
           return Promise.resolve();
         })
-        .then(() =>
-          // Create project
-          models.Project
-            .create(project, {
-              include: [{
-                model: models.ProjectMember,
-                as: 'members',
-              }],
-            }))
-        .then((_newProject) => {
-          newProject = _newProject;
-          return createPhases(req, newProject, projectTemplate);
-        })
-        .then((phases) => {
-          newPhases = phases;
+        // Create project and phases
+        .then(() => createProjectAndPhases(req, project, projectTemplate))
+        .then((createdProjectAndPhases) => {
+          newProject = createdProjectAndPhases.newProject;
+          newPhases = createdProjectAndPhases.newPhases;
 
           req.log.debug('new project created (id# %d, name: %s)',
             newProject.id, newProject.name);
