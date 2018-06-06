@@ -35,6 +35,11 @@ module.exports = () => {
   Authorizer.setPolicy('productTemplate.delete', connectManagerOrAdmin);
   Authorizer.setPolicy('productTemplate.view', true);
 
+  Authorizer.setPolicy('milestoneTemplate.create', connectManagerOrAdmin);
+  Authorizer.setPolicy('milestoneTemplate.edit', connectManagerOrAdmin);
+  Authorizer.setPolicy('milestoneTemplate.delete', connectManagerOrAdmin);
+  Authorizer.setPolicy('milestoneTemplate.view', true);
+
   Authorizer.setPolicy('project.addProjectPhase', projectEdit);
   Authorizer.setPolicy('project.updateProjectPhase', projectEdit);
   Authorizer.setPolicy('project.deleteProjectPhase', projectEdit);
@@ -46,4 +51,14 @@ module.exports = () => {
   Authorizer.setPolicy('projectType.edit', projectAdmin);
   Authorizer.setPolicy('projectType.delete', projectAdmin);
   Authorizer.setPolicy('projectType.view', true); // anyone can view project types
+
+  Authorizer.setPolicy('timeline.create', projectEdit);
+  Authorizer.setPolicy('timeline.edit', projectEdit);
+  Authorizer.setPolicy('timeline.delete', projectEdit);
+  Authorizer.setPolicy('timeline.view', projectView);
+
+  Authorizer.setPolicy('milestone.create', projectEdit);
+  Authorizer.setPolicy('milestone.edit', projectEdit);
+  Authorizer.setPolicy('milestone.delete', projectEdit);
+  Authorizer.setPolicy('milestone.view', projectView);
 };

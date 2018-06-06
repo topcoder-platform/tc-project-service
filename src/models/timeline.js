@@ -1,18 +1,17 @@
 /* eslint-disable valid-jsdoc */
 
 /**
- * The Product Template model
+ * The Timeline model
  */
 module.exports = (sequelize, DataTypes) => {
-  const ProductTemplate = sequelize.define('ProductTemplate', {
+  const Timeline = sequelize.define('Timeline', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING(255), allowNull: false },
-    productKey: { type: DataTypes.STRING(45), allowNull: false },
-    icon: { type: DataTypes.STRING(255), allowNull: false },
-    brief: { type: DataTypes.STRING(45), allowNull: false },
-    details: { type: DataTypes.STRING(255), allowNull: false },
-    aliases: { type: DataTypes.JSON, allowNull: false },
-    template: { type: DataTypes.JSON, allowNull: false },
+    description: DataTypes.STRING(255),
+    startDate: { type: DataTypes.DATE, allowNull: false },
+    endDate: DataTypes.DATE,
+    reference: { type: DataTypes.STRING(45), allowNull: false },
+    referenceId: { type: DataTypes.BIGINT, allowNull: false },
     deletedAt: DataTypes.DATE,
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -20,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     createdBy: { type: DataTypes.BIGINT, allowNull: false },
     updatedBy: { type: DataTypes.BIGINT, allowNull: false },
   }, {
-    tableName: 'product_templates',
+    tableName: 'timelines',
     paranoid: true,
     timestamps: true,
     updatedAt: 'updatedAt',
@@ -28,14 +27,10 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'deletedAt',
     classMethods: {
       associate: (models) => {
-        ProductTemplate.hasMany(models.ProductMilestoneTemplate, {
-          as: 'milestones',
-          foreignKey: 'productTemplateId',
-          onDelete: 'cascade',
-        });
+        Timeline.hasMany(models.Milestone, { as: 'milestones', foreignKey: 'timelineId', onDelete: 'cascade' });
       },
     },
   });
 
-  return ProductTemplate;
+  return Timeline;
 };
