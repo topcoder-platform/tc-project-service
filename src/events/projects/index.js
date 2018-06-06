@@ -5,19 +5,16 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import config from 'config';
 import util from '../../util';
+import { createPhaseTopic } from '../projectPhases';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
-/**
- * Handler for project creation event
- * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} msg     event payload
- * @param  {Object} channel channel to ack, nack
- * @returns {undefined}
- */
-const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+
+
+
+const indexProject = Promise.coroutine(function* (logger, msg) {
   const data = JSON.parse(msg.content.toString());
   const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
   try {
@@ -42,9 +39,26 @@ const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel)
       body: data,
     });
     logger.debug(`project indexed successfully (projectId: ${data.id})`, result);
-    channel.ack(msg);
     return undefined;
   } catch (error) {
+    logger.error(`Error indexing project (projectId: ${data.id})`, error);
+    throw error;
+  }
+});
+
+/**
+ * Handler for project creation event
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload
+ * @param  {Object} channel channel to ack, nack
+ * @returns {undefined}
+ */
+const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+  try {
+    indexProject(logger, msg);
+    createPhaseTopic(logger, msg);
+    channel.ack(msg);
+  } catch(error) {
     logger.error(`Error processing event (projectId: ${data.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;

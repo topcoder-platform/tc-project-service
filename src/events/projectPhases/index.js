@@ -191,4 +191,5 @@ module.exports = {
   projectPhaseAddedHandler,
   projectPhaseRemovedHandler,
   projectPhaseUpdatedHandler,
+  createPhaseTopic,
 };
