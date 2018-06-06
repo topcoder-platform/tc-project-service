@@ -6,6 +6,7 @@ import config from 'config';
 import Promise from 'bluebird';
 import models from '../src/models';
 import RabbitMQService from '../src/services/rabbitmq';
+import { TIMELINE_REFERENCES } from '../src/constants';
 
 const logger = bunyan.createLogger({ name: 'init-es', level: config.get('logLevel') });
 
@@ -19,6 +20,19 @@ function getProjectIds() {
   if (projectIdArg) {
     projectIdArg = projectIdArg.split('=');
     return projectIdArg[1].split(',').map(i => parseInt(i, 10));
+  }
+  return [];
+}
+
+/**
+ * Retrieve timeline ids from cli if provided
+ * @return {Array} list of timelineIds
+ */
+function getTimelineIds() {
+  let timelineIdArg = _.find(process.argv, a => a.indexOf('timelineIds') > -1);
+  if (timelineIdArg) {
+    timelineIdArg = timelineIdArg.split('=');
+    return timelineIdArg[1].split(',').map(i => parseInt(i, 10));
   }
   return [];
 }
@@ -58,11 +72,47 @@ Promise.coroutine(function* wrapped() {
     logger.info(`Retrieved #${members.length} members`);
     members = _.groupBy(members, 'projectId');
 
+    // Get timelines
+    const timelineIds = getTimelineIds();
+    const timelineWhereClause = (timelineIds.length > 0) ? { id: { $in: timelineIds } } : {};
+    let timelines = yield models.Timeline.findAll({
+      where: timelineWhereClause,
+      include: [{ model: models.Milestone, as: 'milestones' }],
+    });
+    logger.info(`Retrieved #${projects.length} timelines`);
+
+    // Convert to raw json and remove unnecessary fields
+    timelines = _.map(timelines, (timeline) => {
+      const entity = _.omit(timeline.toJSON(), ['deletedBy', 'deletedAt']);
+      entity.milestones = _.map(entity.milestones, milestone => _.omit(milestone, ['deletedBy', 'deletedAt']));
+      return entity;
+    });
+
+    // Get projectId for each timeline
+    yield Promise.all(
+      _.map(timelines, (timeline) => {
+        if (timeline.reference === TIMELINE_REFERENCES.PROJECT) {
+          timeline.projectId = timeline.referenceId;
+          return Promise.resolve(timeline);
+        }
+
+        return models.ProjectPhase.findById(timeline.referenceId)
+          .then((phase) => {
+            timeline.projectId = phase.projectId;
+            return Promise.resolve(timeline);
+          });
+      }),
+    );
+
     const promises = [];
     _.forEach(projects, (p) => {
       p.members = members[p.id];
       logger.debug(`Processing Project #${p.id}`);
       promises.push(rabbit.publish('project.initial', p, {}));
+    });
+    _.forEach(timelines, (t) => {
+      logger.debug(`Processing Timeline #${t.id}`);
+      promises.push(rabbit.publish('timeline.initial', t, {}));
     });
     Promise.all(promises)
       .then(() => {
