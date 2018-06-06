@@ -92,7 +92,7 @@ function createProjectAndPhases(req, project, projectTemplate) {
           _.assign(
             _.omit(phase, 'products'),
             {
-              projectId: project.id,
+              projectId: newProject.id,
               updatedBy: req.authUser.userId,
               createdBy: req.authUser.userId,
             },
@@ -114,7 +114,7 @@ function createProjectAndPhases(req, project, projectTemplate) {
               // id need to map to templateId
               _.assign(_.omit(product, ['id', 'productKey']), {
                 phaseId: newPhase.id,
-                projectId: project.id,
+                projectId: newProject.id,
                 templateId: product.id,
                 updatedBy: req.authUser.userId,
                 createdBy: req.authUser.userId,
