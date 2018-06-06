@@ -16,7 +16,95 @@ describe('Project create', () => {
   before((done) => {
     sinon.stub(RabbitMQService.prototype, 'init', () => {});
     sinon.stub(RabbitMQService.prototype, 'publish', () => {});
-    testUtil.clearDb(done);
+    testUtil.clearDb()
+      .then(() => models.ProjectType.bulkCreate([
+        {
+          key: 'generic',
+          displayName: 'Generic',
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      ]))
+      .then(() => models.ProjectTemplate.bulkCreate([
+        {
+          id: 1,
+          name: 'template 1',
+          key: 'key 1',
+          category: 'category 1',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: [],
+          scope: {},
+          phases: {
+            phase1: {
+              name: 'phase 1',
+              products: [
+                {
+                  id: 21,
+                  name: 'product 1',
+                  productKey: 'visual_design_prod1',
+                },
+                {
+                  id: 22,
+                  name: 'product 2',
+                  productKey: 'visual_design_prod2',
+                },
+              ],
+            },
+          },
+          createdBy: 1,
+          updatedBy: 1,
+        },
+        {
+          id: 3,
+          name: 'template 3',
+          key: 'key 3',
+          category: 'category 3',
+          icon: 'http://example.com/icon3.ico',
+          question: 'question 3',
+          info: 'info 3',
+          aliases: [],
+          scope: {},
+          phases: {
+            1: {
+              name: 'Design Stage',
+              status: 'open',
+              details: {
+                description: 'detailed description',
+              },
+              products: [
+                {
+                  id: 21,
+                  name: 'product 1',
+                  productKey: 'visual_design_prod',
+                },
+              ],
+            },
+            2: {
+              name: 'Development Stage',
+              status: 'open',
+              products: [
+                {
+                  id: 23,
+                  name: 'product 2',
+                  details: {
+                    subDetails: 'subDetails 2',
+                  },
+                  productKey: 'website_development',
+                },
+              ],
+            },
+            3: {
+              name: 'QA Stage',
+              status: 'open',
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        },
+      ]))
+      .then(() => done());
   });
 
   after((done) => {
