@@ -27,6 +27,10 @@ describe('Project upgrade', () => {
         billingAccountId: 1,
         name: 'test1',
         description: 'test project1',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 1',
+        info: 'info 1',
+        aliases: [],
         status: 'draft',
         details: {
           name: 'a specific name',
@@ -50,6 +54,10 @@ describe('Project upgrade', () => {
         name: 'template 1',
         key: project.type,
         category: 'category 1',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 1',
+        info: 'info 1',
+        aliases: [],
         scope: {
           scope1: {
             subScope1A: 1,
@@ -239,7 +247,9 @@ describe('Project upgrade', () => {
         const commonTest = async (testCompleted, completedOnDate, additionalPhaseName) => {
           const migratedProject = await models.Project.find({ id: project.id });
           expect(migratedProject.version).to.equal('v3');
-          const newProjectPhases = await models.ProjectPhase.findAll({ projectId: project.id });
+          const newProjectPhases = await models.ProjectPhase.findAll({
+            where: { projectId: project.id },
+          });
           for (const newProjectPhase of newProjectPhases) {
             expect(newProjectPhase).to.exist;
             expect(newProjectPhase.name).to.be.oneOf(['phase 1', 'phase 2'].concat(additionalPhaseName || []));
@@ -255,7 +265,9 @@ describe('Project upgrade', () => {
               expect(newProjectPhase.progress).to.equal(0);
               expect(newProjectPhase.endDate).to.equal(null);
             }
-            const newPhaseProducts = await models.PhaseProduct.findAll({ phaseId: newProjectPhase.id });
+            const newPhaseProducts = await models.PhaseProduct.findAll({ where:
+              { phaseId: newProjectPhase.id },
+            });
             for (const newPhaseProduct of newPhaseProducts) {
               expect(newPhaseProduct).to.exist;
               expect(newPhaseProduct.projectId).to.equal(project.id);
@@ -278,9 +290,9 @@ describe('Project upgrade', () => {
             }
           }
 
-          server.services.pubsub.publish.calledWith('project.phase.added').should.be.true;
-          server.services.pubsub.publish.calledWith('project.phase.product.added').should.be.true;
-          server.services.pubsub.publish.calledWith('project.updated').should.be.true;
+          expect(server.services.pubsub.publish.calledWith('project.phase.added')).to.be.true;
+          expect(server.services.pubsub.publish.calledWith('project.phase.product.added')).to.be.true;
+          expect(server.services.pubsub.publish.calledWith('project.updated')).to.be.true;
         };
 
         it('should migrate a non completed project to the expected state', async () => {

@@ -34,7 +34,6 @@ module.exports = function defineProject(sequelize, DataTypes) {
     details: { type: DataTypes.JSON },
     challengeEligibility: DataTypes.JSON,
     cancelReason: DataTypes.STRING,
-    version: DataTypes.STRING(15),
     templateId: DataTypes.BIGINT,
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

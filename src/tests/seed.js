@@ -264,6 +264,10 @@ models.sequelize.sync({ force: true })
       name: 'template 1',
       key: 'generic',
       category: 'category 1',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: [],
       scope: {
         scope1: {
           subScope1A: 1,
@@ -307,6 +311,8 @@ models.sequelize.sync({ force: true })
       name: 'name 1',
       productKey: 'productKey 1',
       icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
       brief: 'brief 1',
       details: 'details 1',
       aliases: {
@@ -338,10 +344,12 @@ models.sequelize.sync({ force: true })
     {
       name: 'template 2',
       productKey: 'productKey 2',
-      icon: 'http://example.com/icon2.ico',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
       brief: 'brief 2',
       details: 'details 2',
-      aliases: {},
+      aliases: [],
       template: {},
       createdBy: 3,
       updatedBy: 4,
@@ -350,6 +358,8 @@ models.sequelize.sync({ force: true })
       name: 'Generic work',
       productKey: 'generic_work',
       icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
       brief: 'brief 1',
       details: 'details 1',
       aliases: {
@@ -375,6 +385,8 @@ models.sequelize.sync({ force: true })
       name: 'Website product',
       productKey: 'website_development',
       icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
       brief: 'brief 1',
       details: 'details 1',
       aliases: {
