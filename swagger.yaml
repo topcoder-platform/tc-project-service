@@ -27,7 +27,7 @@ paths:
       operationId: findProjects
       security:
         - Bearer: []
-      description: Retreive projects that match the filter
+      description: Retrieve projects that match the filter
       responses:
         '422':
           description: Invalid input
@@ -344,7 +344,7 @@ paths:
       operationId: findProjectPhases
       security:
         - Bearer: []
-      description: Retreive all project phases. All users who can edit project can access this endpoint.
+      description: Retrieve all project phases. All users who can edit project can access this endpoint.
       parameters:
         - name: fields
           required: false
@@ -489,7 +489,7 @@ paths:
       operationId: findPhaseProducts
       security:
         - Bearer: []
-      description: Retreive all phase products. All users who can edit project can access this endpoint.
+      description: Retrieve all phase products. All users who can edit project can access this endpoint.
       responses:
         '403':
           description: No permission or wrong token
@@ -655,7 +655,7 @@ paths:
       operationId: findProjectTemplates
       security:
         - Bearer: []
-      description: Retreive all project templates. All user roles can access this endpoint.
+      description: Retrieve all project templates. All user roles can access this endpoint.
       responses:
         '403':
           description: No permission or wrong token
@@ -781,7 +781,7 @@ paths:
       operationId: findProductTemplates
       security:
         - Bearer: []
-      description: Retreive all product templates. All user roles can access this endpoint.
+      description: Retrieve all product templates. All user roles can access this endpoint.
       responses:
         '403':
           description: No permission or wrong token
@@ -907,7 +907,7 @@ paths:
       operationId: findProjectTypes
       security:
         - Bearer: []
-      description: Retreive all project types. All user roles can access this endpoint.
+      description: Retrieve all project types. All user roles can access this endpoint.
       responses:
         '403':
           description: No permission or wrong token
@@ -1025,6 +1025,441 @@ paths:
           description: Project type successfully removed
 
 
+  /timelines:
+    get:
+      tags:
+        - timeline
+      operationId: findTimelines
+      security:
+        - Bearer: []
+      description: Retrieve timelines which its projects are accessible by the user.
+      parameters:
+        - name: filter
+          required: false
+          type: string
+          in: query
+          description: |
+            Url encoded list of supported filters
+             - reference
+             - referenceId
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of timelines
+          schema:
+            $ref: "#/definitions/TimelineListResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    post:
+      tags:
+        - timeline
+      operationId: addTimeline
+      security:
+        - Bearer: []
+      description: Create a timeline. All users who can edit the project can access this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/TimelineBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created timeline
+          schema:
+            $ref: "#/definitions/TimelineResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /timelines/{timelineId}:
+    get:
+      tags:
+        - timeline
+      description: Retrieve timeline by id. All users who can view the project can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a timeline
+          schema:
+            $ref: "#/definitions/TimelineResponse"
+      parameters:
+        - $ref: "#/parameters/timelineIdParam"
+      operationId: getTimeline
+
+    patch:
+      tags:
+        - timeline
+      operationId: updateTimeline
+      security:
+        - Bearer: []
+      description: Update a timeline. All users who can edit the project can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated timeline.
+          schema:
+            $ref: "#/definitions/TimelineResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/timelineIdParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/TimelineBodyParam"
+
+    delete:
+      tags:
+        - timeline
+      description: Remove an existing timeline. All users who can edit the project can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/timelineIdParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Timeline successfully removed
+
+  /timelines/{timelineId}/milestones:
+    parameters:
+      - $ref: "#/parameters/timelineIdParam"
+    get:
+      tags:
+        - milestone
+      operationId: findMilestones
+      security:
+        - Bearer: []
+      description: Retrieve all milestones. All users who can view the timeline can access this endpoint.
+      parameters:
+        - name: sort
+          required: false
+          description: sort by `order`. Default is `order asc`
+          in: query
+          type: string
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of milestones
+          schema:
+            $ref: "#/definitions/MilestoneListResponse"
+    post:
+      tags:
+        - milestone
+      operationId: addMilestone
+      security:
+        - Bearer: []
+      description: Create a milestone. All users who can edit the timeline can access this endpoint.
+        It also updates the `order` field of all other milestones in the same timeline which have `order` greater than or equal to the `order` specified in the POST body.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/MilestoneBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created milestone
+          schema:
+            $ref: "#/definitions/MilestoneResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /timelines/{timelineId}/milestones/{milestoneId}:
+    parameters:
+      - $ref: "#/parameters/timelineIdParam"
+      - $ref: "#/parameters/milestoneIdParam"
+    get:
+      tags:
+        - milestone
+      description: Retrieve milestone by id. All users who can view the timeline can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a milestone
+          schema:
+            $ref: "#/definitions/MilestoneResponse"
+      operationId: getMilestone
+
+    patch:
+      tags:
+        - milestone
+      operationId: updateMilestone
+      security:
+        - Bearer: []
+      description: Update a milestone. All users who can edit the timeline can access this endpoint.
+        For attributes with JSON object type, it would overwrite the existing fields, or add new if the fields don't exist in the JSON object.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated milestone.
+          schema:
+            $ref: "#/definitions/MilestoneResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/MilestoneBodyParam"
+
+    delete:
+      tags:
+        - milestone
+      description: Remove an existing milestone. All users who can edit the timeline can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Milestone successfully removed
+
+
+  /productTemplates/{productTemplateId}/milestones:
+    parameters:
+      - $ref: "#/parameters/productTemplateIdParam"
+    get:
+      tags:
+        - productMilestoneTemplate
+      operationId: findMilestoneTemplates
+      security:
+        - Bearer: []
+      description: Retrieve all milestone templates. All user roles can access this endpoint.
+      parameters:
+        - name: sort
+          required: false
+          description: sort by `order`. Default is `order asc`
+          in: query
+          type: string
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of milestone templates
+          schema:
+            $ref: "#/definitions/MilestoneTemplateListResponse"
+    post:
+      tags:
+        - productMilestoneTemplate
+      operationId: addMilestoneTemplate
+      security:
+        - Bearer: []
+      description: Create a milestone template. Only connect manager, connect admin, and admin can access this endpoint. It also updates the `order` field of all other milestone templates in the same product template which have `order` greater than or equal to the `order` specified in the POST body.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/MilestoneTemplateBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created milestone template
+          schema:
+            $ref: "#/definitions/MilestoneTemplateResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /productTemplates/{productTemplateId}/milestones/{milestoneTemplateId}:
+    parameters:
+      - $ref: "#/parameters/productTemplateIdParam"
+      - $ref: "#/parameters/milestoneTemplateIdParam"
+    get:
+      tags:
+        - productMilestoneTemplate
+      description: Retrieve milestone template by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a milestone template
+          schema:
+            $ref: "#/definitions/MilestoneTemplateResponse"
+      operationId: getMilestoneTemplate
+
+    patch:
+      tags:
+        - productMilestoneTemplate
+      operationId: updateMilestoneTemplate
+      security:
+        - Bearer: []
+      description: Update a milestone template. Only connect manager, connect admin, and admin can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated milestone template.
+          schema:
+            $ref: "#/definitions/MilestoneTemplateResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/MilestoneTemplateBodyParam"
+
+    delete:
+      tags:
+        - productMilestoneTemplate
+      description: Remove an existing milestone template. Only connect manager, connect admin, and admin can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Milestone template successfully removed
+
+
+
+
 
 
 parameters:
@@ -1065,6 +1500,38 @@ parameters:
     description: project type key
     required: true
     type: string
+  timelineIdParam:
+    name: timelineId
+    in: path
+    description: timeline identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  milestoneIdParam:
+    name: milestoneId
+    in: path
+    description: milestone identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  productTemplateIdParam:
+    name: productTemplateId
+    in: path
+    description: product template identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  milestoneTemplateIdParam:
+    name: milestoneTemplateId
+    in: path
+    description: milestone template identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
   offsetParam:
     name: offset
     description: "number of items to skip. Defaults to 0"
@@ -2319,3 +2786,402 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/ProjectType"
+
+
+  TimelineRequest:
+    title: Timeline request object
+    type: object
+    required:
+      - name
+      - startDate
+      - reference
+      - referenceId
+    properties:
+      name:
+        type: string
+        description: the timeline name
+      description:
+        type: string
+        description: the timeline description
+      startDate:
+        type: string
+        format: date
+        description: the timeline start date
+      endDate:
+        type: string
+        format: date
+        description: the timeline end date
+      reference:
+        type: string
+        enum:
+          - project
+          - phase
+        description: the timeline reference
+      referenceId:
+        type: number
+        format: long
+        description: the timeline reference id (project id or phase id, corresponding to the `reference`)
+
+  TimelineBodyParam:
+    title: Timeline body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/TimelineRequest"
+
+  Timeline:
+    title: Timeline object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/TimelineRequest"
+
+  TimelineResponse:
+    title: Single timeline response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/Timeline"
+
+  TimelineListResponse:
+    title: Timeline list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/Timeline"
+
+  MilestoneRequest:
+    title: Milestone request object
+    type: object
+    required:
+      - name
+      - duration
+      - startDate
+      - status
+      - type
+      - order
+      - plannedText
+      - activeText
+      - completedText
+      - blockedText
+    properties:
+      name:
+        type: string
+        description: the milestone name
+      description:
+        type: string
+        description: the milestone description
+      duration:
+        type: number
+        format: integer
+        description: the milestone duration
+      startDate:
+        type: string
+        format: date
+        description: the milestone start date
+      endDate:
+        type: string
+        format: date
+        description: the milestone end date
+      completionDate:
+        type: string
+        format: date
+        description: the milestone completion date
+      status:
+        type: string
+        description: the milestone status
+      type:
+        type: string
+        description: the milestone type
+      details:
+        type: object
+        description: the milestone details
+      order:
+        type: number
+        format: integer
+        description: the milestone order
+      plannedText:
+        type: string
+        description: the milestone planned text
+      activeText:
+        type: string
+        description: the milestone active text
+      completedText:
+        type: string
+        description: the milestone completed text
+      blockedText:
+        type: string
+        description: the milestone blocked text
+
+  MilestoneBodyParam:
+    title: Milestone body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/MilestoneRequest"
+
+  Milestone:
+    title: Milestone object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/MilestoneRequest"
+
+  MilestoneResponse:
+    title: Single milestone response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/Milestone"
+
+  MilestoneListResponse:
+    title: Milestone list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/Milestone"
+
+
+  MilestoneTemplateRequest:
+    title: Milestone template request object
+    type: object
+    required:
+      - name
+      - duration
+      - type
+      - order
+    properties:
+      name:
+        type: string
+        description: the milestone template name
+      description:
+        type: string
+        description: the milestone template description
+      duration:
+        type: number
+        format: integer
+        description: the milestone template duration
+      type:
+        type: string
+        description: the milestone template type
+      order:
+        type: number
+        format: integer
+        description: the milestone template order
+
+  MilestoneTemplateBodyParam:
+    title: Milestone template body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/MilestoneTemplateRequest"
+
+  MilestoneTemplate:
+    title: Milestone template object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/MilestoneTemplateRequest"
+
+  MilestoneTemplateResponse:
+    title: Single milestone template response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/MilestoneTemplate"
+
+  MilestoneTemplateListResponse:
+    title: Milestone template list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/MilestoneTemplate"

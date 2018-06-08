@@ -9,6 +9,8 @@ import { projectPhaseAddedHandler, projectPhaseRemovedHandler,
   projectPhaseUpdatedHandler } from './projectPhases';
 import { phaseProductAddedHandler, phaseProductRemovedHandler,
   phaseProductUpdatedHandler } from './phaseProducts';
+import { timelineAddedHandler, timelineUpdatedHandler, timelineRemovedHandler } from './timelines';
+import { milestoneAddedHandler, milestoneUpdatedHandler, milestoneRemovedHandler } from './milestones';
 
 export default {
   'project.initial': projectCreatedHandler,
@@ -30,4 +32,13 @@ export default {
   [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED]: phaseProductAddedHandler,
   [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED]: phaseProductRemovedHandler,
   [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED]: phaseProductUpdatedHandler,
+
+  // Timeline and milestone
+  'timeline.initial': timelineAddedHandler,
+  [EVENT.ROUTING_KEY.TIMELINE_ADDED]: timelineAddedHandler,
+  [EVENT.ROUTING_KEY.TIMELINE_REMOVED]: timelineRemovedHandler,
+  [EVENT.ROUTING_KEY.TIMELINE_UPDATED]: timelineUpdatedHandler,
+  [EVENT.ROUTING_KEY.MILESTONE_ADDED]: milestoneAddedHandler,
+  [EVENT.ROUTING_KEY.MILESTONE_REMOVED]: milestoneRemovedHandler,
+  [EVENT.ROUTING_KEY.MILESTONE_UPDATED]: milestoneUpdatedHandler,
 };

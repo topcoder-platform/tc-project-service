@@ -1,4 +1,5 @@
 import models from '../models';
+import { TIMELINE_REFERENCES } from '../constants';
 
 models.sequelize.sync({ force: true })
   .then(() =>
@@ -432,6 +433,132 @@ models.sequelize.sync({ force: true })
       },
       createdBy: 1,
       updatedBy: 2,
+    },
+  ], { returning: true }))
+  // Product milestone templates
+  .then(productTemplates => models.ProductMilestoneTemplate.bulkCreate([
+    {
+      name: 'milestoneTemplate 1',
+      duration: 3,
+      type: 'type1',
+      order: 1,
+      productTemplateId: productTemplates[0].id,
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'milestoneTemplate 2',
+      duration: 4,
+      type: 'type2',
+      order: 2,
+      productTemplateId: productTemplates[0].id,
+      createdBy: 2,
+      updatedBy: 3,
+    },
+  ]))
+  // Project phases
+  .then(() => models.ProjectPhase.bulkCreate([
+    {
+      name: 'phase 1',
+      projectId: 1,
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'phase 2',
+      projectId: 1,
+      createdBy: 2,
+      updatedBy: 3,
+    },
+  ], { returning: true }))
+  // Timelines
+  .then(projectPhases => models.Timeline.bulkCreate([
+    {
+      name: 'timeline 1',
+      startDate: '2018-05-01T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PROJECT,
+      referenceId: projectPhases[0].projectId,
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'timeline 2',
+      startDate: '2018-05-02T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PHASE,
+      referenceId: projectPhases[0].id,
+      createdBy: 2,
+      updatedBy: 3,
+    },
+    {
+      name: 'timeline 3',
+      startDate: '2018-05-03T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PROJECT,
+      referenceId: projectPhases[0].projectId,
+      createdBy: 3,
+      updatedBy: 4,
+    },
+    {
+      name: 'timeline 4',
+      startDate: '2018-05-04T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PROJECT,
+      referenceId: 2,
+      createdBy: 4,
+      updatedBy: 5,
+    },
+  ], { returning: true }))
+  // Milestones
+  .then(timelines => models.Milestone.bulkCreate([
+    {
+      timelineId: timelines[0].id,
+      name: 'milestone 1',
+      duration: 2,
+      startDate: '2018-05-03T00:00:00.000Z',
+      status: 'open',
+      type: 'type1',
+      details: {
+        detail1: {
+          subDetail1A: 1,
+          subDetail1B: 2,
+        },
+        detail2: [1, 2, 3],
+      },
+      order: 1,
+      plannedText: 'plannedText 1',
+      activeText: 'activeText 1',
+      completedText: 'completedText 1',
+      blockedText: 'blockedText 1',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      timelineId: timelines[0].id,
+      name: 'milestone 2',
+      duration: 3,
+      startDate: '2018-05-04T00:00:00.000Z',
+      status: 'open',
+      type: 'type2',
+      order: 2,
+      plannedText: 'plannedText 2',
+      activeText: 'activeText 2',
+      completedText: 'completedText 2',
+      blockedText: 'blockedText 2',
+      createdBy: 2,
+      updatedBy: 3,
+    },
+    {
+      timelineId: timelines[2].id,
+      name: 'milestone 3',
+      duration: 4,
+      startDate: '2018-05-04T00:00:00.000Z',
+      status: 'open',
+      type: 'type3',
+      order: 3,
+      plannedText: 'plannedText 3',
+      activeText: 'activeText 3',
+      completedText: 'completedText 3',
+      blockedText: 'blockedText 3',
+      createdBy: 3,
+      updatedBy: 4,
     },
   ]))
   .then(() => models.ProjectType.bulkCreate([
