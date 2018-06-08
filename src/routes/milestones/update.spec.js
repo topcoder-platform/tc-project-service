@@ -225,6 +225,24 @@ describe('UPDATE Milestone', () => {
                     updatedAt: '2018-05-11T00:00:00.000Z',
                     deletedAt: '2018-05-11T00:00:00.000Z',
                   },
+                  {
+                    id: 6,
+                    timelineId: 2, // Timeline 2
+                    name: 'Milestone 6',
+                    duration: 3,
+                    startDate: '2018-05-14T00:00:00.000Z',
+                    status: 'open',
+                    type: 'type5',
+                    order: 1,
+                    plannedText: 'plannedText 6',
+                    activeText: 'activeText 6',
+                    completedText: 'completedText 6',
+                    blockedText: 'blockedText 6',
+                    createdBy: 2,
+                    updatedBy: 3,
+                    createdAt: '2018-05-11T00:00:00.000Z',
+                    updatedAt: '2018-05-11T00:00:00.000Z',
+                  },
                 ])))
               .then(() => done());
           });
@@ -718,8 +736,8 @@ describe('UPDATE Milestone', () => {
         .expect(200)
         .end(() => {
           // Milestone 1: order 1
-          // Milestone 2: order 3
-          // Milestone 3: order 4
+          // Milestone 2: order 2
+          // Milestone 3: order 3
           // Milestone 4: order 0
           setTimeout(() => {
             models.Milestone.findById(1)
@@ -741,6 +759,178 @@ describe('UPDATE Milestone', () => {
                 done();
               });
           }, 3000);
+        });
+    });
+
+    // eslint-disable-next-line func-names
+    it('should return 200 for admin - changing order with only 1 item in list', function (done) {
+      this.timeout(10000);
+
+      request(server)
+        .patch('/v4/timelines/2/milestones/6')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: _.assign({}, body.param, { order: 0 }) }) // 1 to 0
+        .expect(200)
+        .end(() => {
+          // Milestone 6: order 0
+          setTimeout(() => {
+            models.Milestone.findById(6)
+              .then((milestone) => {
+                milestone.order.should.be.eql(0);
+
+                done();
+              });
+          }, 3000);
+        });
+    });
+
+    // eslint-disable-next-line func-names
+    it('should return 200 for admin - changing order without changing other milestones\' orders', function (done) {
+      this.timeout(10000);
+
+      models.Milestone.bulkCreate([
+        {
+          id: 7,
+          timelineId: 2, // Timeline 2
+          name: 'Milestone 7',
+          duration: 3,
+          startDate: '2018-05-14T00:00:00.000Z',
+          status: 'open',
+          type: 'type7',
+          order: 3,
+          plannedText: 'plannedText 7',
+          activeText: 'activeText 7',
+          completedText: 'completedText 7',
+          blockedText: 'blockedText 7',
+          createdBy: 2,
+          updatedBy: 3,
+          createdAt: '2018-05-11T00:00:00.000Z',
+          updatedAt: '2018-05-11T00:00:00.000Z',
+        },
+        {
+          id: 8,
+          timelineId: 2, // Timeline 2
+          name: 'Milestone 8',
+          duration: 3,
+          startDate: '2018-05-14T00:00:00.000Z',
+          status: 'open',
+          type: 'type7',
+          order: 4,
+          plannedText: 'plannedText 8',
+          activeText: 'activeText 8',
+          completedText: 'completedText 8',
+          blockedText: 'blockedText 8',
+          createdBy: 2,
+          updatedBy: 3,
+          createdAt: '2018-05-11T00:00:00.000Z',
+          updatedAt: '2018-05-11T00:00:00.000Z',
+        },
+      ])
+        .then(() => {
+          request(server)
+            .patch('/v4/timelines/2/milestones/8')
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({ param: _.assign({}, body.param, { order: 2 }) }) // 4 to 2
+            .expect(200)
+            .end(() => {
+              // Milestone 6: order 1 => 1
+              // Milestone 7: order 3 => 3
+              // Milestone 8: order 4 => 2
+              setTimeout(() => {
+                models.Milestone.findById(6)
+                  .then((milestone) => {
+                    milestone.order.should.be.eql(1);
+                  })
+                  .then(() => models.Milestone.findById(7))
+                  .then((milestone) => {
+                    milestone.order.should.be.eql(3);
+                  })
+                  .then(() => models.Milestone.findById(8))
+                  .then((milestone) => {
+                    milestone.order.should.be.eql(2);
+
+                    done();
+                  });
+              }, 3000);
+            });
+        });
+    });
+
+    // eslint-disable-next-line func-names
+    it('should return 200 for admin - changing order withchanging other milestones\' orders', function (done) {
+      this.timeout(10000);
+
+      models.Milestone.bulkCreate([
+        {
+          id: 7,
+          timelineId: 2, // Timeline 2
+          name: 'Milestone 7',
+          duration: 3,
+          startDate: '2018-05-14T00:00:00.000Z',
+          status: 'open',
+          type: 'type7',
+          order: 2,
+          plannedText: 'plannedText 7',
+          activeText: 'activeText 7',
+          completedText: 'completedText 7',
+          blockedText: 'blockedText 7',
+          createdBy: 2,
+          updatedBy: 3,
+          createdAt: '2018-05-11T00:00:00.000Z',
+          updatedAt: '2018-05-11T00:00:00.000Z',
+        },
+        {
+          id: 8,
+          timelineId: 2, // Timeline 2
+          name: 'Milestone 8',
+          duration: 3,
+          startDate: '2018-05-14T00:00:00.000Z',
+          status: 'open',
+          type: 'type7',
+          order: 4,
+          plannedText: 'plannedText 8',
+          activeText: 'activeText 8',
+          completedText: 'completedText 8',
+          blockedText: 'blockedText 8',
+          createdBy: 2,
+          updatedBy: 3,
+          createdAt: '2018-05-11T00:00:00.000Z',
+          updatedAt: '2018-05-11T00:00:00.000Z',
+        },
+      ])
+        .then(() => {
+          request(server)
+            .patch('/v4/timelines/2/milestones/8')
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({ param: _.assign({}, body.param, { order: 2 }) }) // 4 to 2
+            .expect(200)
+            .end(() => {
+              // Milestone 6: order 1 => 1
+              // Milestone 7: order 2 => 3
+              // Milestone 8: order 4 => 2
+              setTimeout(() => {
+                models.Milestone.findById(6)
+                  .then((milestone) => {
+                    milestone.order.should.be.eql(1);
+                  })
+                  .then(() => models.Milestone.findById(7))
+                  .then((milestone) => {
+                    milestone.order.should.be.eql(3);
+                  })
+                  .then(() => models.Milestone.findById(8))
+                  .then((milestone) => {
+                    milestone.order.should.be.eql(2);
+
+                    done();
+                  });
+              }, 3000);
+            });
         });
     });
 
