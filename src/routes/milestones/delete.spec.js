@@ -9,7 +9,7 @@ import testUtil from '../../tests/util';
 import { EVENT } from '../../constants';
 
 
-describe('DELETE milestone', () => {
+xdescribe('DELETE milestone', () => {
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {

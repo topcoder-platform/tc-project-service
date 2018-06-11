@@ -58,7 +58,7 @@ const milestones = [
   },
 ];
 
-describe('GET timeline', () => {
+xdescribe('GET timeline', () => {
   before((done) => {
     testUtil.clearDb()
       .then(() => {

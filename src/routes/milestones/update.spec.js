@@ -11,7 +11,7 @@ import { EVENT } from '../../constants';
 
 const should = chai.should();
 
-describe('UPDATE Milestone', () => {
+xdescribe('UPDATE Milestone', () => {
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {
