@@ -169,7 +169,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
               model: models.PhaseProduct,
               as: 'products',
             }],
-          }]
+          }],
         });
       },
     },
