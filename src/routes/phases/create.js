@@ -50,7 +50,7 @@ module.exports = [
           err.status = 404;
           throw err;
         }
-       return models.ProjectPhase
+        return models.ProjectPhase
           .create(data)
           .then((_newProjectPhase) => {
             newProjectPhase = _.cloneDeep(_newProjectPhase);
