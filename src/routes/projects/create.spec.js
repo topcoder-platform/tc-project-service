@@ -11,6 +11,7 @@ import RabbitMQService from '../../services/rabbitmq';
 import models from '../../models';
 
 const should = chai.should();
+const expect = chai.expect;
 
 describe('Project create', () => {
   before((done) => {
@@ -23,6 +24,44 @@ describe('Project create', () => {
           displayName: 'Generic',
           createdBy: 1,
           updatedBy: 1,
+        },
+      ]))
+      .then(() => models.ProductTemplate.bulkCreate([
+        {
+          id: 21,
+          name: 'template 1',
+          productKey: 'productKey-1',
+          icon: 'http://example.com/icon2.ico',
+          brief: 'brief 1',
+          details: 'details 1',
+          aliases: {},
+          template: {},
+          createdBy: 3,
+          updatedBy: 4,
+        },
+        {
+          id: 22,
+          name: 'template 2',
+          productKey: 'productKey-2',
+          icon: 'http://example.com/icon2.ico',
+          brief: 'brief 2',
+          details: 'details 2',
+          aliases: {},
+          template: {},
+          createdBy: 3,
+          updatedBy: 4,
+        },
+        {
+          id: 23,
+          name: 'template 3',
+          productKey: 'productKey-3',
+          icon: 'http://example.com/icon3.ico',
+          brief: 'brief 3',
+          details: 'details 3',
+          aliases: {},
+          template: {},
+          createdBy: 3,
+          updatedBy: 4,
         },
       ]))
       .then(() => models.ProjectTemplate.bulkCreate([
@@ -209,6 +248,8 @@ describe('Project create', () => {
     });
 
     it('should return 201 if error to create direct project', (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.param.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.reject(new Error('error message')),
       });
@@ -218,7 +259,7 @@ describe('Project create', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send(body)
+        .send(validBody)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
@@ -235,6 +276,8 @@ describe('Project create', () => {
     });
 
     it('should return 201 if valid user and data', (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.param.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
@@ -257,7 +300,7 @@ describe('Project create', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send(body)
+        .send(validBody)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
@@ -335,7 +378,7 @@ describe('Project create', () => {
             const phases = _.sortBy(resJson.phases, p => p.name);
             phases[0].name.should.be.eql('Design Stage');
             phases[0].status.should.be.eql('open');
-            phases[0].details.should.be.eql({ description: 'detailed description' });
+            expect(phases[0].details).to.be.empty;
             phases[0].products.should.have.lengthOf(1);
             phases[0].products[0].name.should.be.eql('product 1');
             phases[0].products[0].templateId.should.be.eql(21);

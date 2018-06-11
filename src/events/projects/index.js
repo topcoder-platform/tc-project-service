@@ -34,6 +34,8 @@ const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disab
       const detail = _.find(memberDetails, md => md.userId === single.userId);
       return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
     });
+    // update project member record with details
+    data.phases = data.phases.map(phase => _.omit(phase, ['deletedAt', 'deletedBy']));
     // add the record to the index
     const result = yield eClient.index({
       index: ES_PROJECT_INDEX,
@@ -59,7 +61,11 @@ const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel)
   const project = JSON.parse(msg.content.toString());
   try {
     yield indexProject(logger, msg);
-    yield createPhaseTopic(logger, msg);
+    if (project.phases && project.phases.length > 0) {
+      logger.debug('Phases found for the project, trying to create topics for each phase.');
+      const topicPromises = _.map(project.phases, phase => createPhaseTopic(logger, phase));
+      yield Promise.all(topicPromises);
+    }
     channel.ack(msg);
   } catch (error) {
     logger.error(`Error processing event (projectId: ${project.id})`, error);
@@ -89,11 +95,11 @@ const projectUpdatedHandler = Promise.coroutine(function* (logger, msg, channel)
         doc: merged,
       },
     });
-    logger.debug(`project updated successfully in elasticsearh index, (projectId: ${data.id})`);
+    logger.debug(`project updated successfully in elasticsearh index, (projectId: ${data.original.id})`);
     channel.ack(msg);
     return undefined;
   } catch (error) {
-    logger.error(`failed to get project document, (projectId: ${data.id})`, error);
+    logger.error(`failed to get project document, (projectId: ${data.original.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;
   }

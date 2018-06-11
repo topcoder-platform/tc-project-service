@@ -23,12 +23,25 @@ const eClient = util.getElasticSearchClient();
  */
 const indexProjectPhase = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
   try {
-    const data = JSON.parse(msg.content.toString());
-    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
+    const phase = JSON.parse(msg.content.toString());
+    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: phase.projectId });
     const phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
-    phases.push(_.omit(data, ['deletedAt', 'deletedBy']));
+    const existingPhaseIndex = _.findIndex(phases, p => p.id === phase.id);
+    // if phase does not exists already
+    if (existingPhaseIndex === -1) {
+      phases.push(_.omit(phase, ['deletedAt', 'deletedBy']));
+    } else { // if phase already exists, ideally we should never land here, but code handles the buggy indexing
+      // replaces the old inconsistent index where previously phase was not removed from the index but deleted
+      // from the database
+      phases.splice(existingPhaseIndex, 1, phase);
+    }
     const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
-    yield eClient.update({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId, body: { doc: merged } });
+    yield eClient.update({
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
+      id: phase.projectId,
+      body: { doc: merged },
+    });
     logger.debug('project phase added to project document successfully');
   } catch (error) {
     logger.error('Error handling indexing the project phase', error);
