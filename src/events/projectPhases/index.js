@@ -59,6 +59,7 @@ const indexProjectPhase = Promise.coroutine(function* (logger, msg) { // eslint-
  */
 const createPhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
   try {
+    logger.debug('Creating topic for phase with msg', msg);
     const phase = JSON.parse(msg.content.toString());
     const topic = yield messageService.createTopic({
       reference: 'project',
@@ -85,7 +86,9 @@ const createPhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-d
  */
 const projectPhaseAddedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   try {
+    logger.debug('calling indexProjectPhase', msg);
     yield indexProjectPhase(logger, msg, channel);
+    logger.debug('calling createPhaseTopic', msg);
     yield createPhaseTopic(logger, msg);
     channel.ack(msg);
   } catch (error) {

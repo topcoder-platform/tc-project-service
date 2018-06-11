@@ -85,10 +85,9 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       return Promise.resolve(result);
     }
     const phases = _.values(projectTemplate.phases);
-    const productTemplateMap = _.map(productTemplates, (pt) => {
-      const map = {};
-      map[pt.id] = pt;
-      return map;
+    const productTemplateMap = {};
+    productTemplates.forEach((pt) => {
+      productTemplateMap[pt.id] = pt;
     });
     return Promise.all(_.map(phases, (phase, phaseIdx) =>
       // Create phase
