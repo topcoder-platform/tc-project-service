@@ -118,13 +118,16 @@ module.exports = [
             if (newProject.billingAccountId) {
               body.billingAccountId = newProject.billingAccountId;
             }
+            req.log.debug('creating project history for project %d', newProject.id);
             // add to project history
             models.ProjectHistory.create({
               projectId: _newProject.id,
               status: PROJECT_STATUS.DRAFT,
               cancelReason: null,
               updatedBy: req.authUser.userId,
-            });
+            }).then(() => req.log.debug('project history created for project %d', newProject.id))
+            .catch(() => req.log.error('project history failed for project %d', newProject.id));
+            req.log.debug('creating direct project for project %d', newProject.id);
             return directProject.createDirectProject(req, body)
               .then((resp) => {
                 newProject.directProjectId = resp.data.result.content.projectId;
@@ -139,17 +142,18 @@ module.exports = [
               });
             // return Promise.resolve();
           })
-
           .then(() => {
             newProject = newProject.get({ plain: true });
             // remove utm details & deletedAt field
             newProject = _.omit(newProject, ['deletedAt', 'utm']);
             // add an empty attachments array
             newProject.attachments = [];
+            req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
             req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
               newProject,
               { correlationId: req.id },
             );
+            req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
             // emit event
             req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
             res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
