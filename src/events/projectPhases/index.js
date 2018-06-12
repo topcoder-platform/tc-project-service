@@ -18,12 +18,12 @@ const eClient = util.getElasticSearchClient();
  * Indexes the project phase in the elastic search.
  *
  * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} msg     event payload
+ * @param  {Object} phase     event payload
  * @returns {undefined}
  */
-const indexProjectPhase = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+const indexProjectPhase = Promise.coroutine(function* (logger, phase) { // eslint-disable-line func-names
   try {
-    const phase = JSON.parse(msg.content.toString());
+    // const phase = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: phase.projectId });
     const phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
     const existingPhaseIndex = _.findIndex(phases, p => p.id === phase.id);
@@ -57,10 +57,10 @@ const indexProjectPhase = Promise.coroutine(function* (logger, msg) { // eslint-
  * @param  {Object} msg     event payload
  * @returns {undefined}
  */
-const createPhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+const createPhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint-disable-line func-names
   try {
-    logger.debug('Creating topic for phase with msg', msg);
-    const phase = JSON.parse(msg.content.toString());
+    logger.debug('Creating topic for phase with phase', phase);
+    // const phase = JSON.parse(msg.content.toString());
     const topic = yield messageService.createTopic({
       reference: 'project',
       referenceId: `${phase.projectId}`,
@@ -85,11 +85,12 @@ const createPhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-d
  * @returns {undefined}
  */
 const projectPhaseAddedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+  const phase = JSON.parse(msg.content.toString());
   try {
-    logger.debug('calling indexProjectPhase', msg);
-    yield indexProjectPhase(logger, msg, channel);
-    logger.debug('calling createPhaseTopic', msg);
-    yield createPhaseTopic(logger, msg);
+    logger.debug('calling indexProjectPhase', phase);
+    yield indexProjectPhase(logger, phase, channel);
+    logger.debug('calling createPhaseTopic', phase);
+    yield createPhaseTopic(logger, phase);
     channel.ack(msg);
   } catch (error) {
     logger.error('Error handling project.phase.added event', error);
