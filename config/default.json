@@ -20,9 +20,7 @@
     "host": "",
     "apiVersion": "2.3",
     "indexName": "projects",
-    "docType": "projectV4",
-    "timelineIndexName": "timelines",
-    "timelineDocType": "timelineV4"
+    "docType": "projectV4"
   },
   "systemUserClientId": "",
   "systemUserClientSecret": "",
