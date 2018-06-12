@@ -9,9 +9,7 @@
     "host": "PROJECTS_ES_URL",
     "apiVersion": "2.3",
     "indexName": "PROJECTS_ES_INDEX_NAME",
-    "docType": "projectV4",
-    "timelineIndexName": "TIMELINES_ES_INDEX_NAME",
-    "timelineDocType": "TIMELINES_ES_DOC_TYPE"
+    "docType": "projectV4"
   },
   "rabbitmqURL": "RABBITMQ_URL",
   "pubsubQueueName": "PUBSUB_QUEUE_NAME",
