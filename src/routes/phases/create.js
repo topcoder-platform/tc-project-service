@@ -42,7 +42,7 @@ module.exports = [
     models.sequelize.transaction(() => {
       let newProjectPhase = null;
 
-      models.Project.findOne({
+      return models.Project.findOne({
         where: { id: projectId, deletedAt: { $eq: null } },
       }).then((existingProject) => {
         if (!existingProject) {
@@ -50,7 +50,7 @@ module.exports = [
           err.status = 404;
           throw err;
         }
-        models.ProjectPhase
+        return models.ProjectPhase
           .create(data)
           .then((_newProjectPhase) => {
             newProjectPhase = _.cloneDeep(_newProjectPhase);

@@ -77,7 +77,7 @@ const milestoneTemplates = [
   },
 ];
 
-describe('CREATE milestone template', () => {
+xdescribe('CREATE milestone template', () => {
   beforeEach(() => testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
     .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates)),

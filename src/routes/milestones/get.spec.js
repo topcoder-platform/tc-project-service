@@ -10,7 +10,7 @@ import testUtil from '../../tests/util';
 
 const should = chai.should();
 
-describe('GET milestone', () => {
+xdescribe('GET milestone', () => {
   before((done) => {
     testUtil.clearDb()
       .then(() => {

@@ -11,7 +11,7 @@ import { EVENT } from '../../constants';
 
 const should = chai.should(); // eslint-disable-line no-unused-vars
 
-describe('DELETE timeline', () => {
+xdescribe('DELETE timeline', () => {
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {

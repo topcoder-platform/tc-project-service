@@ -50,13 +50,15 @@ module.exports = [
     });
 
     const eClient = util.getElasticSearchClient();
-    return models.Project.findProjectRange(projectIdStart, projectIdEnd, fields)
+    return models.Project.findProjectRange(models, projectIdStart, projectIdEnd, fields)
     .then((_projects) => {
       const projects = _projects.map((_project) => {
         const project = _project;
         if (!project) {
           return Promise.resolve(null);
         }
+        // removs the delete audit fields from the index data
+        project.phases = project.phases.map(phase => _.omit(phase, ['deletedAt', 'deletedBy']));
         return models.ProjectMember.getActiveProjectMembers(project.id)
         .then((currentProjectMembers) => {
           // check context for project members

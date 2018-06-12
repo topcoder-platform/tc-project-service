@@ -9,6 +9,8 @@ export const PROJECT_STATUS = {
   CANCELLED: 'cancelled',
 };
 
+export const PROJECT_PHASE_STATUS = PROJECT_STATUS;
+
 export const PROJECT_MEMBER_ROLE = {
   MANAGER: 'manager',
   CUSTOMER: 'customer',
