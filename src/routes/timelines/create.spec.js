@@ -11,7 +11,7 @@ import { EVENT } from '../../constants';
 
 const should = chai.should();
 
-xdescribe('CREATE timeline', () => {
+describe('CREATE timeline', () => {
   let projectId1;
   let projectId2;
 

@@ -100,7 +100,7 @@ const milestoneTemplates = [
   },
 ];
 
-xdescribe('UPDATE milestone template', () => {
+describe('UPDATE milestone template', () => {
   beforeEach(() => testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
     .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates)),

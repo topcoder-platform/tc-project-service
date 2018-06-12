@@ -80,7 +80,7 @@ const milestoneTemplates = [
   },
 ];
 
-xdescribe('GET milestone template', () => {
+describe('GET milestone template', () => {
   beforeEach(() => testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
     .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates)),

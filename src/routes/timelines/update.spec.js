@@ -60,7 +60,7 @@ const milestones = [
   },
 ];
 
-xdescribe('UPDATE timeline', () => {
+describe('UPDATE timeline', () => {
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {

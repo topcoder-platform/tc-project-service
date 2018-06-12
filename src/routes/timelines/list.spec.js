@@ -97,7 +97,7 @@ const milestones = [
 ];
 
 
-xdescribe('LIST timelines', () => {
+describe('LIST timelines', () => {
   before(function beforeHook(done) {
     this.timeout(10000);
     testUtil.clearDb()
