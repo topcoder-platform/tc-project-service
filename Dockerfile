@@ -1,5 +1,5 @@
 FROM node:8.2.1
-LABEL version="1.0"
+LABEL version="1.2"
 LABEL description="Projects microservice"
 
 RUN apt-get update && \
