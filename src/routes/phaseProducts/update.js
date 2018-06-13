@@ -16,6 +16,8 @@ const updatePhaseProductValidation = {
       name: Joi.string().optional(),
       type: Joi.string().optional(),
       templateId: Joi.number().optional(),
+      directProjectId: Joi.number().positive().optional(),
+      billingAccountId: Joi.number().positive().optional(),
       estimatedPrice: Joi.number().positive().optional(),
       actualPrice: Joi.number().positive().optional(),
       details: Joi.any().optional(),

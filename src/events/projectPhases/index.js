@@ -60,7 +60,6 @@ const indexProjectPhase = Promise.coroutine(function* (logger, phase) { // eslin
 const createPhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint-disable-line func-names
   try {
     logger.debug('Creating topic for phase with phase', phase);
-    // const phase = JSON.parse(msg.content.toString());
     const topic = yield messageService.createTopic({
       reference: 'project',
       referenceId: `${phase.projectId}`,
