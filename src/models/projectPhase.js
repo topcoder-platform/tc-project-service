@@ -9,7 +9,7 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
     status: { type: DataTypes.STRING, allowNull: true },
     startDate: { type: DataTypes.DATE, allowNull: true },
     endDate: { type: DataTypes.DATE, allowNull: true },
-    duration: { type: DataTypes.INTEGER, allowNull: false },
+    duration: { type: DataTypes.INTEGER, allowNull: true },
     budget: { type: DataTypes.DOUBLE, defaultValue: 0.0 },
     spentBudget: { type: DataTypes.DOUBLE, defaultValue: 0.0 },
     progress: { type: DataTypes.DOUBLE, defaultValue: 0.0 },
