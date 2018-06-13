@@ -7,6 +7,7 @@ const projectDelete = require('./project.delete');
 const projectMemberDelete = require('./projectMember.delete');
 const projectAdmin = require('./admin.ops');
 const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
+const copilotAndAbove = require('./copilotAndAbove');
 
 module.exports = () => {
   Authorizer.setDeniedStatusCode(403);
@@ -35,12 +36,12 @@ module.exports = () => {
   Authorizer.setPolicy('productTemplate.delete', connectManagerOrAdmin);
   Authorizer.setPolicy('productTemplate.view', true);
 
-  Authorizer.setPolicy('project.addProjectPhase', projectEdit);
-  Authorizer.setPolicy('project.updateProjectPhase', projectEdit);
-  Authorizer.setPolicy('project.deleteProjectPhase', projectEdit);
-  Authorizer.setPolicy('project.addPhaseProduct', projectEdit);
-  Authorizer.setPolicy('project.updatePhaseProduct', projectEdit);
-  Authorizer.setPolicy('project.deletePhaseProduct', projectEdit);
+  Authorizer.setPolicy('project.addProjectPhase', copilotAndAbove);
+  Authorizer.setPolicy('project.updateProjectPhase', copilotAndAbove);
+  Authorizer.setPolicy('project.deleteProjectPhase', copilotAndAbove);
+  Authorizer.setPolicy('project.addPhaseProduct', copilotAndAbove);
+  Authorizer.setPolicy('project.updatePhaseProduct', copilotAndAbove);
+  Authorizer.setPolicy('project.deletePhaseProduct', copilotAndAbove);
 
   Authorizer.setPolicy('projectType.create', projectAdmin);
   Authorizer.setPolicy('projectType.edit', projectAdmin);
