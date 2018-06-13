@@ -21,6 +21,20 @@ const body = {
 describe('Phase Products', () => {
   let projectId;
   let phaseId;
+  const memberUser = {
+    handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
+    userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
+    firstName: 'fname',
+    lastName: 'lName',
+    email: 'some@abc.com',
+  };
+  const copilotUser = {
+    handle: testUtil.getDecodedToken(testUtil.jwts.copilot).handle,
+    userId: testUtil.getDecodedToken(testUtil.jwts.copilot).userId,
+    firstName: 'fname',
+    lastName: 'lName',
+    email: 'some@abc.com',
+  };
   before((done) => {
     // mocks
     testUtil.clearDb()
@@ -37,14 +51,23 @@ describe('Phase Products', () => {
           }).then((p) => {
             projectId = p.id;
             // create members
-            models.ProjectMember.create({
-              userId: 40051332,
+            models.ProjectMember.bulkCreate([{
+              id: 1,
+              userId: copilotUser.userId,
               projectId,
               role: 'copilot',
+              isPrimary: false,
+              createdBy: 1,
+              updatedBy: 1,
+            }, {
+              id: 2,
+              userId: memberUser.userId,
+              projectId,
+              role: 'customer',
               isPrimary: true,
               createdBy: 1,
               updatedBy: 1,
-            }).then(() => {
+            }]).then(() => {
               models.ProjectPhase.create({
                 name: 'test project phase',
                 status: 'active',
@@ -72,7 +95,18 @@ describe('Phase Products', () => {
   });
 
   describe('POST /projects/{projectId}/phases/{phaseId}/products', () => {
-    it('should return 403 if user does not have permissions', (done) => {
+    it('should return 403 if user does not have permissions (non team member)', (done) => {
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(403, done);
+    });
+
+    it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
         .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
         .set({

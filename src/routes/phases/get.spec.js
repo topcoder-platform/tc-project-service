@@ -25,6 +25,20 @@ const body = {
 describe('Project Phases', () => {
   let projectId;
   let phaseId;
+  const memberUser = {
+    handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
+    userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
+    firstName: 'fname',
+    lastName: 'lName',
+    email: 'some@abc.com',
+  };
+  const copilotUser = {
+    handle: testUtil.getDecodedToken(testUtil.jwts.copilot).handle,
+    userId: testUtil.getDecodedToken(testUtil.jwts.copilot).userId,
+    firstName: 'fname',
+    lastName: 'lName',
+    email: 'some@abc.com',
+  };
   before((done) => {
     // mocks
     testUtil.clearDb()
@@ -41,14 +55,23 @@ describe('Project Phases', () => {
           }).then((p) => {
             projectId = p.id;
             // create members
-            models.ProjectMember.create({
-              userId: 40051332,
+            models.ProjectMember.bulkCreate([{
+              id: 1,
+              userId: copilotUser.userId,
               projectId,
               role: 'copilot',
+              isPrimary: false,
+              createdBy: 1,
+              updatedBy: 1,
+            }, {
+              id: 2,
+              userId: memberUser.userId,
+              projectId,
+              role: 'customer',
               isPrimary: true,
               createdBy: 1,
               updatedBy: 1,
-            }).then(() => {
+            }]).then(() => {
               _.assign(body, { projectId });
               models.ProjectPhase.create(body).then((phase) => {
                 phaseId = phase.id;
@@ -64,11 +87,11 @@ describe('Project Phases', () => {
   });
 
   describe('GET /projects/{projectId}/phases/{phaseId}', () => {
-    it('should return 403 when user have no permission', (done) => {
+    it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
         .get(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
         .expect('Content-Type', /json/)
         .expect(403, done);
@@ -94,7 +117,31 @@ describe('Project Phases', () => {
         .expect(404, done);
     });
 
-    it('should return 1 phase when user have project permission', (done) => {
+    it('should return 1 phase when user have project permission (customer)', (done) => {
+      request(server)
+        .get(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.name.should.be.eql('test project phase');
+            resJson.status.should.be.eql('active');
+            resJson.budget.should.be.eql(20.0);
+            resJson.progress.should.be.eql(1.23456);
+            resJson.details.should.be.eql({ message: 'This can be any json' });
+            done();
+          }
+        });
+    });
+
+    it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
         .get(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({

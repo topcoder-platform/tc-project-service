@@ -2,6 +2,8 @@
 
 import models from '../models';
 
+const jwt = require('jsonwebtoken');
+
 export default {
   clearDb: done => models.sequelize.sync({ force: true })
       .then(() => {
@@ -25,4 +27,5 @@ export default {
     // userId = 40051336, [ 'Connect Admin' ], handle: 'connect_admin1', email: 'connect_admin1@topcoder.com'
     connectAdmin: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJDb25uZWN0IEFkbWluIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJjb25uZWN0X2FkbWluMSIsImV4cCI6MjU2MzA3NjY4OSwidXNlcklkIjoiNDAwNTEzMzYiLCJpYXQiOjE0NjMwNzYwODksImVtYWlsIjoiY29ubmVjdF9hZG1pbjFAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.nSGfXMl02NZ90ZKLiEKPg75iAjU92mfteaY6xgqkM30',
   },
+  getDecodedToken: token => jwt.decode(token),
 };
