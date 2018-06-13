@@ -94,6 +94,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       models.ProjectPhase.create({
         projectId: newProject.id,
         name: _.get(phase, 'name', `Stage ${phaseIdx}`),
+        duration: _.get(phase, 'duration', 0),
         status: _.get(phase, 'status', PROJECT_PHASE_STATUS.DRAFT),
         budget: _.get(phase, 'budget', 0),
         updatedBy: req.authUser.userId,
