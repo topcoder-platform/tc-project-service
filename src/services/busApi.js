@@ -6,14 +6,12 @@ const tcCoreLibAuth = require('tc-core-library-js').auth;
 
 const m2m = tcCoreLibAuth.m2m(config);
 
-let client = null;
-
 /**
  * Get Http client to bus api
  * @return {Object} Http Client to bus api
  */
 async function getClient() {
-  if (client) return client;
+  let client = null;
   const apiBusUrl = config.get('busApiUrl');
   try {
     const token = await m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET);
