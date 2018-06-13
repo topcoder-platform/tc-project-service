@@ -1,6 +1,6 @@
 import config from 'config';
 import _ from 'lodash';
-import util from '../util';
+// import util from '../util';
 
 const Promise = require('bluebird');
 const axios = require('axios');
