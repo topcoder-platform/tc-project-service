@@ -1,5 +1,6 @@
 import config from 'config';
 import _ from 'lodash';
+import util from '../util';
 
 const Promise = require('bluebird');
 const axios = require('axios');
@@ -50,7 +51,7 @@ async function getClient(logger) {
 
     return client;
   } catch (err) {
-    return Promise.reject(`Bus api calling - Error in genearting m2m token : ${err.message}`);
+    return Promise.reject(`Message api calling - Error in genearting m2m token : ${err.message}`);
   }
 }
 
@@ -63,13 +64,18 @@ async function getClient(logger) {
  */
 function createTopic(topic, logger) {
   logger.debug(`createTopic for topic: ${JSON.stringify(topic)}`);
-  return getClient(logger).then((msgClient) => {
+  // return getClient(logger).then((msgClient) => {
+  return util.getSystemUserToken(logger).then((adminToken) => {
     logger.debug('calling message service');
-    return msgClient.post('/topics/create', topic)
+    // return msgClient.post('/topics/create', topic)
+    const httpClient = util.getHttpClient({ id: `topic#create#${topic.referenceId}`, log: logger });
+    httpClient.defaults.headers.common.Authorization = `Bearer ${adminToken}`;
+    return httpClient.post(`${config.get('messageApiUrl')}/topics/create`, topic)
       .then((resp) => {
         logger.debug('Topic created successfully');
         logger.debug(`Topic created successfully [status]: ${resp.status}`);
         logger.debug(`Topic created successfully [data]: ${resp.data}`);
+        return _.get(resp.data, 'result.content', {});
       })
       .catch((error) => {
         logger.debug('Error creating topic');

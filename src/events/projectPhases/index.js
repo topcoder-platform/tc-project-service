@@ -69,7 +69,7 @@ const createPhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint
       body: 'Welcome!!! Please use this channel for communication around the phase.',
     }, logger);
     logger.debug('topic for the phase created successfully');
-    logger.debug(topic);
+    logger.debug('created topic', topic);
   } catch (error) {
     logger.error('Error in creating topic for the project phase', error);
     // don't throw the error back to nack the bus, because we don't want to get multiple topics per phase
