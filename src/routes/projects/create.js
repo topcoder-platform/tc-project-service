@@ -135,7 +135,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
 function validateAndFetchTemplates(templateId) {
   // backward compatibility for releasing the service before releasing the front end
   // we ignore missing template id field and create a project without phase/products
-  if (!templateId) return Promise.resolve(null);
+  if (!templateId) return Promise.resolve({});
   return models.ProjectTemplate.findById(templateId, { raw: true })
   .then((existingProjectTemplate) => {
     if (!existingProjectTemplate) {

@@ -329,6 +329,61 @@ describe('Project create', () => {
         });
     });
 
+    it('should return 201 if valid user and data (without template id: backward compatibility)', (done) => {
+      const validBody = _.cloneDeep(body);
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.directProjectId.should.be.eql(128);
+            resJson.status.should.be.eql('draft');
+            resJson.type.should.be.eql(body.param.type);
+            resJson.version.should.be.eql('v3');
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            // should not create phases without a template id
+            resJson.phases.should.have.lengthOf(0);
+            done();
+          }
+        });
+    });
+
     it('should return 201 if valid user and data (with templateId)', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
