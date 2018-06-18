@@ -133,23 +133,6 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
               },
             },
           },
-          {
-            nested: {
-              path: 'details',
-              query: {
-                nested: {
-                  path: 'details.utm',
-                  query: {
-                    query_string: {
-                      query: `*${keyword}*`,
-                      analyze_wildcard: true,
-                      fields: ['details.utm.code'],
-                    },
-                  },
-                },
-              },
-            },
-          },
         ],
       },
     };
