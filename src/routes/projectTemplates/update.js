@@ -26,6 +26,8 @@ const schema = {
       aliases: Joi.array(),
       scope: Joi.object(),
       phases: Joi.object(),
+      disabled: Joi.boolean().optional(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),

@@ -19,6 +19,8 @@ describe('CREATE product template', () => {
         brief: 'brief 1',
         details: 'details 1',
         aliases: ['product key 1', 'product_key_1'],
+        disabled: true,
+        hidden: true,
         template: {
           template1: {
             name: 'template 1',
@@ -102,6 +104,8 @@ describe('CREATE product template', () => {
           resJson.details.should.be.eql(body.param.details);
           resJson.aliases.should.be.eql(body.param.aliases);
           resJson.template.should.be.eql(body.param.template);
+          resJson.disabled.should.be.eql(true);
+          resJson.hidden.should.be.eql(true);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);

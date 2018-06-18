@@ -24,6 +24,8 @@ describe('UPDATE product template', () => {
       },
       alias2: [1, 2, 3],
     },
+    disabled: true,
+    hidden: true,
     template: {
       template1: {
         name: 'template 1',
@@ -174,6 +176,8 @@ describe('UPDATE product template', () => {
           resJson.icon.should.be.eql(body.param.icon);
           resJson.brief.should.be.eql(body.param.brief);
           resJson.details.should.be.eql(body.param.details);
+          resJson.disabled.should.be.eql(true);
+          resJson.hidden.should.be.eql(true);
 
           resJson.aliases.should.be.eql({
             alias1: {

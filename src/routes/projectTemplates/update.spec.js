@@ -19,6 +19,8 @@ describe('UPDATE project template', () => {
     question: 'question 1',
     info: 'info 1',
     aliases: ['key-1', 'key_1'],
+    disabled: true,
+    hidden: true,
     scope: {
       scope1: {
         subScope1A: 1,
@@ -205,6 +207,8 @@ describe('UPDATE project template', () => {
               others: ['others 31', 'others 32'],
             },
           });
+          resJson.disabled.should.be.eql(true);
+          resJson.hidden.should.be.eql(true);
           resJson.createdBy.should.be.eql(template.createdBy);
           should.exist(resJson.createdAt);
           resJson.updatedBy.should.be.eql(40051333); // admin

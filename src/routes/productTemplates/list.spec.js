@@ -2,6 +2,7 @@
  * Tests for list.js
  */
 // import chai from 'chai';
+import _ from 'lodash';
 import request from 'supertest';
 
 import models from '../../models';
@@ -14,7 +15,7 @@ const validateProductTemplates = (count, resJson, expectedTemplates) => {
   resJson.should.have.length(count);
   resJson.forEach((pt, idx) => {
     pt.should.have.all.keys('id', 'name', 'productKey', 'icon', 'brief', 'details', 'aliases',
-    'template', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
+    'template', 'disabled', 'hidden', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
     pt.should.not.have.all.keys('deletedAt', 'deletedBy');
     pt.name.should.be.eql(expectedTemplates[idx].name);
     pt.productKey.should.be.eql(expectedTemplates[idx].productKey);
@@ -25,6 +26,8 @@ const validateProductTemplates = (count, resJson, expectedTemplates) => {
     pt.template.should.be.eql(expectedTemplates[idx].template);
     pt.createdBy.should.be.eql(expectedTemplates[idx].createdBy);
     pt.updatedBy.should.be.eql(expectedTemplates[idx].updatedBy);
+    pt.disabled.should.be.eql(_.get(expectedTemplates[idx], 'disabled', false));
+    pt.hidden.should.be.eql(_.get(expectedTemplates[idx], 'hidden', false));
   });
 };
 
@@ -43,6 +46,8 @@ describe('LIST product templates', () => {
         },
         alias2: [1, 2, 3],
       },
+      disabled: true,
+      hidden: true,
       template: {
         template1: {
           name: 'template 1',

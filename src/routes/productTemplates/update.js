@@ -24,6 +24,8 @@ const schema = {
       details: Joi.string().max(255),
       aliases: Joi.object(),
       template: Joi.object(),
+      disabled: Joi.boolean().optional(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),

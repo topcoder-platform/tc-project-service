@@ -15,6 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     aliases: { type: DataTypes.JSON, allowNull: false },
     scope: { type: DataTypes.JSON, allowNull: false },
     phases: { type: DataTypes.JSON, allowNull: false },
+    disabled: { type: DataTypes.BOOLEAN, defaultValue: false },
+    hidden: { type: DataTypes.BOOLEAN, defaultValue: false },
     deletedAt: DataTypes.DATE,
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

@@ -20,6 +20,8 @@ describe('CREATE project template', () => {
         question: 'question 1',
         info: 'info 1',
         aliases: ['key-1', 'key_1'],
+        disabled: true,
+        hidden: true,
         scope: {
           scope1: {
             subScope1A: 1,
@@ -106,6 +108,8 @@ describe('CREATE project template', () => {
           resJson.name.should.be.eql(body.param.name);
           resJson.key.should.be.eql(body.param.key);
           resJson.category.should.be.eql(body.param.category);
+          resJson.disabled.should.be.eql(true);
+          resJson.hidden.should.be.eql(true);
           resJson.scope.should.be.eql(body.param.scope);
           resJson.phases.should.be.eql(body.param.phases);
 
