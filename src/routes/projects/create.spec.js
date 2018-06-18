@@ -367,7 +367,7 @@ describe('Project create', () => {
             resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('draft');
             resJson.type.should.be.eql(body.param.type);
-            resJson.version.should.be.eql('v3');
+            resJson.version.should.be.eql('v2');
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
             resJson.members[0].userId.should.be.eql(40051331);

@@ -238,6 +238,10 @@ module.exports = [
         createdBy: req.authUser.userId,
       }],
     });
+    // backward compatibility for releasing the service before releasing the front end
+    if (!project.templateId) {
+      project.version = 'v2';
+    }
     models.sequelize.transaction(() => {
       let newProject = null;
       let newPhases;
