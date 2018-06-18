@@ -34,8 +34,10 @@ const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disab
       const detail = _.find(memberDetails, md => md.userId === single.userId);
       return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
     });
-    // update project member record with details
-    data.phases = data.phases.map(phase => _.omit(phase, ['deletedAt', 'deletedBy']));
+    if (data.phases) {
+      // removes non required fields from phase objects
+      data.phases = data.phases.map(phase => _.omit(phase, ['deletedAt', 'deletedBy']));
+    }
     // add the record to the index
     const result = yield eClient.index({
       index: ES_PROJECT_INDEX,

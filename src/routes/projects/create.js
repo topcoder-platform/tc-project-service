@@ -81,6 +81,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
   }).then((newProject) => {
     result.newProject = newProject;
 
+    // backward compatibility for releasing the service before releasing the front end
     if (!projectTemplate) {
       return Promise.resolve(result);
     }
@@ -132,6 +133,9 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
  * @returns {Promise} the promise that resolves to an object containing validated project and product templates
  */
 function validateAndFetchTemplates(templateId) {
+  // backward compatibility for releasing the service before releasing the front end
+  // we ignore missing template id field and create a project without phase/products
+  if (!templateId) return Promise.resolve(null);
   return models.ProjectTemplate.findById(templateId, { raw: true })
   .then((existingProjectTemplate) => {
     if (!existingProjectTemplate) {
