@@ -34,6 +34,15 @@ const updateBody = {
   },
 };
 
+const validatePhase = (resJson, expectedPhase) => {
+  should.exist(resJson);
+  resJson.name.should.be.eql(expectedPhase.name);
+  resJson.status.should.be.eql(expectedPhase.status);
+  resJson.budget.should.be.eql(expectedPhase.budget);
+  resJson.progress.should.be.eql(expectedPhase.progress);
+  resJson.details.should.be.eql(expectedPhase.details);
+};
+
 describe('Project Phases', () => {
   let projectId;
   let phaseId;
@@ -187,12 +196,32 @@ describe('Project Phases', () => {
             done(err);
           } else {
             const resJson = res.body.result.content;
-            should.exist(resJson);
-            resJson.name.should.be.eql(updateBody.name);
-            resJson.status.should.be.eql(updateBody.status);
-            resJson.budget.should.be.eql(updateBody.budget);
-            resJson.progress.should.be.eql(updateBody.progress);
-            resJson.details.should.be.eql(updateBody.details);
+            validatePhase(resJson, updateBody);
+            done();
+          }
+        });
+    });
+
+    it('should return updated phase when parameters are valid (0 for non -ve numbers)', (done) => {
+      const bodyWithZeros = _.cloneDeep(updateBody);
+      bodyWithZeros.duration = 0;
+      bodyWithZeros.spentBudget = 0.0;
+      bodyWithZeros.budget = 0.0;
+      bodyWithZeros.progress = 0.0;
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: bodyWithZeros })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, bodyWithZeros);
             done();
           }
         });

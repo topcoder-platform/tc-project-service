@@ -15,9 +15,20 @@ const body = {
   endDate: '2018-05-15T12:00:00Z',
   budget: 20.0,
   progress: 1.23456,
+  spentBudget: 10.0,
+  duration: 10,
   details: {
     message: 'This can be any json',
   },
+};
+
+const validatePhase = (resJson, expectedPhase) => {
+  should.exist(resJson);
+  resJson.name.should.be.eql(expectedPhase.name);
+  resJson.status.should.be.eql(expectedPhase.status);
+  resJson.budget.should.be.eql(expectedPhase.budget);
+  resJson.progress.should.be.eql(expectedPhase.progress);
+  resJson.details.should.be.eql(expectedPhase.details);
 };
 
 describe('Project Phases', () => {
@@ -190,12 +201,32 @@ describe('Project Phases', () => {
             done(err);
           } else {
             const resJson = res.body.result.content;
-            should.exist(resJson);
-            resJson.name.should.be.eql(body.name);
-            resJson.status.should.be.eql(body.status);
-            resJson.budget.should.be.eql(body.budget);
-            resJson.progress.should.be.eql(body.progress);
-            resJson.details.should.be.eql(body.details);
+            validatePhase(resJson, body);
+            done();
+          }
+        });
+    });
+
+    it('should return 201 if payload is valid (0 for non negative numbers)', (done) => {
+      const bodyWithZeros = _.cloneDeep(body);
+      bodyWithZeros.duration = 0;
+      bodyWithZeros.spentBudget = 0.0;
+      bodyWithZeros.budget = 0.0;
+      bodyWithZeros.progress = 0.0;
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: bodyWithZeros })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, bodyWithZeros);
             done();
           }
         });
