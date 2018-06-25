@@ -92,14 +92,14 @@ module.exports = (app, logger) => {
     models.Project.findOne({
       where: { id: projectId },
     })
-    .then((project) => {
-      createEvent(eventType, {
-        projectId,
-        projectName: project.name,
-        userId: member.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+      .then((project) => {
+        createEvent(eventType, {
+          projectId,
+          projectName: project.name,
+          userId: member.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
   /**
@@ -119,16 +119,16 @@ module.exports = (app, logger) => {
     models.Project.findOne({
       where: { id: projectId },
     })
-    .then((project) => {
-      if (project) {
-        createEvent(eventType, {
-          projectId,
-          projectName: project.name,
-          userId: member.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-      }
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+      .then((project) => {
+        if (project) {
+          createEvent(eventType, {
+            projectId,
+            projectName: project.name,
+            userId: member.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
   /**
@@ -142,16 +142,16 @@ module.exports = (app, logger) => {
       models.Project.findOne({
         where: { id: projectId },
       })
-      .then((project) => {
-        if (project) {
-          createEvent(BUS_API_EVENT.MEMBER_ASSIGNED_AS_OWNER, {
-            projectId,
-            projectName: project.name,
-            userId: updated.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+        .then((project) => {
+          if (project) {
+            createEvent(BUS_API_EVENT.MEMBER_ASSIGNED_AS_OWNER, {
+              projectId,
+              projectName: project.name,
+              userId: updated.userId,
+              initiatorUserId: req.authUser.userId,
+            }, logger);
+          }
+        }).catch(err => null);    // eslint-disable-line no-unused-vars
     }
   });
 
@@ -166,14 +166,158 @@ module.exports = (app, logger) => {
     models.Project.findOne({
       where: { id: projectId },
     })
-    .then((project) => {
-      createEvent(BUS_API_EVENT.PROJECT_FILE_UPLOADED, {
-        projectId,
-        projectName: project.name,
-        fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+      .then((project) => {
+        createEvent(BUS_API_EVENT.PROJECT_FILE_UPLOADED, {
+          projectId,
+          projectName: project.name,
+          fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+   * PROJECT_PHASE_ADDED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, ({ req, created }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_ADDED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+          projectId,
+          projectName: project.name,
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+  * PROJECT_PHASE_REMOVED
+  */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, ({ req, deleted }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_REMOVED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+          projectId,
+          projectName: project.name,
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+  * PROJECT_PHASE_UPDATED
+  */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, ({ req, original, updated }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_UPDATED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+          projectId,
+          projectName: project.name,
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+   * PROJECT_PHASE_PRODUCT_ADDED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, ({ req, created }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_PRODUCT_ADDED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+          projectId,
+          projectName: project.name,
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+          phase: created,
+        }, logger);
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+  * PROJECT_PHASE_PRODUCT_REMOVED
+  */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED, ({ req, deleted }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_PRODUCT_REMOVED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+          projectId,
+          projectName: project.name,
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+  * PROJECT_PHASE_PRODUCT_UPDATED
+  */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED, ({ req, original, updated }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_PRODUCT_UPDATED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        // Spec changes
+        if (!_.isEqual(original.details, updated.details)) {
+          logger.debug(`Spec changed for product id ${updated.id}`);
+
+          createEvent(BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED, {
+            projectId,
+            projectName: project.name,
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+
+        // Other fields change
+        const originalWithouDetails = _.omit(original, 'details');
+        const updatedWithouDetails = _.omit(updated, 'details');
+        if (!_.isEqual(originalWithouDetails.details, updatedWithouDetails.details)) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+            projectId,
+            projectName: project.name,
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 };

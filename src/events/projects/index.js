@@ -5,10 +5,52 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import config from 'config';
 import util from '../../util';
+import { createPhaseTopic } from '../projectPhases';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
+
+/**
+ * Indexes the project in the elastic search.
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload which is essentially a project in JSON format
+ * @returns {undefined}
+ */
+const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+  const data = JSON.parse(msg.content.toString());
+  const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
+  try {
+    // retrieve member details
+    const memberDetails = yield util.getMemberDetailsByUserIds(userIds, msg.properties.correlationId, logger);
+    // if no members are returned than this should result in nack
+    if (!_.isArray(memberDetails) || memberDetails.length === 0) {
+      logger.error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
+      throw new Error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
+    }
+    // update project member record with details
+    data.members = data.members.map((single) => {
+      const detail = _.find(memberDetails, md => md.userId === single.userId);
+      return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
+    });
+    if (data.phases) {
+      // removes non required fields from phase objects
+      data.phases = data.phases.map(phase => _.omit(phase, ['deletedAt', 'deletedBy']));
+    }
+    // add the record to the index
+    const result = yield eClient.index({
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
+      id: data.id,
+      body: data,
+    });
+    logger.debug(`project indexed successfully (projectId: ${data.id})`, result);
+  } catch (error) {
+    logger.error(`Error indexing project (projectId: ${data.id})`, error);
+    throw error;
+  }
+});
 
 /**
  * Handler for project creation event
@@ -18,36 +60,18 @@ const eClient = util.getElasticSearchClient();
  * @returns {undefined}
  */
 const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
-  const data = JSON.parse(msg.content.toString());
-  const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
+  const project = JSON.parse(msg.content.toString());
   try {
-    // retrieve member details
-    const memberDetails = yield util.getMemberDetailsByUserIds(userIds, msg.properties.correlationId, logger);
-    // if no members are returned than this should result in nack
-    if (!_.isArray(memberDetails) || memberDetails.length === 0) {
-      logger.error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
-      channel.nack(msg, false, !msg.fields.redelivered);
-      return undefined;
+    yield indexProject(logger, msg);
+    if (project.phases && project.phases.length > 0) {
+      logger.debug('Phases found for the project, trying to create topics for each phase.');
+      const topicPromises = _.map(project.phases, phase => createPhaseTopic(logger, phase));
+      yield Promise.all(topicPromises);
     }
-    // update project member record with details
-    data.members = data.members.map((single) => {
-      const detail = _.find(memberDetails, md => md.userId === single.userId);
-      return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
-    });
-    // add the record to the index
-    const result = yield eClient.index({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: data.id,
-      body: data,
-    });
-    logger.debug(`project indexed successfully (projectId: ${data.id})`, result);
     channel.ack(msg);
-    return undefined;
   } catch (error) {
-    logger.error(`Error processing event (projectId: ${data.id})`, error);
+    logger.error(`Error processing event (projectId: ${project.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
-    return undefined;
   }
 });
 
@@ -73,11 +97,11 @@ const projectUpdatedHandler = Promise.coroutine(function* (logger, msg, channel)
         doc: merged,
       },
     });
-    logger.debug(`project updated successfully in elasticsearh index, (projectId: ${data.id})`);
+    logger.debug(`project updated successfully in elasticsearh index, (projectId: ${data.original.id})`);
     channel.ack(msg);
     return undefined;
   } catch (error) {
-    logger.error(`failed to get project document, (projectId: ${data.id})`, error);
+    logger.error(`failed to get project document, (projectId: ${data.original.id})`, error);
     channel.nack(msg, false, !msg.fields.redelivered);
     return undefined;
   }

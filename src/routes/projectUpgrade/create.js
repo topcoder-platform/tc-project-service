@@ -1,0 +1,241 @@
+/* eslint-disable no-await-in-loop */
+
+/**
+ * API to upgrade projects
+ */
+import _ from 'lodash';
+import validate from 'express-validation';
+import Joi from 'joi';
+import { middleware as tcMiddleware } from 'tc-core-library-js';
+import models from '../../models';
+import util from '../../util';
+import {
+  PROJECT_STATUS,
+  EVENT,
+} from '../../constants';
+
+const permissions = tcMiddleware.permissions;
+
+/**
+ * Given a completed project id, find the latest completed status' creation date.
+ *
+ * @param {number} projectId the project id
+ * @param {Transaction} [transaction] the transaction
+ * @returns {Promise<date>} the latest completed status' creation date, or undefined if not found
+ */
+async function findCompletedProjectEndDate(projectId, transaction) {
+  const projectHistoryRecord = await models.ProjectHistory.find({
+    where: { projectId, status: PROJECT_STATUS.COMPLETED },
+    order: [['createdAt', 'DESC']],
+    attributes: ['createdAt'],
+    raw: true,
+    transaction,
+  });
+  return projectHistoryRecord && projectHistoryRecord.createdAt;
+}
+
+/**
+ * Applies a given template to the destination object by taking data from the source object.
+ * @param {object} template the template object
+ * @param {object} source the source object
+ * @param {object} destination the destination object
+ * @returns {void}
+ */
+function applyTemplate(template, source, destination) {
+  if (!template || typeof template !== 'object') { return; }
+  Object.keys(template).forEach((key) => {
+    const templateValue = template[key];
+    if (typeof templateValue === 'object') {
+      // eslint-disable-next-line no-param-reassign
+      destination[key] = {};
+      applyTemplate(templateValue, source[key], destination[key]);
+    } else if (source && typeof source === 'object') {
+      // eslint-disable-next-line no-param-reassign
+      destination[key] = source[key];
+    }
+  });
+}
+
+/**
+ * Migrates a given project record from v2 to v3.
+ *
+ * @param {express.Request} req the request
+ * @param {object} project the project record
+ * @param {number} defaultProductTemplateId the default product template id
+ * @param {string|undefined} phaseName the phase name (optional)
+ * @returns {Promise<void>} promise
+ */
+async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseName) {
+  if (!project.details || !project.details.products || !project.details.products.length) {
+    throw util.buildApiError(`could not locate product id for project ${project.id}`, 500);
+  }
+  /** @type {{ phase: {}, products: {}[] }[]} */
+  const newPhasesAndProducts = [];
+  const previousValue = _.clone(project.get({ plain: true }));
+  await models.sequelize.transaction(async (transaction) => {
+    const products = project.details.products;
+    const projectTemplate = await models.ProjectTemplate.find({
+      where: { key: project.type },
+      attributes: ['phases'],
+      raw: true,
+      transaction,
+    });
+    const phaseKeys = projectTemplate && projectTemplate.phases && Object.keys(projectTemplate.phases);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const phaseKey of (phaseKeys || [])) {
+      const phaseObject = projectTemplate.phases[phaseKey];
+      const projectCompleted = project.status === PROJECT_STATUS.COMPLETED;
+      const endDate = projectCompleted
+        ? (await findCompletedProjectEndDate(project.id, transaction)) || project.updatedAt
+        : null;
+      const projectPhase = await models.ProjectPhase.create({
+        projectId: project.id,
+        // TODO: there should be a clear requirement about how to set the phase's name without relying on its
+        // products, as they are multiple, and this needs a single value
+        // setting the name that was on the original phase's object, as is the most promising/obvious way of doing
+        // this
+        name: phaseName || phaseObject.name || '',
+        status: project.status,
+        startDate: project.createdAt,
+        endDate,
+        budget: project.details && project.details.appDefinition && project.details.appDefinition.budget,
+        progress: projectCompleted ? 100 : 0,
+        details: null,
+        createdBy: req.authUser.userId,
+        updatedBy: req.authUser.userId,
+      }, { transaction });
+      const phaseAndProducts = {
+        phase: projectPhase,
+        products: [],
+      };
+      newPhasesAndProducts.push(phaseAndProducts);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const phaseProduct of (phaseObject.products || [])) {
+        const useDefaultProductTemplateId = products.indexOf(phaseProduct.productKey) === -1;
+        let query;
+        if (useDefaultProductTemplateId) {
+          // default strategy is to use the passed default product template id
+          query = { id: defaultProductTemplateId };
+        } else {
+          query = { productKey: phaseProduct.productKey };
+        }
+        const productTemplate = await models.ProductTemplate.find({
+          where: query,
+          attributes: ['id', 'name', 'productKey', 'template'],
+          raw: true,
+          transaction,
+        });
+        if (!productTemplate) {
+          throw util.buildApiError(`could not locate product template for project ${project.id}`, 500);
+        }
+        let detailsObject;
+        if (productTemplate.template) {
+          detailsObject = {};
+          applyTemplate(productTemplate.template, project.details, detailsObject);
+        }
+        phaseAndProducts.products.push(
+          await models.PhaseProduct.create({
+            phaseId: projectPhase.id,
+            projectId: project.id,
+            templateId: productTemplate.id,
+            directProjectId: project.directProjectId,
+            billingAccountId: project.billingAccountId,
+            name: productTemplate.name,
+            type: productTemplate.productKey,
+            estimatedPrice: project.estimatedPrice,
+            actualPrice: project.actualPrice,
+            details: detailsObject,
+            createdBy: req.authUser.userId,
+            updatedBy: req.authUser.userId,
+          }, { transaction }));
+      }
+    }
+    await project.update({ version: 'v3' }, { transaction });
+  });
+  newPhasesAndProducts.forEach(({ phase, products }) => {
+    // Send events to buses (ProjectPhase)
+    req.log.debug('Sending event to RabbitMQ bus for project phase %d', phase.id);
+    req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
+      phase,
+      { correlationId: req.id },
+    );
+    req.log.debug('Sending event to Kafka bus for project phase %d', phase.id);
+    req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phase });
+
+    products.forEach((newPhaseProduct) => {
+      // Send events to buses (PhaseProduct)
+      req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
+        newPhaseProduct,
+        { correlationId: req.id },
+      );
+      req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, { req, created: newPhaseProduct });
+    });
+  });
+
+  // Send events to buses (Project)
+  req.log.debug('updated project', project);
+
+  // publish original and updated project data
+  req.app.services.pubsub.publish(
+    EVENT.ROUTING_KEY.PROJECT_UPDATED, {
+      original: previousValue,
+      updated: project,
+    }, {
+      correlationId: req.id,
+    },
+  );
+  req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
+    req,
+    original: previousValue,
+    updated: project,
+  });
+}
+
+const allowedMigrations = {
+  v3: {
+    v2: migrateFromV2ToV3,
+  },
+};
+
+const schema = {
+  body: {
+    param: Joi.object().keys({
+      targetVersion: Joi.string().valid(Object.keys(allowedMigrations)).required(),
+      defaultProductTemplateId: Joi.number().integer().positive().required(),
+      phaseName: Joi.string(),
+    }).required(),
+  },
+  options: {
+    status: 400,
+  },
+};
+
+module.exports = [
+  validate(schema),
+  permissions('project.admin'),
+  async (req, res, next) => {
+    try {
+      const projectId = Number(req.params.projectId);
+      const targetVersion = req.body.param.targetVersion;
+      const targetVersionMigrationData = allowedMigrations[targetVersion];
+      const project = await models.Project.find({ where: { id: projectId } });
+      if (!project) {
+        // returning 404
+        throw util.buildApiError(`project not found for id ${projectId}`, 404);
+      }
+      const handler = targetVersionMigrationData[project.version];
+      if (!handler) {
+        // returning 400
+        throw util.buildApiError(`current project version ${project.version} is not supported to be upgraded to ${
+          targetVersion}`, 400);
+      }
+      // we have a valid project to be migrated
+      await handler(req, project, req.body.param.defaultProductTemplateId, req.body.param.phaseName);
+      res.status(200).json(util.wrapResponse(req.id, { message: 'Project successfully migrated' }));
+    } catch (err) {
+      next(err);
+    }
+  },
+];

@@ -6,7 +6,6 @@ import {
 } from 'tc-core-library-js';
 import models from '../../models';
 import {
-  PROJECT_TYPE,
   PROJECT_STATUS,
   PROJECT_MEMBER_ROLE,
   EVENT,
@@ -60,9 +59,10 @@ const updateProjectValdiations = {
         title: Joi.string(),
         address: Joi.string().regex(REGEX.URL),
       })).optional().allow(null),
-      type: Joi.any().valid(_.values(PROJECT_TYPE)),
+      type: Joi.string().max(45),
       details: Joi.any(),
       memers: Joi.any(),
+      templateId: Joi.any().strip(), // ignore the template id
       createdBy: Joi.any(),
       createdAt: Joi.any(),
       updatedBy: Joi.any(),
@@ -91,15 +91,15 @@ const validateUpdates = (existingProject, updatedProps, req) => {
       break;
     default:
       break;
-      // disabling this check for now.
-      // case PROJECT_STATUS.DRAFT:
-      //   if (_.get(updatedProject, 'status', '') === 'active') {
-      //     // attempting to launch the project make sure certain
-      //     // properties are set
-      //     if (!updatedProject.billingAccountId && !existingProject.billingAccountId) {
-      //       errors.push('\'billingAccountId\' must be set before activating the project')
-      //     }
-      //   }
+    // disabling this check for now.
+    // case PROJECT_STATUS.DRAFT:
+    //   if (_.get(updatedProject, 'status', '') === 'active') {
+    //     // attempting to launch the project make sure certain
+    //     // properties are set
+    //     if (!updatedProject.billingAccountId && !existingProject.billingAccountId) {
+    //       errors.push('\'billingAccountId\' must be set before activating the project')
+    //     }
+    //   }
   }
   if (_.has(updatedProps, 'directProjectId') &&
     !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
@@ -114,6 +114,25 @@ module.exports = [
   validate(updateProjectValdiations),
   permissions('project.edit'),
   /**
+   * Validate project type to be existed.
+   */
+  (req, res, next) => {
+    if (req.body.param.type) {
+      models.ProjectType.findOne({ where: { key: req.body.param.type } })
+        .then((projectType) => {
+          if (projectType) {
+            next();
+          } else {
+            const err = new Error(`Project type not found for key ${req.body.param.type}`);
+            err.status = 422;
+            next(err);
+          }
+        });
+    } else {
+      next();
+    }
+  },
+  /**
    * POST projects/
    * Create a project if the user has access
    */
@@ -123,7 +142,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     // prune any fields that cannot be updated directly
     updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
-    traverse(updatedProps).forEach(function (x) {
+    traverse(updatedProps).forEach(function (x) { // eslint-disable-line func-names
       if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
     });
     let previousValue;
