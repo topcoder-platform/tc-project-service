@@ -29,6 +29,17 @@ let esClient = null;
 
 _.assignIn(util, {
   /**
+   * Build API error
+   * @param {string} message the API error message
+   * @param {number} status the API status code
+   * @returns {Error} the built API error
+   */
+  buildApiError: (message, status) => {
+    const apiErr = new Error(message);
+    apiErr.status = status || 500;
+    return apiErr;
+  },
+  /**
    * Handle error
    * @param   {String}    msg               the default error message
    * @param   {Error}     err               the err
@@ -227,30 +238,30 @@ _.assignIn(util, {
   getProjectAttachments: (req, projectId) => {
     let attachments = [];
     return models.ProjectAttachment.getActiveProjectAttachments(projectId)
-        .then((_attachments) => {
-          // if attachments were requested
-          if (attachments) {
-            attachments = _attachments;
-          } else {
-            return attachments;
-          }
-          // TODO consider using redis to cache attachments urls
-          const promises = [];
-          _.each(attachments, (a) => {
-            promises.push(util.getFileDownloadUrl(req, a.filePath));
-          });
-          return Promise.all(promises);
-        })
-        .then((result) => {
-          // result is an array of 'tuples' => [[path, url], [path,url]]
-          // convert it to a map for easy lookup
-          const urls = _.fromPairs(result);
-          _.each(attachments, (at) => {
-            const a = at;
-            a.downloadUrl = urls[a.filePath];
-          });
+      .then((_attachments) => {
+        // if attachments were requested
+        if (attachments) {
+          attachments = _attachments;
+        } else {
           return attachments;
+        }
+        // TODO consider using redis to cache attachments urls
+        const promises = [];
+        _.each(attachments, (a) => {
+          promises.push(util.getFileDownloadUrl(req, a.filePath));
         });
+        return Promise.all(promises);
+      })
+      .then((result) => {
+        // result is an array of 'tuples' => [[path, url], [path,url]]
+        // convert it to a map for easy lookup
+        const urls = _.fromPairs(result);
+        _.each(attachments, (at) => {
+          const a = at;
+          a.downloadUrl = urls[a.filePath];
+        });
+        return attachments;
+      });
   },
 
   getSystemUserToken: (logger, id = 'system') => {
@@ -263,19 +274,19 @@ _.assignIn(util, {
         timeout: 4000,
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       },
-      )
+    )
       .then(res => res.data.result.content.token);
   },
 
-    /**
-     * Fetches the topcoder user details using the given JWT token.
-     *
-     * @param {Number}  userId        id of the user to be fetched
-     * @param {String}  jwtToken      JWT token of the admin user or JWT token of the user to be fecthed
-     * @param {Object}  logger        logger to be used for logging purposes
-     *
-     * @return {Promise}              promise which resolves to the user's information
-     */
+  /**
+   * Fetches the topcoder user details using the given JWT token.
+   *
+   * @param {Number}  userId        id of the user to be fetched
+   * @param {String}  jwtToken      JWT token of the admin user or JWT token of the user to be fecthed
+   * @param {Object}  logger        logger to be used for logging purposes
+   *
+   * @return {Promise}              promise which resolves to the user's information
+   */
   getTopcoderUser: (userId, jwtToken, logger) => {
     const httpClient = util.getHttpClient({ id: `userService_${userId}`, log: logger });
     httpClient.defaults.timeout = 3000;
@@ -284,7 +295,7 @@ _.assignIn(util, {
     httpClient.defaults.headers.common.Authorization = `Bearer ${jwtToken}`;
     return httpClient.get(`${config.identityServiceEndpoint}users/${userId}`).then((response) => {
       if (response.data && response.data.result
-          && response.data.result.status === 200 && response.data.result.content) {
+        && response.data.result.status === 200 && response.data.result.content) {
         return response.data.result.content;
       }
       return null;
@@ -354,6 +365,20 @@ _.assignIn(util, {
       }).then(res => _.get(res, 'data.result.content', []).map(r => r.roleName));
     } catch (err) {
       return Promise.reject(err);
+    }
+  }),
+
+  /**
+  * Merge two JSON objects. For array fields, the target will be replaced by source.
+  * @param {Object} targetObj the target object
+  * @param {Object} sourceObj the source object
+  * @returns {Object} the merged object
+  */
+  // eslint-disable-next-line consistent-return
+  mergeJsonObjects: (targetObj, sourceObj) => _.mergeWith(targetObj, sourceObj, (target, source) => {
+    // Overwrite the array
+    if (_.isArray(source)) {
+      return source;
     }
   }),
 });

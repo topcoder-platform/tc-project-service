@@ -1,5 +1,5 @@
 module.exports = function def(req, res, next) {
-  if (req.method === 'POST' && req.url === '/authorizations/') {
+  if (req.method === 'POST' && (req.url === '/authorizations/' || req.url === '/authorizations')) {
     const resp = {
       id: '1',
       result: {

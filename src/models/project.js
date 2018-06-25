@@ -1,7 +1,7 @@
 /* eslint-disable valid-jsdoc */
 
 import _ from 'lodash';
-import { PROJECT_TYPE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
+import { PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 
 module.exports = function defineProject(sequelize, DataTypes) {
   const Project = sequelize.define('Project', {
@@ -23,9 +23,6 @@ module.exports = function defineProject(sequelize, DataTypes) {
     type: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        isIn: [_.values(PROJECT_TYPE)],
-      },
     },
     status: {
       type: DataTypes.STRING,
@@ -37,11 +34,13 @@ module.exports = function defineProject(sequelize, DataTypes) {
     details: { type: DataTypes.JSON },
     challengeEligibility: DataTypes.JSON,
     cancelReason: DataTypes.STRING,
+    templateId: DataTypes.BIGINT,
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     createdBy: { type: DataTypes.INTEGER, allowNull: false },
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
+    version: { type: DataTypes.STRING(3), allowNull: false, defaultValue: 'v3' },
   }, {
     tableName: 'projects',
     timestamps: true,
@@ -92,6 +91,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
       associate: (models) => {
         Project.hasMany(models.ProjectMember, { as: 'members', foreignKey: 'projectId' });
         Project.hasMany(models.ProjectAttachment, { as: 'attachments', foreignKey: 'projectId' });
+        Project.hasMany(models.ProjectPhase, { as: 'phases', foreignKey: 'projectId' });
       },
 
       /**
@@ -155,11 +155,21 @@ module.exports = function defineProject(sequelize, DataTypes) {
               .then(projects => ({ rows: projects, count }));
           });
       },
-      findProjectRange(startId, endId, fields) {
+      findProjectRange(models, startId, endId, fields) {
         return this.findAll({
           where: { id: { $between: [startId, endId] } },
           attributes: _.get(fields, 'projects', null),
           raw: true,
+          include: [{
+            model: models.ProjectPhase,
+            as: 'phases',
+            order: [['startDate', 'asc']],
+            // where: phasesWhere,
+            include: [{
+              model: models.PhaseProduct,
+              as: 'products',
+            }],
+          }],
         });
       },
     },

@@ -1,15 +1,4 @@
 
-export const PROJECT_TYPE = {
-  APP_DEV: 'app_dev',
-  GENERIC: 'generic',
-  VISUAL_PROTOTYPE: 'visual_prototype',
-  VISUAL_DESIGN: 'visual_design',
-  WEBSITE: 'website',
-  APP: 'app',
-  QUALITY_ASSURANCE: 'quality_assurance',
-  CHATBOT: 'chatbot',
-};
-
 export const PROJECT_STATUS = {
   DRAFT: 'draft',
   IN_REVIEW: 'in_review',
@@ -19,6 +8,8 @@ export const PROJECT_STATUS = {
   PAUSED: 'paused',
   CANCELLED: 'cancelled',
 };
+
+export const PROJECT_PHASE_STATUS = PROJECT_STATUS;
 
 export const PROJECT_MEMBER_ROLE = {
   MANAGER: 'manager',
@@ -50,6 +41,14 @@ export const EVENT = {
     PROJECT_DRAFT_CREATED: 'project.draft-created',
     PROJECT_UPDATED: 'project.updated',
     PROJECT_DELETED: 'project.deleted',
+
+    PROJECT_PHASE_ADDED: 'project.phase.added',
+    PROJECT_PHASE_UPDATED: 'project.phase.updated',
+    PROJECT_PHASE_REMOVED: 'project.phase.removed',
+
+    PROJECT_PHASE_PRODUCT_ADDED: 'project.phase.product.added',
+    PROJECT_PHASE_PRODUCT_UPDATED: 'project.phase.product.updated',
+    PROJECT_PHASE_PRODUCT_REMOVED: 'project.phase.product.removed',
   },
 };
 
@@ -72,6 +71,14 @@ export const BUS_API_EVENT = {
   PROJECT_LINK_CREATED: 'notifications.connect.project.linkCreated',
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
+
+  // When phase is added/updated/deleted from the project,
+  // When product is added/deleted from a phase
+  // When product is updated on any field other than specification
+  PROJECT_PLAN_MODIFIED: 'notifications.connect.project.planModified',
+
+  // When specification of a product is modified
+  PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
 };
 
 export const REGEX = {
