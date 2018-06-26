@@ -56,7 +56,7 @@
     "pg": "^4.5.5",
     "pg-native": "^1.10.1",
     "sequelize": "^3.23.0",
-    "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.3",
+    "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.4",
     "traverse": "^0.6.6",
     "urlencode": "^1.1.0"
   },
@@ -67,6 +67,7 @@
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-es2015": "^6.9.0",
+    "babel-runtime": "^6.26.0",
     "bunyan": "^1.8.1",
     "chai": "^3.5.0",
     "eslint": "^3.16.1",
