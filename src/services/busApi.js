@@ -37,19 +37,21 @@ async function getClient() {
 /**
  * Creates a new event in Bus API
  * Any errors will be simply ignored
- * @param {String} type the event type, should be a dot separated fully qualitied name
- * @param {Object} message the message, should be a JSON object
+ * @param {String} topic the event topic, should be a dot separated fully qualitied name
+ * @param {Object} payload the payload, should be a JSON object
  * @param {Object} logger object
  * @return {Promise} new event promise
  */
-function createEvent(type, message, logger) {
-  const body = JSON.stringify(message);
-  logger.debug(`Sending message: ${JSON.stringify(message)}`);
+function createEvent(topic, payload, logger) {
+  logger.debug(`Sending message: ${JSON.stringify(payload)}`);
   return getClient().then((busClient) => {
     logger.debug('calling bus-api');
     return busClient.post('/bus/events', {
-      type,
-      message: body,
+      topic,
+      originator: 'tc-project-service',
+      timestamp: (new Date()).toISOString(),
+      'mime-type': 'application/json',
+      payload,
     }).then((resp) => {
       logger.debug('Sent event to bus-api');
       logger.debug(`Sent event to bus-api [data]: ${resp.data}`);
