@@ -63,14 +63,14 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
             path: 'details.utm',
             query: {
               query_string: {
-                query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword :`*${keyword}*`,
+                query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
                 analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
                 fields: ['details.utm.code^4'],
-              }
-            }
-          }
-        }
-      }
+              },
+            },
+          },
+        },
+      },
     },
     {
       nested: {
@@ -185,7 +185,9 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     // keyword is a full text search
     // escape special fields from keyword search
     const keywordCriterion = criteria.filters.keyword;
-    let keyword, matchType, singleFieldName;
+    let keyword;
+    let matchType;
+    let singleFieldName;
     // check exact phrase match first (starts and ends with double quotes)
     if (keywordCriterion.startsWith('"') && keywordCriterion.endsWith('"')) {
       keyword = keywordCriterion;
@@ -195,7 +197,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     if (keywordCriterion.indexOf(' ') > -1 || keywordCriterion.indexOf(':') > -1) {
       const parts = keywordCriterion.split(' ');
       if (parts.length > 0) {
-        for (let i = 0; i < parts.length; i++) {
+        for (let i = 0; i < parts.length; i += 1) {
           const part = parts[i].trim();
           if (part.length > 4 && part.startsWith('ref:')) {
             keyword = escapeEsKeyword(part.substring(4));
