@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'feature/dev-challenges', 'feature/projectSearchUpdate']
+              only: ['dev', 'feature/dev-challenges']
       - deployProd:
           requires:
             - test
