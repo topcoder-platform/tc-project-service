@@ -220,7 +220,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   const body = { query: { } };
   if (boolQuery.length > 0) {
     body.query.bool = {
-      must: boolQuery,
+      filter: boolQuery,
     };
   }
   if (fullTextQuery) {
@@ -252,6 +252,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   }
 
   const searchCriteria = parseElasticSearchCriteria(criteria, fields, order);
+  req.log.info(searchCriteria);
 
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
