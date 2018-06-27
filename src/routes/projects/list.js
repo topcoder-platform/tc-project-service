@@ -258,7 +258,8 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
-      const rows = _.map(docs.hits.hits, (single) => { const r = single._source; r.all = docs; return r; });     // eslint-disable-line no-underscore-dangle
+      const jres = JSON.stringify(docs);
+      const rows = _.map(docs.hits.hits, (single) => { const r = single._source; r.all = jres; return r; });     // eslint-disable-line no-underscore-dangle
       accept({ rows, count: docs.hits.total });
     }).catch(reject);
   });
