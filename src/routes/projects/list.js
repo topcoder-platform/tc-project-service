@@ -225,6 +225,9 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   }
   if (fullTextQuery) {
     body.query = _.merge(body.query, fullTextQuery);
+    if (body.query.bool) {
+      body.query.bool.minimum_should_match = 1;
+    }
   }
 
   if (fullTextQuery || boolQuery.length > 0) {
