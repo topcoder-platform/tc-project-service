@@ -252,12 +252,13 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   }
 
   const searchCriteria = parseElasticSearchCriteria(criteria, fields, order);
+  searchCriteria.explain = true;
   req.log.info(searchCriteria);
 
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
-      const rows = docs;     // eslint-disable-line no-underscore-dangle
+      const rows = _.map(docs.hits.hits, (single) => { const r = single._source; r.all = docs; return r; });     // eslint-disable-line no-underscore-dangle
       accept({ rows, count: docs.hits.total });
     }).catch(reject);
   });
