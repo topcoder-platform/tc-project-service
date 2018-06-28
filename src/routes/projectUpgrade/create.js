@@ -76,7 +76,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
     const products = project.details.products;
     const projectTemplate = await models.ProjectTemplate.find({
       where: { key: project.type },
-      attributes: ['phases'],
+      attributes: ['id', 'phases'],
       raw: true,
       transaction,
     });
@@ -150,7 +150,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
           }, { transaction }));
       }
     }
-    await project.update({ version: 'v3' }, { transaction });
+    await project.update({ version: 'v3', templateId: projectTemplate.id }, { transaction });
   });
   newPhasesAndProducts.forEach(({ phase, products }) => {
     // Send events to buses (ProjectPhase)

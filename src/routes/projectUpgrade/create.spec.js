@@ -247,6 +247,7 @@ describe('Project upgrade', () => {
         const commonTest = async (testCompleted, completedOnDate, additionalPhaseName) => {
           const migratedProject = await models.Project.find({ id: project.id });
           expect(migratedProject.version).to.equal('v3');
+          expect(migratedProject.templateId).to.equal(projectTemplate.id);
           const newProjectPhases = await models.ProjectPhase.findAll({
             where: { projectId: project.id },
           });
