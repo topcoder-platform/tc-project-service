@@ -36,12 +36,8 @@ describe('Project upgrade', () => {
           name: 'a specific name',
           products: [productId],
           appDefinition: { budget: 10000 },
-          sampleKey1: {
-            sampleSubKey1: 'a specific value',
-          },
-          sampleKey2: {
-            sampleSubKey2: 'a specific value',
-          },
+          testingNeeds: { hours: 10000 },
+          appScreens: { screens: [{ name: 'a', desc: 'ad' }, { name: 'b', desc: 'bd' }] },
         },
         createdBy: 1,
         updatedBy: 1,
@@ -108,13 +104,24 @@ describe('Project upgrade', () => {
           alias2: [1, 2, 3],
         },
         template: {
-          name: 'a template name',
-          sampleKey1: {
-            sampleSubKey1: 'a value',
-          },
-          sampleKey2: {
-            sampleSubKey2: 'a value',
-          },
+          questions: [
+            {
+              subSections: [
+                { fieldName: 'details.name' },
+                { type: 'questions', questions: [{ fieldName: 'details.appDefinition.budget' }] },
+                { fieldName: 'details.testingNeeds.hours' },
+              ],
+            },
+            {
+              subSections: [
+                {
+                  fieldName: 'details.appScreens.screens',
+                  type: 'screens',
+                  questions: [{ fieldName: 'name' }, { fieldName: 'desc' }],
+                },
+              ],
+            },
+          ],
         },
         createdBy: 1,
         updatedBy: 2,
@@ -281,12 +288,9 @@ describe('Project upgrade', () => {
               expect(newPhaseProduct.actualPrice).to.equal(parseInt(project.actualPrice, 10));
               expect(newPhaseProduct.details).to.deep.equal({
                 name: 'a specific name',
-                sampleKey1: {
-                  sampleSubKey1: 'a specific value',
-                },
-                sampleKey2: {
-                  sampleSubKey2: 'a specific value',
-                },
+                appDefinition: { budget: 10000 },
+                testingNeeds: { hours: 10000 },
+                appScreens: { screens: [{ name: 'a', desc: 'ad' }, { name: 'b', desc: 'bd' }] },
               });
             }
           }

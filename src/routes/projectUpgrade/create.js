@@ -43,15 +43,31 @@ async function findCompletedProjectEndDate(projectId, transaction) {
  */
 function applyTemplate(template, source, destination) {
   if (!template || typeof template !== 'object') { return; }
-  Object.keys(template).forEach((key) => {
-    const templateValue = template[key];
-    if (typeof templateValue === 'object') {
-      // eslint-disable-next-line no-param-reassign
-      destination[key] = {};
-      applyTemplate(templateValue, source[key], destination[key]);
-    } else if (source && typeof source === 'object') {
-      // eslint-disable-next-line no-param-reassign
-      destination[key] = source[key];
+  if (!template.questions || !template.questions.length) { return; }
+  // questions field is actually array of sections
+  const templateQuestions = template.questions;
+  // loop through for every section
+  templateQuestions.forEach((section) => {
+    // find subsections
+    if (section.subSections && section.subSections.length) {
+      // loop through every sub section
+      section.subSections.forEach((subSection) => {
+        // screens type sub sections need separate handling
+        if (subSection.type === 'screens') {
+          _.set(destination, subSection.fieldName, _.get(source, subSection.fieldName));
+          return;
+        }
+        // other sub sections which requires generic handling
+        if (subSection.fieldName) { // if sub section contains field name, directly copy its value
+          console.log(subSection.fieldName, _.get(source, subSection.fieldName));
+          _.set(destination, subSection.fieldName, _.get(source, subSection.fieldName));
+        } else if (subSection.type === 'questions') { // if questions typed subsection
+          subSection.questions.forEach((question) => { // iterate throught each question to copy its value
+            console.log(question.fieldName, _.get(source, question.fieldName));
+            _.set(destination, question.fieldName, _.get(source, question.fieldName));
+          });
+        }
+      });
     }
   });
 }
@@ -131,7 +147,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
         let detailsObject;
         if (productTemplate.template) {
           detailsObject = {};
-          applyTemplate(productTemplate.template, project.details, detailsObject);
+          applyTemplate(productTemplate.template, project, detailsObject);
         }
         phaseAndProducts.products.push(
           await models.PhaseProduct.create({
@@ -144,7 +160,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
             type: productTemplate.productKey,
             estimatedPrice: project.estimatedPrice,
             actualPrice: project.actualPrice,
-            details: detailsObject,
+            details: detailsObject.details,
             createdBy: req.authUser.userId,
             updatedBy: req.authUser.userId,
           }, { transaction }));
