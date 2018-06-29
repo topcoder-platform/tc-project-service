@@ -75,7 +75,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
   await models.sequelize.transaction(async (transaction) => {
     const products = project.details.products;
     const projectTemplate = await models.ProjectTemplate.find({
-      where: { key: project.type },
+      where: { key: products[0] },
       attributes: ['id', 'phases'],
       raw: true,
       transaction,

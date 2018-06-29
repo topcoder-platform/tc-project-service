@@ -52,7 +52,7 @@ describe('Project upgrade', () => {
       });
       projectTemplate = await models.ProjectTemplate.create({
         name: 'template 1',
-        key: project.type,
+        key: project.details.products[0],
         category: 'category 1',
         icon: 'http://example.com/icon1.ico',
         question: 'question 1',
