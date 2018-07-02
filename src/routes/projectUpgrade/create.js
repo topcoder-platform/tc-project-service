@@ -106,7 +106,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
         : null;
       let phaseStatus = project.status;
       // maps the in_review status to the draft status for the phase
-      phaseStatus = phaseStatus === PROJECT_STATUS.IN_REVIEW ? PROJECT_STATUS.DRAFT :  phaseStatus;
+      phaseStatus = phaseStatus === PROJECT_STATUS.IN_REVIEW ? PROJECT_STATUS.DRAFT : phaseStatus;
       const projectPhase = await models.ProjectPhase.create({
         projectId: project.id,
         // TODO: there should be a clear requirement about how to set the phase's name without relying on its
