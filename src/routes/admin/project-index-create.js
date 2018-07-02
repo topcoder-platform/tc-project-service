@@ -57,6 +57,7 @@ module.exports = [
         if (!project) {
           return Promise.resolve(null);
         }
+        logger.debug('phases', project.phases)
         if (project.phases) {
           // removs the delete audit fields from the index data
           project.phases = project.phases.map(phase => _.omit(phase, ['deletedAt', 'deletedBy']));

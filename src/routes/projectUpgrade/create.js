@@ -104,6 +104,9 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
       const endDate = projectCompleted
         ? (await findCompletedProjectEndDate(project.id, transaction)) || project.updatedAt
         : null;
+      let phaseStatus = project.status;
+      // maps the in_review status to the draft status for the phase
+      phaseStatus = phaseStatus === PROJECT_STATUS.IN_REVIEW ? PROJECT_STATUS.DRAFT :  phaseStatus;
       const projectPhase = await models.ProjectPhase.create({
         projectId: project.id,
         // TODO: there should be a clear requirement about how to set the phase's name without relying on its
@@ -111,7 +114,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
         // setting the name that was on the original phase's object, as is the most promising/obvious way of doing
         // this
         name: phaseName || phaseObject.name || '',
-        status: project.status,
+        status: phaseStatus,
         startDate: project.createdAt,
         endDate,
         budget: project.details && project.details.appDefinition && project.details.appDefinition.budget,
