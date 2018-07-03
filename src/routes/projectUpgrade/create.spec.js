@@ -296,7 +296,9 @@ describe('Project upgrade', () => {
           }
 
           expect(server.services.pubsub.publish.calledWith('project.phase.added')).to.be.true;
-          expect(server.services.pubsub.publish.calledWith('project.phase.product.added')).to.be.true;
+          // we should not raise product added event as when we are adding a phase, it automatically adds the product
+          // product added event should be raised only when a new product is added to an existing phase
+          expect(server.services.pubsub.publish.calledWith('project.phase.product.added')).to.be.false;
           expect(server.services.pubsub.publish.calledWith('project.updated')).to.be.true;
         };
 

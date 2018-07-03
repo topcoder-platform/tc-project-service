@@ -4,6 +4,7 @@
  * API to upgrade projects
  */
 import _ from 'lodash';
+import moment from 'moment';
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -59,11 +60,11 @@ function applyTemplate(template, source, destination) {
         }
         // other sub sections which requires generic handling
         if (subSection.fieldName) { // if sub section contains field name, directly copy its value
-          console.log(subSection.fieldName, _.get(source, subSection.fieldName));
+          // console.log(subSection.fieldName, _.get(source, subSection.fieldName));
           _.set(destination, subSection.fieldName, _.get(source, subSection.fieldName));
         } else if (subSection.type === 'questions') { // if questions typed subsection
           subSection.questions.forEach((question) => { // iterate throught each question to copy its value
-            console.log(question.fieldName, _.get(source, question.fieldName));
+            // console.log(question.fieldName, _.get(source, question.fieldName));
             _.set(destination, question.fieldName, _.get(source, question.fieldName));
           });
         }
@@ -90,6 +91,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
   const previousValue = _.clone(project.get({ plain: true }));
   await models.sequelize.transaction(async (transaction) => {
     const products = project.details.products;
+
     const projectTemplate = await models.ProjectTemplate.find({
       where: { key: products[0] },
       attributes: ['id', 'phases'],
@@ -104,6 +106,11 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
       const endDate = projectCompleted
         ? (await findCompletedProjectEndDate(project.id, transaction)) || project.updatedAt
         : null;
+      // calculates the duration
+      const projectDuration = endDate
+        ? moment(endDate).diff(project.createdAt, 'days')
+        : moment().diff(moment(project.createdAt), 'days');
+
       let phaseStatus = project.status;
       // maps the in_review status to the draft status for the phase
       phaseStatus = phaseStatus === PROJECT_STATUS.IN_REVIEW ? PROJECT_STATUS.DRAFT : phaseStatus;
@@ -116,6 +123,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
         name: phaseName || phaseObject.name || '',
         status: phaseStatus,
         startDate: project.createdAt,
+        duration: projectDuration,
         endDate,
         budget: project.details && project.details.appDefinition && project.details.appDefinition.budget,
         progress: projectCompleted ? 100 : 0,
@@ -172,25 +180,16 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
     await project.update({ version: 'v3', templateId: projectTemplate.id }, { transaction });
   });
   newPhasesAndProducts.forEach(({ phase, products }) => {
+    const phaseJSON = phase.toJSON();
+    phaseJSON.products = products;
     // Send events to buses (ProjectPhase)
     req.log.debug('Sending event to RabbitMQ bus for project phase %d', phase.id);
     req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-      phase,
+      phaseJSON,
       { correlationId: req.id },
     );
     req.log.debug('Sending event to Kafka bus for project phase %d', phase.id);
-    req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phase });
-
-    products.forEach((newPhaseProduct) => {
-      // Send events to buses (PhaseProduct)
-      req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
-        newPhaseProduct,
-        { correlationId: req.id },
-      );
-      req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, { req, created: newPhaseProduct });
-    });
+    req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phaseJSON });
   });
 
   // Send events to buses (Project)

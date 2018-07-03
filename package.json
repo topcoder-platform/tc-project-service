@@ -53,6 +53,7 @@
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.16.4",
     "method-override": "^2.3.9",
+    "moment": "^2.22.2",
     "pg": "^4.5.5",
     "pg-native": "^1.10.1",
     "sequelize": "^3.23.0",
