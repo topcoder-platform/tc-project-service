@@ -7,7 +7,6 @@ import server from '../../app';
 import { PROJECT_STATUS } from '../../constants';
 import models from '../../models';
 import testUtil from '../../tests/util';
-import RabbitMQService from '../../services/rabbitmq';
 
 describe('Project upgrade', () => {
   describe('POST /projects/:id/upgrade', () => {
@@ -132,13 +131,17 @@ describe('Project upgrade', () => {
           defaultProductTemplateId: defaultProductTemplate.id,
         },
       };
-      sinon.stub(RabbitMQService.prototype, 'init', () => {});
-      sinon.stub(RabbitMQService.prototype, 'publish', () => {});
+      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
+      server.services.pubsub.init.restore();
+      server.services.pubsub.publish.restore();
+      sinon.stub(server.services.pubsub, 'init', () => {});
+      sinon.stub(server.services.pubsub, 'publish', () => {});
     });
 
     afterEach(async () => {
-      RabbitMQService.prototype.init.restore();
-      RabbitMQService.prototype.publish.restore();
+      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
+      // server.services.pubsub.init.restore();
+      // server.services.pubsub.publish.restore();
       await testUtil.clearDb();
     });
 

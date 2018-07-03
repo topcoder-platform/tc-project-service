@@ -10,9 +10,11 @@ import elasticsearch from 'elasticsearch';
 module.exports = (app) => {
   _.assign(app.services, {
     pubsub: {
+      init: () => {},
       publish: () => {},
     },
     es: new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig)),
   });
+  sinon.stub(app.services.pubsub, 'init', () => Promise.resolve(true));
   sinon.stub(app.services.pubsub, 'publish', () => Promise.resolve(true));
 };
