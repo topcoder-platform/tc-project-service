@@ -25,3 +25,6 @@ ALTER TABLE project_types ALTER COLUMN "question" SET NOT NULL;
 ALTER TABLE project_types ADD COLUMN "aliases" json;
 UPDATE project_types set aliases='{}' where aliases is null;
 ALTER TABLE project_types ALTER COLUMN "aliases" SET NOT NULL;
+
+ALTER TABLE project_types ADD COLUMN "hidden" boolean DEFAULT false;
+ALTER TABLE project_types ADD COLUMN "disabled" boolean DEFAULT false;

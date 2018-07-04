@@ -20,6 +20,8 @@ describe('CREATE project type', () => {
       question: 'question 1',
       info: 'info 1',
       aliases: ['key-1', 'key_1'],
+      disabled: false,
+      hidden: false,
       createdBy: 1,
       updatedBy: 1,
     })).then(() => Promise.resolve()),
@@ -35,6 +37,8 @@ describe('CREATE project type', () => {
         info: 'Application Development Info',
         question: 'What kind of devlopment you need?',
         aliases: ['key-1', 'key_1'],
+        disabled: true,
+        hidden: true,
       },
     };
 
@@ -176,6 +180,8 @@ describe('CREATE project type', () => {
           resJson.info.should.be.eql(body.param.info);
           resJson.question.should.be.eql(body.param.question);
           resJson.aliases.should.be.eql(body.param.aliases);
+          resJson.disabled.should.be.eql(body.param.disabled);
+          resJson.hidden.should.be.eql(body.param.hidden);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -205,6 +211,8 @@ describe('CREATE project type', () => {
           resJson.info.should.be.eql(body.param.info);
           resJson.question.should.be.eql(body.param.question);
           resJson.aliases.should.be.eql(body.param.aliases);
+          resJson.disabled.should.be.eql(body.param.disabled);
+          resJson.hidden.should.be.eql(body.param.hidden);
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();

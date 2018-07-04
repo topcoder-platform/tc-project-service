@@ -19,6 +19,8 @@ describe('UPDATE project type', () => {
     question: 'question 1',
     info: 'info 1',
     aliases: ['key-1', 'key_1'],
+    disabled: false,
+    hidden: false,
     createdBy: 1,
     updatedBy: 1,
   };
@@ -38,6 +40,8 @@ describe('UPDATE project type', () => {
         question: 'question 1 - update',
         info: 'info 1 - update',
         aliases: ['key-1-updated', 'key_1_updated'],
+        disabled: true,
+        hidden: true,
       },
     };
 
@@ -107,6 +111,8 @@ describe('UPDATE project type', () => {
       delete partialBody.param.info;
       delete partialBody.param.question;
       delete partialBody.param.aliases;
+      delete partialBody.param.disabled;
+      delete partialBody.param.hidden;
       request(server)
         .patch(`/v4/projectTypes/${key}`)
         .set({
@@ -122,6 +128,8 @@ describe('UPDATE project type', () => {
           resJson.info.should.be.eql(type.info);
           resJson.question.should.be.eql(type.question);
           resJson.aliases.should.be.eql(type.aliases);
+          resJson.disabled.should.be.eql(type.disabled);
+          resJson.hidden.should.be.eql(type.hidden);
           resJson.createdBy.should.be.eql(type.createdBy);
           resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051333); // admin
@@ -139,6 +147,8 @@ describe('UPDATE project type', () => {
       delete partialBody.param.displayName;
       delete partialBody.param.question;
       delete partialBody.param.aliases;
+      delete partialBody.param.disabled;
+      delete partialBody.param.hidden;
       request(server)
         .patch(`/v4/projectTypes/${key}`)
         .set({
@@ -154,6 +164,8 @@ describe('UPDATE project type', () => {
           resJson.info.should.be.eql(type.info);
           resJson.question.should.be.eql(type.question);
           resJson.aliases.should.be.eql(type.aliases);
+          resJson.disabled.should.be.eql(type.disabled);
+          resJson.hidden.should.be.eql(type.hidden);
           resJson.createdBy.should.be.eql(type.createdBy);
           resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051333); // admin
@@ -171,6 +183,8 @@ describe('UPDATE project type', () => {
       delete partialBody.param.displayName;
       delete partialBody.param.question;
       delete partialBody.param.aliases;
+      delete partialBody.param.disabled;
+      delete partialBody.param.hidden;
       request(server)
         .patch(`/v4/projectTypes/${key}`)
         .set({
@@ -186,6 +200,8 @@ describe('UPDATE project type', () => {
           resJson.info.should.be.eql(partialBody.param.info);
           resJson.question.should.be.eql(type.question);
           resJson.aliases.should.be.eql(type.aliases);
+          resJson.disabled.should.be.eql(type.disabled);
+          resJson.hidden.should.be.eql(type.hidden);
           resJson.createdBy.should.be.eql(type.createdBy);
           resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051333); // admin
@@ -203,6 +219,8 @@ describe('UPDATE project type', () => {
       delete partialBody.param.info;
       delete partialBody.param.displayName;
       delete partialBody.param.aliases;
+      delete partialBody.param.disabled;
+      delete partialBody.param.hidden;
       request(server)
         .patch(`/v4/projectTypes/${key}`)
         .set({
@@ -218,6 +236,8 @@ describe('UPDATE project type', () => {
           resJson.info.should.be.eql(type.info);
           resJson.question.should.be.eql(partialBody.param.question);
           resJson.aliases.should.be.eql(type.aliases);
+          resJson.disabled.should.be.eql(type.disabled);
+          resJson.hidden.should.be.eql(type.hidden);
           resJson.createdBy.should.be.eql(type.createdBy);
           resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051333); // admin
@@ -235,6 +255,8 @@ describe('UPDATE project type', () => {
       delete partialBody.param.info;
       delete partialBody.param.question;
       delete partialBody.param.displayName;
+      delete partialBody.param.disabled;
+      delete partialBody.param.hidden;
       request(server)
         .patch(`/v4/projectTypes/${key}`)
         .set({
@@ -250,7 +272,80 @@ describe('UPDATE project type', () => {
           resJson.info.should.be.eql(type.info);
           resJson.question.should.be.eql(type.question);
           resJson.aliases.should.be.eql(partialBody.param.aliases);
+          resJson.disabled.should.be.eql(type.disabled);
+          resJson.hidden.should.be.eql(type.hidden);
           resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for admin disabled updated', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.icon;
+      delete partialBody.param.info;
+      delete partialBody.param.question;
+      delete partialBody.param.displayName;
+      delete partialBody.param.aliases;
+      delete partialBody.param.hidden;
+      request(server)
+        .patch(`/v4/projectTypes/${key}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(type.displayName);
+          resJson.icon.should.be.eql(type.icon);
+          resJson.info.should.be.eql(type.info);
+          resJson.question.should.be.eql(type.question);
+          resJson.aliases.should.be.eql(type.aliases);
+          resJson.disabled.should.be.eql(partialBody.param.disabled);
+          resJson.hidden.should.be.eql(type.hidden);
+          resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for admin hidden updated', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.icon;
+      delete partialBody.param.info;
+      delete partialBody.param.question;
+      delete partialBody.param.displayName;
+      delete partialBody.param.disabled;
+      delete partialBody.param.aliases;
+      request(server)
+        .patch(`/v4/projectTypes/${key}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(type.displayName);
+          resJson.icon.should.be.eql(type.icon);
+          resJson.info.should.be.eql(type.info);
+          resJson.question.should.be.eql(type.question);
+          resJson.aliases.should.be.eql(type.aliases);
+          resJson.disabled.should.be.eql(type.disabled);
+          resJson.hidden.should.be.eql(partialBody.param.hidden);
           resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051333); // admin
           should.exist(resJson.updatedAt);
@@ -277,7 +372,8 @@ describe('UPDATE project type', () => {
           resJson.info.should.be.eql(body.param.info);
           resJson.question.should.be.eql(body.param.question);
           resJson.aliases.should.be.eql(body.param.aliases);
-          resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.disabled.should.be.eql(body.param.disabled);
+          resJson.hidden.should.be.eql(body.param.hidden);
           resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051333); // admin
           should.exist(resJson.updatedAt);
@@ -304,6 +400,8 @@ describe('UPDATE project type', () => {
           resJson.info.should.be.eql(body.param.info);
           resJson.question.should.be.eql(body.param.question);
           resJson.aliases.should.be.eql(body.param.aliases);
+          resJson.disabled.should.be.eql(body.param.disabled);
+          resJson.hidden.should.be.eql(body.param.hidden);
           resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();

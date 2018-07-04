@@ -19,6 +19,8 @@ const schema = {
       question: Joi.string().max(255).required(),
       info: Joi.string().max(255).required(),
       aliases: Joi.array().required(),
+      disabled: Joi.boolean().optional(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),

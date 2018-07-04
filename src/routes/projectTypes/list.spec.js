@@ -19,6 +19,8 @@ describe('LIST project types', () => {
       question: 'question 1',
       info: 'info 1',
       aliases: ['key-1', 'key_1'],
+      disabled: true,
+      hidden: true,
       createdBy: 1,
       updatedBy: 1,
     },
@@ -29,6 +31,8 @@ describe('LIST project types', () => {
       question: 'question 2',
       info: 'info 2',
       aliases: ['key-2', 'key_2'],
+      disabled: true,
+      hidden: true,
       createdBy: 1,
       updatedBy: 1,
     },
@@ -67,6 +71,8 @@ describe('LIST project types', () => {
           resJson[0].question.should.be.eql(type.question);
           resJson[0].aliases.should.be.eql(type.aliases);
           resJson[0].createdBy.should.be.eql(type.createdBy);
+          resJson[0].disabled.should.be.eql(type.disabled);
+          resJson[0].hidden.should.be.eql(type.hidden);
           should.exist(resJson[0].createdAt);
           resJson[0].updatedBy.should.be.eql(type.updatedBy);
           should.exist(resJson[0].updatedAt);
