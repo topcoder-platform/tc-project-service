@@ -15,12 +15,20 @@ describe('LIST project types', () => {
     {
       key: 'key1',
       displayName: 'displayName 1',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: ['key-1', 'key_1'],
       createdBy: 1,
       updatedBy: 1,
     },
     {
       key: 'key2',
-      displayName: 'displayName 1',
+      displayName: 'displayName 2',
+      icon: 'http://example.com/icon2.ico',
+      question: 'question 2',
+      info: 'info 2',
+      aliases: ['key-2', 'key_2'],
       createdBy: 1,
       updatedBy: 1,
     },
@@ -54,6 +62,10 @@ describe('LIST project types', () => {
           resJson.should.have.length(2);
           resJson[0].key.should.be.eql(type.key);
           resJson[0].displayName.should.be.eql(type.displayName);
+          resJson[0].icon.should.be.eql(type.icon);
+          resJson[0].info.should.be.eql(type.info);
+          resJson[0].question.should.be.eql(type.question);
+          resJson[0].aliases.should.be.eql(type.aliases);
           resJson[0].createdBy.should.be.eql(type.createdBy);
           should.exist(resJson[0].createdAt);
           resJson[0].updatedBy.should.be.eql(type.updatedBy);

@@ -1,6 +1,7 @@
 /**
  * Tests for get.js
  */
+import _ from 'lodash';
 import chai from 'chai';
 import request from 'supertest';
 
@@ -14,6 +15,10 @@ describe('UPDATE project type', () => {
   const type = {
     key: 'key1',
     displayName: 'displayName 1',
+    icon: 'http://example.com/icon1.ico',
+    question: 'question 1',
+    info: 'info 1',
+    aliases: ['key-1', 'key_1'],
     createdBy: 1,
     updatedBy: 1,
   };
@@ -29,6 +34,10 @@ describe('UPDATE project type', () => {
     const body = {
       param: {
         displayName: 'displayName 1 - update',
+        icon: 'http://example.com/icon1.ico - update',
+        question: 'question 1 - update',
+        info: 'info 1 - update',
+        aliases: ['key-1-updated', 'key_1_updated'],
       },
     };
 
@@ -69,22 +78,6 @@ describe('UPDATE project type', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for missing displayName', (done) => {
-      const invalidBody = {
-        param: {
-          displayName: null,
-        },
-      };
-
-      request(server)
-        .patch(`/v4/projectTypes/${key}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect(422, done);
-    });
-
     it('should return 404 for non-existed type', (done) => {
       request(server)
         .patch('/v4/projectTypes/1234')
@@ -108,7 +101,167 @@ describe('UPDATE project type', () => {
         });
     });
 
-    it('should return 200 for admin', (done) => {
+    it('should return 200 for admin displayName updated', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.icon;
+      delete partialBody.param.info;
+      delete partialBody.param.question;
+      delete partialBody.param.aliases;
+      request(server)
+        .patch(`/v4/projectTypes/${key}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(partialBody.param.displayName);
+          resJson.icon.should.be.eql(type.icon);
+          resJson.info.should.be.eql(type.info);
+          resJson.question.should.be.eql(type.question);
+          resJson.aliases.should.be.eql(type.aliases);
+          resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for admin icon updated', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.info;
+      delete partialBody.param.displayName;
+      delete partialBody.param.question;
+      delete partialBody.param.aliases;
+      request(server)
+        .patch(`/v4/projectTypes/${key}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(type.displayName);
+          resJson.icon.should.be.eql(partialBody.param.icon);
+          resJson.info.should.be.eql(type.info);
+          resJson.question.should.be.eql(type.question);
+          resJson.aliases.should.be.eql(type.aliases);
+          resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for admin info updated', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.icon;
+      delete partialBody.param.displayName;
+      delete partialBody.param.question;
+      delete partialBody.param.aliases;
+      request(server)
+        .patch(`/v4/projectTypes/${key}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(type.displayName);
+          resJson.icon.should.be.eql(type.icon);
+          resJson.info.should.be.eql(partialBody.param.info);
+          resJson.question.should.be.eql(type.question);
+          resJson.aliases.should.be.eql(type.aliases);
+          resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for admin question updated', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.icon;
+      delete partialBody.param.info;
+      delete partialBody.param.displayName;
+      delete partialBody.param.aliases;
+      request(server)
+        .patch(`/v4/projectTypes/${key}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(type.displayName);
+          resJson.icon.should.be.eql(type.icon);
+          resJson.info.should.be.eql(type.info);
+          resJson.question.should.be.eql(partialBody.param.question);
+          resJson.aliases.should.be.eql(type.aliases);
+          resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for admin aliases updated', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.icon;
+      delete partialBody.param.info;
+      delete partialBody.param.question;
+      delete partialBody.param.displayName;
+      request(server)
+        .patch(`/v4/projectTypes/${key}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(type.displayName);
+          resJson.icon.should.be.eql(type.icon);
+          resJson.info.should.be.eql(type.info);
+          resJson.question.should.be.eql(type.question);
+          resJson.aliases.should.be.eql(partialBody.param.aliases);
+          resJson.createdBy.should.be.eql(type.createdBy);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for admin all fields updated', (done) => {
       request(server)
         .patch(`/v4/projectTypes/${key}`)
         .set({
@@ -120,8 +273,12 @@ describe('UPDATE project type', () => {
           const resJson = res.body.result.content;
           resJson.key.should.be.eql(key);
           resJson.displayName.should.be.eql(body.param.displayName);
+          resJson.icon.should.be.eql(body.param.icon);
+          resJson.info.should.be.eql(body.param.info);
+          resJson.question.should.be.eql(body.param.question);
+          resJson.aliases.should.be.eql(body.param.aliases);
           resJson.createdBy.should.be.eql(type.createdBy);
-          should.exist(resJson.createdAt);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
           resJson.updatedBy.should.be.eql(40051333); // admin
           should.exist(resJson.updatedAt);
           should.not.exist(resJson.deletedBy);
@@ -139,7 +296,18 @@ describe('UPDATE project type', () => {
         })
         .send(body)
         .expect(200)
-        .end(done);
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.key.should.be.eql(key);
+          resJson.displayName.should.be.eql(body.param.displayName);
+          resJson.icon.should.be.eql(body.param.icon);
+          resJson.info.should.be.eql(body.param.info);
+          resJson.question.should.be.eql(body.param.question);
+          resJson.aliases.should.be.eql(body.param.aliases);
+          resJson.createdBy.should.be.eql(type.createdBy); // should not update createdAt
+          resJson.updatedBy.should.be.eql(40051336); // connect admin
+          done();
+        });
     });
   });
 });

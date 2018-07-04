@@ -1,6 +1,7 @@
 /**
  * Tests for create.js
  */
+import _ from 'lodash';
 import chai from 'chai';
 import request from 'supertest';
 
@@ -15,6 +16,10 @@ describe('CREATE project type', () => {
     .then(() => models.ProjectType.create({
       key: 'key1',
       displayName: 'displayName 1',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: ['key-1', 'key_1'],
       createdBy: 1,
       updatedBy: 1,
     })).then(() => Promise.resolve()),
@@ -26,6 +31,10 @@ describe('CREATE project type', () => {
       param: {
         key: 'app_dev',
         displayName: 'Application Development',
+        icon: 'prod-cat-app-icon',
+        info: 'Application Development Info',
+        question: 'What kind of devlopment you need?',
+        aliases: ['key-1', 'key_1'],
       },
     };
 
@@ -67,11 +76,8 @@ describe('CREATE project type', () => {
     });
 
     it('should return 422 for missing key', (done) => {
-      const invalidBody = {
-        param: {
-          displayName: 'displayName',
-        },
-      };
+      const invalidBody = _.cloneDeep(body);
+      delete invalidBody.param.key;
 
       request(server)
         .post('/v4/projectTypes')
@@ -84,11 +90,50 @@ describe('CREATE project type', () => {
     });
 
     it('should return 422 for missing displayName', (done) => {
-      const invalidBody = {
-        param: {
-          key: 'key',
-        },
-      };
+      const invalidBody = _.cloneDeep(body);
+      delete invalidBody.param.displayName;
+
+      request(server)
+        .post('/v4/projectTypes')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 for missing icon', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      delete invalidBody.param.icon;
+
+      request(server)
+        .post('/v4/projectTypes')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 for missing question', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      delete invalidBody.param.question;
+
+      request(server)
+        .post('/v4/projectTypes')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 for missing info', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      delete invalidBody.param.info;
 
       request(server)
         .post('/v4/projectTypes')
@@ -101,12 +146,8 @@ describe('CREATE project type', () => {
     });
 
     it('should return 422 for duplicated key', (done) => {
-      const invalidBody = {
-        param: {
-          key: 'key1',
-          displayName: 'displayName',
-        },
-      };
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.key = 'key1';
 
       request(server)
         .post('/v4/projectTypes')
@@ -131,6 +172,10 @@ describe('CREATE project type', () => {
           const resJson = res.body.result.content;
           resJson.key.should.be.eql(body.param.key);
           resJson.displayName.should.be.eql(body.param.displayName);
+          resJson.icon.should.be.eql(body.param.icon);
+          resJson.info.should.be.eql(body.param.info);
+          resJson.question.should.be.eql(body.param.question);
+          resJson.aliases.should.be.eql(body.param.aliases);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -154,6 +199,12 @@ describe('CREATE project type', () => {
         .expect(201)
         .end((err, res) => {
           const resJson = res.body.result.content;
+          resJson.key.should.be.eql(body.param.key);
+          resJson.displayName.should.be.eql(body.param.displayName);
+          resJson.icon.should.be.eql(body.param.icon);
+          resJson.info.should.be.eql(body.param.info);
+          resJson.question.should.be.eql(body.param.question);
+          resJson.aliases.should.be.eql(body.param.aliases);
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();

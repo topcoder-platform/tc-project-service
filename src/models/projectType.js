@@ -4,6 +4,10 @@ module.exports = function definePhaseProduct(sequelize, DataTypes) {
   const ProjectType = sequelize.define('ProjectType', {
     key: { type: DataTypes.STRING(45), primaryKey: true },
     displayName: { type: DataTypes.STRING(255), allowNull: false },
+    icon: { type: DataTypes.STRING(255), allowNull: false },
+    question: { type: DataTypes.STRING(255), allowNull: false },
+    info: { type: DataTypes.STRING(255), allowNull: false },
+    aliases: { type: DataTypes.JSON, allowNull: false },
 
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
