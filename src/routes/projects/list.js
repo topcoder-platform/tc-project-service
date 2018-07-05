@@ -10,6 +10,11 @@ import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+
+const MATCH_TYPE_EXACT_PHRASE = 1;
+const MATCH_TYPE_WILDCARD = 2;
+const MATCH_TYPE_SINGLE_FIELD = 3;
+
 /**
  * API to handle retrieving projects
  *
@@ -40,6 +45,59 @@ const PROJECT_PHASE_PRODUCTS_ATTRIBUTES = _.without(
 
 
 const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
+
+const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
+  let should = [
+    {
+      query_string: {
+        query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
+        analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
+        fields: ['name^5', 'description^3', 'type^2'],
+      },
+    },
+    {
+      nested: {
+        path: 'details',
+        query: {
+          nested: {
+            path: 'details.utm',
+            query: {
+              query_string: {
+                query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
+                analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
+                fields: ['details.utm.code^4'],
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      nested: {
+        path: 'members',
+        query: {
+          query_string: {
+            query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
+            analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
+            fields: ['members.email', 'members.handle', 'members.firstName', 'members.lastName'],
+          },
+        },
+      },
+    },
+  ];
+
+  if (matchType === MATCH_TYPE_SINGLE_FIELD && singleFieldName === 'ref') {
+    // only need to match the second item in the should array
+    should = should.slice(1, 2);
+  }
+
+  return {
+    bool: {
+      should,
+    },
+  };
+};
+
 /**
  * Parse the ES search criteria and prepare search request body
  *
@@ -126,41 +184,50 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   if (_.has(criteria, 'filters.keyword')) {
     // keyword is a full text search
     // escape special fields from keyword search
-    const keyword = escapeEsKeyword(criteria.filters.keyword);
-    fullTextQuery = {
-      bool: {
-        should: [
-          {
-            query_string: {
-              query: `*${keyword}*`,
-              analyze_wildcard: true,
-              fields: ['name^3', 'description', 'type'], // boost name field
-            },
-          },
-          {
-            nested: {
-              path: 'members',
-              query: {
-                query_string: {
-                  query: `*${keyword}*`,
-                  analyze_wildcard: true,
-                  fields: ['members.email', 'members.handle', 'members.firstName', 'members.lastName'],
-                },
-              },
-            },
-          },
-        ],
-      },
-    };
+    const keywordCriterion = criteria.filters.keyword;
+    let keyword;
+    let matchType;
+    let singleFieldName;
+    // check exact phrase match first (starts and ends with double quotes)
+    if (keywordCriterion.startsWith('"') && keywordCriterion.endsWith('"')) {
+      keyword = keywordCriterion;
+      matchType = MATCH_TYPE_EXACT_PHRASE;
+    }
+
+    if (keywordCriterion.indexOf(' ') > -1 || keywordCriterion.indexOf(':') > -1) {
+      const parts = keywordCriterion.split(' ');
+      if (parts.length > 0) {
+        for (let i = 0; i < parts.length; i += 1) {
+          const part = parts[i].trim();
+          if (part.length > 4 && part.startsWith('ref:')) {
+            keyword = escapeEsKeyword(part.substring(4));
+            matchType = MATCH_TYPE_SINGLE_FIELD;
+            singleFieldName = part.substring(0, 3);
+            break;
+          }
+        }
+      }
+    }
+
+    if (!keyword) {
+      // Not a specific field search nor an exact phrase search, do a wildcard match
+      keyword = escapeEsKeyword(criteria.filters.keyword);
+      matchType = MATCH_TYPE_WILDCARD;
+    }
+
+    fullTextQuery = buildEsFullTextQuery(keyword, matchType, singleFieldName);
   }
   const body = { query: { } };
   if (boolQuery.length > 0) {
     body.query.bool = {
-      must: boolQuery,
+      filter: boolQuery,
     };
   }
   if (fullTextQuery) {
     body.query = _.merge(body.query, fullTextQuery);
+    if (body.query.bool) {
+      body.query.bool.minimum_should_match = 1;
+    }
   }
 
   if (fullTextQuery || boolQuery.length > 0) {
