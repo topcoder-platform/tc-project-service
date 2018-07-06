@@ -46,7 +46,6 @@ describe('LIST project types', () => {
   after(testUtil.clearDb);
 
   describe('GET /projectTypes', () => {
-
     it('should return 200 for admin', (done) => {
       request(server)
         .get('/v4/projectTypes')

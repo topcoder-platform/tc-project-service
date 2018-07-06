@@ -33,7 +33,6 @@ describe('GET project type', () => {
   after(testUtil.clearDb);
 
   describe('GET /projectTypes/{key}', () => {
-
     it('should return 404 for non-existed type', (done) => {
       request(server)
         .get('/v4/projectTypes/1234')

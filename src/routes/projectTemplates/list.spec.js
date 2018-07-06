@@ -75,7 +75,6 @@ describe('LIST project templates', () => {
   after(testUtil.clearDb);
 
   describe('GET /projectTemplates', () => {
-
     it('should return 200 for admin', (done) => {
       request(server)
         .get('/v4/projectTemplates')

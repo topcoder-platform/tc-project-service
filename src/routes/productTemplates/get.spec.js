@@ -56,7 +56,6 @@ describe('GET product template', () => {
   after(testUtil.clearDb);
 
   describe('GET /productTemplates/{templateId}', () => {
-
     it('should return 404 for non-existed template', (done) => {
       request(server)
         .get('/v4/productTemplates/1234')

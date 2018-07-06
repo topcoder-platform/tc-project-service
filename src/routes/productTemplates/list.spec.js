@@ -92,7 +92,6 @@ describe('LIST product templates', () => {
   after(testUtil.clearDb);
 
   describe('GET /productTemplates', () => {
-
     it('should return 200 for admin', (done) => {
       request(server)
         .get('/v4/productTemplates')

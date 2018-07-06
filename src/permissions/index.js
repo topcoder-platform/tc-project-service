@@ -6,7 +6,7 @@ const projectEdit = require('./project.edit');
 const projectDelete = require('./project.delete');
 const projectMemberDelete = require('./projectMember.delete');
 const projectAdmin = require('./admin.ops');
-const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
+// const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 
 module.exports = () => {
