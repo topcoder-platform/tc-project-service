@@ -56,11 +56,6 @@ describe('GET product template', () => {
   after(testUtil.clearDb);
 
   describe('GET /productTemplates/{templateId}', () => {
-    it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get(`/v4/productTemplates/${templateId}`)
-        .expect(403, done);
-    });
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
@@ -110,6 +105,12 @@ describe('GET product template', () => {
 
           done();
         });
+    });
+
+    it('should return 200 even if user is not authenticated', (done) => {
+      request(server)
+        .get(`/v4/productTemplates/${templateId}`)
+        .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {

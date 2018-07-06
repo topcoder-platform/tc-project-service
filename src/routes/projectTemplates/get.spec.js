@@ -58,11 +58,6 @@ describe('GET project template', () => {
   after(testUtil.clearDb);
 
   describe('GET /projectTemplates/{templateId}', () => {
-    it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get(`/v4/projectTemplates/${templateId}`)
-        .expect(403, done);
-    });
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
@@ -109,6 +104,12 @@ describe('GET project template', () => {
 
           done();
         });
+    });
+    
+    it('should return 200 even if user is not authenticated', (done) => {
+      request(server)
+        .get(`/v4/projectTemplates/${templateId}`)
+        .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {

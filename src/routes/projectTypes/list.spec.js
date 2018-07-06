@@ -46,11 +46,6 @@ describe('LIST project types', () => {
   after(testUtil.clearDb);
 
   describe('GET /projectTypes', () => {
-    it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get('/v4/projectTypes')
-        .expect(403, done);
-    });
 
     it('should return 200 for admin', (done) => {
       request(server)
@@ -81,6 +76,12 @@ describe('LIST project types', () => {
 
           done();
         });
+    });
+
+    it('should return 200 even if user is not authenticated', (done) => {
+      request(server)
+        .get('/v4/projectTypes')
+        .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {

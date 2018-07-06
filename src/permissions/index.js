@@ -26,14 +26,14 @@ module.exports = () => {
   Authorizer.setPolicy('project.updateMember', projectEdit);
   Authorizer.setPolicy('project.admin', projectAdmin);
 
-  Authorizer.setPolicy('projectTemplate.create', connectManagerOrAdmin);
-  Authorizer.setPolicy('projectTemplate.edit', connectManagerOrAdmin);
-  Authorizer.setPolicy('projectTemplate.delete', connectManagerOrAdmin);
+  Authorizer.setPolicy('projectTemplate.create', projectAdmin);
+  Authorizer.setPolicy('projectTemplate.edit', projectAdmin);
+  Authorizer.setPolicy('projectTemplate.delete', projectAdmin);
   Authorizer.setPolicy('projectTemplate.view', true);
 
-  Authorizer.setPolicy('productTemplate.create', connectManagerOrAdmin);
-  Authorizer.setPolicy('productTemplate.edit', connectManagerOrAdmin);
-  Authorizer.setPolicy('productTemplate.delete', connectManagerOrAdmin);
+  Authorizer.setPolicy('productTemplate.create', projectAdmin);
+  Authorizer.setPolicy('productTemplate.edit', projectAdmin);
+  Authorizer.setPolicy('productTemplate.delete', projectAdmin);
   Authorizer.setPolicy('productTemplate.view', true);
 
   Authorizer.setPolicy('project.addProjectPhase', copilotAndAbove);

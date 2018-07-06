@@ -75,11 +75,6 @@ describe('LIST project templates', () => {
   after(testUtil.clearDb);
 
   describe('GET /projectTemplates', () => {
-    it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get('/v4/projectTemplates')
-        .expect(403, done);
-    });
 
     it('should return 200 for admin', (done) => {
       request(server)
@@ -108,6 +103,12 @@ describe('LIST project templates', () => {
 
           done();
         });
+    });
+
+    it('should return 200 for anonymous user', (done) => {
+      request(server)
+        .get('/v4/projectTemplates')
+        .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {
