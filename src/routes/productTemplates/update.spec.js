@@ -120,6 +120,16 @@ describe('UPDATE product template', () => {
         .expect(403, done);
     });
 
+    it('should return 403 for connect manager', (done) => {
+      request(server)
+        .patch(`/v4/productTemplates/${templateId}`)
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .expect(403, done);
+    });
+
     it('should return 422 for invalid request', (done) => {
       const invalidBody = {
         param: {
@@ -228,17 +238,6 @@ describe('UPDATE product template', () => {
         .patch(`/v4/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-        })
-        .send(body)
-        .expect(200)
-        .end(done);
-    });
-
-    it('should return 200 for connect manager', (done) => {
-      request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send(body)
         .expect(200)
