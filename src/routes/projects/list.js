@@ -64,7 +64,7 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
             query: {
               query_string: {
                 query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
-                analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
+                analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD || matchType === MATCH_TYPE_SINGLE_FIELD),
                 fields: ['details.utm.code^4'],
               },
             },
