@@ -73,8 +73,8 @@ module.exports = [
           endDate = existing.endDate !== null ? new Date(existing.endDate) : null;
         }
 
-        if (startDate !== null && endDate !== null && startDate >= endDate) {
-          const err = new Error('startDate must be before endDate.');
+        if (startDate !== null && endDate !== null && startDate > endDate) {
+          const err = new Error('startDate must not be after endDate.');
           err.status = 400;
           reject(err);
         } else {

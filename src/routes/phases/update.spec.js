@@ -167,7 +167,7 @@ describe('Project Phases', () => {
         .expect(422, done);
     });
 
-    it('should return 400 when startDate >= endDate', (done) => {
+    it('should return 400 when startDate > endDate', (done) => {
       request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
