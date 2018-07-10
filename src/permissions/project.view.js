@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
-import { USER_ROLE } from '../constants';
+import { USER_ROLE, PROJECT_STATUS } from '../constants';
 
 /**
  * Super admin, Topcoder Managers are allowed to view any projects
@@ -37,8 +37,30 @@ module.exports = freq => new Promise((resolve, reject) => {
       })
       .then((hasAccess) => {
         if (!hasAccess) {
+          let errorMessage = 'You do not have permissions to perform this action';
+          // customize error message for copilots
+          if (util.hasRole(freq, USER_ROLE.COPILOT)) {
+            if (_.findIndex(freq.context.currentProjectMembers, m => m.role === USER_ROLE.COPILOT) >= 0) {
+              errorMessage = 'Project is already claimed by another copilot';
+            } else {
+              models.Project
+                .find({
+                  where: { id: projectId },
+                  attributes: ['status'],
+                  raw: true,
+                })
+                .then((project) => {
+                  if (!project || [PROJECT_STATUS.DRAFT, PROJECT_STATUS.IN_REVIEW].indexOf(project.status) >= 0) {
+                    errorMessage = 'Project is not yet available to copilots';
+                  } else {
+                    // project status is 'active' or higher so it's not available to copilots
+                    errorMessage = 'Project has already started';
+                  }
+                });
+            }
+          }
           // user is not an admin nor is a registered project member
-          return reject(new Error('You do not have permissions to perform this action'));
+          return reject(new Error(errorMessage));
         }
         return resolve(true);
       });
