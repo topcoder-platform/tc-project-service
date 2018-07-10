@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
-import { USER_ROLE, PROJECT_STATUS } from '../constants';
+import { USER_ROLE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 
 /**
  * Super admin, Topcoder Managers are allowed to view any projects
@@ -40,7 +40,7 @@ module.exports = freq => new Promise((resolve, reject) => {
           let errorMessage = 'You do not have permissions to perform this action';
           // customize error message for copilots
           if (util.hasRole(freq, USER_ROLE.COPILOT)) {
-            if (_.findIndex(freq.context.currentProjectMembers, m => m.role === USER_ROLE.COPILOT) >= 0) {
+            if (_.findIndex(freq.context.currentProjectMembers, m => m.role === PROJECT_MEMBER_ROLE.COPILOT) >= 0) {
               errorMessage = 'Copilot: Project is already claimed by another copilot';
               return Promise.resolve(errorMessage);
             }
