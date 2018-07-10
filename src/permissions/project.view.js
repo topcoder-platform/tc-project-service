@@ -41,9 +41,10 @@ module.exports = freq => new Promise((resolve, reject) => {
           // customize error message for copilots
           if (util.hasRole(freq, USER_ROLE.COPILOT)) {
             if (_.findIndex(freq.context.currentProjectMembers, m => m.role === USER_ROLE.COPILOT) >= 0) {
-              errorMessage = 'Project is already claimed by another copilot';
-            } else {
-              models.Project
+              errorMessage = 'Copilot: Project is already claimed by another copilot';
+              return Promise.resolve(errorMessage);
+            }
+            return models.Project
                 .find({
                   where: { id: projectId },
                   attributes: ['status'],
@@ -51,14 +52,20 @@ module.exports = freq => new Promise((resolve, reject) => {
                 })
                 .then((project) => {
                   if (!project || [PROJECT_STATUS.DRAFT, PROJECT_STATUS.IN_REVIEW].indexOf(project.status) >= 0) {
-                    errorMessage = 'Project is not yet available to copilots';
+                    errorMessage = 'Copilot: Project is not yet available to copilots';
                   } else {
                     // project status is 'active' or higher so it's not available to copilots
-                    errorMessage = 'Project has already started';
+                    errorMessage = 'Copilot: Project has already started';
                   }
+                  return Promise.resolve(errorMessage);
                 });
-            }
           }
+            // user is not an admin nor is a registered project member
+          return Promise.resolve(errorMessage);
+        }
+        return Promise.resolve(null);
+      }).then((errorMessage) => {
+        if (errorMessage) {
           // user is not an admin nor is a registered project member
           return reject(new Error(errorMessage));
         }
