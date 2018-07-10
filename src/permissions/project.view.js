@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
-import { USER_ROLE } from '../constants';
+import { USER_ROLE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 
 /**
  * Super admin, Topcoder Managers are allowed to view any projects
@@ -37,8 +37,37 @@ module.exports = freq => new Promise((resolve, reject) => {
       })
       .then((hasAccess) => {
         if (!hasAccess) {
+          let errorMessage = 'You do not have permissions to perform this action';
+          // customize error message for copilots
+          if (util.hasRole(freq, USER_ROLE.COPILOT)) {
+            if (_.findIndex(freq.context.currentProjectMembers, m => m.role === PROJECT_MEMBER_ROLE.COPILOT) >= 0) {
+              errorMessage = 'Copilot: Project is already claimed by another copilot';
+              return Promise.resolve(errorMessage);
+            }
+            return models.Project
+                .find({
+                  where: { id: projectId },
+                  attributes: ['status'],
+                  raw: true,
+                })
+                .then((project) => {
+                  if (!project || [PROJECT_STATUS.DRAFT, PROJECT_STATUS.IN_REVIEW].indexOf(project.status) >= 0) {
+                    errorMessage = 'Copilot: Project is not yet available to copilots';
+                  } else {
+                    // project status is 'active' or higher so it's not available to copilots
+                    errorMessage = 'Copilot: Project has already started';
+                  }
+                  return Promise.resolve(errorMessage);
+                });
+          }
+            // user is not an admin nor is a registered project member
+          return Promise.resolve(errorMessage);
+        }
+        return Promise.resolve(null);
+      }).then((errorMessage) => {
+        if (errorMessage) {
           // user is not an admin nor is a registered project member
-          return reject(new Error('You do not have permissions to perform this action'));
+          return reject(new Error(errorMessage));
         }
         return resolve(true);
       });
