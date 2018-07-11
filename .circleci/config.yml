@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'feature/dev-challenges']
+              only: ['dev', 'feature/dev-challenges-timeline']
       - deployProd:
           requires:
             - test

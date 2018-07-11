@@ -42,7 +42,7 @@ router.route('/v4/projectTypes/:key')
   .get(require('./projectTypes/get'));
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/(projects|projectTemplates|productTemplates|projectTypes)(?!\\/health).*`),
+  RegExp(`\\/${apiVersion}\\/(projects|projectTemplates|productTemplates|projectTypes|timelines)(?!\\/health).*`),
   jwtAuth());
 
 // Register all the routes
@@ -99,6 +99,15 @@ router.route('/v4/productTemplates/:templateId(\\d+)')
   .patch(require('./productTemplates/update'))
   .delete(require('./productTemplates/delete'));
 
+router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones')
+  .post(require('./milestoneTemplates/create'))
+  .get(require('./milestoneTemplates/list'));
+
+router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones/:milestoneTemplateId(\\d+)')
+  .get(require('./milestoneTemplates/get'))
+  .patch(require('./milestoneTemplates/update'))
+  .delete(require('./milestoneTemplates/delete'));
+
 router.route('/v4/projects/:projectId(\\d+)/phases')
   .get(require('./phases/list'))
   .post(require('./phases/create'));
@@ -123,6 +132,24 @@ router.route('/v4/projectTypes')
 router.route('/v4/projectTypes/:key')
   .patch(require('./projectTypes/update'))
   .delete(require('./projectTypes/delete'));
+
+router.route('/v4/timelines')
+  .post(require('./timelines/create'))
+  .get(require('./timelines/list'));
+
+router.route('/v4/timelines/:timelineId(\\d+)')
+  .get(require('./timelines/get'))
+  .patch(require('./timelines/update'))
+  .delete(require('./timelines/delete'));
+
+router.route('/v4/timelines/:timelineId(\\d+)/milestones')
+  .post(require('./milestones/create'))
+  .get(require('./milestones/list'));
+
+router.route('/v4/timelines/:timelineId(\\d+)/milestones/:milestoneId(\\d+)')
+  .get(require('./milestones/get'))
+  .patch(require('./milestones/update'))
+  .delete(require('./milestones/delete'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
