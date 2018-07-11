@@ -122,6 +122,16 @@ describe('CREATE milestone template', () => {
         .expect(403, done);
     });
 
+    it('should return 403 for manager', (done) => {
+      request(server)
+        .post('/v4/productTemplates/1/milestones')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(body)
+        .expect(403, done);
+    });
+
     it('should return 404 for non-existed product template', (done) => {
       request(server)
         .post('/v4/productTemplates/1000/milestones')
@@ -242,23 +252,6 @@ describe('CREATE milestone template', () => {
 
               done();
             });
-        });
-    });
-
-    it('should return 201 for connect manager', (done) => {
-      request(server)
-        .post('/v4/productTemplates/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send(body)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.createdBy.should.be.eql(40051334); // manager
-          resJson.updatedBy.should.be.eql(40051334); // manager
-          done();
         });
     });
 

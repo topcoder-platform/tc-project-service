@@ -145,6 +145,16 @@ describe('UPDATE milestone template', () => {
         .expect(403, done);
     });
 
+    it('should return 403 for manager', (done) => {
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .expect(403, done);
+    });
+
     it('should return 422 for missing name', (done) => {
       const invalidBody = {
         param: {
@@ -408,17 +418,6 @@ describe('UPDATE milestone template', () => {
         .patch('/v4/productTemplates/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-        })
-        .send(body)
-        .expect(200)
-        .end(done);
-    });
-
-    it('should return 200 for connect manager', (done) => {
-      request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send(body)
         .expect(200)
