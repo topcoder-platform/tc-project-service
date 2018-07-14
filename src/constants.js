@@ -61,6 +61,12 @@ export const BUS_API_EVENT = {
   PROJECT_CANCELED: 'notifications.connect.project.canceled',
   PROJECT_ACTIVE: 'notifications.connect.project.active',
 
+  PROJECT_PHASE_TRANSITION_ACTIVE: 'project.phase.transition.active',
+  PROJECT_PHASE_TRANSITION_COMPLETED: 'project.phase.transition.completed',
+  PROJECT_PHASE_UPDATE_PAYMENT: 'project.phase.update.payment',
+  PROJECT_PHASE_UPDATE_PROGRESS: 'project.phase.update.progress',
+  PROJECT_PHASE_UPDATE_SCOPE: 'project.phase.update.scope',
+
   MEMBER_JOINED: 'notifications.connect.project.member.joined',
   MEMBER_LEFT: 'notifications.connect.project.member.left',
   MEMBER_REMOVED: 'notifications.connect.project.member.removed',
@@ -71,11 +77,15 @@ export const BUS_API_EVENT = {
   PROJECT_LINK_CREATED: 'notifications.connect.project.linkCreated',
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
+  PROJECT_PROGRESS_MODIFIED: 'notifications.connect.project.progressModified',
 
   // When phase is added/updated/deleted from the project,
   // When product is added/deleted from a phase
   // When product is updated on any field other than specification
   PROJECT_PLAN_MODIFIED: 'notifications.connect.project.planModified',
+
+  // TODO: add logic to send this event
+  PROJECT_PLAN_READY: 'notifications.connect.project.planReady',
 
   // When specification of a product is modified
   PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
