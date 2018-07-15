@@ -84,7 +84,6 @@ export const BUS_API_EVENT = {
   // When product is updated on any field other than specification
   PROJECT_PLAN_MODIFIED: 'notifications.connect.project.planModified',
 
-  // TODO: add logic to send this event
   PROJECT_PLAN_READY: 'notifications.connect.project.planReady',
 
   // When specification of a product is modified
