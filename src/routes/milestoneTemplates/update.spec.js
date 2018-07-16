@@ -63,6 +63,10 @@ const milestoneTemplates = [
     duration: 3,
     type: 'type1',
     order: 1,
+    plannedText: 'text to be shown in planned stage',
+    blockedText: 'text to be shown in blocked stage',
+    activeText: 'text to be shown in active stage',
+    completedText: 'text to be shown in completed stage',
     productTemplateId: 1,
     createdBy: 1,
     updatedBy: 2,
@@ -73,6 +77,10 @@ const milestoneTemplates = [
     duration: 4,
     type: 'type2',
     order: 2,
+    plannedText: 'text to be shown in planned stage - 2',
+    blockedText: 'text to be shown in blocked stage - 2',
+    activeText: 'text to be shown in active stage - 2',
+    completedText: 'text to be shown in completed stage - 2',
     productTemplateId: 1,
     createdBy: 2,
     updatedBy: 3,
@@ -83,6 +91,10 @@ const milestoneTemplates = [
     duration: 5,
     type: 'type3',
     order: 3,
+    plannedText: 'text to be shown in planned stage - 3',
+    blockedText: 'text to be shown in blocked stage - 3',
+    activeText: 'text to be shown in active stage - 3',
+    completedText: 'text to be shown in completed stage - 3',
     productTemplateId: 1,
     createdBy: 2,
     updatedBy: 3,
@@ -93,6 +105,10 @@ const milestoneTemplates = [
     duration: 5,
     type: 'type4',
     order: 4,
+    plannedText: 'text to be shown in planned stage - 4',
+    blockedText: 'text to be shown in blocked stage - 4',
+    activeText: 'text to be shown in active stage - 4',
+    completedText: 'text to be shown in completed stage - 4',
     productTemplateId: 1,
     createdBy: 2,
     updatedBy: 3,
@@ -115,6 +131,10 @@ describe('UPDATE milestone template', () => {
         duration: 6,
         type: 'type1-updated',
         order: 5,
+        plannedText: 'text to be shown in planned stage',
+        blockedText: 'text to be shown in blocked stage',
+        activeText: 'text to be shown in active stage',
+        completedText: 'text to be shown in completed stage',
       },
     };
 
@@ -153,70 +173,6 @@ describe('UPDATE milestone template', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(403, done);
-    });
-
-    it('should return 422 for missing name', (done) => {
-      const invalidBody = {
-        param: {
-          name: undefined,
-        },
-      };
-
-      request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect(422, done);
-    });
-
-    it('should return 422 for missing type', (done) => {
-      const invalidBody = {
-        param: {
-          type: undefined,
-        },
-      };
-
-      request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect(422, done);
-    });
-
-    it('should return 422 for missing duration', (done) => {
-      const invalidBody = {
-        param: {
-          duration: undefined,
-        },
-      };
-
-      request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect(422, done);
-    });
-
-    it('should return 422 for missing order', (done) => {
-      const invalidBody = {
-        param: {
-          order: undefined,
-        },
-      };
-
-      request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect(422, done);
     });
 
     it('should return 404 for non-existed product template', (done) => {
@@ -265,6 +221,10 @@ describe('UPDATE milestone template', () => {
           resJson.duration.should.be.eql(body.param.duration);
           resJson.type.should.be.eql(body.param.type);
           resJson.order.should.be.eql(body.param.order);
+          resJson.plannedText.should.be.eql(body.param.plannedText);
+          resJson.blockedText.should.be.eql(body.param.blockedText);
+          resJson.activeText.should.be.eql(body.param.activeText);
+          resJson.completedText.should.be.eql(body.param.completedText);
 
           should.exist(resJson.createdBy);
           should.exist(resJson.createdAt);
@@ -411,6 +371,102 @@ describe('UPDATE milestone template', () => {
               });
           }, 3000);
         });
+    });
+
+    it('should return 200 for missing name', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.name;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing type', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.type;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing duration', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.duration;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing order', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.order;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing plannedText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.plannedText;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing blockedText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.blockedText;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing activeText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.activeText;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing completedText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.completedText;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {

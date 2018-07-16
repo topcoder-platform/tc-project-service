@@ -63,6 +63,10 @@ const milestoneTemplates = [
     type: 'type1',
     order: 1,
     productTemplateId: 1,
+    plannedText: 'text to be shown in planned stage',
+    blockedText: 'text to be shown in blocked stage',
+    activeText: 'text to be shown in active stage',
+    completedText: 'text to be shown in completed stage',
     createdBy: 1,
     updatedBy: 2,
   },
@@ -71,6 +75,10 @@ const milestoneTemplates = [
     duration: 4,
     type: 'type2',
     order: 2,
+    plannedText: 'text to be shown in planned stage - 2',
+    blockedText: 'text to be shown in blocked stage - 2',
+    activeText: 'text to be shown in active stage - 2',
+    completedText: 'text to be shown in completed stage - 2',
     productTemplateId: 1,
     createdBy: 2,
     updatedBy: 3,
@@ -92,6 +100,10 @@ describe('CREATE milestone template', () => {
         duration: 33,
         type: 'type3',
         order: 1,
+        plannedText: 'text to be shown in planned stage - 3',
+        blockedText: 'text to be shown in blocked stage - 3',
+        activeText: 'text to be shown in active stage - 3',
+        completedText: 'text to be shown in completed stage - 3',
       },
     };
 
@@ -227,6 +239,10 @@ describe('CREATE milestone template', () => {
           resJson.duration.should.be.eql(body.param.duration);
           resJson.type.should.be.eql(body.param.type);
           resJson.order.should.be.eql(body.param.order);
+          resJson.plannedText.should.be.eql(body.param.plannedText);
+          resJson.blockedText.should.be.eql(body.param.blockedText);
+          resJson.activeText.should.be.eql(body.param.activeText);
+          resJson.completedText.should.be.eql(body.param.completedText);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -240,18 +256,19 @@ describe('CREATE milestone template', () => {
             where: {
               productTemplateId: 1,
             },
-          })
-            .then((milestones) => {
-              _.each(milestones, (milestone) => {
-                if (milestone.id === 1) {
-                  milestone.order.should.be.eql(1 + 1);
-                } else if (milestone.id === 2) {
-                  milestone.order.should.be.eql(2 + 1);
-                }
-              });
-
-              done();
+          }).then((milestones) => {
+            _.each(milestones, (milestone) => {
+              if (milestone.id === 1) {
+                milestone.order.should.be.eql(1 + 1);
+              } else if (milestone.id === 2) {
+                milestone.order.should.be.eql(2 + 1);
+              }
             });
+            done();
+          }).catch((error) => {
+            console.log(error);
+            done();
+          });
         });
     });
 

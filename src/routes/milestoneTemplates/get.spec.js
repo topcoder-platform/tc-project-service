@@ -63,6 +63,10 @@ const milestoneTemplates = [
     duration: 3,
     type: 'type1',
     order: 1,
+    plannedText: 'text to be shown in planned stage',
+    blockedText: 'text to be shown in blocked stage',
+    activeText: 'text to be shown in active stage',
+    completedText: 'text to be shown in completed stage',
     productTemplateId: 1,
     createdBy: 1,
     updatedBy: 2,
@@ -73,6 +77,10 @@ const milestoneTemplates = [
     duration: 4,
     type: 'type2',
     order: 2,
+    plannedText: 'text to be shown in planned stage - 2',
+    blockedText: 'text to be shown in blocked stage - 2',
+    activeText: 'text to be shown in active stage - 2',
+    completedText: 'text to be shown in completed stage - 2',
     productTemplateId: 1,
     createdBy: 2,
     updatedBy: 3,
@@ -135,6 +143,10 @@ describe('GET milestone template', () => {
           resJson.duration.should.be.eql(milestoneTemplates[0].duration);
           resJson.type.should.be.eql(milestoneTemplates[0].type);
           resJson.order.should.be.eql(milestoneTemplates[0].order);
+          resJson.plannedText.should.be.eql(milestoneTemplates[0].plannedText);
+          resJson.blockedText.should.be.eql(milestoneTemplates[0].blockedText);
+          resJson.activeText.should.be.eql(milestoneTemplates[0].activeText);
+          resJson.completedText.should.be.eql(milestoneTemplates[0].completedText);
           resJson.productTemplateId.should.be.eql(milestoneTemplates[0].productTemplateId);
 
           resJson.createdBy.should.be.eql(milestoneTemplates[0].createdBy);

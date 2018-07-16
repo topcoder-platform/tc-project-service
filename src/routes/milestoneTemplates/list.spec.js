@@ -63,6 +63,10 @@ const milestoneTemplates = [
     duration: 3,
     type: 'type1',
     order: 1,
+    plannedText: 'text to be shown in planned stage',
+    blockedText: 'text to be shown in blocked stage',
+    activeText: 'text to be shown in active stage',
+    completedText: 'text to be shown in completed stage',
     productTemplateId: 1,
     createdBy: 1,
     updatedBy: 2,
@@ -73,6 +77,10 @@ const milestoneTemplates = [
     duration: 4,
     type: 'type2',
     order: 2,
+    plannedText: 'text to be shown in planned stage - 2',
+    blockedText: 'text to be shown in blocked stage - 2',
+    activeText: 'text to be shown in active stage - 2',
+    completedText: 'text to be shown in completed stage - 2',
     productTemplateId: 1,
     createdBy: 2,
     updatedBy: 3,
@@ -83,6 +91,10 @@ const milestoneTemplates = [
     duration: 5,
     type: 'type3',
     order: 3,
+    plannedText: 'text to be shown in planned stage - 3',
+    blockedText: 'text to be shown in blocked stage - 3',
+    activeText: 'text to be shown in active stage - 3',
+    completedText: 'text to be shown in completed stage - 3',
     productTemplateId: 1,
     createdBy: 2,
     updatedBy: 3,
@@ -146,6 +158,10 @@ describe('LIST milestone template', () => {
           resJson[0].duration.should.be.eql(milestoneTemplates[0].duration);
           resJson[0].type.should.be.eql(milestoneTemplates[0].type);
           resJson[0].order.should.be.eql(milestoneTemplates[0].order);
+          resJson[0].plannedText.should.be.eql(milestoneTemplates[0].plannedText);
+          resJson[0].blockedText.should.be.eql(milestoneTemplates[0].blockedText);
+          resJson[0].activeText.should.be.eql(milestoneTemplates[0].activeText);
+          resJson[0].completedText.should.be.eql(milestoneTemplates[0].completedText);
           resJson[0].productTemplateId.should.be.eql(milestoneTemplates[0].productTemplateId);
 
           resJson[0].createdBy.should.be.eql(milestoneTemplates[0].createdBy);
