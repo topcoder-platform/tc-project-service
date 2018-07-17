@@ -253,22 +253,20 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 3
           // Milestone 2: order 2 - 1 = 1
           // Milestone 3: order 3 - 1 = 2
-          setTimeout(() => {
-            models.ProductMilestoneTemplate.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(3);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(1);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
+          models.ProductMilestoneTemplate.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(3);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(1);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 
@@ -287,22 +285,20 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 4
           // Milestone 2: order 2
           // Milestone 3: order 3
-          setTimeout(() => {
-            models.ProductMilestoneTemplate.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(4);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(3);
+          models.ProductMilestoneTemplate.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(4);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(3);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 
@@ -321,22 +317,20 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 2
           // Milestone 2: order 3
           // Milestone 3: order 1
-          setTimeout(() => {
-            models.ProductMilestoneTemplate.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(3);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(1);
+          models.ProductMilestoneTemplate.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(3);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(1);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 
@@ -355,22 +349,20 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 1
           // Milestone 2: order 2
           // Milestone 3: order 0
-          setTimeout(() => {
-            models.ProductMilestoneTemplate.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(1);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
-              })
-              .then(() => models.ProductMilestoneTemplate.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(0);
+          models.ProductMilestoneTemplate.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(1);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
+            })
+            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(0);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 

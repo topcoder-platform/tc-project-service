@@ -79,12 +79,12 @@ module.exports = [
             },
             transaction: tx,
           });
-        })
-        .then(() => {
-          // Write to response
-          res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
-        })
-        .catch(next),
-    );
+        }),
+    )
+    .then(() => {
+      // Write to response
+      res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
+    })
+    .catch(next);
   },
 ];

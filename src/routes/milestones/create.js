@@ -33,6 +33,7 @@ const schema = {
       activeText: Joi.string().max(512).required(),
       completedText: Joi.string().max(512).required(),
       blockedText: Joi.string().max(512).required(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),
@@ -94,17 +95,17 @@ module.exports = [
             },
             transaction: tx,
           });
-        })
-        .then(() => {
-          // Do not send events for the updated milestones here,
-          // because it will make 'version conflict' error in ES.
-          // The order of the other milestones need to be updated in the MILESTONE_ADDED event handler
+        }),
+    )
+    .then(() => {
+      // Do not send events for the updated milestones here,
+      // because it will make 'version conflict' error in ES.
+      // The order of the other milestones need to be updated in the MILESTONE_ADDED event handler
 
-          // Write to the response
-          res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
-          return Promise.resolve();
-        })
-        .catch(next),
-    );
+      // Write to the response
+      res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
+      return Promise.resolve();
+    })
+    .catch(next);
   },
 ];

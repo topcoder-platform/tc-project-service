@@ -221,6 +221,7 @@ describe('CREATE milestone', () => {
         activeText: 'activeText 4',
         completedText: 'completedText 4',
         blockedText: 'blockedText 4',
+        hidden: true,
       },
     };
 
@@ -506,6 +507,7 @@ describe('CREATE milestone', () => {
           resJson.activeText.should.be.eql(body.param.activeText);
           resJson.completedText.should.be.eql(body.param.completedText);
           resJson.blockedText.should.be.eql(body.param.blockedText);
+          resJson.hidden.should.be.eql(body.param.hidden);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);

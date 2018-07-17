@@ -275,6 +275,7 @@ describe('UPDATE Milestone', () => {
         activeText: 'activeText 1-updated',
         completedText: 'completedText 1-updated',
         blockedText: 'blockedText 1-updated',
+        hidden: true,
       },
     };
 
@@ -355,141 +356,112 @@ describe('UPDATE Milestone', () => {
         .expect(422, done);
     });
 
-
-    it('should return 422 if missing name', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          name: undefined,
-        }),
-      };
-
+    it('should return 200 for missing name', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.name;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
     });
 
-    it('should return 422 if missing duration', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          duration: undefined,
-        }),
-      };
-
+    it('should return 200 for missing type', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.type;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
     });
 
-    it('should return 422 if missing type', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          type: undefined,
-        }),
-      };
-
+    it('should return 200 for missing duration', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.duration;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
     });
 
-    it('should return 422 if missing order', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          order: undefined,
-        }),
-      };
-
+    it('should return 200 for missing order', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.order;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
     });
 
-    it('should return 422 if missing plannedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          plannedText: undefined,
-        }),
-      };
-
+    it('should return 200 for missing plannedText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.plannedText;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
     });
 
-    it('should return 422 if missing activeText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          activeText: undefined,
-        }),
-      };
-
+    it('should return 200 for missing blockedText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.blockedText;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
     });
 
-    it('should return 422 if missing completedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          completedText: undefined,
-        }),
-      };
-
+    it('should return 200 for missing activeText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.activeText;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
     });
 
-    it('should return 422 if missing blockedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          blockedText: undefined,
-        }),
-      };
-
+    it('should return 200 for missing completedText', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.completedText;
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing hidden field', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.hidden;
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
     });
 
     it('should return 422 if startDate is after endDate', (done) => {
@@ -622,26 +594,24 @@ describe('UPDATE Milestone', () => {
           // Milestone 2: order 2 - 1 = 1
           // Milestone 3: order 3 - 1 = 2
           // Milestone 4: order 4 - 1 = 3
-          setTimeout(() => {
-            models.Milestone.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(4);
-              })
-              .then(() => models.Milestone.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(1);
-              })
-              .then(() => models.Milestone.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
-              })
-              .then(() => models.Milestone.findById(4))
-              .then((milestone) => {
-                milestone.order.should.be.eql(3);
+          models.Milestone.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(4);
+            })
+            .then(() => models.Milestone.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(1);
+            })
+            .then(() => models.Milestone.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
+            })
+            .then(() => models.Milestone.findById(4))
+            .then((milestone) => {
+              milestone.order.should.be.eql(3);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 
@@ -661,26 +631,24 @@ describe('UPDATE Milestone', () => {
           // Milestone 2: order 2
           // Milestone 3: order 3
           // Milestone 4: order 4
-          setTimeout(() => {
-            models.Milestone.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(5);
-              })
-              .then(() => models.Milestone.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
-              })
-              .then(() => models.Milestone.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(3);
-              })
-              .then(() => models.Milestone.findById(4))
-              .then((milestone) => {
-                milestone.order.should.be.eql(4);
+          models.Milestone.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(5);
+            })
+            .then(() => models.Milestone.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
+            })
+            .then(() => models.Milestone.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(3);
+            })
+            .then(() => models.Milestone.findById(4))
+            .then((milestone) => {
+              milestone.order.should.be.eql(4);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 
@@ -700,26 +668,24 @@ describe('UPDATE Milestone', () => {
           // Milestone 2: order 3
           // Milestone 3: order 4
           // Milestone 4: order 2
-          setTimeout(() => {
-            models.Milestone.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(1);
-              })
-              .then(() => models.Milestone.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(3);
-              })
-              .then(() => models.Milestone.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(4);
-              })
-              .then(() => models.Milestone.findById(4))
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
+          models.Milestone.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(1);
+            })
+            .then(() => models.Milestone.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(3);
+            })
+            .then(() => models.Milestone.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(4);
+            })
+            .then(() => models.Milestone.findById(4))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 
@@ -739,26 +705,24 @@ describe('UPDATE Milestone', () => {
           // Milestone 2: order 2
           // Milestone 3: order 3
           // Milestone 4: order 0
-          setTimeout(() => {
-            models.Milestone.findById(1)
-              .then((milestone) => {
-                milestone.order.should.be.eql(1);
-              })
-              .then(() => models.Milestone.findById(2))
-              .then((milestone) => {
-                milestone.order.should.be.eql(2);
-              })
-              .then(() => models.Milestone.findById(3))
-              .then((milestone) => {
-                milestone.order.should.be.eql(3);
-              })
-              .then(() => models.Milestone.findById(4))
-              .then((milestone) => {
-                milestone.order.should.be.eql(0);
+          models.Milestone.findById(1)
+            .then((milestone) => {
+              milestone.order.should.be.eql(1);
+            })
+            .then(() => models.Milestone.findById(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
+            })
+            .then(() => models.Milestone.findById(3))
+            .then((milestone) => {
+              milestone.order.should.be.eql(3);
+            })
+            .then(() => models.Milestone.findById(4))
+            .then((milestone) => {
+              milestone.order.should.be.eql(0);
 
-                done();
-              });
-          }, 3000);
+              done();
+            });
         });
     });
 

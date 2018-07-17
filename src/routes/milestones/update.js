@@ -20,20 +20,21 @@ const schema = {
   body: {
     param: Joi.object().keys({
       id: Joi.any().strip(),
-      name: Joi.string().max(255).required(),
+      name: Joi.string().max(255).optional(),
       description: Joi.string().max(255),
-      duration: Joi.number().integer().required(),
-      startDate: Joi.date().required(),
+      duration: Joi.number().integer().optional(),
+      startDate: Joi.date().optional(),
       endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
       completionDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      status: Joi.string().max(45).required(),
-      type: Joi.string().max(45).required(),
+      status: Joi.string().max(45).optional(),
+      type: Joi.string().max(45).optional(),
       details: Joi.object(),
-      order: Joi.number().integer().required(),
-      plannedText: Joi.string().max(512).required(),
-      activeText: Joi.string().max(512).required(),
-      completedText: Joi.string().max(512).required(),
-      blockedText: Joi.string().max(512).required(),
+      order: Joi.number().integer().optional(),
+      plannedText: Joi.string().max(512).optional(),
+      activeText: Joi.string().max(512).optional(),
+      completedText: Joi.string().max(512).optional(),
+      blockedText: Joi.string().max(512).optional(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),
@@ -138,24 +139,24 @@ module.exports = [
                 },
               });
             });
-        })
-        .then(() => {
-          // Send event to bus
-          req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
-          req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
-            { original, updated },
-            { correlationId: req.id },
-          );
+        }),
+    )
+    .then(() => {
+      // Send event to bus
+      req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+        { original, updated },
+        { correlationId: req.id },
+      );
 
-          // Do not send events for the the other milestones (updated order) here,
-          // because it will make 'version conflict' error in ES.
-          // The order of the other milestones need to be updated in the MILESTONE_UPDATED event above
+      // Do not send events for the the other milestones (updated order) here,
+      // because it will make 'version conflict' error in ES.
+      // The order of the other milestones need to be updated in the MILESTONE_UPDATED event above
 
-          // Write to response
-          res.json(util.wrapResponse(req.id, updated));
-          return Promise.resolve();
-        })
-        .catch(next),
-    );
+      // Write to response
+      res.json(util.wrapResponse(req.id, updated));
+      return Promise.resolve();
+    })
+    .catch(next);
   },
 ];

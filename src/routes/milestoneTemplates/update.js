@@ -115,12 +115,12 @@ module.exports = [
                 },
               });
             });
-        })
-        .then(() => {
-          res.json(util.wrapResponse(req.id, updated));
-          return Promise.resolve();
-        })
-        .catch(next),
-    );
+        }),
+    )
+    .then(() => {
+      res.json(util.wrapResponse(req.id, updated));
+      return Promise.resolve();
+    })
+    .catch(next);
   },
 ];
