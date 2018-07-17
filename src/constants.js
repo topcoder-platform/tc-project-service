@@ -100,4 +100,5 @@ export const TOKEN_SCOPES = {
 export const TIMELINE_REFERENCES = {
   PROJECT: 'project',
   PHASE: 'phase',
+  PRODUCT: 'product',
 };
