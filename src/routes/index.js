@@ -43,7 +43,7 @@ router.route('/v4/projectTypes/:key')
 
 router.all(
   RegExp(`\\/${apiVersion}\\/(projects|projectTemplates|productTemplates|projectTypes)(?!\\/health).*`),
-  jwtAuth());
+  jwtAuth(config));
 
 // Register all the routes
 router.route('/v4/projects')

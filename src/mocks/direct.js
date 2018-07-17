@@ -36,7 +36,7 @@ app.use(coreLib.middleware.logger(null, logger));
 app.logger = logger;
 
 const router = Router();
-router.all('/v3/direct/projects*', jwtAuth());
+router.all('/v3/direct/projects*', jwtAuth(config));
 
 const projectId = 2;
 const projects = {
