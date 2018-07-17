@@ -104,6 +104,7 @@ describe('CREATE milestone template', () => {
         blockedText: 'text to be shown in blocked stage - 3',
         activeText: 'text to be shown in active stage - 3',
         completedText: 'text to be shown in completed stage - 3',
+        hidden: true,
       },
     };
 
@@ -269,6 +270,24 @@ describe('CREATE milestone template', () => {
             console.log(error);
             done();
           });
+        });
+    });
+
+    it('should return 201 for admin without optional fields', (done) => {
+      const minimalBody = _.cloneDeep(body);
+      delete minimalBody.param.hidden;
+      request(server)
+        .post('/v4/productTemplates/1/milestones')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(minimalBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.hidden.should.be.eql(false); // default of hidden field
+          done();
         });
     });
 

@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     activeText: { type: DataTypes.STRING(512), allowNull: false },
     completedText: { type: DataTypes.STRING(512), allowNull: false },
     blockedText: { type: DataTypes.STRING(512), allowNull: false },
+    hidden: { type: DataTypes.BOOLEAN, defaultValue: false },
     deletedAt: DataTypes.DATE,
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

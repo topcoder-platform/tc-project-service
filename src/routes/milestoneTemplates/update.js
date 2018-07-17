@@ -29,6 +29,7 @@ const schema = {
       completedText: Joi.string().max(512).optional(),
       blockedText: Joi.string().max(512).optional(),
       productTemplateId: Joi.any().strip(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),

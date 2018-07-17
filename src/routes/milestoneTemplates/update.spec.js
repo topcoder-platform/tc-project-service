@@ -135,6 +135,7 @@ describe('UPDATE milestone template', () => {
         blockedText: 'text to be shown in blocked stage',
         activeText: 'text to be shown in active stage',
         completedText: 'text to be shown in completed stage',
+        hidden: true,
       },
     };
 
@@ -460,6 +461,18 @@ describe('UPDATE milestone template', () => {
     it('should return 200 for missing completedText', (done) => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.completedText;
+      request(server)
+        .patch('/v4/productTemplates/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(partialBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for missing hidden field', (done) => {
+      const partialBody = _.cloneDeep(body);
+      delete partialBody.param.hidden;
       request(server)
         .patch('/v4/productTemplates/1/milestones/1')
         .set({
