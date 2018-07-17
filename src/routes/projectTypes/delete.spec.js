@@ -15,6 +15,10 @@ describe('DELETE project type', () => {
     .then(() => models.ProjectType.create({
       key: 'key1',
       displayName: 'displayName 1',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: ['key-1', 'key_1'],
       createdBy: 1,
       updatedBy: 1,
     })).then(() => Promise.resolve()),

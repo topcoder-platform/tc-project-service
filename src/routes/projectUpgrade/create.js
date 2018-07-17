@@ -4,6 +4,7 @@
  * API to upgrade projects
  */
 import _ from 'lodash';
+import moment from 'moment';
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -43,15 +44,31 @@ async function findCompletedProjectEndDate(projectId, transaction) {
  */
 function applyTemplate(template, source, destination) {
   if (!template || typeof template !== 'object') { return; }
-  Object.keys(template).forEach((key) => {
-    const templateValue = template[key];
-    if (typeof templateValue === 'object') {
-      // eslint-disable-next-line no-param-reassign
-      destination[key] = {};
-      applyTemplate(templateValue, source[key], destination[key]);
-    } else if (source && typeof source === 'object') {
-      // eslint-disable-next-line no-param-reassign
-      destination[key] = source[key];
+  if (!template.questions || !template.questions.length) { return; }
+  // questions field is actually array of sections
+  const templateQuestions = template.questions;
+  // loop through for every section
+  templateQuestions.forEach((section) => {
+    // find subsections
+    if (section.subSections && section.subSections.length) {
+      // loop through every sub section
+      section.subSections.forEach((subSection) => {
+        // screens type sub sections need separate handling
+        if (subSection.type === 'screens') {
+          _.set(destination, subSection.fieldName, _.get(source, subSection.fieldName));
+          return;
+        }
+        // other sub sections which requires generic handling
+        if (subSection.fieldName) { // if sub section contains field name, directly copy its value
+          // console.log(subSection.fieldName, _.get(source, subSection.fieldName));
+          _.set(destination, subSection.fieldName, _.get(source, subSection.fieldName));
+        } else if (subSection.type === 'questions') { // if questions typed subsection
+          subSection.questions.forEach((question) => { // iterate throught each question to copy its value
+            // console.log(question.fieldName, _.get(source, question.fieldName));
+            _.set(destination, question.fieldName, _.get(source, question.fieldName));
+          });
+        }
+      });
     }
   });
 }
@@ -74,9 +91,10 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
   const previousValue = _.clone(project.get({ plain: true }));
   await models.sequelize.transaction(async (transaction) => {
     const products = project.details.products;
+
     const projectTemplate = await models.ProjectTemplate.find({
-      where: { key: project.type },
-      attributes: ['phases'],
+      where: { key: products[0] },
+      attributes: ['id', 'phases'],
       raw: true,
       transaction,
     });
@@ -88,6 +106,14 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
       const endDate = projectCompleted
         ? (await findCompletedProjectEndDate(project.id, transaction)) || project.updatedAt
         : null;
+      // calculates the duration
+      const projectDuration = endDate
+        ? moment(endDate).diff(project.createdAt, 'days')
+        : moment().diff(moment(project.createdAt), 'days');
+
+      let phaseStatus = project.status;
+      // maps the in_review status to the draft status for the phase
+      phaseStatus = phaseStatus === PROJECT_STATUS.IN_REVIEW ? PROJECT_STATUS.DRAFT : phaseStatus;
       const projectPhase = await models.ProjectPhase.create({
         projectId: project.id,
         // TODO: there should be a clear requirement about how to set the phase's name without relying on its
@@ -95,8 +121,9 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
         // setting the name that was on the original phase's object, as is the most promising/obvious way of doing
         // this
         name: phaseName || phaseObject.name || '',
-        status: project.status,
+        status: phaseStatus,
         startDate: project.createdAt,
+        duration: projectDuration,
         endDate,
         budget: project.details && project.details.appDefinition && project.details.appDefinition.budget,
         progress: projectCompleted ? 100 : 0,
@@ -131,7 +158,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
         let detailsObject;
         if (productTemplate.template) {
           detailsObject = {};
-          applyTemplate(productTemplate.template, project.details, detailsObject);
+          applyTemplate(productTemplate.template, project, detailsObject);
         }
         phaseAndProducts.products.push(
           await models.PhaseProduct.create({
@@ -144,34 +171,25 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
             type: productTemplate.productKey,
             estimatedPrice: project.estimatedPrice,
             actualPrice: project.actualPrice,
-            details: detailsObject,
+            details: detailsObject.details,
             createdBy: req.authUser.userId,
             updatedBy: req.authUser.userId,
           }, { transaction }));
       }
     }
-    await project.update({ version: 'v3' }, { transaction });
+    await project.update({ version: 'v3', templateId: projectTemplate.id }, { transaction });
   });
   newPhasesAndProducts.forEach(({ phase, products }) => {
+    const phaseJSON = phase.toJSON();
+    phaseJSON.products = products;
     // Send events to buses (ProjectPhase)
     req.log.debug('Sending event to RabbitMQ bus for project phase %d', phase.id);
     req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-      phase,
+      phaseJSON,
       { correlationId: req.id },
     );
     req.log.debug('Sending event to Kafka bus for project phase %d', phase.id);
-    req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phase });
-
-    products.forEach((newPhaseProduct) => {
-      // Send events to buses (PhaseProduct)
-      req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
-        newPhaseProduct,
-        { correlationId: req.id },
-      );
-      req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, { req, created: newPhaseProduct });
-    });
+    req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phaseJSON });
   });
 
   // Send events to buses (Project)

@@ -17,7 +17,13 @@ const schema = {
   body: {
     param: Joi.object().keys({
       key: Joi.any().strip(),
-      displayName: Joi.string().max(255).required(),
+      displayName: Joi.string().max(255).optional(),
+      icon: Joi.string().max(255).optional(),
+      question: Joi.string().max(255).optional(),
+      info: Joi.string().max(255).optional(),
+      aliases: Joi.array().optional(),
+      disabled: Joi.boolean().optional(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),

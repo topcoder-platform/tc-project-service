@@ -15,6 +15,12 @@ const schema = {
     param: Joi.object().keys({
       key: Joi.string().max(45).required(),
       displayName: Joi.string().max(255).required(),
+      icon: Joi.string().max(255).required(),
+      question: Joi.string().max(255).required(),
+      info: Joi.string().max(255).required(),
+      aliases: Joi.array().required(),
+      disabled: Joi.boolean().optional(),
+      hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),

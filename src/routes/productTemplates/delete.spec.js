@@ -69,6 +69,15 @@ describe('DELETE product template', () => {
         .expect(403, done);
     });
 
+    it('should return 403 for connect manager', (done) => {
+      request(server)
+        .delete(`/v4/productTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .expect(403, done);
+    });
+
     it('should return 404 for non-existed template', (done) => {
       request(server)
         .delete('/v4/productTemplates/1234')
@@ -105,16 +114,6 @@ describe('DELETE product template', () => {
         .delete(`/v4/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-        })
-        .expect(204)
-        .end(done);
-    });
-
-    it('should return 204, for connect manager, if template was successfully removed', (done) => {
-      request(server)
-        .delete(`/v4/productTemplates/${templateId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(204)
         .end(done);

@@ -24,6 +24,10 @@ describe('Project', () => {
         {
           key: 'generic',
           displayName: 'Generic',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: ['key-1', 'key_1'],
           createdBy: 1,
           updatedBy: 1,
         },

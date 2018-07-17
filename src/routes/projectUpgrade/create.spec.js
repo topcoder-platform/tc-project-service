@@ -7,7 +7,6 @@ import server from '../../app';
 import { PROJECT_STATUS } from '../../constants';
 import models from '../../models';
 import testUtil from '../../tests/util';
-import RabbitMQService from '../../services/rabbitmq';
 
 describe('Project upgrade', () => {
   describe('POST /projects/:id/upgrade', () => {
@@ -36,12 +35,8 @@ describe('Project upgrade', () => {
           name: 'a specific name',
           products: [productId],
           appDefinition: { budget: 10000 },
-          sampleKey1: {
-            sampleSubKey1: 'a specific value',
-          },
-          sampleKey2: {
-            sampleSubKey2: 'a specific value',
-          },
+          testingNeeds: { hours: 10000 },
+          appScreens: { screens: [{ name: 'a', desc: 'ad' }, { name: 'b', desc: 'bd' }] },
         },
         createdBy: 1,
         updatedBy: 1,
@@ -52,7 +47,7 @@ describe('Project upgrade', () => {
       });
       projectTemplate = await models.ProjectTemplate.create({
         name: 'template 1',
-        key: project.type,
+        key: project.details.products[0],
         category: 'category 1',
         icon: 'http://example.com/icon1.ico',
         question: 'question 1',
@@ -108,13 +103,24 @@ describe('Project upgrade', () => {
           alias2: [1, 2, 3],
         },
         template: {
-          name: 'a template name',
-          sampleKey1: {
-            sampleSubKey1: 'a value',
-          },
-          sampleKey2: {
-            sampleSubKey2: 'a value',
-          },
+          questions: [
+            {
+              subSections: [
+                { fieldName: 'details.name' },
+                { type: 'questions', questions: [{ fieldName: 'details.appDefinition.budget' }] },
+                { fieldName: 'details.testingNeeds.hours' },
+              ],
+            },
+            {
+              subSections: [
+                {
+                  fieldName: 'details.appScreens.screens',
+                  type: 'screens',
+                  questions: [{ fieldName: 'name' }, { fieldName: 'desc' }],
+                },
+              ],
+            },
+          ],
         },
         createdBy: 1,
         updatedBy: 2,
@@ -125,13 +131,17 @@ describe('Project upgrade', () => {
           defaultProductTemplateId: defaultProductTemplate.id,
         },
       };
-      sinon.stub(RabbitMQService.prototype, 'init', () => {});
-      sinon.stub(RabbitMQService.prototype, 'publish', () => {});
+      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
+      server.services.pubsub.init.restore();
+      server.services.pubsub.publish.restore();
+      sinon.stub(server.services.pubsub, 'init', () => {});
+      sinon.stub(server.services.pubsub, 'publish', () => {});
     });
 
     afterEach(async () => {
-      RabbitMQService.prototype.init.restore();
-      RabbitMQService.prototype.publish.restore();
+      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
+      // server.services.pubsub.init.restore();
+      // server.services.pubsub.publish.restore();
       await testUtil.clearDb();
     });
 
@@ -247,6 +257,7 @@ describe('Project upgrade', () => {
         const commonTest = async (testCompleted, completedOnDate, additionalPhaseName) => {
           const migratedProject = await models.Project.find({ id: project.id });
           expect(migratedProject.version).to.equal('v3');
+          expect(migratedProject.templateId).to.equal(projectTemplate.id);
           const newProjectPhases = await models.ProjectPhase.findAll({
             where: { projectId: project.id },
           });
@@ -280,18 +291,17 @@ describe('Project upgrade', () => {
               expect(newPhaseProduct.actualPrice).to.equal(parseInt(project.actualPrice, 10));
               expect(newPhaseProduct.details).to.deep.equal({
                 name: 'a specific name',
-                sampleKey1: {
-                  sampleSubKey1: 'a specific value',
-                },
-                sampleKey2: {
-                  sampleSubKey2: 'a specific value',
-                },
+                appDefinition: { budget: 10000 },
+                testingNeeds: { hours: 10000 },
+                appScreens: { screens: [{ name: 'a', desc: 'ad' }, { name: 'b', desc: 'bd' }] },
               });
             }
           }
 
           expect(server.services.pubsub.publish.calledWith('project.phase.added')).to.be.true;
-          expect(server.services.pubsub.publish.calledWith('project.phase.product.added')).to.be.true;
+          // we should not raise product added event as when we are adding a phase, it automatically adds the product
+          // product added event should be raised only when a new product is added to an existing phase
+          expect(server.services.pubsub.publish.calledWith('project.phase.product.added')).to.be.false;
           expect(server.services.pubsub.publish.calledWith('project.updated')).to.be.true;
         };
 

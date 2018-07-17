@@ -67,6 +67,16 @@ describe('CREATE product template', () => {
         .expect(403, done);
     });
 
+    it('should return 403 for connect manager', (done) => {
+      request(server)
+        .post('/v4/productTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(body)
+        .expect(403, done);
+    });
+
     it('should return 422 if validations dont pass', (done) => {
       const invalidBody = {
         param: {
@@ -114,23 +124,6 @@ describe('CREATE product template', () => {
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
 
-          done();
-        });
-    });
-
-    it('should return 201 for connect manager', (done) => {
-      request(server)
-        .post('/v4/productTemplates')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send(body)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.createdBy.should.be.eql(40051334); // manager
-          resJson.updatedBy.should.be.eql(40051334); // manager
           done();
         });
     });

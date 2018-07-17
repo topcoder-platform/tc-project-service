@@ -92,18 +92,24 @@ describe('LIST product templates', () => {
   after(testUtil.clearDb);
 
   describe('GET /productTemplates', () => {
-    it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get('/v4/productTemplates')
-        .expect(403, done);
-    });
-
     it('should return 200 for admin', (done) => {
       request(server)
         .get('/v4/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          validateProductTemplates(2, resJson, templates);
+          resJson[0].id.should.be.eql(templateId);
+          done();
+        });
+    });
+
+    it('should return 200 even if user is not authenticated', (done) => {
+      request(server)
+        .get('/v4/productTemplates')
         .expect(200)
         .end((err, res) => {
           const resJson = res.body.result.content;
