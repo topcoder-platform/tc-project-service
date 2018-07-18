@@ -65,7 +65,7 @@ const createPhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint
       referenceId: `${phase.projectId}`,
       tag: `phase#${phase.id}`,
       title: phase.name,
-      body: 'Welcome!!! Please use this channel for communication around the phase.',
+      body: 'This is the beginning of your phase discussion. During execution of this phase, all related communication will be conducted here - phase updates, questions and answers, suggestions, etc. If you haven\'t already, do please take a moment to review the form in the Specification tab above and fill in as much detail as possible. This will help get started faster. Thanks!', // eslint-disable-line
     }, logger);
     logger.debug('topic for the phase created successfully');
     logger.debug('created topic', topic);
