@@ -22,6 +22,7 @@ describe('CREATE project type', () => {
       aliases: ['key-1', 'key_1'],
       disabled: false,
       hidden: false,
+      metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
       createdBy: 1,
       updatedBy: 1,
     })).then(() => Promise.resolve()),
@@ -39,6 +40,7 @@ describe('CREATE project type', () => {
         aliases: ['key-1', 'key_1'],
         disabled: true,
         hidden: true,
+        metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
       },
     };
 
@@ -149,6 +151,20 @@ describe('CREATE project type', () => {
         .expect(422, done);
     });
 
+    it('should return 422 for missing metadata', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      delete invalidBody.param.metadata;
+
+      request(server)
+        .post('/v4/projectTypes')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
     it('should return 422 for duplicated key', (done) => {
       const invalidBody = _.cloneDeep(body);
       invalidBody.param.key = 'key1';
@@ -182,6 +198,7 @@ describe('CREATE project type', () => {
           resJson.aliases.should.be.eql(body.param.aliases);
           resJson.disabled.should.be.eql(body.param.disabled);
           resJson.hidden.should.be.eql(body.param.hidden);
+          resJson.metadata.should.be.eql(body.param.metadata);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -213,6 +230,7 @@ describe('CREATE project type', () => {
           resJson.aliases.should.be.eql(body.param.aliases);
           resJson.disabled.should.be.eql(body.param.disabled);
           resJson.hidden.should.be.eql(body.param.hidden);
+          resJson.metadata.should.be.eql(body.param.metadata);
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();

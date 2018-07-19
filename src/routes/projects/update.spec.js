@@ -30,6 +30,7 @@ describe('Project', () => {
           aliases: ['key-1', 'key_1'],
           createdBy: 1,
           updatedBy: 1,
+          metadata: {},
         },
       ]))
       .then(() => done());
