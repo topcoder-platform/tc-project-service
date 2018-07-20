@@ -20,6 +20,7 @@ describe('GET project type', () => {
     aliases: ['key-1', 'key_1'],
     disabled: true,
     hidden: true,
+    metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
     createdBy: 1,
     updatedBy: 1,
   };
@@ -71,6 +72,7 @@ describe('GET project type', () => {
           resJson.aliases.should.be.eql(type.aliases);
           resJson.disabled.should.be.eql(type.disabled);
           resJson.hidden.should.be.eql(type.hidden);
+          resJson.metadata.should.be.eql(type.metadata);
           resJson.createdBy.should.be.eql(type.createdBy);
           should.exist(resJson.createdAt);
           resJson.updatedBy.should.be.eql(type.updatedBy);

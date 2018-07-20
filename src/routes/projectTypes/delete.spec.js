@@ -19,6 +19,7 @@ describe('DELETE project type', () => {
       question: 'question 1',
       info: 'info 1',
       aliases: ['key-1', 'key_1'],
+      metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
       createdBy: 1,
       updatedBy: 1,
     })).then(() => Promise.resolve()),

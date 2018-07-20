@@ -21,6 +21,7 @@ describe('LIST project types', () => {
       aliases: ['key-1', 'key_1'],
       disabled: true,
       hidden: true,
+      metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
       createdBy: 1,
       updatedBy: 1,
     },
@@ -33,6 +34,7 @@ describe('LIST project types', () => {
       aliases: ['key-2', 'key_2'],
       disabled: true,
       hidden: true,
+      metadata: { 'slack-notification-mappings': { color: '#b47dd6', label: 'Full App 2' } },
       createdBy: 1,
       updatedBy: 1,
     },
@@ -67,6 +69,7 @@ describe('LIST project types', () => {
           resJson[0].createdBy.should.be.eql(type.createdBy);
           resJson[0].disabled.should.be.eql(type.disabled);
           resJson[0].hidden.should.be.eql(type.hidden);
+          resJson[0].metadata.should.be.eql(type.metadata);
           should.exist(resJson[0].createdAt);
           resJson[0].updatedBy.should.be.eql(type.updatedBy);
           should.exist(resJson[0].updatedAt);
