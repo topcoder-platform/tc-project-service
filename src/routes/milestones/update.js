@@ -24,8 +24,8 @@ const schema = {
       description: Joi.string().max(255),
       duration: Joi.number().integer().optional(),
       startDate: Joi.date().optional(),
-      endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      completionDate: Joi.date().min(Joi.ref('startDate')).allow(null),
+      endDate: Joi.date().allow(null),
+      completionDate: Joi.date().allow(null),
       status: Joi.string().max(45).optional(),
       type: Joi.string().max(45).optional(),
       details: Joi.object(),
@@ -67,6 +67,12 @@ module.exports = [
       error = 'Milestone startDate must not be before the timeline startDate';
     } else if (req.body.param.endDate && req.timeline.endDate && req.body.param.endDate > req.timeline.endDate) {
       error = 'Milestone endDate must not be after the timeline endDate';
+    }
+    if (entityToUpdate.endDate && entityToUpdate.endDate < entityToUpdate.startDate) {
+      error = 'Milestone endDate must not be before startDate';
+    }
+    if (entityToUpdate.completionDate && entityToUpdate.completionDate < entityToUpdate.startDate) {
+      error = 'Milestone endDate must not be before startDate';
     }
     if (error) {
       const apiErr = new Error(error);
