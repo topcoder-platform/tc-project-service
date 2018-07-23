@@ -415,6 +415,28 @@ _.assignIn(util, {
         });
     }
 
+    // The timeline refers to a project
+    if (req.body.param.reference === TIMELINE_REFERENCES.PRODUCT) {
+      // Validate product to be existed
+      return models.PhaseProduct.findOne({
+        where: {
+          id: req.body.param.referenceId,
+          deletedAt: { $eq: null },
+        },
+      })
+        .then((product) => {
+          if (!product) {
+            const apiErr = new Error(`Product not found for product id ${req.body.param.referenceId}`);
+            apiErr.status = 422;
+            return next(apiErr);
+          }
+
+          // Set projectId to the params so it can be used in the permission check middleware
+          req.params.projectId = product.projectId;
+          return next();
+        });
+    }
+
     // The timeline refers to a phase
     return models.ProjectPhase.findOne({
       where: {
@@ -430,7 +452,7 @@ _.assignIn(util, {
         }
 
         // Set projectId to the params so it can be used in the permission check middleware
-        req.params.projectId = req.body.param.referenceId;
+        req.params.projectId = phase.projectId;
         return next();
       });
   },
