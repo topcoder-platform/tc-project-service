@@ -224,7 +224,7 @@ describe('LIST timelines', () => {
 
     it('should return 422 for invalid reference filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dinvalid')
+        .get('/v4/timelines?filter=reference%3Dinvalid%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -234,7 +234,7 @@ describe('LIST timelines', () => {
 
     it('should return 422 for invalid referenceId filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=referenceId%3D0')
+        .get('/v4/timelines?filter=reference%3Dinvalid%26referenceId%3D0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -244,7 +244,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -253,7 +253,7 @@ describe('LIST timelines', () => {
           const timeline = timelines[0];
 
           let resJson = res.body.result.content;
-          resJson.should.have.length(3);
+          resJson.should.have.length(1);
           resJson = _.sortBy(resJson, o => o.id);
           resJson[0].id.should.be.eql(1);
           resJson[0].name.should.be.eql(timeline.name);
@@ -279,14 +279,15 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(200)
         .end((err, res) => {
           const resJson = res.body.result.content;
-          resJson.should.have.length(3);
+          console.log(resJson);
+          resJson.should.have.length(1);
 
           done();
         });
@@ -294,14 +295,14 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(200)
         .end((err, res) => {
           const resJson = res.body.result.content;
-          resJson.should.have.length(3);
+          resJson.should.have.length(1);
 
           done();
         });
@@ -309,13 +310,13 @@ describe('LIST timelines', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .end((err, res) => {
           const resJson = res.body.result.content;
-          resJson.should.have.length(2);
+          resJson.should.have.length(1);
 
           done();
         });
@@ -323,57 +324,27 @@ describe('LIST timelines', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .end((err, res) => {
           const resJson = res.body.result.content;
-          resJson.should.have.length(2);
+          resJson.should.have.length(1);
 
           done();
         });
     });
 
-    it('should return 200 for member with no accessible project', (done) => {
+    it('should return 200 for member with not accessible project', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
         .end((err, res) => {
           const resJson = res.body.result.content;
           resJson.should.have.length(0); // no accessible timelines
-
-          done();
-        });
-    });
-
-    it('should return 200 with reference filter', (done) => {
-      request(server)
-        .get('/v4/timelines?filter=reference%3Dproject')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(200)
-        .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.should.have.length(1);
-
-          done();
-        });
-    });
-
-    it('should return 200 with referenceId filter', (done) => {
-      request(server)
-        .get('/v4/timelines?filter=referenceId%3D2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(200)
-        .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.should.have.length(1);
 
           done();
         });

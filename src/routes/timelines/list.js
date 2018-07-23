@@ -42,6 +42,13 @@ module.exports = [
       return next(apiErr);
     }
 
+    // Verify required filters are present
+    if (!filter.reference || !filter.referenceId) {
+      const apiErr = new Error('Please provide reference and referenceId filter parameters');
+      apiErr.status = 422;
+      return next(apiErr);
+    }
+
     // Build the elastic search query
     const esTerms = [];
     if (filter.reference) {
