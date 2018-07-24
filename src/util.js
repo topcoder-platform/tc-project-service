@@ -485,6 +485,28 @@ _.assignIn(util, {
           return next();
         }
 
+        // The timeline refers to a project
+        if (timeline.reference === TIMELINE_REFERENCES.PRODUCT) {
+          // Validate product to be existed
+          return models.PhaseProduct.findOne({
+            where: {
+              id: timeline.referenceId,
+              deletedAt: { $eq: null },
+            },
+          })
+            .then((product) => {
+              if (!product) {
+                const apiErr = new Error(`Product not found for product id ${timeline.referenceId}`);
+                apiErr.status = 422;
+                return next(apiErr);
+              }
+
+              // Set projectId to the params so it can be used in the permission check middleware
+              req.params.projectId = product.projectId;
+              return next();
+            });
+        }
+
         // The timeline refers to a phase
         return models.ProjectPhase.findOne({
           where: {
