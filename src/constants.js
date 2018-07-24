@@ -11,6 +11,8 @@ export const PROJECT_STATUS = {
 
 export const PROJECT_PHASE_STATUS = PROJECT_STATUS;
 
+export const MILESTONE_STATUS = PROJECT_STATUS;
+
 export const PROJECT_MEMBER_ROLE = {
   MANAGER: 'manager',
   CUSTOMER: 'customer',
