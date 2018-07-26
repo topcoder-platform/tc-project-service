@@ -242,9 +242,10 @@ module.exports = [
     if (!project.templateId) {
       project.version = 'v2';
     }
+    let newProject = null;
+    let newPhases;
     models.sequelize.transaction(() => {
-      let newProject = null;
-      let newPhases;
+      req.log.debug('Create Project - Starting transaction');
       // Validate the project type
       return validateProjectType(project.type)
       // Validate the templates
@@ -294,30 +295,30 @@ module.exports = [
             return Promise.resolve();
           });
         // return Promise.resolve();
-      })
-      .then(() => {
-        newProject = newProject.get({ plain: true });
-        // remove utm details & deletedAt field
-        newProject = _.omit(newProject, ['deletedAt', 'utm']);
-        // add an empty attachments array
-        newProject.attachments = [];
-        // set phases array
-        newProject.phases = newPhases;
-
-        req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
-          newProject,
-          { correlationId: req.id },
-        );
-        req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
-        // emit event
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
-        res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
-      })
-      .catch((err) => {
-        req.log.error(err.message);
-        util.handleError('Error creating project', err, req, next);
       });
+    })
+    .then(() => {
+      newProject = newProject.get({ plain: true });
+      // remove utm details & deletedAt field
+      newProject = _.omit(newProject, ['deletedAt', 'utm']);
+      // add an empty attachments array
+      newProject.attachments = [];
+      // set phases array
+      newProject.phases = newPhases;
+
+      req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
+        newProject,
+        { correlationId: req.id },
+      );
+      req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
+      // emit event
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
+      res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
+    })
+    .catch((err) => {
+      req.log.error(err.message);
+      util.handleError('Error creating project', err, req, next);
     });
   },
 ];
