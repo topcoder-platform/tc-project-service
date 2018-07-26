@@ -46,20 +46,20 @@ module.exports = [
           // Update the deletedBy, and soft delete
           return milestone.update({ deletedBy: req.authUser.userId }, { transaction: tx })
             .then(() => milestone.destroy({ transaction: tx }));
-        })
-        .then((deleted) => {
-          // Send event to bus
-          req.log.debug('Sending event to RabbitMQ bus for milestone %d', deleted.id);
-          req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_REMOVED,
-            deleted,
-            { correlationId: req.id },
-          );
+        }),
+    )
+    .then((deleted) => {
+      // Send event to bus
+      req.log.debug('Sending event to RabbitMQ bus for milestone %d', deleted.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_REMOVED,
+        deleted,
+        { correlationId: req.id },
+      );
 
-          // Write to response
-          res.status(204).end();
-          return Promise.resolve();
-        })
-        .catch(next),
-    );
+      // Write to response
+      res.status(204).end();
+      return Promise.resolve();
+    })
+    .catch(next);
   },
 ];
