@@ -481,6 +481,7 @@ describe('CREATE timeline', () => {
             } else if (mIdx === 1) {
               expMilestoneTemplate = _.find(milestoneTemplates, mt => mt.id === 2);
             }
+            milestone.templateId.should.be.eql(resJson.id);
             milestone.name.should.be.eql(expMilestoneTemplate.name);
             milestone.description.should.be.eql(expMilestoneTemplate.description);
             milestone.duration.should.be.eql(expMilestoneTemplate.duration);

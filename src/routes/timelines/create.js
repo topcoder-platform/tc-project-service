@@ -70,6 +70,7 @@ module.exports = [
                 const milestones = _.map(milestoneTemplates, (mt) => {
                   const endDate = moment.utc(startDate).add(mt.duration - 1, 'days');
                   const milestone = {
+                    timelineId: createdEntity.id,
                     name: mt.name,
                     description: mt.description,
                     type: mt.type,
