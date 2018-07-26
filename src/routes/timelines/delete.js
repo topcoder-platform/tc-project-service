@@ -33,20 +33,20 @@ module.exports = [
         .then(() => timeline.destroy())
         // Cascade delete the milestones
         .then(() => models.Milestone.update({ deletedBy: req.authUser.userId }, { where: { timelineId: timeline.id } }))
-        .then(() => models.Milestone.destroy({ where: { timelineId: timeline.id } }))
-        .then(() => {
-          // Send event to bus
-          req.log.debug('Sending event to RabbitMQ bus for timeline %d', deleted.id);
-          req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_REMOVED,
-            deleted,
-            { correlationId: req.id },
-          );
+        .then(() => models.Milestone.destroy({ where: { timelineId: timeline.id } })),
+    )
+    .then(() => {
+      // Send event to bus
+      req.log.debug('Sending event to RabbitMQ bus for timeline %d', deleted.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_REMOVED,
+        deleted,
+        { correlationId: req.id },
+      );
 
-          // Write to response
-          res.status(204).end();
-          return Promise.resolve();
-        })
-        .catch(next),
-    );
+      // Write to response
+      res.status(204).end();
+      return Promise.resolve();
+    })
+    .catch(next);
   },
 ];
