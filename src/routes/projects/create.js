@@ -93,7 +93,8 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
     });
     return Promise.all(_.map(phases, (phase, phaseIdx) => {
       const duration = _.get(phase, 'duration', 1);
-      const startDate = moment.utc();
+      const startDate = moment.utc().hours(0).minutes(0).seconds(0)
+        .milliseconds(0);
       // Create phase
       return models.ProjectPhase.create({
         projectId: newProject.id,

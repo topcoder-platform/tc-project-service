@@ -446,7 +446,12 @@ describe('Project create', () => {
             phases[0].status.should.be.eql('open');
             phases[0].startDate.should.be.a('string');
             phases[0].duration.should.be.eql(10);
-            new Date(phases[0].endDate).should.be.eql(moment.utc(phases[0].startDate).add(9, 'days').toDate());
+            const startDate = moment.utc(phases[0].startDate);
+            startDate.hours().should.be.eql(0);
+            startDate.minutes().should.be.eql(0);
+            startDate.seconds().should.be.eql(0);
+            startDate.milliseconds().should.be.eql(0);
+            new Date(phases[0].endDate).should.be.eql(startDate.add(9, 'days').toDate());
             expect(phases[0].details).to.be.empty;
             phases[0].products.should.have.lengthOf(1);
             phases[0].products[0].name.should.be.eql('product 1');
