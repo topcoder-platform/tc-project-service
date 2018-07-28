@@ -256,8 +256,6 @@ describe('UPDATE Milestone', () => {
       param: {
         name: 'Milestone 1-updated',
         duration: 3,
-        startDate: '2018-05-14T00:00:00.000Z',
-        endDate: '2018-05-15T00:00:00.000Z',
         completionDate: '2018-05-16T00:00:00.000Z',
         description: 'description-updated',
         status: 'closed',
@@ -482,11 +480,10 @@ describe('UPDATE Milestone', () => {
         .expect(422, done);
     });
 
-    it('should return 422 if startDate is after completionDate', (done) => {
+    it('should return 422 if startDate is different than the original startDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          completionDate: '2018-05-28T00:00:00.000Z',
+          startDate: '2018-07-01T00:00:00.000Z',
         }),
       };
 
@@ -500,24 +497,7 @@ describe('UPDATE Milestone', () => {
         .expect(422, done);
     });
 
-    it('should return 422 if startDate is before timeline startDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-01T00:00:00.000Z',
-        }),
-      };
-
-      request(server)
-        .patch('/v4/timelines/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if endDate is after timeline endDate', (done) => {
+    it('should return 422 if endDate is different than the original endDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           endDate: '2018-07-01T00:00:00.000Z',
@@ -548,8 +528,6 @@ describe('UPDATE Milestone', () => {
           resJson.name.should.be.eql(body.param.name);
           resJson.description.should.be.eql(body.param.description);
           resJson.duration.should.be.eql(body.param.duration);
-          resJson.startDate.should.be.eql(body.param.startDate);
-          resJson.endDate.should.be.eql(body.param.endDate);
           resJson.completionDate.should.be.eql(body.param.completionDate);
           resJson.status.should.be.eql(body.param.status);
           resJson.type.should.be.eql(body.param.type);
@@ -895,6 +873,76 @@ describe('UPDATE Milestone', () => {
                   });
               }, 3000);
             });
+        });
+    });
+
+    it('should return 200 for admin - changing completionDate will cascade changes to coming ' +
+      // eslint-disable-next-line func-names
+      'milestones', function (done) {
+      this.timeout(10000);
+
+      request(server)
+        .patch('/v4/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: _.assign({}, body.param, {
+          completionDate: '2018-05-18T00:00:00.000Z', order: undefined, duration: undefined,
+        }) })
+        .expect(200)
+        .end(() => {
+          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
+          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
+          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
+          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
+          setTimeout(() => {
+            models.Milestone.findById(3)
+              .then((milestone) => {
+                milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
+                return models.Milestone.findById(4);
+              })
+              .then((milestone) => {
+                milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
+                done();
+              })
+              .catch(done);
+          }, 3000);
+        });
+    });
+
+    it('should return 200 for admin - changing duration will cascade changes to coming ' +
+      // eslint-disable-next-line func-names
+      'milestones', function (done) {
+      this.timeout(10000);
+
+      request(server)
+        .patch('/v4/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: _.assign({}, body.param, { duration: 5, order: undefined, completionDate: undefined }) })
+        .expect(200)
+        .end(() => {
+          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
+          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
+          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
+          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
+          setTimeout(() => {
+            models.Milestone.findById(3)
+              .then((milestone) => {
+                milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
+                return models.Milestone.findById(4);
+              })
+              .then((milestone) => {
+                milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
+                done();
+              })
+              .catch(done);
+          }, 3000);
         });
     });
 

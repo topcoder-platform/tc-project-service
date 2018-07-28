@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import _ from 'lodash';
+import moment from 'moment';
 import Joi from 'joi';
 import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -12,6 +13,37 @@ import { EVENT } from '../../constants';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
+
+/**
+ * Cascades endDate/completionDate changes to all milestones with a greater order than the given one.
+ * @param {Object} updatedMilestone the milestone that was updated
+ * @param {Object} transaction the wrapping transaction
+ * @returns {Promise<void>} a promise
+ */
+async function updateComingMilestones(updatedMilestone, transaction) {
+  const comingMilestones = _.sortBy(await models.Milestone.findAll({
+    where: {
+      timelineId: updatedMilestone.timelineId,
+      order: { $gt: updatedMilestone.order },
+    },
+    transaction,
+  }), 'order');
+  let startDate = moment.utc(updatedMilestone.completionDate
+    ? updatedMilestone.completionDate
+    : updatedMilestone.endDate).add(1, 'days').toDate();
+  const promises = _.map(comingMilestones, (_milestone) => {
+    const milestone = _milestone;
+    if (milestone.startDate.getTime() !== startDate.getTime()) {
+      milestone.startDate = startDate;
+      milestone.endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+    }
+    startDate = moment.utc(milestone.completionDate
+      ? milestone.completionDate
+      : milestone.endDate).add(1, 'days').toDate();
+    return milestone.save({ transaction });
+  });
+  await Promise.all(promises);
+}
 
 const schema = {
   params: {
@@ -23,7 +55,7 @@ const schema = {
       id: Joi.any().strip(),
       name: Joi.string().max(255).optional(),
       description: Joi.string().max(255),
-      duration: Joi.number().integer().optional(),
+      duration: Joi.number().integer().min(1).optional(),
       startDate: Joi.date().optional(),
       endDate: Joi.date().allow(null),
       completionDate: Joi.date().allow(null),
@@ -62,29 +94,10 @@ module.exports = [
       timelineId: req.params.timelineId,
     });
 
-    // Validate startDate and endDate to be within the timeline startDate and endDate
-    let error;
-    if (req.body.param.startDate < req.timeline.startDate) {
-      error = 'Milestone startDate must not be before the timeline startDate';
-    } else if (req.body.param.endDate && req.timeline.endDate && req.body.param.endDate > req.timeline.endDate) {
-      error = 'Milestone endDate must not be after the timeline endDate';
-    }
-    if (entityToUpdate.endDate && entityToUpdate.endDate < entityToUpdate.startDate) {
-      error = 'Milestone endDate must not be before startDate';
-    }
-    if (entityToUpdate.completionDate && entityToUpdate.completionDate < entityToUpdate.startDate) {
-      error = 'Milestone endDate must not be before startDate';
-    }
-    if (error) {
-      const apiErr = new Error(error);
-      apiErr.status = 422;
-      return next(apiErr);
-    }
-
     let original;
     let updated;
 
-    return models.sequelize.transaction(() =>
+    return models.sequelize.transaction(transaction =>
       // Find the milestone
       models.Milestone.findOne({ where })
         .then((milestone) => {
@@ -94,14 +107,34 @@ module.exports = [
             apiErr.status = 404;
             return Promise.reject(apiErr);
           }
+          // if any of these keys was provided and is different from what's in the database, error
+          if (['startDate', 'endDate']
+            .some(key => entityToUpdate[key] && (
+              !milestone[key] ||
+              (milestone[key] && entityToUpdate[key].getTime() !== milestone[key].getTime())
+            ))) {
+            const apiErr = new Error('Updating a milestone startDate or endDate is not allowed');
+            apiErr.status = 422;
+            return Promise.reject(apiErr);
+          }
+
+          if (entityToUpdate.completionDate && entityToUpdate.completionDate < milestone.startDate) {
+            const apiErr = new Error('The milestone completionDate should be greater or equal than the startDate.');
+            apiErr.status = 422;
+            return Promise.reject(apiErr);
+          }
 
           original = _.omit(milestone.toJSON(), ['deletedAt', 'deletedBy']);
 
           // Merge JSON fields
           entityToUpdate.details = util.mergeJsonObjects(milestone.details, entityToUpdate.details);
 
+          if (entityToUpdate.duration && entityToUpdate.duration !== milestone.duration) {
+            entityToUpdate.endDate = moment.utc(milestone.startDate).add(entityToUpdate.duration - 1, 'days').toDate();
+          }
+
           // Update
-          return milestone.update(entityToUpdate);
+          return milestone.update(entityToUpdate, { transaction });
         })
         .then((updatedMilestone) => {
           // Omit deletedAt, deletedBy
@@ -118,6 +151,7 @@ module.exports = [
               id: { $ne: updated.id },
               order: updated.order,
             },
+            transaction,
           })
             .then((count) => {
               if (count === 0) {
@@ -133,6 +167,7 @@ module.exports = [
                     id: { $ne: updated.id },
                     order: { $between: [original.order + 1, updated.order] },
                   },
+                  transaction,
                 });
               }
 
@@ -144,8 +179,19 @@ module.exports = [
                   id: { $ne: updated.id },
                   order: { $between: [updated.order, original.order - 1] },
                 },
+                transaction,
               });
             });
+        })
+        .then(() => {
+          // Update dates of the other milestones only if the completionDate nor the duration changed
+          if (((!original.completionDate && !updated.completionDate) ||
+            (original.completionDate && updated.completionDate &&
+              original.completionDate.getTime() === updated.completionDate.getTime())) &&
+            original.duration === updated.duration) {
+            return Promise.resolve();
+          }
+          return updateComingMilestones(updated, transaction);
         }),
     )
     .then(() => {
