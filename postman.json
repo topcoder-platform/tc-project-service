@@ -1,14 +1,268 @@
 {
 	"info": {
-		"_postman_id": "440ee43d-66ca-4c9b-858d-22db97ea4cea",
 		"name": "tc-project-service",
+		"_postman_id": "63bb8939-b1c0-0c3c-ad9d-68e63063eda7",
+		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Project Attachments",
-			"description": null,
 			"item": [
+				{
+					"name": "bookmarks",
+					"item": [
+						{
+							"name": " Create project without bookmarks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": " Create project with valid bookmarks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": " Create project with invalid bookmarks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"invalid\":3,\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get  project",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update project with bookmarks",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\",\n         \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }]\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete project all bookmarks null",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":null\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update  project with invalid bookmarks",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":3\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get projects with admin token",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
 				{
 					"name": "Upload attachment",
 					"request": {
@@ -116,8 +370,75 @@
 			]
 		},
 		{
+			"name": "Project With TemplateId issue",
+			"description": "",
+			"item": [
+				{
+					"name": "Create project with templateId (not existed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with templateId\",\n\t\t\"description\": \"Hello I am a test project with templateId\",\n\t\t\"type\": \"generic\",\n\t\t\"templateId\": 3000\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project with templateId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": 3\n  }\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Project Members",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project member with no payload",
@@ -169,7 +490,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"role\": \"copilot\"\n}"
+							"raw": "{\n\"param\":{\n\t\"role\": \"copilot\"\n}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/members",
@@ -342,16 +663,16 @@
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": true\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/members/16",
+							"raw": "{{api-url}}/v4/projects/1/members/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"1",
 								"members",
-								"16"
+								"1"
 							]
 						},
 						"description": "Update a project's member."
@@ -377,19 +698,53 @@
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": false\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/members/16",
+							"raw": "{{api-url}}/v4/projects/1/members/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"1",
 								"members",
-								"16"
+								"1"
 							]
 						},
 						"description": "Update a project's member."
+					},
+					"response": []
+				},
+				{
+					"name": "wrong role",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n \"param\": {\n    \"role\": \"wrong\"\n   }\n } "
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/3/members/5",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"3",
+								"members",
+								"5"
+							]
+						}
 					},
 					"response": []
 				},
@@ -412,19 +767,53 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/members/15",
+							"raw": "{{api-url}}/v4/projects/3/members/5",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"3",
 								"members",
-								"15"
+								"5"
 							]
 						},
 						"description": "Delete a project's member"
+					},
+					"response": []
+				},
+				{
+					"name": "editing project member roles & primary option",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n \"param\": {\n    \"role\": \"manager\",\n    \"isPrimary\": true\n   }\n } "
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members",
+								"2"
+							]
+						}
 					},
 					"response": []
 				}
@@ -763,6 +1152,33 @@
 					"response": []
 				},
 				{
+					"name": "get projects with copilot token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "DELETE project by id",
 					"request": {
 						"method": "DELETE",
@@ -810,14 +1226,14 @@
 							"raw": "{\n  \"param\": {\n    \"name\": \"project name updated\"\n  }\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/13",
+							"raw": "{{api-url}}/v4/projects/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"13"
+								"1"
 							]
 						},
 						"description": "Update the project name. Name should be updated successfully."
@@ -909,14 +1325,14 @@
 							"raw": "{\n  \"param\": {\n    \"status\": \"in_review\"\n  }\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7",
+							"raw": "{{api-url}}/v4/projects/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7"
+								"1"
 							]
 						},
 						"description": "Update the project status."
@@ -1219,374 +1635,7 @@
 						"description": "Update the project bookmarks. This should fire project link created event"
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "bookmarks",
-			"description": null,
-			"item": [
-				{
-					"name": " Create project without bookmarks",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
 				},
-				{
-					"name": " Create project with valid bookmarks",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": " Create project with invalid bookmarks",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"invalid\":3,\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get  project",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update project with bookmarks",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\",\n         \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }]\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete project all bookmarks null",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":null\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update  project with invalid bookmarks",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":3\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get projects with admin token",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "issue1",
-			"description": null,
-			"item": [
-				{
-					"name": "get projects with copilot token",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "issue10",
-			"description": null,
-			"item": [
-				{
-					"name": "wrong role",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": " {\n \"param\": {\n    \"role\": \"wrong\"\n   }\n } "
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/3/members/5",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"3",
-								"members",
-								"5"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "editing project member roles & primary option",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": " {\n \"param\": {\n    \"role\": \"manager\",\n    \"isPrimary\": true\n   }\n } "
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "issue5",
-			"description": null,
-			"item": [
 				{
 					"name": "launch a project by topcoder managers ",
 					"request": {
@@ -1686,8 +1735,7 @@
 			]
 		},
 		{
-			"name": "issue8",
-			"description": null,
+			"name": "EventHandling and Integration with Direct Project API",
 			"item": [
 				{
 					"name": "mock direct projects",
@@ -1708,12 +1756,13 @@
 							"raw": " {\n \"param\": {\n    \"role\": \"copilot\",\n    \"isPrimary\": true\n   }\n } "
 						},
 						"url": {
-							"raw": "https://localhost:8443/v3/direct/projects",
+							"raw": "https://api.topcoder-dev.com/v3/direct/projects",
 							"protocol": "https",
 							"host": [
-								"localhost"
+								"api",
+								"topcoder-dev",
+								"com"
 							],
-							"port": "8443",
 							"path": [
 								"v3",
 								"direct",
@@ -1920,11 +1969,32 @@
 					},
 					"response": []
 				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ef96ac6a-0fc0-4a64-a4fe-5390e17afe67",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "12f9d794-0872-4058-aafa-77b89e72025b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
 			]
 		},
 		{
 			"name": "Project Phase",
-			"description": null,
 			"item": [
 				{
 					"name": "Create Phase",
@@ -2176,7 +2246,6 @@
 		},
 		{
 			"name": "Phase Products",
-			"description": null,
 			"item": [
 				{
 					"name": "Create Phase Product",
@@ -2348,7 +2417,6 @@
 		},
 		{
 			"name": "Project Templates",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project template",
@@ -2366,7 +2434,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTemplates",
@@ -2460,7 +2528,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTemplates/1",
@@ -2495,14 +2563,14 @@
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projectTemplates/1",
+							"raw": "{{api-url}}/v4/projectTemplates/2",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projectTemplates",
-								"1"
+								"2"
 							]
 						}
 					},
@@ -2512,7 +2580,6 @@
 		},
 		{
 			"name": "Product Templates",
-			"description": null,
 			"item": [
 				{
 					"name": "Create product template",
@@ -2530,7 +2597,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"category\":\"generic\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"alias 1\"\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\"\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n      \"param\": {\r\n        \"name\": \"name 1\",\r\n        \"productKey\": \"productKey 1\",\r\n        \"category\": \"key1\",\r\n        \"icon\": \"http://example.com/icon1.ico\",\r\n        \"brief\": \"brief 1\",\r\n        \"details\": \"details 1\",\r\n        \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n        \"template\": {\r\n          \"template1\": {\r\n            \"name\": \"template 1\",\r\n            \"details\": {\r\n              \"anyDetails\": \"any details 1\"\r\n            },\r\n            \"others\": [\"others 11\", \"others 12\"]\r\n          },\r\n          \"template2\": {\r\n            \"name\": \"template 2\",\r\n            \"details\": {\r\n              \"anyDetails\": \"any details 2\"\r\n            },\r\n            \"others\": [\"others 21\", \"others 22\"]\r\n          }\r\n        }\r\n      }\r\n    }"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/productTemplates",
@@ -2595,14 +2662,14 @@
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/productTemplates/1",
+							"raw": "{{api-url}}/v4/productTemplates/3",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"productTemplates",
-								"1"
+								"3"
 							]
 						}
 					},
@@ -2624,7 +2691,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"category\":\"generic\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"scope 1\",\r\n      \"alias2\": [\"a\"]\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\",\r\n      \"template2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"category\":\"key1\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"scope 1\",\r\n      \"alias2\": [\"a\"]\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\",\r\n      \"template2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/productTemplates/1",
@@ -2656,7 +2723,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/productTemplates/1",
@@ -2676,7 +2743,6 @@
 		},
 		{
 			"name": "Project Type",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project type",
@@ -2694,7 +2760,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\"\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"]\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTypes",
@@ -2820,7 +2886,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTypes/chatbot",
@@ -2840,7 +2906,6 @@
 		},
 		{
 			"name": "Product Category",
-			"description": null,
 			"item": [
 				{
 					"name": "Create product category",
@@ -3035,74 +3100,6 @@
 			]
 		},
 		{
-			"name": "issue86 (create project with templateId)",
-			"description": null,
-			"item": [
-				{
-					"name": "Create project with templateId",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"param\": {\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": 3\n  }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create project with templateId (not existed)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with templateId\",\n\t\t\"description\": \"Hello I am a test project with templateId\",\n\t\t\"type\": \"generic\",\n\t\t\"templateId\": 3000\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Project upgrade",
 			"description": "Request to migrate projects.",
 			"item": [
@@ -3242,7 +3239,6 @@
 		},
 		{
 			"name": "Timeline",
-			"description": null,
 			"item": [
 				{
 					"name": "Create timeline",
@@ -3307,111 +3303,6 @@
 					"response": []
 				},
 				{
-					"name": "List timelines",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/timelines",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"timelines"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List timelines (filter by reference)",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/timelines?filter=reference%3Dproject",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"timelines"
-							],
-							"query": [
-								{
-									"key": "filter",
-									"value": "reference%3Dproject"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List timelines (filter by referenceId)",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/timelines?filter=referenceId%3D1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"timelines"
-							],
-							"query": [
-								{
-									"key": "filter",
-									"value": "referenceId%3D1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "List timelines (filter by reference and referenceId)",
 					"request": {
 						"method": "GET",
@@ -3441,7 +3332,8 @@
 							"query": [
 								{
 									"key": "filter",
-									"value": "reference%3Dphase%26referenceId%3D1"
+									"value": "reference%3Dphase%26referenceId%3D1",
+									"equals": true
 								}
 							]
 						}
@@ -3612,7 +3504,6 @@
 		},
 		{
 			"name": "Milestone",
-			"description": null,
 			"item": [
 				{
 					"name": "Create milestone",
@@ -3994,7 +3885,6 @@
 		},
 		{
 			"name": "Milestone Template",
-			"description": null,
 			"item": [
 				{
 					"name": "Create milestone template",
@@ -4012,7 +3902,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\"\r\n\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/productTemplates/1/milestones",
