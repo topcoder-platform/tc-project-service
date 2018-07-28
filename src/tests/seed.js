@@ -311,6 +311,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'name 1',
       productKey: 'productKey 1',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -345,6 +346,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'template 2',
       productKey: 'productKey 2',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -358,6 +360,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'Generic work',
       productKey: 'generic_work',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -385,6 +388,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'Website product',
       productKey: 'website_development',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -412,6 +416,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'Application product',
       productKey: 'application_development',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       brief: 'brief 1',
       details: 'details 1',

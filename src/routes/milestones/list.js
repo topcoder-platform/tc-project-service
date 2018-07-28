@@ -7,6 +7,7 @@ import config from 'config';
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
+import validateTimeline from '../../middlewares/validateTimeline';
 
 const permissions = tcMiddleware.permissions;
 
@@ -23,7 +24,7 @@ module.exports = [
   validate(schema),
   // Validate and get projectId from the timelineId param, and set to request params for
   // checking by the permissions middleware
-  util.validateTimelineIdParam,
+  validateTimeline.validateTimelineIdParam,
   permissions('milestone.view'),
   (req, res, next) => {
     // Parse the sort query

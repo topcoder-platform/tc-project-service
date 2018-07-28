@@ -1,11 +1,10 @@
 /**
- * API to add a project template
+ * API to add a product category
  */
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
 import models from '../../models';
 
@@ -14,16 +13,12 @@ const permissions = tcMiddleware.permissions;
 const schema = {
   body: {
     param: Joi.object().keys({
-      id: Joi.any().strip(),
-      name: Joi.string().max(255).required(),
       key: Joi.string().max(45).required(),
-      category: Joi.string().max(45).required(),
+      displayName: Joi.string().max(255).required(),
       icon: Joi.string().max(255).required(),
       question: Joi.string().max(255).required(),
       info: Joi.string().max(255).required(),
       aliases: Joi.array().required(),
-      scope: Joi.object().required(),
-      phases: Joi.object().required(),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
@@ -38,16 +33,25 @@ const schema = {
 
 module.exports = [
   validate(schema),
-  permissions('projectTemplate.create'),
-  fieldLookupValidation(models.ProjectType, 'key', 'body.param.category', 'Category'),
+  permissions('productCategory.create'),
   (req, res, next) => {
     const entity = _.assign(req.body.param, {
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
     });
 
-    return models.ProjectTemplate.create(entity)
-      .then((createdEntity) => {
+    // Check if duplicated key
+    return models.ProductCategory.findById(req.body.param.key)
+      .then((existing) => {
+        if (existing) {
+          const apiErr = new Error(`Product category already exists for key ${req.params.key}`);
+          apiErr.status = 422;
+          return Promise.reject(apiErr);
+        }
+
+        // Create
+        return models.ProductCategory.create(entity);
+      }).then((createdEntity) => {
         // Omit deletedAt, deletedBy
         res.status(201).json(util.wrapResponse(
           req.id, _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'), 1, 201));

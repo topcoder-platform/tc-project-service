@@ -6,7 +6,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import { EVENT } from '../../constants';
-import util from '../../util';
+import validateTimeline from '../../middlewares/validateTimeline';
 
 const permissions = tcMiddleware.permissions;
 
@@ -21,7 +21,7 @@ module.exports = [
   validate(schema),
   // Validate and get projectId from the timelineId param, and set to request params for
   // checking by the permissions middleware
-  util.validateTimelineIdParam,
+  validateTimeline.validateTimelineIdParam,
   permissions('milestone.delete'),
   (req, res, next) => {
     const where = {

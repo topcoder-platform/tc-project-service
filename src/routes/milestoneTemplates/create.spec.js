@@ -14,6 +14,7 @@ const productTemplates = [
   {
     name: 'name 1',
     productKey: 'productKey 1',
+    category: 'category',
     icon: 'http://example.com/icon1.ico',
     brief: 'brief 1',
     details: 'details 1',
@@ -46,6 +47,7 @@ const productTemplates = [
   {
     name: 'template 2',
     productKey: 'productKey 2',
+    category: 'category',
     icon: 'http://example.com/icon2.ico',
     brief: 'brief 2',
     details: 'details 2',

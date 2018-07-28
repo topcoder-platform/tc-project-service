@@ -7,6 +7,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import Sequelize from 'sequelize';
 import util from '../../util';
+import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
 import { EVENT } from '../../constants';
 
@@ -48,7 +49,7 @@ module.exports = [
   validate(schema),
   // Validate and get projectId from the timelineId param, and set to request params
   // for checking by the permissions middleware
-  util.validateTimelineIdParam,
+  validateTimeline.validateTimelineIdParam,
   permissions('milestone.create'),
   (req, res, next) => {
     const entity = _.assign(req.body.param, {

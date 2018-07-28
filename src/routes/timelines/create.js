@@ -7,6 +7,7 @@ import Joi from 'joi';
 import moment from 'moment';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
+import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
 import { EVENT, TIMELINE_REFERENCES, MILESTONE_STATUS } from '../../constants';
 
@@ -37,7 +38,7 @@ module.exports = [
   validate(schema),
   // Validate and get projectId from the timeline request body, and set to request params
   // for checking by the permissions middleware
-  util.validateTimelineRequestBody,
+  validateTimeline.validateTimelineRequestBody,
   permissions('timeline.create'),
   (req, res, next) => {
     const templateId = req.body.param.templateId;

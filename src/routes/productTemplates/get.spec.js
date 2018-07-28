@@ -14,6 +14,7 @@ describe('GET product template', () => {
   const template = {
     name: 'name 1',
     productKey: 'productKey 1',
+    category: 'generic',
     icon: 'http://example.com/icon1.ico',
     brief: 'brief 1',
     details: 'details 1',
@@ -89,6 +90,7 @@ describe('GET product template', () => {
           resJson.id.should.be.eql(templateId);
           resJson.name.should.be.eql(template.name);
           resJson.productKey.should.be.eql(template.productKey);
+          resJson.category.should.be.eql(template.category);
           resJson.icon.should.be.eql(template.icon);
           resJson.brief.should.be.eql(template.brief);
           resJson.details.should.be.eql(template.details);

@@ -336,18 +336,13 @@ describe('LIST timelines', () => {
         });
     });
 
-    it('should return 200 for member with not accessible project', (done) => {
+    it('should return 403 for member with not accessible project', (done) => {
       request(server)
         .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.should.have.length(0); // no accessible timelines
-
-          done();
-        });
+        .expect(403, done);
     });
 
     it('should return 200 with reference and referenceId filter', (done) => {

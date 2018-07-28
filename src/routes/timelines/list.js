@@ -3,9 +3,9 @@
  */
 import config from 'config';
 import _ from 'lodash';
+import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
-import models from '../../models';
-import { USER_ROLE, TIMELINE_REFERENCES } from '../../constants';
+import validateTimeline from '../../middlewares/validateTimeline';
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
@@ -31,70 +31,25 @@ function retrieveTimelines(esTerms) {
   });
 }
 
+const permissions = tcMiddleware.permissions;
 
 module.exports = [
+  // Validate and get projectId from the reference/referenceId pair, and set to request params for
+  // checking by the permissions middleware
+  validateTimeline.validateTimelineQueryFilter,
+  permissions('timeline.view'),
   (req, res, next) => {
-    // Validate the filter
-    const filter = util.parseQueryFilter(req.query.filter);
-    if (!util.isValidFilter(filter, ['reference', 'referenceId'])) {
-      const apiErr = new Error('Only allowed to filter by reference and referenceId');
-      apiErr.status = 422;
-      return next(apiErr);
-    }
-
-    // Verify required filters are present
-    if (!filter.reference || !filter.referenceId) {
-      const apiErr = new Error('Please provide reference and referenceId filter parameters');
-      apiErr.status = 422;
-      return next(apiErr);
-    }
+    const filter = req.params.filter;
 
     // Build the elastic search query
-    const esTerms = [];
-    if (filter.reference) {
-      if (!_.includes(TIMELINE_REFERENCES, filter.reference)) {
-        const apiErr = new Error(`reference filter must be in ${TIMELINE_REFERENCES}`);
-        apiErr.status = 422;
-        return next(apiErr);
-      }
+    const esTerms = [{
+      term: { reference: filter.reference },
+    }, {
+      term: { referenceId: filter.referenceId },
+    }];
 
-      esTerms.push({
-        term: { reference: filter.reference },
-      });
-    }
-    if (filter.referenceId) {
-      if (_.lt(filter.referenceId, 1)) {
-        const apiErr = new Error('referenceId filter must be a positive integer');
-        apiErr.status = 422;
-        return next(apiErr);
-      }
-
-      esTerms.push({
-        term: { referenceId: filter.referenceId },
-      });
-    }
-
-    // Admin and topcoder manager can see all timelines
-    if (util.hasAdminRole(req) || util.hasRole(req, USER_ROLE.MANAGER)) {
-      return retrieveTimelines(esTerms)
-        .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
-        .catch(err => next(err));
-    }
-
-    // Get project ids for copilot or member
-    const getProjectIds = util.hasRole(req, USER_ROLE.COPILOT) ?
-      models.Project.getProjectIdsForCopilot(req.authUser.userId) :
-      models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
-
-    return getProjectIds
-      .then((accessibleProjectIds) => {
-        // Copilot or member can see his projects
-        esTerms.push({
-          terms: { projectId: accessibleProjectIds },
-        });
-
-        return retrieveTimelines(esTerms);
-      })
+    // Retrieve timelines, as we know the user has access for the provided reference/referenceId part
+    return retrieveTimelines(esTerms)
       .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
       .catch(err => next(err));
   },
