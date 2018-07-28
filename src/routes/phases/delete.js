@@ -34,7 +34,8 @@ module.exports = [
           _.extend(existing, { deletedBy: req.authUser.userId, deletedAt: Date.now() });
           existing.save().then(accept).catch(reject);
         }
-      })).then((deleted) => {
+      })))
+      .then((deleted) => {
         req.log.debug('deleted project phase', JSON.stringify(deleted, null, 2));
 
         // Send events to buses
@@ -46,7 +47,7 @@ module.exports = [
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, { req, deleted });
 
         res.status(204).json({});
-      }).catch(err => next(err)));
+      }).catch(err => next(err));
   },
 ];
 

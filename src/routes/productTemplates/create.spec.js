@@ -1,20 +1,40 @@
 /**
  * Tests for create.js
  */
+import _ from 'lodash';
 import chai from 'chai';
 import request from 'supertest';
 
 import server from '../../app';
 import testUtil from '../../tests/util';
+import models from '../../models';
 
 const should = chai.should();
 
 describe('CREATE product template', () => {
+  before((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProductCategory.bulkCreate([
+        {
+          key: 'generic',
+          displayName: 'Generic',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: ['key-1', 'key_1'],
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      ]))
+      .then(() => done());
+  });
+
   describe('POST /productTemplates', () => {
     const body = {
       param: {
         name: 'name 1',
         productKey: 'productKey 1',
+        category: 'generic',
         icon: 'http://example.com/icon1.ico',
         brief: 'brief 1',
         details: 'details 1',
@@ -95,6 +115,32 @@ describe('CREATE product template', () => {
         .expect(422, done);
     });
 
+    it('should return 422 if product category is missing', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.category = null;
+      request(server)
+        .post('/v4/productTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if product category does not exist', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.category = 'not_exist';
+      request(server)
+        .post('/v4/productTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
     it('should return 201 for admin', (done) => {
       request(server)
         .post('/v4/productTemplates')
@@ -109,6 +155,7 @@ describe('CREATE product template', () => {
           should.exist(resJson.id);
           resJson.name.should.be.eql(body.param.name);
           resJson.productKey.should.be.eql(body.param.productKey);
+          resJson.category.should.be.eql(body.param.category);
           resJson.icon.should.be.eql(body.param.icon);
           resJson.brief.should.be.eql(body.param.brief);
           resJson.details.should.be.eql(body.param.details);

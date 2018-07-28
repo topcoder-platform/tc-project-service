@@ -82,7 +82,8 @@ module.exports = [
           existing.save().then(accept).catch(reject);
         }
       }
-    })).then((updated) => {
+    })))
+    .then((updated) => {
       req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
 
       // emit original and updated project phase information
@@ -95,6 +96,7 @@ module.exports = [
         { req, original: previousValue, updated });
 
       res.json(util.wrapResponse(req.id, updated));
-    }).catch(err => next(err)));
+    })
+    .catch(err => next(err));
   },
 ];

@@ -22,23 +22,24 @@ module.exports = [
          where: { id: projectId },
          cascade: true,
          transaction: t,
-       })
-        .then((count) => {
-          if (count === 0) {
-            const err = new Error('Project not found');
-            err.status = 404;
-            next(err);
-          } else {
-            req.app.services.pubsub.publish(
-              EVENT.ROUTING_KEY.PROJECT_DELETED,
-              { id: projectId },
-              { correlationId: req.id },
-            );
-            // emit event
-            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED, { req, id: projectId });
-            res.status(204).json({});
-          }
-        })
-        .catch(err => next(err)));
+       }),
+    )
+    .then((count) => {
+      if (count === 0) {
+        const err = new Error('Project not found');
+        err.status = 404;
+        next(err);
+      } else {
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_DELETED,
+          { id: projectId },
+          { correlationId: req.id },
+        );
+        // emit event
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED, { req, id: projectId });
+        res.status(204).json({});
+      }
+    })
+    .catch(err => next(err));
   },
 ];

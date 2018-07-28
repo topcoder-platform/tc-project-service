@@ -2,20 +2,39 @@
  * Tests for create.js
  */
 import chai from 'chai';
+import _ from 'lodash';
 import request from 'supertest';
 
 import server from '../../app';
+import models from '../../models';
 import testUtil from '../../tests/util';
 
 const should = chai.should();
 
 describe('CREATE project template', () => {
+  before((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProjectType.bulkCreate([
+        {
+          key: 'generic',
+          displayName: 'Generic',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: ['key-1', 'key_1'],
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      ]))
+      .then(() => done());
+  });
+
   describe('POST /projectTemplates', () => {
     const body = {
       param: {
         name: 'template 1',
         key: 'key 1',
-        category: 'category 1',
+        category: 'generic',
         icon: 'http://example.com/icon1.ico',
         question: 'question 1',
         info: 'info 1',
@@ -93,6 +112,32 @@ describe('CREATE project template', () => {
         },
       };
 
+      request(server)
+        .post('/v4/projectTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if project type is missing', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.type = null;
+      request(server)
+        .post('/v4/projectTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if project type does not exist', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.type = 'not_exist';
       request(server)
         .post('/v4/projectTemplates')
         .set({

@@ -92,6 +92,7 @@ describe('Project upgrade', () => {
       ].map(specific => models.ProductTemplate.create(Object.assign({
         name: 'name 1',
         productKey: 'a product key',
+        category: 'category',
         icon: 'http://example.com/icon1.ico',
         brief: 'brief 1',
         details: 'details 1',
