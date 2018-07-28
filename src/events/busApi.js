@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import 'config';
+import config from 'config';
 import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
@@ -16,6 +16,17 @@ const mapEventTypes = {
   [PROJECT_STATUS.PAUSED]: BUS_API_EVENT.PROJECT_PAUSED,
   [PROJECT_STATUS.ACTIVE]: BUS_API_EVENT.PROJECT_ACTIVE,
 };
+
+/**
+ * Builds the connect project attachment url for the given project and attachment ids.
+ *
+ * @param {string|number} projectId the project id
+ * @param {string|number} attachmentId the attachment id
+ * @returns {string} the connect project attachment url
+ */
+function connectProjectAttachmentUrl(projectId, attachmentId) {
+  return `${config.get('connectProjectsUrl')}${projectId}/attachments/${attachmentId}`;
+}
 
 module.exports = (app, logger) => {
   /**
@@ -171,6 +182,7 @@ module.exports = (app, logger) => {
           projectId,
           projectName: project.name,
           fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
+          fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
