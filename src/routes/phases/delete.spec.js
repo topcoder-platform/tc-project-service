@@ -4,7 +4,34 @@ import request from 'supertest';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import chai from 'chai';
 
+const expectAfterDelete = (projectId, id, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProjectPhase.findOne({
+    where: {
+      id,
+      projectId,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/projects/${projectId}/phases/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
 const body = {
   name: 'test project phase',
   status: 'active',
@@ -130,7 +157,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .expect(204, done);
+        .end(err => expectAfterDelete(projectId, phaseId, err, done));
     });
   });
 });

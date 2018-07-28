@@ -6,7 +6,34 @@ import request from 'supertest';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import chai from 'chai';
 
+const expectAfterDelete = (productTemplateId, id, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProductMilestoneTemplate.findOne({
+    where: {
+      id,
+      productTemplateId,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/productTemplates/${productTemplateId}/milestones/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
 const productTemplates = [
   {
     name: 'name 1',
@@ -180,7 +207,7 @@ describe('DELETE milestone template', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(1, 1, err, done));
     });
 
     it('should return 204, for connect admin, if template was successfully removed', (done) => {
@@ -190,7 +217,7 @@ describe('DELETE milestone template', () => {
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(1, 1, err, done));
     });
   });
 });

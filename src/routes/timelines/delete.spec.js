@@ -11,6 +11,32 @@ import { EVENT } from '../../constants';
 
 const should = chai.should(); // eslint-disable-line no-unused-vars
 
+const expectAfterDelete = (id, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.Timeline.findOne({
+    where: {
+      id,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/timelines/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
+
 describe('DELETE timeline', () => {
   beforeEach((done) => {
     testUtil.clearDb()
@@ -180,6 +206,7 @@ describe('DELETE timeline', () => {
 
   after(testUtil.clearDb);
 
+
   describe('DELETE /timelines/{timelineId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
@@ -246,19 +273,21 @@ describe('DELETE timeline', () => {
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
             .expect(204)
-            .end(() => {
-              // eslint-disable-next-line no-unused-expressions
-              server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.TIMELINE_REMOVED).should.be.true;
+            .end((err) => {
+              expectAfterDelete(1, err, () => {
+                // eslint-disable-next-line no-unused-expressions
+                server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.TIMELINE_REMOVED).should.be.true;
 
-              // Milestones are cascade deleted
-              setTimeout(() => {
-                models.Milestone.findAll({ where: { timelineId: 1 } })
-                  .then((afterResults) => {
-                    afterResults.should.have.length(0);
+                // Milestones are cascade deleted
+                setTimeout(() => {
+                  models.Milestone.findAll({ where: { timelineId: 1 } })
+                    .then((afterResults) => {
+                      afterResults.should.have.length(0);
 
-                    done();
-                  });
-              }, 3000);
+                      done();
+                    });
+                }, 3000);
+              });
             });
         });
     });
@@ -270,7 +299,7 @@ describe('DELETE timeline', () => {
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(1, err, done));
     });
 
     it('should return 204, for connect manager, if timeline was successfully removed', (done) => {
@@ -280,7 +309,7 @@ describe('DELETE timeline', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(1, err, done));
     });
 
     it('should return 204, for copilot, if timeline was successfully removed', (done) => {
@@ -290,7 +319,7 @@ describe('DELETE timeline', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(1, err, done));
     });
 
     it('should return 204, for member, if timeline was successfully removed', (done) => {
@@ -300,7 +329,7 @@ describe('DELETE timeline', () => {
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(1, err, done));
     });
   });
 });

@@ -23,18 +23,17 @@ module.exports = [
           projectId,
           deletedAt: { $eq: null },
         },
-      }).then(existing => new Promise((accept, reject) => {
+      }).then((existing) => {
         if (!existing) {
           // handle 404
           const err = new Error('no active project phase found for project id ' +
             `${projectId} and phase id ${phaseId}`);
           err.status = 404;
-          reject(err);
-        } else {
-          _.extend(existing, { deletedBy: req.authUser.userId, deletedAt: Date.now() });
-          existing.save().then(accept).catch(reject);
+          return Promise.reject(err);
         }
-      })))
+        return existing.update({ deletedBy: req.authUser.userId });
+      })
+      .then(entity => entity.destroy()))
       .then((deleted) => {
         req.log.debug('deleted project phase', JSON.stringify(deleted, null, 2));
 

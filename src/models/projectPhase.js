@@ -23,7 +23,7 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
   }, {
     tableName: 'project_phases',
-    paranoid: false,
+    paranoid: true,
     timestamps: true,
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',

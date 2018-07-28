@@ -7,6 +7,7 @@ import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import chai from 'chai';
 
 
 describe('Project Attachments delete', () => {
@@ -113,8 +114,31 @@ describe('Project Attachments delete', () => {
             if (err) {
               done(err);
             } else {
-              deleteSpy.should.have.been.calledOnce;
-              done();
+              setTimeout(() =>
+                models.ProjectAttachment.findOne({
+                  where: {
+                    projectId: project1.id,
+                    id: attachment.id,
+                  },
+                  paranoid: false,
+                })
+                  .then((res) => {
+                    if (!res) {
+                      throw new Error('Should found the entity');
+                    } else {
+                      deleteSpy.should.have.been.calledOnce;
+
+                      chai.assert.isNotNull(res.deletedAt);
+                      chai.assert.isNotNull(res.deletedBy);
+
+                      request(server)
+                        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+                        .set({
+                          Authorization: `Bearer ${testUtil.jwts.admin}`,
+                        })
+                        .expect(404, done);
+                    }
+                  }), 500);
             }
           });
     });
