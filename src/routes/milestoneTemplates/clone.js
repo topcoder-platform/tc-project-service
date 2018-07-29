@@ -77,10 +77,18 @@ module.exports = [
             return models.ProductMilestoneTemplate.bulkCreate(newMilestoneTemplates, { transaction: tx });
           });
         })
-        .then((createdEntities) => {
-          // Omit deletedAt and deletedBy
-          result = _.map(createdEntities, entity => _.omit(entity, 'deletedAt', 'deletedBy'));
-          return result;
+        .then(() => { // eslint-disable-line arrow-body-style
+          return models.ProductMilestoneTemplate.findAll({
+            where: {
+              productTemplateId: req.params.productTemplateId,
+            },
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
+            raw: true,
+          })
+          .then((clonedMilestoneTemplates) => {
+            result = clonedMilestoneTemplates;
+            return result;
+          });
         }),
     )
     .then(() => {

@@ -44,17 +44,37 @@ const productTemplates = [
     updatedBy: 2,
   },
   {
-    name: 'template 2',
+    name: 'name 2',
     productKey: 'productKey 2',
     category: 'category',
-    icon: 'http://example.com/icon2.ico',
+    icon: 'http://example.com/icon1.ico',
     brief: 'brief 2',
     details: 'details 2',
-    aliases: {},
-    template: {},
-    createdBy: 3,
-    updatedBy: 4,
-    deletedAt: new Date(),
+    aliases: {
+      alias1: {
+        subAlias1A: 1,
+        subAlias1B: 2,
+      },
+      alias2: [1, 2, 3],
+    },
+    template: {
+      template1: {
+        name: 'template 1',
+        details: {
+          anyDetails: 'any details 1',
+        },
+        others: ['others 11', 'others 12'],
+      },
+      template2: {
+        name: 'template 2',
+        details: {
+          anyDetails: 'any details 2',
+        },
+        others: ['others 21', 'others 22'],
+      },
+    },
+    createdBy: 1,
+    updatedBy: 2,
   },
 ];
 const milestoneTemplates = [
@@ -187,27 +207,27 @@ describe('CLONE milestone template', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
-        .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           const resJson = res.body.result.content;
-          should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.duration.should.be.eql(body.param.duration);
-          resJson.type.should.be.eql(body.param.type);
-          resJson.order.should.be.eql(body.param.order);
-          resJson.plannedText.should.be.eql(body.param.plannedText);
-          resJson.blockedText.should.be.eql(body.param.blockedText);
-          resJson.activeText.should.be.eql(body.param.activeText);
-          resJson.completedText.should.be.eql(body.param.completedText);
+          resJson.should.have.length(2);
+          should.not.equal(resJson[0].id, null);
+          resJson[0].name.should.be.eql(milestoneTemplates[0].name);
+          resJson[0].duration.should.be.eql(milestoneTemplates[0].duration);
+          resJson[0].type.should.be.eql(milestoneTemplates[0].type);
+          resJson[0].order.should.be.eql(milestoneTemplates[0].order);
+          resJson[0].plannedText.should.be.eql(milestoneTemplates[0].plannedText);
+          resJson[0].blockedText.should.be.eql(milestoneTemplates[0].blockedText);
+          resJson[0].activeText.should.be.eql(milestoneTemplates[0].activeText);
+          resJson[0].completedText.should.be.eql(milestoneTemplates[0].completedText);
+          resJson[0].productTemplateId.should.be.eql(2);
 
-          resJson.createdBy.should.be.eql(40051333); // admin
-          should.exist(resJson.createdAt);
-          resJson.updatedBy.should.be.eql(40051333); // admin
-          should.exist(resJson.updatedAt);
-          should.not.exist(resJson.deletedBy);
-          should.not.exist(resJson.deletedAt);
+          resJson[0].createdBy.should.be.eql(40051333); // admin
+          should.exist(resJson[0].createdAt);
+          resJson[0].updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson[0].updatedAt);
+          should.not.exist(resJson[0].deletedBy);
+          should.not.exist(resJson[0].deletedAt);
 
           done();
         });
@@ -215,17 +235,17 @@ describe('CLONE milestone template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/productTemplates/2/milestones')
+        .post('/v4/productTemplates/2/milestones/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .send(body)
-        .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           const resJson = res.body.result.content;
-          resJson.createdBy.should.be.eql(40051336); // connect admin
-          resJson.updatedBy.should.be.eql(40051336); // connect admin
+          resJson.should.have.length(2);
+          resJson[0].createdBy.should.be.eql(40051336); // connect admin
+          resJson[0].updatedBy.should.be.eql(40051336); // connect admin
           done();
         });
     });
