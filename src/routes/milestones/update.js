@@ -17,32 +17,32 @@ const permissions = tcMiddleware.permissions;
 /**
  * Cascades endDate/completionDate changes to all milestones with a greater order than the given one.
  * @param {Object} updatedMilestone the milestone that was updated
- * @param {Object} transaction the wrapping transaction
  * @returns {Promise<void>} a promise
  */
-async function updateComingMilestones(updatedMilestone, transaction) {
-  const comingMilestones = _.sortBy(await models.Milestone.findAll({
+function updateComingMilestones(updatedMilestone) {
+  return models.Milestone.findAll({
     where: {
       timelineId: updatedMilestone.timelineId,
       order: { $gt: updatedMilestone.order },
     },
-    transaction,
-  }), 'order');
-  let startDate = moment.utc(updatedMilestone.completionDate
-    ? updatedMilestone.completionDate
-    : updatedMilestone.endDate).add(1, 'days').toDate();
-  const promises = _.map(comingMilestones, (_milestone) => {
-    const milestone = _milestone;
-    if (milestone.startDate.getTime() !== startDate.getTime()) {
-      milestone.startDate = startDate;
-      milestone.endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
-    }
-    startDate = moment.utc(milestone.completionDate
-      ? milestone.completionDate
-      : milestone.endDate).add(1, 'days').toDate();
-    return milestone.save({ transaction });
+  }).then((affectedMilestones) => {
+    const comingMilestones = _.sortBy(affectedMilestones, 'order');
+    let startDate = moment.utc(updatedMilestone.completionDate
+      ? updatedMilestone.completionDate
+      : updatedMilestone.endDate).add(1, 'days').toDate();
+    const promises = _.map(comingMilestones, (_milestone) => {
+      const milestone = _milestone;
+      if (milestone.startDate.getTime() !== startDate.getTime()) {
+        milestone.startDate = startDate;
+        milestone.endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+      }
+      startDate = moment.utc(milestone.completionDate
+        ? milestone.completionDate
+        : milestone.endDate).add(1, 'days').toDate();
+      return milestone.save();
+    });
+    return Promise.all(promises);
   });
-  await Promise.all(promises);
 }
 
 const schema = {
@@ -97,7 +97,7 @@ module.exports = [
     let original;
     let updated;
 
-    return models.sequelize.transaction(transaction =>
+    return models.sequelize.transaction(() =>
       // Find the milestone
       models.Milestone.findOne({ where })
         .then((milestone) => {
@@ -134,7 +134,7 @@ module.exports = [
           }
 
           // Update
-          return milestone.update(entityToUpdate, { transaction });
+          return milestone.update(entityToUpdate);
         })
         .then((updatedMilestone) => {
           // Omit deletedAt, deletedBy
@@ -151,7 +151,6 @@ module.exports = [
               id: { $ne: updated.id },
               order: updated.order,
             },
-            transaction,
           })
             .then((count) => {
               if (count === 0) {
@@ -167,7 +166,6 @@ module.exports = [
                     id: { $ne: updated.id },
                     order: { $between: [original.order + 1, updated.order] },
                   },
-                  transaction,
                 });
               }
 
@@ -179,7 +177,6 @@ module.exports = [
                   id: { $ne: updated.id },
                   order: { $between: [updated.order, original.order - 1] },
                 },
-                transaction,
               });
             });
         })
@@ -191,7 +188,7 @@ module.exports = [
             original.duration === updated.duration) {
             return Promise.resolve();
           }
-          return updateComingMilestones(updated, transaction);
+          return updateComingMilestones(updated);
         }),
     )
     .then(() => {
