@@ -306,6 +306,82 @@ describe('LIST Project', () => {
         });
     });
 
+    it('should return the project for administrator with field description, billingAccountId and attachments', (done) => {
+      request(server)
+        .get('/v4/projects/?fields=description%2CbillingAccountId%2Cattachments&sort=id%20asc')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson[0].should.have.property('attachments');
+            resJson[0].should.have.property('description');
+            resJson[0].should.have.property('billingAccountId');
+            done();
+          }
+        });
+    });
+
+    it('should return the project for administrator with field description and billingAccountId', (done) => {
+      request(server)
+        .get('/v4/projects/?fields=description%2CbillingAccountId&sort=id%20asc')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson[0].should.not.have.property('attachments');
+            resJson[0].should.have.property('description');
+            resJson[0].should.have.property('billingAccountId');
+            done();
+          }
+        });
+    });
+
+    it('should return the project for administrator with all field', (done) => {
+      request(server)
+        .get('/v4/projects/?sort=id%20asc')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson[0].should.have.property('id');
+            resJson[0].should.have.property('type');
+            resJson[0].should.have.property('billingAccountId');
+            resJson[0].should.have.property('description');
+            resJson[0].should.have.property('status');
+            resJson[0].should.have.property('details');
+            resJson[0].should.have.property('createdBy');
+            resJson[0].should.have.property('updatedBy');
+            resJson[0].should.have.property('members');
+            resJson[0].should.have.property('attachments');
+            done();
+          }
+        });
+    });
+
     it('should return all projects that match when filtering by name', (done) => {
       request(server)
         .get('/v4/projects/?filter=keyword%3Dtest')

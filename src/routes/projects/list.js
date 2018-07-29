@@ -134,7 +134,10 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     const phaseFields = _.get(fields, 'project_phases_products');
     sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `phases.products.${single}`));
   }
-  sourceInclude = sourceInclude.concat(_.map(PROJECT_ATTACHMENT_ATTRIBUTES, single => `attachments.${single}`));
+  if (_.get(fields, 'attachments', null)) {
+    const phaseFields = _.get(fields, 'attachments');
+    sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `attachments.${single}`));
+  }
 
   if (sourceInclude) {
     searchCriteria._sourceInclude = sourceInclude;        // eslint-disable-line no-underscore-dangle
@@ -248,6 +251,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     project_members: PROJECT_MEMBER_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
+    attachments: PROJECT_ATTACHMENT_ATTRIBUTES,
   });
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) {
