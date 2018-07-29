@@ -306,28 +306,29 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return the project for administrator with field description, billingAccountId and attachments', (done) => {
-      request(server)
-        .get('/v4/projects/?fields=description%2CbillingAccountId%2Cattachments&sort=id%20asc')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-            resJson.should.have.lengthOf(3);
-            resJson[0].should.have.property('attachments');
-            resJson[0].should.have.property('description');
-            resJson[0].should.have.property('billingAccountId');
-            done();
-          }
-        });
-    });
+    it('should return the project for administrator with field description, billingAccountId and attachments',
+      (done) => {
+        request(server)
+          .get('/v4/projects/?fields=description%2CbillingAccountId%2Cattachments&sort=id%20asc')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.result.content;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(3);
+              resJson[0].should.have.property('attachments');
+              resJson[0].should.have.property('description');
+              resJson[0].should.have.property('billingAccountId');
+              done();
+            }
+          });
+      });
 
     it('should return the project for administrator with field description and billingAccountId', (done) => {
       request(server)

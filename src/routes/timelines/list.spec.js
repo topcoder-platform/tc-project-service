@@ -286,7 +286,6 @@ describe('LIST timelines', () => {
         .expect(200)
         .end((err, res) => {
           const resJson = res.body.result.content;
-          console.log(resJson);
           resJson.should.have.length(1);
 
           done();
