@@ -3,7 +3,6 @@
  */
 import chai from 'chai';
 import request from 'supertest';
-import _ from 'lodash';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import models from '../../models';

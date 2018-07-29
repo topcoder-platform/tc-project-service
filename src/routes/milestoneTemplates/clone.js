@@ -4,7 +4,6 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
-import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
@@ -30,18 +29,20 @@ module.exports = [
 
     return models.sequelize.transaction(tx =>
       // Find the product template
-      models.ProductTemplate.findAll({ where: { id: [req.params.productTemplateId, req.body.param.sourceTemplateId] }, transaction: tx })
+      models.ProductTemplate.findAll({ where: { id: [req.params.productTemplateId, req.body.param.sourceTemplateId] },
+        transaction: tx })
         .then((productTemplates) => {
           // Not found
           if (!productTemplates) {
             const apiErr = new Error(
-              `Product template not found for product template ids ${req.params.productTemplateId} ${req.body.param.sourceTemplateId}`);
+              `Product template not found for product template ids ${req.params.productTemplateId}
+              ${req.body.param.sourceTemplateId}`);
             apiErr.status = 404;
             return Promise.reject(apiErr);
           }
 
-          const targetProductTemplate = _.find(productTemplates, template => { return template.id == req.params.productTemplateId });
-          const sourceProductTemplate = _.find(productTemplates, template => { return template.id == req.body.param.sourceTemplateId });
+          const targetProductTemplate = _.find(productTemplates, ['id', req.params.productTemplateId]);
+          const sourceProductTemplate = _.find(productTemplates, ['id', req.body.param.sourceTemplateId]);
 
           // Not found
           if (!targetProductTemplate) {
@@ -67,19 +68,19 @@ module.exports = [
             raw: true,
           })
           .then((milestoneTemplatesToClone) => {
-            let newMilestoneTemplates = _.cloneDeep(milestoneTemplatesToClone)
-            _.each(newMilestoneTemplates, milestone => {
-              milestone.productTemplateId = req.params.productTemplateId
-              milestone.createdBy = req.authUser.userId
-              milestone.updatedBy = req.authUser.userId
-            })
+            const newMilestoneTemplates = _.cloneDeep(milestoneTemplatesToClone);
+            _.each(newMilestoneTemplates, (milestone) => {
+              milestone.productTemplateId = req.params.productTemplateId; // eslint-disable-line no-param-reassign
+              milestone.createdBy = req.authUser.userId; // eslint-disable-line no-param-reassign
+              milestone.updatedBy = req.authUser.userId; // eslint-disable-line no-param-reassign
+            });
             return models.ProductMilestoneTemplate.bulkCreate(newMilestoneTemplates, { transaction: tx });
-          })
+          });
         })
         .then((createdEntities) => {
           // Omit deletedAt and deletedBy
-          result = _.map(createdEntities, entity => _.omit(entity, 'deletedAt', 'deletedBy'))
-          return result
+          result = _.map(createdEntities, entity => _.omit(entity, 'deletedAt', 'deletedBy'));
+          return result;
         }),
     )
     .then(() => {
