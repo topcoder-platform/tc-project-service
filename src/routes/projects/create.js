@@ -4,6 +4,7 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import config from 'config';
+import moment from 'moment';
 
 import models from '../../models';
 import { PROJECT_MEMBER_ROLE, PROJECT_STATUS, PROJECT_PHASE_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
@@ -91,12 +92,17 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
     productTemplates.forEach((pt) => {
       productTemplateMap[pt.id] = pt;
     });
-    return Promise.all(_.map(phases, (phase, phaseIdx) =>
+    return Promise.all(_.map(phases, (phase, phaseIdx) => {
+      const duration = _.get(phase, 'duration', 1);
+      const startDate = moment.utc().hours(0).minutes(0).seconds(0)
+        .milliseconds(0);
       // Create phase
-      models.ProjectPhase.create({
+      return models.ProjectPhase.create({
         projectId: newProject.id,
         name: _.get(phase, 'name', `Stage ${phaseIdx}`),
-        duration: _.get(phase, 'duration', 0),
+        duration,
+        startDate: startDate.format(),
+        endDate: moment.utc(startDate).add(duration - 1, 'days').format(),
         status: _.get(phase, 'status', PROJECT_PHASE_STATUS.DRAFT),
         budget: _.get(phase, 'budget', 0),
         updatedBy: req.authUser.userId,
@@ -122,8 +128,8 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
           result.newPhases.push(newPhaseJson);
           return Promise.resolve();
         });
-      }),
-    ));
+      });
+    }));
   }).then(() => Promise.resolve(result));
 }
 

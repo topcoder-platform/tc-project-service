@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import chai from 'chai';
+import moment from 'moment';
 import sinon from 'sinon';
 import request from 'supertest';
 
@@ -85,6 +86,7 @@ describe('Project create', () => {
           phases: {
             phase1: {
               name: 'phase 1',
+              duration: 5,
               products: [
                 {
                   id: 21,
@@ -116,6 +118,7 @@ describe('Project create', () => {
             1: {
               name: 'Design Stage',
               status: 'open',
+              duration: 10,
               details: {
                 description: 'detailed description',
               },
@@ -130,6 +133,7 @@ describe('Project create', () => {
             2: {
               name: 'Development Stage',
               status: 'open',
+              duration: 20,
               products: [
                 {
                   id: 23,
@@ -440,6 +444,14 @@ describe('Project create', () => {
             const phases = _.sortBy(resJson.phases, p => p.name);
             phases[0].name.should.be.eql('Design Stage');
             phases[0].status.should.be.eql('open');
+            phases[0].startDate.should.be.a('string');
+            phases[0].duration.should.be.eql(10);
+            const startDate = moment.utc(phases[0].startDate);
+            startDate.hours().should.be.eql(0);
+            startDate.minutes().should.be.eql(0);
+            startDate.seconds().should.be.eql(0);
+            startDate.milliseconds().should.be.eql(0);
+            new Date(phases[0].endDate).should.be.eql(startDate.add(9, 'days').toDate());
             expect(phases[0].details).to.be.empty;
             phases[0].products.should.have.lengthOf(1);
             phases[0].products[0].name.should.be.eql('product 1');
