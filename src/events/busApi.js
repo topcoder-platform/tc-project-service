@@ -18,6 +18,17 @@ const mapEventTypes = {
 };
 
 /**
+ * Builds the connect project attachment url for the given project and attachment ids.
+ *
+ * @param {string|number} projectId the project id
+ * @param {string|number} attachmentId the attachment id
+ * @returns {string} the connect project attachment url
+ */
+function connectProjectAttachmentUrl(projectId, attachmentId) {
+  return `${config.get('connectProjectsUrl')}${projectId}/attachments/${attachmentId}`;
+}
+
+/**
  * Builds the connect project url for the given project id.
  *
  * @param {string|number} projectId the project id
@@ -189,6 +200,7 @@ module.exports = (app, logger) => {
           projectName: project.name,
           projectUrl: connectProjectUrl(projectId),
           fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
+          fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
