@@ -32,4 +32,4 @@ ALTER TABLE ONLY product_categories
 --
 ALTER TABLE product_templates ADD COLUMN "category" character varying(45);
 UPDATE product_templates set category='generic' where category is null;
-ALTER TABLE product_templates ALTER COLUMN "generic" SET NOT NULL;
+ALTER TABLE product_templates ALTER COLUMN "category" SET NOT NULL;
