@@ -4063,6 +4063,108 @@
 					"response": []
 				},
 				{
+					"name": "Clone milestone template",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceTemplateId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/2/milestones/clone",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"2",
+								"milestones",
+								"clone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clone milestone template with invalid product template id",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceTemplateId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/5/milestones/clone",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"5",
+								"milestones",
+								"clone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clone milestone template with invalid source product template id",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceTemplateId\": 6\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/2/milestones/clone",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"2",
+								"milestones",
+								"clone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "List milestone templates",
 					"request": {
 						"method": "GET",

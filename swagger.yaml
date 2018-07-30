@@ -1494,6 +1494,41 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
+  /productTemplates/{productTemplateId}/milestones/clone:
+    parameters:
+      - $ref: "#/parameters/productTemplateIdParam"
+    post:
+      tags:
+        - productMilestoneTemplate
+      operationId: cloneMilestoneTemplate
+      security:
+        - Bearer: []
+      description: Clone milestone templates from one product template to the other. Only connect manager, connect admin, and admin can access this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/MilestoneCloneTemplateRequest'
+      responses:
+        '201':
+          description: Returns the list of cloned milestone templates
+          schema:
+            $ref: "#/definitions/MilestoneTemplateListResponse"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+
   /productTemplates/{productTemplateId}/milestones/{milestoneTemplateId}:
     parameters:
       - $ref: "#/parameters/productTemplateIdParam"
@@ -3356,6 +3391,17 @@ definitions:
     properties:
       param:
         $ref: "#/definitions/MilestoneTemplateRequest"
+
+  MilestoneCloneTemplateRequest:
+    title: Milestone clone template request object
+    type: object
+    required:
+      - sourceTemplateId
+    properties:
+      sourceTemplateId:
+        type: number
+        format: integer
+        description: the product template id where to clone the milestone templates from
 
   MilestoneTemplate:
     title: Milestone template object

@@ -108,6 +108,9 @@ router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones')
   .post(require('./milestoneTemplates/create'))
   .get(require('./milestoneTemplates/list'));
 
+router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones/clone')
+  .post(require('./milestoneTemplates/clone'));
+
 router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones/:milestoneTemplateId(\\d+)')
   .get(require('./milestoneTemplates/get'))
   .patch(require('./milestoneTemplates/update'))
