@@ -57,22 +57,31 @@ module.exports = [
         // Omit deletedAt, deletedBy
         updated = _.omit(updatedTimeline.toJSON(), ['deletedAt', 'deletedBy']);
 
-        // Update milestones startDate and endDate if necessary
-        if (original.startDate !== updated.startDate || original.endDate !== updated.endDate) {
+        // Update milestones startDate and endDate if necessary, if the timeline startDate changed
+        if (original.startDate.getTime() !== updated.startDate.getTime()) {
           return updatedTimeline.getMilestones()
             .then((milestones) => {
               let startDate = updated.startDate;
+
+              // Process milestones in order
               const updateMilestonePromises = _.chain(milestones).sortBy('order').map((_milestone) => {
                 const milestone = _milestone;
+
+                // Update if the iterating startDate is different than the saved one
                 if (milestone.startDate.getTime() !== startDate.getTime()) {
                   milestone.startDate = startDate;
                   milestone.updatedBy = req.authUser.userId;
                 }
+
+                // Make sure the endDate is the correct, i.e. for duration = 1 it should be equal to the start date,
+                // for duration = 2 it should be equal to the next day and so on...
                 const endDate = moment.utc(milestone.startDate).add(milestone.duration - 1, 'days').toDate();
                 if (!milestone.endDate || endDate.getTime() !== milestone.endDate.getTime()) {
                   milestone.endDate = endDate;
                   milestone.updatedBy = req.authUser.userId;
                 }
+
+                // Next iterated milestone should have as startDate this milestone's endDate plus one day
                 startDate = moment.utc(milestone.endDate).add(1, 'days').toDate();
                 return milestone.save();
               }).value();
