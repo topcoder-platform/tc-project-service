@@ -135,8 +135,8 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `phases.products.${single}`));
   }
   if (_.get(fields, 'attachments', null)) {
-    const phaseFields = _.get(fields, 'attachments');
-    sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `attachments.${single}`));
+    const attachmentFields = _.get(fields, 'attachments');
+    sourceInclude = sourceInclude.concat(_.map(attachmentFields, single => `attachments.${single}`));
   }
 
   if (sourceInclude) {

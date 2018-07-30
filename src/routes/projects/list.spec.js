@@ -323,6 +323,15 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(3);
               resJson[0].should.have.property('attachments');
+              resJson[0].attachments.should.have.lengthOf(1);
+              resJson[0].attachments[0].should.have.property('id');
+              resJson[0].attachments[0].should.have.property('projectId');
+              resJson[0].attachments[0].should.have.property('title');
+              resJson[0].attachments[0].should.have.property('description');
+              resJson[0].attachments[0].should.have.property('filePath');
+              resJson[0].attachments[0].should.have.property('contentType');
+              resJson[0].attachments[0].should.have.property('createdBy');
+              resJson[0].attachments[0].should.have.property('updatedBy');
               resJson[0].should.have.property('description');
               resJson[0].should.have.property('billingAccountId');
               done();
