@@ -9,19 +9,20 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
-import { EVENT } from '../../constants';
+import { EVENT, MILESTONE_STATUS } from '../../constants';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
 
 /**
  * Cascades endDate/completionDate changes to all milestones with a greater order than the given one.
+ * @param {Object} originalMilestone the original milestone that was updated
  * @param {Object} updatedMilestone the milestone that was updated
  * @returns {Promise<void>} a promise that resolves to the last found milestone. If no milestone exists with an
  * order greater than the passed <b>updatedMilestone</b>, the promise will resolve to the passed
  * <b>updatedMilestone</b>
  */
-function updateComingMilestones(updatedMilestone) {
+function updateComingMilestones(originalMilestone, updatedMilestone) {
   return models.Milestone.findAll({
     where: {
       timelineId: updatedMilestone.timelineId,
@@ -32,7 +33,7 @@ function updateComingMilestones(updatedMilestone) {
     let startDate = moment.utc(updatedMilestone.completionDate
       ? updatedMilestone.completionDate
       : updatedMilestone.endDate).add(1, 'days').toDate();
-    const promises = _.map(comingMilestones, (_milestone) => {
+    const promises = _.map(comingMilestones, (_milestone, idx) => {
       const milestone = _milestone;
 
       // Update the milestone startDate if different than the iterated startDate
@@ -46,6 +47,12 @@ function updateComingMilestones(updatedMilestone) {
       if (!_.isEqual(milestone.endDate, endDate)) {
         milestone.endDate = endDate;
         milestone.updatedBy = updatedMilestone.updatedBy;
+      }
+
+      // if completionDate is alerted, update status of the next milestone to the current one
+      if (!_.isEqual(originalMilestone.completionDate, updatedMilestone.completionDate) && idx === 0) {
+        // activate next milestone
+        milestone.status = MILESTONE_STATUS.ACTIVE;
       }
 
       // Set the next startDate value to the next day after completionDate if present or the endDate
@@ -132,12 +139,31 @@ module.exports = [
           }
 
           original = _.omit(milestone.toJSON(), ['deletedAt', 'deletedBy']);
+          const durationChanged = entityToUpdate.duration && entityToUpdate.duration !== milestone.duration;
+          const statusChanged = entityToUpdate.status && entityToUpdate.status !== milestone.status;
+          const completionDateChanged = entityToUpdate.completionDate
+            && !_.isEqual(milestone.completionDate, entityToUpdate.completionDate);
 
           // Merge JSON fields
           entityToUpdate.details = util.mergeJsonObjects(milestone.details, entityToUpdate.details);
 
-          if (entityToUpdate.duration && entityToUpdate.duration !== milestone.duration) {
+          if (durationChanged) {
             entityToUpdate.endDate = moment.utc(milestone.startDate).add(entityToUpdate.duration - 1, 'days').toDate();
+          }
+
+          // if status has changed
+          if (statusChanged) {
+            // if status has changed to be completed, set the compeltionDate if not provided
+            if (entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
+              const today = moment.utc().hours(0).minutes(0).seconds(0)
+                .milliseconds(0);
+              entityToUpdate.completionDate = entityToUpdate.completionDate ? entityToUpdate.completionDate : today;
+            }
+          }
+
+          // if completionDate has changed
+          if (!statusChanged && completionDateChanged) {
+            entityToUpdate.status = MILESTONE_STATUS.COMPLETED;
           }
 
           // Update
@@ -190,7 +216,7 @@ module.exports = [
         .then(() => {
           // Update dates of the other milestones only if the completionDate or the duration changed
           if (!_.isEqual(original.completionDate, updated.completionDate) || original.duration !== updated.duration) {
-            return updateComingMilestones(updated)
+            return updateComingMilestones(original, updated)
               .then((lastTimelineMilestone) => {
                 if (!_.isEqual(lastTimelineMilestone.endDate, timeline.endDate)) {
                   timeline.endDate = lastTimelineMilestone.endDate;
