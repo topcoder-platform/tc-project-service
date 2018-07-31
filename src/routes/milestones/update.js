@@ -56,8 +56,8 @@ const schema = {
       name: Joi.string().max(255).optional(),
       description: Joi.string().max(255),
       duration: Joi.number().integer().min(1).optional(),
-      startDate: Joi.date().optional(),
-      endDate: Joi.date().allow(null),
+      startDate: Joi.any().forbidden(),
+      endDate: Joi.any().forbidden(),
       completionDate: Joi.date().allow(null),
       status: Joi.string().max(45).optional(),
       type: Joi.string().max(45).optional(),
@@ -105,16 +105,6 @@ module.exports = [
           if (!milestone) {
             const apiErr = new Error(`Milestone not found for milestone id ${req.params.milestoneId}`);
             apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-          // if any of these keys was provided and is different from what's in the database, error
-          if (['startDate', 'endDate']
-            .some(key => entityToUpdate[key] && (
-              !milestone[key] ||
-              (milestone[key] && entityToUpdate[key].getTime() !== milestone[key].getTime())
-            ))) {
-            const apiErr = new Error('Updating a milestone startDate or endDate is not allowed');
-            apiErr.status = 422;
             return Promise.reject(apiErr);
           }
 

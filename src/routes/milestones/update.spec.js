@@ -462,56 +462,23 @@ describe('UPDATE Milestone', () => {
         .expect(200, done);
     });
 
-    it('should return 422 if startDate is after endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          endDate: '2018-05-28T00:00:00.000Z',
-        }),
-      };
+    ['startDate', 'endDate'].forEach((field) => {
+      it(`should return 422 if ${field} is present in the payload`, (done) => {
+        const invalidBody = {
+          param: _.assign({}, body.param, {
+            [field]: '2018-07-01T00:00:00.000Z',
+          }),
+        };
 
-      request(server)
-        .patch('/v4/timelines/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if startDate is different than the original startDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-07-01T00:00:00.000Z',
-        }),
-      };
-
-      request(server)
-        .patch('/v4/timelines/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if endDate is different than the original endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          endDate: '2018-07-01T00:00:00.000Z',
-        }),
-      };
-
-      request(server)
-        .patch('/v4/timelines/1/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
+        request(server)
+          .patch('/v4/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(invalidBody)
+          .expect('Content-Type', /json/)
+          .expect(422, done);
+      });
     });
 
     it('should return 200 for admin', (done) => {
@@ -717,14 +684,13 @@ describe('UPDATE Milestone', () => {
         .expect(200)
         .end(() => {
           // Milestone 6: order 0
-          setTimeout(() => {
-            models.Milestone.findById(6)
-              .then((milestone) => {
-                milestone.order.should.be.eql(0);
+          models.Milestone.findById(6)
+            .then((milestone) => {
+              milestone.order.should.be.eql(0);
 
-                done();
-              });
-          }, 3000);
+              done();
+            })
+            .catch(done);
         });
     });
 
@@ -782,22 +748,21 @@ describe('UPDATE Milestone', () => {
               // Milestone 6: order 1 => 1
               // Milestone 7: order 3 => 3
               // Milestone 8: order 4 => 2
-              setTimeout(() => {
-                models.Milestone.findById(6)
-                  .then((milestone) => {
-                    milestone.order.should.be.eql(1);
-                  })
-                  .then(() => models.Milestone.findById(7))
-                  .then((milestone) => {
-                    milestone.order.should.be.eql(3);
-                  })
-                  .then(() => models.Milestone.findById(8))
-                  .then((milestone) => {
-                    milestone.order.should.be.eql(2);
+              models.Milestone.findById(6)
+                .then((milestone) => {
+                  milestone.order.should.be.eql(1);
+                })
+                .then(() => models.Milestone.findById(7))
+                .then((milestone) => {
+                  milestone.order.should.be.eql(3);
+                })
+                .then(() => models.Milestone.findById(8))
+                .then((milestone) => {
+                  milestone.order.should.be.eql(2);
 
-                    done();
-                  });
-              }, 3000);
+                  done();
+                })
+                .catch(done);
             });
         });
     });
@@ -856,22 +821,21 @@ describe('UPDATE Milestone', () => {
               // Milestone 6: order 1 => 1
               // Milestone 7: order 2 => 3
               // Milestone 8: order 4 => 2
-              setTimeout(() => {
-                models.Milestone.findById(6)
-                  .then((milestone) => {
-                    milestone.order.should.be.eql(1);
-                  })
-                  .then(() => models.Milestone.findById(7))
-                  .then((milestone) => {
-                    milestone.order.should.be.eql(3);
-                  })
-                  .then(() => models.Milestone.findById(8))
-                  .then((milestone) => {
-                    milestone.order.should.be.eql(2);
+              models.Milestone.findById(6)
+                .then((milestone) => {
+                  milestone.order.should.be.eql(1);
+                })
+                .then(() => models.Milestone.findById(7))
+                .then((milestone) => {
+                  milestone.order.should.be.eql(3);
+                })
+                .then(() => models.Milestone.findById(8))
+                .then((milestone) => {
+                  milestone.order.should.be.eql(2);
 
-                    done();
-                  });
-              }, 3000);
+                  done();
+                })
+                .catch(done);
             });
         });
     });
@@ -895,20 +859,18 @@ describe('UPDATE Milestone', () => {
           //                endDate: null                       to '2018-05-21T00:00:00.000Z'
           // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
           //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          setTimeout(() => {
-            models.Milestone.findById(3)
-              .then((milestone) => {
-                milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-                milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
-                return models.Milestone.findById(4);
-              })
-              .then((milestone) => {
-                milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
-                milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-                done();
-              })
-              .catch(done);
-          }, 3000);
+          models.Milestone.findById(3)
+            .then((milestone) => {
+              milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
+              milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
+              return models.Milestone.findById(4);
+            })
+            .then((milestone) => {
+              milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
+              milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
+              done();
+            })
+            .catch(done);
         });
     });
 
@@ -929,20 +891,18 @@ describe('UPDATE Milestone', () => {
           //                endDate: null                       to '2018-05-21T00:00:00.000Z'
           // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
           //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          setTimeout(() => {
-            models.Milestone.findById(3)
-              .then((milestone) => {
-                milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-                milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
-                return models.Milestone.findById(4);
-              })
-              .then((milestone) => {
-                milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
-                milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-                done();
-              })
-              .catch(done);
-          }, 3000);
+          models.Milestone.findById(3)
+            .then((milestone) => {
+              milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
+              milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
+              return models.Milestone.findById(4);
+            })
+            .then((milestone) => {
+              milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
+              milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
+              done();
+            })
+            .catch(done);
         });
     });
 
