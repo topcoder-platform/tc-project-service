@@ -17,7 +17,9 @@ const permissions = tcMiddleware.permissions;
 /**
  * Cascades endDate/completionDate changes to all milestones with a greater order than the given one.
  * @param {Object} updatedMilestone the milestone that was updated
- * @returns {Promise<void>} a promise
+ * @returns {Promise<void>} a promise that resolves to the last found milestone. If no milestone exists with an
+ * order greater than the passed <b>updatedMilestone</b>, the promise will resolve to the passed
+ * <b>updatedMilestone</b>
  */
 function updateComingMilestones(updatedMilestone) {
   return models.Milestone.findAll({
@@ -32,16 +34,29 @@ function updateComingMilestones(updatedMilestone) {
       : updatedMilestone.endDate).add(1, 'days').toDate();
     const promises = _.map(comingMilestones, (_milestone) => {
       const milestone = _milestone;
-      if (milestone.startDate.getTime() !== startDate.getTime()) {
+
+      // Update the milestone startDate if different than the iterated startDate
+      if (!_.isEqual(milestone.startDate, startDate)) {
         milestone.startDate = startDate;
-        milestone.endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+        milestone.updatedBy = updatedMilestone.updatedBy;
       }
+
+      // Calculate the endDate, and update it if different
+      const endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+      if (!_.isEqual(milestone.endDate, endDate)) {
+        milestone.endDate = endDate;
+        milestone.updatedBy = updatedMilestone.updatedBy;
+      }
+
+      // Set the next startDate value to the next day after completionDate if present or the endDate
       startDate = moment.utc(milestone.completionDate
         ? milestone.completionDate
         : milestone.endDate).add(1, 'days').toDate();
       return milestone.save();
     });
-    return Promise.all(promises);
+
+    // Resolve promise to the last updated milestone, or to the passed in updatedMilestone
+    return Promise.all(promises).then(updatedMilestones => updatedMilestones.pop() || updatedMilestone);
   });
 }
 
@@ -93,6 +108,8 @@ module.exports = [
       updatedBy: req.authUser.userId,
       timelineId: req.params.timelineId,
     });
+
+    const timeline = req.timeline;
 
     let original;
     let updated;
@@ -173,7 +190,15 @@ module.exports = [
         .then(() => {
           // Update dates of the other milestones only if the completionDate or the duration changed
           if (!_.isEqual(original.completionDate, updated.completionDate) || original.duration !== updated.duration) {
-            return updateComingMilestones(updated);
+            return updateComingMilestones(updated)
+              .then((lastTimelineMilestone) => {
+                if (!_.isEqual(lastTimelineMilestone.endDate, timeline.endDate)) {
+                  timeline.endDate = lastTimelineMilestone.endDate;
+                  timeline.updatedBy = lastTimelineMilestone.updatedBy;
+                  return timeline.save();
+                }
+                return Promise.resolve();
+              });
           }
           return Promise.resolve();
         }),

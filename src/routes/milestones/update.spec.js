@@ -874,6 +874,40 @@ describe('UPDATE Milestone', () => {
         });
     });
 
+    it('should return 200 for admin - changing completionDate will change the timeline\'s ' +
+      // eslint-disable-next-line func-names
+      'endDate', function (done) {
+      this.timeout(10000);
+
+      request(server)
+        .patch('/v4/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: _.assign({}, body.param, {
+          completionDate: '2018-05-18T00:00:00.000Z', order: undefined, duration: undefined,
+        }) })
+        .expect(200)
+        .end(() => {
+          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
+          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
+          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
+          // BELOW will be the new timeline's endDate
+          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
+          models.Timeline.findById(1)
+            .then((timeline) => {
+              // timeline start shouldn't change
+              timeline.startDate.should.be.eql(new Date('2018-05-02T00:00:00.000Z'));
+
+              // timeline end should change
+              timeline.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
+
+              done();
+            })
+            .catch(done);
+        });
+    });
+
     it('should return 200 for admin - changing duration will cascade changes to coming ' +
       // eslint-disable-next-line func-names
       'milestones', function (done) {
@@ -900,6 +934,38 @@ describe('UPDATE Milestone', () => {
             .then((milestone) => {
               milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
               milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
+              done();
+            })
+            .catch(done);
+        });
+    });
+
+    it('should return 200 for admin - changing duration will change the timeline\'s ' +
+      // eslint-disable-next-line func-names
+      'endDate', function (done) {
+      this.timeout(10000);
+
+      request(server)
+        .patch('/v4/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: _.assign({}, body.param, { duration: 5, order: undefined, completionDate: undefined }) })
+        .expect(200)
+        .end(() => {
+          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
+          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
+          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
+          // BELOW will be the new timeline's endDate
+          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
+          models.Timeline.findById(1)
+            .then((timeline) => {
+              // timeline start shouldn't change
+              timeline.startDate.should.be.eql(new Date('2018-05-02T00:00:00.000Z'));
+
+              // timeline end should change
+              timeline.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
+
               done();
             })
             .catch(done);
