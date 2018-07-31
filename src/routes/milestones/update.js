@@ -171,14 +171,11 @@ module.exports = [
             });
         })
         .then(() => {
-          // Update dates of the other milestones only if the completionDate nor the duration changed
-          if (((!original.completionDate && !updated.completionDate) ||
-            (original.completionDate && updated.completionDate &&
-              original.completionDate.getTime() === updated.completionDate.getTime())) &&
-            original.duration === updated.duration) {
-            return Promise.resolve();
+          // Update dates of the other milestones only if the completionDate or the duration changed
+          if (!_.isEqual(original.completionDate, updated.completionDate) || original.duration !== updated.duration) {
+            return updateComingMilestones(updated);
           }
-          return updateComingMilestones(updated);
+          return Promise.resolve();
         }),
     )
     .then(() => {
