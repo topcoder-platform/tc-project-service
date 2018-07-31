@@ -269,8 +269,7 @@ describe('CREATE milestone template', () => {
             });
             done();
           }).catch((error) => {
-            console.log(error);
-            done();
+            done(error);
           });
         });
     });

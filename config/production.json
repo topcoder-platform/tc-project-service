@@ -1,3 +1,4 @@
 {
-  "authDomain": "topcoder.com"
+  "authDomain": "topcoder.com",
+  "connectProjectsUrl": "https://connect.topcoder.com/projects/",
 }

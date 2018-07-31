@@ -154,6 +154,10 @@ _.assignIn(util, {
       if (fields.project_members.length === 0 && _.indexOf(queryFields, 'members') > -1) {
         fields.project_members = allowedFields.project_members;
       }
+      // remove attachments if not requested
+      if (fields.attachments && _.indexOf(queryFields, 'attachments') === -1) {
+        fields.attachments = null;
+      }
     }
     return fields;
   },

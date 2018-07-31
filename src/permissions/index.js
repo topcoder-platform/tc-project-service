@@ -43,6 +43,7 @@ module.exports = () => {
   Authorizer.setPolicy('project.updatePhaseProduct', copilotAndAbove);
   Authorizer.setPolicy('project.deletePhaseProduct', copilotAndAbove);
 
+  Authorizer.setPolicy('milestoneTemplate.clone', projectAdmin);
   Authorizer.setPolicy('milestoneTemplate.create', projectAdmin);
   Authorizer.setPolicy('milestoneTemplate.edit', projectAdmin);
   Authorizer.setPolicy('milestoneTemplate.delete', projectAdmin);

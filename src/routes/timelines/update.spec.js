@@ -518,11 +518,11 @@ describe('UPDATE timeline', () => {
               })
               .then(() => models.Milestone.findById(2))
               .then((milestone) => {
-                milestone.startDate.should.be.eql(new Date('2018-05-15T00:00:00.000Z'));
-                should.not.exist(milestone.endDate);
-
+                milestone.startDate.should.be.eql(new Date('2018-05-17T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
                 done();
-              });
+              })
+              .catch(done);
           }, 3000);
         });
     });
@@ -547,16 +547,17 @@ describe('UPDATE timeline', () => {
           setTimeout(() => {
             models.Milestone.findById(1)
               .then((milestone) => {
-                milestone.startDate.should.be.eql(new Date('2018-05-13T00:00:00.000Z'));
-                milestone.endDate.should.be.eql(new Date('2018-05-15T00:00:00.000Z'));
+                milestone.startDate.should.be.eql(new Date('2018-05-12T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-13T00:00:00.000Z'));
               })
               .then(() => models.Milestone.findById(2))
               .then((milestone) => {
                 milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
-                should.not.exist(milestone.endDate);
+                milestone.endDate.should.be.eql(new Date('2018-05-16T00:00:00.000Z'));
 
                 done();
-              });
+              })
+              .catch(done);
           }, 3000);
         });
     });

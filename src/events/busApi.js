@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import 'config';
+import config from 'config';
 import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
@@ -17,6 +17,27 @@ const mapEventTypes = {
   [PROJECT_STATUS.ACTIVE]: BUS_API_EVENT.PROJECT_ACTIVE,
 };
 
+/**
+ * Builds the connect project attachment url for the given project and attachment ids.
+ *
+ * @param {string|number} projectId the project id
+ * @param {string|number} attachmentId the attachment id
+ * @returns {string} the connect project attachment url
+ */
+function connectProjectAttachmentUrl(projectId, attachmentId) {
+  return `${config.get('connectProjectsUrl')}${projectId}/attachments/${attachmentId}`;
+}
+
+/**
+ * Builds the connect project url for the given project id.
+ *
+ * @param {string|number} projectId the project id
+ * @returns {string} the connect project url
+ */
+function connectProjectUrl(projectId) {
+  return `${config.get('connectProjectsUrl')}${projectId}`;
+}
+
 module.exports = (app, logger) => {
   /**
    * PROJECT_DRAFT_CREATED
@@ -28,6 +49,7 @@ module.exports = (app, logger) => {
     createEvent(BUS_API_EVENT.PROJECT_CREATED, {
       projectId: project.id,
       projectName: project.name,
+      projectUrl: connectProjectUrl(project.id),
       userId: req.authUser.userId,
       initiatorUserId: req.authUser.userId,
     }, logger);
@@ -44,6 +66,7 @@ module.exports = (app, logger) => {
       createEvent(mapEventTypes[updated.status], {
         projectId: updated.id,
         projectName: updated.name,
+        projectUrl: connectProjectUrl(updated.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
@@ -55,6 +78,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED, {
         projectId: updated.id,
         projectName: updated.name,
+        projectUrl: connectProjectUrl(updated.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
@@ -63,6 +87,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_LINK_CREATED, {
         projectId: updated.id,
         projectName: updated.name,
+        projectUrl: connectProjectUrl(updated.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
@@ -96,6 +121,7 @@ module.exports = (app, logger) => {
         createEvent(eventType, {
           projectId,
           projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
           userId: member.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -124,6 +150,7 @@ module.exports = (app, logger) => {
           createEvent(eventType, {
             projectId,
             projectName: project.name,
+            projectUrl: connectProjectUrl(projectId),
             userId: member.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
@@ -147,6 +174,7 @@ module.exports = (app, logger) => {
             createEvent(BUS_API_EVENT.MEMBER_ASSIGNED_AS_OWNER, {
               projectId,
               projectName: project.name,
+              projectUrl: connectProjectUrl(projectId),
               userId: updated.userId,
               initiatorUserId: req.authUser.userId,
             }, logger);
@@ -170,7 +198,9 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_FILE_UPLOADED, {
           projectId,
           projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
           fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
+          fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -192,6 +222,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
           projectId,
           projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -213,6 +244,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
           projectId,
           projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -234,6 +266,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
           projectId,
           projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -255,6 +288,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
           projectId,
           projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
           phase: created,
@@ -277,6 +311,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
           projectId,
           projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -302,6 +337,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED, {
             projectId,
             projectName: project.name,
+            projectUrl: connectProjectUrl(projectId),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
@@ -314,6 +350,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
             projectId,
             projectName: project.name,
+            projectUrl: connectProjectUrl(projectId),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);

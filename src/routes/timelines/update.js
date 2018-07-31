@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import _ from 'lodash';
+import moment from 'moment';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
@@ -60,27 +61,21 @@ module.exports = [
         if (original.startDate !== updated.startDate || original.endDate !== updated.endDate) {
           return updatedTimeline.getMilestones()
             .then((milestones) => {
-              const updateMilestonePromises = _.map(milestones, (_milestone) => {
+              let startDate = updated.startDate;
+              const updateMilestonePromises = _.chain(milestones).sortBy('order').map((_milestone) => {
                 const milestone = _milestone;
-                if (original.startDate !== updated.startDate) {
-                  if (milestone.startDate && milestone.startDate < updated.startDate) {
-                    milestone.startDate = updated.startDate;
-                    if (milestone.endDate && milestone.endDate < milestone.startDate) {
-                      milestone.endDate = milestone.startDate;
-                    }
-                    milestone.updatedBy = req.authUser.userId;
-                  }
+                if (milestone.startDate.getTime() !== startDate.getTime()) {
+                  milestone.startDate = startDate;
+                  milestone.updatedBy = req.authUser.userId;
                 }
-
-                if (original.endDate !== updated.endDate) {
-                  if (milestone.endDate && updated.endDate && updated.endDate < milestone.endDate) {
-                    milestone.endDate = updated.endDate;
-                    milestone.updatedBy = req.authUser.userId;
-                  }
+                const endDate = moment.utc(milestone.startDate).add(milestone.duration - 1, 'days').toDate();
+                if (!milestone.endDate || endDate.getTime() !== milestone.endDate.getTime()) {
+                  milestone.endDate = endDate;
+                  milestone.updatedBy = req.authUser.userId;
                 }
-
+                startDate = moment.utc(milestone.endDate).add(1, 'days').toDate();
                 return milestone.save();
-              });
+              }).value();
 
               return Promise.all(updateMilestonePromises)
                 .then((updatedMilestones) => {
