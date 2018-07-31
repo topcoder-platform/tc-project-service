@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import _ from 'lodash';
+import moment from 'moment';
 import Joi from 'joi';
 import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -12,6 +13,52 @@ import { EVENT } from '../../constants';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
+
+/**
+ * Cascades endDate/completionDate changes to all milestones with a greater order than the given one.
+ * @param {Object} updatedMilestone the milestone that was updated
+ * @returns {Promise<void>} a promise that resolves to the last found milestone. If no milestone exists with an
+ * order greater than the passed <b>updatedMilestone</b>, the promise will resolve to the passed
+ * <b>updatedMilestone</b>
+ */
+function updateComingMilestones(updatedMilestone) {
+  return models.Milestone.findAll({
+    where: {
+      timelineId: updatedMilestone.timelineId,
+      order: { $gt: updatedMilestone.order },
+    },
+  }).then((affectedMilestones) => {
+    const comingMilestones = _.sortBy(affectedMilestones, 'order');
+    let startDate = moment.utc(updatedMilestone.completionDate
+      ? updatedMilestone.completionDate
+      : updatedMilestone.endDate).add(1, 'days').toDate();
+    const promises = _.map(comingMilestones, (_milestone) => {
+      const milestone = _milestone;
+
+      // Update the milestone startDate if different than the iterated startDate
+      if (!_.isEqual(milestone.startDate, startDate)) {
+        milestone.startDate = startDate;
+        milestone.updatedBy = updatedMilestone.updatedBy;
+      }
+
+      // Calculate the endDate, and update it if different
+      const endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+      if (!_.isEqual(milestone.endDate, endDate)) {
+        milestone.endDate = endDate;
+        milestone.updatedBy = updatedMilestone.updatedBy;
+      }
+
+      // Set the next startDate value to the next day after completionDate if present or the endDate
+      startDate = moment.utc(milestone.completionDate
+        ? milestone.completionDate
+        : milestone.endDate).add(1, 'days').toDate();
+      return milestone.save();
+    });
+
+    // Resolve promise to the last updated milestone, or to the passed in updatedMilestone
+    return Promise.all(promises).then(updatedMilestones => updatedMilestones.pop() || updatedMilestone);
+  });
+}
 
 const schema = {
   params: {
@@ -23,9 +70,9 @@ const schema = {
       id: Joi.any().strip(),
       name: Joi.string().max(255).optional(),
       description: Joi.string().max(255),
-      duration: Joi.number().integer().optional(),
-      startDate: Joi.date().optional(),
-      endDate: Joi.date().allow(null),
+      duration: Joi.number().integer().min(1).optional(),
+      startDate: Joi.any().forbidden(),
+      endDate: Joi.any().forbidden(),
       completionDate: Joi.date().allow(null),
       status: Joi.string().max(45).optional(),
       type: Joi.string().max(45).optional(),
@@ -62,24 +109,7 @@ module.exports = [
       timelineId: req.params.timelineId,
     });
 
-    // Validate startDate and endDate to be within the timeline startDate and endDate
-    let error;
-    if (req.body.param.startDate < req.timeline.startDate) {
-      error = 'Milestone startDate must not be before the timeline startDate';
-    } else if (req.body.param.endDate && req.timeline.endDate && req.body.param.endDate > req.timeline.endDate) {
-      error = 'Milestone endDate must not be after the timeline endDate';
-    }
-    if (entityToUpdate.endDate && entityToUpdate.endDate < entityToUpdate.startDate) {
-      error = 'Milestone endDate must not be before startDate';
-    }
-    if (entityToUpdate.completionDate && entityToUpdate.completionDate < entityToUpdate.startDate) {
-      error = 'Milestone endDate must not be before startDate';
-    }
-    if (error) {
-      const apiErr = new Error(error);
-      apiErr.status = 422;
-      return next(apiErr);
-    }
+    const timeline = req.timeline;
 
     let original;
     let updated;
@@ -95,10 +125,20 @@ module.exports = [
             return Promise.reject(apiErr);
           }
 
+          if (entityToUpdate.completionDate && entityToUpdate.completionDate < milestone.startDate) {
+            const apiErr = new Error('The milestone completionDate should be greater or equal than the startDate.');
+            apiErr.status = 422;
+            return Promise.reject(apiErr);
+          }
+
           original = _.omit(milestone.toJSON(), ['deletedAt', 'deletedBy']);
 
           // Merge JSON fields
           entityToUpdate.details = util.mergeJsonObjects(milestone.details, entityToUpdate.details);
+
+          if (entityToUpdate.duration && entityToUpdate.duration !== milestone.duration) {
+            entityToUpdate.endDate = moment.utc(milestone.startDate).add(entityToUpdate.duration - 1, 'days').toDate();
+          }
 
           // Update
           return milestone.update(entityToUpdate);
@@ -146,6 +186,21 @@ module.exports = [
                 },
               });
             });
+        })
+        .then(() => {
+          // Update dates of the other milestones only if the completionDate or the duration changed
+          if (!_.isEqual(original.completionDate, updated.completionDate) || original.duration !== updated.duration) {
+            return updateComingMilestones(updated)
+              .then((lastTimelineMilestone) => {
+                if (!_.isEqual(lastTimelineMilestone.endDate, timeline.endDate)) {
+                  timeline.endDate = lastTimelineMilestone.endDate;
+                  timeline.updatedBy = lastTimelineMilestone.updatedBy;
+                  return timeline.save();
+                }
+                return Promise.resolve();
+              });
+          }
+          return Promise.resolve();
         }),
     )
     .then(() => {

@@ -1335,7 +1335,7 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/MilestoneBodyParam'
+            $ref: '#/definitions/MilestonePostBodyParam'
       responses:
         '403':
           description: No permission or wrong token
@@ -1413,7 +1413,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/MilestoneBodyParam"
+            $ref: "#/definitions/MilestonePatchBodyParam"
 
     delete:
       tags:
@@ -3201,7 +3201,7 @@ definitions:
             items:
               $ref: "#/definitions/Timeline"
 
-  MilestoneRequest:
+  MilestonePostRequest:
     title: Milestone request object
     type: object
     required:
@@ -3264,14 +3264,77 @@ definitions:
         type: string
         description: the milestone blocked text
 
-  MilestoneBodyParam:
+  MilestonePatchRequest:
+    title: Milestone request object
+    type: object
+    required:
+      - name
+      - duration
+      - status
+      - type
+      - order
+      - plannedText
+      - activeText
+      - completedText
+      - blockedText
+    properties:
+      name:
+        type: string
+        description: the milestone name
+      description:
+        type: string
+        description: the milestone description
+      duration:
+        type: number
+        format: integer
+        description: the milestone duration
+      completionDate:
+        type: string
+        format: date
+        description: the milestone completion date
+      status:
+        type: string
+        description: the milestone status
+      type:
+        type: string
+        description: the milestone type
+      details:
+        type: object
+        description: the milestone details
+      order:
+        type: number
+        format: integer
+        description: the milestone order
+      plannedText:
+        type: string
+        description: the milestone planned text
+      activeText:
+        type: string
+        description: the milestone active text
+      completedText:
+        type: string
+        description: the milestone completed text
+      blockedText:
+        type: string
+        description: the milestone blocked text
+
+  MilestonePostBodyParam:
     title: Milestone body param
     type: object
     required:
       - param
     properties:
       param:
-        $ref: "#/definitions/MilestoneRequest"
+        $ref: "#/definitions/MilestonePostRequest"
+
+  MilestonePatchBodyParam:
+    title: Milestone body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/MilestonePatchRequest"
 
   Milestone:
     title: Milestone object
@@ -3306,7 +3369,7 @@ definitions:
             format: int64
             description: READ-ONLY. User that last updated this object
             readOnly: true
-      - $ref: "#/definitions/MilestoneRequest"
+      - $ref: "#/definitions/MilestonePostRequest"
 
   MilestoneResponse:
     title: Single milestone response object
