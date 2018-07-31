@@ -678,7 +678,7 @@ models.sequelize.sync({ force: true })
       aliases: ['key-21', 'key_22'],
       createdBy: 1,
       updatedBy: 1,
-    }
+    },
   ]))
   .then(() => {
     process.exit(0);
