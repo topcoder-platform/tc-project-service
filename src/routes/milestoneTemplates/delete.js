@@ -25,33 +25,24 @@ module.exports = [
       productTemplateId: req.params.productTemplateId,
     };
 
-    return models.sequelize.transaction(tx =>
-      // Update the deletedBy
-      models.ProductMilestoneTemplate.update({ deletedBy: req.authUser.userId }, {
+    return models.sequelize.transaction(() =>
+      // soft delete the record
+      models.ProductMilestoneTemplate.findOne({
         where,
-        returning: true,
-        raw: true,
-        transaction: tx,
+      }).then((existing) => {
+        if (!existing) {
+          // handle 404
+          const err = new Error(
+            `Milestone template not found for milestone template id ${req.params.milestoneTemplateId}`);
+          err.status = 404;
+          return Promise.reject(err);
+        }
+        return existing.update({ deletedBy: req.authUser.userId });
       })
-        .then((updatedResults) => {
-          // Not found
-          if (updatedResults[0] === 0) {
-            const apiErr = new Error(
-              `Milestone template not found for milestone template id ${req.params.milestoneTemplateId}`);
-            apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-
-          // Soft delete
-          return models.ProductMilestoneTemplate.destroy({
-            where,
-            transaction: tx,
-          });
-        })
+        .then(entity => entity.destroy()))
         .then(() => {
           res.status(204).end();
         })
-        .catch(next),
-    );
+        .catch(next);
   },
 ];

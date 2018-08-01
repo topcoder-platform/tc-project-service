@@ -2,11 +2,38 @@
  * Tests for delete.js
  */
 import request from 'supertest';
+import chai from 'chai';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
+
+const expectAfterDelete = (key, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProductCategory.findOne({
+    where: {
+      key,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/productCategories/${key}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
 
 describe('DELETE product category', () => {
   const key = 'key1';
@@ -87,7 +114,7 @@ describe('DELETE product category', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(key, err, done));
     });
 
     it('should return 204, for connect admin, if the product category was successfully removed', (done) => {
@@ -97,7 +124,7 @@ describe('DELETE product category', () => {
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(key, err, done));
     });
   });
 });

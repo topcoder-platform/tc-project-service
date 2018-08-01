@@ -25,18 +25,17 @@ module.exports = [
           phaseId,
           deletedAt: { $eq: null },
         },
-      }).then(existing => new Promise((accept, reject) => {
+      }).then((existing) => {
         if (!existing) {
           // handle 404
           const err = new Error('No active phase product found for project id ' +
             `${projectId}, phase id ${phaseId} and product id ${productId}`);
           err.status = 404;
-          reject(err);
-        } else {
-          _.extend(existing, { deletedBy: req.authUser.userId, deletedAt: Date.now() });
-          existing.save().then(accept).catch(reject);
+          return Promise.reject(err);
         }
-      })))
+        return existing.update({ deletedBy: req.authUser.userId });
+      })
+      .then(entity => entity.destroy()))
       .then((deleted) => {
         req.log.debug('deleted phase product', JSON.stringify(deleted, null, 2));
 
@@ -49,6 +48,7 @@ module.exports = [
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED, { req, deleted });
 
         res.status(204).json({});
-      }).catch(err => next(err));
+      })
+      .catch(err => next(err));
   },
 ];
