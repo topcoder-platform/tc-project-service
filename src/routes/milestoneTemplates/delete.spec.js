@@ -2,11 +2,11 @@
  * Tests for delete.js
  */
 import request from 'supertest';
+import chai from 'chai';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import chai from 'chai';
 
 const expectAfterDelete = (productTemplateId, id, err, next) => {
   if (err) throw err;

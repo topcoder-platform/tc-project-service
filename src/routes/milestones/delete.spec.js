@@ -2,12 +2,12 @@
  * Tests for delete.js
  */
 import request from 'supertest';
+import chai from 'chai';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import { EVENT } from '../../constants';
-import chai from 'chai';
 
 
 const expectAfterDelete = (timelineId, id, err, next) => {

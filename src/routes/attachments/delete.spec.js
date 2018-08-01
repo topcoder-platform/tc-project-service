@@ -2,12 +2,12 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import request from 'supertest';
+import chai from 'chai';
 
 import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import chai from 'chai';
 
 
 describe('Project Attachments delete', () => {
