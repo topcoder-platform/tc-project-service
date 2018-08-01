@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
+import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
-import chai from 'chai';
 
 const expectAfterDelete = (projectId, id, err, next) => {
   if (err) throw err;
