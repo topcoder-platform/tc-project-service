@@ -51,7 +51,7 @@ module.exports = [
 
         // Parse the fields string to determine what fields are to be returned
         let fields = req.query.fields ? req.query.fields.split(',') : PHASE_ATTRIBUTES;
-        fields = _.intersection(fields, [PHASE_ATTRIBUTES, 'products']);
+        fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products']);
         if (_.indexOf(fields, 'id') < 0) {
           fields.push('id');
         }
