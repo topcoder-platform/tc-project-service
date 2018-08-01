@@ -27,6 +27,7 @@ function updateComingMilestones(originalMilestone, updatedMilestone) {
     where: {
       timelineId: updatedMilestone.timelineId,
       order: { $gt: updatedMilestone.order },
+      hidden: false,
     },
   }).then((affectedMilestones) => {
     const comingMilestones = _.sortBy(affectedMilestones, 'order');
