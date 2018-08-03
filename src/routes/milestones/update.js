@@ -23,18 +23,20 @@ const permissions = tcMiddleware.permissions;
  * <b>updatedMilestone</b>
  */
 function updateComingMilestones(originalMilestone, updatedMilestone) {
+  // flag to indicate if the milestone in picture, is updated for completionDate field or not
+  const completionDateChanged = !_.isEqual(originalMilestone.completionDate, updatedMilestone.completionDate);
   return models.Milestone.findAll({
     where: {
       timelineId: updatedMilestone.timelineId,
       order: { $gt: updatedMilestone.order },
-      hidden: false,
     },
   }).then((affectedMilestones) => {
     const comingMilestones = _.sortBy(affectedMilestones, 'order');
     let startDate = moment.utc(updatedMilestone.completionDate
       ? updatedMilestone.completionDate
       : updatedMilestone.endDate).add(1, 'days').toDate();
-    const promises = _.map(comingMilestones, (_milestone, idx) => {
+    let firstMilestoneFound = false;
+    const promises = _.map(comingMilestones, (_milestone) => {
       const milestone = _milestone;
 
       // Update the milestone startDate if different than the iterated startDate
@@ -50,10 +52,11 @@ function updateComingMilestones(originalMilestone, updatedMilestone) {
         milestone.updatedBy = updatedMilestone.updatedBy;
       }
 
-      // if completionDate is alerted, update status of the next milestone to the current one
-      if (!_.isEqual(originalMilestone.completionDate, updatedMilestone.completionDate) && idx === 0) {
+      // if completionDate is alerted, update status of the first non hidden milestone after the current one
+      if (!firstMilestoneFound && completionDateChanged && !milestone.hidden) {
         // activate next milestone
         milestone.status = MILESTONE_STATUS.ACTIVE;
+        firstMilestoneFound = true;
       }
 
       // Set the next startDate value to the next day after completionDate if present or the endDate
