@@ -147,6 +147,8 @@ module.exports = [
           const statusChanged = entityToUpdate.status && entityToUpdate.status !== milestone.status;
           const completionDateChanged = entityToUpdate.completionDate
             && !_.isEqual(milestone.completionDate, entityToUpdate.completionDate);
+          const today = moment.utc().hours(0).minutes(0).seconds(0)
+            .milliseconds(0);
 
           // Merge JSON fields
           entityToUpdate.details = util.mergeJsonObjects(milestone.details, entityToUpdate.details);
@@ -159,9 +161,11 @@ module.exports = [
           if (statusChanged) {
             // if status has changed to be completed, set the compeltionDate if not provided
             if (entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
-              const today = moment.utc().hours(0).minutes(0).seconds(0)
-                .milliseconds(0);
               entityToUpdate.completionDate = entityToUpdate.completionDate ? entityToUpdate.completionDate : today;
+            }
+            // if status has changed to be active, set the startDate to today
+            if (entityToUpdate.status === MILESTONE_STATUS.ACTIVE) {
+              entityToUpdate.startDate = today;
             }
           }
 
