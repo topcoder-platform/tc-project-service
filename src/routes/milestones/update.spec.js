@@ -7,7 +7,7 @@ import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { EVENT } from '../../constants';
+import { EVENT, MILESTONE_STATUS } from '../../constants';
 
 const should = chai.should();
 
@@ -862,11 +862,14 @@ describe('UPDATE Milestone', () => {
           models.Milestone.findById(3)
             .then((milestone) => {
               milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
+              milestone.actualStartDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
               milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
+              milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
               return models.Milestone.findById(4);
             })
             .then((milestone) => {
               milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
+              should.not.exist(milestone.actualStartDate);
               milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
               done();
             })

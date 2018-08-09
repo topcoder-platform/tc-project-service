@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.STRING(255),
     duration: { type: DataTypes.INTEGER, allowNull: false },
     startDate: { type: DataTypes.DATE, allowNull: false },
+    actualStartDate: DataTypes.DATE,
     endDate: DataTypes.DATE,
     completionDate: DataTypes.DATE,
     status: { type: DataTypes.STRING(45), allowNull: false },

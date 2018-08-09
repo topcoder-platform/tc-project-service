@@ -24,6 +24,7 @@ const schema = {
       description: Joi.string().max(255),
       duration: Joi.number().integer().required(),
       startDate: Joi.date().required(),
+      actualStartDate: Joi.date().allow(null),
       endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
       completionDate: Joi.date().min(Joi.ref('startDate')).allow(null),
       status: Joi.string().max(45).required(),

@@ -25,6 +25,8 @@ const permissions = tcMiddleware.permissions;
 function updateComingMilestones(originalMilestone, updatedMilestone) {
   // flag to indicate if the milestone in picture, is updated for completionDate field or not
   const completionDateChanged = !_.isEqual(originalMilestone.completionDate, updatedMilestone.completionDate);
+  const today = moment.utc().hours(0).minutes(0).seconds(0)
+    .milliseconds(0);
   return models.Milestone.findAll({
     where: {
       timelineId: updatedMilestone.timelineId,
@@ -56,6 +58,7 @@ function updateComingMilestones(originalMilestone, updatedMilestone) {
       if (!firstMilestoneFound && completionDateChanged && !milestone.hidden) {
         // activate next milestone
         milestone.status = MILESTONE_STATUS.ACTIVE;
+        milestone.actualStartDate = today;
         firstMilestoneFound = true;
       }
 
@@ -83,6 +86,7 @@ const schema = {
       description: Joi.string().max(255),
       duration: Joi.number().integer().min(1).optional(),
       startDate: Joi.any().forbidden(),
+      actualStartDate: Joi.date().allow(null),
       endDate: Joi.any().forbidden(),
       completionDate: Joi.date().allow(null),
       status: Joi.string().max(45).optional(),
@@ -165,7 +169,10 @@ module.exports = [
             }
             // if status has changed to be active, set the startDate to today
             if (entityToUpdate.status === MILESTONE_STATUS.ACTIVE) {
-              entityToUpdate.startDate = today;
+              // NOTE: not updating startDate as activating a milestone should not update the scheduled start date
+              // entityToUpdate.startDate = today;
+              // should update actual start date
+              entityToUpdate.actualStartDate = today;
             }
           }
 
