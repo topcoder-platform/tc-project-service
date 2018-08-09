@@ -3,6 +3,7 @@
  */
 import chai from 'chai';
 import request from 'supertest';
+import moment from 'moment';
 import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
@@ -862,7 +863,10 @@ describe('UPDATE Milestone', () => {
           models.Milestone.findById(3)
             .then((milestone) => {
               milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-              milestone.actualStartDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
+              const today = moment.utc();
+              should.exist(milestone.actualStartDate);
+              moment().utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
+              // milestone.actualStartDate.should.be.eql(today);
               milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
               milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
               return models.Milestone.findById(4);
