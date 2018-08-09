@@ -66,6 +66,16 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
       return single;
     });
 
+    if (data.cascadedUpdates && data.cascadedUpdates.milestones && data.cascadedUpdates.milestones.length > 0) {
+      const otherUpdatedMilestones = data.cascadedUpdates.milestones;
+      _.each(milestones, (m) => {
+        const updatedMilestone = _.find(otherUpdatedMilestones, oum => oum.id === m.id);
+        if (updatedMilestone) {
+          _.assign(m, updatedMilestone);
+        }
+      });
+    }
+
     if (data.original.order !== data.updated.order) {
       const milestoneWithSameOrder =
         _.find(milestones, milestone => milestone.id !== data.updated.id && milestone.order === data.updated.order);

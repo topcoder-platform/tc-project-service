@@ -69,8 +69,11 @@ function updateComingMilestones(originalMilestone, updatedMilestone) {
       return milestone.save();
     });
 
-    // Resolve promise to the last updated milestone, or to the passed in updatedMilestone
-    return Promise.all(promises).then(updatedMilestones => updatedMilestones.pop() || updatedMilestone);
+    // Resolve promise with all original and updated milestones
+    return Promise.all(promises).then(updatedMilestones => ({
+      originals: affectedMilestones,
+      updated: updatedMilestones,
+    }));
   });
 }
 
@@ -232,23 +235,28 @@ module.exports = [
           // Update dates of the other milestones only if the completionDate or the duration changed
           if (!_.isEqual(original.completionDate, updated.completionDate) || original.duration !== updated.duration) {
             return updateComingMilestones(original, updated)
-              .then((lastTimelineMilestone) => {
+              .then(({ originalMilestones, updatedMilestones }) => {
+                const lastTimelineMilestone = _.last(updatedMilestones);
                 if (!_.isEqual(lastTimelineMilestone.endDate, timeline.endDate)) {
                   timeline.endDate = lastTimelineMilestone.endDate;
                   timeline.updatedBy = lastTimelineMilestone.updatedBy;
-                  return timeline.save();
+                  return timeline.save().then(() => ({ originalMilestones, updatedMilestones }));
                 }
-                return Promise.resolve();
+                return Promise.resolve({ originalMilestones, updatedMilestones });
               });
           }
-          return Promise.resolve();
+          return Promise.resolve({});
         }),
     )
-    .then(() => {
+    .then(({ originalMilestones, updatedMilestones }) => {
+      const cascadedMilestones = _.map(originalMilestones, om => ({
+        original: om, updated: _.find(updatedMilestones, um => um.id === om.id),
+      }));
+      const cascadedUpdates = { milestones: cascadedMilestones };
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
-        { original, updated },
+        { original, updated, cascadedUpdates },
         { correlationId: req.id },
       );
 
