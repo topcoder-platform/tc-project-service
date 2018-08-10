@@ -77,7 +77,6 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
         }
       });
     }
-    console.log(milestones);
 
     // if (data.original.order !== data.updated.order) {
     //   const milestoneWithSameOrder =
