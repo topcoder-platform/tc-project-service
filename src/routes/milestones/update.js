@@ -71,8 +71,8 @@ function updateComingMilestones(originalMilestone, updatedMilestone) {
 
     // Resolve promise with all original and updated milestones
     return Promise.all(promises).then(updatedMilestones => ({
-      originals: affectedMilestones,
-      updated: updatedMilestones,
+      originalMilestones: affectedMilestones,
+      updatedMilestones,
     }));
   });
 }
