@@ -66,11 +66,12 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
       return single;
     });
 
-    console.log(data.cascadedUpdates);
     if (data.cascadedUpdates && data.cascadedUpdates.milestones && data.cascadedUpdates.milestones.length > 0) {
       const otherUpdatedMilestones = data.cascadedUpdates.milestones;
       _.each(milestones, (m) => {
-        const updatedMilestone = _.find(otherUpdatedMilestones, oum => oum.id === m.id);
+        // finds the updated milestone from the cascaded updates
+        const updatedMilestone = _.find(otherUpdatedMilestones, oum => oum.updated && oum.updated.id === m.id);
+        logger.debug('updatedMilestone=>', updatedMilestone);
         if (updatedMilestone) {
           _.assign(m, updatedMilestone);
         }
