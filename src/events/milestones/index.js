@@ -76,33 +76,33 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
       });
     }
 
-    if (data.original.order !== data.updated.order) {
-      const milestoneWithSameOrder =
-        _.find(milestones, milestone => milestone.id !== data.updated.id && milestone.order === data.updated.order);
-      if (milestoneWithSameOrder) {
-        // Increase the order from M to K: if there is an item with order K,
-        // orders from M+1 to K should be made M to K-1
-        if (data.original.order < data.updated.order) {
-          _.each(milestones, (single) => {
-            if (single.id !== data.updated.id
-              && (data.original.order + 1) <= single.order
-              && single.order <= data.updated.order) {
-              single.order -= 1; // eslint-disable-line no-param-reassign
-            }
-          });
-        } else {
-          // Decrease the order from M to K: if there is an item with order K,
-          // orders from K to M-1 should be made K+1 to M
-          _.each(milestones, (single) => {
-            if (single.id !== data.updated.id
-              && data.updated.order <= single.order
-              && single.order <= (data.original.order - 1)) {
-              single.order += 1; // eslint-disable-line no-param-reassign
-            }
-          });
-        }
-      }
-    }
+    // if (data.original.order !== data.updated.order) {
+    //   const milestoneWithSameOrder =
+    //     _.find(milestones, milestone => milestone.id !== data.updated.id && milestone.order === data.updated.order);
+    //   if (milestoneWithSameOrder) {
+    //     // Increase the order from M to K: if there is an item with order K,
+    //     // orders from M+1 to K should be made M to K-1
+    //     if (data.original.order < data.updated.order) {
+    //       _.each(milestones, (single) => {
+    //         if (single.id !== data.updated.id
+    //           && (data.original.order + 1) <= single.order
+    //           && single.order <= data.updated.order) {
+    //           single.order -= 1; // eslint-disable-line no-param-reassign
+    //         }
+    //       });
+    //     } else {
+    //       // Decrease the order from M to K: if there is an item with order K,
+    //       // orders from K to M-1 should be made K+1 to M
+    //       _.each(milestones, (single) => {
+    //         if (single.id !== data.updated.id
+    //           && data.updated.order <= single.order
+    //           && single.order <= (data.original.order - 1)) {
+    //           single.order += 1; // eslint-disable-line no-param-reassign
+    //         }
+    //       });
+    //     }
+    //   }
+    // }
 
     const merged = _.assign(doc._source, { milestones }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({

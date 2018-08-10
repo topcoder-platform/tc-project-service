@@ -236,7 +236,9 @@ module.exports = [
           if (!_.isEqual(original.completionDate, updated.completionDate) || original.duration !== updated.duration) {
             return updateComingMilestones(original, updated)
               .then(({ originalMilestones, updatedMilestones }) => {
-                const lastTimelineMilestone = _.last(updatedMilestones);
+                // finds the last milestone updated
+                // if no milestone is updated by updateComingMilestones method, it means the current milestone is the last one
+                const lastTimelineMilestone = updatedMilestones.length ? _.last(updatedMilestones) : updated;
                 if (!_.isEqual(lastTimelineMilestone.endDate, timeline.endDate)) {
                   timeline.endDate = lastTimelineMilestone.endDate;
                   timeline.updatedBy = lastTimelineMilestone.updatedBy;
