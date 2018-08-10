@@ -66,6 +66,7 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
       return single;
     });
 
+    console.log(data.cascadedUpdates);
     if (data.cascadedUpdates && data.cascadedUpdates.milestones && data.cascadedUpdates.milestones.length > 0) {
       const otherUpdatedMilestones = data.cascadedUpdates.milestones;
       _.each(milestones, (m) => {
@@ -75,6 +76,7 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
         }
       });
     }
+    console.log(milestones);
 
     // if (data.original.order !== data.updated.order) {
     //   const milestoneWithSameOrder =
