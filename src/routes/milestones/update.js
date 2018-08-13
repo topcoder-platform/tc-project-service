@@ -246,8 +246,12 @@ module.exports = [
             });
         })
         .then(() => {
-          // Update dates of the other milestones only if the completionDate or the duration changed
-          if (!_.isEqual(original.completionDate, updated.completionDate) || original.duration !== updated.duration) {
+          // we need to recalculate change in fields because we update some fields before making actual update
+          const needToCascade = !_.isEqual(original.completionDate, updated.completionDate) // completion date changed
+            || original.duration !== updated.duration // duration changed
+            || original.actualStartDate !== updated.actualStartDate; // actual start date updated
+          // Update dates of the other milestones only if cascade updates needed
+          if (needToCascade) {
             return updateComingMilestones(original, updated)
               .then(({ originalMilestones, updatedMilestones }) => {
                 // finds the last milestone updated

@@ -841,10 +841,66 @@ describe('UPDATE Milestone', () => {
         });
     });
 
+    it('should return 200 for admin - marking milestone active later will cascade changes to coming ' +
+      // eslint-disable-next-line func-names
+      'milestones', function (done) {
+      this.timeout(10000);
+      const today = moment.utc().hours(0).minutes(0).seconds(0)
+        .milliseconds(0);
+
+      request(server)
+        .patch('/v4/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: { status: MILESTONE_STATUS.ACTIVE } })
+        .expect(200)
+        .end(() => {
+          // Milestone 2: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-14T00:00:00.000Z'
+          //        actualStartDate: null                       to today
+          //                endDate: null                       to today + 2 (2 = duration - 1)
+          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to today + 3
+          //                endDate: null                       to today + 5 (5 = 3 + duration - 1)
+          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to today + 6
+          //                endDate: null                       to today + 8 (2 = 6 + duration - 1)
+          models.Milestone.findById(2)
+            .then((milestone) => {
+              should.exist(milestone.actualStartDate);
+              moment.utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
+              // start date of the updated milestone should not change
+              milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
+              today.add('days', milestone.duration - 1);
+              // end date of the updated milestone should change, as delayed start caused scheduled to be delayed
+              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
+              milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
+              return models.Milestone.findById(3);
+            })
+            .then((milestone) => {
+              today.add('days', 1); // should have start date next to previous one's end date
+              moment.utc(milestone.startDate).diff(today, 'days').should.be.eql(0);
+              should.not.exist(milestone.actualStartDate);
+              today.add('days', milestone.duration - 1);
+              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
+              return models.Milestone.findById(4);
+            })
+            .then((milestone) => {
+              today.add('days', 1); // should have start date next to previous one's end date
+              moment.utc(milestone.startDate).diff(today, 'days').should.be.eql(0);
+              should.not.exist(milestone.actualStartDate);
+              today.add('days', milestone.duration - 1);
+              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
+              done();
+            })
+            .catch(done);
+        });
+    });
+
     it('should return 200 for admin - changing completionDate will cascade changes to coming ' +
       // eslint-disable-next-line func-names
       'milestones', function (done) {
       this.timeout(10000);
+      const today = moment.utc().hours(0).minutes(0).seconds(0)
+        .milliseconds(0);
 
       request(server)
         .patch('/v4/timelines/1/milestones/2')
@@ -863,7 +919,6 @@ describe('UPDATE Milestone', () => {
           models.Milestone.findById(3)
             .then((milestone) => {
               milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-              const today = moment.utc();
               should.exist(milestone.actualStartDate);
               moment().utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
               // milestone.actualStartDate.should.be.eql(today);
