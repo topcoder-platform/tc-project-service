@@ -14,7 +14,7 @@ const addProjectPhaseValidations = {
     param: Joi.object().keys({
       name: Joi.string().required(),
       status: Joi.string().required(),
-      startDate: Joi.date().max(Joi.ref('endDate')).optional(),
+      startDate: Joi.date().optional(),
       endDate: Joi.date().optional(),
       duration: Joi.number().min(0).optional(),
       budget: Joi.number().min(0).optional(),
@@ -50,6 +50,11 @@ module.exports = [
         if (!existingProject) {
           const err = new Error(`active project not found for project id ${projectId}`);
           err.status = 404;
+          throw err;
+        }
+        if (data.startDate !== null && data.endDate !== null && data.startDate > data.endDate) {
+          const err = new Error('startDate must not be after endDate.');
+          err.status = 400;
           throw err;
         }
         return models.ProjectPhase
