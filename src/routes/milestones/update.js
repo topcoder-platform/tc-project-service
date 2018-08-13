@@ -16,27 +16,32 @@ const permissions = tcMiddleware.permissions;
 
 /**
  * Cascades endDate/completionDate changes to all milestones with a greater order than the given one.
- * @param {Object} originalMilestone the original milestone that was updated
- * @param {Object} updatedMilestone the milestone that was updated
+ * @param {Object} origMilestone the original milestone that was updated
+ * @param {Object} updMilestone the milestone that was updated
  * @returns {Promise<void>} a promise that resolves to the last found milestone. If no milestone exists with an
- * order greater than the passed <b>updatedMilestone</b>, the promise will resolve to the passed
- * <b>updatedMilestone</b>
+ * order greater than the passed <b>updMilestone</b>, the promise will resolve to the passed
+ * <b>updMilestone</b>
  */
-function updateComingMilestones(originalMilestone, updatedMilestone) {
+function updateComingMilestones(origMilestone, updMilestone) {
   // flag to indicate if the milestone in picture, is updated for completionDate field or not
-  const completionDateChanged = !_.isEqual(originalMilestone.completionDate, updatedMilestone.completionDate);
+  const completionDateChanged = !_.isEqual(origMilestone.completionDate, updMilestone.completionDate);
   const today = moment.utc().hours(0).minutes(0).seconds(0)
     .milliseconds(0);
+  // updated milestone's start date, pefers actual start date over scheduled start date
+  const updMSStartDate = updMilestone.actualStartDate ? updMilestone.actualStartDate : updMilestone.startDate;
+  // calculates schedule end date for the milestone based on start date and duration
+  let updMilestoneEndDate = moment.utc(updMSStartDate).add(updMilestone.duration - 1, 'days').toDate();
+  // if the milestone, in context, is completed, overrides the end date to the completion date
+  updMilestoneEndDate = updMilestone.completionDate ? updMilestone.completionDate : updMilestoneEndDate;
   return models.Milestone.findAll({
     where: {
-      timelineId: updatedMilestone.timelineId,
-      order: { $gt: updatedMilestone.order },
+      timelineId: updMilestone.timelineId,
+      order: { $gt: updMilestone.order },
     },
   }).then((affectedMilestones) => {
     const comingMilestones = _.sortBy(affectedMilestones, 'order');
-    let startDate = moment.utc(updatedMilestone.completionDate
-      ? updatedMilestone.completionDate
-      : updatedMilestone.endDate).add(1, 'days').toDate();
+    // calculates the schedule start date for the next milestone
+    let startDate = moment.utc(updMilestoneEndDate).add(1, 'days').toDate();
     let firstMilestoneFound = false;
     const promises = _.map(comingMilestones, (_milestone) => {
       const milestone = _milestone;
@@ -44,14 +49,14 @@ function updateComingMilestones(originalMilestone, updatedMilestone) {
       // Update the milestone startDate if different than the iterated startDate
       if (!_.isEqual(milestone.startDate, startDate)) {
         milestone.startDate = startDate;
-        milestone.updatedBy = updatedMilestone.updatedBy;
+        milestone.updatedBy = updMilestone.updatedBy;
       }
 
       // Calculate the endDate, and update it if different
       const endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
       if (!_.isEqual(milestone.endDate, endDate)) {
         milestone.endDate = endDate;
-        milestone.updatedBy = updatedMilestone.updatedBy;
+        milestone.updatedBy = updMilestone.updatedBy;
       }
 
       // if completionDate is alerted, update status of the first non hidden milestone after the current one
@@ -160,10 +165,7 @@ module.exports = [
           // Merge JSON fields
           entityToUpdate.details = util.mergeJsonObjects(milestone.details, entityToUpdate.details);
 
-          if (durationChanged) {
-            entityToUpdate.endDate = moment.utc(milestone.startDate).add(entityToUpdate.duration - 1, 'days').toDate();
-          }
-
+          let actualStartDateCanged = false;
           // if status has changed
           if (statusChanged) {
             // if status has changed to be completed, set the compeltionDate if not provided
@@ -176,7 +178,19 @@ module.exports = [
               // entityToUpdate.startDate = today;
               // should update actual start date
               entityToUpdate.actualStartDate = today;
+              actualStartDateCanged = true;
             }
+          }
+
+          // Updates the end date of the milestone if:
+          // 1. if duration of the milestone is udpated, update its end date
+          // OR
+          // 2. if actual start date is updated, updating the end date of the activated milestone because
+          // early or late start of milestone, we are essentially changing the end schedule of the milestone
+          if (durationChanged || actualStartDateCanged) {
+            const updatedStartDate = actualStartDateCanged ? entityToUpdate.actualStartDate : milestone.startDate;
+            const updatedDuration = _.get(entityToUpdate, 'duration', milestone.duration);
+            entityToUpdate.endDate = moment.utc(updatedStartDate).add(updatedDuration - 1, 'days').toDate();
           }
 
           // if completionDate has changed
