@@ -90,7 +90,9 @@ module.exports = [
                     createdBy: req.authUser.userId,
                     updatedBy: req.authUser.userId,
                   };
-                  startDate = endDate.add(1, 'days');
+                  if (!mt.hidden) {
+                    startDate = endDate.add(1, 'days');
+                  }
                   return milestone;
                 });
                 return models.Milestone.bulkCreate(milestones, { returning: true })
