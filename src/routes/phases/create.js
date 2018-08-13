@@ -54,7 +54,7 @@ module.exports = [
         }
         if (data.startDate !== null && data.endDate !== null && data.startDate > data.endDate) {
           const err = new Error('startDate must not be after endDate.');
-          err.status = 400;
+          err.status = 422;
           throw err;
         }
         return models.ProjectPhase
