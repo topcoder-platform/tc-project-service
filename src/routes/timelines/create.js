@@ -64,6 +64,7 @@ module.exports = [
                 productTemplateId: templateId,
                 deletedAt: { $eq: null },
               },
+              order: [['order', 'asc']],
             }).then((milestoneTemplates) => {
               if (milestoneTemplates) {
                 req.log.debug('%d MilestoneTemplates found', milestoneTemplates.length);
