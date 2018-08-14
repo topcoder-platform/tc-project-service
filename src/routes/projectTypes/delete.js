@@ -17,38 +17,21 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('projectType.delete'),
-  (req, res, next) => {
-    const where = {
-      deletedAt: { $eq: null },
-      key: req.params.key,
-    };
-
-    return models.sequelize.transaction(tx =>
-      // Update the deletedBy
-      models.ProjectType.update({ deletedBy: req.authUser.userId }, {
-        where,
-        returning: true,
-        raw: true,
-        transaction: tx,
-      })
-        .then((updatedResults) => {
-          // Not found
-          if (updatedResults[0] === 0) {
+  (req, res, next) =>
+     models.sequelize.transaction(() =>
+      models.ProjectType.findById(req.params.key)
+        .then((entity) => {
+          if (!entity) {
             const apiErr = new Error(`Project type not found for key ${req.params.key}`);
             apiErr.status = 404;
             return Promise.reject(apiErr);
           }
-
-          // Soft delete
-          return models.ProjectType.destroy({
-            where,
-            transaction: tx,
-          });
+          // Update the deletedBy, then delete
+          return entity.update({ deletedBy: req.authUser.userId });
         })
+        .then(entity => entity.destroy()))
         .then(() => {
           res.status(204).end();
         })
         .catch(next),
-    );
-  },
 ];

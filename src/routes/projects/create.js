@@ -4,9 +4,11 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import config from 'config';
+import moment from 'moment';
 
 import models from '../../models';
 import { PROJECT_MEMBER_ROLE, PROJECT_STATUS, PROJECT_PHASE_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
+import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
 import directProject from '../../services/directProject';
 
@@ -90,12 +92,17 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
     productTemplates.forEach((pt) => {
       productTemplateMap[pt.id] = pt;
     });
-    return Promise.all(_.map(phases, (phase, phaseIdx) =>
+    return Promise.all(_.map(phases, (phase, phaseIdx) => {
+      const duration = _.get(phase, 'duration', 1);
+      const startDate = moment.utc().hours(0).minutes(0).seconds(0)
+        .milliseconds(0);
       // Create phase
-      models.ProjectPhase.create({
+      return models.ProjectPhase.create({
         projectId: newProject.id,
         name: _.get(phase, 'name', `Stage ${phaseIdx}`),
-        duration: _.get(phase, 'duration', 0),
+        duration,
+        startDate: startDate.format(),
+        endDate: moment.utc(startDate).add(duration - 1, 'days').format(),
         status: _.get(phase, 'status', PROJECT_PHASE_STATUS.DRAFT),
         budget: _.get(phase, 'budget', 0),
         updatedBy: req.authUser.userId,
@@ -121,8 +128,8 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
           result.newPhases.push(newPhaseJson);
           return Promise.resolve();
         });
-      }),
-    ));
+      });
+    }));
   }).then(() => Promise.resolve(result));
 }
 
@@ -178,30 +185,11 @@ function validateAndFetchTemplates(templateId) {
   });
 }
 
-/**
- * Validates the project type being one from the allowed ones.
- *
- * @param {String} type key of the project type to be used
- * @returns {Promise} promise which resolves to a project type if it is valid, rejects otherwise with 422 error
- */
-function validateProjectType(type) {
-  return models.ProjectType.findOne({ where: { key: type } })
-  .then((projectType) => {
-    if (!projectType) {
-      // Not found
-      const apiErr = new Error(`Project type not found for key ${type}`);
-      apiErr.status = 422;
-      return Promise.reject(apiErr);
-    }
-
-    return Promise.resolve(projectType);
-  });
-}
-
 module.exports = [
   // handles request validations
   validate(createProjectValdiations),
   permissions('project.create'),
+  fieldLookupValidation(models.ProjectType, 'key', 'body.param.type', 'Project type'),
   /**
    * POST projects/
    * Create a project if the user has access
@@ -242,16 +230,12 @@ module.exports = [
     if (!project.templateId) {
       project.version = 'v2';
     }
+    let newProject = null;
+    let newPhases;
     models.sequelize.transaction(() => {
-      let newProject = null;
-      let newPhases;
-      // Validate the project type
-      return validateProjectType(project.type)
+      req.log.debug('Create Project - Starting transaction');
       // Validate the templates
-      .then((projectType) => {
-        req.log.debug(`Project type ${projectType.key} validated successfully`);
-        return validateAndFetchTemplates(project.templateId);
-      })
+      return validateAndFetchTemplates(project.templateId)
       // Create project and phases
       .then(({ projectTemplate, productTemplates }) => {
         req.log.debug('Creating project, phase and products');
@@ -294,30 +278,30 @@ module.exports = [
             return Promise.resolve();
           });
         // return Promise.resolve();
-      })
-      .then(() => {
-        newProject = newProject.get({ plain: true });
-        // remove utm details & deletedAt field
-        newProject = _.omit(newProject, ['deletedAt', 'utm']);
-        // add an empty attachments array
-        newProject.attachments = [];
-        // set phases array
-        newProject.phases = newPhases;
-
-        req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
-          newProject,
-          { correlationId: req.id },
-        );
-        req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
-        // emit event
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
-        res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
-      })
-      .catch((err) => {
-        req.log.error(err.message);
-        util.handleError('Error creating project', err, req, next);
       });
+    })
+    .then(() => {
+      newProject = newProject.get({ plain: true });
+      // remove utm details & deletedAt field
+      newProject = _.omit(newProject, ['deletedAt', 'utm']);
+      // add an empty attachments array
+      newProject.attachments = [];
+      // set phases array
+      newProject.phases = newPhases;
+
+      req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
+        newProject,
+        { correlationId: req.id },
+      );
+      req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
+      // emit event
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
+      res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
+    })
+    .catch((err) => {
+      req.log.error(err.message);
+      util.handleError('Error creating project', err, req, next);
     });
   },
 ];

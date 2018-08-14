@@ -11,6 +11,24 @@ import testUtil from '../../tests/util';
 
 const should = chai.should();
 
+const expectAfterDelete = (projectId, id, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProjectMember.findOne({
+    where: {
+      id,
+      projectId,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        next();
+      }
+    }), 500);
+};
 describe('Project members delete', () => {
   let project1;
   let member1;
@@ -109,9 +127,7 @@ describe('Project members delete', () => {
         })
         .expect(204)
         .end((err) => {
-          if (err) {
-            done(err);
-          } else {
+          expectAfterDelete(project1.id, member1.id, err, () => {
             const removedMember = {
               projectId: project1.id,
               userId: 40051332,
@@ -121,7 +137,7 @@ describe('Project members delete', () => {
             server.services.pubsub.publish.calledWith('project.member.removed',
               sinon.match(removedMember)).should.be.true;
             done();
-          }
+          });
 
           // models.ProjectMember
           //     .count({where: { projectId: project1.id, deletedAt: { $eq: null } }})
@@ -170,9 +186,7 @@ describe('Project members delete', () => {
           })
           .expect(204)
           .end((err) => {
-            if (err) {
-              done(err);
-            } else {
+            expectAfterDelete(project1.id, member1.id, err, () => {
               const removedMember = {
                 projectId: project1.id,
                 userId: 40051332,
@@ -201,7 +215,7 @@ describe('Project members delete', () => {
                   plain.userId.should.equal(40051331);
                   done();
                 });
-            }
+            });
           });
       });
     });
@@ -230,9 +244,7 @@ describe('Project members delete', () => {
         })
         .expect(204)
         .end((err) => {
-          if (err) {
-            done(err);
-          } else {
+          expectAfterDelete(project1.id, member2.id, err, () => {
             const removedMember = {
               projectId: project1.id,
               userId: 40051334,
@@ -243,7 +255,7 @@ describe('Project members delete', () => {
               sinon.match(removedMember)).should.be.true;
             postSpy.should.have.been.calledOnce;
             done();
-          }
+          });
         });
     });
 
@@ -279,9 +291,7 @@ describe('Project members delete', () => {
             })
             .expect(204)
             .end((err) => {
-              if (err) {
-                done(err);
-              } else {
+              expectAfterDelete(project1.id, member2.id, err, () => {
                 const removedMember = {
                   projectId: project1.id,
                   userId: 40051334,
@@ -292,7 +302,7 @@ describe('Project members delete', () => {
                   sinon.match(removedMember)).should.be.true;
                 postSpy.should.not.have.been.calledOnce;
                 done();
-              }
+              });
             });
         });
     });

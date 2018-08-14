@@ -43,8 +43,29 @@ module.exports = () => {
   Authorizer.setPolicy('project.updatePhaseProduct', copilotAndAbove);
   Authorizer.setPolicy('project.deletePhaseProduct', copilotAndAbove);
 
+  Authorizer.setPolicy('milestoneTemplate.clone', projectAdmin);
+  Authorizer.setPolicy('milestoneTemplate.create', projectAdmin);
+  Authorizer.setPolicy('milestoneTemplate.edit', projectAdmin);
+  Authorizer.setPolicy('milestoneTemplate.delete', projectAdmin);
+  Authorizer.setPolicy('milestoneTemplate.view', true);
+
   Authorizer.setPolicy('projectType.create', projectAdmin);
   Authorizer.setPolicy('projectType.edit', projectAdmin);
   Authorizer.setPolicy('projectType.delete', projectAdmin);
   Authorizer.setPolicy('projectType.view', true); // anyone can view project types
+
+  Authorizer.setPolicy('productCategory.create', projectAdmin);
+  Authorizer.setPolicy('productCategory.edit', projectAdmin);
+  Authorizer.setPolicy('productCategory.delete', projectAdmin);
+  Authorizer.setPolicy('productCategory.view', true); // anyone can view product categories
+
+  Authorizer.setPolicy('timeline.create', projectEdit);
+  Authorizer.setPolicy('timeline.edit', projectEdit);
+  Authorizer.setPolicy('timeline.delete', projectEdit);
+  Authorizer.setPolicy('timeline.view', projectView);
+
+  Authorizer.setPolicy('milestone.create', projectEdit);
+  Authorizer.setPolicy('milestone.edit', projectEdit);
+  Authorizer.setPolicy('milestone.delete', projectEdit);
+  Authorizer.setPolicy('milestone.view', projectView);
 };

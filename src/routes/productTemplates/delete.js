@@ -17,39 +17,21 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('productTemplate.delete'),
-  (req, res, next) => {
-    const where = {
-      deletedAt: { $eq: null },
-      id: req.params.templateId,
-    };
-
-    return models.sequelize.transaction(tx =>
-      // Update the deletedBy
-      models.ProductTemplate.update({ deletedBy: req.authUser.userId }, {
-        where,
-        returning: true,
-        raw: true,
-        transaction: tx,
-      })
-        .then((updatedResults) => {
-          // Not found
-          if (updatedResults[0] === 0) {
+  (req, res, next) =>
+     models.sequelize.transaction(() =>
+      models.ProductTemplate.findById(req.params.templateId)
+        .then((entity) => {
+          if (!entity) {
             const apiErr = new Error(`Product template not found for template id ${req.params.templateId}`);
             apiErr.status = 404;
             return Promise.reject(apiErr);
           }
-
-          // Soft delete
-          return models.ProductTemplate.destroy({
-            where,
-            transaction: tx,
-            raw: true,
-          });
+          // Update the deletedBy, then delete
+          return entity.update({ deletedBy: req.authUser.userId });
         })
+        .then(entity => entity.destroy()))
         .then(() => {
           res.status(204).end();
         })
         .catch(next),
-    );
-  },
 ];

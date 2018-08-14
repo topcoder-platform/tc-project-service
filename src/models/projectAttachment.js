@@ -12,11 +12,12 @@ module.exports = function defineProjectAttachment(sequelize, DataTypes) {
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    deletedBy: DataTypes.BIGINT,
     createdBy: { type: DataTypes.INTEGER, allowNull: false },
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
   }, {
     tableName: 'project_attachments',
-    paranoid: false,
+    paranoid: true,
     timestamps: true,
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',

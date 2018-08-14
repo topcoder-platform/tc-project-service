@@ -20,6 +20,8 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
 
+    // Parse the fields string to determine what fields are to be returned
+    let fields = req.query.fields ? decodeURIComponent(req.query.fields).split(',') : PHASE_ATTRIBUTES;
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'startDate';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
@@ -49,9 +51,7 @@ module.exports = [
         // Sort
         phases = _.sortBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
 
-        // Parse the fields string to determine what fields are to be returned
-        let fields = req.query.fields ? req.query.fields.split(',') : PHASE_ATTRIBUTES;
-        fields = _.intersection(fields, PHASE_ATTRIBUTES);
+        fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products']);
         if (_.indexOf(fields, 'id') < 0) {
           fields.push('id');
         }

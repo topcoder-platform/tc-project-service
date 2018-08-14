@@ -37,8 +37,9 @@ module.exports = [
             return Promise.reject(err);
           }
           attachment = _attachment;
-          return _attachment.destroy();
-        })
+          return _attachment.update({ deletedBy: req.authUser.userId })
+            .then(() => _attachment.destroy());
+        }))
         .then((_attachment) => {
           if (process.env.NODE_ENV !== 'development') {
             return fileService.deleteFile(req, _attachment.filePath);
@@ -56,6 +57,6 @@ module.exports = [
           req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED, { req, pattachment });
           res.status(204).json({});
         })
-        .catch(err => next(err)));
+        .catch(err => next(err));
   },
 ];
