@@ -1,10 +1,38 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
+import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 
+const expectAfterDelete = (projectId, phaseId, id, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.PhaseProduct.findOne({
+    where: {
+      id,
+      projectId,
+      phaseId,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/projects/${projectId}/phases/${phaseId}/products/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
 const body = {
   name: 'test phase product',
   type: 'product1',
@@ -156,7 +184,8 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .expect(204, done);
+        .expect(204)
+        .end(err => expectAfterDelete(projectId, phaseId, productId, err, done));
     });
   });
 });

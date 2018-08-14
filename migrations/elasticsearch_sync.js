@@ -16,6 +16,7 @@ import util from '../src/util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 
 // create new elasticsearch client
 // the client modifies the config object, so always passed the cloned object
@@ -323,10 +324,14 @@ esClient.indices.delete({
   ignore: [404],
 })
 .then(() => esClient.indices.create(getRequestBody(ES_PROJECT_INDEX)))
+// Re-create timeline index
+.then(() => esClient.indices.delete({ index: ES_TIMELINE_INDEX, ignore: [404] }))
+.then(() => esClient.indices.create({ index: ES_TIMELINE_INDEX }))
 .then(() => {
   console.log('elasticsearch indices synced successfully');
   process.exit();
-}).catch((err) => {
+})
+.catch((err) => {
   console.error('elasticsearch indices sync failed', err);
   process.exit();
 });

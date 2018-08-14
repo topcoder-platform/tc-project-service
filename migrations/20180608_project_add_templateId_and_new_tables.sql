@@ -35,6 +35,7 @@ CREATE TABLE milestones (
     duration integer NOT NULL,
     "startDate" timestamp with time zone NOT NULL,
     "endDate" timestamp with time zone,
+    "actualStartDate" timestamp with time zone,
     "completionDate" timestamp with time zone,
     status character varying(45) NOT NULL,
     type character varying(45) NOT NULL,
@@ -108,6 +109,10 @@ CREATE TABLE product_milestone_templates (
     duration integer NOT NULL,
     type character varying(45) NOT NULL,
     "order" integer NOT NULL,
+    "plannedText" character varying(512) NOT NULL,
+    "activeText" character varying(512) NOT NULL,
+    "blockedText" character varying(512) NOT NULL,
+    "completedText" character varying(512) NOT NULL,
     "deletedAt" timestamp with time zone,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,
@@ -312,10 +317,6 @@ ALTER TABLE ONLY milestones
 
 ALTER TABLE ONLY phase_products
     ADD CONSTRAINT "phase_products_phaseId_fkey" FOREIGN KEY ("phaseId") REFERENCES project_phases(id) ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-ALTER TABLE ONLY product_milestone_templates
-    ADD CONSTRAINT "product_milestone_templates_productTemplateId_fkey" FOREIGN KEY ("productTemplateId") REFERENCES product_templates(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_phases
     ADD CONSTRAINT "project_phases_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES projects(id) ON UPDATE CASCADE ON DELETE SET NULL;

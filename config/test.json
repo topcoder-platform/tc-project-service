@@ -7,9 +7,12 @@
       "host": "http://localhost:9200",
       "apiVersion": "2.3",
       "indexName": "projects_test",
-      "docType": "projectV4"
+      "docType": "projectV4",
+      "timelineIndexName": "timelines_test",
+      "timelineDocType": "timelineV4"
     },
     "rabbitmqUrl": "amqp://localhost:5672",
+    "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
     "dbConfig": {
         "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",
         "maxPoolSize": 50,

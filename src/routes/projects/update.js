@@ -228,8 +228,8 @@ module.exports = [
         } else {
           accept();
         }
-      }))
-      .then(() => {
+      })))
+      .then(() => { // transaction has been committed
         project = project.get({ plain: true });
         project = _.omit(project, ['deletedAt']);
         req.log.debug('updated project', project);
@@ -252,7 +252,7 @@ module.exports = [
         project.members = req.context.currentProjectMembers;
         // get attachments
         return util.getProjectAttachments(req, project.id);
-      }))
+      })
       .then((attachments) => {
         // make sure we only send response after transaction is committed
         project.attachments = attachments;

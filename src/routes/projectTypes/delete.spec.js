@@ -2,11 +2,36 @@
  * Tests for delete.js
  */
 import request from 'supertest';
-
+import chai from 'chai';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
+const expectAfterDelete = (key, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProjectType.findOne({
+    where: {
+      key,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/projectTypes/${key}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
 
 describe('DELETE project type', () => {
   const key = 'key1';
@@ -19,6 +44,7 @@ describe('DELETE project type', () => {
       question: 'question 1',
       info: 'info 1',
       aliases: ['key-1', 'key_1'],
+      metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
       createdBy: 1,
       updatedBy: 1,
     })).then(() => Promise.resolve()),
@@ -87,7 +113,7 @@ describe('DELETE project type', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(key, err, done));
     });
 
     it('should return 204, for connect admin, if type was successfully removed', (done) => {
@@ -97,7 +123,7 @@ describe('DELETE project type', () => {
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(key, err, done));
     });
   });
 });

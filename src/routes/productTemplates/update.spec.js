@@ -14,6 +14,7 @@ describe('UPDATE product template', () => {
   const template = {
     name: 'name 1',
     productKey: 'productKey 1',
+    category: 'generic',
     icon: 'http://example.com/icon1.ico',
     brief: 'brief 1',
     details: 'details 1',
@@ -49,6 +50,28 @@ describe('UPDATE product template', () => {
   let templateId;
 
   beforeEach(() => testUtil.clearDb()
+    .then(() => models.ProductCategory.bulkCreate([
+      {
+        key: 'generic',
+        displayName: 'Generic',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 1',
+        info: 'info 1',
+        aliases: ['key-1', 'key_1'],
+        createdBy: 1,
+        updatedBy: 1,
+      },
+      {
+        key: 'concrete',
+        displayName: 'Concrete',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 2',
+        info: 'info 2',
+        aliases: ['key-2', 'key_2'],
+        createdBy: 1,
+        updatedBy: 1,
+      },
+    ]))
     .then(() => models.ProductTemplate.create(template))
     .then((createdTemplate) => {
       templateId = createdTemplate.id;
@@ -62,6 +85,7 @@ describe('UPDATE product template', () => {
       param: {
         name: 'template 1 - update',
         productKey: 'productKey 1 - update',
+        category: 'concrete',
         icon: 'http://example.com/icon1-update.ico',
         brief: 'brief 1 - update',
         details: 'details 1 - update',
@@ -183,6 +207,7 @@ describe('UPDATE product template', () => {
           resJson.id.should.be.eql(templateId);
           resJson.name.should.be.eql(body.param.name);
           resJson.productKey.should.be.eql(body.param.productKey);
+          resJson.category.should.be.eql(body.param.category);
           resJson.icon.should.be.eql(body.param.icon);
           resJson.brief.should.be.eql(body.param.brief);
           resJson.details.should.be.eql(body.param.details);

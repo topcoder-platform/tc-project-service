@@ -11,7 +11,7 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
   }, {
     tableName: 'project_history',
-    paranoid: false,
+    paranoid: true,
     timestamps: true,
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',

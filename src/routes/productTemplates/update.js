@@ -5,6 +5,7 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
 import models from '../../models';
 
@@ -19,6 +20,7 @@ const schema = {
       id: Joi.any().strip(),
       name: Joi.string().max(255),
       productKey: Joi.string().max(45),
+      category: Joi.string().max(45),
       icon: Joi.string().max(255),
       brief: Joi.string().max(45),
       details: Joi.string().max(255),
@@ -39,6 +41,7 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('productTemplate.edit'),
+  fieldLookupValidation(models.ProductCategory, 'key', 'body.param.category', 'Category'),
   (req, res, next) => {
     const entityToUpdate = _.assign(req.body.param, {
       updatedBy: req.authUser.userId,

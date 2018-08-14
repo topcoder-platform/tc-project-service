@@ -1,14 +1,268 @@
 {
 	"info": {
-		"_postman_id": "1791b330-5331-4768-a265-f1cb5e6b4492",
 		"name": "tc-project-service",
+		"_postman_id": "63bb8939-b1c0-0c3c-ad9d-68e63063eda7",
+		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Project Attachments",
-			"description": null,
 			"item": [
+				{
+					"name": "bookmarks",
+					"item": [
+						{
+							"name": " Create project without bookmarks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": " Create project with valid bookmarks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": " Create project with invalid bookmarks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"invalid\":3,\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get  project",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\"\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update project with bookmarks",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\",\n         \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }]\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete project all bookmarks null",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":null\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update  project with invalid bookmarks",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":3\n      }\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects/2",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get projects with admin token",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api-url}}/v4/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
 				{
 					"name": "Upload attachment",
 					"request": {
@@ -116,8 +370,75 @@
 			]
 		},
 		{
+			"name": "Project With TemplateId issue",
+			"description": "",
+			"item": [
+				{
+					"name": "Create project with templateId (not existed)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with templateId\",\n\t\t\"description\": \"Hello I am a test project with templateId\",\n\t\t\"type\": \"generic\",\n\t\t\"templateId\": 3000\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project with templateId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"param\": {\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": 3\n  }\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Project Members",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project member with no payload",
@@ -169,7 +490,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"role\": \"copilot\"\n}"
+							"raw": "{\n\"param\":{\n\t\"role\": \"copilot\"\n}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/members",
@@ -342,16 +663,16 @@
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": true\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/members/16",
+							"raw": "{{api-url}}/v4/projects/1/members/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"1",
 								"members",
-								"16"
+								"1"
 							]
 						},
 						"description": "Update a project's member."
@@ -377,19 +698,53 @@
 							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": false\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/members/16",
+							"raw": "{{api-url}}/v4/projects/1/members/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"1",
 								"members",
-								"16"
+								"1"
 							]
 						},
 						"description": "Update a project's member."
+					},
+					"response": []
+				},
+				{
+					"name": "wrong role",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n \"param\": {\n    \"role\": \"wrong\"\n   }\n } "
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/3/members/5",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"3",
+								"members",
+								"5"
+							]
+						}
 					},
 					"response": []
 				},
@@ -412,19 +767,53 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/members/15",
+							"raw": "{{api-url}}/v4/projects/3/members/5",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"3",
 								"members",
-								"15"
+								"5"
 							]
 						},
 						"description": "Delete a project's member"
+					},
+					"response": []
+				},
+				{
+					"name": "editing project member roles & primary option",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n \"param\": {\n    \"role\": \"manager\",\n    \"isPrimary\": true\n   }\n } "
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members",
+								"2"
+							]
+						}
 					},
 					"response": []
 				}
@@ -763,6 +1152,33 @@
 					"response": []
 				},
 				{
+					"name": "get projects with copilot token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "DELETE project by id",
 					"request": {
 						"method": "DELETE",
@@ -810,14 +1226,14 @@
 							"raw": "{\n  \"param\": {\n    \"name\": \"project name updated\"\n  }\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/13",
+							"raw": "{{api-url}}/v4/projects/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"13"
+								"1"
 							]
 						},
 						"description": "Update the project name. Name should be updated successfully."
@@ -909,14 +1325,14 @@
 							"raw": "{\n  \"param\": {\n    \"status\": \"in_review\"\n  }\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7",
+							"raw": "{{api-url}}/v4/projects/1",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7"
+								"1"
 							]
 						},
 						"description": "Update the project status."
@@ -1219,374 +1635,7 @@
 						"description": "Update the project bookmarks. This should fire project link created event"
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "bookmarks",
-			"description": null,
-			"item": [
-				{
-					"name": " Create project without bookmarks",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
 				},
-				{
-					"name": " Create project with valid bookmarks",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": " Create project with invalid bookmarks",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"type\": \"generic\",\n        \"description\": \"test project\",\n        \"details\": {},\n        \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"invalid\":3,\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }],\n        \"billingAccountId\": 123,\n        \"name\": \"test project1\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get  project",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\"\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update project with bookmarks",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\",\n         \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }]\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete project all bookmarks null",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":null\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update  project with invalid bookmarks",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":3\n      }\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get projects with admin token",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "issue1",
-			"description": null,
-			"item": [
-				{
-					"name": "get projects with copilot token",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "issue10",
-			"description": null,
-			"item": [
-				{
-					"name": "wrong role",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": " {\n \"param\": {\n    \"role\": \"wrong\"\n   }\n } "
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/3/members/5",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"3",
-								"members",
-								"5"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "editing project member roles & primary option",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": " {\n \"param\": {\n    \"role\": \"manager\",\n    \"isPrimary\": true\n   }\n } "
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "issue5",
-			"description": null,
-			"item": [
 				{
 					"name": "launch a project by topcoder managers ",
 					"request": {
@@ -1686,8 +1735,7 @@
 			]
 		},
 		{
-			"name": "issue8",
-			"description": null,
+			"name": "EventHandling and Integration with Direct Project API",
 			"item": [
 				{
 					"name": "mock direct projects",
@@ -1708,12 +1756,13 @@
 							"raw": " {\n \"param\": {\n    \"role\": \"copilot\",\n    \"isPrimary\": true\n   }\n } "
 						},
 						"url": {
-							"raw": "https://localhost:8443/v3/direct/projects",
+							"raw": "https://api.topcoder-dev.com/v3/direct/projects",
 							"protocol": "https",
 							"host": [
-								"localhost"
+								"api",
+								"topcoder-dev",
+								"com"
 							],
-							"port": "8443",
 							"path": [
 								"v3",
 								"direct",
@@ -1920,11 +1969,32 @@
 					},
 					"response": []
 				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ef96ac6a-0fc0-4a64-a4fe-5390e17afe67",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "12f9d794-0872-4058-aafa-77b89e72025b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
 			]
 		},
 		{
 			"name": "Project Phase",
-			"description": null,
 			"item": [
 				{
 					"name": "Create Phase",
@@ -2176,7 +2246,6 @@
 		},
 		{
 			"name": "Phase Products",
-			"description": null,
 			"item": [
 				{
 					"name": "Create Phase Product",
@@ -2348,7 +2417,6 @@
 		},
 		{
 			"name": "Project Templates",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project template",
@@ -2366,7 +2434,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTemplates",
@@ -2460,7 +2528,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTemplates/1",
@@ -2495,14 +2563,14 @@
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projectTemplates/1",
+							"raw": "{{api-url}}/v4/projectTemplates/2",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projectTemplates",
-								"1"
+								"2"
 							]
 						}
 					},
@@ -2512,7 +2580,6 @@
 		},
 		{
 			"name": "Product Templates",
-			"description": null,
 			"item": [
 				{
 					"name": "Create product template",
@@ -2530,7 +2597,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"alias 1\"\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\"\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n      \"param\": {\r\n        \"name\": \"name 1\",\r\n        \"productKey\": \"productKey 1\",\r\n        \"category\": \"key1\",\r\n        \"icon\": \"http://example.com/icon1.ico\",\r\n        \"brief\": \"brief 1\",\r\n        \"details\": \"details 1\",\r\n        \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n        \"template\": {\r\n          \"template1\": {\r\n            \"name\": \"template 1\",\r\n            \"details\": {\r\n              \"anyDetails\": \"any details 1\"\r\n            },\r\n            \"others\": [\"others 11\", \"others 12\"]\r\n          },\r\n          \"template2\": {\r\n            \"name\": \"template 2\",\r\n            \"details\": {\r\n              \"anyDetails\": \"any details 2\"\r\n            },\r\n            \"others\": [\"others 21\", \"others 22\"]\r\n          }\r\n        }\r\n      }\r\n    }"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/productTemplates",
@@ -2595,14 +2662,14 @@
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/productTemplates/1",
+							"raw": "{{api-url}}/v4/productTemplates/3",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"productTemplates",
-								"1"
+								"3"
 							]
 						}
 					},
@@ -2624,7 +2691,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"scope 1\",\r\n      \"alias2\": [\"a\"]\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\",\r\n      \"template2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"category\":\"key1\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"scope 1\",\r\n      \"alias2\": [\"a\"]\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\",\r\n      \"template2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/productTemplates/1",
@@ -2656,7 +2723,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/productTemplates/1",
@@ -2676,7 +2743,6 @@
 		},
 		{
 			"name": "Project Type",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project type",
@@ -2694,7 +2760,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\"\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"]\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTypes",
@@ -2820,7 +2886,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projectTypes/chatbot",
@@ -2839,70 +2905,197 @@
 			]
 		},
 		{
-			"name": "issue86 (create project with templateId)",
-			"description": "",
+			"name": "Product Category",
 			"item": [
 				{
-					"name": "Create project with templateId",
+					"name": "Create product category",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"param\": {\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": 3\n  }\n}"
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"generic\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"icon\",\r\n        \"question\": \"question\",\r\n        \"info\": \"info\",\r\n        \"aliases\": [\"key-1\", \"key-2\"]\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects",
+							"raw": "{{api-url}}/v4/productCategories",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
-								"projects"
+								"productCategories"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Create project with templateId (not existed)",
+					"name": "List product categories",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project with templateId\",\n\t\t\"description\": \"Hello I am a test project with templateId\",\n\t\t\"type\": \"generic\",\n\t\t\"templateId\": 3000\n\t}\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects",
+							"raw": "{{api-url}}/v4/productCategories",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
-								"projects"
+								"productCategories"
 							]
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get product category",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productCategories/generic",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productCategories",
+								"generic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update product category",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"displayName\": \"Chatbot-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productCategories/generic",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productCategories",
+								"generic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete product category",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productCategories/generic",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productCategories",
+								"generic"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJwc2hhaDEiLCJleHAiOjI0NjI0OTQ2MTgsInVzZXJJZCI6IjQwMTM1OTc4IiwiaWF0IjoxNDYyNDk0MDE4LCJlbWFpbCI6InBzaGFoMUB0ZXN0LmNvbSIsImp0aSI6ImY0ZTFhNTE0LTg5ODAtNDY0MC04ZWM1LWUzNmUzMWE3ZTg0OSJ9.XuNN7tpMOXvBG1QwWRQROj7NfuUbqhkjwn39Vy4tR5I",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f0092ef5-e624-4c25-87b2-b6a9e4c81ec8",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9183c429-a5e0-4bf9-96a2-89f4d66e9b0d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		},
@@ -2928,8 +3121,18 @@
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3\n\t}\n}"
 						},
-						"url": "{{api-url}}/v4/projects/6/upgrade",
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/6/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"6",
+								"upgrade"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2951,8 +3154,18 @@
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3\n\t}\n}"
 						},
-						"url": "{{api-url}}/v4/projects/7/upgrade",
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/7/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"7",
+								"upgrade"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2974,8 +3187,18 @@
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3,\n\t\t\"phaseName\": \"Custom phase name\"\n\t}\n}"
 						},
-						"url": "{{api-url}}/v4/projects/6/upgrade",
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/6/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"6",
+								"upgrade"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2997,8 +3220,1147 @@
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"targetVersion\": \"v3\",\n\t\t\"defaultProductTemplateId\": 3,\n\t\t\"phaseName\": \"Custom phase name\"\n\t}\n}"
 						},
-						"url": "{{api-url}}/v4/projects/7/upgrade",
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/7/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"7",
+								"upgrade"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Timeline",
+			"item": [
+				{
+					"name": "Create timeline",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-connectAdmin-40051336}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create timeline with invalid data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-connectAdmin-40051336}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-28T00:00:00.000Z\",\r\n    \"reference\": \"invalid\",\r\n    \"referenceId\": 0\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List timelines (filter by reference and referenceId)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines?filter=reference%3Dphase%26referenceId%3D1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "reference%3Dphase%26referenceId%3D1",
+									"equals": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get timeline",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update timeline",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-01T00:00:00.000Z\",\r\n    \"endDate\": null,\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update timeline (startDate)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"endDate\": null,\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update timeline (endDate)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-04T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete timeline",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/4",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Milestone",
+			"item": [
+				{
+					"name": "Create milestone",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 4,\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-08T00:00:00.000Z\",\r\n    \"status\": \"open\",\r\n    \"type\": \"type3\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            2,\r\n            3,\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 3\",\r\n    \"activeText\": \"activeText 3\",\r\n    \"completedText\": \"completedText 3\",\r\n    \"blockedText\": \"blockedText 3\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create milestone with invalid data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-04T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-04T00:00:00.000Z\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List milestones",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List milestones (sort)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones?sort=order desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "order desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get milestone",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 1 => 2)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 2,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 2 => 1)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 1 => 3)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 3,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 3 => 1)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete milestone",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Milestone Template",
+			"item": [
+				{
+					"name": "Create milestone template",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\"\r\n\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create milestone template with invalid data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clone milestone template",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceTemplateId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/2/milestones/clone",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"2",
+								"milestones",
+								"clone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clone milestone template with invalid product template id",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceTemplateId\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/5/milestones/clone",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"5",
+								"milestones",
+								"clone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Clone milestone template with invalid source product template id",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceTemplateId\": 6\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/2/milestones/clone",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"2",
+								"milestones",
+								"clone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List milestone templates",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List milestone templates (sort)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones?sort=order desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "order desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get milestone template",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 1 => 2)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 2\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 2 => 1)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 1 => 3)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 3\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (order 3 => 1)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 1\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete milestone",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/productTemplates/1/milestones/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"productTemplates",
+								"1",
+								"milestones",
+								"2"
+							]
+						}
 					},
 					"response": []
 				}

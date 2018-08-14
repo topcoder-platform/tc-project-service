@@ -16,29 +16,28 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
 
-    models.sequelize.transaction(t =>
-      // soft delete the record
-       models.Project.destroy({
-         where: { id: projectId },
-         cascade: true,
-         transaction: t,
-       })
-        .then((count) => {
-          if (count === 0) {
-            const err = new Error('Project not found');
-            err.status = 404;
-            next(err);
-          } else {
-            req.app.services.pubsub.publish(
-              EVENT.ROUTING_KEY.PROJECT_DELETED,
-              { id: projectId },
-              { correlationId: req.id },
-            );
-            // emit event
-            req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED, { req, id: projectId });
-            res.status(204).json({});
+    models.sequelize.transaction(() =>
+      models.Project.findById(req.params.projectId)
+        .then((entity) => {
+          if (!entity) {
+            const apiErr = new Error(`Project template not found for template id ${projectId}`);
+            apiErr.status = 404;
+            return Promise.reject(apiErr);
           }
+          // Update the deletedBy, then delete
+          return entity.update({ deletedBy: req.authUser.userId });
         })
-        .catch(err => next(err)));
+        .then(project => project.destroy({ cascade: true })))
+        .then(() => {
+          req.app.services.pubsub.publish(
+            EVENT.ROUTING_KEY.PROJECT_DELETED,
+            { id: projectId },
+            { correlationId: req.id },
+          );
+          // emit event
+          req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED, { req, id: projectId });
+          res.status(204).json({});
+        })
+        .catch(err => next(err));
   },
 ];
