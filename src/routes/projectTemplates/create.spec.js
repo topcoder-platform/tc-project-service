@@ -22,6 +22,7 @@ describe('CREATE project template', () => {
           question: 'question 1',
           info: 'info 1',
           aliases: ['key-1', 'key_1'],
+          metadata: {},
           createdBy: 1,
           updatedBy: 1,
         },
