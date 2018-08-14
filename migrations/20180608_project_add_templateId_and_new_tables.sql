@@ -318,9 +318,5 @@ ALTER TABLE ONLY milestones
 ALTER TABLE ONLY phase_products
     ADD CONSTRAINT "phase_products_phaseId_fkey" FOREIGN KEY ("phaseId") REFERENCES project_phases(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
-
-ALTER TABLE ONLY product_milestone_templates
-    ADD CONSTRAINT "product_milestone_templates_productTemplateId_fkey" FOREIGN KEY ("productTemplateId") REFERENCES product_templates(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
 ALTER TABLE ONLY project_phases
     ADD CONSTRAINT "project_phases_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES projects(id) ON UPDATE CASCADE ON DELETE SET NULL;
