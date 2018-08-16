@@ -384,6 +384,9 @@ _.assignIn(util, {
     if (_.isArray(source)) {
       return source;
     }
+    if (source === null) {
+      _.unset(destination, key);
+    }
   }),
 });
 
