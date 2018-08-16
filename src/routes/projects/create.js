@@ -87,7 +87,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
     if (!projectTemplate) {
       return Promise.resolve(result);
     }
-    const phases = _.values(projectTemplate.phases);
+    const phases = _.filter(_.values(projectTemplate.phases), p => !!p);
     const productTemplateMap = {};
     productTemplates.forEach((pt) => {
       productTemplateMap[pt.id] = pt;
