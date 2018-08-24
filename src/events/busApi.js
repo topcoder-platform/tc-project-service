@@ -403,7 +403,7 @@ module.exports = (app, logger) => {
         // Other fields change
         const originalWithouDetails = _.omit(original, 'details');
         const updatedWithouDetails = _.omit(updated, 'details');
-        if (!_.isEqual(originalWithouDetails.details, updatedWithouDetails.details)) {
+        if (!_.isEqual(originalWithouDetails, updatedWithouDetails)) {
           createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
             projectId,
             projectName: project.name,
