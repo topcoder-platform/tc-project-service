@@ -211,10 +211,10 @@ module.exports = (app, logger) => {
    * If the project is in draft status and the phase is in reviewed status, and it's the
    * only phase in the project with that status, then send the plan ready event.
    *
-   * @param req the req
-   * @param project the project
-   * @param phase the phase that was created/updated
-   * @returns {Promise<void>}
+   * @param {object} req the req
+   * @param {object} project the project
+   * @param {object} phase the phase that was created/updated
+   * @returns {Promise<void>} void
    */
   async function sendPlanReadyEventIfNeeded(req, project, phase) {
     if (project.status === PROJECT_STATUS.DRAFT &&
@@ -223,14 +223,15 @@ module.exports = (app, logger) => {
         where: { projectId: project.id, status: PROJECT_PHASE_STATUS.REVIEWED },
       }).then(((count) => {
         // only send the plan ready event when this is the only reviewed phase in the project
-        if (count !== 1) { return; }
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_READY, {
-          projectId: project.id,
-          phaseId: phase.id,
-          projectName: project.name,
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
+        if (count === 1) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_READY, {
+            projectId: project.id,
+            phaseId: phase.id,
+            projectName: project.name,
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
       }));
     }
   }
