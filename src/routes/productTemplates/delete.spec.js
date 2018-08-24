@@ -2,10 +2,37 @@
  * Tests for delete.js
  */
 import request from 'supertest';
+import chai from 'chai';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+
+const expectAfterDelete = (id, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProductTemplate.findOne({
+    where: {
+      id,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/productTemplates/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
 
 
 describe('DELETE product template', () => {
@@ -15,6 +42,7 @@ describe('DELETE product template', () => {
     .then(() => models.ProductTemplate.create({
       name: 'name 1',
       productKey: 'productKey 1',
+      category: 'generic',
       icon: 'http://example.com/icon1.ico',
       brief: 'brief 1',
       details: 'details 1',
@@ -106,7 +134,7 @@ describe('DELETE product template', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(templateId, err, done));
     });
 
     it('should return 204, for connect admin, if template was successfully removed', (done) => {
@@ -116,7 +144,7 @@ describe('DELETE product template', () => {
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(templateId, err, done));
     });
   });
 });

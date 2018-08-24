@@ -1,4 +1,5 @@
 import models from '../models';
+import { TIMELINE_REFERENCES } from '../constants';
 
 models.sequelize.sync({ force: true })
   .then(() =>
@@ -310,6 +311,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'name 1',
       productKey: 'productKey 1',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -344,6 +346,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'template 2',
       productKey: 'productKey 2',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -357,6 +360,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'Generic work',
       productKey: 'generic_work',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -384,6 +388,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'Website product',
       productKey: 'website_development',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',
@@ -411,6 +416,7 @@ models.sequelize.sync({ force: true })
     {
       name: 'Application product',
       productKey: 'application_development',
+      category: 'category',
       icon: 'http://example.com/icon1.ico',
       brief: 'brief 1',
       details: 'details 1',
@@ -433,6 +439,140 @@ models.sequelize.sync({ force: true })
       createdBy: 1,
       updatedBy: 2,
     },
+  ], { returning: true }))
+  // Product milestone templates
+  .then(productTemplates => models.ProductMilestoneTemplate.bulkCreate([
+    {
+      name: 'milestoneTemplate 1',
+      duration: 3,
+      type: 'type1',
+      order: 1,
+      productTemplateId: productTemplates[0].id,
+      activeText: 'activeText 1',
+      completedText: 'completedText 1',
+      blockedText: 'blockedText 1',
+      plannedText: 'planned Text 1',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'milestoneTemplate 2',
+      duration: 4,
+      type: 'type2',
+      order: 2,
+      productTemplateId: productTemplates[0].id,
+      activeText: 'activeText 2',
+      completedText: 'completedText 2',
+      blockedText: 'blockedText 2',
+      plannedText: 'planned Text 2',
+      createdBy: 2,
+      updatedBy: 3,
+    },
+  ]))
+  // Project phases
+  .then(() => models.ProjectPhase.bulkCreate([
+    {
+      name: 'phase 1',
+      projectId: 1,
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'phase 2',
+      projectId: 1,
+      createdBy: 2,
+      updatedBy: 3,
+    },
+  ], { returning: true }))
+  // Timelines
+  .then(projectPhases => models.Timeline.bulkCreate([
+    {
+      name: 'timeline 1',
+      startDate: '2018-05-01T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PROJECT,
+      referenceId: projectPhases[0].projectId,
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      name: 'timeline 2',
+      startDate: '2018-05-02T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PHASE,
+      referenceId: projectPhases[0].id,
+      createdBy: 2,
+      updatedBy: 3,
+    },
+    {
+      name: 'timeline 3',
+      startDate: '2018-05-03T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PROJECT,
+      referenceId: projectPhases[0].projectId,
+      createdBy: 3,
+      updatedBy: 4,
+    },
+    {
+      name: 'timeline 4',
+      startDate: '2018-05-04T00:00:00.000Z',
+      reference: TIMELINE_REFERENCES.PROJECT,
+      referenceId: 2,
+      createdBy: 4,
+      updatedBy: 5,
+    },
+  ], { returning: true }))
+  // Milestones
+  .then(timelines => models.Milestone.bulkCreate([
+    {
+      timelineId: timelines[0].id,
+      name: 'milestone 1',
+      duration: 2,
+      startDate: '2018-05-03T00:00:00.000Z',
+      status: 'open',
+      type: 'type1',
+      details: {
+        detail1: {
+          subDetail1A: 1,
+          subDetail1B: 2,
+        },
+        detail2: [1, 2, 3],
+      },
+      order: 1,
+      plannedText: 'plannedText 1',
+      activeText: 'activeText 1',
+      completedText: 'completedText 1',
+      blockedText: 'blockedText 1',
+      createdBy: 1,
+      updatedBy: 2,
+    },
+    {
+      timelineId: timelines[0].id,
+      name: 'milestone 2',
+      duration: 3,
+      startDate: '2018-05-04T00:00:00.000Z',
+      status: 'open',
+      type: 'type2',
+      order: 2,
+      plannedText: 'plannedText 2',
+      activeText: 'activeText 2',
+      completedText: 'completedText 2',
+      blockedText: 'blockedText 2',
+      createdBy: 2,
+      updatedBy: 3,
+    },
+    {
+      timelineId: timelines[2].id,
+      name: 'milestone 3',
+      duration: 4,
+      startDate: '2018-05-04T00:00:00.000Z',
+      status: 'open',
+      type: 'type3',
+      order: 3,
+      plannedText: 'plannedText 3',
+      activeText: 'activeText 3',
+      completedText: 'completedText 3',
+      blockedText: 'blockedText 3',
+      createdBy: 3,
+      updatedBy: 4,
+    },
   ]))
   .then(() => models.ProjectType.bulkCreate([
     {
@@ -440,48 +580,104 @@ models.sequelize.sync({ force: true })
       displayName: 'Application development',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: ['key-11', 'key_12'],
     },
     {
       key: 'generic',
       displayName: 'Generic',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon2.ico',
+      question: 'question 2',
+      info: 'info 2',
+      aliases: ['key-21', 'key_22'],
     },
     {
       key: 'visual_prototype',
       displayName: 'Visual Prototype',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon3.ico',
+      question: 'question 3',
+      info: 'info 1',
+      aliases: ['key-31', 'key_32'],
     },
     {
       key: 'visual_design',
       displayName: 'Visual Design',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon4.ico',
+      question: 'question 4',
+      info: 'info 4',
+      aliases: ['key-41', 'key_42'],
     },
     {
       key: 'website',
       displayName: 'Website',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon5.ico',
+      question: 'question 5',
+      info: 'info 5',
+      aliases: ['key-51', 'key_52'],
     },
     {
       key: 'app',
       displayName: 'Application',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon6.ico',
+      question: 'question 6',
+      info: 'info 6',
+      aliases: ['key-61', 'key_62'],
     },
     {
       key: 'quality_assurance',
       displayName: 'Quality Assurance',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon7.ico',
+      question: 'question 7',
+      info: 'info 7',
+      aliases: ['key-71', 'key_72'],
     },
     {
       key: 'chatbot',
       displayName: 'Chatbot',
       createdBy: 1,
       updatedBy: 2,
+      icon: 'http://example.com/icon8.ico',
+      question: 'question 8',
+      info: 'info 8',
+      aliases: ['key-81', 'key_82'],
+    },
+  ]))
+  .then(() => models.ProductCategory.bulkCreate([
+    {
+      key: 'key1',
+      displayName: 'displayName 1',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: ['key-11', 'key_12'],
+      disabled: false,
+      hidden: false,
+      createdBy: 1,
+      updatedBy: 1,
+    },
+    {
+      key: 'key2',
+      displayName: 'displayName 2',
+      icon: 'http://example.com/icon2.ico',
+      question: 'question 2',
+      info: 'info 2',
+      aliases: ['key-21', 'key_22'],
+      createdBy: 1,
+      updatedBy: 1,
     },
   ]))
   .then(() => {

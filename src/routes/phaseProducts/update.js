@@ -62,7 +62,8 @@ module.exports = [
         _.extend(existing, updatedProps);
         existing.save().then(accept).catch(reject);
       }
-    })).then((updated) => {
+    })))
+    .then((updated) => {
       req.log.debug('updated phase product', JSON.stringify(updated, null, 2));
 
       const updatedValue = updated.get({ plain: true });
@@ -77,6 +78,6 @@ module.exports = [
         { req, original: previousValue, updated: updatedValue });
 
       res.json(util.wrapResponse(req.id, updated));
-    }).catch(err => next(err)));
+    }).catch(err => next(err));
   },
 ];

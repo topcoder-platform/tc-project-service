@@ -2,11 +2,37 @@
  * Tests for delete.js
  */
 import request from 'supertest';
+import chai from 'chai';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
+const expectAfterDelete = (id, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProjectTemplate.findOne({
+    where: {
+      id,
+    },
+    paranoid: false,
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        chai.assert.isNotNull(res.deletedAt);
+        chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v4/projectTemplates/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
+      }
+    }), 500);
+};
 
 describe('DELETE project template', () => {
   let templateId;
@@ -113,8 +139,7 @@ describe('DELETE project template', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(templateId, err, done));
     });
 
     it('should return 204, for connect admin, if template was successfully removed', (done) => {
@@ -124,7 +149,7 @@ describe('DELETE project template', () => {
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(204)
-        .end(done);
+        .end(err => expectAfterDelete(templateId, err, done));
     });
   });
 });

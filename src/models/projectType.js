@@ -10,6 +10,7 @@ module.exports = function definePhaseProduct(sequelize, DataTypes) {
     aliases: { type: DataTypes.JSON, allowNull: false },
     disabled: { type: DataTypes.BOOLEAN, defaultValue: false },
     hidden: { type: DataTypes.BOOLEAN, defaultValue: false },
+    metadata: { type: DataTypes.JSON, allowNull: false },
 
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

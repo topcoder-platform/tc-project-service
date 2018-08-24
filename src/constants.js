@@ -11,6 +11,8 @@ export const PROJECT_STATUS = {
 
 export const PROJECT_PHASE_STATUS = PROJECT_STATUS;
 
+export const MILESTONE_STATUS = PROJECT_STATUS;
+
 export const PROJECT_MEMBER_ROLE = {
   MANAGER: 'manager',
   CUSTOMER: 'customer',
@@ -49,6 +51,14 @@ export const EVENT = {
     PROJECT_PHASE_PRODUCT_ADDED: 'project.phase.product.added',
     PROJECT_PHASE_PRODUCT_UPDATED: 'project.phase.product.updated',
     PROJECT_PHASE_PRODUCT_REMOVED: 'project.phase.product.removed',
+
+    TIMELINE_ADDED: 'timeline.added',
+    TIMELINE_UPDATED: 'timeline.updated',
+    TIMELINE_REMOVED: 'timeline.removed',
+
+    MILESTONE_ADDED: 'milestone.added',
+    MILESTONE_UPDATED: 'milestone.updated',
+    MILESTONE_REMOVED: 'milestone.removed',
   },
 };
 
@@ -96,4 +106,10 @@ export const REGEX = {
 
 export const TOKEN_SCOPES = {
   CONNECT_PROJECT_ADMIN: 'all:connect_project',
+};
+
+export const TIMELINE_REFERENCES = {
+  PROJECT: 'project',
+  PHASE: 'phase',
+  PRODUCT: 'product',
 };

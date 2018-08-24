@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING(255), allowNull: false },
     productKey: { type: DataTypes.STRING(45), allowNull: false },
+    category: { type: DataTypes.STRING(45), allowNull: false },
     icon: { type: DataTypes.STRING(255), allowNull: false },
     brief: { type: DataTypes.STRING(45), allowNull: false },
     details: { type: DataTypes.STRING(255), allowNull: false },
@@ -28,6 +29,15 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
+    classMethods: {
+      associate: (models) => {
+        ProductTemplate.hasMany(models.ProductMilestoneTemplate, {
+          as: 'milestones',
+          foreignKey: 'productTemplateId',
+          onDelete: 'cascade',
+        });
+      },
+    },
   });
 
   return ProductTemplate;

@@ -5,6 +5,7 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
 import models from '../../models';
 
@@ -41,6 +42,7 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('projectTemplate.edit'),
+  fieldLookupValidation(models.ProjectType, 'key', 'body.param.category', 'Category'),
   (req, res, next) => {
     const entityToUpdate = _.assign(req.body.param, {
       updatedBy: req.authUser.userId,
@@ -64,6 +66,8 @@ module.exports = [
         // Merge JSON fields
         entityToUpdate.scope = util.mergeJsonObjects(projectTemplate.scope, entityToUpdate.scope);
         entityToUpdate.phases = util.mergeJsonObjects(projectTemplate.phases, entityToUpdate.phases);
+        // removes null phase templates
+        entityToUpdate.phases = _.omitBy(entityToUpdate.phases, _.isNull);
 
         return projectTemplate.update(entityToUpdate);
       })
