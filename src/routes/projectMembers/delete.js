@@ -28,9 +28,9 @@ module.exports = [
           err.status = 404;
           return Promise.reject(err);
         }
-        return member.update({ deletedBy: req.authUser.userId });        // eslint-disable-line no-console
+        return member.update({ deletedBy: req.authUser.userId });
       })
-      .then(member => member.destroy({ logging: console.log }))
+      .then(member => member.destroy({ logging: console.log })) // eslint-disable-line no-console
       .then(member => member.save())
       // if primary co-pilot is removed promote the next co-pilot to primary #43
       .then(member => new Promise((accept, reject) => {

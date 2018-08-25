@@ -32,7 +32,7 @@ describe('UPDATE product category', () => {
   );
   after(testUtil.clearDb);
 
-  describe('PATCH /productCategories/{key}', () => {
+  describe('PATCH /projects/metadata/productCategories/{key}', () => {
     const body = {
       param: {
         displayName: 'displayName 1 - update',
@@ -47,14 +47,14 @@ describe('UPDATE product category', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -64,7 +64,7 @@ describe('UPDATE product category', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -74,7 +74,7 @@ describe('UPDATE product category', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
@@ -84,7 +84,7 @@ describe('UPDATE product category', () => {
 
     it('should return 404 for non-existed product category', (done) => {
       request(server)
-        .patch('/v4/productCategories/1234')
+        .patch('/v4/projects/metadata/productCategories/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -96,7 +96,7 @@ describe('UPDATE product category', () => {
       models.ProductCategory.destroy({ where: { key } })
         .then(() => {
           request(server)
-            .patch(`/v4/productCategories/${key}`)
+            .patch(`/v4/projects/metadata/productCategories/${key}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -114,7 +114,7 @@ describe('UPDATE product category', () => {
       delete partialBody.param.disabled;
       delete partialBody.param.hidden;
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -150,7 +150,7 @@ describe('UPDATE product category', () => {
       delete partialBody.param.disabled;
       delete partialBody.param.hidden;
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -186,7 +186,7 @@ describe('UPDATE product category', () => {
       delete partialBody.param.disabled;
       delete partialBody.param.hidden;
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -222,7 +222,7 @@ describe('UPDATE product category', () => {
       delete partialBody.param.disabled;
       delete partialBody.param.hidden;
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -258,7 +258,7 @@ describe('UPDATE product category', () => {
       delete partialBody.param.disabled;
       delete partialBody.param.hidden;
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -294,7 +294,7 @@ describe('UPDATE product category', () => {
       delete partialBody.param.aliases;
       delete partialBody.param.hidden;
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -330,7 +330,7 @@ describe('UPDATE product category', () => {
       delete partialBody.param.disabled;
       delete partialBody.param.aliases;
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -358,7 +358,7 @@ describe('UPDATE product category', () => {
 
     it('should return 200 for admin all fields updated', (done) => {
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -386,7 +386,7 @@ describe('UPDATE product category', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch(`/v4/productCategories/${key}`)
+        .patch(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

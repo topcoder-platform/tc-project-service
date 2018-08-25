@@ -30,7 +30,7 @@ describe('CREATE project template', () => {
       .then(() => done());
   });
 
-  describe('POST /projectTemplates', () => {
+  describe('POST /projects/metadata/projectTemplates', () => {
     const body = {
       param: {
         name: 'template 1',
@@ -70,14 +70,14 @@ describe('CREATE project template', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -87,7 +87,7 @@ describe('CREATE project template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -97,7 +97,7 @@ describe('CREATE project template', () => {
 
     it('should return 403 for connect manager', (done) => {
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -114,7 +114,7 @@ describe('CREATE project template', () => {
       };
 
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -127,7 +127,7 @@ describe('CREATE project template', () => {
       const invalidBody = _.cloneDeep(body);
       invalidBody.param.type = null;
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -140,7 +140,7 @@ describe('CREATE project template', () => {
       const invalidBody = _.cloneDeep(body);
       invalidBody.param.type = 'not_exist';
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -151,7 +151,7 @@ describe('CREATE project template', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -182,7 +182,7 @@ describe('CREATE project template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/projectTemplates')
+        .post('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

@@ -1,23 +1,16 @@
 /**
  * API to list all milestone templates
  */
-import validate from 'express-validation';
-import Joi from 'joi';
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
+import validateMilestoneTemplate from '../../middlewares/validateMilestoneTemplate';
 
 const permissions = tcMiddleware.permissions;
 
-const schema = {
-  params: {
-    productTemplateId: Joi.number().integer().positive().required(),
-  },
-};
-
 module.exports = [
-  validate(schema),
+  validateMilestoneTemplate.validateQueryFilter,
   permissions('milestoneTemplate.view'),
   (req, res, next) => {
     // Parse the sort query
@@ -36,10 +29,9 @@ module.exports = [
     const sortColumnAndOrder = sort.split(' ');
 
     // Get all milestone templates
-    return models.ProductMilestoneTemplate.findAll({
-      where: {
-        productTemplateId: req.params.productTemplateId,
-      },
+    const where = req.params.filter || {};
+    return models.MilestoneTemplate.findAll({
+      where,
       order: [sortColumnAndOrder],
       attributes: { exclude: ['deletedAt', 'deletedBy'] },
       raw: true,

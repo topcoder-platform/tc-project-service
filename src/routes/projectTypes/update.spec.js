@@ -33,7 +33,7 @@ describe('UPDATE project type', () => {
   );
   after(testUtil.clearDb);
 
-  describe('PATCH /projectTypes/{key}', () => {
+  describe('PATCH /projects/metadata/projectTypes/{key}', () => {
     const body = {
       param: {
         displayName: 'displayName 1 - update',
@@ -49,14 +49,14 @@ describe('UPDATE project type', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -66,7 +66,7 @@ describe('UPDATE project type', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -76,7 +76,7 @@ describe('UPDATE project type', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
@@ -86,7 +86,7 @@ describe('UPDATE project type', () => {
 
     it('should return 404 for non-existed type', (done) => {
       request(server)
-        .patch('/v4/projectTypes/1234')
+        .patch('/v4/projects/metadata/projectTypes/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -98,7 +98,7 @@ describe('UPDATE project type', () => {
       models.ProjectType.destroy({ where: { key } })
         .then(() => {
           request(server)
-            .patch(`/v4/projectTypes/${key}`)
+            .patch(`/v4/projects/metadata/projectTypes/${key}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -117,7 +117,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.hidden;
       delete partialBody.param.metadata;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -155,7 +155,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.hidden;
       delete partialBody.param.metadata;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -193,7 +193,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.hidden;
       delete partialBody.param.metadata;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -231,7 +231,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.hidden;
       delete partialBody.param.metadata;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -269,7 +269,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.hidden;
       delete partialBody.param.metadata;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -307,7 +307,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.hidden;
       delete partialBody.param.metadata;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -345,7 +345,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.aliases;
       delete partialBody.param.metadata;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -382,7 +382,7 @@ describe('UPDATE project type', () => {
       delete partialBody.param.aliases;
       delete partialBody.param.hidden;
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -411,7 +411,7 @@ describe('UPDATE project type', () => {
 
     it('should return 200 for admin all fields updated', (done) => {
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -440,7 +440,7 @@ describe('UPDATE project type', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch(`/v4/projectTypes/${key}`)
+        .patch(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

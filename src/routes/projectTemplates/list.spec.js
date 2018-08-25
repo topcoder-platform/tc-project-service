@@ -74,10 +74,10 @@ describe('LIST project templates', () => {
   );
   after(testUtil.clearDb);
 
-  describe('GET /projectTemplates', () => {
+  describe('GET /projects/metadata/projectTemplates', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projectTemplates')
+        .get('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -106,13 +106,13 @@ describe('LIST project templates', () => {
 
     it('should return 200 for anonymous user', (done) => {
       request(server)
-        .get('/v4/projectTemplates')
+        .get('/v4/projects/metadata/projectTemplates')
         .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/projectTemplates')
+        .get('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -122,7 +122,7 @@ describe('LIST project templates', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/projectTemplates')
+        .get('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -132,7 +132,7 @@ describe('LIST project templates', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/projectTemplates')
+        .get('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -141,7 +141,7 @@ describe('LIST project templates', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/projectTemplates')
+        .get('/v4/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

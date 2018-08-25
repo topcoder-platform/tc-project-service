@@ -64,7 +64,9 @@ const milestoneTemplates = [
     duration: 3,
     type: 'type1',
     order: 1,
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     plannedText: 'text to be shown in planned stage',
     blockedText: 'text to be shown in blocked stage',
     activeText: 'text to be shown in active stage',
@@ -81,7 +83,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
   },
@@ -90,11 +94,11 @@ const milestoneTemplates = [
 describe('CREATE milestone template', () => {
   beforeEach(() => testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
   );
   after(testUtil.clearDb);
 
-  describe('POST /productTemplates/{productTemplateId}/milestones', () => {
+  describe('POST /timelines/metadata/milestoneTemplates', () => {
     const body = {
       param: {
         name: 'milestoneTemplate 3',
@@ -107,19 +111,22 @@ describe('CREATE milestone template', () => {
         activeText: 'text to be shown in active stage - 3',
         completedText: 'text to be shown in completed stage - 3',
         hidden: true,
+        reference: 'product',
+        referenceId: 1,
+        metadata: {},
       },
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -129,7 +136,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -139,7 +146,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -147,14 +154,18 @@ describe('CREATE milestone template', () => {
         .expect(403, done);
     });
 
-    it('should return 404 for non-existed product template', (done) => {
+    it('should return 422 for non-existed product template', (done) => {
+      const invalidBody = {
+        param: _.assign({}, body.param, { referenceId: 1000 }),
+      };
+
       request(server)
-        .post('/v4/productTemplates/1000/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(body)
-        .expect(404, done);
+        .send(invalidBody)
+        .expect(422, done);
     });
 
     it('should return 422 if missing name', (done) => {
@@ -165,7 +176,7 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -182,7 +193,7 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -199,7 +210,7 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -216,7 +227,7 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -227,7 +238,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -246,6 +257,9 @@ describe('CREATE milestone template', () => {
           resJson.blockedText.should.be.eql(body.param.blockedText);
           resJson.activeText.should.be.eql(body.param.activeText);
           resJson.completedText.should.be.eql(body.param.completedText);
+          resJson.reference.should.be.eql(body.param.reference);
+          resJson.referenceId.should.be.eql(body.param.referenceId);
+          resJson.metadata.should.be.eql(body.param.metadata);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -255,9 +269,10 @@ describe('CREATE milestone template', () => {
           should.not.exist(resJson.deletedAt);
 
           // Verify 'order' of the other milestones
-          models.ProductMilestoneTemplate.findAll({
+          models.MilestoneTemplate.findAll({
             where: {
-              productTemplateId: 1,
+              reference: body.param.reference,
+              referenceId: body.param.referenceId,
             },
           }).then((milestones) => {
             _.each(milestones, (milestone) => {
@@ -278,7 +293,7 @@ describe('CREATE milestone template', () => {
       const minimalBody = _.cloneDeep(body);
       delete minimalBody.param.hidden;
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -294,7 +309,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/productTemplates/1/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

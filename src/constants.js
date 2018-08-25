@@ -104,3 +104,9 @@ export const TIMELINE_REFERENCES = {
   PHASE: 'phase',
   PRODUCT: 'product',
 };
+
+export const MILESTONE_TEMPLATE_REFERENCES = {
+  PROJECT: 'project',
+  PRODUCT: 'product',
+};
+

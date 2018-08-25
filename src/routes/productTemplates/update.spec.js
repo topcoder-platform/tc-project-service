@@ -80,7 +80,7 @@ describe('UPDATE product template', () => {
   );
   after(testUtil.clearDb);
 
-  describe('PATCH /productTemplates/{templateId}', () => {
+  describe('PATCH /projects/metadata/productTemplates/{templateId}', () => {
     const body = {
       param: {
         name: 'template 1 - update',
@@ -119,14 +119,14 @@ describe('UPDATE product template', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -136,7 +136,7 @@ describe('UPDATE product template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -146,7 +146,7 @@ describe('UPDATE product template', () => {
 
     it('should return 403 for connect manager', (done) => {
       request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
@@ -163,7 +163,7 @@ describe('UPDATE product template', () => {
       };
 
       request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -173,7 +173,7 @@ describe('UPDATE product template', () => {
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1234')
+        .patch('/v4/projects/metadata/productTemplates/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -185,7 +185,7 @@ describe('UPDATE product template', () => {
       models.ProductTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-            .patch(`/v4/productTemplates/${templateId}`)
+            .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -196,7 +196,7 @@ describe('UPDATE product template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -260,7 +260,7 @@ describe('UPDATE product template', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch(`/v4/productTemplates/${templateId}`)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

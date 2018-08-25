@@ -47,10 +47,10 @@ describe('LIST project types', () => {
   );
   after(testUtil.clearDb);
 
-  describe('GET /projectTypes', () => {
+  describe('GET /projects/metadata/projectTypes', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projectTypes')
+        .get('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -82,13 +82,13 @@ describe('LIST project types', () => {
 
     it('should return 200 even if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/projectTypes')
+        .get('/v4/projects/metadata/projectTypes')
         .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/projectTypes')
+        .get('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -98,7 +98,7 @@ describe('LIST project types', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/projectTypes')
+        .get('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -108,7 +108,7 @@ describe('LIST project types', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/projectTypes')
+        .get('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -117,7 +117,7 @@ describe('LIST project types', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/projectTypes')
+        .get('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

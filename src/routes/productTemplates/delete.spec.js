@@ -25,7 +25,7 @@ const expectAfterDelete = (id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/productTemplates/${id}`)
+          .get(`/v4/projects/metadata/productTemplates/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -72,16 +72,16 @@ describe('DELETE product template', () => {
   );
   after(testUtil.clearDb);
 
-  describe('DELETE /productTemplates/{templateId}', () => {
+  describe('DELETE /projects/metadata/productTemplates/{templateId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/productTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/productTemplates/${templateId}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/productTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -90,7 +90,7 @@ describe('DELETE product template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/productTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -99,7 +99,7 @@ describe('DELETE product template', () => {
 
     it('should return 403 for connect manager', (done) => {
       request(server)
-        .delete(`/v4/productTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -108,7 +108,7 @@ describe('DELETE product template', () => {
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .delete('/v4/productTemplates/1234')
+        .delete('/v4/projects/metadata/productTemplates/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -119,7 +119,7 @@ describe('DELETE product template', () => {
       models.ProductTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-            .delete(`/v4/productTemplates/${templateId}`)
+            .delete(`/v4/projects/metadata/productTemplates/${templateId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -129,7 +129,7 @@ describe('DELETE product template', () => {
 
     it('should return 204, for admin, if template was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/productTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -139,7 +139,7 @@ describe('DELETE product template', () => {
 
     it('should return 204, for connect admin, if template was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/productTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

@@ -8,12 +8,13 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
+import validateMilestoneTemplate from '../../middlewares/validateMilestoneTemplate';
+import { MILESTONE_TEMPLATE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
 const schema = {
   params: {
-    productTemplateId: Joi.number().integer().positive().required(),
     milestoneTemplateId: Joi.number().integer().positive().required(),
   },
   body: {
@@ -30,6 +31,9 @@ const schema = {
       blockedText: Joi.string().max(512).optional(),
       productTemplateId: Joi.any().strip(),
       hidden: Joi.boolean().optional(),
+      reference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
+      referenceId: Joi.number().integer().positive().required(),
+      metadata: Joi.object().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),
@@ -42,37 +46,20 @@ const schema = {
 
 module.exports = [
   validate(schema),
+  validateMilestoneTemplate.validateIdParam,
+  validateMilestoneTemplate.validateRequestBody,
   permissions('milestoneTemplate.edit'),
   (req, res, next) => {
     const entityToUpdate = _.assign(req.body.param, {
       updatedBy: req.authUser.userId,
     });
 
-    let original;
+    const original = _.omit(req.milestoneTemplate.toJSON(), 'deletedAt', 'deletedBy');
     let updated;
 
     return models.sequelize.transaction(() =>
-      // Get the milestone template
-      models.ProductMilestoneTemplate.findOne({
-        where: {
-          id: req.params.milestoneTemplateId,
-          productTemplateId: req.params.productTemplateId,
-        },
-        attributes: { exclude: ['deletedAt', 'deletedBy'] },
-      })
-        .then((milestoneTemplate) => {
-          // Not found
-          if (!milestoneTemplate) {
-            const apiErr = new Error(`Milestone template not found for template id ${req.params.milestoneTemplateId}`);
-            apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-
-          original = _.omit(milestoneTemplate.toJSON(), ['deletedAt', 'deletedBy']);
-
-          // Update
-          return milestoneTemplate.update(entityToUpdate);
-        })
+      // Update
+      req.milestoneTemplate.update(entityToUpdate)
         .then((milestoneTemplate) => {
           updated = _.omit(milestoneTemplate.toJSON(), ['deletedAt', 'deletedBy']);
 
@@ -81,9 +68,10 @@ module.exports = [
             return Promise.resolve();
           }
 
-          return models.ProductMilestoneTemplate.count({
+          return models.MilestoneTemplate.count({
             where: {
-              productTemplateId: updated.productTemplateId,
+              reference: updated.reference,
+              referenceId: updated.referenceId,
               id: { $ne: updated.id },
               order: updated.order,
             },
@@ -96,9 +84,10 @@ module.exports = [
               // Increase the order from M to K: if there is an item with order K,
               // orders from M+1 to K should be made M to K-1
               if (original.order < updated.order) {
-                return models.ProductMilestoneTemplate.update({ order: Sequelize.literal('"order" - 1') }, {
+                return models.MilestoneTemplate.update({ order: Sequelize.literal('"order" - 1') }, {
                   where: {
-                    productTemplateId: updated.productTemplateId,
+                    reference: updated.reference,
+                    referenceId: updated.referenceId,
                     id: { $ne: updated.id },
                     order: { $between: [original.order + 1, updated.order] },
                   },
@@ -107,9 +96,10 @@ module.exports = [
 
               // Decrease the order from M to K: if there is an item with order K,
               // orders from K to M-1 should be made K+1 to M
-              return models.ProductMilestoneTemplate.update({ order: Sequelize.literal('"order" + 1') }, {
+              return models.MilestoneTemplate.update({ order: Sequelize.literal('"order" + 1') }, {
                 where: {
-                  productTemplateId: updated.productTemplateId,
+                  reference: updated.reference,
+                  referenceId: updated.referenceId,
                   id: { $ne: updated.id },
                   order: { $between: [updated.order, original.order - 1] },
                 },
@@ -117,10 +107,10 @@ module.exports = [
             });
         }),
     )
-    .then(() => {
-      res.json(util.wrapResponse(req.id, updated));
-      return Promise.resolve();
-    })
-    .catch(next);
+      .then(() => {
+        res.json(util.wrapResponse(req.id, updated));
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

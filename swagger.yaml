@@ -648,7 +648,7 @@ paths:
           schema:
             $ref: "#/definitions/ProjectUpgradeResponse"
 
-  /projectTemplates:
+  /projects/metadata/projectTemplates:
     get:
       tags:
         - projectTemplate
@@ -692,7 +692,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /projectTemplates/{templateId}:
+  /projects/metadata/projectTemplates/{templateId}:
     get:
       tags:
         - projectTemplate
@@ -774,7 +774,7 @@ paths:
           description: Project template successfully removed
 
 
-  /productTemplates:
+  /projects/metadata/productTemplates:
     get:
       tags:
         - productTemplate
@@ -818,7 +818,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /productTemplates/{templateId}:
+  /projects/metadata/productTemplates/{templateId}:
     get:
       tags:
         - productTemplate
@@ -900,7 +900,7 @@ paths:
           description: Product template successfully removed
 
 
-  /productCategories:
+  /projects/metadata/productCategories:
     get:
       tags:
         - productCategory
@@ -944,7 +944,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /productCategories/{key}:
+  /projects/metadata/productCategories/{key}:
     get:
       tags:
         - productCategory
@@ -1023,7 +1023,7 @@ paths:
           description: Product category successfully removed
 
 
-  /projectTypes:
+  /projects/metadata/projectTypes:
     get:
       tags:
         - projectType
@@ -1067,7 +1067,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /projectTypes/{key}:
+  /projects/metadata/projectTypes/{key}:
     get:
       tags:
         - projectType
@@ -1438,12 +1438,10 @@ paths:
           description: Milestone successfully removed
 
 
-  /productTemplates/{productTemplateId}/milestones:
-    parameters:
-      - $ref: "#/parameters/productTemplateIdParam"
+  /timelines/metadata/milestoneTemplates:
     get:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: findMilestoneTemplates
       security:
         - Bearer: []
@@ -1454,6 +1452,14 @@ paths:
           description: sort by `order`. Default is `order asc`
           in: query
           type: string
+        - name: filter
+          required: false
+          type: string
+          in: query
+          description: |
+            Url encoded list of supported filters
+             - reference
+             - referenceId
       responses:
         '403':
           description: No permission or wrong token
@@ -1469,7 +1475,7 @@ paths:
             $ref: "#/definitions/MilestoneTemplateListResponse"
     post:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: addMilestoneTemplate
       security:
         - Bearer: []
@@ -1494,12 +1500,10 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /productTemplates/{productTemplateId}/milestones/clone:
-    parameters:
-      - $ref: "#/parameters/productTemplateIdParam"
+  /timelines/metadata/milestoneTemplates/clone:
     post:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: cloneMilestoneTemplate
       security:
         - Bearer: []
@@ -1529,13 +1533,12 @@ paths:
             $ref: "#/definitions/ErrorModel"
 
 
-  /productTemplates/{productTemplateId}/milestones/{milestoneTemplateId}:
+  /timelines/metadata/milestoneTemplates/{milestoneTemplateId}:
     parameters:
-      - $ref: "#/parameters/productTemplateIdParam"
       - $ref: "#/parameters/milestoneTemplateIdParam"
     get:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       description: Retrieve milestone template by id. All user roles can access this endpoint.
       security:
         - Bearer: []
@@ -1560,7 +1563,7 @@ paths:
 
     patch:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: updateMilestoneTemplate
       security:
         - Bearer: []
@@ -1595,7 +1598,7 @@ paths:
 
     delete:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       description: Remove an existing milestone template. Only connect manager, connect admin, and admin can access this endpoint.
       security:
         - Bearer: []
@@ -3427,6 +3430,9 @@ definitions:
       - duration
       - type
       - order
+      - reference
+      - referenceId
+      - metadata
     properties:
       name:
         type: string
@@ -3445,6 +3451,20 @@ definitions:
         type: number
         format: integer
         description: the milestone template order
+      reference:
+        type: string
+        enum:
+        - product
+        - project
+        description: the milestone template reference
+      refereneceId:
+        type: number
+        format: long
+        minimum: 1
+        description: the milestone template reference id
+      metadata: 
+        type: object
+        description: the milestone template metadata
 
   MilestoneTemplateBodyParam:
     title: Milestone template body param
@@ -3459,12 +3479,33 @@ definitions:
     title: Milestone clone template request object
     type: object
     required:
-      - sourceTemplateId
+      - sourceReference
+      - sourceReferenceId
+      - reference
+      - referenceId
     properties:
-      sourceTemplateId:
+      sourceReference:
+        type: string
+        enum:
+        - product
+        - project
+        description: the source reference to clone the milestone templates from
+      sourceReferenceId:
         type: number
-        format: integer
-        description: the product template id where to clone the milestone templates from
+        format: long
+        minimum: 1
+        description: the source reference id to clone the milestone templates from
+      reference:
+        type: string
+        enum:
+        - product
+        - project
+        description: the target reference to clone the milestone templates to
+      refereneceId:
+        type: number
+        format: long
+        minimum: 1
+        description: the target reference id to clone the milestone templates to
 
   MilestoneTemplate:
     title: Milestone template object

@@ -25,7 +25,7 @@ const expectAfterDelete = (id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projectTemplates/${id}`)
+          .get(`/v4/projects/metadata/projectTemplates/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -78,16 +78,16 @@ describe('DELETE project template', () => {
   );
   after(testUtil.clearDb);
 
-  describe('DELETE /projectTemplates/{templateId}', () => {
+  describe('DELETE /projects/metadata/projectTemplates/{templateId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projectTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/projectTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -96,7 +96,7 @@ describe('DELETE project template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projectTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -105,7 +105,7 @@ describe('DELETE project template', () => {
 
     it('should return 403 for connect manager', (done) => {
       request(server)
-        .delete(`/v4/projectTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -114,7 +114,7 @@ describe('DELETE project template', () => {
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .delete('/v4/projectTemplates/1234')
+        .delete('/v4/projects/metadata/projectTemplates/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -125,7 +125,7 @@ describe('DELETE project template', () => {
       models.ProjectTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-            .delete(`/v4/projectTemplates/${templateId}`)
+            .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -135,7 +135,7 @@ describe('DELETE project template', () => {
 
     it('should return 204, for admin, if template was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projectTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -144,7 +144,7 @@ describe('DELETE project template', () => {
 
     it('should return 204, for connect admin, if template was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projectTemplates/${templateId}`)
+        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

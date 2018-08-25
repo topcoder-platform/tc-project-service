@@ -69,7 +69,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage',
     activeText: 'text to be shown in active stage',
     completedText: 'text to be shown in completed stage',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 1,
     updatedBy: 2,
   },
@@ -83,7 +85,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
   },
@@ -97,7 +101,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 3',
     activeText: 'text to be shown in active stage - 3',
     completedText: 'text to be shown in completed stage - 3',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
     deletedAt: new Date(),
@@ -107,29 +113,20 @@ const milestoneTemplates = [
 describe('LIST milestone template', () => {
   beforeEach(() => testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
   );
   after(testUtil.clearDb);
 
-  describe('GET /productTemplates/{productTemplateId}/milestones', () => {
+  describe('GET /timelines/metadata/milestoneTemplates', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones')
+        .get('/v4/timelines/metadata/milestoneTemplates')
         .expect(403, done);
-    });
-
-    it('should return 422 for invalid productTemplateId param', (done) => {
-      request(server)
-        .get('/v4/productTemplates/0/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(422, done);
     });
 
     it('should return 422 for invalid sort column', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones?sort=id')
+        .get('/v4/timelines/metadata/milestoneTemplates?sort=id')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -138,7 +135,7 @@ describe('LIST milestone template', () => {
 
     it('should return 422 for invalid sort order', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones?sort=order%20invalid')
+        .get('/v4/timelines/metadata/milestoneTemplates?sort=order%20invalid')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -147,7 +144,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones')
+        .get('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -164,7 +161,9 @@ describe('LIST milestone template', () => {
           resJson[0].blockedText.should.be.eql(milestoneTemplates[0].blockedText);
           resJson[0].activeText.should.be.eql(milestoneTemplates[0].activeText);
           resJson[0].completedText.should.be.eql(milestoneTemplates[0].completedText);
-          resJson[0].productTemplateId.should.be.eql(milestoneTemplates[0].productTemplateId);
+          resJson[0].reference.should.be.eql(milestoneTemplates[0].reference);
+          resJson[0].referenceId.should.be.eql(milestoneTemplates[0].referenceId);
+          resJson[0].metadata.should.be.eql(milestoneTemplates[0].metadata);
 
           resJson[0].createdBy.should.be.eql(milestoneTemplates[0].createdBy);
           should.exist(resJson[0].createdAt);
@@ -177,9 +176,9 @@ describe('LIST milestone template', () => {
         });
     });
 
-    it('should return 200 for connect admin', (done) => {
+    it('should return 200 for connect admin with filter', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones')
+        .get('/v4/timelines/metadata/milestoneTemplates?filter=reference%3Dproduct%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -189,7 +188,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones')
+        .get('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -199,7 +198,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones')
+        .get('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -208,7 +207,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones')
+        .get('/v4/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -217,7 +216,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 with sort desc', (done) => {
       request(server)
-        .get('/v4/productTemplates/1/milestones?sort=order%20desc')
+        .get('/v4/timelines/metadata/milestoneTemplates?sort=order%20desc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

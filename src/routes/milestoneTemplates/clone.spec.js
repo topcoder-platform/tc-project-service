@@ -83,7 +83,9 @@ const milestoneTemplates = [
     duration: 3,
     type: 'type1',
     order: 1,
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     plannedText: 'text to be shown in planned stage',
     blockedText: 'text to be shown in blocked stage',
     activeText: 'text to be shown in active stage',
@@ -100,7 +102,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
   },
@@ -109,27 +113,30 @@ const milestoneTemplates = [
 describe('CLONE milestone template', () => {
   beforeEach(() => testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
   );
   after(testUtil.clearDb);
 
-  describe('POST /productTemplates/{productTemplateId}/milestones/clone', () => {
+  describe('POST /timelines/metadata/milestoneTemplates/clone', () => {
     const body = {
       param: {
-        sourceTemplateId: 1,
+        sourceReference: 'product',
+        sourceReferenceId: 1,
+        reference: 'product',
+        referenceId: 2,
       },
     };
 
     it('should return 403 if user is not authenticated/clone', (done) => {
       request(server)
-        .post('/v4/productTemplates/2/milestones')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/productTemplates/2/milestones/clone')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -139,7 +146,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/productTemplates/2/milestones/clone')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -149,7 +156,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/productTemplates/2/milestones/clone')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -157,41 +164,55 @@ describe('CLONE milestone template', () => {
         .expect(403, done);
     });
 
-    it('should return 404 for non-existent product template', (done) => {
-      request(server)
-        .post('/v4/productTemplates/1000/milestones/clone')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(body)
-        .expect(404, done);
-    });
-
-    it('should return 404 for non-existent source product template', (done) => {
+    it('should return 422 for non-existent product template', (done) => {
       const invalidBody = {
         param: {
-          sourceTemplateId: 99,
+          sourceReference: 'product',
+          sourceReferenceId: 1,
+          reference: 'product',
+          referenceId: 2000,
         },
       };
 
       request(server)
-        .post('/v4/productTemplates/2/milestones/clone')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
-        .expect(404, done);
+        .expect(422, done);
     });
 
-    it('should return 422 if missing sourceTemplateId', (done) => {
+    it('should return 422 for non-existent source product template', (done) => {
       const invalidBody = {
         param: {
-          sourceTemplateId: undefined,
+          sourceReference: 'product',
+          sourceReferenceId: 1000,
+          reference: 'product',
+          referenceId: 2,
         },
       };
 
       request(server)
-        .post('/v4/productTemplates/2/milestones/clone')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(invalidBody)
+        .expect(422, done);
+    });
+
+    it('should return 422 if missing sourceReference', (done) => {
+      const invalidBody = {
+        param: {
+          sourceReferenceId: 1000,
+          reference: 'product',
+          referenceId: 2,
+        },
+      };
+
+      request(server)
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -202,7 +223,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/productTemplates/2/milestones/clone')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -220,7 +241,9 @@ describe('CLONE milestone template', () => {
           resJson[0].blockedText.should.be.eql(milestoneTemplates[0].blockedText);
           resJson[0].activeText.should.be.eql(milestoneTemplates[0].activeText);
           resJson[0].completedText.should.be.eql(milestoneTemplates[0].completedText);
-          resJson[0].productTemplateId.should.be.eql(2);
+          resJson[0].reference.should.be.eql('product');
+          resJson[0].referenceId.should.be.eql(2);
+          resJson[0].metadata.should.be.eql({});
 
           resJson[0].createdBy.should.be.eql(40051333); // admin
           should.exist(resJson[0].createdAt);
@@ -235,7 +258,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/productTemplates/2/milestones/clone')
+        .post('/v4/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
