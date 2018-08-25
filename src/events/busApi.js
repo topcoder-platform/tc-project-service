@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import config from 'config';
-import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
+import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
 
@@ -208,6 +208,35 @@ module.exports = (app, logger) => {
   });
 
   /**
+   * If the project is in draft status and the phase is in reviewed status, and it's the
+   * only phase in the project with that status, then send the plan ready event.
+   *
+   * @param {object} req the req
+   * @param {object} project the project
+   * @param {object} phase the phase that was created/updated
+   * @returns {Promise<void>} void
+   */
+  async function sendPlanReadyEventIfNeeded(req, project, phase) {
+    if (project.status === PROJECT_STATUS.DRAFT &&
+      phase.status === PROJECT_PHASE_STATUS.REVIEWED) {
+      await models.ProjectPhase.count({
+        where: { projectId: project.id, status: PROJECT_PHASE_STATUS.REVIEWED },
+      }).then(((count) => {
+        // only send the plan ready event when this is the only reviewed phase in the project
+        if (count === 1) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_READY, {
+            projectId: project.id,
+            phaseId: phase.id,
+            projectName: project.name,
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+      }));
+    }
+  }
+
+  /**
    * PROJECT_PHASE_ADDED
    */
   app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, ({ req, created }) => { // eslint-disable-line no-unused-vars
@@ -226,6 +255,8 @@ module.exports = (app, logger) => {
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
+
+        return sendPlanReadyEventIfNeeded(req, project, created);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
@@ -258,6 +289,7 @@ module.exports = (app, logger) => {
     logger.debug('receive PROJECT_PHASE_UPDATED event');
 
     const projectId = _.parseInt(req.params.projectId);
+    const phaseId = _.parseInt(req.params.phaseId);
 
     models.Project.findOne({
       where: { id: projectId },
@@ -270,6 +302,31 @@ module.exports = (app, logger) => {
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
+
+        [
+          ['spentBudget', BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT],
+          ['progress', [BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS, BUS_API_EVENT.PROJECT_PROGRESS_MODIFIED]],
+          ['details', BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE],
+          ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE, PROJECT_PHASE_STATUS.ACTIVE],
+          ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED, PROJECT_PHASE_STATUS.COMPLETED],
+        ].forEach(([key, events, sendIfEqual]) => {
+          // eslint-disable-next-line no-param-reassign
+          events = Array.isArray(events) ? events : [events];
+
+          // send event(s) only if the target field's value was updated, or when an update matches a "sendIfEqual" value
+          if ((!sendIfEqual && !_.isEqual(original[key], updated[key])) ||
+            (original[key] !== sendIfEqual && updated[key] === sendIfEqual)) {
+            events.forEach(event => createEvent(event, {
+              projectId,
+              phaseId,
+              projectName: project.name,
+              userId: req.authUser.userId,
+              initiatorUserId: req.authUser.userId,
+            }, logger));
+          }
+        });
+
+        return sendPlanReadyEventIfNeeded(req, project, updated);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
@@ -346,7 +403,7 @@ module.exports = (app, logger) => {
         // Other fields change
         const originalWithouDetails = _.omit(original, 'details');
         const updatedWithouDetails = _.omit(updated, 'details');
-        if (!_.isEqual(originalWithouDetails.details, updatedWithouDetails.details)) {
+        if (!_.isEqual(originalWithouDetails, updatedWithouDetails)) {
           createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
             projectId,
             projectName: project.name,

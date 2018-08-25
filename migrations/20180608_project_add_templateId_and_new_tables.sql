@@ -45,6 +45,7 @@ CREATE TABLE milestones (
     "activeText" character varying(512) NOT NULL,
     "completedText" character varying(512) NOT NULL,
     "blockedText" character varying(512) NOT NULL,
+    "hidden" boolean DEFAULT false,
     "deletedAt" timestamp with time zone,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,
