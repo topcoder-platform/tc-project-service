@@ -4475,6 +4475,40 @@
 					"response": []
 				},
 				{
+					"name": "Update milestone with metadata",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 5-updated\",\r\n\t\"description\": \"description 5-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type5-updated\",\r\n\t\"order\": 5,\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {\r\n        \"metadata1\": {\r\n          \"name\": \"metadata 1 - update\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 1 - update\",\r\n            \"newDetails\": \"new\"\r\n          },\r\n          \"others\": [\"others new\"]\r\n        },\r\n        \"metadata3\": {\r\n          \"name\": \"metadata 3\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 3\"\r\n          },\r\n          \"others\": [\"others 31\", \"others 32\"]\r\n        }\r\n      }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"metadata",
+								"milestoneTemplates",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Delete milestone",
 					"request": {
 						"method": "DELETE",

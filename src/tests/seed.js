@@ -450,6 +450,22 @@ models.sequelize.sync({ force: true })
       metadata: {},
       reference: 'product',
       referenceId: productTemplates[0].id,
+      metadata: {
+        metadata1: {
+          name: 'metadata 1',
+          details: {
+            anyDetails: 'any details 1',
+          },
+          others: ['others 11', 'others 12'],
+        },
+        metadata2: {
+          name: 'metadata 2',
+          details: {
+            anyDetails: 'any details 2',
+          },
+          others: ['others 21', 'others 22'],
+        },
+      },
       activeText: 'activeText 1',
       completedText: 'completedText 1',
       blockedText: 'blockedText 1',

@@ -124,6 +124,37 @@ const milestoneTemplates = [
     updatedBy: 3,
     deletedAt: new Date(),
   },
+  {
+    id: 5,
+    name: 'milestoneTemplate 5',
+    duration: 5,
+    type: 'type5',
+    order: 5,
+    plannedText: 'text to be shown in planned stage - 5',
+    blockedText: 'text to be shown in blocked stage - 5',
+    activeText: 'text to be shown in active stage - 5',
+    completedText: 'text to be shown in completed stage - 5',
+    reference: 'product',
+    referenceId: 1,
+    metadata: {
+      metadata1: {
+        name: 'metadata 1',
+        details: {
+          anyDetails: 'any details 1',
+        },
+        others: ['others 11', 'others 12'],
+      },
+      metadata2: {
+        name: 'metadata 2',
+        details: {
+          anyDetails: 'any details 2',
+        },
+        others: ['others 21', 'others 22'],
+      },
+    },
+    createdBy: 2,
+    updatedBy: 3
+  }
 ];
 
 describe('UPDATE milestone template', () => {
@@ -281,7 +312,7 @@ describe('UPDATE milestone template', () => {
       this.timeout(10000);
 
       request(server)
-      .patch('/v4/timelines/metadata/milestoneTemplates/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -313,7 +344,7 @@ describe('UPDATE milestone template', () => {
       this.timeout(10000);
 
       request(server)
-      .patch('/v4/timelines/metadata/milestoneTemplates/3')
+        .patch('/v4/timelines/metadata/milestoneTemplates/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -345,7 +376,7 @@ describe('UPDATE milestone template', () => {
       this.timeout(10000);
 
       request(server)
-      .patch('/v4/timelines/metadata/milestoneTemplates/3')
+        .patch('/v4/timelines/metadata/milestoneTemplates/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -489,6 +520,79 @@ describe('UPDATE milestone template', () => {
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    it('should return 200 for admin - updating metadata', (done) => {
+      const bodyWithMetadata = {
+        param: {
+          name: 'milestoneTemplate 5-updated',
+          description: 'description-updated',
+          duration: 6,
+          type: 'type5-updated',
+          order: 5,
+          plannedText: 'text to be shown in planned stage',
+          blockedText: 'text to be shown in blocked stage',
+          activeText: 'text to be shown in active stage',
+          completedText: 'text to be shown in completed stage',
+          hidden: true,
+          reference: 'product',
+          referenceId: 1,
+          metadata: {
+            metadata1: {
+              name: 'metadata 1 - update',
+              details: {
+                anyDetails: 'any details 1 - update',
+                newDetails: 'new',
+              },
+              others: ['others new'],
+            },
+            metadata3: {
+              name: 'metadata 3',
+              details: {
+                anyDetails: 'any details 3',
+              },
+              others: ['others 31', 'others 32'],
+            },
+          },
+        },
+      };
+
+      request(server)
+        .patch('/v4/timelines/metadata/milestoneTemplates/5')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithMetadata)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.metadata.should.be.eql({
+            metadata1: {
+              name: 'metadata 1 - update',
+              details: {
+                anyDetails: 'any details 1 - update',
+                newDetails: 'new',
+              },
+              others: ['others new'],
+            },
+            metadata2: {
+              name: 'metadata 2',
+              details: {
+                anyDetails: 'any details 2',
+              },
+              others: ['others 21', 'others 22'],
+            },
+            metadata3: {
+              name: 'metadata 3',
+              details: {
+                anyDetails: 'any details 3',
+              },
+              others: ['others 31', 'others 32'],
+            },
+          });
+
+          done();
+        });
     });
   });
 });
