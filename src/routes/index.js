@@ -46,6 +46,9 @@ router.route('/v4/projects/metadata/productCategories')
 router.route('/v4/projects/metadata/productCategories/:key')
   .get(require('./productCategories/get'));
 
+router.route('/v4/projects/metadata')
+  .get(require('./metadata/list'));
+
 router.all(
   RegExp(`\\/${apiVersion}\\/(projects|timelines)(?!\\/health).*`), jwtAuth());
 

@@ -447,8 +447,7 @@ models.sequelize.sync({ force: true })
       duration: 3,
       type: 'type1',
       order: 1,
-      metadata: {},
-      reference: 'product',
+      reference: 'productTemplate',
       referenceId: productTemplates[0].id,
       metadata: {
         metadata1: {
@@ -479,7 +478,7 @@ models.sequelize.sync({ force: true })
       type: 'type2',
       order: 2,
       metadata: {},
-      reference: 'product',
+      reference: 'productTemplate',
       referenceId: productTemplates[0].id,
       activeText: 'activeText 2',
       completedText: 'completedText 2',

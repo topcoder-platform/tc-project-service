@@ -115,7 +115,6 @@ export const TIMELINE_REFERENCES = {
 };
 
 export const MILESTONE_TEMPLATE_REFERENCES = {
-  PROJECT: 'project',
-  PRODUCT: 'product',
+  PRODUCT_TEMPLATE: 'productTemplate',
 };
 

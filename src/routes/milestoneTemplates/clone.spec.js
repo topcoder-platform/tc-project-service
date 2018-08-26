@@ -83,7 +83,7 @@ const milestoneTemplates = [
     duration: 3,
     type: 'type1',
     order: 1,
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     plannedText: 'text to be shown in planned stage',
@@ -102,7 +102,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 2,
@@ -120,9 +120,9 @@ describe('CLONE milestone template', () => {
   describe('POST /timelines/metadata/milestoneTemplates/clone', () => {
     const body = {
       param: {
-        sourceReference: 'product',
+        sourceReference: 'productTemplate',
         sourceReferenceId: 1,
-        reference: 'product',
+        reference: 'productTemplate',
         referenceId: 2,
       },
     };
@@ -167,9 +167,9 @@ describe('CLONE milestone template', () => {
     it('should return 422 for non-existent product template', (done) => {
       const invalidBody = {
         param: {
-          sourceReference: 'product',
+          sourceReference: 'productTemplate',
           sourceReferenceId: 1,
-          reference: 'product',
+          reference: 'productTemplate',
           referenceId: 2000,
         },
       };
@@ -206,7 +206,7 @@ describe('CLONE milestone template', () => {
       const invalidBody = {
         param: {
           sourceReferenceId: 1000,
-          reference: 'product',
+          reference: 'productTemplate',
           referenceId: 2,
         },
       };
@@ -241,7 +241,7 @@ describe('CLONE milestone template', () => {
           resJson[0].blockedText.should.be.eql(milestoneTemplates[0].blockedText);
           resJson[0].activeText.should.be.eql(milestoneTemplates[0].activeText);
           resJson[0].completedText.should.be.eql(milestoneTemplates[0].completedText);
-          resJson[0].reference.should.be.eql('product');
+          resJson[0].reference.should.be.eql('productTemplate');
           resJson[0].referenceId.should.be.eql(2);
           resJson[0].metadata.should.be.eql({});
 

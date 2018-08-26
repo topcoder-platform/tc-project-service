@@ -3970,7 +3970,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {}\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {}\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates",
@@ -4003,7 +4003,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1000,\r\n\t\"metadata\": {}\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1000,\r\n\t\"metadata\": {}\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates",
@@ -4069,7 +4069,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"product\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"product\",\r\n    \"referenceId\": 2\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/clone",
@@ -4103,7 +4103,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"product\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"product\",\r\n    \"referenceId\": 2000\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2000\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/clone",
@@ -4137,7 +4137,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"product\",\r\n    \"sourceReferenceId\": 1000,\r\n    \"reference\": \"product\",\r\n    \"referenceId\": 2\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1000,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/clone",
@@ -4207,7 +4207,7 @@
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3Dproduct%26referenceId%3D1",
+							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1",
 							"host": [
 								"{{api-url}}"
 							],
@@ -4220,7 +4220,7 @@
 							"query": [
 								{
 									"key": "filter",
-									"value": "reference%3Dproduct%26referenceId%3D1"
+									"value": "reference%3DproductTemplate%26referenceId%3D1"
 								}
 							]
 						}
@@ -4246,7 +4246,7 @@
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new category\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3Dproduct%26referenceId%3D1&sort=order desc",
+							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1&sort=order desc",
 							"host": [
 								"{{api-url}}"
 							],
@@ -4259,7 +4259,7 @@
 							"query": [
 								{
 									"key": "filter",
-									"value": "reference%3Dproduct%26referenceId%3D1"
+									"value": "reference%3DproductTemplate%26referenceId%3D1"
 								},
 								{
 									"key": "sort",
@@ -4320,7 +4320,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
@@ -4354,7 +4354,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 2,\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 2,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
@@ -4388,7 +4388,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
@@ -4422,7 +4422,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 3,\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 3,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
@@ -4456,7 +4456,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 1,\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
@@ -4490,7 +4490,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 5-updated\",\r\n\t\"description\": \"description 5-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type5-updated\",\r\n\t\"order\": 5,\r\n\t\"reference\": \"product\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {\r\n        \"metadata1\": {\r\n          \"name\": \"metadata 1 - update\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 1 - update\",\r\n            \"newDetails\": \"new\"\r\n          },\r\n          \"others\": [\"others new\"]\r\n        },\r\n        \"metadata3\": {\r\n          \"name\": \"metadata 3\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 3\"\r\n          },\r\n          \"others\": [\"others 31\", \"others 32\"]\r\n        }\r\n      }\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 5-updated\",\r\n\t\"description\": \"description 5-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type5-updated\",\r\n\t\"order\": 5,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {\r\n        \"metadata1\": {\r\n          \"name\": \"metadata 1 - update\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 1 - update\",\r\n            \"newDetails\": \"new\"\r\n          },\r\n          \"others\": [\"others new\"]\r\n        },\r\n        \"metadata3\": {\r\n          \"name\": \"metadata 3\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 3\"\r\n          },\r\n          \"others\": [\"others 31\", \"others 32\"]\r\n        }\r\n      }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
@@ -4537,6 +4537,31 @@
 								"metadata",
 								"milestoneTemplates",
 								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Metadata",
+			"item": [
+				{
+					"name": "Get all metadata",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata"
 							]
 						}
 					},

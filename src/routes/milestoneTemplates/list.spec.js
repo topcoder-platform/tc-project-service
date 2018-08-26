@@ -69,7 +69,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage',
     activeText: 'text to be shown in active stage',
     completedText: 'text to be shown in completed stage',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 1,
@@ -85,7 +85,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 2,
@@ -101,7 +101,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 3',
     activeText: 'text to be shown in active stage - 3',
     completedText: 'text to be shown in completed stage - 3',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 2,
@@ -178,7 +178,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for connect admin with filter', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates?filter=reference%3Dproduct%26referenceId%3D1')
+        .get('/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

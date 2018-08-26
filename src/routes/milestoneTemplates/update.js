@@ -58,7 +58,7 @@ module.exports = [
     let updated;
 
     // Merge JSON field
-    entityToUpdate.metadata = util.mergeJsonObjects(original.metadata, entityToUpdate.metadata  || {});
+    entityToUpdate.metadata = util.mergeJsonObjects(original.metadata, entityToUpdate.metadata || {});
 
     return models.sequelize.transaction(() =>
       // Update

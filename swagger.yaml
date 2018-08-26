@@ -647,6 +647,24 @@ paths:
           description: Project migrated successfully
           schema:
             $ref: "#/definitions/ProjectUpgradeResponse"
+            
+  /projects/metadata:
+    get:
+      tags:
+        - metadata
+      operationId: getAllMetadata
+      security:
+        - Bearer: []
+      description: Retrieve all metadata including projectTemplates, productTemplates, milestoneTemplates, projectTypes, productCategories. All user roles can access this endpoint.
+      responses:
+        '200':
+          description: The metadata
+          schema:
+            $ref: "#/definitions/AllMetadataResponse"
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: "#/definitions/ErrorModel"
 
   /projects/metadata/projectTemplates:
     get:
@@ -3454,8 +3472,7 @@ definitions:
       reference:
         type: string
         enum:
-        - product
-        - project
+        - productTemplate
         description: the milestone template reference
       refereneceId:
         type: number
@@ -3487,8 +3504,7 @@ definitions:
       sourceReference:
         type: string
         enum:
-        - product
-        - project
+        - productTemplate
         description: the source reference to clone the milestone templates from
       sourceReferenceId:
         type: number
@@ -3498,8 +3514,7 @@ definitions:
       reference:
         type: string
         enum:
-        - product
-        - project
+        - productTemplate
         description: the target reference to clone the milestone templates to
       refereneceId:
         type: number
@@ -3588,3 +3603,48 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/MilestoneTemplate"
+              
+  AllMetadataResponse:
+    title: All metadata response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: object
+            properties:
+              projectTemplates:
+                type: array
+                items:
+                  $ref: "#/definitions/ProjectTemplate"
+              productTemplates:
+                type: array
+                items:
+                  $ref: "#/definitions/ProductTemplate"
+              milestoneTemplates:
+                type: array
+                items:
+                  $ref: "#/definitions/MilestoneTemplate"
+              projectTypes:
+                type: array
+                items:
+                  $ref: "#/definitions/ProjectType"
+              productCategories:
+                type: array
+                items:
+                  $ref: "#/definitions/ProductCategory"
+              

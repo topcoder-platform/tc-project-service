@@ -10,26 +10,8 @@ import util from '../util';
  * @returns {Promise}
  */
 async function validateReference(sourceObject) {
-  // The source object refers to a project template
-  if (sourceObject.reference === MILESTONE_TEMPLATE_REFERENCES.PROJECT) {
-    // Validate projectTemplateId to be existed
-    const projectTemplate = await models.ProjectTemplate.findOne({
-      where: {
-        id: sourceObject.referenceId,
-        deletedAt: { $eq: null },
-      },
-    });
-    if (!projectTemplate) {
-      const apiErr = new Error(
-        `Project template not found for project id ${sourceObject.referenceId}`);
-      apiErr.status = 422;
-      throw apiErr;
-    }
-    return;
-  }
-
   // The source object refers to a product template
-  if (sourceObject.reference === MILESTONE_TEMPLATE_REFERENCES.PRODUCT) {
+  if (sourceObject.reference === MILESTONE_TEMPLATE_REFERENCES.PRODUCT_TEMPLATE) {
     // Validate ProductTemplate to be existed
     const productTemplate = await models.ProductTemplate.findOne({
       where: {
@@ -39,7 +21,7 @@ async function validateReference(sourceObject) {
     });
     if (!productTemplate) {
       const apiErr = new Error(
-        `Product template not found for product id ${sourceObject.referenceId}`);
+        `Product template not found for product template id ${sourceObject.referenceId}`);
       apiErr.status = 422;
       throw apiErr;
     }

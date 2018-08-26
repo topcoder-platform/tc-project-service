@@ -62,7 +62,7 @@ module.exports = [
             req.log.debug('Found templateId, finding milestone templates for the template');
             return models.MilestoneTemplate.findAll({
               where: {
-                reference: MILESTONE_TEMPLATE_REFERENCES.PRODUCT,
+                reference: MILESTONE_TEMPLATE_REFERENCES.PRODUCT_TEMPLATE,
                 referenceId: templateId,
                 deletedAt: { $eq: null },
               },

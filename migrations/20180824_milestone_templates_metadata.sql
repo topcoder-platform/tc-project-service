@@ -15,7 +15,7 @@ ALTER TABLE product_milestone_templates DROP CONSTRAINT "product_milestone_templ
 ALTER TABLE product_milestone_templates RENAME COLUMN "productTemplateId" TO referenceId;
 
 ALTER TABLE product_milestone_templates ADD COLUMN "reference" character varying(45);
-UPDATE product_milestone_templates set reference='product' where reference is null;
+UPDATE product_milestone_templates set reference='productTemplate' where reference is null;
 ALTER TABLE product_milestone_templates ALTER COLUMN "reference" SET NOT NULL;
 
 ALTER TABLE product_milestone_templates ADD COLUMN "metadata" json;

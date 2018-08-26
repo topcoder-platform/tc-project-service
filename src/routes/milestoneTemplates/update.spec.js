@@ -69,7 +69,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage',
     activeText: 'text to be shown in active stage',
     completedText: 'text to be shown in completed stage',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 1,
@@ -85,7 +85,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 2,
@@ -101,7 +101,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 3',
     activeText: 'text to be shown in active stage - 3',
     completedText: 'text to be shown in completed stage - 3',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 2,
@@ -117,7 +117,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 4',
     activeText: 'text to be shown in active stage - 4',
     completedText: 'text to be shown in completed stage - 4',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {},
     createdBy: 2,
@@ -134,7 +134,7 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 5',
     activeText: 'text to be shown in active stage - 5',
     completedText: 'text to be shown in completed stage - 5',
-    reference: 'product',
+    reference: 'productTemplate',
     referenceId: 1,
     metadata: {
       metadata1: {
@@ -153,8 +153,8 @@ const milestoneTemplates = [
       },
     },
     createdBy: 2,
-    updatedBy: 3
-  }
+    updatedBy: 3,
+  },
 ];
 
 describe('UPDATE milestone template', () => {
@@ -177,7 +177,7 @@ describe('UPDATE milestone template', () => {
         activeText: 'text to be shown in active stage',
         completedText: 'text to be shown in completed stage',
         hidden: true,
-        reference: 'product',
+        reference: 'productTemplate',
         referenceId: 1,
         metadata: {},
       },
@@ -535,7 +535,7 @@ describe('UPDATE milestone template', () => {
           activeText: 'text to be shown in active stage',
           completedText: 'text to be shown in completed stage',
           hidden: true,
-          reference: 'product',
+          reference: 'productTemplate',
           referenceId: 1,
           metadata: {
             metadata1: {
