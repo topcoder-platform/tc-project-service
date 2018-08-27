@@ -2061,6 +2061,39 @@
 					"response": []
 				},
 				{
+					"name": "Create Phase with productTemplateId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t},\n\t\t\"order\": 1,\n\t\t\"productTemplateId\": 1\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/phases",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"phases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "List Phase",
 					"request": {
 						"method": "GET",
@@ -3867,7 +3900,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-09-28T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
@@ -3880,6 +3913,40 @@
 								"1",
 								"milestones",
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone 2",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"open\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"2"
 							]
 						}
 					},

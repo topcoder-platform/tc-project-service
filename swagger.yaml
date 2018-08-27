@@ -380,7 +380,17 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectPhaseBodyParam'
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectPhaseBodyParam'
+            properties:
+              param:
+                type: object
+                properties:
+                  productTemplateId:
+                    type: number
+                    format: long
+                    description: the optional productTemplateId used to populate a new phase product for the created phase
       responses:
         '403':
           description: No permission or wrong token

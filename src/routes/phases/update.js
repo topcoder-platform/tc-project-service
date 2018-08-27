@@ -145,6 +145,7 @@ module.exports = [
           where: {
             projectId,
           },
+          include: [{ model: models.PhaseProduct, as: 'products' }]
         })),
     )
       .then((allPhases) => {

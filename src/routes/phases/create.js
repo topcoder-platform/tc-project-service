@@ -23,6 +23,7 @@ const addProjectPhaseValidations = {
       progress: Joi.number().min(0).optional(),
       details: Joi.any().optional(),
       order: Joi.number().integer().optional(),
+      productTemplateId: Joi.number().integer().positive().optional(),
     }).required(),
   },
 };
@@ -48,28 +49,29 @@ module.exports = [
       req.log.debug('Create Phase - Starting transaction');
       return models.Project.findOne({
         where: { id: projectId, deletedAt: { $eq: null } },
-      }).then((existingProject) => {
-        if (!existingProject) {
-          const err = new Error(`active project not found for project id ${projectId}`);
-          err.status = 404;
-          throw err;
-        }
-        if (data.startDate !== null && data.endDate !== null && data.startDate > data.endDate) {
-          const err = new Error('startDate must not be after endDate.');
-          err.status = 422;
-          throw err;
-        }
-        return models.ProjectPhase
-          .create(data)
-          .then((_newProjectPhase) => {
-            newProjectPhase = _.cloneDeep(_newProjectPhase);
-            req.log.debug('new project phase created (id# %d, name: %s)',
-              newProjectPhase.id, newProjectPhase.name);
-
-            newProjectPhase = newProjectPhase.get({ plain: true });
-            newProjectPhase = _.omit(newProjectPhase, ['deletedAt', 'deletedBy', 'utm']);
-          });
       })
+        .then((existingProject) => {
+          if (!existingProject) {
+            const err = new Error(`active project not found for project id ${projectId}`);
+            err.status = 404;
+            throw err;
+          }
+          if (data.startDate !== null && data.endDate !== null && data.startDate > data.endDate) {
+            const err = new Error('startDate must not be after endDate.');
+            err.status = 422;
+            throw err;
+          }
+          return models.ProjectPhase
+            .create(data)
+            .then((_newProjectPhase) => {
+              newProjectPhase = _.cloneDeep(_newProjectPhase);
+              req.log.debug('new project phase created (id# %d, name: %s)',
+                newProjectPhase.id, newProjectPhase.name);
+
+              newProjectPhase = newProjectPhase.get({ plain: true });
+              newProjectPhase = _.omit(newProjectPhase, ['deletedAt', 'deletedBy', 'utm']);
+            });
+        })
         .then(() => {
           req.log.debug('re-ordering the other phases');
 
@@ -86,6 +88,37 @@ module.exports = [
               order: { $gte: newProjectPhase.order },
             },
           });
+        })
+        .then(() => {
+          if (_.isNil(data.productTemplateId)) {
+            return Promise.resolve();
+          }
+
+          // Get the product template
+          return models.ProductTemplate.findById(data.productTemplateId)
+            .then((productTemplate) => {
+              if (!productTemplate) {
+                const err = new Error(`Product template does not exist with id = ${data.productTemplateId}`);
+                err.status = 422;
+                throw err;
+              }
+
+              // Create the phase product
+              return models.PhaseProduct.create({
+                name: productTemplate.name,
+                templateId: data.productTemplateId,
+                type: productTemplate.productKey,
+                projectId,
+                phaseId: newProjectPhase.id,
+                createdBy: req.authUser.userId,
+                updatedBy: req.authUser.userId,
+              })
+                .then((phaseProduct) => {
+                  newProjectPhase.products = [
+                    _.omit(phaseProduct.toJSON(), ['deletedAt', 'deletedBy'])
+                  ];
+                });
+            });
         });
     })
       .then(() => {

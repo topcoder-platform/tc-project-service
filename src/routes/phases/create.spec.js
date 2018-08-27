@@ -47,6 +47,7 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
+  let productTemplateId;
   before((done) => {
     // mocks
     testUtil.clearDb()
@@ -79,9 +80,42 @@ describe('Project Phases', () => {
             isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-          }]).then(() => done());
+          }])
         });
-      });
+      })
+      .then(() =>
+        models.ProductTemplate.create({
+          name: 'name 1',
+          productKey: 'productKey 1',
+          category: 'generic',
+          icon: 'http://example.com/icon1.ico',
+          brief: 'brief 1',
+          details: 'details 1',
+          aliases: ['product key 1', 'product_key_1'],
+          template: {
+            template1: {
+              name: 'template 1',
+              details: {
+                anyDetails: 'any details 1',
+              },
+              others: ['others 11', 'others 12'],
+            },
+            template2: {
+              name: 'template 2',
+              details: {
+                anyDetails: 'any details 2',
+              },
+              others: ['others 21', 'others 22'],
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        }).then((template) => {
+          productTemplateId = template.id;
+          return Promise.resolve();
+        })
+      )
+      .then(() => done());
   });
 
   after((done) => {
@@ -271,6 +305,34 @@ describe('Project Phases', () => {
                     done();
                   });
               });
+          }
+        });
+    });
+
+    it('should return 201 if payload has productTemplateId specified', (done) => {
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: _.assign({ productTemplateId }, body) })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, body);
+            resJson.products.should.have.length(1);
+
+            resJson.products[0].name.should.be.eql('name 1');
+            resJson.products[0].templateId.should.be.eql(1);
+            resJson.products[0].type.should.be.eql('productKey 1');
+            resJson.products[0].projectId.should.be.eql(1);
+            resJson.products[0].phaseId.should.be.eql(resJson.id);
+
+            done();
           }
         });
     });
