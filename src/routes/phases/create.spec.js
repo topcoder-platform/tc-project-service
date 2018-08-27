@@ -50,38 +50,38 @@ describe('Project Phases', () => {
   before((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
-              createdBy: 1,
-              updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => done());
-          });
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => done());
         });
+      });
   });
 
   after((done) => {
@@ -91,24 +91,24 @@ describe('Project Phases', () => {
   describe('POST /projects/{id}/phases/', () => {
     it('should return 403 if user does not have permissions (non team member)', (done) => {
       request(server)
-          .post(`/v4/projects/${projectId}/phases/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member2}`,
-          })
-          .send({ param: body })
-          .expect('Content-Type', /json/)
-          .expect(403, done);
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(403, done);
     });
 
     it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
-          .post(`/v4/projects/${projectId}/phases/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member}`,
-          })
-          .send({ param: body })
-          .expect('Content-Type', /json/)
-          .expect(403, done);
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(403, done);
     });
 
     it('should return 422 when name not provided', (done) => {
@@ -228,6 +228,49 @@ describe('Project Phases', () => {
             const resJson = res.body.result.content;
             validatePhase(resJson, bodyWithZeros);
             done();
+          }
+        });
+    });
+
+    it('should return 201 if payload has order specified', (done) => {
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: _.assign({ order: 1 }, body) })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, body);
+            resJson.order.should.be.eql(1);
+
+            const firstPhaseId = resJson.id;
+
+            // Create second phase
+            request(server)
+              .post(`/v4/projects/${projectId}/phases/`)
+              .set({
+                Authorization: `Bearer ${testUtil.jwts.copilot}`,
+              })
+              .send({ param: _.assign({ order: 1 }, body) })
+              .expect('Content-Type', /json/)
+              .expect(201)
+              .end((err2, res2) => {
+                const resJson2 = res2.body.result.content;
+                validatePhase(resJson2, body);
+                resJson2.order.should.be.eql(1);
+
+                models.ProjectPhase.findOne({ where: { id: firstPhaseId } })
+                  .then((firstPhase) => {
+                    firstPhase.order.should.be.eql(2);
+                    done();
+                  });
+              });
           }
         });
     });

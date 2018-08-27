@@ -46,6 +46,7 @@ const validatePhase = (resJson, expectedPhase) => {
 describe('Project Phases', () => {
   let projectId;
   let phaseId;
+  let phaseId2;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -63,44 +64,51 @@ describe('Project Phases', () => {
   before((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
-              createdBy: 1,
-              updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              _.assign(body, { projectId });
-              models.ProjectPhase.create(body).then((phase) => {
-                phaseId = phase.id;
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            _.assign(body, { projectId });
+            const phases = [
+              body,
+              _.assign({ order: 1 }, body),
+            ];
+            models.ProjectPhase.bulkCreate(phases, { returning: true })
+              .then((createdPhases) => {
+                phaseId = createdPhases[0].id;
+                phaseId2 = createdPhases[1].id;
+
                 done();
               });
-            });
           });
         });
+      });
   });
 
   after((done) => {
@@ -223,6 +231,33 @@ describe('Project Phases', () => {
             const resJson = res.body.result.content;
             validatePhase(resJson, bodyWithZeros);
             done();
+          }
+        });
+    });
+
+    it('should return updated phase if the order is specified', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: _.assign({ order: 1 }, updateBody) })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, updateBody);
+            resJson.order.should.be.eql(1);
+
+            // Check the order of the other phase
+            models.ProjectPhase.findOne({ where: { id: phaseId2 } })
+              .then((phase2) => {
+                phase2.order.should.be.eql(2);
+                done();
+              });
           }
         });
     });

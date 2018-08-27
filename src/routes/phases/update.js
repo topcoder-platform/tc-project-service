@@ -2,6 +2,7 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
@@ -22,6 +23,7 @@ const updateProjectPhaseValidation = {
       spentBudget: Joi.number().min(0).optional(),
       progress: Joi.number().min(0).optional(),
       details: Joi.any().optional(),
+      order: Joi.number().integer().optional(),
     }).required(),
   },
 };
@@ -41,6 +43,7 @@ module.exports = [
     updatedProps.updatedBy = req.authUser.userId;
 
     let previousValue;
+    let updated;
 
     models.sequelize.transaction(() => models.ProjectPhase.findOne({
       where: {
@@ -82,21 +85,82 @@ module.exports = [
           existing.save().then(accept).catch(reject);
         }
       }
-    })))
-    .then((updated) => {
-      req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
+    }))
+      .then((updatedPhase) => {
+        updated = updatedPhase;
 
-      // emit original and updated project phase information
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-        { original: previousValue, updated },
-        { correlationId: req.id },
-      );
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-        { req, original: previousValue, updated });
+        // Ignore re-ordering if there's no order specified for this phase
+        if (_.isNil(updated.order)) {
+          return Promise.resolve();
+        }
 
-      res.json(util.wrapResponse(req.id, updated));
-    })
-    .catch(err => next(err));
+        // Update order of the other phases only if the order was changed
+        if (previousValue.order === updated.order) {
+          return Promise.resolve();
+        }
+
+        return models.ProjectPhase.count({
+          where: {
+            projectId,
+            id: { $ne: updated.id },
+            order: updated.order,
+          },
+        })
+          .then((count) => {
+            if (count === 0) {
+              return Promise.resolve();
+            }
+
+            // Increase the order from M to K: if there is an item with order K,
+            // orders from M+1 to K should be made M to K-1
+            if (!_.isNil(previousValue.order) && previousValue.order < updated.order) {
+              return models.ProjectPhase.update({ order: Sequelize.literal('"order" - 1') }, {
+                where: {
+                  projectId,
+                  id: { $ne: updated.id },
+                  order: { $between: [previousValue.order + 1, updated.order] },
+                },
+              });
+            }
+
+            // Decrease the order from M to K: if there is an item with order K,
+            // orders from K to M-1 should be made K+1 to M
+            return models.ProjectPhase.update({ order: Sequelize.literal('"order" + 1') }, {
+              where: {
+                projectId,
+                id: { $ne: updated.id },
+                order: {
+                  $between: [
+                    updated.order,
+                    (previousValue.order ? previousValue.order : Number.MAX_SAFE_INTEGER) - 1,
+                  ],
+                },
+              },
+            });
+          });
+      })
+      .then(() =>
+        // To simpify the logic, reload the phases from DB and send to the message queue
+        models.ProjectPhase.findAll({
+          where: {
+            projectId,
+          },
+        })),
+    )
+      .then((allPhases) => {
+        req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
+
+        // emit original and updated project phase information
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+          { original: previousValue, updated, allPhases },
+          { correlationId: req.id },
+        );
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+          { req, original: previousValue, updated });
+
+        res.json(util.wrapResponse(req.id, updated));
+      })
+      .catch(err => next(err));
   },
 ];

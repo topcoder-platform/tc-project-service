@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6b341e19-8aa0-4827-8bdb-d676c3c5e20b",
+		"_postman_id": "607f173b-5427-4f94-8b56-8fbcab0ec7f0",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2028,6 +2028,39 @@
 					"response": []
 				},
 				{
+					"name": "Create Phase with order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t},\n\t\t\"order\": 1\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/phases",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"phases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "List Phase",
 					"request": {
 						"method": "GET",
@@ -2139,6 +2172,45 @@
 					"response": []
 				},
 				{
+					"name": "List Phase with sort by order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/phases?sort=order desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"phases"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "order desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get Phase",
 					"request": {
 						"method": "GET",
@@ -2189,6 +2261,40 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase xxx\",\n\t\t\"status\": \"inactive\",\n\t\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\t\"budget\": 30,\n\t\t\"progress\": 15,\n\t\t\"details\": {\n\t\t\t\"message\": \"phase details\"\n\t\t}\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/phases/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"phases",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Phase with order",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase xxx\",\n\t\t\"status\": \"inactive\",\n\t\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\t\"budget\": 30,\n\t\t\"progress\": 15,\n\t\t\"details\": {\n\t\t\t\"message\": \"phase details\"\n\t\t},\n\t\t\"order\": 1\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1",
@@ -4552,7 +4658,10 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {},
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata",
 							"host": [

@@ -355,7 +355,7 @@ paths:
         - name: sort
           required: false
           description: |
-            sort project phases by startDate, endDate, status. Default is startDate asc
+            sort project phases by startDate, endDate, status, order. Default is startDate asc
           in: query
           type: string
       responses:
@@ -373,7 +373,8 @@ paths:
       operationId: addProjectPhase
       security:
         - Bearer: []
-      description: Create a project phase
+      description: Create a project phase.
+        It also updates the `order` field of all other phases in the same project which have `order` greater than or equal to the `order` specified in the POST body.
       parameters:
         - in: body
           name: body
@@ -428,6 +429,7 @@ paths:
       security:
         - Bearer: []
       description: Update a project phase. All users who can edit project can access this endpoint.
+        It also updates the `order` field of all other phases in the same project which have `order` greater than or equal to the `order` specified in the POST body.
       responses:
         '403':
           description: No permission or wrong token
@@ -2634,6 +2636,10 @@ definitions:
       details:
         type: object
         description: the project phase details
+      order:
+        type: number
+        format: integer
+        description: the project phase order
 
   ProjectPhaseBodyParam:
     title: Project phase body param
