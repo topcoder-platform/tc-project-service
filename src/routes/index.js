@@ -3,6 +3,7 @@ import _ from 'lodash';
 import config from 'config';
 import validate from 'express-validation';
 import { Router } from 'express';
+import userIdAuth from '../middlewares/userIdAuth';
 
 const router = Router();
 
@@ -50,7 +51,20 @@ router.route('/v4/projects/metadata')
   .get(require('./metadata/list'));
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/(projects|timelines)(?!\\/health).*`), jwtAuth());
+  RegExp(`\\/${apiVersion}\\/(projects|timelines)(?!\\/health).*`), (req, res, next) => {
+    // userId authentication for project creation endpoint
+    if (req.method === 'POST' &&
+      req.path.endsWith('/v4/projects') &&
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer userId_')
+    ) {
+      return userIdAuth(req, res, next);
+    }
+
+    // JWT authentication
+    return jwtAuth()(req, res, next);
+  }
+);
 
 // Register all the routes
 router.route('/v4/projects')

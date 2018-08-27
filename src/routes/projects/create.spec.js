@@ -462,5 +462,90 @@ describe('Project create', () => {
           }
         });
     });
+
+    it('should return 201 if valid user and data (using Bearer userId_<userId>)', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [
+                {
+                  id: 1800075,
+                  active: false,
+                }
+              ],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer userId_1800075`,
+        })
+        .send(_.merge({ param: { templateId: 3 } }, body))
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            server.log.error(err)
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.directProjectId.should.be.eql(128);
+            resJson.status.should.be.eql('draft');
+            resJson.type.should.be.eql(body.param.type);
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(1800075);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            resJson.phases.should.have.lengthOf(3);
+            const phases = _.sortBy(resJson.phases, p => p.name);
+            phases[0].name.should.be.eql('Design Stage');
+            phases[0].status.should.be.eql('open');
+            phases[0].startDate.should.be.a('string');
+            phases[0].duration.should.be.eql(10);
+            const startDate = moment.utc(phases[0].startDate);
+            startDate.hours().should.be.eql(0);
+            startDate.minutes().should.be.eql(0);
+            startDate.seconds().should.be.eql(0);
+            startDate.milliseconds().should.be.eql(0);
+            new Date(phases[0].endDate).should.be.eql(startDate.add(9, 'days').toDate());
+            expect(phases[0].details).to.be.empty;
+            phases[0].products.should.have.lengthOf(1);
+            phases[0].products[0].name.should.be.eql('product 1');
+            phases[0].products[0].templateId.should.be.eql(21);
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            done();
+          }
+        });
+    });
   });
 });
