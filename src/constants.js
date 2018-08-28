@@ -98,6 +98,13 @@ export const BUS_API_EVENT = {
 
   // When specification of a product is modified
   PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
+
+  // When milestone is marked as active
+  MILESTONE_TRANSITION_ACTIVE: 'notifications.connect.project.phase.milestone.transition.active',
+  // When milestone is marked as completed
+  MILESTONE_TRANSITION_COMPLETED: 'notifications.connect.project.phase.milestone.transition.completed',
+  // When milestone is waiting for customers's input
+  MILESTONE_WAITING_CUSTOMER: 'notifications.connect.project.phase.milestone.waiting.customer',
 };
 
 export const REGEX = {

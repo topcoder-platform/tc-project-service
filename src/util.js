@@ -303,13 +303,13 @@ _.assignIn(util, {
       },
     })
       .then((response) => {
-      if (response.data && response.data.result
+        if (response.data && response.data.result
         && response.data.result.status === 200 && response.data.result.content
         && response.data.result.content.length === 1) {
-        return response.data.result.content[0];
-      }
-      return null;
-    });
+          return response.data.result.content[0];
+        }
+        return null;
+      });
   },
 
   /**

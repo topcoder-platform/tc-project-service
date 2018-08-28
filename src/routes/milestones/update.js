@@ -284,6 +284,9 @@ module.exports = [
       // because it will make 'version conflict' error in ES.
       // The order of the other milestones need to be updated in the MILESTONE_UPDATED event above
 
+      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+        { req, original, updated, cascadedUpdates });
+
       // Write to response
       res.json(util.wrapResponse(req.id, updated));
       return Promise.resolve();

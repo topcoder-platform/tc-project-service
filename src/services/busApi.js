@@ -43,7 +43,7 @@ async function getClient() {
  * @return {Promise} new event promise
  */
 function createEvent(topic, payload, logger) {
-  logger.debug(`Sending message: ${JSON.stringify(payload)}`);
+  logger.debug(`Sending message to topic ${topic}: ${JSON.stringify(payload)}`);
   return getClient().then((busClient) => {
     logger.debug('calling bus-api');
     return busClient.post('/bus/events', {

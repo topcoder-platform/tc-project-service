@@ -63,7 +63,7 @@ router.all(
 
     // JWT authentication
     return jwtAuth()(req, res, next);
-  }
+  },
 );
 
 // Register all the routes

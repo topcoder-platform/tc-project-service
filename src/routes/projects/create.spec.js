@@ -491,7 +491,7 @@ describe('Project create', () => {
                 {
                   id: 1800075,
                   active: false,
-                }
+                },
               ],
             },
           },
@@ -501,14 +501,14 @@ describe('Project create', () => {
       request(server)
         .post('/v4/projects')
         .set({
-          Authorization: `Bearer userId_1800075`,
+          Authorization: 'Bearer userId_1800075',
         })
         .send(_.merge({ param: { templateId: 3 } }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
-            server.log.error(err)
+            server.log.error(err);
             done(err);
           } else {
             const resJson = res.body.result.content;

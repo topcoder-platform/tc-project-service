@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "607f173b-5427-4f94-8b56-8fbcab0ec7f0",
+		"_postman_id": "160fcac7-f74a-4047-a4e4-b53f08d991c5",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -892,6 +892,38 @@
 							{
 								"key": "Authorization",
 								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
 							},
 							{
 								"key": "Content-Type",
@@ -3919,7 +3951,7 @@
 					"response": []
 				},
 				{
-					"name": "Update milestone 2",
+					"name": "Update milestone (active)",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -3934,7 +3966,41 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"open\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"active\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone (completed)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"completed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones/2",

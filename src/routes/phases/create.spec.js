@@ -80,7 +80,7 @@ describe('Project Phases', () => {
             isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-          }])
+          }]);
         });
       })
       .then(() =>
@@ -113,7 +113,7 @@ describe('Project Phases', () => {
         }).then((template) => {
           productTemplateId = template.id;
           return Promise.resolve();
-        })
+        }),
       )
       .then(() => done());
   });

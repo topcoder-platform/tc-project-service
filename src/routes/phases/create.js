@@ -115,7 +115,7 @@ module.exports = [
               })
                 .then((phaseProduct) => {
                   newProjectPhase.products = [
-                    _.omit(phaseProduct.toJSON(), ['deletedAt', 'deletedBy'])
+                    _.omit(phaseProduct.toJSON(), ['deletedAt', 'deletedBy']),
                   ];
                 });
             });

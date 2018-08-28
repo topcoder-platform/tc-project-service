@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import config from 'config';
-import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
+import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEMBER_ROLE, MILESTONE_STATUS }
+  from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
 
@@ -413,5 +414,93 @@ module.exports = (app, logger) => {
           }, logger);
         }
       }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+   * Send milestone notification if needed.
+   * @param {Object} req the request
+   * @param {Object} original the original milestone
+   * @param {Object} updated the updated milestone
+   * @param {Object} project the project
+   * @returns {Promise<void>} void
+   */
+  function sendMilestoneNotification(req, original, updated, project) {
+    // Send transition events
+    if (original.status !== updated.status) {
+      let event;
+      if (updated.status === MILESTONE_STATUS.COMPLETED) {
+        event = BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED;
+      } else if (updated.status === MILESTONE_STATUS.ACTIVE) {
+        event = BUS_API_EVENT.MILESTONE_TRANSITION_ACTIVE;
+      }
+
+      if (event) {
+        createEvent(event, {
+          projectId: project.id,
+          projectName: project.name,
+          projectUrl: connectProjectUrl(project.id),
+          timelineId: req.timeline.id,
+          timelineName: req.timeline.name,
+          milestoneId: updated.id,
+          milestoneName: updated.name,
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }
+    }
+
+    // Send notifications.connect.project.phase.milestone.waiting.customer event
+    const originalWaiting = _.get(original, 'details.metadata.waitingForCustomer', false);
+    const updatedWaiting = _.get(updated, 'details.metadata.waitingForCustomer', false);
+    if (!originalWaiting && updatedWaiting) {
+      createEvent(BUS_API_EVENT.MILESTONE_WAITING_CUSTOMER, {
+        projectId: project.id,
+        projectName: project.name,
+        projectUrl: connectProjectUrl(project.id),
+        timelineId: req.timeline.id,
+        timelineName: req.timeline.name,
+        milestoneId: updated.id,
+        milestoneName: updated.name,
+        userId: req.authUser.userId,
+        initiatorUserId: req.authUser.userId,
+      }, logger);
+    }
+  }
+
+  /**
+   * MILESTONE_ADDED.
+   */
+  app.on(EVENT.ROUTING_KEY.MILESTONE_ADDED, ({ req, created }) => {
+    logger.debug('receive MILESTONE_ADDED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then(project => sendMilestoneNotification(req, {}, created, project))
+      .catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+  * MILESTONE_UPDATED.
+  */
+  // eslint-disable-next-line no-unused-vars
+  app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, ({ req, original, updated, cascadedUpdates }) => {
+    logger.debug('receive MILESTONE_UPDATED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        sendMilestoneNotification(req, original, updated, project);
+
+        _.each(cascadedUpdates, cascadedUpdate =>
+          sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project),
+        );
+      })
+      .catch(err => null);    // eslint-disable-line no-unused-vars
   });
 };

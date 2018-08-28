@@ -2,20 +2,24 @@
  * The userId authentication middleware.
  */
 import config from 'config';
+import _ from 'lodash';
 import util from '../util';
 
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
 const m2m = tcCoreLibAuth.m2m(config);
 
+const whitelistedOrigins = JSON.parse(config.get('whitelistedOriginsForUserIdAuth'));
+
 /**
  * The userId authentication middleware.
  * @param {Object} req the request
  * @param {Object} res the response
  * @param {Function} next the next middleware
+ * @returns {Promise<void>} void
  */
-module.exports = function userIdAuth(req, res, next) {
-  req.log.debug(`Enter userIdAuth middleware`);
+module.exports = function userIdAuth(req, res, next) { // eslint-disable-line consistent-return
+  req.log.debug('Enter userIdAuth middleware');
 
   const bearerUserId = 'Bearer userId_';
 
@@ -27,9 +31,17 @@ module.exports = function userIdAuth(req, res, next) {
     return res.send();
   }
 
+  // Check origin
+  const origin = req.header('Origin') || ' ';
+  if (!_.some(whitelistedOrigins, whitelistedOrigin => origin.startsWith(whitelistedOrigin))) {
+    res.status(403).json(
+      util.wrapErrorResponse(req.id, 403, `Origin ${origin} is not allowed to access this authentication scheme`));
+    return res.end();
+  }
+
   const userId = req.headers.authorization.split(bearerUserId)[1];
 
-  req.log.debug(`Get m2m token`);
+  req.log.debug('Get m2m token');
 
   m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
     .then((token) => {
