@@ -441,8 +441,8 @@ module.exports = (app, logger) => {
           projectUrl: connectProjectUrl(project.id),
           timelineId: req.timeline.id,
           timelineName: req.timeline.name,
-          milestoneId: updated.id,
-          milestoneName: updated.name,
+          originalMilestone: original,
+          updatedMilestone: updated,
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -459,8 +459,8 @@ module.exports = (app, logger) => {
         projectUrl: connectProjectUrl(project.id),
         timelineId: req.timeline.id,
         timelineName: req.timeline.name,
-        milestoneId: updated.id,
-        milestoneName: updated.name,
+        originalMilestone: original,
+        updatedMilestone: updated,
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);

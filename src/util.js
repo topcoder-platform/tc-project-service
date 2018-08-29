@@ -17,10 +17,14 @@ import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 import AWS from 'aws-sdk';
+
 import { ADMIN_ROLES, TOKEN_SCOPES } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
+const tcCoreLibAuth = require('tc-core-library-js').auth;
+
+const m2m = tcCoreLibAuth.m2m(config);
 
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
 
@@ -281,6 +285,12 @@ _.assignIn(util, {
     )
       .then(res => res.data.result.content.token);
   },
+
+  /**
+   * Get machine to machine token.
+   * @returns {Promise} promise which resolves to the m2m token
+   */
+  getM2MToken: () => m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET),
 
   /**
    * Fetches the topcoder user details using the given JWT token.

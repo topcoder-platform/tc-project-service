@@ -5,10 +5,6 @@ import config from 'config';
 import _ from 'lodash';
 import util from '../util';
 
-const tcCoreLibAuth = require('tc-core-library-js').auth;
-
-const m2m = tcCoreLibAuth.m2m(config);
-
 const whitelistedOrigins = JSON.parse(config.get('whitelistedOriginsForUserIdAuth'));
 
 /**
@@ -42,8 +38,7 @@ module.exports = function userIdAuth(req, res, next) { // eslint-disable-line co
   const userId = req.headers.authorization.split(bearerUserId)[1];
 
   req.log.debug('Get m2m token');
-
-  m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
+  util.getM2MToken()
     .then((token) => {
       req.log.debug(`Get topcoder user from identity service, userId = ${userId}`);
 
