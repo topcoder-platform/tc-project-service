@@ -6,6 +6,7 @@ import expressSanitizer from 'express-sanitizer';
 import config from 'config';
 import cors from 'cors';
 import coreLib from 'tc-core-library-js';
+import performanceRequestLogger from './middlewares/performanceRequestLogger';
 import expressRequestId from 'express-request-id';
 import memWatch from 'memwatch-next';
 import router from './routes';
@@ -62,7 +63,7 @@ const logger = coreLib.logger({
   captureLogs: config.get('captureLogs'),
   logentriesToken: _.get(config, 'logentriesToken', null),
 });
-app.use(coreLib.middleware.logger(null, logger));
+app.use(performanceRequestLogger(logger));
 app.logger = logger;
 
 // ========================
