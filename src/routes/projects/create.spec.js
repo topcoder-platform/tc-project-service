@@ -463,7 +463,7 @@ describe('Project create', () => {
         });
     });
 
-    it('should return 201 if valid user and data (using Bearer userId_<userId>)', (done) => {
+    xit('should return 201 if valid user and data (using Bearer userId_<userId>)', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
