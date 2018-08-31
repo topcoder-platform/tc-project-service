@@ -12,7 +12,7 @@
 --
 ALTER TABLE product_milestone_templates DROP CONSTRAINT "product_milestone_templates_productTemplateId_fkey";
 
-ALTER TABLE product_milestone_templates RENAME COLUMN "productTemplateId" TO referenceId;
+ALTER TABLE product_milestone_templates RENAME COLUMN "productTemplateId" TO "referenceId";
 
 ALTER TABLE product_milestone_templates ADD COLUMN "reference" character varying(45);
 UPDATE product_milestone_templates set reference='productTemplate' where reference is null;
