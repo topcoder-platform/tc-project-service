@@ -18,5 +18,6 @@
         "maxPoolSize": 50,
         "minPoolSize": 4,
         "idleTimeout": 1000
-    }
+    },
+    "whitelistedOriginsForUserIdAuth": "[\"\"]"
 }

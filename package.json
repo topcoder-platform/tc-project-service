@@ -52,6 +52,7 @@
     "joi": "^8.0.5",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.16.4",
+    "memwatch-next": "^0.3.0",
     "method-override": "^2.3.9",
     "moment": "^2.22.2",
     "pg": "^4.5.5",

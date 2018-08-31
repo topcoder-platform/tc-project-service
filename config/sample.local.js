@@ -28,6 +28,7 @@ if (process.env.NODE_ENV === 'test') {
       indexName: 'projects',
       docType: 'projectV4'
     },
+    whitelistedOriginsForUserIdAuth: "[\"\"]",
   };
 }
 module.exports = config;

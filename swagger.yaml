@@ -355,7 +355,7 @@ paths:
         - name: sort
           required: false
           description: |
-            sort project phases by startDate, endDate, status. Default is startDate asc
+            sort project phases by startDate, endDate, status, order. Default is startDate asc
           in: query
           type: string
       responses:
@@ -373,13 +373,24 @@ paths:
       operationId: addProjectPhase
       security:
         - Bearer: []
-      description: Create a project phase
+      description: Create a project phase.
+        It also updates the `order` field of all other phases in the same project which have `order` greater than or equal to the `order` specified in the POST body.
       parameters:
         - in: body
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectPhaseBodyParam'
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectPhaseBodyParam'
+            properties:
+              param:
+                type: object
+                properties:
+                  productTemplateId:
+                    type: number
+                    format: long
+                    description: the optional productTemplateId used to populate a new phase product for the created phase
       responses:
         '403':
           description: No permission or wrong token
@@ -428,6 +439,7 @@ paths:
       security:
         - Bearer: []
       description: Update a project phase. All users who can edit project can access this endpoint.
+        It also updates the `order` field of all other phases in the same project which have `order` greater than or equal to the `order` specified in the POST body.
       responses:
         '403':
           description: No permission or wrong token
@@ -647,8 +659,26 @@ paths:
           description: Project migrated successfully
           schema:
             $ref: "#/definitions/ProjectUpgradeResponse"
+            
+  /projects/metadata:
+    get:
+      tags:
+        - metadata
+      operationId: getAllMetadata
+      security:
+        - Bearer: []
+      description: Retrieve all metadata including projectTemplates, productTemplates, milestoneTemplates, projectTypes, productCategories. All user roles can access this endpoint.
+      responses:
+        '200':
+          description: The metadata
+          schema:
+            $ref: "#/definitions/AllMetadataResponse"
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: "#/definitions/ErrorModel"
 
-  /projectTemplates:
+  /projects/metadata/projectTemplates:
     get:
       tags:
         - projectTemplate
@@ -692,7 +722,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /projectTemplates/{templateId}:
+  /projects/metadata/projectTemplates/{templateId}:
     get:
       tags:
         - projectTemplate
@@ -774,7 +804,7 @@ paths:
           description: Project template successfully removed
 
 
-  /productTemplates:
+  /projects/metadata/productTemplates:
     get:
       tags:
         - productTemplate
@@ -818,7 +848,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /productTemplates/{templateId}:
+  /projects/metadata/productTemplates/{templateId}:
     get:
       tags:
         - productTemplate
@@ -900,7 +930,7 @@ paths:
           description: Product template successfully removed
 
 
-  /productCategories:
+  /projects/metadata/productCategories:
     get:
       tags:
         - productCategory
@@ -944,7 +974,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /productCategories/{key}:
+  /projects/metadata/productCategories/{key}:
     get:
       tags:
         - productCategory
@@ -1023,7 +1053,7 @@ paths:
           description: Product category successfully removed
 
 
-  /projectTypes:
+  /projects/metadata/projectTypes:
     get:
       tags:
         - projectType
@@ -1067,7 +1097,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /projectTypes/{key}:
+  /projects/metadata/projectTypes/{key}:
     get:
       tags:
         - projectType
@@ -1438,12 +1468,10 @@ paths:
           description: Milestone successfully removed
 
 
-  /productTemplates/{productTemplateId}/milestones:
-    parameters:
-      - $ref: "#/parameters/productTemplateIdParam"
+  /timelines/metadata/milestoneTemplates:
     get:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: findMilestoneTemplates
       security:
         - Bearer: []
@@ -1454,6 +1482,14 @@ paths:
           description: sort by `order`. Default is `order asc`
           in: query
           type: string
+        - name: filter
+          required: false
+          type: string
+          in: query
+          description: |
+            Url encoded list of supported filters
+             - reference
+             - referenceId
       responses:
         '403':
           description: No permission or wrong token
@@ -1469,7 +1505,7 @@ paths:
             $ref: "#/definitions/MilestoneTemplateListResponse"
     post:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: addMilestoneTemplate
       security:
         - Bearer: []
@@ -1494,12 +1530,10 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
-  /productTemplates/{productTemplateId}/milestones/clone:
-    parameters:
-      - $ref: "#/parameters/productTemplateIdParam"
+  /timelines/metadata/milestoneTemplates/clone:
     post:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: cloneMilestoneTemplate
       security:
         - Bearer: []
@@ -1529,13 +1563,12 @@ paths:
             $ref: "#/definitions/ErrorModel"
 
 
-  /productTemplates/{productTemplateId}/milestones/{milestoneTemplateId}:
+  /timelines/metadata/milestoneTemplates/{milestoneTemplateId}:
     parameters:
-      - $ref: "#/parameters/productTemplateIdParam"
       - $ref: "#/parameters/milestoneTemplateIdParam"
     get:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       description: Retrieve milestone template by id. All user roles can access this endpoint.
       security:
         - Bearer: []
@@ -1560,7 +1593,7 @@ paths:
 
     patch:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       operationId: updateMilestoneTemplate
       security:
         - Bearer: []
@@ -1595,7 +1628,7 @@ paths:
 
     delete:
       tags:
-        - productMilestoneTemplate
+        - milestoneTemplates
       description: Remove an existing milestone template. Only connect manager, connect admin, and admin can access this endpoint.
       security:
         - Bearer: []
@@ -2613,6 +2646,10 @@ definitions:
       details:
         type: object
         description: the project phase details
+      order:
+        type: number
+        format: integer
+        description: the project phase order
 
   ProjectPhaseBodyParam:
     title: Project phase body param
@@ -3427,6 +3464,9 @@ definitions:
       - duration
       - type
       - order
+      - reference
+      - referenceId
+      - metadata
     properties:
       name:
         type: string
@@ -3445,6 +3485,19 @@ definitions:
         type: number
         format: integer
         description: the milestone template order
+      reference:
+        type: string
+        enum:
+        - productTemplate
+        description: the milestone template reference
+      refereneceId:
+        type: number
+        format: long
+        minimum: 1
+        description: the milestone template reference id
+      metadata: 
+        type: object
+        description: the milestone template metadata
 
   MilestoneTemplateBodyParam:
     title: Milestone template body param
@@ -3459,12 +3512,31 @@ definitions:
     title: Milestone clone template request object
     type: object
     required:
-      - sourceTemplateId
+      - sourceReference
+      - sourceReferenceId
+      - reference
+      - referenceId
     properties:
-      sourceTemplateId:
+      sourceReference:
+        type: string
+        enum:
+        - productTemplate
+        description: the source reference to clone the milestone templates from
+      sourceReferenceId:
         type: number
-        format: integer
-        description: the product template id where to clone the milestone templates from
+        format: long
+        minimum: 1
+        description: the source reference id to clone the milestone templates from
+      reference:
+        type: string
+        enum:
+        - productTemplate
+        description: the target reference to clone the milestone templates to
+      refereneceId:
+        type: number
+        format: long
+        minimum: 1
+        description: the target reference id to clone the milestone templates to
 
   MilestoneTemplate:
     title: Milestone template object
@@ -3547,3 +3619,48 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/MilestoneTemplate"
+              
+  AllMetadataResponse:
+    title: All metadata response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: object
+            properties:
+              projectTemplates:
+                type: array
+                items:
+                  $ref: "#/definitions/ProjectTemplate"
+              productTemplates:
+                type: array
+                items:
+                  $ref: "#/definitions/ProductTemplate"
+              milestoneTemplates:
+                type: array
+                items:
+                  $ref: "#/definitions/MilestoneTemplate"
+              projectTypes:
+                type: array
+                items:
+                  $ref: "#/definitions/ProjectType"
+              productCategories:
+                type: array
+                items:
+                  $ref: "#/definitions/ProductCategory"
+              

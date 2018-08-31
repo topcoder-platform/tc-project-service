@@ -14,6 +14,7 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
     spentBudget: { type: DataTypes.DOUBLE, defaultValue: 0.0 },
     progress: { type: DataTypes.DOUBLE, defaultValue: 0.0 },
     details: { type: DataTypes.JSON, defaultValue: {} },
+    order: { type: DataTypes.INTEGER, allowNull: true },
 
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

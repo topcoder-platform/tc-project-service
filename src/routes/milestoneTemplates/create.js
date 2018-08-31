@@ -8,13 +8,12 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
+import validateMilestoneTemplate from '../../middlewares/validateMilestoneTemplate';
+import { MILESTONE_TEMPLATE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
 const schema = {
-  params: {
-    productTemplateId: Joi.number().integer().positive().required(),
-  },
   body: {
     param: Joi.object().keys({
       id: Joi.any().strip(),
@@ -27,7 +26,9 @@ const schema = {
       activeText: Joi.string().max(512).required(),
       completedText: Joi.string().max(512).required(),
       blockedText: Joi.string().max(512).required(),
-      productTemplateId: Joi.any().strip(),
+      reference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
+      referenceId: Joi.number().integer().positive().required(),
+      metadata: Joi.object().required(),
       hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
@@ -41,39 +42,28 @@ const schema = {
 
 module.exports = [
   validate(schema),
+  validateMilestoneTemplate.validateRequestBody,
   permissions('milestoneTemplate.create'),
   (req, res, next) => {
     const entity = _.assign(req.body.param, {
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
-      productTemplateId: req.params.productTemplateId,
     });
     let result;
 
     return models.sequelize.transaction(tx =>
-      // Find the product template
-      models.ProductTemplate.findById(req.params.productTemplateId, { transaction: tx })
-        .then((productTemplate) => {
-          // Not found
-          if (!productTemplate) {
-            const apiErr = new Error(
-              `Product template not found for product template id ${req.params.productTemplateId}`);
-            apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-
-          // Create the milestone template
-          return models.ProductMilestoneTemplate.create(entity, { transaction: tx });
-        })
+      // Create the milestone template
+      models.MilestoneTemplate.create(entity, { transaction: tx })
         .then((createdEntity) => {
           // Omit deletedAt and deletedBy
           result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
 
-          // Increase the order of the other milestone templates in the same product template,
+          // Increase the order of the other milestone templates in the same referenceId,
           // which have `order` >= this milestone template order
-          return models.ProductMilestoneTemplate.update({ order: Sequelize.literal('"order" + 1') }, {
+          return models.MilestoneTemplate.update({ order: Sequelize.literal('"order" + 1') }, {
             where: {
-              productTemplateId: req.params.productTemplateId,
+              reference: result.reference,
+              referenceId: result.referenceId,
               id: { $ne: result.id },
               order: { $gte: result.order },
             },

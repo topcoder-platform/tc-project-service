@@ -29,7 +29,7 @@ describe('CREATE project type', () => {
   );
   after(testUtil.clearDb);
 
-  describe('POST /projectTypes', () => {
+  describe('POST /projects/metadata/projectTypes', () => {
     const body = {
       param: {
         key: 'app_dev',
@@ -46,14 +46,14 @@ describe('CREATE project type', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -63,7 +63,7 @@ describe('CREATE project type', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -73,7 +73,7 @@ describe('CREATE project type', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -86,7 +86,7 @@ describe('CREATE project type', () => {
       delete invalidBody.param.key;
 
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -100,7 +100,7 @@ describe('CREATE project type', () => {
       delete invalidBody.param.displayName;
 
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -114,7 +114,7 @@ describe('CREATE project type', () => {
       delete invalidBody.param.icon;
 
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -128,7 +128,7 @@ describe('CREATE project type', () => {
       delete invalidBody.param.question;
 
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -142,7 +142,7 @@ describe('CREATE project type', () => {
       delete invalidBody.param.info;
 
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -156,7 +156,7 @@ describe('CREATE project type', () => {
       delete invalidBody.param.metadata;
 
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -170,7 +170,7 @@ describe('CREATE project type', () => {
       invalidBody.param.key = 'key1';
 
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -181,7 +181,7 @@ describe('CREATE project type', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -213,7 +213,7 @@ describe('CREATE project type', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/projectTypes')
+        .post('/v4/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

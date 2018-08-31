@@ -47,41 +47,75 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
+  let productTemplateId;
   before((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
-              createdBy: 1,
-              updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => done());
-          });
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]);
         });
+      })
+      .then(() =>
+        models.ProductTemplate.create({
+          name: 'name 1',
+          productKey: 'productKey 1',
+          category: 'generic',
+          icon: 'http://example.com/icon1.ico',
+          brief: 'brief 1',
+          details: 'details 1',
+          aliases: ['product key 1', 'product_key_1'],
+          template: {
+            template1: {
+              name: 'template 1',
+              details: {
+                anyDetails: 'any details 1',
+              },
+              others: ['others 11', 'others 12'],
+            },
+            template2: {
+              name: 'template 2',
+              details: {
+                anyDetails: 'any details 2',
+              },
+              others: ['others 21', 'others 22'],
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        }).then((template) => {
+          productTemplateId = template.id;
+          return Promise.resolve();
+        }),
+      )
+      .then(() => done());
   });
 
   after((done) => {
@@ -91,24 +125,24 @@ describe('Project Phases', () => {
   describe('POST /projects/{id}/phases/', () => {
     it('should return 403 if user does not have permissions (non team member)', (done) => {
       request(server)
-          .post(`/v4/projects/${projectId}/phases/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member2}`,
-          })
-          .send({ param: body })
-          .expect('Content-Type', /json/)
-          .expect(403, done);
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(403, done);
     });
 
     it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
-          .post(`/v4/projects/${projectId}/phases/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member}`,
-          })
-          .send({ param: body })
-          .expect('Content-Type', /json/)
-          .expect(403, done);
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(403, done);
     });
 
     it('should return 422 when name not provided', (done) => {
@@ -227,6 +261,77 @@ describe('Project Phases', () => {
           } else {
             const resJson = res.body.result.content;
             validatePhase(resJson, bodyWithZeros);
+            done();
+          }
+        });
+    });
+
+    it('should return 201 if payload has order specified', (done) => {
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: _.assign({ order: 1 }, body) })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, body);
+            resJson.order.should.be.eql(1);
+
+            const firstPhaseId = resJson.id;
+
+            // Create second phase
+            request(server)
+              .post(`/v4/projects/${projectId}/phases/`)
+              .set({
+                Authorization: `Bearer ${testUtil.jwts.copilot}`,
+              })
+              .send({ param: _.assign({ order: 1 }, body) })
+              .expect('Content-Type', /json/)
+              .expect(201)
+              .end((err2, res2) => {
+                const resJson2 = res2.body.result.content;
+                validatePhase(resJson2, body);
+                resJson2.order.should.be.eql(1);
+
+                models.ProjectPhase.findOne({ where: { id: firstPhaseId } })
+                  .then((firstPhase) => {
+                    firstPhase.order.should.be.eql(2);
+                    done();
+                  });
+              });
+          }
+        });
+    });
+
+    it('should return 201 if payload has productTemplateId specified', (done) => {
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: _.assign({ productTemplateId }, body) })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, body);
+            resJson.products.should.have.length(1);
+
+            resJson.products[0].name.should.be.eql('name 1');
+            resJson.products[0].templateId.should.be.eql(1);
+            resJson.products[0].type.should.be.eql('productKey 1');
+            resJson.products[0].projectId.should.be.eql(1);
+            resJson.products[0].phaseId.should.be.eql(resJson.id);
+
             done();
           }
         });

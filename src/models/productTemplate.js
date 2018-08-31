@@ -29,15 +29,6 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
-    classMethods: {
-      associate: (models) => {
-        ProductTemplate.hasMany(models.ProductMilestoneTemplate, {
-          as: 'milestones',
-          foreignKey: 'productTemplateId',
-          onDelete: 'cascade',
-        });
-      },
-    },
   });
 
   return ProductTemplate;

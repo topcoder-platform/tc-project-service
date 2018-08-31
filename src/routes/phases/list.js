@@ -30,6 +30,7 @@ module.exports = [
       'startDate asc', 'startDate desc',
       'endDate asc', 'endDate desc',
       'status asc', 'status desc',
+      'order asc', 'order desc',
     ];
     if (sort && _.indexOf(sortableProps, sort) < 0) {
       return util.handleError('Invalid sort criteria', null, req, next);

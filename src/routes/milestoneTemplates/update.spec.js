@@ -69,7 +69,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage',
     activeText: 'text to be shown in active stage',
     completedText: 'text to be shown in completed stage',
-    productTemplateId: 1,
+    reference: 'productTemplate',
+    referenceId: 1,
+    metadata: {},
     createdBy: 1,
     updatedBy: 2,
   },
@@ -83,7 +85,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    productTemplateId: 1,
+    reference: 'productTemplate',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
   },
@@ -97,7 +101,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 3',
     activeText: 'text to be shown in active stage - 3',
     completedText: 'text to be shown in completed stage - 3',
-    productTemplateId: 1,
+    reference: 'productTemplate',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
   },
@@ -111,21 +117,54 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 4',
     activeText: 'text to be shown in active stage - 4',
     completedText: 'text to be shown in completed stage - 4',
-    productTemplateId: 1,
+    reference: 'productTemplate',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
     deletedAt: new Date(),
+  },
+  {
+    id: 5,
+    name: 'milestoneTemplate 5',
+    duration: 5,
+    type: 'type5',
+    order: 5,
+    plannedText: 'text to be shown in planned stage - 5',
+    blockedText: 'text to be shown in blocked stage - 5',
+    activeText: 'text to be shown in active stage - 5',
+    completedText: 'text to be shown in completed stage - 5',
+    reference: 'productTemplate',
+    referenceId: 1,
+    metadata: {
+      metadata1: {
+        name: 'metadata 1',
+        details: {
+          anyDetails: 'any details 1',
+        },
+        others: ['others 11', 'others 12'],
+      },
+      metadata2: {
+        name: 'metadata 2',
+        details: {
+          anyDetails: 'any details 2',
+        },
+        others: ['others 21', 'others 22'],
+      },
+    },
+    createdBy: 2,
+    updatedBy: 3,
   },
 ];
 
 describe('UPDATE milestone template', () => {
   beforeEach(() => testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
   );
   after(testUtil.clearDb);
 
-  describe('PATCH /productTemplates/{productTemplateId}/milestones/{milestoneTemplateId}', () => {
+  describe('PATCH /timelines/metadata/milestoneTemplates/{milestoneTemplateId}', () => {
     const body = {
       param: {
         name: 'milestoneTemplate 1-updated',
@@ -138,19 +177,22 @@ describe('UPDATE milestone template', () => {
         activeText: 'text to be shown in active stage',
         completedText: 'text to be shown in completed stage',
         hidden: true,
+        reference: 'productTemplate',
+        referenceId: 1,
+        metadata: {},
       },
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -160,7 +202,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -170,7 +212,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
@@ -178,19 +220,9 @@ describe('UPDATE milestone template', () => {
         .expect(403, done);
     });
 
-    it('should return 404 for non-existed product template', (done) => {
-      request(server)
-        .patch('/v4/productTemplates/122/milestones/1')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(body)
-        .expect(404, done);
-    });
-
     it('should return 404 for non-existed milestone template', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/111')
+        .patch('/v4/timelines/metadata/milestoneTemplates/111')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -200,7 +232,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 404 for deleted milestone template', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/4')
+        .patch('/v4/timelines/metadata/milestoneTemplates/4')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -210,7 +242,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -228,6 +260,9 @@ describe('UPDATE milestone template', () => {
           resJson.blockedText.should.be.eql(body.param.blockedText);
           resJson.activeText.should.be.eql(body.param.activeText);
           resJson.completedText.should.be.eql(body.param.completedText);
+          resJson.reference.should.be.eql(body.param.reference);
+          resJson.referenceId.should.be.eql(body.param.referenceId);
+          resJson.metadata.should.be.eql(body.param.metadata);
 
           should.exist(resJson.createdBy);
           should.exist(resJson.createdAt);
@@ -245,7 +280,7 @@ describe('UPDATE milestone template', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -255,15 +290,15 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 3
           // Milestone 2: order 2 - 1 = 1
           // Milestone 3: order 3 - 1 = 2
-          models.ProductMilestoneTemplate.findById(1)
+          models.MilestoneTemplate.findById(1)
             .then((milestone) => {
               milestone.order.should.be.eql(3);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then(() => models.MilestoneTemplate.findById(2))
             .then((milestone) => {
               milestone.order.should.be.eql(1);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then(() => models.MilestoneTemplate.findById(3))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
 
@@ -277,7 +312,7 @@ describe('UPDATE milestone template', () => {
       this.timeout(10000);
 
       request(server)
-      .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -287,15 +322,15 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 4
           // Milestone 2: order 2
           // Milestone 3: order 3
-          models.ProductMilestoneTemplate.findById(1)
+          models.MilestoneTemplate.findById(1)
             .then((milestone) => {
               milestone.order.should.be.eql(4);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then(() => models.MilestoneTemplate.findById(2))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then(() => models.MilestoneTemplate.findById(3))
             .then((milestone) => {
               milestone.order.should.be.eql(3);
 
@@ -309,7 +344,7 @@ describe('UPDATE milestone template', () => {
       this.timeout(10000);
 
       request(server)
-      .patch('/v4/productTemplates/1/milestones/3')
+        .patch('/v4/timelines/metadata/milestoneTemplates/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -319,15 +354,15 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 2
           // Milestone 2: order 3
           // Milestone 3: order 1
-          models.ProductMilestoneTemplate.findById(1)
+          models.MilestoneTemplate.findById(1)
             .then((milestone) => {
               milestone.order.should.be.eql(2);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then(() => models.MilestoneTemplate.findById(2))
             .then((milestone) => {
               milestone.order.should.be.eql(3);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then(() => models.MilestoneTemplate.findById(3))
             .then((milestone) => {
               milestone.order.should.be.eql(1);
 
@@ -341,7 +376,7 @@ describe('UPDATE milestone template', () => {
       this.timeout(10000);
 
       request(server)
-      .patch('/v4/productTemplates/1/milestones/3')
+        .patch('/v4/timelines/metadata/milestoneTemplates/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -351,15 +386,15 @@ describe('UPDATE milestone template', () => {
           // Milestone 1: order 1
           // Milestone 2: order 2
           // Milestone 3: order 0
-          models.ProductMilestoneTemplate.findById(1)
+          models.MilestoneTemplate.findById(1)
             .then((milestone) => {
               milestone.order.should.be.eql(1);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(2))
+            .then(() => models.MilestoneTemplate.findById(2))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
             })
-            .then(() => models.ProductMilestoneTemplate.findById(3))
+            .then(() => models.MilestoneTemplate.findById(3))
             .then((milestone) => {
               milestone.order.should.be.eql(0);
 
@@ -372,7 +407,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.name;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -384,7 +419,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.type;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -396,7 +431,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.duration;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -408,7 +443,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.order;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -420,7 +455,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.plannedText;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -432,7 +467,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.blockedText;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -444,7 +479,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.activeText;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -456,7 +491,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.completedText;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -468,7 +503,7 @@ describe('UPDATE milestone template', () => {
       const partialBody = _.cloneDeep(body);
       delete partialBody.param.hidden;
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -478,13 +513,86 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch('/v4/productTemplates/1/milestones/1')
+        .patch('/v4/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    it('should return 200 for admin - updating metadata', (done) => {
+      const bodyWithMetadata = {
+        param: {
+          name: 'milestoneTemplate 5-updated',
+          description: 'description-updated',
+          duration: 6,
+          type: 'type5-updated',
+          order: 5,
+          plannedText: 'text to be shown in planned stage',
+          blockedText: 'text to be shown in blocked stage',
+          activeText: 'text to be shown in active stage',
+          completedText: 'text to be shown in completed stage',
+          hidden: true,
+          reference: 'productTemplate',
+          referenceId: 1,
+          metadata: {
+            metadata1: {
+              name: 'metadata 1 - update',
+              details: {
+                anyDetails: 'any details 1 - update',
+                newDetails: 'new',
+              },
+              others: ['others new'],
+            },
+            metadata3: {
+              name: 'metadata 3',
+              details: {
+                anyDetails: 'any details 3',
+              },
+              others: ['others 31', 'others 32'],
+            },
+          },
+        },
+      };
+
+      request(server)
+        .patch('/v4/timelines/metadata/milestoneTemplates/5')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithMetadata)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.metadata.should.be.eql({
+            metadata1: {
+              name: 'metadata 1 - update',
+              details: {
+                anyDetails: 'any details 1 - update',
+                newDetails: 'new',
+              },
+              others: ['others new'],
+            },
+            metadata2: {
+              name: 'metadata 2',
+              details: {
+                anyDetails: 'any details 2',
+              },
+              others: ['others 21', 'others 22'],
+            },
+            metadata3: {
+              name: 'metadata 3',
+              details: {
+                anyDetails: 'any details 3',
+              },
+              others: ['others 31', 'others 32'],
+            },
+          });
+
+          done();
+        });
     });
   });
 });
