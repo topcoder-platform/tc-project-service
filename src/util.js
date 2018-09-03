@@ -307,14 +307,19 @@ _.assignIn(util, {
     httpClient.defaults.headers.common.Accept = 'application/json';
     httpClient.defaults.headers.common['Content-Type'] = 'application/json';
     httpClient.defaults.headers.common.Authorization = `Bearer ${jwtToken}`;
-    return httpClient.get(`${config.identityServiceEndpoint}users/${userId}`).then((response) => {
-      if (response.data && response.data.result
+    return httpClient.get(`${config.identityServiceEndpoint}users`, {
+      params: {
+        filter: `id=${userId}`,
+      },
+    })
+      .then((response) => {
+        if (response.data && response.data.result
         && response.data.result.status === 200 && response.data.result.content
-        && response.data.result.content.length > 0) {
-        return response.data.result.content[0];
-      }
-      return null;
-    });
+        && response.data.result.content.length === 1) {
+          return response.data.result.content[0];
+        }
+        return null;
+      });
   },
 
   /**
