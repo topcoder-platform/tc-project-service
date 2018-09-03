@@ -425,6 +425,7 @@ module.exports = (app, logger) => {
    * @returns {Promise<void>} void
    */
   function sendMilestoneNotification(req, original, updated, project) {
+    logger.debug('sendMilestoneNotification', original, updated);
     // Send transition events
     if (original.status !== updated.status) {
       let event;
