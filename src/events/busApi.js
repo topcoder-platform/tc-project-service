@@ -497,6 +497,7 @@ module.exports = (app, logger) => {
       .then((project) => {
         sendMilestoneNotification(req, original, updated, project);
 
+        logger.debug('cascadedUpdates', cascadedUpdates);
         _.each(cascadedUpdates, cascadedUpdate =>
           sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project),
         );
