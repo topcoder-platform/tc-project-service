@@ -33,12 +33,14 @@ function updateComingMilestones(origMilestone, updMilestone) {
   let updMilestoneEndDate = moment.utc(updMSStartDate).add(updMilestone.duration - 1, 'days').toDate();
   // if the milestone, in context, is completed, overrides the end date to the completion date
   updMilestoneEndDate = updMilestone.completionDate ? updMilestone.completionDate : updMilestoneEndDate;
+  let originalMilestones;
   return models.Milestone.findAll({
     where: {
       timelineId: updMilestone.timelineId,
       order: { $gt: updMilestone.order },
     },
   }).then((affectedMilestones) => {
+    originalMilestones = affectedMilestones.map(am => _.omit(am.toJSON(), 'deletedAt', 'deletedBy'));
     const comingMilestones = _.sortBy(affectedMilestones, 'order');
     // calculates the schedule start date for the next milestone
     let startDate = moment.utc(updMilestoneEndDate).add(1, 'days').toDate();
@@ -76,7 +78,7 @@ function updateComingMilestones(origMilestone, updMilestone) {
 
     // Resolve promise with all original and updated milestones
     return Promise.all(promises).then(updatedMilestones => ({
-      originalMilestones: affectedMilestones.map(am => _.omit(am.toJSON(), 'deletedAt', 'deletedBy')),
+      originalMilestones,
       updatedMilestones: updatedMilestones.map(um => _.omit(um.toJSON(), 'deletedAt', 'deletedBy')),
     }));
   });
