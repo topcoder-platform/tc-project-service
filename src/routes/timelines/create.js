@@ -85,7 +85,7 @@ module.exports = [
                     blockedText: mt.blockedText,
                     completedText: mt.completedText,
                     hidden: !!mt.hidden,
-                    details: {},
+                    details: { metadata: mt.metadata },
                     status: MILESTONE_STATUS.REVIEWED,
                     startDate: startDate.format(),
                     endDate: endDate.format(),
