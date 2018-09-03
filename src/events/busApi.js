@@ -498,9 +498,11 @@ module.exports = (app, logger) => {
         sendMilestoneNotification(req, original, updated, project);
 
         logger.debug('cascadedUpdates', cascadedUpdates);
-        _.each(cascadedUpdates, cascadedUpdate =>
-          sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project),
-        );
+        if (cascadedUpdates && cascadedUpdates.milestones && cascadedUpdates.milestones.length > 0) {
+          _.each(cascadedUpdates.milestones, cascadedUpdate =>
+            sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project),
+          );
+        }
       })
       .catch(err => null);    // eslint-disable-line no-unused-vars
   });
