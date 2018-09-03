@@ -76,8 +76,8 @@ function updateComingMilestones(origMilestone, updMilestone) {
 
     // Resolve promise with all original and updated milestones
     return Promise.all(promises).then(updatedMilestones => ({
-      originalMilestones: affectedMilestones,
-      updatedMilestones,
+      originalMilestones: affectedMilestones.map(am => _.omit(am.toJSON(), 'deletedAt', 'deletedBy')),
+      updatedMilestones: updatedMilestones.map(um => _.omot(um.toJSON(), 'deletedAt', 'deletedBy')),
     }));
   });
 }
