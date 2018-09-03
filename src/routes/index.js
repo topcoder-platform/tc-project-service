@@ -52,15 +52,6 @@ router.route('/v4/projects/metadata')
 
 router.all(
   RegExp(`\\/${apiVersion}\\/(projects|timelines)(?!\\/health).*`), (req, res, next) => {
-    // userId authentication for project creation endpoint
-    if (req.method === 'POST' &&
-      req.path.endsWith('/v4/projects') &&
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer userId_')
-    ) {
-      return userIdAuth(req, res, next);
-    }
-
     // JWT authentication
     return jwtAuth()(req, res, next);
   },
