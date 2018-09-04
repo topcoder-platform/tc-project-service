@@ -135,6 +135,7 @@ module.exports = [
     });
 
     const timeline = req.timeline;
+    const originalTimeline = _.omit(timeline.toJSON(), 'deletedAt', 'deletedBy');
 
     let original;
     let updated;
@@ -275,6 +276,13 @@ module.exports = [
         original: om, updated: _.find(updatedMilestones, um => um.id === om.id),
       }));
       const cascadedUpdates = { milestones: cascadedMilestones };
+      // if there is a change in timeline, add it to the cascadedUpdates
+      if (originalTimeline.updatedAt !== timeline.updatedAt) {
+        cascadedUpdates.timeline = {
+          original: originalTimeline,
+          updated: _.omit(timeline.toJSON(), 'deletedAt', 'deletedBy'),
+        };
+      }
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,

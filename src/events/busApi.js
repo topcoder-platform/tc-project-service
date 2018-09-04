@@ -504,6 +504,24 @@ module.exports = (app, logger) => {
             sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project),
           );
         }
+
+        // if timeline is modified
+        if (cascadedUpdates && cascadedUpdates.timeline) {
+          const timeline = cascadedUpdates.timeline;
+          // if endDate of the timeline is modified, raise TIMELINE_MODIFIED event
+          if (timeline.original.endDate !== timeline.updated.endDate) {
+            // Raise Timeline changed event
+            createEvent(BUS_API_EVENT.TIMELINE_MODIFIED, {
+              projectId: project.id,
+              projectName: project.name,
+              projectUrl: connectProjectUrl(project.id),
+              original: timeline.original,
+              updated: timeline.updated,
+              userId: req.authUser.userId,
+              initiatorUserId: req.authUser.userId,
+            }, logger);
+          }
+        }
       })
       .catch(err => null);    // eslint-disable-line no-unused-vars
   });

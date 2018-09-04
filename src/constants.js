@@ -96,6 +96,10 @@ export const BUS_API_EVENT = {
 
   PROJECT_PLAN_READY: 'notifications.connect.project.planReady',
 
+  // When milestone is added/deleted to/from the phase,
+  // When milestone is updated for duration/startDate/endDate/status
+  TIMELINE_MODIFIED: 'notifications.connect.project.phase.timelineModified',
+
   // When specification of a product is modified
   PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
 
