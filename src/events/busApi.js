@@ -437,7 +437,7 @@ module.exports = (app, logger) => {
       }
 
       if (events) {
-        events.forEach(event => {
+        events.forEach((event) => {
           createEvent(event, {
             projectId: project.id,
             projectName: project.name,
