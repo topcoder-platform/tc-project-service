@@ -428,25 +428,28 @@ module.exports = (app, logger) => {
     logger.debug('sendMilestoneNotification', original, updated);
     // Send transition events
     if (original.status !== updated.status) {
-      let event;
+      let events;
       if (updated.status === MILESTONE_STATUS.COMPLETED) {
-        event = BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED;
+        // on milestone completion, raise milestone completion and project phase progress events
+        events = [BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED, BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS];
       } else if (updated.status === MILESTONE_STATUS.ACTIVE) {
-        event = BUS_API_EVENT.MILESTONE_TRANSITION_ACTIVE;
+        events = [BUS_API_EVENT.MILESTONE_TRANSITION_ACTIVE];
       }
 
-      if (event) {
-        createEvent(event, {
-          projectId: project.id,
-          projectName: project.name,
-          projectUrl: connectProjectUrl(project.id),
-          timelineId: req.timeline.id,
-          timelineName: req.timeline.name,
-          originalMilestone: original,
-          updatedMilestone: updated,
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
+      if (events) {
+        events.forEach(event => {
+          createEvent(event, {
+            projectId: project.id,
+            projectName: project.name,
+            projectUrl: connectProjectUrl(project.id),
+            timelineId: req.timeline.id,
+            timelineName: req.timeline.name,
+            originalMilestone: original,
+            updatedMilestone: updated,
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        });
       }
     }
 
