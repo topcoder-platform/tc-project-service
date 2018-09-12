@@ -320,6 +320,8 @@ module.exports = (app, logger) => {
             events.forEach(event => createEvent(event, {
               projectId,
               phaseId,
+              originalPhase: original,
+              updatedPhase: updated,
               projectName: project.name,
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
