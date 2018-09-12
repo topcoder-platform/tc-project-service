@@ -2,7 +2,6 @@
 /* globals Promise */
 
 import _ from 'lodash';
-import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 
@@ -17,8 +16,6 @@ import util from '../../util';
 
 // var permissions = require('tc-core-library-js').middleware.permissions
 const permissions = tcMiddleware.permissions;
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-// const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 module.exports = [
   permissions('project.admin'),
@@ -43,6 +40,6 @@ module.exports = [
       // we would want to ignore no such index error
       ignore: [404],
     });
-    res.status(200).json(util.wrapResponse(req.id, { message: 'Delete index request successfully submitted' }));
+    return res.status(200).json(util.wrapResponse(req.id, { message: 'Delete index request successfully submitted' }));
   },
 ];
