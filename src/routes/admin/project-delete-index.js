@@ -29,10 +29,13 @@ module.exports = [
   (req, res, next) => { // eslint-disable-line no-unused-vars
     const logger = req.log;
     logger.debug('Entered Admin#deleteIndex');
-    const indexName = _.get(req, 'body.param.indexName', ES_PROJECT_INDEX);
-    // const docType = _.get(req, 'body.param.docType', ES_PROJECT_TYPE);
+    const indexName = _.get(req, 'body.param.indexName');
     logger.debug('indexName', indexName);
-    // logger.debug('docType', docType);
+    if (!indexName) {
+      const apiErr = new Error('indexName is required');
+      apiErr.status = 400;
+      return Promise.reject(apiErr);
+    }
 
     const esClient = util.getElasticSearchClient();
     esClient.indices.delete({
