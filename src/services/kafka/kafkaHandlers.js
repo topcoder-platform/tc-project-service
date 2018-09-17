@@ -9,8 +9,8 @@ export default {
   [BUS_API_EVENT.PROJECT_TEAM_UPDATED]: updateProjectActivity,
   [BUS_API_EVENT.PROJECT_PLAN_UPDATED]: updateProjectActivity,
   // Events from message-service
-  'notifications.connect.project.topic.created': updateProjectActivity,
-  'notifications.connect.project.topic.updated': updateProjectActivity,
-  'notifications.connect.project.post.created': updateProjectActivity,
-  'notifications.connect.project.post.edited': updateProjectActivity,
+  [BUS_API_EVENT.TOPIC_CREATED]: updateProjectActivity,
+  [BUS_API_EVENT.TOPIC_UPDATED]: updateProjectActivity,
+  [BUS_API_EVENT.POST_CREATED]: updateProjectActivity,
+  [BUS_API_EVENT.POST_UPDATED]: updateProjectActivity,
 };

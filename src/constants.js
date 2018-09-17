@@ -112,6 +112,12 @@ export const BUS_API_EVENT = {
   MILESTONE_TRANSITION_COMPLETED: 'notifications.connect.project.phase.milestone.transition.completed',
   // When milestone is waiting for customers's input
   MILESTONE_WAITING_CUSTOMER: 'notifications.connect.project.phase.milestone.waiting.customer',
+
+  // TC Message Service events
+  TOPIC_CREATED: 'notifications.connect.project.topic.created',
+  TOPIC_UPDATED: 'notifications.connect.project.topic.updated',
+  POST_CREATED: 'notifications.connect.project.post.created',
+  POST_UPDATED: 'notifications.connect.project.post.edited',
 };
 
 export const REGEX = {
