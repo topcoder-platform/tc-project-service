@@ -281,6 +281,13 @@ function getRequestBody(indexName) {
       updatedBy: {
         type: 'integer',
       },
+      lastActivityAt: {
+        type: 'date',
+        format: 'strict_date_optional_time||epoch_millis',
+      },
+      lastActivityUserId: {
+        type: 'integer',
+      },
       utm: {
         properties: {
           campaign: {
