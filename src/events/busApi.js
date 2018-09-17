@@ -93,6 +93,19 @@ module.exports = (app, logger) => {
         initiatorUserId: req.authUser.userId,
       }, logger);
     }
+
+    // send PROJECT_UPDATED Kafka message when one of the specified below properties changed
+    const watchProperties = ['status', 'details', 'name', 'description', 'bookmarks'];
+    if (!_.isEqual(_.pick(original, watchProperties),
+                   _.pick(updated, watchProperties))) {
+      createEvent(BUS_API_EVENT.PROJECT_UPDATED, {
+        projectId: updated.id,
+        projectName: updated.name,
+        projectUrl: connectProjectUrl(updated.id),
+        userId: req.authUser.userId,
+        initiatorUserId: req.authUser.userId,
+      }, logger);
+    }
   });
 
   /**
@@ -126,6 +139,14 @@ module.exports = (app, logger) => {
           userId: member.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
+
+        createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
+          projectId: project.id,
+          projectName: project.name,
+          projectUrl: connectProjectUrl(project.id),
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
@@ -155,6 +176,14 @@ module.exports = (app, logger) => {
             userId: member.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
+
+          createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
+            projectId: project.id,
+            projectName: project.name,
+            projectUrl: connectProjectUrl(project.id),
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
         }
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -166,12 +195,13 @@ module.exports = (app, logger) => {
     logger.debug('receive PROJECT_MEMBER_UPDATED event');
 
     const projectId = _.parseInt(req.params.projectId);
-    if (updated.isPrimary && !original.isPrimary) {
-      models.Project.findOne({
-        where: { id: projectId },
-      })
-        .then((project) => {
-          if (project) {
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+      .then((project) => {
+        if (project) {
+          if (updated.isPrimary && !original.isPrimary) {
             createEvent(BUS_API_EVENT.MEMBER_ASSIGNED_AS_OWNER, {
               projectId,
               projectName: project.name,
@@ -180,8 +210,16 @@ module.exports = (app, logger) => {
               initiatorUserId: req.authUser.userId,
             }, logger);
           }
-        }).catch(err => null);    // eslint-disable-line no-unused-vars
-    }
+
+          createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
+            projectId: project.id,
+            projectName: project.name,
+            projectUrl: connectProjectUrl(project.id),
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
   /**
@@ -205,7 +243,60 @@ module.exports = (app, logger) => {
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
+
+        createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
+          projectId: project.id,
+          projectName: project.name,
+          projectUrl: connectProjectUrl(project.id),
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+
+  /**
+   * PROJECT_ATTACHMENT_UPDATED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED, ({ req }) => {
+    logger.debug('receive PROJECT_ATTACHMENT_UPDATED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+    .then((project) => {
+      createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
+        projectId: project.id,
+        projectName: project.name,
+        projectUrl: connectProjectUrl(project.id),
+        userId: req.authUser.userId,
+        initiatorUserId: req.authUser.userId,
+      }, logger);
+    }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  /**
+   * PROJECT_ATTACHMENT_REMOVED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED, ({ req }) => {
+    logger.debug('receive PROJECT_ATTACHMENT_REMOVED event');
+
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+    .then((project) => {
+      createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
+        projectId: project.id,
+        projectName: project.name,
+        projectUrl: connectProjectUrl(project.id),
+        userId: req.authUser.userId,
+        initiatorUserId: req.authUser.userId,
+      }, logger);
+    }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
   /**
@@ -249,14 +340,13 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
       .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
           projectId,
           projectName: project.name,
           projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
-
         return sendPlanReadyEventIfNeeded(req, project, created);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -273,7 +363,7 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
       .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
           projectId,
           projectName: project.name,
           projectUrl: connectProjectUrl(projectId),
@@ -296,13 +386,18 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
       .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
-          projectId,
-          projectName: project.name,
-          projectUrl: connectProjectUrl(projectId),
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
+        // send PROJECT_PLAN_UPDATED Kafka message when one of the specified below properties changed
+        const watchProperties = ['spentBudget', 'progress', 'details', 'status', 'budget', 'startDate', 'duration'];
+        if (!_.isEqual(_.pick(original, watchProperties),
+                      _.pick(updated, watchProperties))) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+            projectId,
+            projectName: project.name,
+            projectUrl: connectProjectUrl(projectId),
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
 
         [
           ['spentBudget', BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT],
@@ -332,51 +427,6 @@ module.exports = (app, logger) => {
   });
 
   /**
-   * PROJECT_PHASE_PRODUCT_ADDED
-   */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, ({ req, created }) => { // eslint-disable-line no-unused-vars
-    logger.debug('receive PROJECT_PHASE_PRODUCT_ADDED event');
-
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
-          projectId,
-          projectName: project.name,
-          projectUrl: connectProjectUrl(projectId),
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-          phase: created,
-        }, logger);
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
-  });
-
-  /**
-  * PROJECT_PHASE_PRODUCT_REMOVED
-  */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED, ({ req, deleted }) => { // eslint-disable-line no-unused-vars
-    logger.debug('receive PROJECT_PHASE_PRODUCT_REMOVED event');
-
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
-          projectId,
-          projectName: project.name,
-          projectUrl: connectProjectUrl(projectId),
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
-  });
-
-  /**
   * PROJECT_PHASE_PRODUCT_UPDATED
   */
   app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED, ({ req, original, updated }) => { // eslint-disable-line no-unused-vars
@@ -401,11 +451,10 @@ module.exports = (app, logger) => {
           }, logger);
         }
 
-        // Other fields change
-        const originalWithouDetails = _.omit(original, 'details');
-        const updatedWithouDetails = _.omit(updated, 'details');
-        if (!_.isEqual(originalWithouDetails, updatedWithouDetails)) {
-          createEvent(BUS_API_EVENT.PROJECT_PLAN_MODIFIED, {
+        const watchProperties = ['name', 'estimatedPrice', 'actualPrice', 'details'];
+        if (!_.isEqual(_.pick(original, watchProperties),
+                       _.pick(updated, watchProperties))) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
             projectId,
             projectName: project.name,
             projectUrl: connectProjectUrl(projectId),
@@ -479,7 +528,18 @@ module.exports = (app, logger) => {
     models.Project.findOne({
       where: { id: projectId },
     })
-      .then(project => sendMilestoneNotification(req, {}, created, project))
+      .then((project) => {
+        if (project) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+            projectId,
+            projectName: project.name,
+            projectUrl: connectProjectUrl(projectId),
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+        sendMilestoneNotification(req, {}, created, project);
+      })
       .catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
@@ -496,6 +556,18 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
       .then((project) => {
+        // send PROJECT_UPDATED Kafka message when one of the specified below properties changed
+        const watchProperties = ['startDate', 'endDate', 'duration', 'details', 'status', 'order'];
+        if (!_.isEqual(_.pick(original, watchProperties),
+                      _.pick(updated, watchProperties))) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+            projectId,
+            projectName: project.name,
+            projectUrl: connectProjectUrl(projectId),
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
         sendMilestoneNotification(req, original, updated, project);
 
         logger.debug('cascadedUpdates', cascadedUpdates);
@@ -524,5 +596,55 @@ module.exports = (app, logger) => {
         }
       })
       .catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+ /**
+  * MILESTONE_REMOVED.
+  */
+  app.on(EVENT.ROUTING_KEY.MILESTONE_REMOVED, ({ req }) => {
+    logger.debug('receive MILESTONE_REMOVED event');
+    // req.params.projectId is set by validateTimelineIdParam middleware
+    const projectId = _.parseInt(req.params.projectId);
+
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+    .then((project) => {
+      if (project) {
+        createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+          projectId,
+          projectName: project.name,
+          projectUrl: connectProjectUrl(projectId),
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
+      }
+    }).catch(err => null);    // eslint-disable-line no-unused-vars
+  });
+
+  app.on(EVENT.ROUTING_KEY.TIMELINE_UPDATED, ({ req, original, updated }) => {
+    logger.debug('receive TIMELINE_UPDATED event');
+    // send PROJECT_UPDATED Kafka message when one of the specified below properties changed
+    const watchProperties = ['startDate', 'endDate'];
+    if (!_.isEqual(_.pick(original, watchProperties),
+                   _.pick(updated, watchProperties))) {
+      // req.params.projectId is set by validateTimelineIdParam middleware
+      const projectId = _.parseInt(req.params.projectId);
+
+      models.Project.findOne({
+        where: { id: projectId },
+      })
+      .then((project) => {
+        if (project) {
+          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+            projectId,
+            projectName: project.name,
+            projectUrl: connectProjectUrl(projectId),
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    }
   });
 };

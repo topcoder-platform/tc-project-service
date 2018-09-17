@@ -13,6 +13,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: 1,
+      lastActivityUserId: 1,
     }, {
       type: 'visual_design',
       directProjectId: 1,
@@ -23,6 +25,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: 1,
+      lastActivityUserId: 1,
     }, {
       type: 'visual_design',
       billingAccountId: 3,
@@ -32,6 +36,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: 1,
+      lastActivityUserId: 1,
     }, {
       type: 'generic',
       billingAccountId: 4,
@@ -41,6 +47,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: 1,
+      lastActivityUserId: 1,
     }, {
       type: 'generic',
       billingAccountId: 5,
@@ -50,6 +58,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: 1,
+      lastActivityUserId: 1,
     }, {
       type: 'generic',
       billingAccountId: 5,
@@ -69,6 +79,8 @@ models.sequelize.sync({ force: true })
       },
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: 1,
+      lastActivityUserId: 1,
       version: 'v2',
       directProjectId: 123,
       estimatedPrice: 15000,
@@ -92,6 +104,8 @@ models.sequelize.sync({ force: true })
       },
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: 1,
+      lastActivityUserId: 1,
       version: 'v2',
       directProjectId: 123,
       estimatedPrice: 15000,

@@ -7,6 +7,8 @@ import models from '../../models';
 import server from '../../app';
 import util from '../../util';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+import { BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -28,6 +30,8 @@ describe('Project members update', () => {
           details: {},
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: 1,
         }).then((p) => {
           project1 = p;
           // create members
@@ -448,6 +452,51 @@ describe('Project members update', () => {
             done();
           }
         });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when user role updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
     });
   });
 });

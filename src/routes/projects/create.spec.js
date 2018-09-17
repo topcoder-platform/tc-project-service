@@ -335,6 +335,9 @@ describe('Project create', () => {
             resJson.bookmarks.should.have.lengthOf(1);
             resJson.bookmarks[0].title.should.be.eql('title1');
             resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            // Check that activity fields are set
+            resJson.lastActivityUserId.should.be.eql(40051331);
+            resJson.lastActivityAt.should.be.not.null;
             server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }

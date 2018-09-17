@@ -62,6 +62,7 @@ module.exports = [
         { original: previousValue, updated: updated.get({ plain: true }) },
         { correlationId: req.id },
       );
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED, { req, original: previousValue, updated });
     }).catch(err => next(err)));
   },
 ];

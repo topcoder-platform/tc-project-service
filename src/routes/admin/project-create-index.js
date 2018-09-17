@@ -253,6 +253,13 @@ function getRequestBody(indexName, docType) {
           updatedBy: {
             type: 'integer',
           },
+          lastActivityAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          lastActivityUserId: {
+            type: 'long',
+          },
           userId: {
             type: 'long',
           },

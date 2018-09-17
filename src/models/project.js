@@ -42,6 +42,8 @@ module.exports = function defineProject(sequelize, DataTypes) {
     createdBy: { type: DataTypes.INTEGER, allowNull: false },
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
     version: { type: DataTypes.STRING(3), allowNull: false, defaultValue: 'v3' },
+    lastActivityAt: { type: DataTypes.DATE, allowNull: false },
+    lastActivityUserId: { type: DataTypes.INTEGER, allowNull: false },
   }, {
     tableName: 'projects',
     paranoid: true,

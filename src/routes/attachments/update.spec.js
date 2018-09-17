@@ -6,6 +6,8 @@ import request from 'supertest';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+import { BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -25,6 +27,8 @@ describe('Project Attachments update', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: 1,
           }).then((p) => {
             project1 = p;
             // create members
@@ -105,6 +109,47 @@ describe('Project Attachments update', () => {
             done();
           }
         });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.stub(busApi, 'createEvent');
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment updated', (done) => {
+        request(server)
+          .patch(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({ param: { title: 'updated title', description: 'updated description' } })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              // Wait for app message handler to complete
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });

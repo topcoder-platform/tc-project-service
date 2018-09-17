@@ -8,7 +8,8 @@ import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { USER_ROLE } from '../../constants';
+import busApi from '../../services/busApi';
+import { USER_ROLE, PROJECT_MEMBER_ROLE, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -28,6 +29,8 @@ describe('Project Members create', () => {
           details: {},
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: 1,
         }).then((p) => {
           project1 = p;
           // create members
@@ -49,6 +52,8 @@ describe('Project Members create', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: 1,
           }).then((p2) => {
             project2 = p2;
             done();
@@ -473,6 +478,147 @@ describe('Project Members create', () => {
             done();
           }
         });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when manager added', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          get: () => Promise.resolve({
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: [{
+                  roleName: USER_ROLE.MANAGER,
+                }],
+              },
+            },
+          }),
+          post: () => Promise.resolve({
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: {},
+              },
+            },
+          }),
+        });
+        sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+        request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: PROJECT_MEMBER_ROLE.MANAGER,
+          },
+        })
+        .expect(201)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_JOINED_MANAGER);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051334,
+                initiatorUserId: 40051334,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when copilot added', (done) => {
+        request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: PROJECT_MEMBER_ROLE.COPILOT,
+          },
+        })
+        .expect(201)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_JOINED_COPILOT);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when customer added', (done) => {
+        request(server)
+        .post(`/v4/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            userId: 3,
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+          },
+        })
+        .expect(201)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_JOINED);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
     });
   });
 });

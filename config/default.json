@@ -33,6 +33,8 @@
     "minPoolSize": 4,
     "idleTimeout": 1000
   },
+  "kafkaConfig": {
+  },
   "analyticsKey": "",
   "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
   "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",

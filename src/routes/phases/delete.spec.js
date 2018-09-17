@@ -1,10 +1,16 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
+import sinon from 'sinon';
 import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+
+import {
+  BUS_API_EVENT,
+} from '../../constants';
 
 const expectAfterDelete = (projectId, id, err, next) => {
   if (err) throw err;
@@ -48,6 +54,7 @@ const body = {
 
 describe('Project Phases', () => {
   let projectId;
+  let projectName;
   let phaseId;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
@@ -63,7 +70,7 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-  before((done) => {
+  beforeEach((done) => {
     // mocks
     testUtil.clearDb()
         .then(() => {
@@ -76,8 +83,11 @@ describe('Project Phases', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: 1,
           }).then((p) => {
             projectId = p.id;
+            projectName = p.name;
             // create members
             models.ProjectMember.bulkCreate([{
               id: 1,
@@ -106,7 +116,7 @@ describe('Project Phases', () => {
         });
   });
 
-  after((done) => {
+  afterEach((done) => {
     testUtil.clearDb(done);
   });
 
@@ -158,6 +168,50 @@ describe('Project Phases', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .end(err => expectAfterDelete(projectId, phaseId, err, done));
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when phase removed', (done) => {
+        request(server)
+        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
     });
   });
 });

@@ -6,6 +6,8 @@ import server from '../../app';
 import models from '../../models';
 import util from '../../util';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+import { BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -17,9 +19,46 @@ const body = {
   s3Bucket: 'submissions-staging-dev',
   contentType: 'application/pdf',
 };
+
 describe('Project Attachments', () => {
   let project1;
-  before((done) => {
+  let postSpy;
+  let getSpy;
+  let stub;
+  let sandbox;
+
+  beforeEach((done) => {
+    const mockHttpClient = {
+      defaults: { headers: { common: {} } },
+      post: () => new Promise(resolve => resolve({
+        status: 200,
+        data: {
+          status: 200,
+          result: {
+            success: true,
+            status: 200,
+            content: {
+              filePath: 'tmp/spec.pdf',
+              preSignedURL: 'www.topcoder.com/media/spec.pdf',
+            },
+          },
+        },
+      })),
+      get: () => new Promise(resolve => resolve({
+        status: 200,
+        data: {
+          result: {
+            success: true,
+            status: 200,
+            content: {
+              filePath: 'tmp/spec.pdf',
+              preSignedURL: 'http://topcoder-media.s3.amazon.com/projects/1/spec.pdf',
+            },
+          },
+        },
+      })),
+    };
+
     // mocks
     testUtil.clearDb()
         .then(() => {
@@ -32,6 +71,8 @@ describe('Project Attachments', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: 1,
           }).then((p) => {
             project1 = p;
             // create members
@@ -42,12 +83,20 @@ describe('Project Attachments', () => {
               isPrimary: true,
               createdBy: 1,
               updatedBy: 1,
-            }).then(() => done());
+            }).then(() => {
+              sandbox = sinon.sandbox.create();
+              postSpy = sandbox.spy(mockHttpClient, 'post');
+              getSpy = sandbox.spy(mockHttpClient, 'get');
+              stub = sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+              sandbox.stub(util, 's3FileTransfer').returns(Promise.resolve(true));
+              done();
+            });
           });
         });
   });
 
-  after((done) => {
+  afterEach((done) => {
+    sandbox.restore();
     testUtil.clearDb(done);
   });
 
@@ -64,41 +113,6 @@ describe('Project Attachments', () => {
     });
 
     it('should return 201 return attachment record', (done) => {
-      const mockHttpClient = {
-        defaults: { headers: { common: {} } },
-        post: () => new Promise(resolve => resolve({
-          status: 200,
-          data: {
-            status: 200,
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                filePath: 'tmp/spec.pdf',
-                preSignedURL: 'www.topcoder.com/media/spec.pdf',
-              },
-            },
-          },
-        })),
-        get: () => new Promise(resolve => resolve({
-          status: 200,
-          data: {
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                filePath: 'tmp/spec.pdf',
-                preSignedURL: 'http://topcoder-media.s3.amazon.com/projects/1/spec.pdf',
-              },
-            },
-          },
-        })),
-      };
-      const postSpy = sinon.spy(mockHttpClient, 'post');
-      const getSpy = sinon.spy(mockHttpClient, 'get');
-      const stub = sinon.stub(util, 'getHttpClient', () => mockHttpClient);
-      // mock util s3FileTransfer
-      util.s3FileTransfer = () => Promise.resolve(true);
       request(server)
           .post(`/v4/projects/${project1.id}/attachments/`)
           .set({
@@ -122,6 +136,48 @@ describe('Project Attachments', () => {
               done();
             }
           });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment added', (done) => {
+        request(server)
+          .post(`/v4/projects/${project1.id}/attachments/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({ param: body })
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              // Wait for app message handler to complete
+              testUtil.wait(() => {
+                createEventSpy.calledTwice.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_FILE_UPLOADED);
+                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });

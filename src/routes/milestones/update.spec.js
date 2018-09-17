@@ -1,14 +1,17 @@
+/* eslint-disable no-unused-expressions */
 /**
  * Tests for get.js
  */
 import chai from 'chai';
+import sinon from 'sinon';
 import request from 'supertest';
 import moment from 'moment';
 import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { EVENT, MILESTONE_STATUS } from '../../constants';
+import busApi from '../../services/busApi';
+import { EVENT, MILESTONE_STATUS, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -26,6 +29,8 @@ describe('UPDATE Milestone', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: 1,
           },
           {
             type: 'generic',
@@ -36,6 +41,8 @@ describe('UPDATE Milestone', () => {
             details: {},
             createdBy: 2,
             updatedBy: 2,
+            lastActivityAt: 1,
+            lastActivityUserId: 1,
             deletedAt: '2018-05-15T00:00:00Z',
           },
         ])
@@ -1076,6 +1083,142 @@ describe('UPDATE Milestone', () => {
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone duration updated', (done) => {
+        request(server)
+          .patch('/v4/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({
+            param: {
+              duration: 1,
+            },
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledTwice.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+                createEventSpy.secondCall.calledWith(BUS_API_EVENT.TIMELINE_MODIFIED);
+                done();
+              });
+            }
+          });
+      });
+
+      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone status updated', (done) => {
+        request(server)
+          .patch('/v4/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({
+            param: {
+              status: 'reviewed',
+            },
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
+
+      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone order updated', (done) => {
+        request(server)
+          .patch('/v4/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({
+            param: {
+              order: 2,
+            },
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
+
+      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone plannedText updated', (done) => {
+        request(server)
+          .patch('/v4/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({
+            param: {
+              plannedText: 'new text',
+            },
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.notCalled.should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });
