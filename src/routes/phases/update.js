@@ -158,7 +158,7 @@ module.exports = [
           { correlationId: req.id },
         );
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { req, original: previousValue, updated });
+          { req, original: previousValue, updated: _.clone(updated.get({ plain: true })) });
 
         res.json(util.wrapResponse(req.id, updated));
       })
