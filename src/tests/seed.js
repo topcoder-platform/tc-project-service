@@ -13,7 +13,7 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
-      lastActivityAt: 1,
+      lastActivityAt: new Date(),
       lastActivityUserId: 1,
     }, {
       type: 'visual_design',
@@ -25,7 +25,7 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
-      lastActivityAt: 1,
+      lastActivityAt: new Date(),
       lastActivityUserId: 1,
     }, {
       type: 'visual_design',
@@ -36,7 +36,7 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
-      lastActivityAt: 1,
+      lastActivityAt: new Date(),
       lastActivityUserId: 1,
     }, {
       type: 'generic',
@@ -47,7 +47,7 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
-      lastActivityAt: 1,
+      lastActivityAt: new Date(),
       lastActivityUserId: 1,
     }, {
       type: 'generic',
@@ -58,7 +58,7 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
-      lastActivityAt: 1,
+      lastActivityAt: new Date(),
       lastActivityUserId: 1,
     }, {
       type: 'generic',
@@ -79,7 +79,7 @@ models.sequelize.sync({ force: true })
       },
       createdBy: 1,
       updatedBy: 1,
-      lastActivityAt: 1,
+      lastActivityAt: new Date(),
       lastActivityUserId: 1,
       version: 'v2',
       directProjectId: 123,
@@ -104,7 +104,7 @@ models.sequelize.sync({ force: true })
       },
       createdBy: 1,
       updatedBy: 1,
-      lastActivityAt: 1,
+      lastActivityAt: new Date(),
       lastActivityUserId: 1,
       version: 'v2',
       directProjectId: 123,
