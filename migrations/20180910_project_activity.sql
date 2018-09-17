@@ -8,7 +8,7 @@
 -- projects
 
 -- Add new columns
-ALTER TABLE projects ADD COLUMN "lastActivityAt" timestamp;
+ALTER TABLE projects ADD COLUMN "lastActivityAt" timestamp with time zone;
 ALTER TABLE projects ADD COLUMN "lastActivityUserId" INT;
 -- Update new colums
 UPDATE projects SET "lastActivityAt"="updatedAt" WHERE "lastActivityAt" is NULL;
