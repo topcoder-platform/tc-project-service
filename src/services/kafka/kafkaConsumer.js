@@ -45,6 +45,7 @@ export default async function startKafkaConsumer(handlers, app, logger) {
 
         await handler(app, topic, kafkaMessage.message.value.toString('utf8'));
         await consumer.commitOffset({ topic, partition, offset: kafkaMessage.offset });
+        logger.info(`Message for topic '${topic}' was successfully processed`);
       } catch (error) {
         logger.error(`Message processing failed: ${error}`);
       }

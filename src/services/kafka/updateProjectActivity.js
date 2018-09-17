@@ -1,7 +1,13 @@
+import _ from 'lodash';
 import Joi from 'joi';
-import uuid from 'uuid';
+import config from 'config';
+import util from '../../util';
 import models from '../../models';
-import { REGEX, EVENT } from '../../constants';
+import { REGEX } from '../../constants';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const eClient = util.getElasticSearchClient();
 
 const payloadSchema = Joi.object().keys({
   projectId: Joi.number().integer().positive().required(),
@@ -38,12 +44,16 @@ export default async function updateProjectActivity(app, topic, payload) {
 
   await project.save();
 
-  app.services.pubsub.publish(
-    EVENT.ROUTING_KEY.PROJECT_UPDATED, {
-      original: previousValue,
-      updated: project.get({ plain: true }),
-    }, {
-      correlationId: uuid.v4(),
+  // first get the existing document and than merge the updated changes and save the new document
+  const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
+  const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
+  // update the merged document
+  await eClient.update({
+    index: ES_PROJECT_INDEX,
+    type: ES_PROJECT_TYPE,
+    id: previousValue.id,
+    body: {
+      doc: merged,
     },
-  );
+  });
 }
