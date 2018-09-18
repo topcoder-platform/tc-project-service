@@ -26,21 +26,20 @@ const payloadSchema = Joi.object().keys({
  */
 export default async function updateProjectActivity(app, topic, payload) {
   // Validate payload
-  const jsonMessage = JSON.parse(payload);
-  const result = Joi.validate(jsonMessage, payloadSchema);
+  const result = Joi.validate(payload, payloadSchema);
   if (result.error) {
     throw new Error(result.error);
   }
 
   // Find project by id and update activity. Single update is used as there is no need to wrap it into transaction
-  const projectId = jsonMessage.projectId;
+  const projectId = payload.projectId;
   const project = await models.Project.findById(projectId);
   if (!project) {
     throw new Error(`Project with id ${projectId} not found`);
   }
   const previousValue = project.get({ plain: true });
   project.lastActivityAt = new Date();
-  project.lastActivityUserId = jsonMessage.initiatorUserId;
+  project.lastActivityUserId = payload.initiatorUserId;
 
   await project.save();
 

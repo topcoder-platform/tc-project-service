@@ -36,6 +36,7 @@ export default async function startKafkaConsumer(handlers, app, logger) {
    */
   const onConsume = async (messageSet, topic, partition) => {
     messageSet.forEach(async (kafkaMessage) => {
+      logger.debug(`Consume topic '${topic}' with message: '${kafkaMessage.message.value.toString('utf8')}'.`);
       try {
         const handler = handlers[topic];
         if (!handler) {
@@ -43,7 +44,9 @@ export default async function startKafkaConsumer(handlers, app, logger) {
           return;
         }
 
-        await handler(app, topic, kafkaMessage.message.value.toString('utf8'));
+        const busMessage = JSON.parse(kafkaMessage.message.value.toString('utf8'));
+        const payload = busMessage.payload;
+        await handler(app, topic, payload);
         await consumer.commitOffset({ topic, partition, offset: kafkaMessage.offset });
         logger.info(`Message for topic '${topic}' was successfully processed`);
       } catch (error) {
