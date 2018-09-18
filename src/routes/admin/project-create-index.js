@@ -258,7 +258,7 @@ function getRequestBody(indexName, docType) {
             format: 'strict_date_optional_time||epoch_millis',
           },
           lastActivityUserId: {
-            type: 'long',
+            type: 'string',
           },
           userId: {
             type: 'long',

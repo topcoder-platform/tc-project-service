@@ -286,7 +286,7 @@ function getRequestBody(indexName) {
         format: 'strict_date_optional_time||epoch_millis',
       },
       lastActivityUserId: {
-        type: 'integer',
+        type: 'string',
       },
       utm: {
         properties: {

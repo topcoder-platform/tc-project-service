@@ -43,7 +43,9 @@ module.exports = function defineProject(sequelize, DataTypes) {
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
     version: { type: DataTypes.STRING(3), allowNull: false, defaultValue: 'v3' },
     lastActivityAt: { type: DataTypes.DATE, allowNull: false },
-    lastActivityUserId: { type: DataTypes.INTEGER, allowNull: false },
+    // we use string for `lastActivityUserId` because it comes in Kafka messages payloads
+    // and can be not only user id but also `coderbot`, `system` or some kind of autopilot bot id in the future
+    lastActivityUserId: { type: DataTypes.STRING, allowNull: false },
   }, {
     tableName: 'projects',
     paranoid: true,
