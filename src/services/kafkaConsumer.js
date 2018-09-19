@@ -11,9 +11,9 @@ export default async function startKafkaConsumer(handlers, app, logger) {
   // Read config and prepare Kafka options object
   const kafkaConfig = config.get('kafkaConfig');
 
-  const options = {};
-  if (kafkaConfig.has('hosts')) {
-    options.connectionString = kafkaConfig.get('hosts');
+  const options = { groupId: kafkaConfig.get('groupId') };
+  if (kafkaConfig.has('url')) {
+    options.connectionString = kafkaConfig.get('url');
   }
   if (kafkaConfig.has('clientCert') && kafkaConfig.has('clientCertKey')) {
     options.ssl = {
