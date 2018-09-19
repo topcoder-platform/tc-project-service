@@ -386,32 +386,31 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
       .then((project) => {
-        // send PROJECT_PLAN_UPDATED Kafka message when one of the specified below properties changed
-        const watchProperties = ['spentBudget', 'progress', 'details', 'status', 'budget', 'startDate', 'duration'];
-        if (!_.isEqual(_.pick(original, watchProperties),
-                      _.pick(updated, watchProperties))) {
-          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
-            projectId,
-            projectName: project.name,
-            projectUrl: connectProjectUrl(projectId),
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-
+        logger.debug(`Fetched project ${projectId} for the phase ${phaseId}`);
+        const eventsMap = {};
         [
+          ['duration', BUS_API_EVENT.PROJECT_PLAN_UPDATED],
+          ['startDate', BUS_API_EVENT.PROJECT_PLAN_UPDATED],
           ['spentBudget', BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT],
           ['progress', [BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS, BUS_API_EVENT.PROJECT_PROGRESS_MODIFIED]],
           ['details', BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE],
           ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE, PROJECT_PHASE_STATUS.ACTIVE],
           ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED, PROJECT_PHASE_STATUS.COMPLETED],
-        ].forEach(([key, events, sendIfEqual]) => {
+          // ideally we should validate the old value being 'DRAFT' but there is no other status from which
+          // we can move phase to REVIEWED status
+          ['status', BUS_API_EVENT.PROJECT_PLAN_UPDATED, PROJECT_PHASE_STATUS.REVIEWED],
+          // ideally we should validate the old value being 'REVIEWED' but there is no other status from which
+          // we can move phase to DRAFT status
+          ['status', BUS_API_EVENT.PROJECT_PLAN_UPDATED, PROJECT_PHASE_STATUS.DRAFT],
+        ].forEach(([key, events, sendIfNewEqual]) => {
           // eslint-disable-next-line no-param-reassign
           events = Array.isArray(events) ? events : [events];
+          // eslint-disable-next-line no-param-reassign
+          events = _.filter(events, e => !eventsMap[e]);
 
-          // send event(s) only if the target field's value was updated, or when an update matches a "sendIfEqual" value
-          if ((!sendIfEqual && !_.isEqual(original[key], updated[key])) ||
-            (original[key] !== sendIfEqual && updated[key] === sendIfEqual)) {
+          // send event(s) only if the target field's value was updated, or when an update matches a "sendIfNewEqual" value
+          if ((!sendIfNewEqual && !_.isEqual(original[key], updated[key])) ||
+            (original[key] !== sendIfNewEqual && updated[key] === sendIfNewEqual)) {
             events.forEach(event => createEvent(event, {
               projectId,
               phaseId,
@@ -421,6 +420,7 @@ module.exports = (app, logger) => {
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
             }, logger));
+            events.forEach((event) => { eventsMap[event] = true; });
           }
         });
 
