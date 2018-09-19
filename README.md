@@ -18,7 +18,7 @@ Microservice to manage CRUD operations for all things Projects.
 Copy config/sample.local.js as config/local.js, update the properties and according to your env setup
 
 #### Database
-Once you start your PostgreSQL database through docker, it will create a projectsDB.
+Once you start your PostgreSQL database through docker, it will create a projectsdb.
 *To create tables - note this will drop tables if they already exist*
 ```
 NODE_ENV=development npm run sync:db
