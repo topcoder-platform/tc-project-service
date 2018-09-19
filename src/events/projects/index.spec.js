@@ -7,6 +7,7 @@ import util from '../../util';
 import models from '../../models';
 import { projectUpdatedKafkaHandler } from './index';
 import testUtil from '../../tests/util';
+import server from '../../app';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -93,7 +94,6 @@ describe('projectUpdatedKafkaHandler', () => {
 
     beforeEach(async () => {
       await testUtil.clearDb();
-      await testUtil.clearEs();
       project = await models.Project.create({
         type: 'generic',
         billingAccountId: 1,
@@ -106,7 +106,8 @@ describe('projectUpdatedKafkaHandler', () => {
         lastActivityAt: 1,
         lastActivityUserId: '1',
       });
-      await eClient.index({
+      // add project to ES index
+      await server.services.es.index({
         index: ES_PROJECT_INDEX,
         type: ES_PROJECT_TYPE,
         id: project.id,
@@ -116,7 +117,7 @@ describe('projectUpdatedKafkaHandler', () => {
       });
     });
 
-    afterEach(async () => {
+    after(async () => {
       await testUtil.clearDb();
     });
 
