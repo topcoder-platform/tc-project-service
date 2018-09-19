@@ -1,8 +1,14 @@
 /* eslint-disable max-len */
 
+import config from 'config';
+import util from '../util';
 import models from '../models';
 
 const jwt = require('jsonwebtoken');
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
+const esClient = util.getElasticSearchClient();
 
 export default {
   clearDb: done => models.sequelize.sync({ force: true })
@@ -31,4 +37,26 @@ export default {
 
   // Waits for 500ms and executes cb function
   wait: cb => setTimeout(cb, 500),
+
+  // clears elastic search indexes
+  clearEs: () => {
+    esClient.indices.delete({
+      index: ES_PROJECT_INDEX,
+      // we would want to ignore no such index error
+      ignore: [404],
+    })
+    .then(() => esClient.indices.create({
+      index: ES_PROJECT_INDEX,
+      updateAllTypes: true,
+      body: {
+        // WARNING unlike all other places for tests we don't use mapping to keep it easier,
+        // I think it's ok, but if there are any issues regarding it, a proper configuration for ES_PROJECT_INDEX
+        // has to be used, same like in `migrations/elasticsearch_sync.js` or `routes/admin/project-create-index.js`
+        mappings: { },
+      },
+    }))
+    // Re-create timeline index
+    .then(() => esClient.indices.delete({ index: ES_TIMELINE_INDEX, ignore: [404] }))
+    .then(() => esClient.indices.create({ index: ES_TIMELINE_INDEX }));
+  },
 };

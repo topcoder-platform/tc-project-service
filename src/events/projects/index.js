@@ -165,22 +165,27 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
   }
   const previousValue = project.get({ plain: true });
   project.lastActivityAt = new Date();
-  project.lastActivityUserId = payload.initiatorUserId;
+  project.lastActivityUserId = payload.initiatorUserId.toString();
 
   await project.save();
 
   // first get the existing document and than merge the updated changes and save the new document
-  const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
-  const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
-  // update the merged document
-  await eClient.update({
-    index: ES_PROJECT_INDEX,
-    type: ES_PROJECT_TYPE,
-    id: previousValue.id,
-    body: {
-      doc: merged,
-    },
-  });
+  try {
+    const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
+    const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
+    // update the merged document
+    await eClient.update({
+      index: ES_PROJECT_INDEX,
+      type: ES_PROJECT_TYPE,
+      id: previousValue.id,
+      body: {
+        doc: merged,
+      },
+    });
+  } catch (error) {
+    throw Error(`failed to updated project document in elasitcsearch index (projectId: ${previousValue.id})` +
+      `. Details: '${error}'.`);
+  }
 }
 
 module.exports = {
