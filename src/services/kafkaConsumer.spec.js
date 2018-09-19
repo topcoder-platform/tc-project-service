@@ -4,7 +4,8 @@ import * as Kafka from 'no-kafka';
 import chai from 'chai';
 
 import startKafkaConsumer from './kafkaConsumer';
-const should = chai.should();
+
+chai.should();
 
 describe('Kafka service', () => {
   const sandbox = sinon.sandbox.create();
