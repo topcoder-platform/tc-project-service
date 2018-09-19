@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-expressions */
 import sinon from 'sinon';
 import * as Kafka from 'no-kafka';
+import chai from 'chai';
 
 import startKafkaConsumer from './kafkaConsumer';
+const should = chai.should();
 
 describe('Kafka service', () => {
   const sandbox = sinon.sandbox.create();
@@ -57,6 +59,7 @@ describe('Kafka service', () => {
 
     beforeEach(async () => {
       mockedLogger.error.reset();
+      mockedLogger.info.reset();
 
       handlers = {
         topic1: sinon.stub(),
@@ -70,7 +73,11 @@ describe('Kafka service', () => {
     it('calls handler for specific topic only', async () => {
       await consumerFunction([{
         message: {
-          value: 'message',
+          value: `{
+            "payload": {
+              "prop": "message"
+            }
+          }`,
         },
       }], 'topic1', {});
 
@@ -83,7 +90,11 @@ describe('Kafka service', () => {
 
       await consumerFunction([{
         message: {
-          value: 'message',
+          value: `{
+            "payload": {
+              "prop": "message"
+            }
+          }`,
         },
       }], 'topic2', {});
 
@@ -95,7 +106,11 @@ describe('Kafka service', () => {
     it('drops message when handler not found', async () => {
       await consumerFunction([{
         message: {
-          value: 'message',
+          value: `{
+            "payload": {
+              "prop": "message"
+            }
+          }`,
         },
       }], 'unknown-topic', {});
 
