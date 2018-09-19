@@ -8,6 +8,8 @@ import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+import { BUS_API_EVENT } from '../../constants';
 
 
 describe('Project Attachments delete', () => {
@@ -26,6 +28,8 @@ describe('Project Attachments delete', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: '1',
           }).then((p) => {
             project1 = p;
             // create members
@@ -141,6 +145,46 @@ describe('Project Attachments delete', () => {
                   }), 500);
             }
           });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment deleted', (done) => {
+        request(server)
+          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(204)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              // Wait for app message handler to complete
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });

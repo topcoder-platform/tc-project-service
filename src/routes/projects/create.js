@@ -218,6 +218,8 @@ module.exports = [
       status: PROJECT_STATUS.DRAFT,
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
+      lastActivityAt: new Date(),
+      lastActivityUserId: req.authUser.userId.toString(10),
       members: [{
         isPrimary: true,
         role: userRole,

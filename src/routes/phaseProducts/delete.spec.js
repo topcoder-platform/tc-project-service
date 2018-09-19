@@ -1,10 +1,12 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
+import sinon from 'sinon';
 import request from 'supertest';
 import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
 
 const expectAfterDelete = (projectId, phaseId, id, err, next) => {
   if (err) throw err;
@@ -63,7 +65,7 @@ describe('Phase Products', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-  before((done) => {
+  beforeEach((done) => {
     // mocks
     testUtil.clearDb()
         .then(() => {
@@ -76,6 +78,8 @@ describe('Phase Products', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: '1',
           }).then((p) => {
             projectId = p.id;
             // create members
@@ -123,7 +127,7 @@ describe('Phase Products', () => {
         });
   });
 
-  after((done) => {
+  afterEach((done) => {
     testUtil.clearDb(done);
   });
 
@@ -186,6 +190,43 @@ describe('Phase Products', () => {
         })
         .expect(204)
         .end(err => expectAfterDelete(projectId, phaseId, productId, err, done));
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when product phase removed', (done) => {
+        request(server)
+          .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .expect(204)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.notCalled.should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });

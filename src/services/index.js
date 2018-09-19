@@ -2,6 +2,8 @@
 
 import config from 'config';
 import RabbitMQService from './rabbitmq';
+import startKafkaConsumer from './kafkaConsumer';
+import { kafkaHandlers } from '../events';
 
 /**
  * Responsible for establishing connections to all external services
@@ -30,6 +32,10 @@ module.exports = (fapp, logger) => {
     )
     .then(() => {
       logger.info('RabbitMQ service initialized');
+    })
+    .then(() => startKafkaConsumer(kafkaHandlers, app, logger))
+    .then(() => {
+      logger.info('Kafka consumer service initialized');
     })
     .catch((err) => {
       logger.error('Error initializing services', err);

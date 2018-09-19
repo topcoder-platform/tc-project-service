@@ -1,6 +1,7 @@
 
-import { EVENT } from '../constants';
-import { projectCreatedHandler, projectUpdatedHandler, projectDeletedHandler } from './projects';
+import { EVENT, BUS_API_EVENT } from '../constants';
+import { projectCreatedHandler, projectUpdatedHandler, projectDeletedHandler,
+  projectUpdatedKafkaHandler } from './projects';
 import { projectMemberAddedHandler, projectMemberRemovedHandler,
   projectMemberUpdatedHandler } from './projectMembers';
 import { projectAttachmentAddedHandler, projectAttachmentRemovedHandler,
@@ -12,7 +13,7 @@ import { phaseProductAddedHandler, phaseProductRemovedHandler,
 import { timelineAddedHandler, timelineUpdatedHandler, timelineRemovedHandler } from './timelines';
 import { milestoneAddedHandler, milestoneUpdatedHandler, milestoneRemovedHandler } from './milestones';
 
-export default {
+export const rabbitHandlers = {
   'project.initial': projectCreatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED]: projectCreatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_UPDATED]: projectUpdatedHandler,
@@ -41,4 +42,18 @@ export default {
   [EVENT.ROUTING_KEY.MILESTONE_ADDED]: milestoneAddedHandler,
   [EVENT.ROUTING_KEY.MILESTONE_REMOVED]: milestoneRemovedHandler,
   [EVENT.ROUTING_KEY.MILESTONE_UPDATED]: milestoneUpdatedHandler,
+};
+
+export const kafkaHandlers = {
+  // Events defined by project-service
+  [BUS_API_EVENT.PROJECT_UPDATED]: projectUpdatedKafkaHandler,
+  [BUS_API_EVENT.PROJECT_FILES_UPDATED]: projectUpdatedKafkaHandler,
+  [BUS_API_EVENT.PROJECT_TEAM_UPDATED]: projectUpdatedKafkaHandler,
+  [BUS_API_EVENT.PROJECT_PLAN_UPDATED]: projectUpdatedKafkaHandler,
+
+  // Events from message-service
+  [BUS_API_EVENT.TOPIC_CREATED]: projectUpdatedKafkaHandler,
+  [BUS_API_EVENT.TOPIC_UPDATED]: projectUpdatedKafkaHandler,
+  [BUS_API_EVENT.POST_CREATED]: projectUpdatedKafkaHandler,
+  [BUS_API_EVENT.POST_UPDATED]: projectUpdatedKafkaHandler,
 };

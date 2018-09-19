@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions */
+/* eslint-disable max-len */
 import chai from 'chai';
 import request from 'supertest';
 import sleep from 'sleep';
@@ -28,6 +29,8 @@ const data = [
     },
     createdBy: 1,
     updatedBy: 1,
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
     members: [
       {
         id: 1,
@@ -72,6 +75,8 @@ const data = [
     details: {},
     createdBy: 1,
     updatedBy: 1,
+    lastActivityAt: 2,
+    lastActivityUserId: '1',
     members: [
       {
         id: 1,
@@ -88,12 +93,14 @@ const data = [
     id: 3,
     type: 'visual_design',
     billingAccountId: 1,
-    name: 'test2',
+    name: 'test3',
     description: 'test project3',
     status: 'reviewed',
     details: {},
     createdBy: 1,
     updatedBy: 1,
+    lastActivityAt: 3,
+    lastActivityUserId: '1',
   },
 ];
 
@@ -118,6 +125,8 @@ describe('LIST Project', () => {
           },
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
           // create members
@@ -158,6 +167,8 @@ describe('LIST Project', () => {
           details: {},
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 2,
+          lastActivityUserId: '1',
         }).then((p) => {
           project2 = p;
           return models.ProjectMember.create({
@@ -172,12 +183,14 @@ describe('LIST Project', () => {
         const p3 = models.Project.create({
           type: 'visual_design',
           billingAccountId: 1,
-          name: 'test2',
+          name: 'test3',
           description: 'test project3',
           status: 'reviewed',
           details: {},
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 3,
+          lastActivityUserId: '1',
         }).then((p) => {
           project3 = p;
           return Promise.resolve();
@@ -469,6 +482,72 @@ describe('LIST Project', () => {
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
+            done();
+          }
+        });
+    });
+
+    it('should return list of projects ordered ascending by lastActivityAt when sort column is "lastActivityAt"', (done) => {
+      request(server)
+        .get('/v4/projects/?sort=lastActivityAt')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson[0].name.should.equal('test1');
+            resJson[1].name.should.equal('test2');
+            resJson[2].name.should.equal('test3');
+            done();
+          }
+        });
+    });
+
+    it('should return list of projects ordered descending by lastActivityAt when sort column is "lastActivityAt desc"', (done) => {
+      request(server)
+        .get('/v4/projects/?sort=lastActivityAt desc')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson[0].name.should.equal('test3');
+            resJson[1].name.should.equal('test2');
+            resJson[2].name.should.equal('test1');
+            done();
+          }
+        });
+    });
+
+    it('should return list of projects ordered ascending by lastActivityAt when sort column is "lastActivityAt asc"', (done) => {
+      request(server)
+        .get('/v4/projects/?sort=lastActivityAt asc')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson[0].name.should.equal('test1');
+            resJson[1].name.should.equal('test2');
+            resJson[2].name.should.equal('test3');
             done();
           }
         });
