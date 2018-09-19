@@ -30,7 +30,7 @@ describe('Project Members create', () => {
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 1,
-          lastActivityUserId: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
           // create members
@@ -53,7 +53,7 @@ describe('Project Members create', () => {
             createdBy: 1,
             updatedBy: 1,
             lastActivityAt: 1,
-            lastActivityUserId: 1,
+            lastActivityUserId: '1',
           }).then((p2) => {
             project2 = p2;
             done();

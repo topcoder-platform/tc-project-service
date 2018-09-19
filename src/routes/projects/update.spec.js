@@ -67,7 +67,7 @@ describe('Project', () => {
         createdBy: 1,
         updatedBy: 1,
         lastActivityAt: 1,
-        lastActivityUserId: 1,
+        lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
         updatedAt: '2016-06-30 00:33:07+00',
       }, {
@@ -80,7 +80,7 @@ describe('Project', () => {
         createdBy: 1,
         updatedBy: 1,
         lastActivityAt: 1,
-        lastActivityUserId: 1,
+        lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
         updatedAt: '2016-06-30 00:33:07+00',
       }, {
@@ -92,7 +92,7 @@ describe('Project', () => {
         createdBy: 1,
         updatedBy: 1,
         lastActivityAt: 1,
-        lastActivityUserId: 1,
+        lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
         updatedAt: '2016-06-30 00:33:07+00',
       }])

@@ -53,7 +53,7 @@ describe('Project Phases', () => {
             createdBy: 1,
             updatedBy: 1,
             lastActivityAt: 1,
-            lastActivityUserId: 1,
+            lastActivityUserId: '1',
           }).then((p) => {
             projectId = p.id;
             // create members

@@ -41,7 +41,7 @@ describe('Project upgrade', () => {
         createdBy: 1,
         updatedBy: 1,
         lastActivityAt: 1,
-        lastActivityUserId: 1,
+        lastActivityUserId: '1',
         version: 'v2',
         directProjectId: 123,
         estimatedPrice: 15000,

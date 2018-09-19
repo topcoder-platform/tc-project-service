@@ -30,7 +30,7 @@ const data = [
     createdBy: 1,
     updatedBy: 1,
     lastActivityAt: 1,
-    lastActivityUserId: 1,
+    lastActivityUserId: '1',
     members: [
       {
         id: 1,
@@ -76,7 +76,7 @@ const data = [
     createdBy: 1,
     updatedBy: 1,
     lastActivityAt: 2,
-    lastActivityUserId: 1,
+    lastActivityUserId: '1',
     members: [
       {
         id: 1,
@@ -100,7 +100,7 @@ const data = [
     createdBy: 1,
     updatedBy: 1,
     lastActivityAt: 3,
-    lastActivityUserId: 1,
+    lastActivityUserId: '1',
   },
 ];
 
@@ -126,7 +126,7 @@ describe('LIST Project', () => {
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 1,
-          lastActivityUserId: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
           // create members
@@ -168,7 +168,7 @@ describe('LIST Project', () => {
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 2,
-          lastActivityUserId: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project2 = p;
           return models.ProjectMember.create({
@@ -190,7 +190,7 @@ describe('LIST Project', () => {
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 3,
-          lastActivityUserId: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project3 = p;
           return Promise.resolve();

@@ -63,7 +63,7 @@ describe('LIST Project db', () => {
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 1,
-          lastActivityUserId: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
           // create members
@@ -105,7 +105,7 @@ describe('LIST Project db', () => {
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 2,
-          lastActivityUserId: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project2 = p;
           return models.ProjectMember.create({
@@ -127,7 +127,7 @@ describe('LIST Project db', () => {
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 3,
-          lastActivityUserId: 1,
+          lastActivityUserId: '1',
         });
         return Promise.all([p1, p2, p3])
           .then(() => done());

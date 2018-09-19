@@ -23,7 +23,7 @@ const testProjects = [
     createdBy: 1,
     updatedBy: 1,
     lastActivityAt: 1,
-    lastActivityUserId: 1,
+    lastActivityUserId: '1',
   },
   {
     type: 'generic',
@@ -36,7 +36,7 @@ const testProjects = [
     updatedBy: 2,
     deletedAt: '2018-05-15T00:00:00Z',
     lastActivityAt: 1,
-    lastActivityUserId: 1,
+    lastActivityUserId: '1',
   },
 ];
 

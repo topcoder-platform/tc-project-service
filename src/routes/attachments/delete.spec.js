@@ -29,7 +29,7 @@ describe('Project Attachments delete', () => {
             createdBy: 1,
             updatedBy: 1,
             lastActivityAt: 1,
-            lastActivityUserId: 1,
+            lastActivityUserId: '1',
           }).then((p) => {
             project1 = p;
             // create members

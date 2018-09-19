@@ -32,7 +32,7 @@ describe('CREATE milestone', () => {
             createdBy: 1,
             updatedBy: 1,
             lastActivityAt: 1,
-            lastActivityUserId: 1,
+            lastActivityUserId: '1',
           },
           {
             type: 'generic',
@@ -44,7 +44,7 @@ describe('CREATE milestone', () => {
             createdBy: 2,
             updatedBy: 2,
             lastActivityAt: 1,
-            lastActivityUserId: 1,
+            lastActivityUserId: '1',
             deletedAt: '2018-05-15T00:00:00Z',
           },
         ], { returning: true })
