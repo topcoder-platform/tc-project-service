@@ -289,7 +289,7 @@ describe('Project Phases', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when spentBudget updated', (done) => {
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when spentBudget updated', (done) => {
         request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -307,23 +307,16 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
+              createEventSpy.calledOnce.should.be.true;
 
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT);
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT);
               done();
             });
           }
         });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when progress updated', (done) => {
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when progress updated', (done) => {
         request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -341,15 +334,8 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(3);
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS);
+              createEventSpy.callCount.should.be.eql(2);
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS);
               createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PROGRESS_MODIFIED);
               done();
             });
@@ -357,7 +343,7 @@ describe('Project Phases', () => {
         });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
         request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -377,22 +363,15 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE);
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE);
               done();
             });
           }
         });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated', (done) => {
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (completed)', (done) => {
         request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -410,22 +389,15 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED);
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED);
               done();
             });
           }
         });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when budget updated', (done) => {
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when budget updated', (done) => {
         request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -443,14 +415,7 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
+              createEventSpy.notCalled.should.be.true;
               done();
             });
           }
@@ -480,6 +445,8 @@ describe('Project Phases', () => {
                 projectId,
                 projectName,
                 projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                // originalPhase: sinon.match(originalPhase),
+                // updatedPhase: sinon.match(updatedPhase),
                 userId: 40051332,
                 initiatorUserId: 40051332,
               })).should.be.true;

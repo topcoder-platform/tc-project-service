@@ -30,7 +30,7 @@
     "minPoolSize": "DB_MIN_POOL_SIZE"
   },
   "kafkaConfig": {
-    "groupdId": "KAFKA_GROUP_ID",
+    "groupId": "KAFKA_GROUP_ID",
     "url": "KAFKA_URL",
     "clientCert": "KAFKA_CLIENT_CERT",
     "clientCertKey": "KAFKA_CLIENT_CERT_KEY"

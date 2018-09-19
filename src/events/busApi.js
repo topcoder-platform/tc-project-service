@@ -414,6 +414,7 @@ module.exports = (app, logger) => {
             events.forEach(event => createEvent(event, {
               projectId,
               phaseId,
+              projectUrl: connectProjectUrl(projectId),
               originalPhase: original,
               updatedPhase: updated,
               projectName: project.name,
