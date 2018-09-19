@@ -11,7 +11,10 @@ export default async function startKafkaConsumer(handlers, app, logger) {
   // Read config and prepare Kafka options object
   const kafkaConfig = config.get('kafkaConfig');
 
-  const options = { groupId: kafkaConfig.get('groupId') };
+  const options = {};
+  if (kafkaConfig.has('groupId')) {
+    options.groupId = kafkaConfig.get('groupId');
+  }
   if (kafkaConfig.has('url')) {
     options.connectionString = kafkaConfig.get('url');
   }
