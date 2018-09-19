@@ -285,6 +285,7 @@ module.exports = [
       'best match',
       'createdAt', 'createdAt asc', 'createdAt desc',
       'updatedAt', 'updatedAt asc', 'updatedAt desc',
+      'lastActivityAt', 'lastActivityAt asc', 'lastActivityAt desc',
       'id', 'id asc', 'id desc',
       'status', 'status asc', 'status desc',
       'name', 'name asc', 'name desc',

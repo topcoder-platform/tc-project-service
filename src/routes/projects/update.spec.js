@@ -8,8 +8,12 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import util from '../../util';
+
+import busApi from '../../services/busApi';
+
 import {
   PROJECT_STATUS,
+  BUS_API_EVENT,
 } from '../../constants';
 
 const should = chai.should();
@@ -62,6 +66,8 @@ describe('Project', () => {
         details: {},
         createdBy: 1,
         updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
         updatedAt: '2016-06-30 00:33:07+00',
       }, {
@@ -73,6 +79,8 @@ describe('Project', () => {
         details: {},
         createdBy: 1,
         updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
         updatedAt: '2016-06-30 00:33:07+00',
       }, {
@@ -83,6 +91,8 @@ describe('Project', () => {
         details: {},
         createdBy: 1,
         updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
         updatedAt: '2016-06-30 00:33:07+00',
       }])
@@ -807,6 +817,255 @@ describe('Project', () => {
                 }
               });
           });
+      });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project status update', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            status: PROJECT_STATUS.COMPLETED,
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_COMPLETED);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project details update', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            details: {
+              info: 'something',
+            },
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project name update', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            name: 'New project name',
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: 'New project name',
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project description update', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            description: 'Updated description',
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project bookmarks update', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            bookmarks: [{
+              title: 'title1',
+              address: 'http://someurl.com',
+            }],
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('should not send BUS_API_EVENT.PROJECT_UPDATED message when project estimatedPrice is updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            estimatedPrice: 123,
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.notCalled.should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('should not send BUS_API_EVENT.PROJECT_UPDATED message when project actualPrice is updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            actualPrice: 123,
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.notCalled.should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('should not send BUS_API_EVENT.PROJECT_UPDATED message when project terms are updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          param: {
+            terms: [1, 2, 3],
+          },
+        })
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.notCalled.should.be.true;
+              done();
+            });
+          }
+        });
       });
     });
   });

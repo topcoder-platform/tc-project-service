@@ -104,6 +104,8 @@ module.exports = [
           { original, updated },
           { correlationId: req.id },
         );
+        req.app.emit(EVENT.ROUTING_KEY.TIMELINE_UPDATED,
+          { req, original, updated });
 
         // Write to response
         res.json(util.wrapResponse(req.id, updated));

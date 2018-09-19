@@ -55,6 +55,8 @@ module.exports = [
         deleted,
         { correlationId: req.id },
       );
+      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_REMOVED,
+        { req, deleted });
 
       // Write to response
       res.status(204).end();

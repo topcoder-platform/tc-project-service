@@ -64,6 +64,7 @@ export const EVENT = {
 
 export const BUS_API_EVENT = {
   PROJECT_CREATED: 'notifications.connect.project.created',
+  PROJECT_UPDATED: 'notifications.connect.project.updated',
   PROJECT_SUBMITTED_FOR_REVIEW: 'notifications.connect.project.submittedForReview',
   PROJECT_APPROVED: 'notifications.connect.project.approved',
   PROJECT_PAUSED: 'notifications.connect.project.paused',
@@ -88,11 +89,13 @@ export const BUS_API_EVENT = {
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
   PROJECT_PROGRESS_MODIFIED: 'notifications.connect.project.progressModified',
+  PROJECT_FILES_UPDATED: 'notifications.connect.project.files.updated',
+  PROJECT_TEAM_UPDATED: 'notifications.connect.project.team.updated',
 
   // When phase is added/updated/deleted from the project,
   // When product is added/deleted from a phase
   // When product is updated on any field other than specification
-  PROJECT_PLAN_MODIFIED: 'notifications.connect.project.planModified',
+  PROJECT_PLAN_UPDATED: 'notifications.connect.project.plan.updated',
 
   PROJECT_PLAN_READY: 'notifications.connect.project.planReady',
 
@@ -109,6 +112,12 @@ export const BUS_API_EVENT = {
   MILESTONE_TRANSITION_COMPLETED: 'notifications.connect.project.phase.milestone.transition.completed',
   // When milestone is waiting for customers's input
   MILESTONE_WAITING_CUSTOMER: 'notifications.connect.project.phase.milestone.waiting.customer',
+
+  // TC Message Service events
+  TOPIC_CREATED: 'notifications.connect.project.topic.created',
+  TOPIC_UPDATED: 'notifications.connect.project.topic.updated',
+  POST_CREATED: 'notifications.connect.project.post.created',
+  POST_UPDATED: 'notifications.connect.project.post.edited',
 };
 
 export const REGEX = {
