@@ -139,8 +139,9 @@ describe('projectUpdatedKafkaHandler', () => {
       await projectUpdatedKafkaHandler(mockedApp, topic, validPayload);
 
       const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: validPayload.projectId });
-      expect(doc._source.lastActivityUserId).to.be.eql('2');
-      expect(new Date(doc._source.lastActivityAt)).to.be.greaterThan(project.lastActivityAt);
+      const esProject = doc._source; // eslint-disable-line no-underscore-dangle
+      expect(esProject.lastActivityUserId).to.be.eql('2');
+      expect(new Date(esProject.lastActivityAt)).to.be.greaterThan(project.lastActivityAt);
     });
   });
 });
