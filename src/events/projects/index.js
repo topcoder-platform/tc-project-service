@@ -137,8 +137,8 @@ const projectDeletedHandler = Promise.coroutine(function* (logger, msg, channel)
 
 const payloadSchema = Joi.object().keys({
   projectId: Joi.number().integer().positive().required(),
-  projectName: Joi.string().required(),
-  projectUrl: Joi.string().regex(REGEX.URL).required(),
+  projectName: Joi.string().optional(),
+  projectUrl: Joi.string().regex(REGEX.URL).optional(),
   userId: Joi.number().integer().positive().required(),
   initiatorUserId: Joi.number().integer().positive().required(),
 }).unknown(true).required();
