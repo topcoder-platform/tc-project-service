@@ -21,7 +21,7 @@ export default async function startKafkaConsumer(handlers, app, logger) {
   if (kafkaConfig.has('clientCert') && kafkaConfig.has('clientCertKey')) {
 
     const clientCert = kafkaConfig.get('clientCert').replace('\\n', '\n');
-    const clientCertKey = kafkaConfig.has('clientCertKey').replace('\\n', '\n');
+    const clientCertKey = kafkaConfig.get('clientCertKey').replace('\\n', '\n');
     options.ssl = {
       cert: clientCert,
       key: clientCertKey,
