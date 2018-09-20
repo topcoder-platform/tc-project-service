@@ -141,7 +141,7 @@ const payloadSchema = Joi.object().keys({
   projectUrl: Joi.string().regex(REGEX.URL).required(),
   userId: Joi.number().integer().positive().required(),
   initiatorUserId: Joi.number().integer().positive().required(),
-}).required();
+}).unknown(true).required();
 
 /**
  * Updates project activity fields. throws exceptions in case of error
