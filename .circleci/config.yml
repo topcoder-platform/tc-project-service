@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'feature/timeline-milestone']
+              only: ['dev', 'feature/project_events_after_timeline_events']
       - deployProd:
           requires:
             - test
