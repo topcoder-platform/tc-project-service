@@ -1102,7 +1102,7 @@ describe('UPDATE Milestone', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone duration updated', (done) => {
+      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone duration updated', (done) => {
         request(server)
           .patch('/v4/timelines/1/milestones/1')
           .set({
@@ -1119,22 +1119,27 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                // 5 milestones in total, so it would trigger 5 events
+                // 4 MILESTONE_UPDATED events are for 4 non deleted milestones
+                // 1 TIMELINE_ADJUSTED event, because timeline's end date updated
+                createEventSpy.callCount.should.be.eql(5);
+                console.log(createEventSpy.firstCall);
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
                   userId: 40051332,
                   initiatorUserId: 40051332,
                 })).should.be.true;
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED);
+                console.log(createEventSpy.lastCall);
+                createEventSpy.lastCall.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED);
                 done();
               });
             }
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone status updated', (done) => {
+      it('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone status updated', (done) => {
         request(server)
           .patch('/v4/timelines/1/milestones/1')
           .set({
@@ -1152,7 +1157,7 @@ describe('UPDATE Milestone', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
@@ -1165,7 +1170,7 @@ describe('UPDATE Milestone', () => {
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone order updated', (done) => {
+      it('should ONLY send message BUS_API_EVENT.MILESTONE_UPDATED when milestone order updated', (done) => {
         request(server)
           .patch('/v4/timelines/1/milestones/1')
           .set({
@@ -1183,7 +1188,7 @@ describe('UPDATE Milestone', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
@@ -1196,7 +1201,7 @@ describe('UPDATE Milestone', () => {
           });
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone plannedText updated', (done) => {
+      it('should ONLY send message BUS_API_EVENT.MILESTONE_UPDATED when milestone plannedText updated', (done) => {
         request(server)
           .patch('/v4/timelines/1/milestones/1')
           .set({
@@ -1213,7 +1218,14 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.notCalled.should.be.true;
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
                 done();
               });
             }

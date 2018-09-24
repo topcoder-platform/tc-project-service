@@ -41,7 +41,8 @@ module.exports = (sequelize, DataTypes) => {
        * @param timelineId the id of timeline
        */
       getTimelineDuration(timelineId) {
-        const where = { timelineId, [sequelize.Op.eq]: null };
+        console.log('getTimelineDuration');
+        const where = { timelineId };
         return this.sum('duration', {
           where,
         });

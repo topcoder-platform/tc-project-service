@@ -474,25 +474,22 @@ module.exports = (app, logger) => {
    * @param {Object} original the original milestone
    * @param {Object} updated the updated milestone
    * @param {Object} project the project
+   * @param {Object} timeline the updated timeline
    * @returns {Promise<void>} void
    */
-  function sendMilestoneNotification(req, original, updated, project) {
+  function sendMilestoneNotification(req, original, updated, project, timeline) {
     logger.debug('sendMilestoneNotification', original, updated);
-
     // throw generic milestone updated bus api event
-    models.Milestone.getTimelineDuration(req.timeline.id)
-    .then((duration) => {
-      createEvent(BUS_API_EVENT.MILESTONE_UPDATED, {
-        projectId: project.id,
-        projectName: project.name,
-        projectUrl: connectProjectUrl(project.id),
-        timeline: _.assign({}, req.timeline, { duration }),
-        originalMilestone: original,
-        updatedMilestone: updated,
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    });
+    createEvent(BUS_API_EVENT.MILESTONE_UPDATED, {
+      projectId: project.id,
+      projectName: project.name,
+      projectUrl: connectProjectUrl(project.id),
+      timeline,
+      originalMilestone: original,
+      updatedMilestone: updated,
+      userId: req.authUser.userId,
+      initiatorUserId: req.authUser.userId,
+    }, logger);
     // Send transition events
     if (original.status !== updated.status) {
       let event;
@@ -503,19 +500,16 @@ module.exports = (app, logger) => {
       }
 
       if (event) {
-        models.Milestone.getTimelineDuration(req.timeline.id)
-        .then((duration) => {
-          createEvent(event, {
-            projectId: project.id,
-            projectName: project.name,
-            projectUrl: connectProjectUrl(project.id),
-            timeline: _.assign({}, req.timeline, { duration }),
-            originalMilestone: original,
-            updatedMilestone: updated,
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        });
+        createEvent(event, {
+          projectId: project.id,
+          projectName: project.name,
+          projectUrl: connectProjectUrl(project.id),
+          timeline,
+          originalMilestone: original,
+          updatedMilestone: updated,
+          userId: req.authUser.userId,
+          initiatorUserId: req.authUser.userId,
+        }, logger);
       }
     }
 
@@ -523,19 +517,16 @@ module.exports = (app, logger) => {
     const originalWaiting = _.get(original, 'details.metadata.waitingForCustomer', false);
     const updatedWaiting = _.get(updated, 'details.metadata.waitingForCustomer', false);
     if (!originalWaiting && updatedWaiting) {
-      models.Milestone.getTimelineDuration(req.timeline.id)
-      .then((duration) => {
-        createEvent(BUS_API_EVENT.MILESTONE_WAITING_CUSTOMER, {
-          projectId: project.id,
-          projectName: project.name,
-          projectUrl: connectProjectUrl(project.id),
-          timeline: _.assign({}, req.timeline, { duration }),
-          originalMilestone: original,
-          updatedMilestone: updated,
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-      });
+      createEvent(BUS_API_EVENT.MILESTONE_WAITING_CUSTOMER, {
+        projectId: project.id,
+        projectName: project.name,
+        projectUrl: connectProjectUrl(project.id),
+        timeline,
+        originalMilestone: original,
+        updatedMilestone: updated,
+        userId: req.authUser.userId,
+        initiatorUserId: req.authUser.userId,
+      }, logger);
     }
   }
 
@@ -574,39 +565,44 @@ module.exports = (app, logger) => {
     logger.debug('receive MILESTONE_UPDATED event');
 
     const projectId = _.parseInt(req.params.projectId);
+    const timeline = _.omit(req.timeline.toJSON(), 'deletedAt', 'deletedBy');
 
     models.Project.findOne({
       where: { id: projectId },
     })
-      .then((project) => {
-        sendMilestoneNotification(req, original, updated, project);
+    .then((project) => {
+      logger.debug(`Found project with id ${projectId}`);
+      return models.Milestone.getTimelineDuration(timeline.id)
+      .then((duration) => {
+        timeline.duration = duration;
+        sendMilestoneNotification(req, original, updated, project, timeline);
 
         logger.debug('cascadedUpdates', cascadedUpdates);
         if (cascadedUpdates && cascadedUpdates.milestones && cascadedUpdates.milestones.length > 0) {
           _.each(cascadedUpdates.milestones, cascadedUpdate =>
-            sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project),
+            sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project, timeline),
           );
         }
 
         // if timeline is modified
         if (cascadedUpdates && cascadedUpdates.timeline) {
-          const timeline = cascadedUpdates.timeline;
+          const cTimeline = cascadedUpdates.timeline;
           // if endDate of the timeline is modified, raise TIMELINE_ADJUSTED event
-          if (timeline.original.endDate !== timeline.updated.endDate) {
+          if (cTimeline.original.endDate !== cTimeline.updated.endDate) {
             // Raise Timeline changed event
             createEvent(BUS_API_EVENT.TIMELINE_ADJUSTED, {
               projectId: project.id,
               projectName: project.name,
               projectUrl: connectProjectUrl(project.id),
-              original: timeline.original,
-              updated: timeline.updated,
+              original: cTimeline.original,
+              updated: cTimeline.updated,
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
             }, logger);
           }
         }
-      })
-      .catch(err => null);    // eslint-disable-line no-unused-vars
+      });
+    }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
  /**

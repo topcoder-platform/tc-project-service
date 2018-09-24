@@ -629,7 +629,7 @@ describe('CREATE milestone', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone created', (done) => {
+      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone created', (done) => {
         request(server)
           .post('/v4/timelines/1/milestones')
           .set({
@@ -644,7 +644,7 @@ describe('CREATE milestone', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',

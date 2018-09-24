@@ -648,8 +648,8 @@ describe('UPDATE timeline', () => {
       });
 
       // not testing fields separately as startDate is required parameter,
-      // thus PROJECT_PLAN_UPDATED will be always sent
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when timeline updated', (done) => {
+      // thus TIMELINE_ADJUSTED will be always sent
+      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when timeline updated', (done) => {
         request(server)
           .patch('/v4/timelines/1')
           .set({
@@ -663,7 +663,7 @@ describe('UPDATE timeline', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
