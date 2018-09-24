@@ -387,7 +387,7 @@ describe('DELETE milestone', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED, sinon.match({
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',

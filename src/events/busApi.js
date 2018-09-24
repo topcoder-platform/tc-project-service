@@ -552,7 +552,7 @@ module.exports = (app, logger) => {
             initiatorUserId: req.authUser.userId,
           }, logger);
         }
-        sendMilestoneNotification(req, {}, created, project);
+        // sendMilestoneNotification(req, {}, created, project);
       })
       .catch(err => null);    // eslint-disable-line no-unused-vars
   });
