@@ -1127,7 +1127,7 @@ describe('UPDATE Milestone', () => {
                   userId: 40051332,
                   initiatorUserId: 40051332,
                 })).should.be.true;
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.TIMELINE_MODIFIED);
+                createEventSpy.secondCall.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED);
                 done();
               });
             }

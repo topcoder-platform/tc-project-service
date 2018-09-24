@@ -35,6 +35,18 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
+    classMethods: {
+      /**
+       * Get total duration of the given timeline by summing up individual milestone durations
+       * @param timelineId the id of timeline
+       */
+      getTimelineDuration(timelineId) {
+        const where = { timelineId, [sequelize.Op.eq]: null };
+        return this.sum('duration', {
+          where,
+        });
+      },
+    },
   });
 
   return Milestone;

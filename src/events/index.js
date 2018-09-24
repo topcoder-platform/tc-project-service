@@ -10,8 +10,18 @@ import { projectPhaseAddedHandler, projectPhaseRemovedHandler,
   projectPhaseUpdatedHandler } from './projectPhases';
 import { phaseProductAddedHandler, phaseProductRemovedHandler,
   phaseProductUpdatedHandler } from './phaseProducts';
-import { timelineAddedHandler, timelineUpdatedHandler, timelineRemovedHandler } from './timelines';
-import { milestoneAddedHandler, milestoneUpdatedHandler, milestoneRemovedHandler } from './milestones';
+import {
+  timelineAddedHandler,
+  timelineUpdatedHandler,
+  timelineRemovedHandler,
+  timelineAdjustedKafkaHandler,
+} from './timelines';
+import {
+  milestoneAddedHandler,
+  milestoneUpdatedHandler,
+  milestoneRemovedHandler,
+  milestoneUpdatedKafkaHandler,
+} from './milestones';
 
 export const rabbitHandlers = {
   'project.initial': projectCreatedHandler,
@@ -56,4 +66,8 @@ export const kafkaHandlers = {
   [BUS_API_EVENT.TOPIC_UPDATED]: projectUpdatedKafkaHandler,
   [BUS_API_EVENT.POST_CREATED]: projectUpdatedKafkaHandler,
   [BUS_API_EVENT.POST_UPDATED]: projectUpdatedKafkaHandler,
+
+  // Events coming from timeline/milestones (considering it as a separate module/service in future)
+  [BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED]: milestoneUpdatedKafkaHandler,
+  [BUS_API_EVENT.TIMELINE_ADJUSTED]: timelineAdjustedKafkaHandler,
 };
