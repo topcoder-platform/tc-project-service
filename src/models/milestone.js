@@ -1,3 +1,4 @@
+import moment from 'moment';
 /* eslint-disable valid-jsdoc */
 
 /**
@@ -50,18 +51,20 @@ module.exports = (sequelize, DataTypes) => {
         })
         .then((milestones) => {
           let duration = 0;
-          milestones.forEach((m) => {
-            if (m.completionDate) {
-              if (m.actualStartDate) {
-                duration += m.completionDate.diff(m.actualStartDate, 'days') + 1;
+          if (milestones) {
+            milestones.forEach((m) => {
+              if (m.completionDate) {
+                if (m.actualStartDate) {
+                  duration += moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
+                } else {
+                  duration += moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
+                }
               } else {
-                duration += m.completionDate.diff(m.startDate, 'days') + 1;
+                duration += m.duration;
               }
-            } else {
-              duration += m.duration;
-            }
-          });
-          return duration;
+            });
+          }
+          return Promise.resolve(duration);
         });
       },
     },

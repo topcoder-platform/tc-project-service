@@ -174,6 +174,7 @@ module.exports = [
             // if status has changed to be completed, set the compeltionDate if not provided
             if (entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
               entityToUpdate.completionDate = entityToUpdate.completionDate ? entityToUpdate.completionDate : today;
+              entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
             }
             // if status has changed to be active, set the startDate to today
             if (entityToUpdate.status === MILESTONE_STATUS.ACTIVE) {
@@ -198,6 +199,7 @@ module.exports = [
 
           // if completionDate has changed
           if (!statusChanged && completionDateChanged) {
+            entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
             entityToUpdate.status = MILESTONE_STATUS.COMPLETED;
           }
 
