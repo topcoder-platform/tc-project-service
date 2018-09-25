@@ -236,7 +236,7 @@ async function milestoneUpdatedKafkaHandler(app, topic, payload) {
           app.logger.debug(`Current phase progress: ${phase.progress}`);
           const progress = phase.progress + ((updated.duration / timeline.duration) * 100);
           app.logger.debug(`Updated phase progress: ${progress}`);
-          const updatedPhase = await models.ProjectPhase.update({ progress }, { fields: ['progress'] });
+          const updatedPhase = await models.ProjectPhase.update({ progress }, { where: { id: phase.id } });
           app.logger.debug('Raising node event for PROJECT_PHASE_UPDATED');
           app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
             req: {

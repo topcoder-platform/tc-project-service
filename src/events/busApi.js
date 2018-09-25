@@ -594,8 +594,8 @@ module.exports = (app, logger) => {
               projectId: project.id,
               projectName: project.name,
               projectUrl: connectProjectUrl(project.id),
-              original: cTimeline.original,
-              updated: cTimeline.updated,
+              originalTimeline: cTimeline.original,
+              updatedTimeline: cTimeline.updated,
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
             }, logger);

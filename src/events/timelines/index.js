@@ -157,7 +157,7 @@ async function timelineAdjustedKafkaHandler(app, topic, payload) {
     throw new Error(result.error);
   }
 
-  const timeline = payload.timeline;
+  const timeline = payload.updatedTimeline;
   // process only if timeline is related to a product reference
   if (timeline && timeline.reference === TIMELINE_REFERENCES.PRODUCT) {
     app.logger.debug('Found product timelin event ');
