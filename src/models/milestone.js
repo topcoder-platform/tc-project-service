@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
        */
       getTimelineDuration(timelineId) {
         console.log('getTimelineDuration');
-        const where = { timelineId };
+        const where = { timelineId, hidden: false };
         return this.sum('duration', {
           where,
         });
