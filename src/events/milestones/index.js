@@ -170,11 +170,11 @@ const payloadSchema = Joi.object().keys({
   initiatorUserId: Joi.number().integer().positive().required(),
 }).unknown(true).required();
 
-const findProjectPhaseProduct = function (logger, productId) { // eslint-disable-line func-names
+const findProjectPhaseProduct = function (logger, productId, raw = true) { // eslint-disable-line func-names
   let product;
   return models.PhaseProduct.findOne({
     where: { id: productId },
-    raw: true,
+    raw,
   }).then((_product) => {
     logger.debug('_product', _product);
     if (_product) {
@@ -184,11 +184,11 @@ const findProjectPhaseProduct = function (logger, productId) { // eslint-disable
       return Promise.all([
         models.ProjectPhase.findOne({
           where: { id: phaseId, projectId },
-          raw: true,
+          raw,
         }),
         models.Project.findOne({
           where: { id: projectId },
-          raw: true,
+          raw,
         }),
       ]);
     }
@@ -226,20 +226,20 @@ async function milestoneUpdatedKafkaHandler(app, topic, payload) {
     const original = payload.originalMilestone;
     const updated = payload.updatedMilestone;
     app.logger.debug('Calling findProjectPhaseProduct');
-    const { project, phase } = await findProjectPhaseProduct(app.logger, productId);
+    const { project, phase } = await findProjectPhaseProduct(app.logger, productId, false);
     app.logger.debug('Successfully fetched project, phase and product');
     if (original.status !== updated.status) {
       if (updated.status === MILESTONE_STATUS.COMPLETED) {
         app.logger.debug('Found milestone status to be completed');
         app.logger.debug(`Duration: ${timeline.duration}`);
-        if (timeline.duration) {
+        if (!!timeline.duration && !isNaN(timeline.duration.scheduled) && !isNaN(timeline.duration.completed)) {
           app.logger.debug(`Current phase progress ${phase.progress} and duration ${phase.duration}`);
-          const progress = Math.round(phase.progress + ((updated.duration / timeline.duration) * 100));
+          const progress = Math.round((timeline.duration.completed / timeline.duration.scheduled) * 100);
           app.logger.debug(`Updated phase progress ${progress} and duration ${timeline.duration}`);
-          const updatedPhase = await models.ProjectPhase.update({
+          const updatedPhase = await phase.update({
             progress,
             duration: timeline.duration,
-          }, { where: { id: phase.id } });
+          }, ['progress', 'duration']);
           app.logger.debug('Raising node event for PROJECT_PHASE_UPDATED');
           app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
             req: {

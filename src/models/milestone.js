@@ -50,21 +50,24 @@ module.exports = (sequelize, DataTypes) => {
           raw: true,
         })
         .then((milestones) => {
-          let duration = 0;
+          let scheduledDuration = 0;
+          let completedDuration = 0;
           if (milestones) {
             milestones.forEach((m) => {
               if (m.completionDate) {
                 if (m.actualStartDate) {
-                  duration += moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
+                  scheduledDuration += moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
+                  completedDuration += scheduledDuration;
                 } else {
-                  duration += moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
+                  scheduledDuration += moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
+                  completedDuration += scheduledDuration;
                 }
               } else {
-                duration += m.duration;
+                scheduledDuration += m.scheduledDuration;
               }
             });
           }
-          return Promise.resolve(duration);
+          return Promise.resolve({ scheduledDuration, completedDuration });
         });
       },
     },

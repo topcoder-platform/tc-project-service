@@ -573,8 +573,8 @@ module.exports = (app, logger) => {
     .then((project) => {
       logger.debug(`Found project with id ${projectId}`);
       return models.Milestone.getTimelineDuration(timeline.id)
-      .then((duration) => {
-        timeline.duration = duration;
+      .then(({ scheduledDuration, completedDuration }) => {
+        timeline.duration = { scheduled: scheduledDuration, completed: completedDuration };
         sendMilestoneNotification(req, original, updated, project, timeline);
 
         logger.debug('cascadedUpdates', cascadedUpdates);
