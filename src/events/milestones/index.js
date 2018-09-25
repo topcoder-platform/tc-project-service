@@ -247,7 +247,7 @@ async function milestoneUpdatedKafkaHandler(app, topic, payload) {
               authUser: { userId: payload.userId },
             },
             original: phase,
-            updated: _.clone(updatedPhase.get({ plain: true })),
+            updated: _.omit(updatedPhase.toJSON(), 'deletedAt', 'deletedBy'),
           });
         }
       }
