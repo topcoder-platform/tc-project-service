@@ -253,9 +253,9 @@ module.exports = [
           const needToCascade = !_.isEqual(original.completionDate, updated.completionDate) // completion date changed
             || original.duration !== updated.duration // duration changed
             || original.actualStartDate !== updated.actualStartDate; // actual start date updated
+          req.log.debug('needToCascade', needToCascade);
           // Update dates of the other milestones only if cascade updates needed
           if (needToCascade) {
-            console.log('needToCascade', needToCascade);
             return updateComingMilestones(original, updated)
               .then(({ originalMilestones, updatedMilestones }) => {
                 // finds the last milestone updated
@@ -284,7 +284,6 @@ module.exports = [
           updated: _.omit(timeline.toJSON(), 'deletedAt', 'deletedBy'),
         };
       }
-      console.log(cascadedUpdates.timeline);
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,

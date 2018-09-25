@@ -177,7 +177,7 @@ const findProjectPhaseProduct = function (logger, productId) { // eslint-disable
     raw: true,
   }).then((_product) => {
     logger.debug('_product', _product);
-    if (product) {
+    if (_product) {
       product = _product;
       const phaseId = product.phaseId;
       const projectId = product.projectId;

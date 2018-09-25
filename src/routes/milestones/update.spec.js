@@ -1123,7 +1123,6 @@ describe('UPDATE Milestone', () => {
                 // 4 MILESTONE_UPDATED events are for 4 non deleted milestones
                 // 1 TIMELINE_ADJUSTED event, because timeline's end date updated
                 createEventSpy.callCount.should.be.eql(5);
-                console.log(createEventSpy.firstCall);
                 createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
@@ -1131,7 +1130,6 @@ describe('UPDATE Milestone', () => {
                   userId: 40051332,
                   initiatorUserId: 40051332,
                 })).should.be.true;
-                console.log(createEventSpy.lastCall);
                 createEventSpy.lastCall.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED);
                 done();
               });
