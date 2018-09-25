@@ -63,7 +63,7 @@ module.exports = (sequelize, DataTypes) => {
                   completedDuration += scheduledDuration;
                 }
               } else {
-                scheduledDuration += m.scheduledDuration;
+                scheduledDuration += m.duration;
               }
             });
           }
