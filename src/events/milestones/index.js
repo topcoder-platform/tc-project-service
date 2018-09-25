@@ -170,12 +170,13 @@ const payloadSchema = Joi.object().keys({
   initiatorUserId: Joi.number().integer().positive().required(),
 }).unknown(true).required();
 
-const findProjectPhaseProduct = function (productId) { // eslint-disable-line func-names
+const findProjectPhaseProduct = function (logger, productId) { // eslint-disable-line func-names
   let product;
   return models.PhaseProduct.findOne({
     where: { id: productId },
     raw: true,
   }).then((_product) => {
+    logger.debug('_product', _product);
     if (product) {
       product = _product;
       const phaseId = product.phaseId;
@@ -193,6 +194,7 @@ const findProjectPhaseProduct = function (productId) { // eslint-disable-line fu
     }
     return Promise.reject('Unable to find product');
   }).then((projectAndPhase) => {
+    logger.debug('projectAndPhase', projectAndPhase);
     if (projectAndPhase) {
       const phase = projectAndPhase[0];
       const project = projectAndPhase[1];
@@ -210,7 +212,7 @@ const findProjectPhaseProduct = function (productId) { // eslint-disable-line fu
  * @return  {Promise} Promise
  */
 async function milestoneUpdatedKafkaHandler(app, topic, payload) {
-  app.logger(`Handling Kafka event for ${topic}`);
+  app.logger.info(`Handling Kafka event for ${topic}`);
   // Validate payload
   const result = Joi.validate(payload, payloadSchema);
   if (result.error) {
@@ -223,12 +225,19 @@ async function milestoneUpdatedKafkaHandler(app, topic, payload) {
     const productId = timeline.referenceId;
     const original = payload.originalMilestone;
     const updated = payload.updatedMilestone;
-    const { project, phase } = await findProjectPhaseProduct(productId);
+    app.logger.debug('Calling findProjectPhaseProduct');
+    const { project, phase } = await findProjectPhaseProduct(app.logger, productId);
+    app.logger.debug('Successfully fetched project, phase and product');
     if (original.status !== updated.status) {
       if (updated.status === MILESTONE_STATUS.COMPLETED) {
+        app.logger.debug('Found milestone status to be completed');
+        app.logger.debug(`Duration: ${timeline.duration}`);
         if (timeline.duration) {
+          app.logger.debug(`Current phase progress: ${phase.progress}`);
           const progress = phase.progress + ((updated.duration / timeline.duration) * 100);
+          app.logger.debug(`Updated phase progress: ${progress}`);
           const updatedPhase = await models.ProjectPhase.update({ progress }, { fields: ['progress'] });
+          app.logger.debug('Raising node event for PROJECT_PHASE_UPDATED');
           app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
             req: {
               params: { projectId: project.id, phaseId: phase.id },

@@ -108,12 +108,13 @@ const payloadSchema = Joi.object().keys({
   initiatorUserId: Joi.number().integer().positive().required(),
 }).unknown(true).required();
 
-const findProjectPhaseProduct = function (productId) { // eslint-disable-line func-names
+const findProjectPhaseProduct = function (logger, productId) { // eslint-disable-line func-names
   let product;
   return models.PhaseProduct.findOne({
     where: { id: productId },
     raw: true,
   }).then((_product) => {
+    logger.debug('_product', _product);
     if (_product) {
       product = _product;
       const phaseId = product.phaseId;
@@ -131,6 +132,7 @@ const findProjectPhaseProduct = function (productId) { // eslint-disable-line fu
     }
     return Promise.reject('Unable to find product');
   }).then((projectAndPhase) => {
+    logger.debug('projectAndPhase', projectAndPhase);
     if (projectAndPhase) {
       const phase = projectAndPhase[0];
       const project = projectAndPhase[1];
@@ -148,7 +150,7 @@ const findProjectPhaseProduct = function (productId) { // eslint-disable-line fu
  * @return  {Promise} Promise
  */
 async function timelineAdjustedKafkaHandler(app, topic, payload) {
-  app.logger(`Handling Kafka event for ${topic}`);
+  app.logger.debug(`Handling Kafka event for ${topic}`);
   // Validate payload
   const result = Joi.validate(payload, payloadSchema);
   if (result.error) {
@@ -158,8 +160,12 @@ async function timelineAdjustedKafkaHandler(app, topic, payload) {
   const timeline = payload.timeline;
   // process only if timeline is related to a product reference
   if (timeline && timeline.reference === TIMELINE_REFERENCES.PRODUCT) {
+    app.logger.debug('Found product timelin event ');
     const productId = timeline.referenceId;
-    const { project } = await findProjectPhaseProduct(productId);
+    app.logger.debug('Calling findProjectPhaseProduct');
+    const { project } = await findProjectPhaseProduct(app.logger, productId);
+    app.logger.debug('Successfully fetched project, phase and product');
+    app.logger.debug('Raising BUS event for PROJECT_PLAN_UPDATED');
     createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
       projectId: project.id,
       projectName: project.name,
