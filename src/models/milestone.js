@@ -53,15 +53,15 @@ module.exports = (sequelize, DataTypes) => {
           let scheduledDuration = 0;
           let completedDuration = 0;
           if (milestones) {
+            console.log(milestones);
             milestones.forEach((m) => {
-              if (m.completionDate) {
-                if (m.actualStartDate) {
+              if (!!m.completionDate) {
+                if (!!m.actualStartDate) {
                   scheduledDuration += moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
-                  completedDuration += scheduledDuration;
                 } else {
                   scheduledDuration += moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
-                  completedDuration += scheduledDuration;
                 }
+                completedDuration += scheduledDuration;
               } else {
                 scheduledDuration += m.duration;
               }
