@@ -234,7 +234,7 @@ async function milestoneUpdatedKafkaHandler(app, topic, payload) {
         app.logger.debug(`Duration: ${timeline.duration}`);
         if (timeline.duration) {
           app.logger.debug(`Current phase progress ${phase.progress} and duration ${phase.duration}`);
-          const progress = phase.progress + ((updated.duration / timeline.duration) * 100);
+          const progress = Math.round(phase.progress + ((updated.duration / timeline.duration) * 100));
           app.logger.debug(`Updated phase progress ${progress} and duration ${timeline.duration}`);
           const updatedPhase = await models.ProjectPhase.update({
             progress,
