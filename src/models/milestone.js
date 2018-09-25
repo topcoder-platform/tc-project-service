@@ -43,8 +43,25 @@ module.exports = (sequelize, DataTypes) => {
       getTimelineDuration(timelineId) {
         console.log('getTimelineDuration');
         const where = { timelineId, hidden: false };
-        return this.sum('duration', {
+        return this.findAll({
           where,
+          attributes: ['id', 'duration', 'startDate', 'actualStartDate', 'completionDate'],
+          raw: true,
+        })
+        .then((milestones) => {
+          let duration = 0;
+          milestones.forEach((m) => {
+            if (m.completionDate) {
+              if (m.actualStartDate) {
+                duration += m.completionDate.diff(m.actualStartDate, 'days') + 1;
+              } else {
+                duration += m.completionDate.diff(m.startDate, 'days') + 1;
+              }
+            } else {
+              duration += m.duration;
+            }
+          });
+          return duration;
         });
       },
     },
