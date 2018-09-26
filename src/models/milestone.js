@@ -46,30 +46,41 @@ module.exports = (sequelize, DataTypes) => {
         const where = { timelineId, hidden: false };
         return this.findAll({
           where,
+          order: [['order', 'asc']],
           attributes: ['id', 'duration', 'startDate', 'actualStartDate', 'completionDate'],
           raw: true,
         })
         .then((milestones) => {
           let scheduledDuration = 0;
           let completedDuration = 0;
+          let duration = 0;
+          let progress = 0;
           if (milestones) {
             console.log(milestones);
+            const fMilestone = milestones[0];
+            const lMilestone = milestones[milestones.length - 1];
+            const startDate = fMilestone.actualStartDate ? fMilestone.actualStartDate : fMilestone.startDate;
+            const endDate = lMilestone.completionDate ? lMilestone.completionDate : lMilestone.endDate;
+            duration = moment.utc(endDate).diff(moment.utc(startDate), 'days') + 1;
             milestones.forEach((m) => {
               if (m.completionDate !== null) {
-                let duration = 0;
+                let mDuration = 0;
                 if (m.actualStartDate !== null) {
-                  duration = moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
+                  mDuration = moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
                 } else {
-                  duration = moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
+                  mDuration = moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
                 }
-                scheduledDuration += duration;
-                completedDuration += duration;
+                scheduledDuration += mDuration;
+                completedDuration += mDuration;
               } else {
                 scheduledDuration += m.duration;
               }
             });
+            if (scheduledDuration > 0) {
+              progress = Math.round(completedDuration / scheduledDuration);
+            }
           }
-          return Promise.resolve({ scheduledDuration, completedDuration });
+          return Promise.resolve({ duration, progress });
         });
       },
     },

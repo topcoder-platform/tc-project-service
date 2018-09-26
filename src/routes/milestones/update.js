@@ -55,7 +55,7 @@ function updateComingMilestones(origMilestone, updMilestone) {
       }
 
       // Calculate the endDate, and update it if different
-      const endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+      const endDate = moment.utc(milestone.startDate).add(milestone.duration - 1, 'days').toDate();
       if (!_.isEqual(milestone.endDate, endDate)) {
         milestone.endDate = endDate;
         milestone.updatedBy = updMilestone.updatedBy;

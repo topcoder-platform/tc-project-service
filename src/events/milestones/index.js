@@ -232,14 +232,13 @@ async function milestoneUpdatedKafkaHandler(app, topic, payload) {
       if (updated.status === MILESTONE_STATUS.COMPLETED) {
         app.logger.debug('Found milestone status to be completed');
         app.logger.debug(`Duration: ${timeline.duration}`);
-        if (!!timeline.duration && !isNaN(timeline.duration.scheduled) && !isNaN(timeline.duration.completed)) {
+        if (!isNaN(timeline.duration) && !isNaN(timeline.progress)) {
           app.logger.debug(`Current phase progress ${phase.progress} and duration ${phase.duration}`);
-          const progress = Math.round((timeline.duration.completed / timeline.duration.scheduled) * 100);
           const updatedPhase = await phase.update({
-            progress,
-            duration: timeline.duration.scheduled,
+            progress: timeline.progress,
+            duration: timeline.duration,
           }, ['progress', 'duration']);
-          app.logger.debug(`Updated phase progress ${progress} and duration ${timeline.duration.scheduled}`);
+          app.logger.debug(`Updated phase progress ${timeline.progress} and duration ${timeline.duration}`);
           app.logger.debug('Raising node event for PROJECT_PHASE_UPDATED');
           app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
             req: {
