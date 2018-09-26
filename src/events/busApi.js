@@ -562,7 +562,7 @@ module.exports = (app, logger) => {
   */
   // eslint-disable-next-line no-unused-vars
   app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, ({ req, original, updated, cascadedUpdates }) => {
-    logger.debug('receive MILESTONE_UPDATED event');
+    logger.debug(`receive MILESTONE_UPDATED event for milestone ${original.id}`);
 
     const projectId = _.parseInt(req.params.projectId);
     const timeline = _.omit(req.timeline.toJSON(), 'deletedAt', 'deletedBy');
