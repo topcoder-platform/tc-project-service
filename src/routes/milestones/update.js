@@ -69,10 +69,13 @@ function updateComingMilestones(origMilestone, updMilestone) {
         firstMilestoneFound = true;
       }
 
-      // Set the next startDate value to the next day after completionDate if present or the endDate
-      startDate = moment.utc(milestone.completionDate
-        ? milestone.completionDate
-        : milestone.endDate).add(1, 'days').toDate();
+      // if milestone is not hidden, update the startDate for the next milestone, otherwise keep the same startDate for next milestone
+      if (!milestone.hidden) {
+        // Set the next startDate value to the next day after completionDate if present or the endDate
+        startDate = moment.utc(milestone.completionDate
+          ? milestone.completionDate
+          : milestone.endDate).add(1, 'days').toDate();
+      }
       return milestone.save();
     });
 
