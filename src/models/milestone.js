@@ -63,7 +63,6 @@ module.exports = (sequelize, DataTypes) => {
             const endDate = lMilestone.completionDate ? lMilestone.completionDate : lMilestone.endDate;
             duration = moment.utc(endDate).diff(moment.utc(startDate), 'days') + 1;
             milestones.forEach((m) => {
-              console.log(`${m.completionDate} is not null: ${m.completionDate !== null}`);
               if (m.completionDate !== null) {
                 let mDuration = 0;
                 if (m.actualStartDate !== null) {
@@ -79,7 +78,7 @@ module.exports = (sequelize, DataTypes) => {
             });
             console.log(`${completedDuration} completed out of ${scheduledDuration} duration`);
             if (scheduledDuration > 0) {
-              progress = Math.round(completedDuration / scheduledDuration);
+              progress = Math.round((completedDuration / scheduledDuration) * 100);
             }
           }
           return Promise.resolve({ duration, progress });
