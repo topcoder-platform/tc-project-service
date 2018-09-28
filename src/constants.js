@@ -88,33 +88,33 @@ export const BUS_API_EVENT = {
   PROJECT_LINK_CREATED: 'notifications.connect.project.linkCreated',
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
-  PROJECT_PROGRESS_MODIFIED: 'notifications.connect.project.progressModified',
+  PROJECT_PROGRESS_MODIFIED: 'connect.action.project.updated.progress',
   PROJECT_FILES_UPDATED: 'notifications.connect.project.files.updated',
   PROJECT_TEAM_UPDATED: 'notifications.connect.project.team.updated',
 
   // When phase is added/updated/deleted from the project,
   // When product is added/deleted from a phase
   // When product is updated on any field other than specification
-  PROJECT_PLAN_UPDATED: 'notifications.connect.project.plan.updated',
+  PROJECT_PLAN_UPDATED: 'connect.action.project.plan.updated',
 
-  PROJECT_PLAN_READY: 'notifications.connect.project.planReady',
+  PROJECT_PLAN_READY: 'connect.action.project.plan.ready',
 
   // When milestone is added/deleted to/from the phase,
   // When milestone is updated for duration/startDate/endDate/status
-  TIMELINE_ADJUSTED: 'notifications.connect.project.phase.timeline.adjusted',
+  TIMELINE_ADJUSTED: 'connect.action.timeline.adjusted',
 
   // When specification of a product is modified
-  PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
+  PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'connect.action.project.product.update.spec',
 
-  MILESTONE_ADDED: 'notifications.connect.project.phase.milestone.added',
-  MILESTONE_REMOVED: 'notifications.connect.project.phase.milestone.removed',
-  MILESTONE_UPDATED: 'notifications.connect.project.phase.milestone.updated',
+  MILESTONE_ADDED: 'connect.action.timeline.milestone.added',
+  MILESTONE_REMOVED: 'connect.action.timeline.milestone.removed',
+  MILESTONE_UPDATED: 'connect.action.timeline.milestone.updated',
   // When milestone is marked as active
-  MILESTONE_TRANSITION_ACTIVE: 'notifications.connect.project.phase.milestone.transition.active',
+  MILESTONE_TRANSITION_ACTIVE: 'connect.action.timeline.milestone.transition.active',
   // When milestone is marked as completed
-  MILESTONE_TRANSITION_COMPLETED: 'notifications.connect.project.phase.milestone.transition.completed',
+  MILESTONE_TRANSITION_COMPLETED: 'connect.action.timeline.milestone.transition.completed',
   // When milestone is waiting for customers's input
-  MILESTONE_WAITING_CUSTOMER: 'notifications.connect.project.phase.milestone.waiting.customer',
+  MILESTONE_WAITING_CUSTOMER: 'connect.action.timeline.milestone.waiting.customer',
 
   // TC Message Service events
   TOPIC_CREATED: 'notifications.connect.project.topic.created',
