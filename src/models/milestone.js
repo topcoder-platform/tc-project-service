@@ -56,7 +56,6 @@ module.exports = (sequelize, DataTypes) => {
           let duration = 0;
           let progress = 0;
           if (milestones) {
-            console.log(milestones);
             const fMilestone = milestones[0];
             const lMilestone = milestones[milestones.length - 1];
             const startDate = fMilestone.actualStartDate ? fMilestone.actualStartDate : fMilestone.startDate;
