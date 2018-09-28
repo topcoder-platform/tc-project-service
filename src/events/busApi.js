@@ -474,10 +474,22 @@ module.exports = (app, logger) => {
    * @param {Object} original the original milestone
    * @param {Object} updated the updated milestone
    * @param {Object} project the project
+   * @param {Object} timeline the updated timeline
    * @returns {Promise<void>} void
    */
-  function sendMilestoneNotification(req, original, updated, project) {
+  function sendMilestoneNotification(req, original, updated, project, timeline) {
     logger.debug('sendMilestoneNotification', original, updated);
+    // throw generic milestone updated bus api event
+    createEvent(BUS_API_EVENT.MILESTONE_UPDATED, {
+      projectId: project.id,
+      projectName: project.name,
+      projectUrl: connectProjectUrl(project.id),
+      timeline,
+      originalMilestone: original,
+      updatedMilestone: updated,
+      userId: req.authUser.userId,
+      initiatorUserId: req.authUser.userId,
+    }, logger);
     // Send transition events
     if (original.status !== updated.status) {
       let event;
@@ -492,8 +504,7 @@ module.exports = (app, logger) => {
           projectId: project.id,
           projectName: project.name,
           projectUrl: connectProjectUrl(project.id),
-          timelineId: req.timeline.id,
-          timelineName: req.timeline.name,
+          timeline,
           originalMilestone: original,
           updatedMilestone: updated,
           userId: req.authUser.userId,
@@ -510,8 +521,7 @@ module.exports = (app, logger) => {
         projectId: project.id,
         projectName: project.name,
         projectUrl: connectProjectUrl(project.id),
-        timelineId: req.timeline.id,
-        timelineName: req.timeline.name,
+        timeline,
         originalMilestone: original,
         updatedMilestone: updated,
         userId: req.authUser.userId,
@@ -533,15 +543,16 @@ module.exports = (app, logger) => {
     })
       .then((project) => {
         if (project) {
-          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+          createEvent(BUS_API_EVENT.MILESTONE_ADDED, {
             projectId,
             projectName: project.name,
             projectUrl: connectProjectUrl(projectId),
+            addedMilestone: created,
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
         }
-        sendMilestoneNotification(req, {}, created, project);
+        // sendMilestoneNotification(req, {}, created, project);
       })
       .catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -551,60 +562,54 @@ module.exports = (app, logger) => {
   */
   // eslint-disable-next-line no-unused-vars
   app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, ({ req, original, updated, cascadedUpdates }) => {
-    logger.debug('receive MILESTONE_UPDATED event');
+    logger.debug(`receive MILESTONE_UPDATED event for milestone ${original.id}`);
 
     const projectId = _.parseInt(req.params.projectId);
+    const timeline = _.omit(req.timeline.toJSON(), 'deletedAt', 'deletedBy');
 
     models.Project.findOne({
       where: { id: projectId },
     })
-      .then((project) => {
-        // send PROJECT_UPDATED Kafka message when one of the specified below properties changed
-        const watchProperties = ['startDate', 'endDate', 'duration', 'details', 'status', 'order'];
-        if (!_.isEqual(_.pick(original, watchProperties),
-                      _.pick(updated, watchProperties))) {
-          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
-            projectId,
-            projectName: project.name,
-            projectUrl: connectProjectUrl(projectId),
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-        sendMilestoneNotification(req, original, updated, project);
+    .then((project) => {
+      logger.debug(`Found project with id ${projectId}`);
+      return models.Milestone.getTimelineDuration(timeline.id)
+      .then(({ duration, progress }) => {
+        timeline.duration = duration;
+        timeline.progress = progress;
+        sendMilestoneNotification(req, original, updated, project, timeline);
 
         logger.debug('cascadedUpdates', cascadedUpdates);
         if (cascadedUpdates && cascadedUpdates.milestones && cascadedUpdates.milestones.length > 0) {
           _.each(cascadedUpdates.milestones, cascadedUpdate =>
-            sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project),
+            sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project, timeline),
           );
         }
 
         // if timeline is modified
         if (cascadedUpdates && cascadedUpdates.timeline) {
-          const timeline = cascadedUpdates.timeline;
-          // if endDate of the timeline is modified, raise TIMELINE_MODIFIED event
-          if (timeline.original.endDate !== timeline.updated.endDate) {
+          const cTimeline = cascadedUpdates.timeline;
+          // if endDate of the timeline is modified, raise TIMELINE_ADJUSTED event
+          if (cTimeline.original.endDate !== cTimeline.updated.endDate) {
             // Raise Timeline changed event
-            createEvent(BUS_API_EVENT.TIMELINE_MODIFIED, {
+            createEvent(BUS_API_EVENT.TIMELINE_ADJUSTED, {
               projectId: project.id,
               projectName: project.name,
               projectUrl: connectProjectUrl(project.id),
-              original: timeline.original,
-              updated: timeline.updated,
+              originalTimeline: cTimeline.original,
+              updatedTimeline: cTimeline.updated,
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
             }, logger);
           }
         }
-      })
-      .catch(err => null);    // eslint-disable-line no-unused-vars
+      });
+    }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
  /**
   * MILESTONE_REMOVED.
   */
-  app.on(EVENT.ROUTING_KEY.MILESTONE_REMOVED, ({ req }) => {
+  app.on(EVENT.ROUTING_KEY.MILESTONE_REMOVED, ({ req, deleted }) => {
     logger.debug('receive MILESTONE_REMOVED event');
     // req.params.projectId is set by validateTimelineIdParam middleware
     const projectId = _.parseInt(req.params.projectId);
@@ -614,10 +619,11 @@ module.exports = (app, logger) => {
     })
     .then((project) => {
       if (project) {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+        createEvent(BUS_API_EVENT.MILESTONE_REMOVED, {
           projectId,
           projectName: project.name,
           projectUrl: connectProjectUrl(projectId),
+          removedMilestone: deleted,
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
@@ -639,10 +645,12 @@ module.exports = (app, logger) => {
       })
       .then((project) => {
         if (project) {
-          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
+          createEvent(BUS_API_EVENT.TIMELINE_ADJUSTED, {
             projectId,
             projectName: project.name,
             projectUrl: connectProjectUrl(projectId),
+            originalTimeline: original,
+            updatedTimeline: updated,
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
