@@ -373,8 +373,8 @@ describe('DELETE milestone', () => {
       });
 
       // not testing fields separately as startDate is required parameter,
-      // thus PROJECT_PLAN_UPDATED will be always sent
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when milestone removed', (done) => {
+      // thus TIMELINE_ADJUSTED will be always sent
+      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone removed', (done) => {
         request(server)
           .delete('/v4/timelines/1/milestones/1')
           .set({
@@ -387,7 +387,7 @@ describe('DELETE milestone', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',

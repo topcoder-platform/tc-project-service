@@ -101,11 +101,14 @@ export const BUS_API_EVENT = {
 
   // When milestone is added/deleted to/from the phase,
   // When milestone is updated for duration/startDate/endDate/status
-  TIMELINE_MODIFIED: 'notifications.connect.project.phase.timelineModified',
+  TIMELINE_ADJUSTED: 'notifications.connect.project.phase.timeline.adjusted',
 
   // When specification of a product is modified
   PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
 
+  MILESTONE_ADDED: 'notifications.connect.project.phase.milestone.added',
+  MILESTONE_REMOVED: 'notifications.connect.project.phase.milestone.removed',
+  MILESTONE_UPDATED: 'notifications.connect.project.phase.milestone.updated',
   // When milestone is marked as active
   MILESTONE_TRANSITION_ACTIVE: 'notifications.connect.project.phase.milestone.transition.active',
   // When milestone is marked as completed

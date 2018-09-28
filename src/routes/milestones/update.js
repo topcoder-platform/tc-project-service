@@ -55,7 +55,7 @@ function updateComingMilestones(origMilestone, updMilestone) {
       }
 
       // Calculate the endDate, and update it if different
-      const endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+      const endDate = moment.utc(milestone.startDate).add(milestone.duration - 1, 'days').toDate();
       if (!_.isEqual(milestone.endDate, endDate)) {
         milestone.endDate = endDate;
         milestone.updatedBy = updMilestone.updatedBy;
@@ -69,10 +69,13 @@ function updateComingMilestones(origMilestone, updMilestone) {
         firstMilestoneFound = true;
       }
 
-      // Set the next startDate value to the next day after completionDate if present or the endDate
-      startDate = moment.utc(milestone.completionDate
-        ? milestone.completionDate
-        : milestone.endDate).add(1, 'days').toDate();
+      // if milestone is not hidden, update the startDate for the next milestone, otherwise keep the same startDate for next milestone
+      if (!milestone.hidden) {
+        // Set the next startDate value to the next day after completionDate if present or the endDate
+        startDate = moment.utc(milestone.completionDate
+          ? milestone.completionDate
+          : milestone.endDate).add(1, 'days').toDate();
+      }
       return milestone.save();
     });
 
@@ -174,6 +177,7 @@ module.exports = [
             // if status has changed to be completed, set the compeltionDate if not provided
             if (entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
               entityToUpdate.completionDate = entityToUpdate.completionDate ? entityToUpdate.completionDate : today;
+              entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
             }
             // if status has changed to be active, set the startDate to today
             if (entityToUpdate.status === MILESTONE_STATUS.ACTIVE) {
@@ -198,6 +202,7 @@ module.exports = [
 
           // if completionDate has changed
           if (!statusChanged && completionDateChanged) {
+            entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
             entityToUpdate.status = MILESTONE_STATUS.COMPLETED;
           }
 
@@ -253,6 +258,7 @@ module.exports = [
           const needToCascade = !_.isEqual(original.completionDate, updated.completionDate) // completion date changed
             || original.duration !== updated.duration // duration changed
             || original.actualStartDate !== updated.actualStartDate; // actual start date updated
+          req.log.debug('needToCascade', needToCascade);
           // Update dates of the other milestones only if cascade updates needed
           if (needToCascade) {
             return updateComingMilestones(original, updated)
