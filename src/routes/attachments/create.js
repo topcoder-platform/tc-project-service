@@ -67,7 +67,7 @@ module.exports = [
     }
 
     const fileTransferPromise = new Promise((accept, reject) => {
-      if (process.env.NODE_ENV !== 'development') {
+      if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
         // get pre-signed Url
         req.log.debug('requesting presigned Url');
         httpClient.post(`${fileServiceUrl}uploadurl/`, {

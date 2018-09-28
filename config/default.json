@@ -4,6 +4,7 @@
   "logLevel": "info",
   "version": "v4",
   "captureLogs": "false",
+  "enableFileUpload": "true",
   "logentriesToken": "",
   "rabbitmqURL": "",
   "pubsubQueueName": "project.service",

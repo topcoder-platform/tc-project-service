@@ -4,6 +4,7 @@
   "logLevel": "LOG_LEVEL",
   "version": "APP_VERSION",
   "captureLogs": "CAPTURE_LOGS",
+  "enableFileUpload": "ENABLE_FILE_UPLOAD",
   "logentriesToken": "LOGENTRIES_TOKEN",
   "elasticsearchConfig": {
     "host": "PROJECTS_ES_URL",
