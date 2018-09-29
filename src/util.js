@@ -248,26 +248,9 @@ _.assignIn(util, {
     return models.ProjectAttachment.getActiveProjectAttachments(projectId)
       .then((_attachments) => {
         // if attachments were requested
-        if (attachments) {
+        if (_attachments) {
           attachments = _attachments;
-        } else {
-          return attachments;
         }
-        // TODO consider using redis to cache attachments urls
-        const promises = [];
-        _.each(attachments, (a) => {
-          promises.push(util.getFileDownloadUrl(req, a.filePath));
-        });
-        return Promise.all(promises);
-      })
-      .then((result) => {
-        // result is an array of 'tuples' => [[path, url], [path,url]]
-        // convert it to a map for easy lookup
-        const urls = _.fromPairs(result);
-        _.each(attachments, (at) => {
-          const a = at;
-          a.downloadUrl = urls[a.filePath];
-        });
         return attachments;
       });
   },
