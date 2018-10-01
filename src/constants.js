@@ -64,7 +64,7 @@ export const EVENT = {
 
 export const BUS_API_EVENT = {
   PROJECT_CREATED: 'notifications.connect.project.created',
-  PROJECT_UPDATED: 'notifications.connect.project.updated',
+  PROJECT_UPDATED: 'connect.action.project.updated',
   PROJECT_SUBMITTED_FOR_REVIEW: 'notifications.connect.project.submittedForReview',
   PROJECT_APPROVED: 'notifications.connect.project.approved',
   PROJECT_PAUSED: 'notifications.connect.project.paused',
@@ -89,8 +89,8 @@ export const BUS_API_EVENT = {
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
   PROJECT_PROGRESS_MODIFIED: 'connect.action.project.updated.progress',
-  PROJECT_FILES_UPDATED: 'notifications.connect.project.files.updated',
-  PROJECT_TEAM_UPDATED: 'notifications.connect.project.team.updated',
+  PROJECT_FILES_UPDATED: 'connect.action.project.files.updated',
+  PROJECT_TEAM_UPDATED: 'connect.action.project.team.updated',
 
   // When phase is added/updated/deleted from the project,
   // When product is added/deleted from a phase
