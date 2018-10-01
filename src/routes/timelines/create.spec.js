@@ -22,6 +22,8 @@ const testProjects = [
     details: {},
     createdBy: 1,
     updatedBy: 1,
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
   },
   {
     type: 'generic',
@@ -33,6 +35,8 @@ const testProjects = [
     createdBy: 2,
     updatedBy: 2,
     deletedAt: '2018-05-15T00:00:00Z',
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
   },
 ];
 
@@ -62,7 +66,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage',
     activeText: 'text to be shown in active stage',
     completedText: 'text to be shown in completed stage',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 1,
     updatedBy: 2,
     hidden: false,
@@ -78,7 +84,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 2',
     activeText: 'text to be shown in active stage - 2',
     completedText: 'text to be shown in completed stage - 2',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
     hidden: false,
@@ -94,7 +102,9 @@ const milestoneTemplates = [
     blockedText: 'text to be shown in blocked stage - 3',
     activeText: 'text to be shown in active stage - 3',
     completedText: 'text to be shown in completed stage - 3',
-    productTemplateId: 1,
+    reference: 'product',
+    referenceId: 1,
+    metadata: {},
     createdBy: 2,
     updatedBy: 3,
     hidden: false,
@@ -168,7 +178,7 @@ describe('CREATE timeline', () => {
           });
       })
       .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-      .then(() => models.ProductMilestoneTemplate.bulkCreate(milestoneTemplates))
+      .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates))
       .then(() => {
         done();
       });

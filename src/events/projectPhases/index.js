@@ -29,6 +29,14 @@ const indexProjectPhase = Promise.coroutine(function* (logger, phase) { // eslin
     const existingPhaseIndex = _.findIndex(phases, p => p.id === phase.id);
     // if phase does not exists already
     if (existingPhaseIndex === -1) {
+      // Increase the order of the other phases in the same project,
+      // which have `order` >= this phase order
+      _.each(phases, (_phase) => {
+        if (!_.isNil(_phase.order) && !_.isNil(phase.order) && _phase.order >= phase.order) {
+          _phase.order += 1; // eslint-disable-line no-param-reassign
+        }
+      });
+
       phases.push(_.omit(phase, ['deletedAt', 'deletedBy']));
     } else { // if phase already exists, ideally we should never land here, but code handles the buggy indexing
       // replaces the old inconsistent index where previously phase was not removed from the index but deleted
@@ -109,12 +117,7 @@ const projectPhaseUpdatedHandler = Promise.coroutine(function* (logger, msg, cha
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.projectId });
-    const phases = _.map(doc._source.phases, (single) => { // eslint-disable-line no-underscore-dangle
-      if (single.id === data.original.id) {
-        return _.assign(single, _.omit(data.updated, ['deletedAt', 'deletedBy']));
-      }
-      return single;
-    });
+    const phases = _.map(data.allPhases, single => _.omit(single, ['deletedAt', 'deletedBy']));
     const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({
       index: ES_PROJECT_INDEX,

@@ -80,13 +80,6 @@ module.exports = [
           // Omit deletedAt, deletedBy
           result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
 
-          // Send event to bus
-          req.log.debug('Sending event to RabbitMQ bus for milestone %d', result.id);
-          req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_ADDED,
-            result,
-            { correlationId: req.id },
-          );
-
           // Increase the order of the other milestones in the same timeline,
           // which have `order` >= this milestone order
           return models.Milestone.update({ order: Sequelize.literal('"order" + 1') }, {
@@ -103,6 +96,16 @@ module.exports = [
       // Do not send events for the updated milestones here,
       // because it will make 'version conflict' error in ES.
       // The order of the other milestones need to be updated in the MILESTONE_ADDED event handler
+
+      // Send event to bus
+      req.log.debug('Sending event to RabbitMQ bus for milestone %d', result.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_ADDED,
+        result,
+        { correlationId: req.id },
+      );
+
+      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_ADDED,
+        { req, created: result });
 
       // Write to the response
       res.status(201).json(util.wrapResponse(req.id, result, 1, 201));

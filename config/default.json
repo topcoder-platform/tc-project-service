@@ -4,6 +4,7 @@
   "logLevel": "info",
   "version": "v4",
   "captureLogs": "false",
+  "enableFileUpload": "true",
   "logentriesToken": "",
   "rabbitmqURL": "",
   "pubsubQueueName": "project.service",
@@ -33,6 +34,8 @@
     "minPoolSize": 4,
     "idleTimeout": 1000
   },
+  "kafkaConfig": {
+  },
   "analyticsKey": "",
   "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
   "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
@@ -46,5 +49,6 @@
   "AUTH0_CLIENT_SECRET": "",
   "AUTH0_AUDIENCE": "",
   "AUTH0_URL": "",
-  "TOKEN_CACHE_TIME": ""
+  "TOKEN_CACHE_TIME": "",
+  "whitelistedOriginsForUserIdAuth": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]"
 }

@@ -1,10 +1,10 @@
 /* eslint-disable valid-jsdoc */
 
 /**
- * The Product Milestone Template model
+ * The Milestone Template model
  */
 module.exports = (sequelize, DataTypes) => {
-  const ProductMilestoneTemplate = sequelize.define('ProductMilestoneTemplate', {
+  const MilestoneTemplate = sequelize.define('MilestoneTemplate', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING(255), allowNull: false },
     description: DataTypes.STRING(255),
@@ -16,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
     completedText: { type: DataTypes.STRING(512), allowNull: false },
     blockedText: { type: DataTypes.STRING(512), allowNull: false },
     hidden: { type: DataTypes.BOOLEAN, defaultValue: false },
+
+    reference: { type: DataTypes.STRING(45), allowNull: false },
+    referenceId: { type: DataTypes.BIGINT, allowNull: false },
+    metadata: { type: DataTypes.JSON, defaultValue: {}, allowNull: false },
+
     deletedAt: DataTypes.DATE,
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -23,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     createdBy: { type: DataTypes.BIGINT, allowNull: false },
     updatedBy: { type: DataTypes.BIGINT, allowNull: false },
   }, {
-    tableName: 'product_milestone_templates',
+    tableName: 'milestone_templates',
     paranoid: true,
     timestamps: true,
     updatedAt: 'updatedAt',
@@ -31,5 +36,5 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: 'deletedAt',
   });
 
-  return ProductMilestoneTemplate;
+  return MilestoneTemplate;
 };

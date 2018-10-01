@@ -24,7 +24,7 @@ const expectAfterDelete = (key, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projectTypes/${key}`)
+          .get(`/v4/projects/metadata/projectTypes/${key}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -51,16 +51,16 @@ describe('DELETE project type', () => {
   );
   after(testUtil.clearDb);
 
-  describe('DELETE /projectTypes/{key}', () => {
+  describe('DELETE /projects/metadata/projectTypes/{key}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projectTypes/${key}`)
+        .delete(`/v4/projects/metadata/projectTypes/${key}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/projectTypes/${key}`)
+        .delete(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -69,7 +69,7 @@ describe('DELETE project type', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projectTypes/${key}`)
+        .delete(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -78,7 +78,7 @@ describe('DELETE project type', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .delete(`/v4/projectTypes/${key}`)
+        .delete(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -87,7 +87,7 @@ describe('DELETE project type', () => {
 
     it('should return 404 for non-existed type', (done) => {
       request(server)
-        .delete('/v4/projectTypes/not_existed')
+        .delete('/v4/projects/metadata/projectTypes/not_existed')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -98,7 +98,7 @@ describe('DELETE project type', () => {
       models.ProjectType.destroy({ where: { key } })
         .then(() => {
           request(server)
-            .delete(`/v4/projectTypes/${key}`)
+            .delete(`/v4/projects/metadata/projectTypes/${key}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -108,7 +108,7 @@ describe('DELETE project type', () => {
 
     it('should return 204, for admin, if type was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projectTypes/${key}`)
+        .delete(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -118,7 +118,7 @@ describe('DELETE project type', () => {
 
     it('should return 204, for connect admin, if type was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projectTypes/${key}`)
+        .delete(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

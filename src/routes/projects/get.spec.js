@@ -25,6 +25,8 @@ describe('GET Project', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: '1',
           }).then((p) => {
             project1 = p;
             // create members
@@ -56,6 +58,8 @@ describe('GET Project', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: '1',
           }).then((p) => {
             project2 = p;
           });
@@ -200,7 +204,8 @@ describe('GET Project', () => {
                 spy.should.have.been.calledOnce;
                 resJson.attachments.should.have.lengthOf(1);
                 resJson.attachments[0].filePath.should.equal(attachment.filePath);
-                resJson.attachments[0].downloadUrl.should.exist;
+                // downloadUrl no more needed
+                // resJson.attachments[0].downloadUrl.should.exist;
                 done();
               }
             });

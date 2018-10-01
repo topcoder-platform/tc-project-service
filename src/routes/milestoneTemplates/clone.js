@@ -7,94 +7,68 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
+import { MILESTONE_TEMPLATE_REFERENCES } from '../../constants';
+import validateMilestoneTemplate from '../../middlewares/validateMilestoneTemplate';
 
 const permissions = tcMiddleware.permissions;
 
 const schema = {
-  params: {
-    productTemplateId: Joi.number().integer().positive().required(),
-  },
   body: {
     param: Joi.object().keys({
-      sourceTemplateId: Joi.number().integer().positive().required(),
+      sourceReference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
+      sourceReferenceId: Joi.number().integer().positive().required(),
+      reference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
+      referenceId: Joi.number().integer().positive().required(),
     }).required(),
   },
 };
 
 module.exports = [
   validate(schema),
+  validateMilestoneTemplate.validateRequestBody,
   permissions('milestoneTemplate.clone'),
   (req, res, next) => {
     let result;
 
     return models.sequelize.transaction(tx =>
       // Find the product template
-      models.ProductTemplate.findAll({ where: { id: [req.params.productTemplateId, req.body.param.sourceTemplateId] },
-        transaction: tx })
-        .then((productTemplates) => {
-          // Not found
-          if (!productTemplates) {
-            const apiErr = new Error(
-              `Product template not found for product template ids ${req.params.productTemplateId}
-              ${req.body.param.sourceTemplateId}`);
-            apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-
-          const targetProductTemplate = _.find(productTemplates, ['id', req.params.productTemplateId]);
-          const sourceProductTemplate = _.find(productTemplates, ['id', req.body.param.sourceTemplateId]);
-
-          // Not found
-          if (!targetProductTemplate) {
-            const apiErr = new Error(
-              `Product template not found for product template id ${req.params.productTemplateId}`);
-            apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-
-          // Not found
-          if (!sourceProductTemplate) {
-            const apiErr = new Error(
-              `Product template not found for source product template id ${req.body.param.sourceTemplateId}`);
-            apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-
-          return models.ProductMilestoneTemplate.findAll({
-            where: {
-              productTemplateId: req.body.param.sourceTemplateId,
-            },
-            attributes: { exclude: ['id', 'deletedAt', 'createdAt', 'updatedAt', 'deletedBy'] },
-            raw: true,
-          })
-          .then((milestoneTemplatesToClone) => {
-            const newMilestoneTemplates = _.cloneDeep(milestoneTemplatesToClone);
-            _.each(newMilestoneTemplates, (milestone) => {
-              milestone.productTemplateId = req.params.productTemplateId; // eslint-disable-line no-param-reassign
-              milestone.createdBy = req.authUser.userId; // eslint-disable-line no-param-reassign
-              milestone.updatedBy = req.authUser.userId; // eslint-disable-line no-param-reassign
-            });
-            return models.ProductMilestoneTemplate.bulkCreate(newMilestoneTemplates, { transaction: tx });
+      models.MilestoneTemplate.findAll({
+        where: {
+          reference: req.body.param.sourceReference,
+          referenceId: req.body.param.sourceReferenceId,
+        },
+        attributes: { exclude: ['id', 'deletedAt', 'createdAt', 'updatedAt', 'deletedBy'] },
+        raw: true,
+      })
+        .then((milestoneTemplatesToClone) => {
+          const newMilestoneTemplates = _.cloneDeep(milestoneTemplatesToClone);
+          _.each(newMilestoneTemplates, (milestone) => {
+            milestone.reference = req.body.param.reference; // eslint-disable-line no-param-reassign
+            milestone.referenceId = req.body.param.referenceId; // eslint-disable-line no-param-reassign
+            milestone.createdBy = req.authUser.userId; // eslint-disable-line no-param-reassign
+            milestone.updatedBy = req.authUser.userId; // eslint-disable-line no-param-reassign
           });
+          return models.MilestoneTemplate.bulkCreate(newMilestoneTemplates, { transaction: tx });
         })
         .then(() => { // eslint-disable-line arrow-body-style
-          return models.ProductMilestoneTemplate.findAll({
+          return models.MilestoneTemplate.findAll({
             where: {
-              productTemplateId: req.params.productTemplateId,
+              reference: req.body.param.reference,
+              referenceId: req.body.param.referenceId,
             },
             attributes: { exclude: ['deletedAt', 'deletedBy'] },
             raw: true,
           })
-          .then((clonedMilestoneTemplates) => {
-            result = clonedMilestoneTemplates;
-            return result;
-          });
+            .then((clonedMilestoneTemplates) => {
+              result = clonedMilestoneTemplates;
+              return result;
+            });
         }),
     )
-    .then(() => {
-      // Write to response
-      res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
-    })
-    .catch(next);
+      .then(() => {
+        // Write to response
+        res.status(201).json(util.wrapResponse(req.id, result, result.length, 201));
+      })
+      .catch(next);
   },
 ];

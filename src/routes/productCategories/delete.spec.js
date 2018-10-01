@@ -26,7 +26,7 @@ const expectAfterDelete = (key, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/productCategories/${key}`)
+          .get(`/v4/projects/metadata/productCategories/${key}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -52,16 +52,16 @@ describe('DELETE product category', () => {
   );
   after(testUtil.clearDb);
 
-  describe('DELETE /productCategories/{key}', () => {
+  describe('DELETE /projects/metadata/productCategories/{key}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/productCategories/${key}`)
+        .delete(`/v4/projects/metadata/productCategories/${key}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/productCategories/${key}`)
+        .delete(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -70,7 +70,7 @@ describe('DELETE product category', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/productCategories/${key}`)
+        .delete(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -79,7 +79,7 @@ describe('DELETE product category', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .delete(`/v4/productCategories/${key}`)
+        .delete(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -88,7 +88,7 @@ describe('DELETE product category', () => {
 
     it('should return 404 for non-existed product category', (done) => {
       request(server)
-        .delete('/v4/productCategories/not_existed')
+        .delete('/v4/projects/metadata/productCategories/not_existed')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -99,7 +99,7 @@ describe('DELETE product category', () => {
       models.ProductCategory.destroy({ where: { key } })
         .then(() => {
           request(server)
-            .delete(`/v4/productCategories/${key}`)
+            .delete(`/v4/projects/metadata/productCategories/${key}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -109,7 +109,7 @@ describe('DELETE product category', () => {
 
     it('should return 204, for admin, if the product category was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/productCategories/${key}`)
+        .delete(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -119,7 +119,7 @@ describe('DELETE product category', () => {
 
     it('should return 204, for connect admin, if the product category was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/productCategories/${key}`)
+        .delete(`/v4/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

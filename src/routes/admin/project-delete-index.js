@@ -2,7 +2,6 @@
 /* globals Promise */
 
 import _ from 'lodash';
-import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 
@@ -17,8 +16,6 @@ import util from '../../util';
 
 // var permissions = require('tc-core-library-js').middleware.permissions
 const permissions = tcMiddleware.permissions;
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-// const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 module.exports = [
   permissions('project.admin'),
@@ -29,10 +26,13 @@ module.exports = [
   (req, res, next) => { // eslint-disable-line no-unused-vars
     const logger = req.log;
     logger.debug('Entered Admin#deleteIndex');
-    const indexName = _.get(req, 'body.param.indexName', ES_PROJECT_INDEX);
-    // const docType = _.get(req, 'body.param.docType', ES_PROJECT_TYPE);
+    const indexName = _.get(req, 'body.param.indexName');
     logger.debug('indexName', indexName);
-    // logger.debug('docType', docType);
+    if (!indexName) {
+      const apiErr = new Error('indexName is required');
+      apiErr.status = 400;
+      return Promise.reject(apiErr);
+    }
 
     const esClient = util.getElasticSearchClient();
     esClient.indices.delete({
@@ -40,6 +40,6 @@ module.exports = [
       // we would want to ignore no such index error
       ignore: [404],
     });
-    res.status(200).json(util.wrapResponse(req.id, { message: 'Delete index request successfully submitted' }));
+    return res.status(200).json(util.wrapResponse(req.id, { message: 'Delete index request successfully submitted' }));
   },
 ];

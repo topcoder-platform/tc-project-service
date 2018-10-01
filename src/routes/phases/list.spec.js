@@ -58,6 +58,8 @@ describe('Project Phases', () => {
           details: {},
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           projectId = p.id;
           project = p.toJSON();
@@ -83,6 +85,8 @@ describe('Project Phases', () => {
             return models.ProjectPhase.create(body);
           }).then((phase) => {
             // Index to ES
+            // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+            project.lastActivityAt = 1;
             project.phases = [phase];
             return server.services.es.index({
               index: ES_PROJECT_INDEX,

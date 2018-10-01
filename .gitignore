@@ -1,6 +1,8 @@
 
 # Created by https://www.gitignore.io/api/node
 config/local.js
+# can be used locally to config some env variables and after apply them using `source .env`
+.env
 ### Node ###
 # Logs
 logs

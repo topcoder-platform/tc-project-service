@@ -1,10 +1,16 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
+import sinon from 'sinon';
 import chai from 'chai';
 import request from 'supertest';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+
+import {
+  BUS_API_EVENT,
+} from '../../constants';
 
 const should = chai.should();
 
@@ -45,7 +51,9 @@ const validatePhase = (resJson, expectedPhase) => {
 
 describe('Project Phases', () => {
   let projectId;
+  let projectName;
   let phaseId;
+  let phaseId2;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -63,44 +71,54 @@ describe('Project Phases', () => {
   before((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          projectId = p.id;
+          projectName = p.name;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
-              createdBy: 1,
-              updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              _.assign(body, { projectId });
-              models.ProjectPhase.create(body).then((phase) => {
-                phaseId = phase.id;
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            _.assign(body, { projectId });
+            const phases = [
+              body,
+              _.assign({ order: 1 }, body),
+            ];
+            models.ProjectPhase.bulkCreate(phases, { returning: true })
+              .then((createdPhases) => {
+                phaseId = createdPhases[0].id;
+                phaseId2 = createdPhases[1].id;
+
                 done();
               });
-            });
           });
         });
+      });
   });
 
   after((done) => {
@@ -225,6 +243,300 @@ describe('Project Phases', () => {
             done();
           }
         });
+    });
+
+    it('should return updated phase if the order is specified', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: _.assign({ order: 1 }, updateBody) })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            validatePhase(resJson, updateBody);
+            resJson.order.should.be.eql(1);
+
+            // Check the order of the other phase
+            models.ProjectPhase.findOne({ where: { id: phaseId2 } })
+              .then((phase2) => {
+                phase2.order.should.be.eql(2);
+                done();
+              });
+          }
+        });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when spentBudget updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            spentBudget: 123,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT);
+              done();
+            });
+          }
+        });
+      });
+
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when progress updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            progress: 50,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.callCount.should.be.eql(2);
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS);
+              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PROGRESS_MODIFIED);
+              done();
+            });
+          }
+        });
+      });
+
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            details: {
+              text: 'something',
+            },
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE);
+              done();
+            });
+          }
+        });
+      });
+
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (completed)', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            status: 'completed',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED);
+              done();
+            });
+          }
+        });
+      });
+
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when budget updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            budget: 123,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.notCalled.should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when startDate updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            startDate: 123,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                // originalPhase: sinon.match(originalPhase),
+                // updatedPhase: sinon.match(updatedPhase),
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when duration updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            duration: 100,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when order updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            order: 100,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.notCalled.should.be.true;
+              done();
+            });
+          }
+        });
+      });
+
+      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when endDate updated', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            endDate: new Date(),
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.notCalled.should.be.true;
+              done();
+            });
+          }
+        });
+      });
     });
   });
 });

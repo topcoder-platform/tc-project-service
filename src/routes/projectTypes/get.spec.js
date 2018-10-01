@@ -33,10 +33,10 @@ describe('GET project type', () => {
   );
   after(testUtil.clearDb);
 
-  describe('GET /projectTypes/{key}', () => {
+  describe('GET /projects/metadata/projectTypes/{key}', () => {
     it('should return 404 for non-existed type', (done) => {
       request(server)
-        .get('/v4/projectTypes/1234')
+        .get('/v4/projects/metadata/projectTypes/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -47,7 +47,7 @@ describe('GET project type', () => {
       models.ProjectType.destroy({ where: { key } })
         .then(() => {
           request(server)
-            .get(`/v4/projectTypes/${key}`)
+            .get(`/v4/projects/metadata/projectTypes/${key}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -57,7 +57,7 @@ describe('GET project type', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projectTypes/${key}`)
+        .get(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -86,13 +86,13 @@ describe('GET project type', () => {
 
     it('should return 200 even if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projectTypes/${key}`)
+        .get(`/v4/projects/metadata/projectTypes/${key}`)
         .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/projectTypes/${key}`)
+        .get(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -102,7 +102,7 @@ describe('GET project type', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/projectTypes/${key}`)
+        .get(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -112,7 +112,7 @@ describe('GET project type', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get(`/v4/projectTypes/${key}`)
+        .get(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -121,7 +121,7 @@ describe('GET project type', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get(`/v4/projectTypes/${key}`)
+        .get(`/v4/projects/metadata/projectTypes/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

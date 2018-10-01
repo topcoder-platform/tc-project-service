@@ -13,6 +13,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: new Date(),
+      lastActivityUserId: '1',
     }, {
       type: 'visual_design',
       directProjectId: 1,
@@ -23,6 +25,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: new Date(),
+      lastActivityUserId: '1',
     }, {
       type: 'visual_design',
       billingAccountId: 3,
@@ -32,6 +36,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: new Date(),
+      lastActivityUserId: '1',
     }, {
       type: 'generic',
       billingAccountId: 4,
@@ -41,6 +47,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: new Date(),
+      lastActivityUserId: '1',
     }, {
       type: 'generic',
       billingAccountId: 5,
@@ -50,6 +58,8 @@ models.sequelize.sync({ force: true })
       details: {},
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: new Date(),
+      lastActivityUserId: '1',
     }, {
       type: 'generic',
       billingAccountId: 5,
@@ -69,6 +79,8 @@ models.sequelize.sync({ force: true })
       },
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: new Date(),
+      lastActivityUserId: '1',
       version: 'v2',
       directProjectId: 123,
       estimatedPrice: 15000,
@@ -92,6 +104,8 @@ models.sequelize.sync({ force: true })
       },
       createdBy: 1,
       updatedBy: 1,
+      lastActivityAt: new Date(),
+      lastActivityUserId: '1',
       version: 'v2',
       directProjectId: 123,
       estimatedPrice: 15000,
@@ -441,13 +455,30 @@ models.sequelize.sync({ force: true })
     },
   ], { returning: true }))
   // Product milestone templates
-  .then(productTemplates => models.ProductMilestoneTemplate.bulkCreate([
+  .then(productTemplates => models.MilestoneTemplate.bulkCreate([
     {
       name: 'milestoneTemplate 1',
       duration: 3,
       type: 'type1',
       order: 1,
-      productTemplateId: productTemplates[0].id,
+      reference: 'productTemplate',
+      referenceId: productTemplates[0].id,
+      metadata: {
+        metadata1: {
+          name: 'metadata 1',
+          details: {
+            anyDetails: 'any details 1',
+          },
+          others: ['others 11', 'others 12'],
+        },
+        metadata2: {
+          name: 'metadata 2',
+          details: {
+            anyDetails: 'any details 2',
+          },
+          others: ['others 21', 'others 22'],
+        },
+      },
       activeText: 'activeText 1',
       completedText: 'completedText 1',
       blockedText: 'blockedText 1',
@@ -460,7 +491,9 @@ models.sequelize.sync({ force: true })
       duration: 4,
       type: 'type2',
       order: 2,
-      productTemplateId: productTemplates[0].id,
+      metadata: {},
+      reference: 'productTemplate',
+      referenceId: productTemplates[0].id,
       activeText: 'activeText 2',
       completedText: 'completedText 2',
       blockedText: 'blockedText 2',
@@ -584,6 +617,7 @@ models.sequelize.sync({ force: true })
       question: 'question 1',
       info: 'info 1',
       aliases: ['key-11', 'key_12'],
+      metadata: {},
     },
     {
       key: 'generic',
@@ -594,6 +628,7 @@ models.sequelize.sync({ force: true })
       question: 'question 2',
       info: 'info 2',
       aliases: ['key-21', 'key_22'],
+      metadata: {},
     },
     {
       key: 'visual_prototype',
@@ -604,6 +639,7 @@ models.sequelize.sync({ force: true })
       question: 'question 3',
       info: 'info 1',
       aliases: ['key-31', 'key_32'],
+      metadata: {},
     },
     {
       key: 'visual_design',
@@ -614,6 +650,7 @@ models.sequelize.sync({ force: true })
       question: 'question 4',
       info: 'info 4',
       aliases: ['key-41', 'key_42'],
+      metadata: {},
     },
     {
       key: 'website',
@@ -624,6 +661,7 @@ models.sequelize.sync({ force: true })
       question: 'question 5',
       info: 'info 5',
       aliases: ['key-51', 'key_52'],
+      metadata: {},
     },
     {
       key: 'app',
@@ -634,6 +672,7 @@ models.sequelize.sync({ force: true })
       question: 'question 6',
       info: 'info 6',
       aliases: ['key-61', 'key_62'],
+      metadata: {},
     },
     {
       key: 'quality_assurance',
@@ -644,6 +683,7 @@ models.sequelize.sync({ force: true })
       question: 'question 7',
       info: 'info 7',
       aliases: ['key-71', 'key_72'],
+      metadata: {},
     },
     {
       key: 'chatbot',
@@ -654,6 +694,7 @@ models.sequelize.sync({ force: true })
       question: 'question 8',
       info: 'info 8',
       aliases: ['key-81', 'key_82'],
+      metadata: {},
     },
   ]))
   .then(() => models.ProductCategory.bulkCreate([

@@ -57,6 +57,8 @@ describe('Phase Products', () => {
           details: {},
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           projectId = p.id;
           project = p.toJSON();
@@ -94,12 +96,13 @@ describe('Phase Products', () => {
             }).then((phase) => {
               phaseId = phase.id;
               _.assign(body, { phaseId, projectId });
-
+              project.lastActivityAt = 1;
               project.phases = [phase.toJSON()];
 
               models.PhaseProduct.create(body).then((product) => {
                 project.phases[0].products = [product.toJSON()];
-
+                // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+                project.lastActivityAt = 1;
                 // Index to ES
                 return server.services.es.index({
                   index: ES_PROJECT_INDEX,

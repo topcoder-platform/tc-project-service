@@ -18,7 +18,7 @@ Microservice to manage CRUD operations for all things Projects.
 Copy config/sample.local.js as config/local.js, update the properties and according to your env setup
 
 #### Database
-Once you start your PostgreSQL database through docker, it will create a projectsDB.
+Once you start your PostgreSQL database through docker, it will create a projectsdb.
 *To create tables - note this will drop tables if they already exist*
 ```
 NODE_ENV=development npm run sync:db
@@ -39,6 +39,33 @@ Run `npm run sync:es` from the root of project to execute the script.
 > NOTE: This will first clear all the indices and than recreate them. So use with caution.
 
 **NOTE**: In production these dependencies / services are hosted & managed outside tc-projects-service.
+
+#### Kafka
+Kafka must be installed and configured prior starting the application.
+Following topics must be created:
+```
+notifications.connect.project.updated
+notifications.connect.project.files.updated
+notifications.connect.project.team.updated
+notifications.connect.project.plan.updated
+notifications.connect.project.topic.created
+notifications.connect.project.topic.updated
+notifications.connect.project.post.created
+notifications.connect.project.post.edited
+```
+
+New Kafka related configuration options has been introduced:
+```
+"kafkaConfig": {
+    "hosts": List of Kafka brokers. Default: localhost: 9092
+    "clientCert": SSL certificate
+    "clientCertKey": Certificate key
+}
+```
+Environment variables:
+KAFKA_HOSTS - same as "hosts"
+KAFKA_CLIENT_CERT - same as "clientCert"
+KAFKA_CLIENT_CERT_KEY - same as "clientCertKey"
 
 ### Test
 

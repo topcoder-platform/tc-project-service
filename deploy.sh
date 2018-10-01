@@ -54,11 +54,15 @@ make_task_def(){
       "name": "%s",
       "image": "%s.dkr.ecr.%s.amazonaws.com/%s:%s",
       "essential": true,
-      "memory": 200,
-      "cpu": 10,
+      "memory": 1536,
+      "cpu": 768,
       "environment": [
         {
           "name": "NODE_ENV",
+          "value": "%s"
+        },
+        {
+          "name": "ENABLE_FILE_UPLOAD",
           "value": "%s"
         },
         {
@@ -176,6 +180,22 @@ make_task_def(){
         {
           "name": "TOKEN_CACHE_TIME",
           "value": "%s"
+        },
+        {
+          "name": "KAFKA_CLIENT_CERT",
+          "value": "%s"
+        },
+        {
+          "name": "KAFKA_CLIENT_CERT_KEY",
+          "value": "%s"
+        },
+        {
+          "name": "KAFKA_GROUP_ID",
+          "value": "%s"
+        },
+        {
+          "name": "KAFKA_URL",
+          "value": "%s"
         }
       ],
       "portMappings": [
@@ -220,15 +240,20 @@ make_task_def(){
   fi
   echo "NODE_ENV"
   echo $NODE_ENV
+  ENABLE_FILE_UPLOAD=$(eval "echo \$${ENV}_ENABLE_FILE_UPLOAD")
 
   AUTH0_URL=$(eval "echo \$${ENV}_AUTH0_URL")
   AUTH0_AUDIENCE=$(eval "echo \$${ENV}_AUTH0_AUDIENCE")
   AUTH0_CLIENT_ID=$(eval "echo \$${ENV}_AUTH0_CLIENT_ID")
   AUTH0_CLIENT_SECRET=$(eval "echo \$${ENV}_AUTH0_CLIENT_SECRET")
   TOKEN_CACHE_TIME=$(eval "echo \$${ENV}_TOKEN_CACHE_TIME")
+  KAFKA_CLIENT_CERT=$(eval "echo \$${ENV}_KAFKA_CLIENT_CERT")
+  KAFKA_CLIENT_CERT_KEY=$(eval "echo \$${ENV}_KAFKA_CLIENT_CERT_KEY")
+  KAFKA_GROUP_ID=$(eval "echo \$${ENV}_KAFKA_GROUP_ID")
+  KAFKA_URL=$(eval "echo \$${ENV}_KAFKA_URL")
 
 
-  task_def=$(printf "$task_template" $family $ACCOUNT_ID $AWS_ECS_CONTAINER_NAME $ACCOUNT_ID $AWS_REGION $AWS_REPOSITORY $CIRCLE_SHA1 $NODE_ENV $LOG_LEVEL $CAPTURE_LOGS $LOGENTRIES_TOKEN $API_VERSION $AWS_REGION $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY $AUTH_DOMAIN $AUTH_SECRET $VALID_ISSUERS $DB_MASTER_URL $MEMBER_SERVICE_ENDPOINT $IDENTITY_SERVICE_ENDPOINT $BUS_API_URL $MESSAGE_SERVICE_URL $SYSTEM_USER_CLIENT_ID $SYSTEM_USER_CLIENT_SECRET $PROJECTS_ES_URL $PROJECTS_ES_INDEX_NAME $RABBITMQ_URL $DIRECT_PROJECT_SERVICE_ENDPOINT $FILE_SERVICE_ENDPOINT $CONNECT_PROJECTS_URL $SEGMENT_ANALYTICS_KEY "$AUTH0_URL" "$AUTH0_AUDIENCE" $AUTH0_CLIENT_ID "$AUTH0_CLIENT_SECRET" $TOKEN_CACHE_TIME $PORT $PORT $AWS_ECS_CLUSTER $AWS_REGION $NODE_ENV)
+  task_def=$(printf "$task_template" $family $ACCOUNT_ID $AWS_ECS_CONTAINER_NAME $ACCOUNT_ID $AWS_REGION $AWS_REPOSITORY $CIRCLE_SHA1 $NODE_ENV $ENABLE_FILE_UPLOAD $LOG_LEVEL $CAPTURE_LOGS $LOGENTRIES_TOKEN $API_VERSION $AWS_REGION $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY $AUTH_DOMAIN $AUTH_SECRET $VALID_ISSUERS $DB_MASTER_URL $MEMBER_SERVICE_ENDPOINT $IDENTITY_SERVICE_ENDPOINT $BUS_API_URL $MESSAGE_SERVICE_URL $SYSTEM_USER_CLIENT_ID $SYSTEM_USER_CLIENT_SECRET $PROJECTS_ES_URL $PROJECTS_ES_INDEX_NAME $RABBITMQ_URL $DIRECT_PROJECT_SERVICE_ENDPOINT $FILE_SERVICE_ENDPOINT $CONNECT_PROJECTS_URL $SEGMENT_ANALYTICS_KEY "$AUTH0_URL" "$AUTH0_AUDIENCE" $AUTH0_CLIENT_ID "$AUTH0_CLIENT_SECRET" $TOKEN_CACHE_TIME "$KAFKA_CLIENT_CERT" "$KAFKA_CLIENT_CERT_KEY" $KAFKA_GROUP_ID $KAFKA_URL $PORT $PORT $AWS_ECS_CLUSTER $AWS_REGION $NODE_ENV)
 }
 
 push_ecr_image(){

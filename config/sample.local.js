@@ -5,6 +5,7 @@ if (process.env.NODE_ENV === 'test') {
   config = require('./test.json');
 } else {
   config = {
+    identityServiceEndpoint: "http://dockerhost:3001/",
     authSecret: 'secret',
     authDomain: 'topcoder-dev.com',
     logLevel: 'debug',
@@ -14,9 +15,9 @@ if (process.env.NODE_ENV === 'test') {
     fileServiceEndpoint: 'https://api.topcoder-dev.com/v3/files/',
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',
-    memberServiceEndpoint: 'http://dockerhost:3001/members',
+    memberServiceEndpoint: 'http://dockerhost:3001/v3/members',
     dbConfig: {
-      masterUrl: 'postgres://coder:mysecretpassword@dockerhost:54321/projectsdb',
+      masterUrl: 'postgres://coder:mysecretpassword@dockerhost:5432/projectsdb',
       maxPoolSize: 50,
       minPoolSize: 4,
       idleTimeout: 1000,
@@ -28,6 +29,7 @@ if (process.env.NODE_ENV === 'test') {
       indexName: 'projects',
       docType: 'projectV4'
     },
+    whitelistedOriginsForUserIdAuth: "[\"\"]",
   };
 }
 module.exports = config;

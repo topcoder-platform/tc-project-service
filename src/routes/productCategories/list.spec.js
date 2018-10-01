@@ -45,10 +45,10 @@ describe('LIST product categories', () => {
   );
   after(testUtil.clearDb);
 
-  describe('GET /productCategories', () => {
+  describe('GET /projects/metadata/productCategories', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/productCategories')
+        .get('/v4/projects/metadata/productCategories')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -79,13 +79,13 @@ describe('LIST product categories', () => {
 
     it('should return 200 even if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/productCategories')
+        .get('/v4/projects/metadata/productCategories')
         .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/productCategories')
+        .get('/v4/projects/metadata/productCategories')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -95,7 +95,7 @@ describe('LIST product categories', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/productCategories')
+        .get('/v4/projects/metadata/productCategories')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -105,7 +105,7 @@ describe('LIST product categories', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/productCategories')
+        .get('/v4/projects/metadata/productCategories')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -114,7 +114,7 @@ describe('LIST product categories', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/productCategories')
+        .get('/v4/projects/metadata/productCategories')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

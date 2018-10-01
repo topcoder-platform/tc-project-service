@@ -1,13 +1,16 @@
+/* eslint-disable no-unused-expressions */
 /**
  * Tests for create.js
  */
 import chai from 'chai';
+import sinon from 'sinon';
 import request from 'supertest';
 import _ from 'lodash';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import models from '../../models';
-import { EVENT } from '../../constants';
+import busApi from '../../services/busApi';
+import { EVENT, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -28,6 +31,8 @@ describe('CREATE milestone', () => {
             details: {},
             createdBy: 1,
             updatedBy: 1,
+            lastActivityAt: 1,
+            lastActivityUserId: '1',
           },
           {
             type: 'generic',
@@ -38,6 +43,8 @@ describe('CREATE milestone', () => {
             details: {},
             createdBy: 2,
             updatedBy: 2,
+            lastActivityAt: 1,
+            lastActivityUserId: '1',
             deletedAt: '2018-05-15T00:00:00Z',
           },
         ], { returning: true })
@@ -603,6 +610,52 @@ describe('CREATE milestone', () => {
           resJson.updatedBy.should.be.eql(40051331); // member
           done();
         });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone created', (done) => {
+        request(server)
+          .post('/v4/timelines/1/milestones')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });

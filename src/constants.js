@@ -64,12 +64,19 @@ export const EVENT = {
 
 export const BUS_API_EVENT = {
   PROJECT_CREATED: 'notifications.connect.project.created',
+  PROJECT_UPDATED: 'connect.action.project.updated',
   PROJECT_SUBMITTED_FOR_REVIEW: 'notifications.connect.project.submittedForReview',
   PROJECT_APPROVED: 'notifications.connect.project.approved',
   PROJECT_PAUSED: 'notifications.connect.project.paused',
   PROJECT_COMPLETED: 'notifications.connect.project.completed',
   PROJECT_CANCELED: 'notifications.connect.project.canceled',
   PROJECT_ACTIVE: 'notifications.connect.project.active',
+
+  PROJECT_PHASE_TRANSITION_ACTIVE: 'notifications.connect.project.phase.transition.active',
+  PROJECT_PHASE_TRANSITION_COMPLETED: 'notifications.connect.project.phase.transition.completed',
+  PROJECT_PHASE_UPDATE_PAYMENT: 'notifications.connect.project.phase.update.payment',
+  PROJECT_PHASE_UPDATE_PROGRESS: 'notifications.connect.project.phase.update.progress',
+  PROJECT_PHASE_UPDATE_SCOPE: 'notifications.connect.project.phase.update.scope',
 
   MEMBER_JOINED: 'notifications.connect.project.member.joined',
   MEMBER_LEFT: 'notifications.connect.project.member.left',
@@ -81,14 +88,39 @@ export const BUS_API_EVENT = {
   PROJECT_LINK_CREATED: 'notifications.connect.project.linkCreated',
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
+  PROJECT_PROGRESS_MODIFIED: 'connect.action.project.updated.progress',
+  PROJECT_FILES_UPDATED: 'connect.action.project.files.updated',
+  PROJECT_TEAM_UPDATED: 'connect.action.project.team.updated',
 
   // When phase is added/updated/deleted from the project,
   // When product is added/deleted from a phase
   // When product is updated on any field other than specification
-  PROJECT_PLAN_MODIFIED: 'notifications.connect.project.planModified',
+  PROJECT_PLAN_UPDATED: 'connect.action.project.plan.updated',
+
+  PROJECT_PLAN_READY: 'connect.action.project.plan.ready',
+
+  // When milestone is added/deleted to/from the phase,
+  // When milestone is updated for duration/startDate/endDate/status
+  TIMELINE_ADJUSTED: 'connect.action.timeline.adjusted',
 
   // When specification of a product is modified
-  PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'notifications.connect.project.productSpecificationModified',
+  PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'connect.action.project.product.update.spec',
+
+  MILESTONE_ADDED: 'connect.action.timeline.milestone.added',
+  MILESTONE_REMOVED: 'connect.action.timeline.milestone.removed',
+  MILESTONE_UPDATED: 'connect.action.timeline.milestone.updated',
+  // When milestone is marked as active
+  MILESTONE_TRANSITION_ACTIVE: 'connect.action.timeline.milestone.transition.active',
+  // When milestone is marked as completed
+  MILESTONE_TRANSITION_COMPLETED: 'connect.action.timeline.milestone.transition.completed',
+  // When milestone is waiting for customers's input
+  MILESTONE_WAITING_CUSTOMER: 'connect.action.timeline.milestone.waiting.customer',
+
+  // TC Message Service events
+  TOPIC_CREATED: 'notifications.connect.project.topic.created',
+  TOPIC_UPDATED: 'notifications.connect.project.topic.updated',
+  POST_CREATED: 'notifications.connect.project.post.created',
+  POST_UPDATED: 'notifications.connect.project.post.edited',
 };
 
 export const REGEX = {
@@ -104,3 +136,8 @@ export const TIMELINE_REFERENCES = {
   PHASE: 'phase',
   PRODUCT: 'product',
 };
+
+export const MILESTONE_TEMPLATE_REFERENCES = {
+  PRODUCT_TEMPLATE: 'productTemplate',
+};
+

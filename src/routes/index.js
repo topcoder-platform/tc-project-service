@@ -26,29 +26,35 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
-router.route('/v4/projectTemplates')
+router.route('/v4/projects/metadata/projectTemplates')
   .get(require('./projectTemplates/list'));
-router.route('/v4/projectTemplates/:templateId(\\d+)')
+router.route('/v4/projects/metadata/projectTemplates/:templateId(\\d+)')
   .get(require('./projectTemplates/get'));
 
-router.route('/v4/productTemplates')
+router.route('/v4/projects/metadata/productTemplates')
   .get(require('./productTemplates/list'));
-router.route('/v4/productTemplates/:templateId(\\d+)')
+router.route('/v4/projects/metadata/productTemplates/:templateId(\\d+)')
   .get(require('./productTemplates/get'));
 
-router.route('/v4/projectTypes')
+router.route('/v4/projects/metadata/projectTypes')
   .get(require('./projectTypes/list'));
-router.route('/v4/projectTypes/:key')
+router.route('/v4/projects/metadata/projectTypes/:key')
   .get(require('./projectTypes/get'));
 
-router.route('/v4/productCategories')
+router.route('/v4/projects/metadata/productCategories')
   .get(require('./productCategories/list'));
-router.route('/v4/productCategories/:key')
+router.route('/v4/projects/metadata/productCategories/:key')
   .get(require('./productCategories/get'));
 
+router.route('/v4/projects/metadata')
+  .get(require('./metadata/list'));
+
 router.all(
-  RegExp(`\\/${apiVersion}\\/(projects|projectTemplates|productTemplates|productCategories|projectTypes|` +
-    'timelines)(?!\\/health).*'), jwtAuth());
+  RegExp(`\\/${apiVersion}\\/(projects|timelines)(?!\\/health).*`), (req, res, next) => (
+    // JWT authentication
+    jwtAuth()(req, res, next)
+  ),
+);
 
 // Register all the routes
 router.route('/v4/projects')
@@ -90,31 +96,19 @@ router.route('/v4/projects/:projectId(\\d+)/attachments/:id(\\d+)')
 router.route('/v4/projects/:projectId(\\d+)/upgrade')
   .post(require('./projectUpgrade/create'));
 
-router.route('/v4/projectTemplates')
+router.route('/v4/projects/metadata/projectTemplates')
   .post(require('./projectTemplates/create'));
 
-router.route('/v4/projectTemplates/:templateId(\\d+)')
+router.route('/v4/projects/metadata/projectTemplates/:templateId(\\d+)')
   .patch(require('./projectTemplates/update'))
   .delete(require('./projectTemplates/delete'));
 
-router.route('/v4/productTemplates')
+router.route('/v4/projects/metadata/productTemplates')
   .post(require('./productTemplates/create'));
 
-router.route('/v4/productTemplates/:templateId(\\d+)')
+router.route('/v4/projects/metadata/productTemplates/:templateId(\\d+)')
   .patch(require('./productTemplates/update'))
   .delete(require('./productTemplates/delete'));
-
-router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones')
-  .post(require('./milestoneTemplates/create'))
-  .get(require('./milestoneTemplates/list'));
-
-router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones/clone')
-  .post(require('./milestoneTemplates/clone'));
-
-router.route('/v4/productTemplates/:productTemplateId(\\d+)/milestones/:milestoneTemplateId(\\d+)')
-  .get(require('./milestoneTemplates/get'))
-  .patch(require('./milestoneTemplates/update'))
-  .delete(require('./milestoneTemplates/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/phases')
   .get(require('./phases/list'))
@@ -134,17 +128,17 @@ router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/:prod
   .patch(require('./phaseProducts/update'))
   .delete(require('./phaseProducts/delete'));
 
-router.route('/v4/productCategories')
+router.route('/v4/projects/metadata/productCategories')
   .post(require('./productCategories/create'));
 
-router.route('/v4/productCategories/:key')
+router.route('/v4/projects/metadata/productCategories/:key')
   .patch(require('./productCategories/update'))
   .delete(require('./productCategories/delete'));
 
-router.route('/v4/projectTypes')
+router.route('/v4/projects/metadata/projectTypes')
   .post(require('./projectTypes/create'));
 
-router.route('/v4/projectTypes/:key')
+router.route('/v4/projects/metadata/projectTypes/:key')
   .patch(require('./projectTypes/update'))
   .delete(require('./projectTypes/delete'));
 
@@ -165,6 +159,18 @@ router.route('/v4/timelines/:timelineId(\\d+)/milestones/:milestoneId(\\d+)')
   .get(require('./milestones/get'))
   .patch(require('./milestones/update'))
   .delete(require('./milestones/delete'));
+
+router.route('/v4/timelines/metadata/milestoneTemplates')
+  .post(require('./milestoneTemplates/create'))
+  .get(require('./milestoneTemplates/list'));
+
+router.route('/v4/timelines/metadata/milestoneTemplates/clone')
+  .post(require('./milestoneTemplates/clone'));
+
+router.route('/v4/timelines/metadata/milestoneTemplates/:milestoneTemplateId(\\d+)')
+  .get(require('./milestoneTemplates/get'))
+  .patch(require('./milestoneTemplates/update'))
+  .delete(require('./milestoneTemplates/delete'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

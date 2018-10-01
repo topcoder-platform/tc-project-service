@@ -9,7 +9,8 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
-import { EVENT, TIMELINE_REFERENCES, MILESTONE_STATUS } from '../../constants';
+import { EVENT, TIMELINE_REFERENCES, MILESTONE_STATUS, MILESTONE_TEMPLATE_REFERENCES }
+  from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -59,9 +60,10 @@ module.exports = [
           req.log.debug('Checking templateId %d for creating milestones', templateId);
           if (templateId) {
             req.log.debug('Found templateId, finding milestone templates for the template');
-            return models.ProductMilestoneTemplate.findAll({
+            return models.MilestoneTemplate.findAll({
               where: {
-                productTemplateId: templateId,
+                reference: MILESTONE_TEMPLATE_REFERENCES.PRODUCT_TEMPLATE,
+                referenceId: templateId,
                 deletedAt: { $eq: null },
               },
               order: [['order', 'asc']],
@@ -83,7 +85,7 @@ module.exports = [
                     blockedText: mt.blockedText,
                     completedText: mt.completedText,
                     hidden: !!mt.hidden,
-                    details: {},
+                    details: { metadata: mt.metadata },
                     status: MILESTONE_STATUS.REVIEWED,
                     startDate: startDate.format(),
                     endDate: endDate.format(),

@@ -28,4 +28,7 @@ export default {
     connectAdmin: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJDb25uZWN0IEFkbWluIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJjb25uZWN0X2FkbWluMSIsImV4cCI6MjU2MzA3NjY4OSwidXNlcklkIjoiNDAwNTEzMzYiLCJpYXQiOjE0NjMwNzYwODksImVtYWlsIjoiY29ubmVjdF9hZG1pbjFAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.nSGfXMl02NZ90ZKLiEKPg75iAjU92mfteaY6xgqkM30',
   },
   getDecodedToken: token => jwt.decode(token),
+
+  // Waits for 500ms and executes cb function
+  wait: cb => setTimeout(cb, 500),
 };

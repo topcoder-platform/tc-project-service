@@ -94,10 +94,10 @@ describe('LIST product templates', () => {
   );
   after(testUtil.clearDb);
 
-  describe('GET /productTemplates', () => {
+  describe('GET /projects/metadata/productTemplates', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/productTemplates')
+        .get('/v4/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -112,7 +112,7 @@ describe('LIST product templates', () => {
 
     it('should return 200 even if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/productTemplates')
+        .get('/v4/projects/metadata/productTemplates')
         .expect(200)
         .end((err, res) => {
           const resJson = res.body.result.content;
@@ -124,7 +124,7 @@ describe('LIST product templates', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/productTemplates')
+        .get('/v4/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -139,7 +139,7 @@ describe('LIST product templates', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/productTemplates')
+        .get('/v4/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -154,7 +154,7 @@ describe('LIST product templates', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/productTemplates')
+        .get('/v4/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -168,7 +168,7 @@ describe('LIST product templates', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/productTemplates')
+        .get('/v4/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -182,7 +182,7 @@ describe('LIST product templates', () => {
 
     it('should return filtered templates', (done) => {
       request(server)
-        .get('/v4/productTemplates?filter=productKey%3DproductKey-2')
+        .get('/v4/projects/metadata/productTemplates?filter=productKey%3DproductKey-2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })

@@ -8,6 +8,8 @@ import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+import { BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -46,6 +48,8 @@ describe('Project members delete', () => {
           details: {},
           createdBy: 1,
           updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
           // create members
@@ -314,6 +318,88 @@ describe('Project members delete', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect(403, done);
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when manager removed', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          post: () => Promise.resolve({
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: {},
+              },
+            },
+          }),
+        });
+        sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+        request(server)
+          .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .expect(204)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledTwice.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_LEFT);
+                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051334,
+                  initiatorUserId: 40051334,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
+
+      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when copilot removed', (done) => {
+        request(server)
+          .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .expect(204)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledTwice.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_REMOVED);
+                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051334,
+                  initiatorUserId: 40051334,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });

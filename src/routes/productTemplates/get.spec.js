@@ -56,10 +56,10 @@ describe('GET product template', () => {
   );
   after(testUtil.clearDb);
 
-  describe('GET /productTemplates/{templateId}', () => {
+  describe('GET /projects/metadata/productTemplates/{templateId}', () => {
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .get('/v4/productTemplates/1234')
+        .get('/v4/projects/metadata/productTemplates/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -70,7 +70,7 @@ describe('GET product template', () => {
       models.ProductTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-            .get(`/v4/productTemplates/${templateId}`)
+            .get(`/v4/projects/metadata/productTemplates/${templateId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -80,7 +80,7 @@ describe('GET product template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/productTemplates/${templateId}`)
+        .get(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -110,13 +110,13 @@ describe('GET product template', () => {
 
     it('should return 200 even if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/productTemplates/${templateId}`)
+        .get(`/v4/projects/metadata/productTemplates/${templateId}`)
         .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/productTemplates/${templateId}`)
+        .get(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -126,7 +126,7 @@ describe('GET product template', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/productTemplates/${templateId}`)
+        .get(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -136,7 +136,7 @@ describe('GET product template', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get(`/v4/productTemplates/${templateId}`)
+        .get(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -145,7 +145,7 @@ describe('GET product template', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get(`/v4/productTemplates/${templateId}`)
+        .get(`/v4/projects/metadata/productTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

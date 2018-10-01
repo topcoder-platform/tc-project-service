@@ -33,12 +33,14 @@ function updateComingMilestones(origMilestone, updMilestone) {
   let updMilestoneEndDate = moment.utc(updMSStartDate).add(updMilestone.duration - 1, 'days').toDate();
   // if the milestone, in context, is completed, overrides the end date to the completion date
   updMilestoneEndDate = updMilestone.completionDate ? updMilestone.completionDate : updMilestoneEndDate;
+  let originalMilestones;
   return models.Milestone.findAll({
     where: {
       timelineId: updMilestone.timelineId,
       order: { $gt: updMilestone.order },
     },
   }).then((affectedMilestones) => {
+    originalMilestones = affectedMilestones.map(am => _.omit(am.toJSON(), 'deletedAt', 'deletedBy'));
     const comingMilestones = _.sortBy(affectedMilestones, 'order');
     // calculates the schedule start date for the next milestone
     let startDate = moment.utc(updMilestoneEndDate).add(1, 'days').toDate();
@@ -53,7 +55,7 @@ function updateComingMilestones(origMilestone, updMilestone) {
       }
 
       // Calculate the endDate, and update it if different
-      const endDate = moment.utc(startDate).add(milestone.duration - 1, 'days').toDate();
+      const endDate = moment.utc(milestone.startDate).add(milestone.duration - 1, 'days').toDate();
       if (!_.isEqual(milestone.endDate, endDate)) {
         milestone.endDate = endDate;
         milestone.updatedBy = updMilestone.updatedBy;
@@ -67,17 +69,20 @@ function updateComingMilestones(origMilestone, updMilestone) {
         firstMilestoneFound = true;
       }
 
-      // Set the next startDate value to the next day after completionDate if present or the endDate
-      startDate = moment.utc(milestone.completionDate
-        ? milestone.completionDate
-        : milestone.endDate).add(1, 'days').toDate();
+      // if milestone is not hidden, update the startDate for the next milestone, otherwise keep the same startDate for next milestone
+      if (!milestone.hidden) {
+        // Set the next startDate value to the next day after completionDate if present or the endDate
+        startDate = moment.utc(milestone.completionDate
+          ? milestone.completionDate
+          : milestone.endDate).add(1, 'days').toDate();
+      }
       return milestone.save();
     });
 
     // Resolve promise with all original and updated milestones
     return Promise.all(promises).then(updatedMilestones => ({
-      originalMilestones: affectedMilestones,
-      updatedMilestones,
+      originalMilestones,
+      updatedMilestones: updatedMilestones.map(um => _.omit(um.toJSON(), 'deletedAt', 'deletedBy')),
     }));
   });
 }
@@ -133,6 +138,7 @@ module.exports = [
     });
 
     const timeline = req.timeline;
+    const originalTimeline = _.omit(timeline.toJSON(), 'deletedAt', 'deletedBy');
 
     let original;
     let updated;
@@ -171,6 +177,7 @@ module.exports = [
             // if status has changed to be completed, set the compeltionDate if not provided
             if (entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
               entityToUpdate.completionDate = entityToUpdate.completionDate ? entityToUpdate.completionDate : today;
+              entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
             }
             // if status has changed to be active, set the startDate to today
             if (entityToUpdate.status === MILESTONE_STATUS.ACTIVE) {
@@ -195,6 +202,7 @@ module.exports = [
 
           // if completionDate has changed
           if (!statusChanged && completionDateChanged) {
+            entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
             entityToUpdate.status = MILESTONE_STATUS.COMPLETED;
           }
 
@@ -250,6 +258,7 @@ module.exports = [
           const needToCascade = !_.isEqual(original.completionDate, updated.completionDate) // completion date changed
             || original.duration !== updated.duration // duration changed
             || original.actualStartDate !== updated.actualStartDate; // actual start date updated
+          req.log.debug('needToCascade', needToCascade);
           // Update dates of the other milestones only if cascade updates needed
           if (needToCascade) {
             return updateComingMilestones(original, updated)
@@ -273,6 +282,13 @@ module.exports = [
         original: om, updated: _.find(updatedMilestones, um => um.id === om.id),
       }));
       const cascadedUpdates = { milestones: cascadedMilestones };
+      // if there is a change in timeline, add it to the cascadedUpdates
+      if (originalTimeline.updatedAt !== timeline.updatedAt) {
+        cascadedUpdates.timeline = {
+          original: originalTimeline,
+          updated: _.omit(timeline.toJSON(), 'deletedAt', 'deletedBy'),
+        };
+      }
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
@@ -283,6 +299,9 @@ module.exports = [
       // Do not send events for the the other milestones (updated order) here,
       // because it will make 'version conflict' error in ES.
       // The order of the other milestones need to be updated in the MILESTONE_UPDATED event above
+
+      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+        { req, original, updated, cascadedUpdates });
 
       // Write to response
       res.json(util.wrapResponse(req.id, updated));
