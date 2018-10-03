@@ -64,6 +64,7 @@ module.exports = [
         }
         return models.ProjectMember.getActiveProjectMembers(project.id)
         .then((currentProjectMembers) => {
+          logger.debug('currentProjectMembers : ', currentProjectMembers);
           // check context for project members
           project.members = _.map(currentProjectMembers, m => _.pick(m, fields.project_members));
 
