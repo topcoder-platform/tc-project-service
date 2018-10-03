@@ -48,6 +48,7 @@ module.exports = [
       projects: PROJECT_ATTRIBUTES,
       project_members: PROJECT_MEMBER_ATTRIBUTES,
     });
+    logger.debug('fields', fields);
 
     const eClient = util.getElasticSearchClient();
     return models.Project.findProjectRange(models, projectIdStart, projectIdEnd, fields, false)
@@ -67,15 +68,18 @@ module.exports = [
           logger.debug('currentProjectMembers : ', currentProjectMembers);
           // check context for project members
           project.members = _.map(currentProjectMembers, m => _.pick(m, fields.project_members));
-
+          logger.debug('project.members => ', project.members);
           const userIds = project.members ? project.members.map(single => `userId:${single.userId}`) : [];
+          logger.debug('userIds => ', userIds);
           return util.getMemberDetailsByUserIds(userIds, logger, req.id)
           .then((memberDetails) => {
+            logger.debug('memberDetails => ', memberDetails);
             // update project member record with details
             project.members = project.members.map((single) => {
               const detail = _.find(memberDetails, md => md.userId === single.userId);
               return _.merge(single, _.pick(detail, 'handle', 'firstName', 'lastName', 'email'));
             });
+            logger.debug('After adding details, project.members => ', project.members);
             return Promise.delay(1000).return(project);
           })
           .catch((error) => {
