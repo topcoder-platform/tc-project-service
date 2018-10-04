@@ -169,11 +169,13 @@ module.exports = function defineProject(sequelize, DataTypes) {
           include: [{
             model: models.ProjectPhase,
             as: 'phases',
+            raw,
             order: [['startDate', 'asc']],
             // where: phasesWhere,
             include: [{
               model: models.PhaseProduct,
               as: 'products',
+              raw,
             }],
           }],
         });
