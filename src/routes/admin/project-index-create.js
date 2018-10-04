@@ -117,6 +117,7 @@ module.exports = [
         })
         .then((result) => {
           logger.debug(`project indexed successfully (projectId: ${projectIdStart}-${projectIdEnd})`, result);
+          logger.debug('project content after indexed successfully : ', JSON.stringify(result));
         })
         .catch((error) => {
           logger.error(`Error in indexing project (projectId: ${projectIdStart}-${projectIdEnd})`, error);

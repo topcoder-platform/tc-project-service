@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev']
+              only: ['dev', 'feature/debug_member_indexing_issue']
       - deployProd:
           requires:
             - test
