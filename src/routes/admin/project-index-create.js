@@ -51,7 +51,7 @@ module.exports = [
     logger.debug('fields', fields);
 
     const eClient = util.getElasticSearchClient();
-    return models.Project.findProjectRange(models, projectIdStart, projectIdEnd, fields, false)
+    return models.Project.findProjectRange(models, projectIdStart, projectIdEnd, fields, true)
     .then((_projects) => {
       const projects = _projects.map((_project) => {
         const project = _project;
