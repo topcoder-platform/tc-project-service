@@ -54,10 +54,10 @@ module.exports = [
     return models.Project.findProjectRange(models, projectIdStart, projectIdEnd, fields, false)
     .then((_projects) => {
       const projects = _projects.map((_project) => {
-        const project = _project;
-        if (!project) {
+        if (!_project) {
           return Promise.resolve(null);
         }
+        const project = _project.toJSON();
         logger.debug('phases', project.phases);
         if (project.phases) {
           // removs the delete audit fields from the index data
