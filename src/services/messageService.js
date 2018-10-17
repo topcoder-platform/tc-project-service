@@ -88,6 +88,35 @@ function createTopic(topic, logger) {
 }
 
 /**
+ * Updates the given topic in message api
+ *
+ * @param {Number} topicId id of the topic to be updated
+ * @param {Object} topic the topic, should be a JSON object
+ * @param {Object} logger object
+ * @return {Promise} new topic promise
+ */
+function updateTopic(topicId, topic, logger) {
+  logger.debug(`updateTopic for topic: ${JSON.stringify(topic)}`);
+  return getClient(logger).then((msgClient) => {
+    logger.debug('calling message service');
+    return msgClient.post(`/topics/${topicId}/edit`, topic)
+      .then((resp) => {
+        logger.debug('Topic updated successfully');
+        logger.debug(`Topic updated successfully [status]: ${resp.status}`);
+        logger.debug(`Topic updated successfully [data]: ${resp.data}`);
+        return _.get(resp.data, 'result.content', {});
+      })
+      .catch((error) => {
+        logger.debug('Error updating topic');
+        logger.error(error);
+         // eslint-disable-line
+      });
+  }).catch((errMessage) => {
+    logger.debug(errMessage);
+  });
+}
+
+/**
  * Deletes the given posts for the given topic.
  *
  * @param {Integer} topicId id of the topic
@@ -121,12 +150,13 @@ function deletePosts(topicId, postIds, logger) {
  * @return {Promise} topic promise
  */
 function getPhaseTopic(projectId, phaseId, logger) {
-  logger.debug(`getPhaseTopic for phaseId: ${phaseId}`);
+  logger.debug(`getPhaseTopic for projectId: ${projectId} phaseId: ${phaseId}`);
   return getClient(logger).then((msgClient) => {
     logger.debug(`calling message service for fetching phaseId#${phaseId}`);
-    return msgClient.get('/topics/list', {
-      params: { filter: `reference=project&referenceId=${projectId}&tag=phase#${phaseId}` },
-    }).then((resp) => {
+    const encodedFilter = encodeURIComponent(`reference=project&referenceId=${projectId}&tag=phase#${phaseId}`);
+    return msgClient.get(`/topics/list/db?filter=${encodedFilter}`)
+    .then((resp) => {
+      logger.debug('Fetched phase topic', resp);
       const topics = _.get(resp.data, 'result.content', []);
       if (topics && topics.length > 0) {
         return topics[0];
@@ -153,6 +183,7 @@ function deleteTopic(topicId, logger) {
 
 module.exports = {
   createTopic,
+  updateTopic,
   deletePosts,
   getPhaseTopic,
   deleteTopic,
