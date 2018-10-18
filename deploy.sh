@@ -296,7 +296,7 @@ configure_aws_cli
 push_ecr_image $AWS_REPOSITORY
 deploy_cluster $AWS_ECS_SERVICE "npm" "run" "start"
 
-push_ecr_image $AWS_CONSUMERS_REPOSITORY
+# push_ecr_image $AWS_CONSUMERS_REPOSITORY
 deploy_cluster $AWS_ECS_CONSUMERS_SERVICE "npm" "run" "startKafkaConsumers"
 
 check_service_status $AWS_ECS_SERVICE
