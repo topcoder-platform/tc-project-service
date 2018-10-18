@@ -9,7 +9,6 @@ ACCOUNT_ID=$(eval "echo \$${ENV}_AWS_ACCOUNT_ID")
 AWS_REGION=$(eval "echo \$${ENV}_AWS_REGION")
 AWS_ECS_CONTAINER_NAME="tc-project-service"
 AWS_REPOSITORY=$(eval "echo \$${ENV}_AWS_REPOSITORY")
-AWS_CONSUMERS_REPOSITORY=$(eval "echo \$${ENV}_AWS_CONSUMERS_REPOSITORY")
 AWS_ECS_CLUSTER=$(eval "echo \$${ENV}_AWS_ECS_CLUSTER")
 AWS_ECS_SERVICE=$(eval "echo \$${ENV}_AWS_ECS_SERVICE")
 AWS_ECS_CONSUMERS_SERVICE=$(eval "echo \$${ENV}_AWS_ECS_CONSUMERS_SERVICE")
@@ -296,7 +295,6 @@ configure_aws_cli
 push_ecr_image $AWS_REPOSITORY
 deploy_cluster $AWS_ECS_SERVICE "npm" "run" "start"
 
-# push_ecr_image $AWS_CONSUMERS_REPOSITORY
 deploy_cluster $AWS_ECS_CONSUMERS_SERVICE "npm" "run" "startKafkaConsumers"
 
 check_service_status $AWS_ECS_SERVICE
