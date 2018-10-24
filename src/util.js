@@ -16,7 +16,7 @@ import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
-import AWS from 'aws-sdk';
+// import AWS from 'aws-sdk';
 
 import { ADMIN_ROLES, TOKEN_SCOPES } from './constants';
 
