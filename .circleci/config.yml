@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'feature/multi-container-task']
+              only: ['dev']
       - deployProd:
           requires:
             - test
