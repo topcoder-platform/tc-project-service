@@ -49,7 +49,7 @@
     "express-request-id": "^1.1.0",
     "express-sanitizer": "^1.0.2",
     "express-validation": "^0.6.0",
-    "http-aws-es": "^1.1.3",
+    "http-aws-es": "^6.0.0",
     "joi": "^8.0.5",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.16.4",
