@@ -63,9 +63,9 @@ New Kafka related configuration options has been introduced:
 }
 ```
 Environment variables:
-KAFKA_HOSTS - same as "hosts"
-KAFKA_CLIENT_CERT - same as "clientCert"
-KAFKA_CLIENT_CERT_KEY - same as "clientCertKey"
+- `KAFKA_HOSTS` - same as "hosts"
+- `KAFKA_CLIENT_CERT` - same as "clientCert"
+- `KAFKA_CLIENT_CERT_KEY` - same as "clientCertKey"
 
 ### Test
 
