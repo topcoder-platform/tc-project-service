@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev']
+              only: ['dev', 'feature/auth0-proxy-server']
       - deployProd:
           requires:
             - test

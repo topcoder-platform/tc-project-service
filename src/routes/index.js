@@ -52,7 +52,7 @@ router.route('/v4/projects/metadata')
 router.all(
   RegExp(`\\/${apiVersion}\\/(projects|timelines)(?!\\/health).*`), (req, res, next) => (
     // JWT authentication
-    jwtAuth()(req, res, next)
+    jwtAuth(config)(req, res, next)
   ),
 );
 
