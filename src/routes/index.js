@@ -48,7 +48,7 @@ router.route('/v4/projects/metadata/productCategories/:key')
   .get(require('./productCategories/get'));
 
 
-router.use(`/v4/projects/metadata`, compression());
+router.use('/v4/projects/metadata', compression());
 router.route('/v4/projects/metadata')
   .get(require('./metadata/list'));
 
