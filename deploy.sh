@@ -11,6 +11,7 @@ AWS_ECS_CONTAINER_NAME="tc-project-service"
 AWS_REPOSITORY=$(eval "echo \$${ENV}_AWS_REPOSITORY")
 AWS_ECS_CLUSTER=$(eval "echo \$${ENV}_AWS_ECS_CLUSTER")
 AWS_ECS_SERVICE=$(eval "echo \$${ENV}_AWS_ECS_SERVICE")
+AWS_ECS_SERVICE_CONSUMERS=$(eval "echo \$${ENV}_AWS_ECS_SERVICE_CONSUMERS")
 AUTH_DOMAIN=$(eval "echo \$${ENV}_AUTH_DOMAIN")
 AUTH_SECRET=$(eval "echo \$${ENV}_AUTH_SECRET")
 VALID_ISSUERS=$(eval "echo \$${ENV}_VALID_ISSUERS")
@@ -29,9 +30,9 @@ configure_aws_cli() {
 # deploys the app to the ecs cluster
 deploy_cluster() {
 
-    make_task_def
-    register_definition
-    if [[ $(aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $AWS_ECS_SERVICE --task-definition $revision | \
+    make_task_def $1 $2 $3 $4
+    register_definition $1
+    if [[ $(aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $1 --task-definition $revision | \
                    $JQ '.service.taskDefinition') != $revision ]]; then
         echo "Error updating service."
         return 1
@@ -46,6 +47,7 @@ make_task_def(){
    "family": "%s",
    "requiresCompatibilities": ["EC2", "FARGATE"],
    "networkMode": "awsvpc",
+   "taskRoleArn": "arn:aws:iam::%s:role/tc-project-service-ecs-task-role",
    "executionRoleArn": "arn:aws:iam::%s:role/ecsTaskExecutionRole",
    "cpu": "1024",
    "memory": "2048",
@@ -56,6 +58,7 @@ make_task_def(){
       "essential": true,
       "memory": 1536,
       "cpu": 768,
+      "entryPoint": ["%s", "%s", "%s"],
       "environment": [
         {
           "name": "NODE_ENV",
@@ -83,14 +86,6 @@ make_task_def(){
         },
         {
           "name": "AWS_REGION",
-          "value": "%s"
-        },
-        {
-          "name": "AWS_ACCESS_KEY_ID",
-          "value": "%s"
-        },
-        {
-          "name": "AWS_SECRET_ACCESS_KEY",
           "value": "%s"
         },
         {
@@ -255,16 +250,16 @@ make_task_def(){
   KAFKA_CLIENT_CERT_KEY=$(eval "echo \$${ENV}_KAFKA_CLIENT_CERT_KEY")
   KAFKA_GROUP_ID=$(eval "echo \$${ENV}_KAFKA_GROUP_ID")
   KAFKA_URL=$(eval "echo \$${ENV}_KAFKA_URL")
+  AUTH0_PROXY_SERVER_URL=$(eval "echo \$${ENV}_AUTH0_PROXY_SERVER_URL")
 
   AUTH0_PROXY_SERVER_URL=$(eval "echo \$${ENV}_AUTH0_PROXY_SERVER_URL")
 
-
-  task_def=$(printf "$task_template" $family $ACCOUNT_ID $AWS_ECS_CONTAINER_NAME $ACCOUNT_ID $AWS_REGION $AWS_REPOSITORY $CIRCLE_SHA1 $NODE_ENV $ENABLE_FILE_UPLOAD $LOG_LEVEL $CAPTURE_LOGS $LOGENTRIES_TOKEN $API_VERSION $AWS_REGION $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY $AUTH_DOMAIN $AUTH_SECRET $VALID_ISSUERS $DB_MASTER_URL $MEMBER_SERVICE_ENDPOINT $IDENTITY_SERVICE_ENDPOINT $BUS_API_URL $MESSAGE_SERVICE_URL $SYSTEM_USER_CLIENT_ID $SYSTEM_USER_CLIENT_SECRET $PROJECTS_ES_URL $PROJECTS_ES_INDEX_NAME $RABBITMQ_URL $DIRECT_PROJECT_SERVICE_ENDPOINT $FILE_SERVICE_ENDPOINT $CONNECT_PROJECTS_URL $SEGMENT_ANALYTICS_KEY "$AUTH0_URL" "$AUTH0_AUDIENCE" $AUTH0_CLIENT_ID "$AUTH0_CLIENT_SECRET" $TOKEN_CACHE_TIME "$KAFKA_CLIENT_CERT" "$KAFKA_CLIENT_CERT_KEY" $KAFKA_GROUP_ID $KAFKA_URL "$AUTH0_PROXY_SERVER_URL" $PORT $PORT $AWS_ECS_CLUSTER $AWS_REGION $NODE_ENV)
+  task_def=$(printf "$task_template" $1 $ACCOUNT_ID $ACCOUNT_ID $AWS_ECS_CONTAINER_NAME $ACCOUNT_ID $AWS_REGION $AWS_REPOSITORY $CIRCLE_SHA1 $2 $3 $4 $NODE_ENV $ENABLE_FILE_UPLOAD $LOG_LEVEL $CAPTURE_LOGS $LOGENTRIES_TOKEN $API_VERSION $AWS_REGION $AUTH_DOMAIN $AUTH_SECRET $VALID_ISSUERS $DB_MASTER_URL $MEMBER_SERVICE_ENDPOINT $IDENTITY_SERVICE_ENDPOINT $BUS_API_URL $MESSAGE_SERVICE_URL $SYSTEM_USER_CLIENT_ID $SYSTEM_USER_CLIENT_SECRET $PROJECTS_ES_URL $PROJECTS_ES_INDEX_NAME $RABBITMQ_URL $DIRECT_PROJECT_SERVICE_ENDPOINT $FILE_SERVICE_ENDPOINT $CONNECT_PROJECTS_URL $SEGMENT_ANALYTICS_KEY "$AUTH0_URL" "$AUTH0_AUDIENCE" $AUTH0_CLIENT_ID "$AUTH0_CLIENT_SECRET" $TOKEN_CACHE_TIME "$KAFKA_CLIENT_CERT" "$KAFKA_CLIENT_CERT_KEY" $KAFKA_GROUP_ID $KAFKA_URL "$AUTH0_PROXY_SERVER_URL" $PORT $PORT $AWS_ECS_CLUSTER $AWS_REGION $NODE_ENV)
 }
 
 push_ecr_image(){
   eval $(aws ecr get-login --region $AWS_REGION --no-include-email)
-  docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY:$CIRCLE_SHA1
+  docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$1:$CIRCLE_SHA1
 }
 
 register_definition() {
@@ -279,13 +274,13 @@ register_definition() {
 check_service_status() {
         counter=0
   sleep 60
-        servicestatus=`aws ecs describe-services --service $AWS_ECS_SERVICE --cluster $AWS_ECS_CLUSTER | $JQ '.services[].events[0].message'`
+        servicestatus=`aws ecs describe-services --service $1 --cluster $AWS_ECS_CLUSTER | $JQ '.services[].events[0].message'`
         while [[ $servicestatus != *"steady state"* ]]
         do
            echo "Current event message : $servicestatus"
            echo "Waiting for 30 seconds to check the service status...."
            sleep 30
-           servicestatus=`aws ecs describe-services --service $AWS_ECS_SERVICE --cluster $AWS_ECS_CLUSTER | $JQ '.services[].events[0].message'`
+           servicestatus=`aws ecs describe-services --service $1 --cluster $AWS_ECS_CLUSTER | $JQ '.services[].events[0].message'`
            counter=`expr $counter + 1`
            if [[ $counter -gt $COUNTER_LIMIT ]] ; then
                 echo "Service does not reach steady state within 10 minutes. Please check"
@@ -296,6 +291,10 @@ check_service_status() {
 }
 
 configure_aws_cli
-push_ecr_image
-deploy_cluster
-check_service_status
+push_ecr_image $AWS_REPOSITORY
+deploy_cluster $AWS_ECS_SERVICE "npm" "run" "start"
+
+deploy_cluster $AWS_ECS_SERVICE_CONSUMERS "npm" "run" "startKafkaConsumers"
+
+check_service_status $AWS_ECS_SERVICE
+check_service_status $AWS_ECS_SERVICE_CONSUMERS
