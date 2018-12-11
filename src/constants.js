@@ -87,7 +87,7 @@ export const BUS_API_EVENT = {
 
   PROJECT_LINK_CREATED: 'notifications.connect.project.linkCreated',
   PROJECT_FILE_UPLOADED: 'notifications.connect.project.fileUploaded',
-  PROJECT_SPECIFICATION_MODIFIED: 'notifications.connect.project.specificationModified',
+  PROJECT_SPECIFICATION_MODIFIED: 'connect.action.project.updated.spec',
   PROJECT_PROGRESS_MODIFIED: 'connect.action.project.updated.progress',
   PROJECT_FILES_UPDATED: 'connect.action.project.files.updated',
   PROJECT_TEAM_UPDATED: 'connect.action.project.team.updated',

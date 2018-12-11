@@ -2,9 +2,11 @@
 
 Microservice to manage CRUD operations for all things Projects.
 
+### Note : Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.
+
 ### Local Development
 * We use docker-compose for running dependencies locally. Instructions for Docker compose setup - https://docs.docker.com/compose/install/
-* Nodejs 6.9.4 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
+* Nodejs 8.9.4 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
 * Install [libpg](https://www.npmjs.com/package/pg-native)
 * Install node dependencies
 `npm install`
@@ -63,9 +65,9 @@ New Kafka related configuration options has been introduced:
 }
 ```
 Environment variables:
-KAFKA_HOSTS - same as "hosts"
-KAFKA_CLIENT_CERT - same as "clientCert"
-KAFKA_CLIENT_CERT_KEY - same as "clientCertKey"
+- `KAFKA_HOSTS` - same as "hosts"
+- `KAFKA_CLIENT_CERT` - same as "clientCert"
+- `KAFKA_CLIENT_CERT_KEY` - same as "clientCertKey"
 
 ### Test
 

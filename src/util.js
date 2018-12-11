@@ -16,7 +16,7 @@ import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
-import AWS from 'aws-sdk';
+// import AWS from 'aws-sdk';
 
 import { ADMIN_ROLES, TOKEN_SCOPES } from './constants';
 
@@ -317,10 +317,10 @@ _.assignIn(util, {
         apiVersion: config.get('elasticsearchConfig.apiVersion'),
         hosts: esHost,
         connectionClass: require('http-aws-es'), // eslint-disable-line global-require
-        amazonES: {
-          region: 'us-east-1',
-          credentials: new AWS.EnvironmentCredentials('AWS'),
-        },
+        // amazonES: {
+        //   region: 'us-east-1',
+        //   credentials: new AWS.EnvironmentCredentials('AWS'),
+        // },
       });
     } else {
       esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
