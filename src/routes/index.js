@@ -3,6 +3,7 @@ import _ from 'lodash';
 import config from 'config';
 import validate from 'express-validation';
 import { Router } from 'express';
+import compression from 'compression';
 
 const router = Router();
 
@@ -46,6 +47,8 @@ router.route('/v4/projects/metadata/productCategories')
 router.route('/v4/projects/metadata/productCategories/:key')
   .get(require('./productCategories/get'));
 
+
+router.use('/v4/projects/metadata', compression());
 router.route('/v4/projects/metadata')
   .get(require('./metadata/list'));
 
