@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev']
+              only: ['dev', 'hotfix/gzip_compression']
       - deployProd:
           requires:
             - test
