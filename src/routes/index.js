@@ -60,10 +60,12 @@ router.all(
 );
 
 // Register all the routes
+router.use('/v4/projects', compression());
 router.route('/v4/projects')
   .post(require('./projects/create'))
   .get(require('./projects/list'));
 
+router.use('/v4/projects/db', compression());
 router.route('/v4/projects/db')
   .get(require('./projects/list-db'));
 
