@@ -76,7 +76,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'feature/auth0-proxy-server']
+              only: ['dev', 'feature/gzip_compression_projects_list']
       - deployProd:
           requires:
             - test
