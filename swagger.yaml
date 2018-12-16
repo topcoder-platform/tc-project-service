@@ -1648,11 +1648,100 @@ paths:
         '204':
           description: Milestone template successfully removed
 
-
-
-
-
-
+  /projects/{projectId}/members/invite:
+    get:
+      tags:
+        - project member invite
+      operationId: getCurrentUserInvite
+      security:
+        - Bearer: []
+      description: Retrieve the invite for current user.
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+      responses:
+        '200':
+          description: The invite for current user
+          schema:
+            $ref: "#/definitions/ProjectMemberInviteResponse"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '400':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Invite not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    post:
+      tags:
+         - project member invite
+      operationId: addProjectMemberInvite
+      security:
+        - Bearer: []
+      description: Create an invite. All users who can access this endpoint, however more restriction will be applied based on role to be added.
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/AddProjectMemberInvitesRequest'
+      responses:
+        '201':
+          description: Returns the newly created invite
+          schema:
+            $ref: "#/definitions/ProjectMemberInviteResponse"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '400':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    put:
+      tags:
+         - project member invite
+      operationId: updateProjectMemberInvite
+      security:
+        - Bearer: []
+      description: Update an invite. All users who can access this endpoint, however more restriction will be applied based on role to be updated.
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateProjectMemberInviteRequest'
+      responses:
+        '200':
+          description: Returns the newly updated invite
+          schema:
+            $ref: "#/definitions/ProjectMemberInviteResponse"
+        '400':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+         
 parameters:
   projectIdParam:
     name: projectId
@@ -3663,4 +3752,113 @@ definitions:
                 type: array
                 items:
                   $ref: "#/definitions/ProductCategory"
+                  
+  ProjectMemberInvite:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      projectId:
+        description: unique project identifier
+        type: integer
+        format: int64
+      userId:
+        type: integer
+        format: int64
+        description: The user Id
+      email:
+        type: string
+        description: The user email
+      role:
+        description: The user role in the project
+        type: string
+        enum: ["manager", "customer", "copilot"]
+      status:
+        description: The invite status
+        type: string
+        enum: ["pending", "accepted", "refused", "canceled"]
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+   
+  AddProjectMemberInvitesRequest:
+    title: Add project member invites request object
+    type: object
+    properties:
+     param:
+        type: object
+        properties:
+          userIds:
+            description: The user Id list, could not present with emails
+            type: array
+            items:
+              type: integer
+              format: int64
+          emails:
+            type: array
+            items:
+              type: string
+            description: The user email list, could not present with userIds
+          role:
+            description: The target role in the project
+            type: string
+            enum: ["manager", "customer", "copilot"]  
+        
+  UpdateProjectMemberInviteRequest:
+    title: Update project member invite request object
+    type: object
+    properties:
+      param:
+        type: object
+        properties:
+          userId:
+            type: integer
+            format: int64
+            description: The user Id, could not present with email
+          email:
+            type: string
+            description: The user email, could not present with userId
+          status:
+            description: The invite status
+            type: string
+            enum: ["pending", "accepted", "refused", "canceled"]
+        
+  ProjectMemberInviteResponse:
+    title: Project member invite response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/ProjectMemberInvite"
               

@@ -18,7 +18,7 @@ import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES } from './constants';
+import { ADMIN_ROLES, TOKEN_SCOPES, EVENT } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -365,7 +365,8 @@ _.assignIn(util, {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', []).map(r => r.roleName));
+      }).then(res => _.get(res, 'data.result.content', [])
+          .map(r => r.roleName));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -383,6 +384,44 @@ _.assignIn(util, {
     if (_.isArray(source)) {
       return source;
     }
+  }),
+
+  /**
+   * Add userId to project
+   * @param  {object} req  Request object that should contain project info and user info
+   * @param  {object} member  the member to be added to project
+  */
+  addUserToProject: Promise.coroutine(function* (req, member) {    // eslint-disable-line
+    const members = req.context.currentProjectMembers;
+
+    // check if member is already registered
+    const existingMember = _.find(members, m => m.userId === member.userId);
+    if (existingMember) {
+      const err = new Error(`User already registered for role: ${existingMember.role}`);
+      err.status = 400;
+      return Promise.reject(err);
+    }
+
+    req.log.debug('creating member', member);
+    let newMember = null;
+    // register member
+
+    return models.ProjectMember.create(member)
+    .then((_newMember) => {
+      newMember = _newMember.get({ plain: true });
+      // publish event
+      req.app.services.pubsub.publish(
+        EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+        newMember,
+        { correlationId: req.id },
+      );
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, { req, member: newMember });
+      return newMember;
+    })
+    .catch((err) => {
+      req.log.error('Unable to register ', err);
+      return Promise.reject(err);
+    });
   }),
 });
 

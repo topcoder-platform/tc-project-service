@@ -70,4 +70,8 @@ module.exports = () => {
   Authorizer.setPolicy('milestone.view', projectView);
 
   Authorizer.setPolicy('metadata.list', true); // anyone can view all metadata
+
+  Authorizer.setPolicy('projectMemberInvite.create', projectView);
+  Authorizer.setPolicy('projectMemberInvite.put', true);
+  Authorizer.setPolicy('projectMemberInvite.get', true);
 };

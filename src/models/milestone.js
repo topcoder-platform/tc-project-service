@@ -42,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
        * @param timelineId the id of timeline
        */
       getTimelineDuration(timelineId) {
-        console.log('getTimelineDuration');
         const where = { timelineId, hidden: false };
         return this.findAll({
           where,
@@ -75,7 +74,6 @@ module.exports = (sequelize, DataTypes) => {
                 scheduledDuration += m.duration;
               }
             });
-            console.log(`${completedDuration} completed out of ${scheduledDuration} duration`);
             if (scheduledDuration > 0) {
               progress = Math.round((completedDuration / scheduledDuration) * 100);
             }

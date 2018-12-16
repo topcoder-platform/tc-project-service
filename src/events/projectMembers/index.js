@@ -24,7 +24,7 @@ const updateESPromise = Promise.coroutine(function* a(logger, requestId, project
       id: projectId,
       body: { doc: updatedDoc },
     })
-    .then(() => logger.debug('elasticsearch project document updated, member updated successfully'));
+    .then(() => logger.debug('elasticsearch project document updated successfully'));
   } catch (error) {
     logger.error('Error caught updating ES document', error);
     return Promise.reject(error);
@@ -83,10 +83,13 @@ const projectMemberAddedHandler = Promise.coroutine(function* a(logger, msg, cha
     const updateDocPromise = Promise.coroutine(function* (doc) { // eslint-disable-line func-names
       const memberDetails = yield util.getMemberDetailsByUserIds([newMember.userId], logger, origRequestId);
       const payload = _.merge(newMember, _.pick(memberDetails[0], 'handle', 'firstName', 'lastName', 'email'));
-      // now merge the updated changes and reindex the document
+      // now merge the updated changes and reindex the document for members
       const members = _.isArray(doc._source.members) ? doc._source.members : []; // eslint-disable-line no-underscore-dangle
       members.push(payload);
-      return _.merge(doc._source, { members }); // eslint-disable-line no-underscore-dangle
+      // now merge the updated changes and reindex the document for invites
+      const invites = _.isArray(doc._source.invites) ? doc._source.invites : []; // eslint-disable-line no-underscore-dangle
+      _.remove(invites, invite => invite === payload.email || invite === payload.userId);
+      return _.merge(doc._source, { members, invites }); // eslint-disable-line no-underscore-dangle
     });
     yield Promise.all([directUpdatePromise(), updateESPromise(logger, origRequestId, projectId, updateDocPromise)]);
     logger.debug('elasticsearch index updated successfully and co-pilot/manager updated in direct project');
@@ -205,4 +208,5 @@ module.exports = {
   projectMemberAddedHandler,
   projectMemberRemovedHandler,
   projectMemberUpdatedHandler,
+  updateESPromise,
 };
