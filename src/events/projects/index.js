@@ -28,10 +28,10 @@ const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disab
     // retrieve member details
     const memberDetails = yield util.getMemberDetailsByUserIds(userIds, msg.properties.correlationId, logger);
     // if no members are returned than this should result in nack
-    if (!_.isArray(memberDetails) || memberDetails.length === 0) {
-      logger.error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
-      throw new Error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
-    }
+    // if (!_.isArray(memberDetails) || memberDetails.length === 0) {
+    //   logger.error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
+    //   throw new Error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
+    // }
     // update project member record with details
     data.members = data.members.map((single) => {
       const detail = _.find(memberDetails, md => md.userId === single.userId);
