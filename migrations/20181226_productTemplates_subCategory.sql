@@ -9,6 +9,6 @@
 -- Add new column
 ALTER TABLE product_templates ADD COLUMN "subCategory" character varying(45);
 -- Update new column
-UPDATE projects SET "subCategory"="category" WHERE "subCategory" is NULL;
+UPDATE product_templates SET "subCategory"="category" WHERE "subCategory" is NULL;
 -- Set not null
-ALTER TABLE projects ALTER COLUMN "subCategory" SET NOT NULL;
+ALTER TABLE product_templates ALTER COLUMN "subCategory" SET NOT NULL;
