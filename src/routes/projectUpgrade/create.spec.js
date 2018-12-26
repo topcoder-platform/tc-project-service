@@ -95,6 +95,7 @@ describe('Project upgrade', () => {
         name: 'name 1',
         productKey: 'a product key',
         category: 'category',
+        subCategory: 'category',
         icon: 'http://example.com/icon1.ico',
         brief: 'brief 1',
         details: 'details 1',

@@ -14,12 +14,13 @@ import testUtil from '../../tests/util';
 const validateProductTemplates = (count, resJson, expectedTemplates) => {
   resJson.should.have.length(count);
   resJson.forEach((pt, idx) => {
-    pt.should.have.all.keys('id', 'name', 'productKey', 'category', 'icon', 'brief', 'details', 'aliases',
-    'template', 'disabled', 'hidden', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
+    pt.should.have.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
+    'aliases', 'template', 'disabled', 'hidden', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
     pt.should.not.have.all.keys('deletedAt', 'deletedBy');
     pt.name.should.be.eql(expectedTemplates[idx].name);
     pt.productKey.should.be.eql(expectedTemplates[idx].productKey);
     pt.category.should.be.eql(expectedTemplates[idx].category);
+    pt.subCategory.should.be.eql(expectedTemplates[idx].subCategory);
     pt.icon.should.be.eql(expectedTemplates[idx].icon);
     pt.brief.should.be.eql(expectedTemplates[idx].brief);
     pt.details.should.be.eql(expectedTemplates[idx].details);
@@ -38,6 +39,7 @@ describe('LIST product templates', () => {
       name: 'name 1',
       productKey: 'productKey-1',
       category: 'generic',
+      subCategory: 'generic',
       icon: 'http://example.com/icon1.ico',
       brief: 'brief 1',
       details: 'details 1',
@@ -73,6 +75,7 @@ describe('LIST product templates', () => {
       name: 'template 2',
       productKey: 'productKey-2',
       category: 'concrete',
+      subCategory: 'concrete',
       icon: 'http://example.com/icon2.ico',
       brief: 'brief 2',
       details: 'details 2',

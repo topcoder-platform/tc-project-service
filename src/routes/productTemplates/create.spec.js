@@ -35,6 +35,7 @@ describe('CREATE product template', () => {
         name: 'name 1',
         productKey: 'productKey 1',
         category: 'generic',
+        subCategory: 'generic',
         icon: 'http://example.com/icon1.ico',
         brief: 'brief 1',
         details: 'details 1',
