@@ -101,12 +101,12 @@ describe('Project Member Invite create', () => {
           },
         })
         .expect('Content-Type', /json/)
-        .expect(400)
+        .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            res.body.result.status.should.equal(400);
+            res.body.result.status.should.equal(201);
             done();
           }
         });

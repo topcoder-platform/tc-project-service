@@ -192,7 +192,7 @@ describe('Project member invite update', () => {
             should.exist(resJson);
             res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*Copilot can cancel invites only for/);
+            sinon.assert.match(errorMessage, /.*Project members can cancel invites only for customer/);
             done();
           }
         });
