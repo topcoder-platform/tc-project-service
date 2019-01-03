@@ -223,7 +223,7 @@ describe('Project member invite update', () => {
         })
         .send({
           param: {
-            userId: invite1.userId,
+            userId: invite2.userId,
             status: INVITE_STATUS.CANCELED,
           },
         })
