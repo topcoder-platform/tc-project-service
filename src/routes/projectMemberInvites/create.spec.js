@@ -16,7 +16,6 @@ const should = chai.should();
 describe('Project Member Invite create', () => {
   let project1;
   let project2;
-  let invite1;
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {
@@ -179,50 +178,6 @@ describe('Project Member Invite create', () => {
             res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
             sinon.assert.match(errorMessage, /.*You are not allowed to invite user as/);
-            done();
-          }
-        });
-    });
-
-    it('should return 400 if user has a pending invite', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          param: {
-            userIds: [invite1.userId],
-            role: 'customer',
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body.result.content;
-            res.body.result.status.should.equal(400);
-            const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*already invited/);
             done();
           }
         });
@@ -462,50 +417,6 @@ describe('Project Member Invite create', () => {
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40152855);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
-            done();
-          }
-        });
-    });
-    it('should return 400 if already in the project', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: [{
-                roleName: USER_ROLE.MANAGER,
-              }],
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          param: {
-            userIds: [40051332],
-            role: 'manager',
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-            res.body.result.status.should.equal(400);
-            const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*are already members of project/);
             done();
           }
         });

@@ -153,35 +153,6 @@ describe('Project member invite update', () => {
         });
     });
 
-    it('should return 400 if userId and email are presented the same time', (done) => {
-      request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          param: {
-            userId: 40051332,
-            email: 'hello@world.com',
-            status: INVITE_STATUS.CANCELED,
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-            res.body.result.status.should.equal(400);
-            const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*userId and email cannot be presented in the same request/);
-            done();
-          }
-        });
-    });
-
     it('should return 403 if try to update MANAGER role invite with copilot', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         get: () => Promise.resolve({
