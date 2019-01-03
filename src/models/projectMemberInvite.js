@@ -56,7 +56,7 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
         });
       },
       getPendingInviteByEmailOrUserId(projectId, email, userId) {
-        const where = { status: INVITE_STATUS.PENDING };
+        const where = { projectId, status: INVITE_STATUS.PENDING };
 
         if (email && userId) {
           _.assign(where, { $or: [{ email: { $eq: email } }, { userId: { $eq: userId } }] });

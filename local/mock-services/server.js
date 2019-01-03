@@ -44,6 +44,7 @@ server.get('/v3/members/_search', (req, res) => {
     return ret;
   });
   const userIds = _.map(criteria, 'userId');
+  const handles = _.map(criteria, 'handle');
   const cloned = _.cloneDeep(members);
   const response = {
     id: 'res1',
@@ -54,6 +55,12 @@ server.get('/v3/members/_search', (req, res) => {
   };
   response.result.content = _.map(cloned, (single) => {
     if (_.indexOf(userIds, single.result.content.userId) > -1) {
+      let found = single.result.content;
+      if (fields.length > 0) {
+        found = _.pick(found, fields);
+      }
+      return found;
+    } else if (_.indexOf(handles, single.result.content.handle) > -1) {
       let found = single.result.content;
       if (fields.length > 0) {
         found = _.pick(found, fields);
