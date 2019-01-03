@@ -49,6 +49,8 @@ module.exports = [
 
     const promises = [];
     if (invite.userIds) {
+      // remove members already in the team
+      _.remove(invite.userIds, u => _.some(members, m => m.userId === u));
         // permission:
         // user has to have constants.MANAGER_ROLES role
         // to be invited as PROJECT_MEMBER_ROLE.MANAGER
@@ -57,19 +59,6 @@ module.exports = [
           req.log.info(userId);
           promises.push(util.getUserRoles(userId, req.log, req.id));
         });
-      }
-
-        // validate each userId is not already a member
-      const alreadyMembers = [];
-      _.forEach(members, (member) => {
-        if (invite.userIds.includes(member.userId)) {
-          alreadyMembers.push(member.userId);
-        }
-      });
-      if (alreadyMembers.length > 0) {
-        const err = new Error(`${alreadyMembers.join()} are already members of project ${projectId}`);
-        err.status = 400;
-        return next(err);
       }
     }
 
@@ -104,24 +93,6 @@ module.exports = [
       }
       return models.ProjectMemberInvite.getPendingInvitesForProject(projectId)
             .then((invites) => {
-              req.log.debug('Chekcing if user has been invited');
-              // validate for each userId/email there is no existing invitation
-              const alreadyInvites = [];
-              _.forEach(invites, (i) => {
-                if (invite.userIds) {
-                  if (invite.userIds.includes(i.userId)) {
-                    alreadyInvites.push(i.userId);
-                  }
-                } else if (invite.emails.includes(i.email)) {
-                  alreadyInvites.push(i.email);
-                }
-              });
-              if (alreadyInvites.length > 0) {
-                const err = new Error(`${alreadyInvites.join()} are already invited`);
-                err.status = 400;
-                return next(err);
-              }
-
               const data = {
                 projectId,
                 role: invite.role,
@@ -131,6 +102,8 @@ module.exports = [
               };
               const invitePromises = [];
               if (invite.userIds) {
+                // remove invites for users that are invited already
+                _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
                 invite.userIds.forEach((userId) => {
                   const dataNew = _.clone(data);
                   _.assign(dataNew, {
@@ -142,6 +115,8 @@ module.exports = [
               data.userId = null;
 
               if (invite.emails) {
+                // remove invites for users that are invited already
+                _.remove(invite.emails, u => _.some(invites, i => i.email === u));
                 invite.emails.forEach((email) => {
                   const dataNew = _.clone(data);
                   _.assign(dataNew, {

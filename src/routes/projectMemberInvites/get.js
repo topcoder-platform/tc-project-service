@@ -18,14 +18,14 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const currentUserId = req.authUser.userId;
     let invite;
-    return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, null, currentUserId)
+    return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, req.authUser.email, currentUserId)
         .then((_invite) => {
           invite = _invite;
           if (!invite) {
                 // check there is an existing invite for the user with status PENDING
                 // handle 404
             const err = new Error('invite not found for project id ' +
-                        `${projectId}, userId ${currentUserId}`);
+                        `${projectId}, userId ${currentUserId}, email ${req.authUser.email}`);
             err.status = 404;
             return next(err);
           }

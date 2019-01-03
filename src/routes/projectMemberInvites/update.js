@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, USER_ROLE, INVITE_STATUS, EVENT } from '../../constants';
+import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT } from '../../constants';
 
 /**
  * API to update invite member to project.
@@ -36,13 +36,6 @@ module.exports = [
     const putInvite = req.body.param;
     const projectId = _.parseInt(req.params.projectId);
 
-    // not userId and email at the same time
-    if (!!putInvite.userId && !!putInvite.email) {
-      const err = new Error('userId and email cannot be presented in the same request');
-      err.status = 400;
-      return next(err);
-    }
-
     // userId or email should be provided
     if (!putInvite.userId && !putInvite.email) {
       const err = new Error('userId or email should be provided');
@@ -70,9 +63,7 @@ module.exports = [
       req.log.debug('Chekcing user permission for updating invite');
       let error = null;
       if (putInvite.status === INVITE_STATUS.CANCELED) {
-        if (util.hasRole(req, USER_ROLE.COPILOT) && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
-          error = `Copilot can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
-        } else if (!util.hasRoles(req, MANAGER_ROLES)) {
+        if (!util.hasRoles(req, MANAGER_ROLES) && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
           error = `Project members can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
         }
       } else if (!!putInvite.userId && putInvite.userId !== req.authUser.userId) {
@@ -111,7 +102,7 @@ module.exports = [
                 const member = {
                   projectId,
                   role: updatedInvite.role,
-                  userId: updatedInvite.userId,
+                  userId: req.authUser.userId,
                   createdBy: req.authUser.userId,
                   updatedBy: req.authUser.userId,
                 };

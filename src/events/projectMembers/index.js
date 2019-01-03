@@ -88,7 +88,8 @@ const projectMemberAddedHandler = Promise.coroutine(function* a(logger, msg, cha
       members.push(payload);
       // now merge the updated changes and reindex the document for invites
       const invites = _.isArray(doc._source.invites) ? doc._source.invites : []; // eslint-disable-line no-underscore-dangle
-      _.remove(invites, invite => invite === payload.email || invite === payload.userId);
+      // removing any invites for the member just added to the team
+      _.remove(invites, invite => invite.email === payload.email || invite.userId === payload.userId);
       return _.merge(doc._source, { members, invites }); // eslint-disable-line no-underscore-dangle
     });
     yield Promise.all([directUpdatePromise(), updateESPromise(logger, origRequestId, projectId, updateDocPromise)]);

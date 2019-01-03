@@ -32,7 +32,7 @@ const PROJECT_MEMBER_ATTRIBUTES = _.without(
 );
 const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(
   _.keys(models.ProjectMemberInvite.rawAttributes),
-  'deletedAt'
+  'deletedAt',
 );
 const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
   _.keys(models.ProjectAttachment.rawAttributes),
