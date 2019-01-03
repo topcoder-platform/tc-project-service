@@ -66,10 +66,7 @@ describe('Project Member Invite create', () => {
               updatedBy: 1,
               createdAt: '2016-06-30 00:33:07+00',
               updatedAt: '2016-06-30 00:33:07+00',
-            }).then((in1) => {
-              invite1 = in1.get({
-                plain: true,
-              });
+            }).then(() => {
               done();
             });
           }));
