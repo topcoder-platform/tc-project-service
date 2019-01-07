@@ -14,6 +14,7 @@ const middlewares = jsonServer.defaults();
 const authMiddleware = require('./authMiddleware');
 
 const members = require('./services.json').members;
+const roles = require('./services.json').roles;
 
 server.use(middlewares);
 
@@ -29,7 +30,12 @@ server.get('/v3/members/_search', (req, res) => {
     const ret = {};
     const splitted = single.split(':');
     // if the result can be parsed successfully
-    const parsed = jsprim.parseInteger(splitted[1], { allowTrailing: true, trimWhitespace: true });
+    let parsed = Error();
+    try {
+      parsed = jsprim.parseInteger(splitted[1], { allowTrailing: true, trimWhitespace: true });
+    } catch (e) {
+      // no-empty
+    }
     if (parsed instanceof Error) {
       ret[splitted[0]] = splitted[1];
     } else {
@@ -38,6 +44,7 @@ server.get('/v3/members/_search', (req, res) => {
     return ret;
   });
   const userIds = _.map(criteria, 'userId');
+  const handles = _.map(criteria, 'handle');
   const cloned = _.cloneDeep(members);
   const response = {
     id: 'res1',
@@ -53,10 +60,39 @@ server.get('/v3/members/_search', (req, res) => {
         found = _.pick(found, fields);
       }
       return found;
+    } else if (_.indexOf(handles, single.result.content.handle) > -1) {
+      let found = single.result.content;
+      if (fields.length > 0) {
+        found = _.pick(found, fields);
+      }
+      return found;
     }
     return null;
   }).filter(_.identity);
   response.result.metadata = { totalCount: response.result.content.length };
+  res.status(200).json(response);
+});
+
+// add additional search route for project members
+server.get('/roles', (req, res) => {
+  const filter = _.isString(req.query.filter) ?
+    req.query.filter.replace('%2520', ' ').replace('%20', ' ').split('=') : [];
+  const cloned = _.cloneDeep(roles);
+  const response = {
+    id: 'res1',
+    result: {
+      success: true,
+      status: 200,
+    },
+  };
+  const role = filter ? _.find(cloned, (single) => {
+    if (single.userId === filter[1]) {
+      return single.roles;
+    }
+    return null;
+  }) : null;
+
+  response.result.content = role ? role.roles : [];
   res.status(200).json(response);
 });
 

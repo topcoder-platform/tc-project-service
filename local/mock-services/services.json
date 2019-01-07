@@ -300,5 +300,13 @@
             },
             "version": "v3"
         }
+    ],
+    "roles": [
+        { "userId": "40051334", "roles": [ { "roleName": "Connect Manager" } ] },
+        { "userId": "40051332", "roles": [ { "roleName": "Connect Copilot" } ] },
+        { "userId": "40051333", "roles": [ { "roleName": "administrator" } ] },
+        { "userId": "40051336", "roles": [ { "roleName": "Connect Admin" }, { "roleName": "Connect Copilot" } ] },
+        { "userId": "40051331", "roles": [ ] },
+        { "userId": "40051335", "roles": [ ] }
     ]
 }

@@ -64,6 +64,10 @@ module.exports = [
         if (attachments) {
           project.attachments = attachments;
         }
+        return models.ProjectMemberInvite.getPendingInvitesForProject(projectId);
+      })
+      .then((invites) => {
+        project.invites = invites;
         res.status(200).json(util.wrapResponse(req.id, project));
       })
       .catch(err => next(err));

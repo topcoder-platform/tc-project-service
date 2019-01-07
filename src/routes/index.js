@@ -177,6 +177,11 @@ router.route('/v4/timelines/metadata/milestoneTemplates/:milestoneTemplateId(\\d
   .patch(require('./milestoneTemplates/update'))
   .delete(require('./milestoneTemplates/delete'));
 
+router.route('/v4/projects/:projectId(\\d+)/members/invite')
+  .post(require('./projectMemberInvites/create'))
+  .put(require('./projectMemberInvites/update'))
+  .get(require('./projectMemberInvites/get'));
+
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint

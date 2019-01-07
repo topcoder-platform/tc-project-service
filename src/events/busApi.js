@@ -658,4 +658,29 @@ module.exports = (app, logger) => {
       }).catch(err => null);    // eslint-disable-line no-unused-vars
     }
   });
+
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, ({ req, userId, email }) => {
+    logger.debug('receive PROJECT_MEMBER_INVITE_CREATED event');
+    const projectId = _.parseInt(req.params.projectId);
+
+    // send event to bus api
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
+      projectId,
+      userId,
+      email,
+    }, logger);
+  });
+
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, ({ req, userId, email, status }) => {
+    logger.debug('receive PROJECT_MEMBER_INVITE_UPDATED event');
+    const projectId = _.parseInt(req.params.projectId);
+
+    // send event to bus api
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, {
+      projectId,
+      userId,
+      email,
+      status,
+    }, logger);
+  });
 };

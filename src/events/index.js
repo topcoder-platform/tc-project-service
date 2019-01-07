@@ -4,7 +4,9 @@ import { projectCreatedHandler, projectUpdatedHandler, projectDeletedHandler,
   projectUpdatedKafkaHandler } from './projects';
 import { projectMemberAddedHandler, projectMemberRemovedHandler,
   projectMemberUpdatedHandler } from './projectMembers';
-import { projectAttachmentAddedHandler, projectAttachmentRemovedHandler,
+import { projectMemberInviteCreatedHandler,
+  projectMemberInviteUpdatedHandler } from './projectMemberInvites';
+import { projectAttachmentRemovedHandler,
   projectAttachmentUpdatedHandler } from './projectAttachments';
 import { projectPhaseAddedHandler, projectPhaseRemovedHandler,
   projectPhaseUpdatedHandler } from './projectPhases';
@@ -31,7 +33,9 @@ export const rabbitHandlers = {
   [EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED]: projectMemberAddedHandler,
   [EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED]: projectMemberRemovedHandler,
   [EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED]: projectMemberUpdatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED]: projectAttachmentAddedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED]: projectMemberInviteCreatedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED]: projectMemberInviteUpdatedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED]: projectMemberInviteUpdatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED]: projectAttachmentRemovedHandler,
   [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED]: projectAttachmentUpdatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED]: projectPhaseAddedHandler,
