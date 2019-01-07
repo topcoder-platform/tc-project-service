@@ -513,7 +513,7 @@ describe('Project Member Invite create', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.calledTwice.should.be.true;
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
                 projectId: project1.id,
                 userId: null,
