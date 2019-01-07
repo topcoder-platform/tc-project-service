@@ -154,9 +154,20 @@ module.exports = [
                         createEvent(PROJECT_MEMBER_EMAIL_INVITE_CREATED,
                           {
                             data: {
-                              date: (new Date()).toISOString(),
-                              projectName: _project.name,
-                              projectId,
+                              connectURL: config.get('CONNECT_URL'),
+                              projects: [
+                                {
+                                  name: _project.name,
+                                  projectId,
+                                  sections: [
+                                    {
+                                      EMAIL_INVITES: true,
+                                      projectName: _project.name,
+                                      projectId,
+                                    },
+                                  ],
+                                },
+                              ],
                             },
                             recipients: [v.email],
                             version: 'v3',
