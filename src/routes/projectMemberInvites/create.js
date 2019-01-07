@@ -8,7 +8,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, PROJECT_MEMBER_EMAIL_INVITE_CREATED } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT } from '../../constants';
 import { createEvent } from '../../services/busApi';
 
 
@@ -151,7 +151,7 @@ module.exports = [
                         raw: true,
                       })
                       .then((_project) => {
-                        createEvent(PROJECT_MEMBER_EMAIL_INVITE_CREATED,
+                        createEvent(BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED,
                           {
                             data: {
                               date: (new Date()).toISOString(),
