@@ -165,7 +165,7 @@ module.exports = [
                               name: config.get('EMAIL_INVITE_FROM_NAME'),
                               email: config.get('EMAIL_INVITE_FROM_EMAIL'),
                             },
-                            categories: [`${config.ENV}:${emailEventType}`.toLowerCase()],
+                            categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
                           }, req.log);
                       });
                     }
