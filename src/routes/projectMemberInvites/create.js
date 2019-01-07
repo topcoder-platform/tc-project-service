@@ -3,11 +3,14 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, PROJECT_MEMBER_EMAIL_INVITE_CREATED } from '../../constants';
+import { createEvent } from '../../services/busApi';
+
 
 /**
  * API to create member invite to project.
@@ -140,8 +143,33 @@ module.exports = [
                             v,
                             { correlationId: req.id },
                         );
+                    // send email invite (async)
+                    if (v.email) {
+                      models.Project
+                      .find({
+                        where: { id: projectId },
+                        raw: true,
+                      })
+                      .then((_project) => {
+                        createEvent(PROJECT_MEMBER_EMAIL_INVITE_CREATED,
+                          {
+                            data: {
+                              date: (new Date()).toISOString(),
+                              projectName: _project.name,
+                              projectId,
+                            },
+                            recipients: [v.email],
+                            version: 'v3',
+                            from: {
+                              name: config.get('EMAIL_INVITE_FROM_NAME'),
+                              email: config.get('EMAIL_INVITE_FROM_EMAIL'),
+                            },
+                            categories: [PROJECT_MEMBER_EMAIL_INVITE_CREATED],
+                          }, req.log);
+                      });
+                    }
+                    return res.status(201).json(util.wrapResponse(req.id, values, null, 201));
                   });
-                  return res.status(201).json(util.wrapResponse(req.id, values, null, 201));
                 });
             });
     }).catch(err => next(err));
