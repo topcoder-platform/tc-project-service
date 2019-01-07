@@ -197,7 +197,7 @@ make_task_def(){
           "value": "%s"
         },
         {
-          "name": "EMAIL_INVITE_FROM_NAMEL",
+          "name": "EMAIL_INVITE_FROM_NAME",
           "value": "%s"
         },
         {
