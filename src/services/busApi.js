@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import config from 'config';
 
 const Promise = require('bluebird');
@@ -54,8 +55,8 @@ function createEvent(topic, payload, logger) {
       payload,
     }).then((resp) => {
       logger.debug('Sent event to bus-api');
-      logger.debug(`Sent event to bus-api [data]: ${resp}`);
-      logger.debug(`Sent event to bus-api [status]: ${resp.status}`);
+      logger.debug(`Sent event to bus-api [data]: ${_.get(resp, 'data')}`);
+      logger.debug(`Sent event to bus-api [status]: ${_.get(resp, 'status')}`);
     }).catch((error) => {
       logger.debug('Error sending event to bus-api');
       if (error.response) {
