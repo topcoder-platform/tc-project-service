@@ -54,7 +54,7 @@ function createEvent(topic, payload, logger) {
       payload,
     }).then((resp) => {
       logger.debug('Sent event to bus-api');
-      logger.debug(`Sent event to bus-api [data]: ${resp.data}`);
+      logger.debug(`Sent event to bus-api [data]: ${resp}`);
       logger.debug(`Sent event to bus-api [status]: ${resp.status}`);
     }).catch((error) => {
       logger.debug('Error sending event to bus-api');
