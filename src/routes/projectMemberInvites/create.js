@@ -130,7 +130,7 @@ module.exports = [
               }
 
               req.log.debug('Creating invites');
-              const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED
+              const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
               return models.sequelize.Promise.all(invitePromises)
                 .then((values) => {
                   values.forEach((v) => {
