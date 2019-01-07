@@ -130,6 +130,7 @@ module.exports = [
               }
 
               req.log.debug('Creating invites');
+              const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED
               return models.sequelize.Promise.all(invitePromises)
                 .then((values) => {
                   values.forEach((v) => {
@@ -151,7 +152,7 @@ module.exports = [
                         raw: true,
                       })
                       .then((_project) => {
-                        createEvent(BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED,
+                        createEvent(emailEventType,
                           {
                             data: {
                               date: (new Date()).toISOString(),
@@ -164,7 +165,7 @@ module.exports = [
                               name: config.get('EMAIL_INVITE_FROM_NAME'),
                               email: config.get('EMAIL_INVITE_FROM_EMAIL'),
                             },
-                            categories: [PROJECT_MEMBER_EMAIL_INVITE_CREATED],
+                            categories: [`${config.ENV}:${emailEventType}`.toLowerCase()],
                           }, req.log);
                       });
                     }
