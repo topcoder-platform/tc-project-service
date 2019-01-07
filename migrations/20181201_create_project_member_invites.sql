@@ -29,7 +29,7 @@ CREATE SEQUENCE project_member_invites_id_seq
     NO MAXVALUE
     CACHE 1;
 
-ALTER TABLE project_member_invites_id_seq OWNER BY project_member_invites.id;
+ALTER SEQUENCE project_member_invites_id_seq OWNED BY project_member_invites.id;
 
 ALTER TABLE ONLY project_member_invites
     ADD CONSTRAINT "project_member_invites_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
