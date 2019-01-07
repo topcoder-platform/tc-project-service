@@ -131,7 +131,7 @@ export const BUS_API_EVENT = {
   // Project Member Invites
   PROJECT_MEMBER_INVITE_CREATED: 'notifications.connect.project.member.invite.created',
   PROJECT_MEMBER_INVITE_UPDATED: 'notifications.connect.project.member.invite.updated',
-  PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.action.project.member.invite.created',
+  PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.action.email.project.member.invite.created',
 };
 
 export const REGEX = {

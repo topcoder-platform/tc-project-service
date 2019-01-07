@@ -8,7 +8,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, PROJECT_MEMBER_EMAIL_INVITE_CREATED } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT } from '../../constants';
 import { createEvent } from '../../services/busApi';
 
 
@@ -130,6 +130,7 @@ module.exports = [
               }
 
               req.log.debug('Creating invites');
+              const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
               return models.sequelize.Promise.all(invitePromises)
                 .then((values) => {
                   values.forEach((v) => {
@@ -151,7 +152,7 @@ module.exports = [
                         raw: true,
                       })
                       .then((_project) => {
-                        createEvent(PROJECT_MEMBER_EMAIL_INVITE_CREATED,
+                        createEvent(emailEventType,
                           {
                             data: {
                               connectURL: config.get('CONNECT_URL'),
@@ -175,7 +176,7 @@ module.exports = [
                               name: config.get('EMAIL_INVITE_FROM_NAME'),
                               email: config.get('EMAIL_INVITE_FROM_EMAIL'),
                             },
-                            categories: [PROJECT_MEMBER_EMAIL_INVITE_CREATED],
+                            categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
                           }, req.log);
                       });
                     }
