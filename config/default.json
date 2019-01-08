@@ -54,6 +54,8 @@
   "AUTH0_PROXY_SERVER_URL" : "",
   "EMAIL_INVITE_FROM_NAME":"Topcoder",
   "EMAIL_INVITE_FROM_EMAIL":"noreply@connect.topcoder.com",
-  "CONNECT_URL":"https://connect.topcoder-dev.com"
+  "inviteEmailSubject": "You are invited to Topcoder",
+  "connectUrl":"https://connect.topcoder-dev.com",
+  "accountsAppUrl": "https://accounts.topcoder-dev.com"
 
 }

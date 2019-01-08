@@ -155,7 +155,9 @@ module.exports = [
                         createEvent(emailEventType,
                           {
                             data: {
-                              connectURL: config.get('CONNECT_URL'),
+                              connectURL: config.get('connectUrl'),
+                              accountsAppURL: config.get('accountsAppUrl'),
+                              subject: config.get("inviteEmailSubject"),
                               projects: [
                                 {
                                   name: _project.name,
