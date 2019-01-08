@@ -157,7 +157,7 @@ module.exports = [
                             data: {
                               connectURL: config.get('connectUrl'),
                               accountsAppURL: config.get('accountsAppUrl'),
-                              subject: config.get("inviteEmailSubject"),
+                              subject: config.get('inviteEmailSubject'),
                               projects: [
                                 {
                                   name: _project.name,
@@ -165,7 +165,7 @@ module.exports = [
                                   sections: [
                                     {
                                       EMAIL_INVITES: true,
-                                      title: config.get("inviteEmailSectionTitle"),
+                                      title: config.get('inviteEmailSectionTitle'),
                                       projectName: _project.name,
                                       projectId,
                                     },
