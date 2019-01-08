@@ -165,6 +165,7 @@ module.exports = [
                                   sections: [
                                     {
                                       EMAIL_INVITES: true,
+                                      title: config.get("inviteEmailSectionTitle"),
                                       projectName: _project.name,
                                       projectId,
                                     },

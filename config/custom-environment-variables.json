@@ -50,5 +50,6 @@
   "AUTH0_PROXY_SERVER_URL" : "AUTH0_PROXY_SERVER_URL",
   "connectUrl": "CONNECT_URL",
   "accountsAppUrl": "ACCOUNTS_APP_URL",
-  "inviteEmailSubject": "INVITE_EMAIL_SUBJECT"
+  "inviteEmailSubject": "INVITE_EMAIL_SUBJECT",
+  "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE"
 }
