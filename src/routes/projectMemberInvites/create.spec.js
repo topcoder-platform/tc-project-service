@@ -81,6 +81,11 @@ describe('Project Member Invite create', () => {
     let sandbox;
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
+      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
+      server.services.pubsub.init.restore();
+      server.services.pubsub.publish.restore();
+      sinon.stub(server.services.pubsub, 'init', () => {});
+      sinon.stub(server.services.pubsub, 'publish', () => {});
     });
     afterEach(() => {
       sandbox.restore();
@@ -335,7 +340,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project2.id}/members/invite`)
+        .post(`/v4/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -354,7 +359,7 @@ describe('Project Member Invite create', () => {
             const resJson = res.body.result.content;
             should.exist(resJson);
             resJson.length.should.equal(0);
-            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.false;
+            server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
