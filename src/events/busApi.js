@@ -668,6 +668,7 @@ module.exports = (app, logger) => {
       projectId,
       userId,
       email,
+      initiatorUserId: req.authUser.userId,
     }, logger);
   });
 
@@ -681,6 +682,7 @@ module.exports = (app, logger) => {
       userId,
       email,
       status,
+      initiatorUserId: req.authUser.userId,
     }, logger);
   });
 };
