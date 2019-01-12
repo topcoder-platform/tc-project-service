@@ -316,6 +316,50 @@ describe('Project Member Invite create', () => {
         });
     });
 
+    it('should return 201 and empty response when trying add already invited member', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.COPILOT,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project2.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            userIds: [40051335],
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.length.should.equal(0)
+            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.false;
+            done();
+          }
+        });
+    });
+
     it('should return 403 if try to create manager without MANAGER_ROLES', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         get: () => Promise.resolve({
