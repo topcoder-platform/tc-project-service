@@ -95,98 +95,104 @@ module.exports = [
         }
       }
       return models.ProjectMemberInvite.getPendingInvitesForProject(projectId)
-            .then((invites) => {
-              const data = {
-                projectId,
-                role: invite.role,
-                status: INVITE_STATUS.PENDING,
-                createdBy: req.authUser.userId,
-                updatedBy: req.authUser.userId,
-              };
-              const invitePromises = [];
-              if (invite.userIds) {
-                // remove invites for users that are invited already
-                _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
-                invite.userIds.forEach((userId) => {
-                  const dataNew = _.clone(data);
-                  _.assign(dataNew, {
-                    userId,
-                  });
-                  invitePromises.push(models.ProjectMemberInvite.create(dataNew));
-                });
-              }
-              data.userId = null;
+        .then((invites) => {
+          const data = {
+            projectId,
+            role: invite.role,
+            status: INVITE_STATUS.PENDING,
+            createdBy: req.authUser.userId,
+            updatedBy: req.authUser.userId,
+          };
+          const invitePromises = [];
+          if (invite.userIds) {
+            // remove invites for users that are invited already
+            _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
+            invite.userIds.forEach((userId) => {
+              const dataNew = _.clone(data);
+              _.assign(dataNew, {
+                userId,
+              });
+              invitePromises.push(models.ProjectMemberInvite.create(dataNew));
+            });
+          }
+          data.userId = null;
 
-              if (invite.emails) {
-                // remove invites for users that are invited already
-                _.remove(invite.emails, u => _.some(invites, i => i.email === u));
-                invite.emails.forEach((email) => {
-                  const dataNew = _.clone(data);
-                  _.assign(dataNew, {
-                    email,
-                  });
-                  invitePromises.push(models.ProjectMemberInvite.create(dataNew));
-                });
-              }
+          if (invite.emails) {
+            // remove invites for users that are invited already
+            _.remove(invite.emails, u => _.some(invites, i => i.email === u));
+            invite.emails.forEach((email) => {
+              const dataNew = _.clone(data);
+              _.assign(dataNew, {
+                email,
+              });
+              invitePromises.push(models.ProjectMemberInvite.create(dataNew));
+            });
+          }
 
-              req.log.debug('Creating invites');
-              const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
-              return models.sequelize.Promise.all(invitePromises)
-                .then((values) => {
-                  values.forEach((v) => {
-                    req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
-                      req,
-                      userId: v.userId,
-                      email: v.email,
-                    });
-                    req.app.services.pubsub.publish(
-                            EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
-                            v,
-                            { correlationId: req.id },
-                        );
-                    // send email invite (async)
-                    if (v.email) {
-                      models.Project
-                      .find({
-                        where: { id: projectId },
-                        raw: true,
-                      })
-                      .then((_project) => {
-                        createEvent(emailEventType,
-                          {
-                            data: {
-                              connectURL: config.get('connectUrl'),
-                              accountsAppURL: config.get('accountsAppUrl'),
-                              subject: config.get('inviteEmailSubject'),
-                              projects: [
+          if (invitePromises.length === 0) {
+            return [];
+          }
+
+          req.log.debug('Creating invites');
+          const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
+          return models.sequelize.Promise.all(invitePromises)
+            .then((values) => {
+              values.forEach((v) => {
+                req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
+                  req,
+                  userId: v.userId,
+                  email: v.email,
+                });
+                req.app.services.pubsub.publish(
+                        EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
+                        v,
+                        { correlationId: req.id },
+                    );
+                // send email invite (async)
+                if (v.email) {
+                  models.Project
+                  .find({
+                    where: { id: projectId },
+                    raw: true,
+                  })
+                  .then((_project) => {
+                    createEvent(emailEventType,
+                      {
+                        data: {
+                          connectURL: config.get('connectUrl'),
+                          accountsAppURL: config.get('accountsAppUrl'),
+                          subject: config.get('inviteEmailSubject'),
+                          projects: [
+                            {
+                              name: _project.name,
+                              projectId,
+                              sections: [
                                 {
-                                  name: _project.name,
+                                  EMAIL_INVITES: true,
+                                  title: config.get('inviteEmailSectionTitle'),
+                                  projectName: _project.name,
                                   projectId,
-                                  sections: [
-                                    {
-                                      EMAIL_INVITES: true,
-                                      title: config.get('inviteEmailSectionTitle'),
-                                      projectName: _project.name,
-                                      projectId,
-                                    },
-                                  ],
                                 },
                               ],
                             },
-                            recipients: [v.email],
-                            version: 'v3',
-                            from: {
-                              name: config.get('EMAIL_INVITE_FROM_NAME'),
-                              email: config.get('EMAIL_INVITE_FROM_EMAIL'),
-                            },
-                            categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
-                          }, req.log);
-                      });
-                    }
-                    return res.status(201).json(util.wrapResponse(req.id, values, null, 201));
+                          ],
+                        },
+                        recipients: [v.email],
+                        version: 'v3',
+                        from: {
+                          name: config.get('EMAIL_INVITE_FROM_NAME'),
+                          email: config.get('EMAIL_INVITE_FROM_EMAIL'),
+                        },
+                        categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
+                      }, req.log);
                   });
-                });
+                }
+              });
+              return values;
             });
-    }).catch(err => next(err));
+        });
+    })
+    .then(values => res.status(201).json(util.wrapResponse(req.id, values, null, 201)))
+    .catch(err => next(err));
   },
 ];
