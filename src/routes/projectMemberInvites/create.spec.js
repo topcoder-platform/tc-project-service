@@ -353,7 +353,7 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.result.content;
             should.exist(resJson);
-            resJson.length.should.equal(0)
+            resJson.length.should.equal(0);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.false;
             done();
           }
