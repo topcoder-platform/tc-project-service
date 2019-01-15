@@ -453,7 +453,7 @@ _.assignIn(util, {
           filter,
         },
         // set longer timeout as default 3000 could be not enough for identity service response
-        timeout: 5000,
+        timeout: 15000,
       })
       .then((response) => {
         const data = _.get(response, 'data.result.content', null);
