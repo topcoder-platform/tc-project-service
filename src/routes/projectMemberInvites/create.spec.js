@@ -87,7 +87,7 @@ describe('Project Member Invite create', () => {
       sinon.stub(server.services.pubsub, 'init', () => {});
       sinon.stub(server.services.pubsub, 'publish', () => {});
       // by default mock lookupUserEmails return nothing so all the cases are not broken
-      sandbox.stub(util, 'lookupUserEmails', () => []);
+      sandbox.stub(util, 'lookupUserEmails', () => Promise.resolve([]));
     });
     afterEach(() => {
       sandbox.restore();
@@ -296,10 +296,10 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       util.lookupUserEmails.restore();
-      sandbox.stub(util, 'lookupUserEmails', () => [{
+      sandbox.stub(util, 'lookupUserEmails', () => Promise.resolve([{
         id: '12345',
         email: 'hello@world.com',
-      }]);
+      }]));
       request(server)
         .post(`/v4/projects/${project2.id}/members/invite`)
         .set({

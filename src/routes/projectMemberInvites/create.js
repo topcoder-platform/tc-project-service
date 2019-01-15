@@ -28,6 +28,70 @@ const addMemberValidations = {
   },
 };
 
+/**
+ * Helper method to build promises for creating new invites in DB
+ *
+ * @param {Object} req     express request object
+ * @param {Object} invite  invite to process
+ * @param {Array}  invites existent invites from DB
+ * @param {Object} data    template for new invites to be put in DB
+ *
+ * @returns {Promise<Promise[]>} list of promises
+ */
+const buildCreateInvitePromises = (req, invite, invites, data) => {
+  const invitePromises = [];
+
+  if (invite.userIds) {
+    // remove invites for users that are invited already
+    _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
+    invite.userIds.forEach((userId) => {
+      const dataNew = _.clone(data);
+
+      dataNew.userId = userId;
+
+      invitePromises.push(models.ProjectMemberInvite.create(dataNew));
+    });
+  }
+
+  if (invite.emails) {
+    // if for some emails there are already existent users, we will invite them by userId,
+    // to avoid sending them registration email
+    return util.lookupUserEmails(req, invite.emails)
+      .then((existentUsers) => {
+        // for existent users - invite by ids
+        const existentUserIds = existentUsers.map(user => parseInt(user.id, 10));
+        // the rest of email of non-existent users, so we will invite them by email
+        const nonExistentUserEmails = invite.emails.filter(inviteEmail =>
+          !_.find(existentUsers, { email: inviteEmail }),
+        );
+
+        // remove invites for users that are invited already
+        _.remove(existentUserIds, userId => _.some(invites, i => i.userId === userId));
+        existentUserIds.forEach((userId) => {
+          const dataNew = _.clone(data);
+
+          dataNew.userId = userId;
+
+          invitePromises.push(models.ProjectMemberInvite.create(dataNew));
+        });
+
+        // remove invites for users that are invited already
+        _.remove(nonExistentUserEmails, email => _.some(invites, i => i.email === email));
+        nonExistentUserEmails.forEach((email) => {
+          const dataNew = _.clone(data);
+
+          dataNew.email = email;
+
+          invitePromises.push(models.ProjectMemberInvite.create(dataNew));
+        });
+
+        return Promise.resolve(invitePromises);
+      });
+  }
+
+  return Promise.resolve(invitePromises);
+};
+
 module.exports = [
   // handles request validations
   validate(addMemberValidations),
@@ -103,120 +167,72 @@ module.exports = [
             createdBy: req.authUser.userId,
             updatedBy: req.authUser.userId,
           };
-          const invitePromises = [];
-          if (invite.userIds) {
-            // remove invites for users that are invited already
-            _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
-            invite.userIds.forEach((userId) => {
-              const dataNew = _.clone(data);
-              _.assign(dataNew, {
-                userId,
-              });
-              invitePromises.push(models.ProjectMemberInvite.create(dataNew));
-            });
-          }
-          data.userId = null;
 
-          if (invite.emails) {
-            // if for some emails there are already existent users, we will invite them by userId,
-            // to avoid sending them registration email
-            const existentUsers = util.lookupUserEmails(req, invite.emails).map((user) => {
-              const userWithNumberId = {};
-              _.assign(userWithNumberId, user, {
-                id: parseInt(user.id, 10),
-              });
-              return userWithNumberId;
-            });
-            // for existent users - invite by ids
-            const existentUserIds = _.map(existentUsers, 'id');
-            // the rest of email of non-existent users, so we will invite them by email
-            const nonExistentUserEmails = invite.emails.filter(inviteEmail =>
-              !_.find(existentUsers, { email: inviteEmail }),
-            );
+          return buildCreateInvitePromises(req, invite, invites, data)
+            .then((invitePromises) => {
+              if (invitePromises.length === 0) {
+                return [];
+              }
 
-            // remove invites for users that are invited already
-            _.remove(existentUserIds, userId => _.some(invites, i => i.userId === userId));
-            existentUserIds.forEach((userId) => {
-              const dataNew = _.clone(data);
-              _.assign(dataNew, {
-                userId,
-              });
-              invitePromises.push(models.ProjectMemberInvite.create(dataNew));
-            });
-
-            // remove invites for users that are invited already
-            _.remove(nonExistentUserEmails, email => _.some(invites, i => i.email === email));
-            nonExistentUserEmails.forEach((email) => {
-              const dataNew = _.clone(data);
-              _.assign(dataNew, {
-                email,
-              });
-              invitePromises.push(models.ProjectMemberInvite.create(dataNew));
-            });
-          }
-
-          if (invitePromises.length === 0) {
-            return [];
-          }
-
-          req.log.debug('Creating invites');
-          const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
-          return models.sequelize.Promise.all(invitePromises)
-            .then((values) => {
-              values.forEach((v) => {
-                req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
-                  req,
-                  userId: v.userId,
-                  email: v.email,
-                });
-                req.app.services.pubsub.publish(
-                        EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
-                        v,
-                        { correlationId: req.id },
-                    );
-                // send email invite (async)
-                if (v.email) {
-                  models.Project
-                  .find({
-                    where: { id: projectId },
-                    raw: true,
-                  })
-                  .then((_project) => {
-                    createEvent(emailEventType,
-                      {
-                        data: {
-                          connectURL: config.get('connectUrl'),
-                          accountsAppURL: config.get('accountsAppUrl'),
-                          subject: config.get('inviteEmailSubject'),
-                          projects: [
-                            {
-                              name: _project.name,
-                              projectId,
-                              sections: [
+              req.log.debug('Creating invites');
+              const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
+              return models.sequelize.Promise.all(invitePromises)
+                .then((values) => {
+                  values.forEach((v) => {
+                    req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
+                      req,
+                      userId: v.userId,
+                      email: v.email,
+                    });
+                    req.app.services.pubsub.publish(
+                            EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
+                            v,
+                            { correlationId: req.id },
+                        );
+                    // send email invite (async)
+                    if (v.email) {
+                      models.Project
+                      .find({
+                        where: { id: projectId },
+                        raw: true,
+                      })
+                      .then((_project) => {
+                        createEvent(emailEventType,
+                          {
+                            data: {
+                              connectURL: config.get('connectUrl'),
+                              accountsAppURL: config.get('accountsAppUrl'),
+                              subject: config.get('inviteEmailSubject'),
+                              projects: [
                                 {
-                                  EMAIL_INVITES: true,
-                                  title: config.get('inviteEmailSectionTitle'),
-                                  projectName: _project.name,
+                                  name: _project.name,
                                   projectId,
+                                  sections: [
+                                    {
+                                      EMAIL_INVITES: true,
+                                      title: config.get('inviteEmailSectionTitle'),
+                                      projectName: _project.name,
+                                      projectId,
+                                    },
+                                  ],
                                 },
                               ],
                             },
-                          ],
-                        },
-                        recipients: [v.email],
-                        version: 'v3',
-                        from: {
-                          name: config.get('EMAIL_INVITE_FROM_NAME'),
-                          email: config.get('EMAIL_INVITE_FROM_EMAIL'),
-                        },
-                        categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
-                      }, req.log);
+                            recipients: [v.email],
+                            version: 'v3',
+                            from: {
+                              name: config.get('EMAIL_INVITE_FROM_NAME'),
+                              email: config.get('EMAIL_INVITE_FROM_EMAIL'),
+                            },
+                            categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
+                          }, req.log);
+                      });
+                    }
                   });
-                }
-              });
-              return values;
-            });
-        });
+                  return values;
+                }); // models.sequelize.Promise.all
+            }); // buildCreateInvitePromises
+        }); // models.ProjectMemberInvite.getPendingInvitesForProject
     })
     .then(values => res.status(201).json(util.wrapResponse(req.id, values, null, 201)))
     .catch(err => next(err));
