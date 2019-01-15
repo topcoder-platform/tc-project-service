@@ -335,7 +335,7 @@ _.assignIn(util, {
     try {
       const token = yield this.getSystemUserToken(logger);
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
-      logger.info(userIds);
+      logger.trace(userIds);
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
           query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
