@@ -103,6 +103,7 @@ const buildCreateInvitePromises = (req, invite, invites, data) => {
 };
 
 const sendInviteEmail = (req, projectId, invite) => {
+  req.log.info(req.authUser);
   const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
     models.Project.find({
