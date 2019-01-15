@@ -441,7 +441,7 @@ _.assignIn(util, {
     return util.getSystemUserToken(req.log)
     .then((token) => {
       req.log.debug(`Bearer ${token}`);
-      const httpClient = this.getHttpClient({ id: req.id, log: req.log });
+      const httpClient = util.getHttpClient({ id: req.id, log: req.log });
       return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
         headers: {
           Authorization: `Bearer ${token}`,
