@@ -58,19 +58,26 @@ const buildCreateInvitePromises = (req, invite, invites, data) => {
     // to avoid sending them registration email
     return util.lookupUserEmails(req, invite.emails)
       .then((existentUsers) => {
-        // for existent users - invite by ids
-        const existentUserIds = existentUsers.map(user => parseInt(user.id, 10));
-        // the rest of email of non-existent users, so we will invite them by email
+        // existent user we will invite by userId and email
+        const existentUsersWithNumberId = existentUsers.map((user) => {
+          const userWithNumberId = _.clone(user);
+
+          userWithNumberId.id = parseInt(user.id, 10);
+
+          return userWithNumberId;
+        });
+        // non-existent users we will invite them by email only
         const nonExistentUserEmails = invite.emails.filter(inviteEmail =>
           !_.find(existentUsers, { email: inviteEmail }),
         );
 
         // remove invites for users that are invited already
-        _.remove(existentUserIds, userId => _.some(invites, i => i.userId === userId));
-        existentUserIds.forEach((userId) => {
+        _.remove(existentUsersWithNumberId, user => _.some(invites, i => i.userId === user.id));
+        existentUsersWithNumberId.forEach((user) => {
           const dataNew = _.clone(data);
 
-          dataNew.userId = userId;
+          dataNew.userId = user.id;
+          dataNew.email = user.email;
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
@@ -190,7 +197,7 @@ module.exports = [
                             { correlationId: req.id },
                         );
                     // send email invite (async)
-                    if (v.email) {
+                    if (v.email && !v.userId) {
                       models.Project
                       .find({
                         where: { id: projectId },
