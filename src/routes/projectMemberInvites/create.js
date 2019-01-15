@@ -99,6 +99,52 @@ const buildCreateInvitePromises = (req, invite, invites, data) => {
   return Promise.resolve(invitePromises);
 };
 
+const sendInviteEmail = (req, invite) => {
+  const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
+  const promises = [
+    models.Project.find({
+      where: { id: projectId },
+      raw: true,
+    }),
+    util.getMemberDetailsByUserIds(req.authUser.userId, req.logger, req.id),
+  ];
+  return Promise.all(promises).then((responses) => {
+    const _project = responses[0];
+    const initiator = responses[1] && responses[1].length ? responses[1][0] : null;
+    createEvent(emailEventType, {
+      data: {
+        connectURL: config.get('connectUrl'),
+        accountsAppURL: config.get('accountsAppUrl'),
+        subject: config.get('inviteEmailSubject'),
+        projects: [{
+          name: _project.name,
+          projectId,
+          sections: [
+            {
+              EMAIL_INVITES: true,
+              title: config.get('inviteEmailSectionTitle'),
+              projectName: _project.name,
+              projectId,
+              initiator: initiator ? initiator : {
+                userId: req.authUser.userId,
+                firstName: 'Connect',
+                lastName: 'User',
+              }
+            },
+          ],
+        }],
+      },
+      recipients: [invite.email],
+      version: 'v3',
+      from: {
+        name: config.get('EMAIL_INVITE_FROM_NAME'),
+        email: config.get('EMAIL_INVITE_FROM_EMAIL'),
+      },
+      categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
+    }, req.log);
+  });
+}
+
 module.exports = [
   // handles request validations
   validate(addMemberValidations),
@@ -182,7 +228,6 @@ module.exports = [
               }
 
               req.log.debug('Creating invites');
-              const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
               return models.sequelize.Promise.all(invitePromises)
                 .then((values) => {
                   values.forEach((v) => {
@@ -198,42 +243,7 @@ module.exports = [
                         );
                     // send email invite (async)
                     if (v.email && !v.userId) {
-                      models.Project
-                      .find({
-                        where: { id: projectId },
-                        raw: true,
-                      })
-                      .then((_project) => {
-                        createEvent(emailEventType,
-                          {
-                            data: {
-                              connectURL: config.get('connectUrl'),
-                              accountsAppURL: config.get('accountsAppUrl'),
-                              subject: config.get('inviteEmailSubject'),
-                              projects: [
-                                {
-                                  name: _project.name,
-                                  projectId,
-                                  sections: [
-                                    {
-                                      EMAIL_INVITES: true,
-                                      title: config.get('inviteEmailSectionTitle'),
-                                      projectName: _project.name,
-                                      projectId,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                            recipients: [v.email],
-                            version: 'v3',
-                            from: {
-                              name: config.get('EMAIL_INVITE_FROM_NAME'),
-                              email: config.get('EMAIL_INVITE_FROM_EMAIL'),
-                            },
-                            categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
-                          }, req.log);
-                      });
+                      sendInviteEmail(req, v);
                     }
                   });
                   return values;
