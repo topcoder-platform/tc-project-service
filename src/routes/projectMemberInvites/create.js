@@ -93,6 +93,9 @@ const buildCreateInvitePromises = (req, invite, invites, data) => {
         });
 
         return Promise.resolve(invitePromises);
+      }).catch((error) => {
+        req.log.error(error);
+        return Promise.reject(invitePromises);
       });
   }
 
@@ -106,7 +109,7 @@ const sendInviteEmail = (req, projectId, invite) => {
       where: { id: projectId },
       raw: true,
     }),
-    util.getMemberDetailsByUserIds(req.authUser.userId, req.logger, req.id),
+    util.getMemberDetailsByUserIds(req.authUser.userId, req.log, req.id),
   ];
   return Promise.all(promises).then((responses) => {
     const project = responses[0];
@@ -142,6 +145,8 @@ const sendInviteEmail = (req, projectId, invite) => {
       },
       categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
     }, req.log);
+  }).catch((error) => {
+    req.log.error(error);
   });
 };
 
@@ -243,7 +248,7 @@ module.exports = [
                         );
                     // send email invite (async)
                     if (v.email && !v.userId) {
-                      sendInviteEmail(req, v);
+                      sendInviteEmail(req, projectId, v);
                     }
                   });
                   return values;

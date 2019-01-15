@@ -88,6 +88,11 @@ describe('Project Member Invite create', () => {
       sinon.stub(server.services.pubsub, 'publish', () => {});
       // by default mock lookupUserEmails return nothing so all the cases are not broken
       sandbox.stub(util, 'lookupUserEmails', () => Promise.resolve([]));
+      sandbox.stub(util, 'getMemberDetailsByUserIds', () => Promise.resolve([{
+        userId: 40051333,
+        firstName: 'Admin',
+        lastName: 'User',
+      }]));
     });
     afterEach(() => {
       sandbox.restore();
