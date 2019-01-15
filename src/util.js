@@ -452,6 +452,8 @@ _.assignIn(util, {
           fields: 'handle,id,email',
           filter,
         },
+        // set longer timeout as default 3000 could be not enough for identity service response
+        timeout: 5000,
       })
       .then((response) => {
         const data = _.get(response, 'data.result.content', null);
