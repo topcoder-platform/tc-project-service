@@ -86,6 +86,8 @@ describe('Project Member Invite create', () => {
       server.services.pubsub.publish.restore();
       sinon.stub(server.services.pubsub, 'init', () => {});
       sinon.stub(server.services.pubsub, 'publish', () => {});
+      // by default mock lookupUserEmails return nothing so all the cases are not broken
+      sandbox.stub(util, 'lookupUserEmails', () => []);
     });
     afterEach(() => {
       sandbox.restore();
@@ -269,6 +271,58 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
             resJson.email.should.equal('hello@world.com');
+            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 201 and add new userId invite as customer for existent user when invite by email', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.COPILOT,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      util.lookupUserEmails.restore();
+      sandbox.stub(util, 'lookupUserEmails', () => [{
+        id: '12345',
+        email: 'hello@world.com',
+      }]);
+      request(server)
+        .post(`/v4/projects/${project2.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            emails: ['hello@world.com'],
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content[0];
+            should.exist(resJson);
+            resJson.role.should.equal('customer');
+            resJson.projectId.should.equal(project2.id);
+            resJson.userId.should.equal(12345);
+            should.not.exist(resJson.email);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }

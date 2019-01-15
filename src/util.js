@@ -423,6 +423,44 @@ _.assignIn(util, {
       return Promise.reject(err);
     });
   }),
+
+  /**
+   * Lookup user handles from emails
+   * @param {Object}  req        request
+   * @param {Array}   userEmails user emails
+   * @param {Boolean} isPattern  flag to indicate that pattern matching is required or not
+   * @return {Promise} promise
+   */
+  lookupUserEmails: (req, userEmails, isPattern = false) => {
+    req.log.debug(`identityServiceEndpoint: ${config.get('identityServiceEndpoint')}`);
+    let filter = _.map(userEmails, i => `email=${i}`).join(' OR ');
+    if (isPattern) {
+      filter += '&like=true';
+    }
+    req.log.trace('filter for users api call', filter);
+    return util.getSystemUserToken(req.log)
+    .then((token) => {
+      req.log.debug(`Bearer ${token}`);
+      const httpClient = this.getHttpClient({ id: req.id, log: req.log });
+      return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        params: {
+          fields: 'handle,id,email',
+          filter,
+        },
+      })
+      .then((response) => {
+        const data = _.get(response, 'data.result.content', null);
+        if (!data) { throw new Error('Response does not have result.content'); }
+        req.log.debug('UserHandle response', data);
+        return data;
+      });
+    });
+  },
 });
 
 export default util;
