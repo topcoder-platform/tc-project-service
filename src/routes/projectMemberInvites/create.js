@@ -109,7 +109,7 @@ const sendInviteEmail = (req, projectId, invite) => {
       where: { id: projectId },
       raw: true,
     }),
-    util.getMemberDetailsByUserIds(req.authUser.userId, req.log, req.id),
+    util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id),
   ];
   return Promise.all(promises).then((responses) => {
     const project = responses[0];
