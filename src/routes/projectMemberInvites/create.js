@@ -99,7 +99,7 @@ const buildCreateInvitePromises = (req, invite, invites, data) => {
   return Promise.resolve(invitePromises);
 };
 
-const sendInviteEmail = (req, invite) => {
+const sendInviteEmail = (req, projectId, invite) => {
   const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
     models.Project.find({
@@ -109,27 +109,27 @@ const sendInviteEmail = (req, invite) => {
     util.getMemberDetailsByUserIds(req.authUser.userId, req.logger, req.id),
   ];
   return Promise.all(promises).then((responses) => {
-    const _project = responses[0];
-    const initiator = responses[1] && responses[1].length ? responses[1][0] : null;
+    const project = responses[0];
+    const initiator = responses[1] && responses[1].length ? responses[1][0] : {
+      userId: req.authUser.userId,
+      firstName: 'Connect',
+      lastName: 'User',
+    };
     createEvent(emailEventType, {
       data: {
         connectURL: config.get('connectUrl'),
         accountsAppURL: config.get('accountsAppUrl'),
         subject: config.get('inviteEmailSubject'),
         projects: [{
-          name: _project.name,
+          name: project.name,
           projectId,
           sections: [
             {
               EMAIL_INVITES: true,
               title: config.get('inviteEmailSectionTitle'),
-              projectName: _project.name,
+              projectName: project.name,
               projectId,
-              initiator: initiator ? initiator : {
-                userId: req.authUser.userId,
-                firstName: 'Connect',
-                lastName: 'User',
-              }
+              initiator,
             },
           ],
         }],
@@ -143,7 +143,7 @@ const sendInviteEmail = (req, invite) => {
       categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
     }, req.log);
   });
-}
+};
 
 module.exports = [
   // handles request validations
