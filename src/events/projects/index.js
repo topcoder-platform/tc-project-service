@@ -26,7 +26,7 @@ const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disab
   const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
   try {
     // retrieve member details
-    const memberDetails = yield util.getMemberDetailsByUserIds(userIds, msg.properties.correlationId, logger);
+    const memberDetails = yield util.getMemberDetailsByUserIds(userIds, logger, msg.properties.correlationId);
     // if no members are returned than this should result in nack
     // if (!_.isArray(memberDetails) || memberDetails.length === 0) {
     //   logger.error(`Empty member details for userIds ${userIds.join(',')} requeing the message`);
