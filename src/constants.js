@@ -15,9 +15,12 @@ export const MILESTONE_STATUS = PROJECT_STATUS;
 
 export const PROJECT_MEMBER_ROLE = {
   MANAGER: 'manager',
+  OBSERVER: 'observer',
   CUSTOMER: 'customer',
   COPILOT: 'copilot',
 };
+
+export const PROJECT_MEMBER_MANAGER_ROLES = [PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.OBSERVER];
 
 export const USER_ROLE = {
   TOPCODER_ADMIN: 'administrator',
@@ -59,6 +62,9 @@ export const EVENT = {
     MILESTONE_ADDED: 'milestone.added',
     MILESTONE_UPDATED: 'milestone.updated',
     MILESTONE_REMOVED: 'milestone.removed',
+
+    PROJECT_MEMBER_INVITE_CREATED: 'project.member.invite.created',
+    PROJECT_MEMBER_INVITE_UPDATED: 'project.member.invite.updated',
   },
 };
 
@@ -121,6 +127,11 @@ export const BUS_API_EVENT = {
   TOPIC_UPDATED: 'notifications.connect.project.topic.updated',
   POST_CREATED: 'notifications.connect.project.post.created',
   POST_UPDATED: 'notifications.connect.project.post.edited',
+
+  // Project Member Invites
+  PROJECT_MEMBER_INVITE_CREATED: 'notifications.connect.project.member.invite.created',
+  PROJECT_MEMBER_INVITE_UPDATED: 'notifications.connect.project.member.invite.updated',
+  PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.action.email.project.member.invite.created',
 };
 
 export const REGEX = {
@@ -141,3 +152,9 @@ export const MILESTONE_TEMPLATE_REFERENCES = {
   PRODUCT_TEMPLATE: 'productTemplate',
 };
 
+export const INVITE_STATUS = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  REFUSED: 'refused',
+  CANCELED: 'canceled',
+};

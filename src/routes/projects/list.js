@@ -30,6 +30,10 @@ const PROJECT_MEMBER_ATTRIBUTES = _.without(
   _.keys(models.ProjectMember.rawAttributes),
   'deletedAt',
 );
+const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(
+  _.keys(models.ProjectMemberInvite.rawAttributes),
+  'deletedAt',
+);
 const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(
   _.keys(models.ProjectAttachment.rawAttributes),
   'deletedAt',
@@ -125,6 +129,10 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   if (_.get(fields, 'project_members', null)) {
     const memberFields = _.get(fields, 'project_members');
     sourceInclude = sourceInclude.concat(_.map(memberFields, single => `members.${single}`));
+  }
+  if (_.get(fields, 'project_member_invites', null)) {
+    const memberFields = _.get(fields, 'project_member_invites');
+    sourceInclude = sourceInclude.concat(_.map(memberFields, single => `invites.${single}`));
   }
   if (_.get(fields, 'project_phases', null)) {
     const phaseFields = _.get(fields, 'project_phases');
@@ -249,6 +257,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
     project_members: PROJECT_MEMBER_ATTRIBUTES,
+    project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
     attachments: PROJECT_ATTACHMENT_ATTRIBUTES,
@@ -321,16 +330,26 @@ module.exports = [
     const getProjectIds = !memberOnly && util.hasRole(req, USER_ROLE.COPILOT) ?
         models.Project.getProjectIdsForCopilot(req.authUser.userId) :
         models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
+
     return getProjectIds
         .then((accessibleProjectIds) => {
+          const allowedProjectIds = accessibleProjectIds;
+          // get projects with pending invite for current user
+          const invites = models.ProjectMemberInvite.getProjectInvitesForUser(
+            req.authUser.email,
+            req.authUser.userId);
+
+          return invites.then((ids => _.union(allowedProjectIds, ids)));
+        })
+        .then((allowedProjectIds) => {
           // filter based on accessible
           if (_.get(criteria.filters, 'id', null)) {
             criteria.filters.id.$in = _.intersection(
-              accessibleProjectIds,
+              allowedProjectIds,
               criteria.filters.id.$in,
             );
           } else {
-            criteria.filters.id = { $in: accessibleProjectIds };
+            criteria.filters.id = { $in: allowedProjectIds };
           }
           return retrieveProjects(req, criteria, sort, req.query.fields);
         })

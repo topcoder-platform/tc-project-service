@@ -60,10 +60,12 @@ router.all(
 );
 
 // Register all the routes
+router.use('/v4/projects', compression());
 router.route('/v4/projects')
   .post(require('./projects/create'))
   .get(require('./projects/list'));
 
+router.use('/v4/projects/db', compression());
 router.route('/v4/projects/db')
   .get(require('./projects/list-db'));
 
@@ -174,6 +176,11 @@ router.route('/v4/timelines/metadata/milestoneTemplates/:milestoneTemplateId(\\d
   .get(require('./milestoneTemplates/get'))
   .patch(require('./milestoneTemplates/update'))
   .delete(require('./milestoneTemplates/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/members/invite')
+  .post(require('./projectMemberInvites/create'))
+  .put(require('./projectMemberInvites/update'))
+  .get(require('./projectMemberInvites/get'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

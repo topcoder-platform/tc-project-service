@@ -16,6 +16,7 @@ const schema = {
     param: Joi.object().keys({
       id: Joi.any().strip(),
       category: Joi.string().max(45).required(),
+      subCategory: Joi.string().max(45).required(),
       name: Joi.string().max(255).required(),
       productKey: Joi.string().max(45).required(),
       icon: Joi.string().max(255).required(),

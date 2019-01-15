@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     name: { type: DataTypes.STRING(255), allowNull: false },
     productKey: { type: DataTypes.STRING(45), allowNull: false },
     category: { type: DataTypes.STRING(45), allowNull: false },
+    subCategory: { type: DataTypes.STRING(45), allowNull: false },
     icon: { type: DataTypes.STRING(255), allowNull: false },
     brief: { type: DataTypes.STRING(45), allowNull: false },
     details: { type: DataTypes.STRING(255), allowNull: false },

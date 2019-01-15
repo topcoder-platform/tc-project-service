@@ -326,6 +326,7 @@ models.sequelize.sync({ force: true })
       name: 'name 1',
       productKey: 'productKey 1',
       category: 'category',
+      subCategory: 'category',
       icon: 'http://example.com/icon1.ico',
       question: 'question 1',
       info: 'info 1',

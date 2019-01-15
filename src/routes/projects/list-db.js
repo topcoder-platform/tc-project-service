@@ -140,14 +140,22 @@ module.exports = [
         models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
     return getProjectIds
         .then((accessibleProjectIds) => {
+          let allowedProjectIds = accessibleProjectIds;
+          // get projects with pending invite for current user
+          const invites = models.ProjectMemberInvite.getProjectInvitesForUser(
+            req.authUser.email,
+            req.authUser.userId);
+          if (invites) {
+            allowedProjectIds = _.union(allowedProjectIds, invites);
+          }
           // filter based on accessible
           if (_.get(criteria.filters, 'id', null)) {
             criteria.filters.id.$in = _.intersection(
-              accessibleProjectIds,
+              allowedProjectIds,
               criteria.filters.id.$in,
             );
           } else {
-            criteria.filters.id = { $in: accessibleProjectIds };
+            criteria.filters.id = { $in: allowedProjectIds };
           }
           return retrieveProjects(req, criteria, sort, req.query.fields);
         })

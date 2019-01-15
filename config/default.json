@@ -51,5 +51,12 @@
   "AUTH0_URL": "",
   "TOKEN_CACHE_TIME": "",
   "whitelistedOriginsForUserIdAuth": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
-  "AUTH0_PROXY_SERVER_URL" : ""
+  "AUTH0_PROXY_SERVER_URL" : "",
+  "EMAIL_INVITE_FROM_NAME":"Topcoder",
+  "EMAIL_INVITE_FROM_EMAIL":"noreply@connect.topcoder.com",
+  "inviteEmailSubject": "You are invited to Topcoder",
+  "inviteEmailSectionTitle": "Project Invitation",
+  "connectUrl":"https://connect.topcoder-dev.com",
+  "accountsAppUrl": "https://accounts.topcoder-dev.com"
+
 }

@@ -15,16 +15,11 @@ describe('UPDATE product template', () => {
     name: 'name 1',
     productKey: 'productKey 1',
     category: 'generic',
+    subCategory: 'generic',
     icon: 'http://example.com/icon1.ico',
     brief: 'brief 1',
     details: 'details 1',
-    aliases: {
-      alias1: {
-        subAlias1A: 1,
-        subAlias1B: 2,
-      },
-      alias2: [1, 2, 3],
-    },
+    aliases: ['productTemplate-1', 'productTemplate_1'],
     disabled: true,
     hidden: true,
     template: {
@@ -86,17 +81,11 @@ describe('UPDATE product template', () => {
         name: 'template 1 - update',
         productKey: 'productKey 1 - update',
         category: 'concrete',
+        subCategory: 'concrete',
         icon: 'http://example.com/icon1-update.ico',
         brief: 'brief 1 - update',
         details: 'details 1 - update',
-        aliases: {
-          alias1: {
-            subAlias1A: 11,
-            subAlias1C: 'new',
-          },
-          alias2: [4],
-          alias3: 'new',
-        },
+        aliases: ['productTemplate-1-update', 'productTemplate_1-update'],
         template: {
           template1: {
             name: 'template 1 - update',
@@ -213,16 +202,7 @@ describe('UPDATE product template', () => {
           resJson.details.should.be.eql(body.param.details);
           resJson.disabled.should.be.eql(true);
           resJson.hidden.should.be.eql(true);
-
-          resJson.aliases.should.be.eql({
-            alias1: {
-              subAlias1A: 11,
-              subAlias1B: 2,
-              subAlias1C: 'new',
-            },
-            alias2: [4],
-            alias3: 'new',
-          });
+          resJson.aliases.should.be.eql(body.param.aliases);
           resJson.template.should.be.eql({
             template1: {
               name: 'template 1 - update',
