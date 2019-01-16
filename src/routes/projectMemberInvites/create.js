@@ -103,15 +103,17 @@ const buildCreateInvitePromises = (req, invite, invites, data) => {
 };
 
 const sendInviteEmail = (req, projectId, invite) => {
+  req.log.debug(req.authUser);
   const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
     models.Project.find({
       where: { id: projectId },
       raw: true,
     }),
-    util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id),
+    util.getMemberDetailsByUserIds([`userId:${req.authUser.userId}`], req.log, req.id),
   ];
   return Promise.all(promises).then((responses) => {
+    req.log.debug(responses);
     const project = responses[0];
     const initiator = responses[1] && responses[1].length ? responses[1][0] : {
       userId: req.authUser.userId,

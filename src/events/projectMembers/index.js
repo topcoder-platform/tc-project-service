@@ -178,7 +178,7 @@ const projectMemberUpdatedHandler = Promise.coroutine(function* a(logger, msg, c
   try {
     const data = JSON.parse(msg.content.toString());
     // get member information
-    const memberDetails = yield util.getMemberDetailsByUserIds[data.original.userId];
+    const memberDetails = yield util.getMemberDetailsByUserIds([data.original.userId], logger);
     const payload = _.merge(data.updated, _.pick(memberDetails[0], 'handle', 'firstName', 'lastName', 'email'));
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.projectId });
 
