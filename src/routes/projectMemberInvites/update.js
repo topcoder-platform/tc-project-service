@@ -66,7 +66,7 @@ module.exports = [
         if (!util.hasRoles(req, MANAGER_ROLES) && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
           error = `Project members can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
         }
-      } else if ((!!putInvite.userId && `${putInvite.userId}` !== req.authUser.userId) ||
+      } else if ((!!putInvite.userId && putInvite.userId !== req.authUser.userId) ||
                  (!!putInvite.email && putInvite.email !== req.authUser.email)) {
         error = 'Project members can only update invites for themselves';
       }
