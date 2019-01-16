@@ -181,7 +181,7 @@ module.exports = [
         // permission:
         // user has to have constants.MANAGER_ROLES role
         // to be invited as PROJECT_MEMBER_ROLE.MANAGER
-      if (invite.role === PROJECT_MEMBER_ROLE.MANAGER) {
+      if (_.includes(PROJECT_MEMBER_MANAGER_ROLES, invite.role)) {
         _.forEach(invite.userIds, (userId) => {
           req.log.info(userId);
           promises.push(util.getUserRoles(userId, req.log, req.id));
