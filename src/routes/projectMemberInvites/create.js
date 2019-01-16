@@ -207,6 +207,7 @@ module.exports = [
         const forbidUserList = [];
         _.zip(invite.userIds, rolesList).forEach((data) => {
           const [userId, roles] = data;
+          req.log.debug(roles);
 
           if (!util.hasIntersection(MANAGER_ROLES, roles)) {
             forbidUserList.push(userId);
