@@ -68,7 +68,7 @@ module.exports = [
         }
       } else if ((!!putInvite.userId && putInvite.userId !== req.authUser.userId) ||
                  (!!putInvite.email && putInvite.email !== req.authUser.email)) {
-        error = 'Project members can only update invites for themselves putInvite: ' + JSON.stringify(putInvite) + ', req.authUser: ' + JSON.stringify(req.authUser); // eslint-disable-line
+        error = 'Project members can only update invites for themselves';
       }
 
       if (error) {
