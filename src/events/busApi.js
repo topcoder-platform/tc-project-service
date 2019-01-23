@@ -50,6 +50,7 @@ module.exports = (app, logger) => {
     createEvent(BUS_API_EVENT.PROJECT_CREATED, {
       projectId: project.id,
       projectName: project.name,
+      refCode: _.get(project, 'details.utm.code'),
       projectUrl: connectProjectUrl(project.id),
       userId: req.authUser.userId,
       initiatorUserId: req.authUser.userId,
@@ -67,6 +68,7 @@ module.exports = (app, logger) => {
       createEvent(mapEventTypes[updated.status], {
         projectId: updated.id,
         projectName: updated.name,
+        refCode: _.get(updated, 'details.utm.code'),
         projectUrl: connectProjectUrl(updated.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
@@ -79,6 +81,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED, {
         projectId: updated.id,
         projectName: updated.name,
+        refCode: _.get(updated, 'details.utm.code'),
         projectUrl: connectProjectUrl(updated.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
@@ -88,6 +91,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_LINK_CREATED, {
         projectId: updated.id,
         projectName: updated.name,
+        refCode: _.get(updated, 'details.utm.code'),
         projectUrl: connectProjectUrl(updated.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
@@ -101,6 +105,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_UPDATED, {
         projectId: updated.id,
         projectName: updated.name,
+        refCode: _.get(updated, 'details.utm.code'),
         projectUrl: connectProjectUrl(updated.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
@@ -135,6 +140,7 @@ module.exports = (app, logger) => {
         createEvent(eventType, {
           projectId,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(projectId),
           userId: member.userId,
           initiatorUserId: req.authUser.userId,
@@ -143,6 +149,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
           projectId: project.id,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(project.id),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
@@ -172,6 +179,7 @@ module.exports = (app, logger) => {
           createEvent(eventType, {
             projectId,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(projectId),
             userId: member.userId,
             initiatorUserId: req.authUser.userId,
@@ -180,6 +188,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
             projectId: project.id,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(project.id),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
@@ -205,6 +214,7 @@ module.exports = (app, logger) => {
             createEvent(BUS_API_EVENT.MEMBER_ASSIGNED_AS_OWNER, {
               projectId,
               projectName: project.name,
+              refCode: _.get(project, 'details.utm.code'),
               projectUrl: connectProjectUrl(projectId),
               userId: updated.userId,
               initiatorUserId: req.authUser.userId,
@@ -214,6 +224,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
             projectId: project.id,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(project.id),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
@@ -237,6 +248,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_FILE_UPLOADED, {
           projectId,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(projectId),
           fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
           fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
@@ -247,6 +259,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
           projectId: project.id,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(project.id),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
@@ -270,6 +283,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
         projectId: project.id,
         projectName: project.name,
+        refCode: _.get(project, 'details.utm.code'),
         projectUrl: connectProjectUrl(project.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
@@ -292,6 +306,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
         projectId: project.id,
         projectName: project.name,
+        refCode: _.get(project, 'details.utm.code'),
         projectUrl: connectProjectUrl(project.id),
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
@@ -320,6 +335,7 @@ module.exports = (app, logger) => {
             projectId: project.id,
             phaseId: phase.id,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
@@ -343,6 +359,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
           projectId,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
@@ -366,6 +383,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
           projectId,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
@@ -448,6 +466,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED, {
             projectId,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(projectId),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
@@ -460,6 +479,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
             projectId,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(projectId),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
@@ -483,6 +503,7 @@ module.exports = (app, logger) => {
     createEvent(BUS_API_EVENT.MILESTONE_UPDATED, {
       projectId: project.id,
       projectName: project.name,
+      refCode: _.get(project, 'details.utm.code'),
       projectUrl: connectProjectUrl(project.id),
       timeline,
       originalMilestone: original,
@@ -503,6 +524,7 @@ module.exports = (app, logger) => {
         createEvent(event, {
           projectId: project.id,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(project.id),
           timeline,
           originalMilestone: original,
@@ -520,6 +542,7 @@ module.exports = (app, logger) => {
       createEvent(BUS_API_EVENT.MILESTONE_WAITING_CUSTOMER, {
         projectId: project.id,
         projectName: project.name,
+        refCode: _.get(project, 'details.utm.code'),
         projectUrl: connectProjectUrl(project.id),
         timeline,
         originalMilestone: original,
@@ -546,6 +569,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.MILESTONE_ADDED, {
             projectId,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(projectId),
             addedMilestone: created,
             userId: req.authUser.userId,
@@ -594,6 +618,7 @@ module.exports = (app, logger) => {
             createEvent(BUS_API_EVENT.TIMELINE_ADJUSTED, {
               projectId: project.id,
               projectName: project.name,
+              refCode: _.get(project, 'details.utm.code'),
               projectUrl: connectProjectUrl(project.id),
               originalTimeline: cTimeline.original,
               updatedTimeline: cTimeline.updated,
@@ -622,6 +647,7 @@ module.exports = (app, logger) => {
         createEvent(BUS_API_EVENT.MILESTONE_REMOVED, {
           projectId,
           projectName: project.name,
+          refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(projectId),
           removedMilestone: deleted,
           userId: req.authUser.userId,
@@ -648,6 +674,7 @@ module.exports = (app, logger) => {
           createEvent(BUS_API_EVENT.TIMELINE_ADJUSTED, {
             projectId,
             projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(projectId),
             originalTimeline: original,
             updatedTimeline: updated,
