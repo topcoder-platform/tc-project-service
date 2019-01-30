@@ -11,7 +11,7 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 describe('LIST organization config', () => {
-  const orgConfigPath = '/v4/projects/metadata/orgConfig'
+  const orgConfigPath = '/v4/projects/metadata/orgConfig';
   const configs = [
     {
       id: 1,
