@@ -40,7 +40,7 @@ describe('LIST organization config', () => {
   describe('GET /orgConfig', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/orgConfig')
+        .get('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -66,7 +66,7 @@ describe('LIST organization config', () => {
 
     it('should return 200 with filters', (done) => {
       request(server)
-        .get(`/v4/orgConfig?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
+        .get(`/v4/projects/metadata/orgConfig?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -92,13 +92,13 @@ describe('LIST organization config', () => {
 
     it('should return 200 even if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/orgConfig')
+        .get('/v4/projects/metadata/orgConfig')
         .expect(200, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/orgConfig')
+        .get('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -108,7 +108,7 @@ describe('LIST organization config', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/orgConfig')
+        .get('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -118,7 +118,7 @@ describe('LIST organization config', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/orgConfig')
+        .get('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -127,7 +127,7 @@ describe('LIST organization config', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/orgConfig')
+        .get('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

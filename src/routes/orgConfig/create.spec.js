@@ -34,14 +34,14 @@ describe('CREATE organization config', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -51,7 +51,7 @@ describe('CREATE organization config', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -61,7 +61,7 @@ describe('CREATE organization config', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -74,7 +74,7 @@ describe('CREATE organization config', () => {
       delete invalidBody.param.orgId;
 
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -88,7 +88,7 @@ describe('CREATE organization config', () => {
       delete invalidBody.param.configName;
 
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -103,7 +103,7 @@ describe('CREATE organization config', () => {
       invalidBody.param.configName = 'project_catefory_url';
 
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -114,7 +114,7 @@ describe('CREATE organization config', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -140,7 +140,7 @@ describe('CREATE organization config', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/orgConfig')
+        .post('/v4/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

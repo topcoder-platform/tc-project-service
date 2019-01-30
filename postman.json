@@ -3308,7 +3308,7 @@
 				{
 					"name": "Create organization config",
 					"request": {
-						"url": "{{api-url}}/v4/orgConfig",
+						"url": "{{api-url}}/v4/projects/metadata/orgConfig",
 						"method": "POST",
 						"header": [
 							{
@@ -3333,7 +3333,7 @@
 				{
 					"name": "List organization config",
 					"request": {
-						"url": "{{api-url}}/v4/orgConfig",
+						"url": "{{api-url}}/v4/projects/metadata/orgConfig",
 						"method": "GET",
 						"header": [
 							{
@@ -3359,7 +3359,7 @@
 					"name": "List organization config - filter",
 					"request": {
 						"url": {
-							"raw": "{{api-url}}/v4/orgConfig?filter=orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
+							"raw": "{{api-url}}/v4/projects/metadata/orgConfig?filter=orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
 							"host": [
 								"{{api-url}}"
 							],
@@ -3401,7 +3401,7 @@
 				{
 					"name": "Get organization config",
 					"request": {
-						"url": "{{api-url}}/v4/orgConfig/1",
+						"url": "{{api-url}}/v4/projects/metadata/orgConfig/1",
 						"method": "GET",
 						"header": [
 							{
@@ -3426,7 +3426,7 @@
 				{
 					"name": "Update organization config",
 					"request": {
-						"url": "{{api-url}}/v4/orgConfig/1",
+						"url": "{{api-url}}/v4/projects/metadata/orgConfig/1",
 						"method": "PATCH",
 						"header": [
 							{
@@ -3451,7 +3451,7 @@
 				{
 					"name": "Delete organization config",
 					"request": {
-						"url": "{{api-url}}/v4/orgConfig/1",
+						"url": "{{api-url}}/v4/projects/metadata/orgConfig/1",
 						"method": "DELETE",
 						"header": [
 							{

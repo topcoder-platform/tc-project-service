@@ -40,14 +40,14 @@ describe('UPDATE organization config', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -57,7 +57,7 @@ describe('UPDATE organization config', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -67,7 +67,7 @@ describe('UPDATE organization config', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
@@ -77,7 +77,7 @@ describe('UPDATE organization config', () => {
 
     it('should return 404 for non-existed config', (done) => {
       request(server)
-        .patch('/v4/orgConfig/1234')
+        .patch('/v4/projects/metadata/orgConfig/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -89,7 +89,7 @@ describe('UPDATE organization config', () => {
       models.OrgConfig.destroy({ where: { id } })
         .then(() => {
           request(server)
-            .patch(`/v4/orgConfig/${id}`)
+            .patch(`/v4/projects/metadata/orgConfig/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -103,7 +103,7 @@ describe('UPDATE organization config', () => {
       delete partialBody.param.orgId;
       delete partialBody.param.configName;
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -131,7 +131,7 @@ describe('UPDATE organization config', () => {
       delete partialBody.param.configName;
       delete partialBody.param.configValue;
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -159,7 +159,7 @@ describe('UPDATE organization config', () => {
       delete partialBody.param.orgId;
       delete partialBody.param.configValue;
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -184,7 +184,7 @@ describe('UPDATE organization config', () => {
 
     it('should return 200 for admin all fields updated', (done) => {
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -208,7 +208,7 @@ describe('UPDATE organization config', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch(`/v4/orgConfig/${id}`)
+        .patch(`/v4/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

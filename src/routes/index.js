@@ -42,10 +42,10 @@ router.route('/v4/projects/metadata/projectTypes')
 router.route('/v4/projects/metadata/projectTypes/:key')
   .get(require('./projectTypes/get'));
 
-router.route('/v4/orgConfig')
+router.route('/v4/projects/metadata/orgConfig')
   .get(require('./orgConfig/list'));
 
-router.route('/v4/orgConfig/:id(\\d+)')
+router.route('/v4/projects/metadata/orgConfig/:id(\\d+)')
   .get(require('./orgConfig/get'));
 
 router.route('/v4/projects/metadata/productCategories')
@@ -188,10 +188,10 @@ router.route('/v4/projects/:projectId(\\d+)/members/invite')
   .put(require('./projectMemberInvites/update'))
   .get(require('./projectMemberInvites/get'));
 
-router.route('/v4/orgConfig')
+router.route('/v4/projects/metadata/orgConfig')
   .post(require('./orgConfig/create'));
 
-router.route('/v4/orgConfig/:id(\\d+)')
+router.route('/v4/projects/metadata/orgConfig/:id(\\d+)')
   .patch(require('./orgConfig/update'))
   .delete(require('./orgConfig/delete'));
 
