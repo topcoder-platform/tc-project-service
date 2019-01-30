@@ -3302,6 +3302,180 @@
 			]
 		},
 		{
+			"name": "Organization Config",
+			"description": "",
+			"item": [
+				{
+					"name": "Create organization config",
+					"request": {
+						"url": "{{api-url}}/v4/orgConfig",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n        \"orgId\": \"20000013\",\r\n        \"configName\": \"project_catalog_url\",\r\n        \"configValue\": \"/projects/1\"\r\n  }\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "List organization config",
+					"request": {
+						"url": "{{api-url}}/v4/orgConfig",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "List organization config - filter",
+					"request": {
+						"url": {
+							"raw": "{{api-url}}/v4/orgConfig?filter=orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"orgConfig"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Get organization config",
+					"request": {
+						"url": "{{api-url}}/v4/orgConfig/1",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Update organization config",
+					"request": {
+						"url": "{{api-url}}/v4/orgConfig/1",
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"configName\": \"project_catalog_url\"\r\n  }\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Delete organization config",
+					"request": {
+						"url": "{{api-url}}/v4/orgConfig/1",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Product Category",
 			"item": [
 				{
