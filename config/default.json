@@ -35,6 +35,7 @@
     "idleTimeout": 1000
   },
   "kafkaConfig": {
+    "hosts": "localhost:9092"
   },
   "analyticsKey": "",
   "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
