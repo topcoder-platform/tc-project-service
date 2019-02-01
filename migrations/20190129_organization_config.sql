@@ -4,9 +4,9 @@
 --
 CREATE TABLE org_config (
     id bigint NOT NULL,
-    orgId character varying(45) NOT NULL,
-    configName character varying(45) NOT NULL,
-    configValue character varying(512),
+    "orgId" character varying(45) NOT NULL,
+    "configName" character varying(45) NOT NULL,
+    "configValue" character varying(512),
     "deletedAt" timestamp with time zone,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,

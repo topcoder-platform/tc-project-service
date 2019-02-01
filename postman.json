@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e810fc27-5518-4cc5-8f90-6b1423c6b0b4",
+		"_postman_id": "d9f6cae1-30c2-4c85-96c3-428b1f2fc08d",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -3303,63 +3303,93 @@
 		},
 		{
 			"name": "Organization Config",
-			"description": "",
 			"item": [
 				{
 					"name": "Create organization config",
 					"request": {
-						"url": "{{api-url}}/v4/projects/metadata/orgConfig",
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n        \"orgId\": \"20000013\",\r\n        \"configName\": \"project_catalog_url\",\r\n        \"configValue\": \"/projects/1\"\r\n  }\r\n}"
 						},
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/orgConfig",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"orgConfig"
+							]
+						}
 					},
 					"response": []
 				},
 				{
-					"name": "List organization config",
+					"name": "List organization config - error without filter",
 					"request": {
-						"url": "{{api-url}}/v4/projects/metadata/orgConfig",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/orgConfig",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"orgConfig"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "List organization config - filter",
 					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/metadata/orgConfig?filter=orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
+							"raw": "{{api-url}}/v4/orgConfig?filter=orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
 							"host": [
 								"{{api-url}}"
 							],
@@ -3370,106 +3400,112 @@
 							"query": [
 								{
 									"key": "filter",
-									"value": "orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
-									"equals": true,
-									"description": ""
+									"value": "orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url"
 								}
-							],
-							"variable": []
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"description": ""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Get organization config",
 					"request": {
-						"url": "{{api-url}}/v4/projects/metadata/orgConfig/1",
 						"method": "GET",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/orgConfig/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"orgConfig",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Update organization config",
 					"request": {
-						"url": "{{api-url}}/v4/projects/metadata/orgConfig/1",
 						"method": "PATCH",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"configName\": \"project_catalog_url\"\r\n  }\r\n}"
 						},
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/orgConfig/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"orgConfig",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Delete organization config",
 					"request": {
-						"url": "{{api-url}}/v4/projects/metadata/orgConfig/1",
 						"method": "DELETE",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
+								"value": "application/json"
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}",
-								"description": ""
+								"value": "Bearer {{jwt-token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
 						},
-						"description": ""
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/orgConfig/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"orgConfig",
+								"1"
+							]
+						}
 					},
 					"response": []
 				}

@@ -32,40 +32,12 @@ describe('LIST organization config', () => {
   ];
 
   beforeEach(() => testUtil.clearDb()
-    .then(() => models.OrgConfig.create(configs[0]))
-    .then(() => models.OrgConfig.create(configs[1]))
-    .then(() => Promise.resolve()),
+    .then(() => models.OrgConfig.bulkCreate(configs)),
   );
   after(testUtil.clearDb);
 
   describe('GET /orgConfig', () => {
-    it('should return 200 for admin', (done) => {
-      request(server)
-        .get(`${orgConfigPath}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(200)
-        .end((err, res) => {
-          const config = configs[0];
-
-          const resJson = res.body.result.content;
-          resJson.should.have.length(2);
-          resJson[0].id.should.be.eql(config.id);
-          resJson[0].orgId.should.be.eql(config.orgId);
-          resJson[0].configName.should.be.eql(config.configName);
-          resJson[0].configValue.should.be.eql(config.configValue);
-          should.exist(resJson[0].createdAt);
-          resJson[0].updatedBy.should.be.eql(config.updatedBy);
-          should.exist(resJson[0].updatedAt);
-          should.not.exist(resJson[0].deletedBy);
-          should.not.exist(resJson[0].deletedAt);
-
-          done();
-        });
-    });
-
-    it('should return 200 with filters', (done) => {
+    it('should return 200 for admin with filter', (done) => {
       request(server)
         .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
         .set({
@@ -91,15 +63,15 @@ describe('LIST organization config', () => {
         });
     });
 
-    it('should return 200 even if user is not authenticated', (done) => {
+    it('should return 200 even if user is not authenticated with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}`)
+        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
         .expect(200, done);
     });
 
-    it('should return 200 for connect admin', (done) => {
+    it('should return 200 for connect admin with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}`)
+        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -107,9 +79,9 @@ describe('LIST organization config', () => {
         .end(done);
     });
 
-    it('should return 200 for connect manager', (done) => {
+    it('should return 200 for connect manager with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}`)
+        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -117,22 +89,34 @@ describe('LIST organization config', () => {
         .end(done);
     });
 
-    it('should return 200 for member', (done) => {
+    it('should return 200 for member with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}`)
+        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .expect(200, done);
     });
 
-    it('should return 200 for copilot', (done) => {
+    it('should return 200 for copilot with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}`)
+        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect(200, done);
+    });
+
+    it('should return 422 without filter query param', (done) => {
+      request(server)
+        .get(`${orgConfigPath}`)
+        .expect(422, done);
+    });
+
+    it('should return 422 with filter query param but without orgId defined', (done) => {
+      request(server)
+        .get(`${orgConfigPath}?filter=configName=${configs[0].configName}`)
+        .expect(422, done);
     });
   });
 });
