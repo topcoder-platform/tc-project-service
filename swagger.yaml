@@ -1177,6 +1177,137 @@ paths:
         '204':
           description: Project type successfully removed
 
+  /projects/metadata/orgConfig:
+    get:
+      tags:
+        - orgConfig
+      operationId: findOrgConfigs
+      security:
+        - Bearer: []
+      description: Retrieve all organization configs. All user roles can access this endpoint.
+      parameters:
+        - name: filter
+          required: true
+          type: string
+          in: query
+          description: |
+            Url encoded list of Supported filters
+             - orgId (required)
+             - configName
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of organization configs
+          schema:
+            $ref: "#/definitions/OrgConfigListResponse"
+    post:
+      tags:
+        - orgConfig
+      operationId: addOrgConfig
+      security:
+        - Bearer: []
+      description: Create a organization config. Only admin or connect admin can access this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/OrgConfigCreateBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created organization config
+          schema:
+            $ref: "#/definitions/OrgConfigResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projects/metadata/orgConfig/{id}:
+    get:
+      tags:
+        - orgConfig
+      description: Retrieve project type by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a project type
+          schema:
+            $ref: "#/definitions/OrgConfigResponse"
+      parameters:
+        - $ref: "#/parameters/idParam"
+      operationId: getOrgConfig
+    patch:
+      tags:
+        - orgConfig
+      operationId: updateOrgConfig
+      security:
+        - Bearer: []
+      description: Update a organization config. Only admin or connect admin can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated organization config.
+          schema:
+            $ref: "#/definitions/OrgConfigResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/idParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/OrgConfigCreateBodyParam"
+
+    delete:
+      tags:
+        - orgConfig
+      description: Remove an existing organization config. Only admin or connect admin can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/idParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If organization config is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Organization config successfully removed
 
   /timelines:
     get:
@@ -1741,136 +1872,6 @@ paths:
           description: Invalid server state or unknown error
           schema:
             $ref: "#/definitions/ErrorModel"
-  /orgConfig:
-    get:
-      tags:
-        - orgConfig
-      operationId: findOrgConfigs
-      security:
-        - Bearer: []
-      description: Retrieve all organization configs. All user roles can access this endpoint.
-      parameters:
-        - name: filter
-          required: true
-          type: string
-          in: query
-          description: |
-            Url encoded list of Supported filters
-             - orgId (required)
-             - configName
-      responses:
-        '403':
-          description: No permission or wrong token
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '200':
-          description: A list of organization configs
-          schema:
-            $ref: "#/definitions/OrgConfigListResponse"
-    post:
-      tags:
-        - orgConfig
-      operationId: addOrgConfig
-      security:
-        - Bearer: []
-      description: Create a organization config. Only admin or connect admin can access this endpoint.
-      parameters:
-        - in: body
-          name: body
-          required: true
-          schema:
-            $ref: '#/definitions/OrgConfigCreateBodyParam'
-      responses:
-        '403':
-          description: No permission or wrong token
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '201':
-          description: Returns the newly created organization config
-          schema:
-            $ref: "#/definitions/OrgConfigResponse"
-        '422':
-          description: Invalid input
-          schema:
-            $ref: "#/definitions/ErrorModel"
-  /orgConfig/{id}:
-    get:
-      tags:
-        - orgConfig
-      description: Retrieve project type by id. All user roles can access this endpoint.
-      security:
-        - Bearer: []
-      responses:
-        '404':
-          description: Not found
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '403':
-          description: No permission or wrong token
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '200':
-          description: a project type
-          schema:
-            $ref: "#/definitions/OrgConfigResponse"
-      parameters:
-        - $ref: "#/parameters/idParam"
-      operationId: getOrgConfig
-    patch:
-      tags:
-        - orgConfig
-      operationId: updateOrgConfig
-      security:
-        - Bearer: []
-      description: Update a organization config. Only admin or connect admin can access this endpoint.
-      responses:
-        '403':
-          description: No permission or wrong token
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '404':
-          description: Not found
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '200':
-          description: Successfully updated organization config.
-          schema:
-            $ref: "#/definitions/OrgConfigResponse"
-        '422':
-          description: Invalid input
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        default:
-          description: error payload
-          schema:
-            $ref: '#/definitions/ErrorModel'
-      parameters:
-        - $ref: "#/parameters/idParam"
-        - name: body
-          in: body
-          required: true
-          schema:
-            $ref: "#/definitions/OrgConfigCreateBodyParam"
-
-    delete:
-      tags:
-        - orgConfig
-      description: Remove an existing organization config. Only admin or connect admin can access this endpoint.
-      security:
-        - Bearer: []
-      parameters:
-        - $ref: "#/parameters/idParam"
-      responses:
-        '403':
-          description: No permission or wrong token
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '404':
-          description: If organization config is not found
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        '204':
-          description: Organization config successfully removed
 parameters:
   projectIdParam:
     name: projectId
