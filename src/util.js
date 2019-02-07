@@ -382,13 +382,14 @@ _.assignIn(util, {
   * @param {Object} mergeExceptions list of keys which should be exempted from merge
   * @returns {Object} the merged object
   */
-  // eslint-disable-next-line consistent-return
-  mergeJsonObjects: (targetObj, sourceObj, mergeExceptions) => _.mergeWith(targetObj, sourceObj, (target, source, key) => {
-    // Overwrite the array or merge exception keys
-    if (_.isArray(source) || (mergeExceptions && mergeExceptions.indexOf(key) !== -1)) {
-      return source;
-    }
-  }),
+  mergeJsonObjects: (targetObj, sourceObj, mergeExceptions) =>
+    // eslint-disable-next-line consistent-return
+    _.mergeWith(targetObj, sourceObj, (target, source, key) => {
+      // Overwrite the array or merge exception keys
+      if (_.isArray(source) || (mergeExceptions && mergeExceptions.indexOf(key) !== -1)) {
+        return source;
+      }
+    }),
 
   /**
    * Add userId to project
