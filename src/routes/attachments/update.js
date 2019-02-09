@@ -19,6 +19,7 @@ const updateProjectAttachmentValidation = {
     param: Joi.object().keys({
       title: Joi.string().required(),
       description: Joi.string().optional().allow(null).allow(''),
+      userIds: Joi.array(Joi.number().integer().positive()).allow(null).default(null),
     }),
   },
 };

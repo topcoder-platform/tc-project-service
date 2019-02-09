@@ -47,8 +47,9 @@ describe('Project Attachments update', () => {
               size: 12312,
               category: null,
               filePath: 'https://media.topcoder.com/projects/1/test.txt',
-              createdBy: 1,
+              createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
+              userIds: [],
             }).then((a1) => {
               attachment = a1;
               done();
@@ -106,6 +107,27 @@ describe('Project Attachments update', () => {
             should.exist(resJson);
             resJson.title.should.equal('updated title');
             resJson.description.should.equal('updated description');
+            done();
+          }
+        });
+    });
+
+    it('should return 200 if admin updates the attachment', (done) => {
+      request(server)
+        .patch(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: { title: 'updated title 1', description: 'updated description 1' } })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.title.should.equal('updated title 1');
+            resJson.description.should.equal('updated description 1');
             done();
           }
         });
