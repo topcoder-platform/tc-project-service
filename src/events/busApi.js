@@ -4,6 +4,7 @@ import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEM
   from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
+import getTopcoderProjectMembers from '../util';
 
 /**
  * Map of project status and event name sent to bus api
@@ -363,6 +364,8 @@ module.exports = (app, logger) => {
           projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
+          allowedUsers: created.status === PROJECT_PHASE_STATUS.DRAFT ?
+            getTopcoderProjectMembers(project.members) : null,
         }, logger);
         return sendPlanReadyEventIfNeeded(req, project, created);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
@@ -387,6 +390,8 @@ module.exports = (app, logger) => {
           projectUrl: connectProjectUrl(projectId),
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
+          allowedUsers: deleted.status === PROJECT_PHASE_STATUS.DRAFT ?
+            getTopcoderProjectMembers(project.members) : null,
         }, logger);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -438,6 +443,8 @@ module.exports = (app, logger) => {
               projectName: project.name,
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
+              allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
+                getTopcoderProjectMembers(project.members) : null,
             }, logger));
             events.forEach((event) => { eventsMap[event] = true; });
           }
@@ -483,6 +490,8 @@ module.exports = (app, logger) => {
             projectUrl: connectProjectUrl(projectId),
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
+            allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
+              getTopcoderProjectMembers(project.members) : null,
           }, logger);
         }
       }).catch(err => null);    // eslint-disable-line no-unused-vars
