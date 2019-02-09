@@ -25,7 +25,7 @@ const addAttachmentValidations = {
       filePath: Joi.string().required(),
       s3Bucket: Joi.string().required(),
       contentType: Joi.string().required(),
-      userIds: Joi.array(Joi.number().integer().positive()).allow(null).default(null),
+      allowedUsers: Joi.array(Joi.number().integer().positive()).allow(null).default(null),
     }).required(),
   },
 };
@@ -42,7 +42,7 @@ module.exports = [
     const data = req.body.param;
     // default values
     const projectId = req.params.projectId;
-    const userIds = data.userIds;
+    const allowedUsers = data.allowedUsers;
     _.assign(data, {
       projectId,
       createdBy: req.authUser.userId,
@@ -100,7 +100,7 @@ module.exports = [
       req.log.debug('creating db record');
       return models.ProjectAttachment.create({
         projectId,
-        userIds,
+        allowedUsers,
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
         title: data.title,

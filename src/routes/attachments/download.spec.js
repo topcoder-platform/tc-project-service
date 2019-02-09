@@ -52,7 +52,7 @@ describe('Project Attachments download', () => {
               filePath: 'https://media.topcoder.com/projects/1/test.txt',
               createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
-              userIds: [testUtil.userIds.member],
+              allowedUsers: [testUtil.userIds.member],
             }).then((a1) => {
               attachment = a1;
               done();

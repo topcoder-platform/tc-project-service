@@ -9,7 +9,7 @@ module.exports = function defineProjectAttachment(sequelize, DataTypes) {
     description: { type: DataTypes.STRING, allowNull: true },
     filePath: { type: DataTypes.STRING, allowNull: false },
     contentType: { type: DataTypes.STRING, allowNull: false },
-    userIds: DataTypes.ARRAY({ type: DataTypes.INTEGER, allowNull: true }),
+    allowedUsers: DataTypes.ARRAY({ type: DataTypes.INTEGER, allowNull: true }),
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -51,7 +51,7 @@ module.exports = function defineProjectAttachment(sequelize, DataTypes) {
             $or: [{
               createdBy: { $eq: userId },
             }, {
-              userIds: {
+              allowedUsers: {
                 $or: [
                   { $contains: [userId] },
                   { $eq: null },

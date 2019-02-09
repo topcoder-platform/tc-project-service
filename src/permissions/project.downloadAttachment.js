@@ -27,7 +27,8 @@ module.exports = freq => new Promise((resolve, reject) => {
           return resolve(true);
         }
 
-        if (attachment.createdBy === userId || attachment.userIds === null || attachment.userIds.indexOf(userId) >= 0) {
+        if (attachment.createdBy === userId || attachment.allowedUsers === null ||
+          attachment.allowedUsers.indexOf(userId) >= 0) {
           return resolve(true);
         }
 

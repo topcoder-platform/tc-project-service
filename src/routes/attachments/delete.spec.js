@@ -48,7 +48,7 @@ describe('Project Attachments delete', () => {
               size: 12312,
               category: null,
               filePath: 'https://media.topcoder.com/projects/1/test.txt',
-              createdBy: testUtil.userIds.copilot,
+              createdBy: testUtil.allowedUsers.copilot,
               updatedBy: 1,
             }).then((a1) => {
               attachment = a1;
