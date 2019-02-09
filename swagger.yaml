@@ -2346,7 +2346,7 @@ definitions:
         type: number
         format: float
         description: The size of attachment
-      userIds:
+      allowedUsers:
         type: array
         items:
           type: integer
