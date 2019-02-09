@@ -12,18 +12,12 @@ module.exports = freq => new Promise((resolve, reject) => {
   const projectId = _.parseInt(freq.params.projectId);
   const attachmentId = _.parseInt(freq.params.id);
 
-  freq.log.debug('Hello');
-
   if (util.hasAdminRole(freq)) {
-    freq.log.debug('Has Admin Role!');
     return resolve(true);
   }
 
-  freq.log.debug('Hello Hello Hello');
-
   return models.ProjectAttachment.getAttachmentById(projectId, attachmentId)
       .then((attachment) => {
-        freq.log.debug('Hello Hello');
         const req = freq;
         req.context = req.context || {};
         req.context.existingAttachment = attachment;
