@@ -278,7 +278,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\",\n\t\t\"userIds\": [40051331]\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\",\n\t\t\"allowedUsers\": [40051331]\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/attachments",
@@ -452,7 +452,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\",\n\t\t\"userIds\": null\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\",\n\t\t\"allowedUsers\": null\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/attachments/2",
