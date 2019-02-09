@@ -385,15 +385,17 @@ _.assignIn(util, {
   * Merge two JSON objects. For array fields, the target will be replaced by source.
   * @param {Object} targetObj the target object
   * @param {Object} sourceObj the source object
+  * @param {Object} mergeExceptions list of keys which should be exempted from merge
   * @returns {Object} the merged object
   */
-  // eslint-disable-next-line consistent-return
-  mergeJsonObjects: (targetObj, sourceObj) => _.mergeWith(targetObj, sourceObj, (target, source) => {
-    // Overwrite the array
-    if (_.isArray(source)) {
-      return source;
-    }
-  }),
+  mergeJsonObjects: (targetObj, sourceObj, mergeExceptions) =>
+    // eslint-disable-next-line consistent-return
+    _.mergeWith(targetObj, sourceObj, (target, source, key) => {
+      // Overwrite the array or merge exception keys
+      if (_.isArray(source) || (mergeExceptions && mergeExceptions.indexOf(key) !== -1)) {
+        return source;
+      }
+    }),
 
   /**
    * Add userId to project

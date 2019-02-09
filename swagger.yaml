@@ -659,7 +659,7 @@ paths:
           description: Project migrated successfully
           schema:
             $ref: "#/definitions/ProjectUpgradeResponse"
-            
+
   /projects/metadata:
     get:
       tags:
@@ -1177,6 +1177,137 @@ paths:
         '204':
           description: Project type successfully removed
 
+  /projects/metadata/orgConfig:
+    get:
+      tags:
+        - orgConfig
+      operationId: findOrgConfigs
+      security:
+        - Bearer: []
+      description: Retrieve all organization configs. All user roles can access this endpoint.
+      parameters:
+        - name: filter
+          required: true
+          type: string
+          in: query
+          description: |
+            Url encoded list of Supported filters
+             - orgId (required)
+             - configName
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: A list of organization configs
+          schema:
+            $ref: "#/definitions/OrgConfigListResponse"
+    post:
+      tags:
+        - orgConfig
+      operationId: addOrgConfig
+      security:
+        - Bearer: []
+      description: Create a organization config. Only admin or connect admin can access this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/OrgConfigCreateBodyParam'
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '201':
+          description: Returns the newly created organization config
+          schema:
+            $ref: "#/definitions/OrgConfigResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  /projects/metadata/orgConfig/{id}:
+    get:
+      tags:
+        - orgConfig
+      description: Retrieve project type by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: a project type
+          schema:
+            $ref: "#/definitions/OrgConfigResponse"
+      parameters:
+        - $ref: "#/parameters/idParam"
+      operationId: getOrgConfig
+    patch:
+      tags:
+        - orgConfig
+      operationId: updateOrgConfig
+      security:
+        - Bearer: []
+      description: Update a organization config. Only admin or connect admin can access this endpoint.
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '200':
+          description: Successfully updated organization config.
+          schema:
+            $ref: "#/definitions/OrgConfigResponse"
+        '422':
+          description: Invalid input
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: "#/parameters/idParam"
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/OrgConfigCreateBodyParam"
+
+    delete:
+      tags:
+        - orgConfig
+      description: Remove an existing organization config. Only admin or connect admin can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: "#/parameters/idParam"
+      responses:
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '404':
+          description: If organization config is not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '204':
+          description: Organization config successfully removed
 
   /timelines:
     get:
@@ -1741,7 +1872,6 @@ paths:
           description: Invalid server state or unknown error
           schema:
             $ref: "#/definitions/ErrorModel"
-         
 parameters:
   projectIdParam:
     name: projectId
@@ -1812,6 +1942,13 @@ parameters:
     type: integer
     format: int64
     minimum: 1
+  idParam:
+    name: id
+    in: path
+    description: organization config id
+    required: true
+    type: integer
+    format: int64
   offsetParam:
     name: offset
     description: "number of items to skip. Defaults to 0"
@@ -3159,6 +3296,132 @@ definitions:
             readOnly: true
       - $ref: "#/definitions/ProjectTypeCreateRequest"
 
+  OrgConfigRequest:
+    title: Organization config request object
+    type: object
+    required:
+      - orgId
+      - configName
+    properties:
+      orgId:
+        type: string
+        description: the org id
+      configName:
+        type: string
+        description: the organization config name
+
+  OrgConfigCreateRequest:
+    title: Organization config creation request object
+    type: object
+    allOf:
+      - type: object
+        properties:
+          configValue:
+            type: string
+            description: the organization config id
+      - $ref: "#/definitions/OrgConfigRequest"
+
+  OrgConfigCreateBodyParam:
+    title: Organization config creation body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: "#/definitions/OrgConfigCreateRequest"
+
+  OrgConfig:
+    title: Organization config object
+    allOf:
+      - type: object
+        required:
+          - id
+          - orgId
+          - configName
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          orgId:
+            type: string
+            description: the org id
+          configName:
+            type: string
+            description: the config name
+          configValue:
+            type: string
+            description: the config value
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/OrgConfigCreateRequest"
+
+  OrgConfigResponse:
+    title: Single organization config response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            $ref: "#/definitions/OrgConfig"
+
+  OrgConfigListResponse:
+    title: Organization confige list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: "#/definitions/ResponseMetadata"
+          content:
+            type: array
+            items:
+              $ref: "#/definitions/OrgConfig"
 
   ProjectTypeResponse:
     title: Single project type response object
@@ -3590,7 +3853,7 @@ definitions:
         format: long
         minimum: 1
         description: the milestone template reference id
-      metadata: 
+      metadata:
         type: object
         description: the milestone template metadata
 
@@ -3714,7 +3977,7 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/MilestoneTemplate"
-              
+
   AllMetadataResponse:
     title: All metadata response object
     type: object
@@ -3758,7 +4021,7 @@ definitions:
                 type: array
                 items:
                   $ref: "#/definitions/ProductCategory"
-                  
+
   ProjectMemberInvite:
     type: object
     properties:
@@ -3803,7 +4066,7 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this task
         readOnly: true
-   
+
   AddProjectMemberInvitesRequest:
     title: Add project member invites request object
     type: object
@@ -3825,8 +4088,8 @@ definitions:
           role:
             description: The target role in the project
             type: string
-            enum: ["manager", "customer", "copilot"]  
-        
+            enum: ["manager", "customer", "copilot"]
+
   UpdateProjectMemberInviteRequest:
     title: Update project member invite request object
     type: object
@@ -3845,7 +4108,7 @@ definitions:
             description: The invite status
             type: string
             enum: ["pending", "accepted", "refused", "canceled"]
-        
+
   ProjectMemberInviteResponse:
     title: Project member invite response object
     type: object
@@ -3867,4 +4130,3 @@ definitions:
             $ref: "#/definitions/ResponseMetadata"
           content:
             $ref: "#/definitions/ProjectMemberInvite"
-              
