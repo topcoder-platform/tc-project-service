@@ -2346,6 +2346,12 @@ definitions:
         type: number
         format: float
         description: The size of attachment
+      allowedUsers:
+        type: array
+        items:
+          type: integer
+          format: int64
+          description: Users allowed to access the attachment
 
   NewProjectAttachmentBodyParam:
     type: object

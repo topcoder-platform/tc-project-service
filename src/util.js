@@ -245,7 +245,13 @@ _.assignIn(util, {
   },
   getProjectAttachments: (req, projectId) => {
     let attachments = [];
-    return models.ProjectAttachment.getActiveProjectAttachments(projectId)
+    let attachmentsPromise;
+    if (util.hasAdminRole(req)) {
+      attachmentsPromise = models.ProjectAttachment.getActiveProjectAttachments(projectId);
+    } else {
+      attachmentsPromise = models.ProjectAttachment.getAttachmentsForUser(projectId, req.authUser.userId);
+    }
+    return attachmentsPromise
       .then((_attachments) => {
         // if attachments were requested
         if (_attachments) {

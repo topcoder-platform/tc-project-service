@@ -252,6 +252,7 @@ module.exports = (app, logger) => {
           projectUrl: connectProjectUrl(projectId),
           fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
           fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
+          allowedUsers: attachment.allowedUsers,
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);

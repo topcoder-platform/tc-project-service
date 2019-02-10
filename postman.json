@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d9f6cae1-30c2-4c85-96c3-428b1f2fc08d",
+		"_postman_id": "97085cd7-b298-4f1c-9629-24af14ff5f13",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -278,18 +278,123 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\"\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\",\n\t\t\"allowedUsers\": [40051331]\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/attachments",
+							"raw": "{{api-url}}/v4/projects/1/attachments",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"1",
 								"attachments"
+							]
+						},
+						"description": "Create an project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Download attachment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/attachments/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"attachments",
+								"2"
+							]
+						},
+						"description": "Create an project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Download attachment admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/attachments/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"attachments",
+								"2"
+							]
+						},
+						"description": "Create an project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Download attachment - No access",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/attachments/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"attachments",
+								"2"
 							]
 						},
 						"description": "Create an project attachment"
@@ -315,14 +420,49 @@
 							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\"\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/7/attachments/2",
+							"raw": "{{api-url}}/v4/projects/1/attachments/2",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"7",
+								"1",
+								"attachments",
+								"2"
+							]
+						},
+						"description": "Update project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Update attachment - No access",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\",\n\t\t\"allowedUsers\": null\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/attachments/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
 								"attachments",
 								"2"
 							]
@@ -358,6 +498,41 @@
 								"v4",
 								"projects",
 								"7",
+								"attachments",
+								"2"
+							]
+						},
+						"description": "Delete a project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete attachment - No access",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/attachments/2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
 								"attachments",
 								"2"
 							]
@@ -1098,7 +1273,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}\n}"
+							"raw": "{\n    \"param\": {\n        \"name\": \"Test 3\",\n        \"details\": {\n            \"utm\": {\n                \"code\": \"\"\n            },\n            \"appDefinition\": {\n                \"primaryTarget\": \"phone\",\n                \"goal\": {\n                    \"value\": \"Nothing\"\n                },\n                \"users\": {\n                    \"value\": \"No one\"\n                },\n                \"notes\": \"\"\n            },\n            \"hideDiscussions\": true\n        },\n        \"description\": \"Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message\",\n        \"templateId\": 3,\n        \"type\": \"app\"\n    }\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",
@@ -2240,17 +2415,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2019-02-15T00:00:00\",\n\t\t\"endDate\": \"2019-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/1/phases",
+							"raw": "{{api-url}}/v4/projects/2/phases",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"1",
+								"2",
 								"phases"
 							]
 						}
@@ -2594,7 +2769,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/1/phases/3",
+							"raw": "{{api-url}}/v4/projects/1/phases/2",
 							"host": [
 								"{{api-url}}"
 							],
@@ -2603,7 +2778,7 @@
 								"projects",
 								"1",
 								"phases",
-								"3"
+								"2"
 							]
 						}
 					},
@@ -2630,7 +2805,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test phase product\",\n\t\t\"type\": \"type 1\",\n\t\t\"estimatedPrice\": 10\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test phase product\",\n\t\t\"type\": \"application_development\",\n\t\t\"estimatedPrice\": 10000\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products",
@@ -3147,7 +3322,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"generic\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"app\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTypes",
@@ -3530,7 +3705,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"generic\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"icon\",\r\n        \"question\": \"question\",\r\n        \"info\": \"info\",\r\n        \"aliases\": [\"key-1\", \"key-2\"]\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"app\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"icon\",\r\n        \"question\": \"question\",\r\n        \"info\": \"info\",\r\n        \"aliases\": [\"key-1\", \"key-2\"]\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productCategories",
@@ -3873,7 +4048,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2019-02-29T00:00:00.000Z\",\r\n    \"endDate\": \"2019-04-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines",
@@ -3904,7 +4079,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1,\r\n    \"templateId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2019-02-29T00:00:00.000Z\",\r\n    \"endDate\": \"2019-04-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1,\r\n    \"templateId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines",

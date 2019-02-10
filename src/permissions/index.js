@@ -6,6 +6,8 @@ const projectEdit = require('./project.edit');
 const projectDelete = require('./project.delete');
 const projectMemberDelete = require('./projectMember.delete');
 const projectAdmin = require('./admin.ops');
+const projectAttachmentUpdate = require('./project.updateAttachment');
+const projectAttachmentDownload = require('./project.downloadAttachment');
 // const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 
@@ -20,9 +22,9 @@ module.exports = () => {
   Authorizer.setPolicy('project.addMember', projectView);
   Authorizer.setPolicy('project.removeMember', projectMemberDelete);
   Authorizer.setPolicy('project.addAttachment', projectEdit);
-  Authorizer.setPolicy('project.updateAttachment', projectEdit);
-  Authorizer.setPolicy('project.removeAttachment', projectEdit);
-  Authorizer.setPolicy('project.downloadAttachment', projectView);
+  Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);
+  Authorizer.setPolicy('project.removeAttachment', projectAttachmentUpdate);
+  Authorizer.setPolicy('project.downloadAttachment', projectAttachmentDownload);
   Authorizer.setPolicy('project.updateMember', projectEdit);
   Authorizer.setPolicy('project.admin', projectAdmin);
 

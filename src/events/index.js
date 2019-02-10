@@ -7,7 +7,7 @@ import { projectMemberAddedHandler, projectMemberRemovedHandler,
 import { projectMemberInviteCreatedHandler,
   projectMemberInviteUpdatedHandler } from './projectMemberInvites';
 import { projectAttachmentRemovedHandler,
-  projectAttachmentUpdatedHandler } from './projectAttachments';
+  projectAttachmentUpdatedHandler, projectAttachmentAddedHandler } from './projectAttachments';
 import { projectPhaseAddedHandler, projectPhaseRemovedHandler,
   projectPhaseUpdatedHandler } from './projectPhases';
 import { phaseProductAddedHandler, phaseProductRemovedHandler,
@@ -35,7 +35,7 @@ export const rabbitHandlers = {
   [EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED]: projectMemberUpdatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED]: projectMemberInviteCreatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED]: projectMemberInviteUpdatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED]: projectMemberInviteUpdatedHandler,
+  [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED]: projectAttachmentAddedHandler,
   [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED]: projectAttachmentRemovedHandler,
   [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED]: projectAttachmentUpdatedHandler,
   [EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED]: projectPhaseAddedHandler,
