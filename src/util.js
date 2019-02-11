@@ -18,7 +18,7 @@ import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT } from './constants';
+import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -474,6 +474,13 @@ _.assignIn(util, {
       });
     });
   },
+
+  /**
+   * Filter only members of topcoder team
+   * @param {Array}  members        project members
+   * @return {Array} tpcoder project members
+   */
+  getTopcoderProjectMembers: members => _(members).filter(m => m.role !== PROJECT_MEMBER_ROLE.CUSTOMER),
 });
 
 export default util;
