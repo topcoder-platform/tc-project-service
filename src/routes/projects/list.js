@@ -103,6 +103,87 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
 };
 
 /**
+ * Build ES query search request body based on value, keyword, matchType and fieldName
+ *
+ * @param  {String}     value          the value to build request body for
+ * @param  {String}     keyword        the keyword to query
+ * @param  {String}     matchType      wildcard match or exact match
+ * @param  {Array}      fieldName      the fieldName
+ * @return {Object}                    search request body that can be passed to .search api call
+ */
+const buildEsQueryWithFilter = (value, keyword, matchType, fieldName) => {
+  let should = [];
+  if (value !== 'details' && value !== 'customer' && value !== 'manager') {
+    should = _.concat(should, {
+      query_string: {
+        query: keyword,
+        analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
+        fields: fieldName,
+      },
+    });
+  }
+
+  if (value === 'details') {
+    should = _.concat(should, {
+      nested: {
+        path: 'details',
+        query: {
+          nested: {
+            path: 'details.utm',
+            query: {
+              query_string: {
+                query: keyword,
+                analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
+                fields: fieldName,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  if (value === 'customer' || value === 'manager') {
+    should = _.concat(should, {
+      nested: {
+        path: 'members',
+        query: {
+          bool: {
+            must: [
+              { match: { 'members.role': value } },
+              {
+                query_string: {
+                  query: keyword,
+                  analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
+                  fields: fieldName,
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  }
+
+  return should;
+};
+
+/**
+ * Prepare search request body based on wildcard query
+ *
+ * @param  {String}     value          the value to build request body for
+ * @param  {String}     keyword        the keyword to query
+ * @param  {Array}      fieldName      the fieldName
+ * @return {Object}                    search request body that can be passed to .search api call
+ */
+const setFilter = (value, keyword, fieldName) => {
+  if (keyword.indexOf('*') > -1) {
+    return buildEsQueryWithFilter(value, keyword, MATCH_TYPE_WILDCARD, fieldName);
+  }
+  return buildEsQueryWithFilter(value, keyword, MATCH_TYPE_EXACT_PHRASE, fieldName);
+};
+
+/**
  * Parse the ES search criteria and prepare search request body
  *
  * @param  {Object}     criteria          the filter criteria parsed from client request
@@ -152,6 +233,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   }
   // prepare the elasticsearch filter criteria
   const boolQuery = [];
+  let mustQuery = [];
   let fullTextQuery;
   if (_.has(criteria, 'filters.id.$in')) {
     boolQuery.push({
@@ -159,6 +241,34 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
         values: criteria.filters.id.$in,
       },
     });
+  } else if (_.has(criteria, 'filters.id') && criteria.filters.id.indexOf('*') > -1) {
+    mustQuery = _.concat(mustQuery, buildEsQueryWithFilter('id', criteria.filters.id, MATCH_TYPE_WILDCARD, ['id']));
+  } else if (_.has(criteria, 'filters.id')) {
+    boolQuery.push({
+      term: {
+        id: criteria.filters.id,
+      },
+    });
+  }
+
+  if (_.has(criteria, 'filters.name')) {
+    mustQuery = _.concat(mustQuery, setFilter('name', criteria.filters.name, ['name']));
+  }
+
+  if (_.has(criteria, 'filters.code')) {
+    mustQuery = _.concat(mustQuery, setFilter('details', criteria.filters.code, ['details.utm.code']));
+  }
+
+  if (_.has(criteria, 'filters.customer')) {
+    mustQuery = _.concat(mustQuery, setFilter('customer',
+      criteria.filters.customer,
+      ['members.firstName', 'members.lastName']));
+  }
+
+  if (_.has(criteria, 'filters.manager')) {
+    mustQuery = _.concat(mustQuery, setFilter('manager',
+      criteria.filters.manager,
+      ['members.firstName', 'members.lastName']));
   }
 
   if (_.has(criteria, 'filters.status.$in')) {
@@ -177,21 +287,6 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     });
   }
 
-  if (_.has(criteria, 'filters.type.$in')) {
-    // type is an array
-    boolQuery.push({
-      terms: {
-        type: criteria.filters.type.$in,
-      },
-    });
-  } else if (_.has(criteria, 'filters.type')) {
-    // type is simple string
-    boolQuery.push({
-      term: {
-        type: criteria.filters.type,
-      },
-    });
-  }
   if (_.has(criteria, 'filters.keyword')) {
     // keyword is a full text search
     // escape special fields from keyword search
@@ -222,7 +317,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
 
     if (!keyword) {
       // Not a specific field search nor an exact phrase search, do a wildcard match
-      keyword = escapeEsKeyword(criteria.filters.keyword);
+      keyword = criteria.filters.keyword;
       matchType = MATCH_TYPE_WILDCARD;
     }
 
@@ -234,6 +329,12 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
       filter: boolQuery,
     };
   }
+
+  if (mustQuery.length > 0) {
+    body.query.bool = _.merge(body.query.bool, {
+      must: mustQuery,
+    });
+  }
   if (fullTextQuery) {
     body.query = _.merge(body.query, fullTextQuery);
     if (body.query.bool) {
@@ -241,10 +342,9 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     }
   }
 
-  if (fullTextQuery || boolQuery.length > 0) {
+  if (fullTextQuery || boolQuery.length > 0 || mustQuery.length > 0) {
     searchCriteria.body = body;
   }
-
   return searchCriteria;
 };
 
@@ -267,8 +367,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     fields.projects.push('id');
   }
 
-  const searchCriteria = parseElasticSearchCriteria(criteria, fields, order);
-
+  const searchCriteria = parseElasticSearchCriteria(criteria, fields, order) || {};
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
@@ -300,7 +399,8 @@ module.exports = [
       'name', 'name asc', 'name desc',
       'type', 'type asc', 'type desc',
     ];
-    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'keyword']) ||
+    if (!util.isValidFilter(filters,
+      ['id', 'status', 'memberOnly', 'keyword', 'name', 'code', 'customer', 'manager']) ||
       (sort && _.indexOf(sortableProps, sort) < 0)) {
       return util.handleError('Invalid filters or sort', null, req, next);
     }

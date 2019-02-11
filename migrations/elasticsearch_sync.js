@@ -209,7 +209,8 @@ function getRequestBody(indexName) {
         },
       },
       id: {
-        type: 'long',
+        type: 'string',
+        index: 'not_analyzed',
       },
       members: {
         type: 'nested',

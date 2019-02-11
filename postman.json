@@ -1486,6 +1486,120 @@
 					"response": []
 				},
 				{
+					"name": "List projects with filters - name, code, customer, manager",
+					"request": {
+						"url": {
+							"raw": "{{api-url}}/v4/projects?filter=id%3D1*%26name%3Dtes*%26code=test*%26customer%3DDiya*%26manager=first*",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "id%3D1*%26name%3Dtes*%26code=test*%26customer%3DDiya*%26manager=first*",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects with filters - id",
+					"request": {
+						"url": {
+							"raw": "{{api-url}}/v4/projects?filter=id%3D2",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "id%3D2",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects with filters - code",
+					"request": {
+						"url": {
+							"raw": "{{api-url}}/v4/projects?filter=code%3Dtest*",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "code%3Dtest*",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
+					},
+					"response": []
+				},
+				{
 					"name": "List projects with sort applied",
 					"request": {
 						"method": "GET",
