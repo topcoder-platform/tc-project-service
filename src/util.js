@@ -18,7 +18,7 @@ import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT } from './constants';
+import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -245,7 +245,13 @@ _.assignIn(util, {
   },
   getProjectAttachments: (req, projectId) => {
     let attachments = [];
-    return models.ProjectAttachment.getActiveProjectAttachments(projectId)
+    let attachmentsPromise;
+    if (util.hasAdminRole(req)) {
+      attachmentsPromise = models.ProjectAttachment.getActiveProjectAttachments(projectId);
+    } else {
+      attachmentsPromise = models.ProjectAttachment.getAttachmentsForUser(projectId, req.authUser.userId);
+    }
+    return attachmentsPromise
       .then((_attachments) => {
         // if attachments were requested
         if (_attachments) {
@@ -379,15 +385,17 @@ _.assignIn(util, {
   * Merge two JSON objects. For array fields, the target will be replaced by source.
   * @param {Object} targetObj the target object
   * @param {Object} sourceObj the source object
+  * @param {Object} mergeExceptions list of keys which should be exempted from merge
   * @returns {Object} the merged object
   */
-  // eslint-disable-next-line consistent-return
-  mergeJsonObjects: (targetObj, sourceObj) => _.mergeWith(targetObj, sourceObj, (target, source) => {
-    // Overwrite the array
-    if (_.isArray(source)) {
-      return source;
-    }
-  }),
+  mergeJsonObjects: (targetObj, sourceObj, mergeExceptions) =>
+    // eslint-disable-next-line consistent-return
+    _.mergeWith(targetObj, sourceObj, (target, source, key) => {
+      // Overwrite the array or merge exception keys
+      if (_.isArray(source) || (mergeExceptions && mergeExceptions.indexOf(key) !== -1)) {
+        return source;
+      }
+    }),
 
   /**
    * Add userId to project
@@ -466,6 +474,13 @@ _.assignIn(util, {
       });
     });
   },
+
+  /**
+   * Filter only members of topcoder team
+   * @param {Array}  members        project members
+   * @return {Array} tpcoder project members
+   */
+  getTopcoderProjectMembers: members => _(members).filter(m => m.role !== PROJECT_MEMBER_ROLE.CUSTOMER),
 });
 
 export default util;

@@ -1,5 +1,5 @@
-
 import _ from 'lodash';
+import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
@@ -29,6 +29,9 @@ module.exports = [
         const err = new Error('Record not found');
         err.status = 404;
         return Promise.reject(err);
+      }
+      if (process.env.NODE_ENV === 'development' || config.get('enableFileUpload') === false) {
+        return ['dummy://url'];
       }
       return util.getFileDownloadUrl(req, attachment.filePath);
     })

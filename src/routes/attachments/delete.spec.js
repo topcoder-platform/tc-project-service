@@ -48,7 +48,7 @@ describe('Project Attachments delete', () => {
               size: 12312,
               category: null,
               filePath: 'https://media.topcoder.com/projects/1/test.txt',
-              createdBy: 1,
+              createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
             }).then((a1) => {
               attachment = a1;
@@ -91,7 +91,7 @@ describe('Project Attachments delete', () => {
           .expect(404, done);
     });
 
-    it('should return 204 if attachment was successfully removed', (done) => {
+    it('should return 204 if the CREATOR removes the attachment successfully', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         delete: () => Promise.resolve({
           status: 200,
@@ -143,6 +143,28 @@ describe('Project Attachments delete', () => {
                         .expect(404, done);
                     }
                   }), 500);
+            }
+          });
+    });
+
+    it('should return 204 if ADMIN deletes the attachment successfully', (done) => {
+      request(server)
+          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({ param: { userId: 1, projectId: project1.id, role: 'customer' } })
+          .expect(204, done)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              request(server)
+              .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+              .set({
+                Authorization: `Bearer ${testUtil.jwts.admin}`,
+              })
+              .expect(404, done);
             }
           });
     });
