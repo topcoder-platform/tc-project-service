@@ -16,6 +16,7 @@ describe('Project member invite update', () => {
   let project1;
   let invite1;
   let invite2;
+  let invite3;
 
   beforeEach((done) => {
     testUtil.clearDb()
@@ -73,7 +74,22 @@ describe('Project member invite update', () => {
                 invite2 = in2.get({
                   plain: true,
                 });
-                done();
+                models.ProjectMemberInvite.create({
+                  projectId: project1.id,
+                  userId: 40051332,
+                  email: null,
+                  role: PROJECT_MEMBER_ROLE.COPILOT,
+                  status: INVITE_STATUS.PENDING,
+                  createdBy: 1,
+                  updatedBy: 1,
+                  createdAt: '2016-06-30 00:33:07+00',
+                  updatedAt: '2016-06-30 00:33:07+00',
+                }).then((in3) => {
+                  invite3 = in3.get({
+                    plain: true,
+                  });
+                  done();
+                });
               });
             });
           });
@@ -242,6 +258,52 @@ describe('Project member invite update', () => {
           }
         });
     });
+
+    it('should return 403 if try to update COPILOT role invite with copilot', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.COPILOT,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .put(`/v4/projects/${project1.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            userId: invite3.userId,
+            status: INVITE_STATUS.ACCEPTED,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(403)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            res.body.result.status.should.equal(403);
+            const errorMessage = _.get(resJson, 'message', '');
+            sinon.assert.match(errorMessage, 'Only Connect copilot manager can add copilots');
+            done();
+          }
+        });
+    });
+
 
     describe('Bus api', () => {
       let createEventSpy;

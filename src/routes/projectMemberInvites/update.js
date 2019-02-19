@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT } from '../../constants';
+import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT, USER_ROLE } from '../../constants';
 
 /**
  * API to update invite member to project.
@@ -66,8 +66,12 @@ module.exports = [
         if (!util.hasRoles(req, MANAGER_ROLES) && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
           error = `Project members can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
         }
-      } else if ((!!putInvite.userId && putInvite.userId !== req.authUser.userId) ||
-                 (!!putInvite.email && putInvite.email !== req.authUser.email)) {
+      } else if ((!!invite.role && invite.role === PROJECT_MEMBER_ROLE.COPILOT) &&
+                !req.authUser.roles.includes(USER_ROLE.COPILOT_MANAGER)) {
+        error = 'Only Connect copilot manager can add copilots';
+      } else if (((!!putInvite.userId && putInvite.userId !== req.authUser.userId) ||
+                 (!!putInvite.email && putInvite.email !== req.authUser.email)) &&
+                 (!!invite.role && invite.role !== PROJECT_MEMBER_ROLE.COPILOT)) {
         error = 'Project members can only update invites for themselves';
       }
 
@@ -88,6 +92,8 @@ module.exports = [
             userId: updatedInvite.userId,
             email: updatedInvite.email,
             status: updatedInvite.status,
+            role: updatedInvite.role,
+            createdBy: updatedInvite.createdBy,
           });
           req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, updatedInvite, {
             correlationId: req.id,
@@ -103,7 +109,7 @@ module.exports = [
                 const member = {
                   projectId,
                   role: updatedInvite.role,
-                  userId: req.authUser.userId,
+                  userId: updatedInvite.userId,
                   createdBy: req.authUser.userId,
                   updatedBy: req.authUser.userId,
                 };
