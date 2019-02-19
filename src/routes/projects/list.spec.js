@@ -513,9 +513,9 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return project that match when filtering by id', (done) => {
+    it('should return project that match when filtering by id (exact)', (done) => {
       request(server)
-        .get('/v4/projects/?filter=id%3D1*')
+        .get('/v4/projects/?filter=id%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

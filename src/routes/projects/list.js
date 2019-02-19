@@ -241,8 +241,6 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
         values: criteria.filters.id.$in,
       },
     });
-  } else if (_.has(criteria, 'filters.id') && criteria.filters.id.indexOf('*') > -1) {
-    mustQuery = _.concat(mustQuery, buildEsQueryWithFilter('id', criteria.filters.id, MATCH_TYPE_WILDCARD, ['id']));
   } else if (_.has(criteria, 'filters.id')) {
     boolQuery.push({
       term: {
@@ -287,6 +285,21 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     });
   }
 
+  if (_.has(criteria, 'filters.type.$in')) {
+    // type is an array
+    boolQuery.push({
+      terms: {
+        type: criteria.filters.type.$in,
+      },
+    });
+  } else if (_.has(criteria, 'filters.type')) {
+    // type is simple string
+    boolQuery.push({
+      term: {
+        type: criteria.filters.type,
+      },
+    });
+  }
   if (_.has(criteria, 'filters.keyword')) {
     // keyword is a full text search
     // escape special fields from keyword search
@@ -400,7 +413,7 @@ module.exports = [
       'type', 'type asc', 'type desc',
     ];
     if (!util.isValidFilter(filters,
-      ['id', 'status', 'memberOnly', 'keyword', 'name', 'code', 'customer', 'manager']) ||
+      ['id', 'status', 'memberOnly', 'keyword', 'type', 'name', 'code', 'customer', 'manager']) ||
       (sort && _.indexOf(sortableProps, sort) < 0)) {
       return util.handleError('Invalid filters or sort', null, req, next);
     }
