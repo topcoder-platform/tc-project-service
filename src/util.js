@@ -180,7 +180,7 @@ _.assignIn(util, {
       }
       return val;
     });
-    if (queryFilter.id) {
+    if (queryFilter.id && queryFilter.id.$in) {
       queryFilter.id.$in = _.map(queryFilter.id.$in, _.parseInt);
     }
     return queryFilter;
