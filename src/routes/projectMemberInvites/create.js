@@ -250,7 +250,7 @@ module.exports = [
                             { correlationId: req.id },
                         );
                     // send email invite (async)
-                    if (v.email && !v.userId & v.role !== PROJECT_MEMBER_ROLE.COPILOT) {
+                    if (v.email && !v.userId && v.role !== PROJECT_MEMBER_ROLE.COPILOT) {
                       sendInviteEmail(req, projectId, v);
                     }
                   });
