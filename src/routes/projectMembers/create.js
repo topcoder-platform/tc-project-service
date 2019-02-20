@@ -44,9 +44,9 @@ module.exports = [
         err.status = 401;
         return next(err);
       }
-    } else if (util.hasRoles(req, [USER_ROLE.MANAGER])) {
+    } else if (util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.MANAGER;
-    } else if (util.hasRoles(req, [USER_ROLE.COPILOT])) {
+    } else if (util.hasRoles(req, [USER_ROLE.COPILOT, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.COPILOT;
     } else {
       const err = new Error('Only copilot or manager is able to call this endpoint');
