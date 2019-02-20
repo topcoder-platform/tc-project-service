@@ -701,16 +701,16 @@ module.exports = (app, logger) => {
     logger.debug('receive PROJECT_MEMBER_INVITE_CREATED event');
     const projectId = _.parseInt(req.params.projectId);
 
-    // send event to bus api
-    createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
-      projectId,
-      userId,
-      email,
-      initiatorUserId: req.authUser.userId,
-    }, logger);
-
     if (role === PROJECT_MEMBER_ROLE.COPILOT) {
       createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED, {
+        projectId,
+        userId,
+        email,
+        initiatorUserId: req.authUser.userId,
+      }, logger);
+    } else {
+      // send event to bus api
+      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
         projectId,
         userId,
         email,
@@ -723,31 +723,31 @@ module.exports = (app, logger) => {
     logger.debug('receive PROJECT_MEMBER_INVITE_UPDATED event');
     const projectId = _.parseInt(req.params.projectId);
 
-    // send event to bus api
-    createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, {
-      projectId,
-      userId,
-      email,
-      status,
-      initiatorUserId: req.authUser.userId,
-    }, logger);
-
     if (role === PROJECT_MEMBER_ROLE.COPILOT && status === INVITE_STATUS.ACCEPTED) {
       // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_COPILOT_ADDED, {
+      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_APPROVED, {
         projectId,
         userId,
-        createdBy,
+        originator: createdBy,
         email,
         status,
         initiatorUserId: req.authUser.userId,
       }, logger);
     } else if (role === PROJECT_MEMBER_ROLE.COPILOT && status === INVITE_STATUS.REFUSED) {
       // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_COPILOT_REFUSED, {
+      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REJECTED, {
         projectId,
         userId,
-        createdBy,
+        originator: createdBy,
+        email,
+        status,
+        initiatorUserId: req.authUser.userId,
+      }, logger);
+    } else {
+      // send event to bus api
+      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, {
+        projectId,
+        userId,
         email,
         status,
         initiatorUserId: req.authUser.userId,

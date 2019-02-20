@@ -133,8 +133,8 @@ export const BUS_API_EVENT = {
   PROJECT_MEMBER_INVITE_CREATED: 'notifications.connect.project.member.invite.created',
   PROJECT_MEMBER_INVITE_REQUESTED: 'notifications.connect.project.member.invite.requested',
   PROJECT_MEMBER_INVITE_UPDATED: 'notifications.connect.project.member.invite.updated',
-  PROJECT_MEMBER_COPILOT_ADDED: 'notifications.connect.project.member.copilot.added',
-  PROJECT_MEMBER_COPILOT_REFUSED: 'notifications.connect.project.member.copilot.refused',
+  PROJECT_MEMBER_INVITE_APPROVED: 'notifications.connect.project.member.invite.approved',
+  PROJECT_MEMBER_INVITE_REJECTED: 'notifications.connect.project.member.invite.rejected',
   PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.action.email.project.member.invite.created',
 };
 
