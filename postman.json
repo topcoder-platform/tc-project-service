@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "97085cd7-b298-4f1c-9629-24af14ff5f13",
+		"_postman_id": "4fc2b7cf-404a-4fd7-b6d2-4828a3994859",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1452,7 +1452,7 @@
 					"response": []
 				},
 				{
-					"name": "List projects with filters applied",
+					"name": "List projects with filters - type (exact)",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1466,7 +1466,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects?filter=type%3Dgeneric",
+							"raw": "{{api-url}}/v4/projects?filter=type%3Dapp",
 							"host": [
 								"{{api-url}}"
 							],
@@ -1477,7 +1477,109 @@
 							"query": [
 								{
 									"key": "filter",
-									"value": "type%3Dgeneric"
+									"value": "type%3Dapp"
+								}
+							]
+						},
+						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects with filters - id (exact)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects?filter=id%3D1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "id%3D1"
+								}
+							]
+						},
+						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects with filters - name, code, customer, manager",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects?filter=id%3D1*%26name%3Dtes*%26code=test*%26customer%3DDiya*%26manager=first*",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "id%3D1*%26name%3Dtes*%26code=test*%26customer%3DDiya*%26manager=first*"
+								}
+							]
+						},
+						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects with filters - code",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects?filter=code%3Dtest*",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "code%3Dtest*"
 								}
 							]
 						},

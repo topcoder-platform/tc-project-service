@@ -55,6 +55,10 @@ paths:
              - type
              - memberOnly
              - keyword
+             - name
+             - code
+             - customer
+             - manager
         - name: sort
           required: false
           description: |
