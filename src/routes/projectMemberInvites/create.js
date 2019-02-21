@@ -243,6 +243,7 @@ module.exports = [
                       req,
                       userId: v.userId,
                       email: v.email,
+                      role: v.role,
                     });
                     req.app.services.pubsub.publish(
                             EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
