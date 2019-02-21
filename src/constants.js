@@ -29,6 +29,7 @@ export const USER_ROLE = {
   TOPCODER_ACCOUNT_MANAGER: 'Connect Account Manager',
   COPILOT: 'Connect Copilot',
   CONNECT_ADMIN: 'Connect Admin',
+  COPILOT_MANAGER: 'Connect Copilot Manager',
 };
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
@@ -132,7 +133,10 @@ export const BUS_API_EVENT = {
 
   // Project Member Invites
   PROJECT_MEMBER_INVITE_CREATED: 'notifications.connect.project.member.invite.created',
+  PROJECT_MEMBER_INVITE_REQUESTED: 'notifications.connect.project.member.invite.requested',
   PROJECT_MEMBER_INVITE_UPDATED: 'notifications.connect.project.member.invite.updated',
+  PROJECT_MEMBER_INVITE_APPROVED: 'notifications.connect.project.member.invite.approved',
+  PROJECT_MEMBER_INVITE_REJECTED: 'notifications.connect.project.member.invite.rejected',
   PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.action.email.project.member.invite.created',
 };
 
