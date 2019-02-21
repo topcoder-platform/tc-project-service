@@ -22,6 +22,7 @@ module.exports = freq => new Promise((resolve, reject) => {
         // check if auth user has acecss to this project
         const hasAccess = util.hasAdminRole(req)
           || util.hasRole(req, USER_ROLE.MANAGER)
+          || util.hasRole(req, USER_ROLE.ACCOUNT_MANAGER)
           || !_.isUndefined(_.find(members, m => m.userId === currentUserId));
 
         // if user is co-pilot and the project doesn't have any copilots then

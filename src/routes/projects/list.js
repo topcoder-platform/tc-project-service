@@ -430,7 +430,8 @@ module.exports = [
 
     if (!memberOnly
       && (util.hasAdminRole(req)
-          || util.hasRole(req, USER_ROLE.MANAGER))) {
+          || util.hasRole(req, USER_ROLE.MANAGER)
+          || util.hasRole(req, USER_ROLE.ACCOUNT_MANAGER))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))

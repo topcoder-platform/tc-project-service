@@ -32,9 +32,16 @@ module.exports = [
     if (_.get(req, 'body.param.role')) {
       targetRole = _.get(req, 'body.param.role');
 
-      if ([PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER].includes(targetRole) &&
+      if (PROJECT_MEMBER_ROLE.MANAGER === targetRole &&
         !util.hasRoles(req, [USER_ROLE.MANAGER])) {
         const err = new Error(`Only manager is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+
+      if (PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER === targetRole &&
+        !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.ACCOUNT_MANAGER])) {
+        const err = new Error(`Only manager  or account manager is able to join as ${targetRole}`);
         err.status = 401;
         return next(err);
       }
@@ -46,6 +53,8 @@ module.exports = [
       }
     } else if (util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.MANAGER;
+    } else if (util.hasRoles(req, [USER_ROLE.ACCOUNT_MANAGER])) {
+      targetRole = PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER;
     } else if (util.hasRoles(req, [USER_ROLE.COPILOT, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.COPILOT;
     } else {
