@@ -5,7 +5,7 @@ import _ from 'lodash';
 import config from 'config';
 
 import models from '../../models';
-import { USER_ROLE } from '../../constants';
+import { USER_ROLE, MANAGER_ROLES } from '../../constants';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -430,8 +430,7 @@ module.exports = [
 
     if (!memberOnly
       && (util.hasAdminRole(req)
-          || util.hasRole(req, USER_ROLE.MANAGER)
-          || util.hasRole(req, USER_ROLE.TOPCODER_ACCOUNT_MANAGER))) {
+          || util.hasRoles(req, MANAGER_ROLES))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))

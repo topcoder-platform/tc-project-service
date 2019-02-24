@@ -697,15 +697,16 @@ module.exports = (app, logger) => {
     }
   });
 
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, ({ req, userId, email, role }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, ({ req, userId, email, status, role }) => {
     logger.debug('receive PROJECT_MEMBER_INVITE_CREATED event');
     const projectId = _.parseInt(req.params.projectId);
 
-    if (role === PROJECT_MEMBER_ROLE.COPILOT) {
+    if (status === INVITE_STATUS.REQUESTED) {
       createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED, {
         projectId,
         userId,
         email,
+        role,
         initiatorUserId: req.authUser.userId,
       }, logger);
     } else {
@@ -714,6 +715,7 @@ module.exports = (app, logger) => {
         projectId,
         userId,
         email,
+        role,
         initiatorUserId: req.authUser.userId,
       }, logger);
     }
@@ -723,23 +725,25 @@ module.exports = (app, logger) => {
     logger.debug('receive PROJECT_MEMBER_INVITE_UPDATED event');
     const projectId = _.parseInt(req.params.projectId);
 
-    if (role === PROJECT_MEMBER_ROLE.COPILOT && status === INVITE_STATUS.ACCEPTED) {
+    if (status === INVITE_STATUS.REQUEST_APPROVED) {
       // send event to bus api
       createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_APPROVED, {
         projectId,
         userId,
         originator: createdBy,
         email,
+        role,
         status,
         initiatorUserId: req.authUser.userId,
       }, logger);
-    } else if (role === PROJECT_MEMBER_ROLE.COPILOT && status === INVITE_STATUS.REFUSED) {
+    } else if (status === INVITE_STATUS.REQUEST_REJECTED) {
       // send event to bus api
       createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REJECTED, {
         projectId,
         userId,
         originator: createdBy,
         email,
+        role,
         status,
         initiatorUserId: req.authUser.userId,
       }, logger);
@@ -749,6 +753,7 @@ module.exports = (app, logger) => {
         projectId,
         userId,
         email,
+        role,
         status,
         initiatorUserId: req.authUser.userId,
       }, logger);

@@ -34,7 +34,12 @@ export const USER_ROLE = {
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
 
-export const MANAGER_ROLES = [...ADMIN_ROLES, USER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER];
+export const MANAGER_ROLES = [
+  ...ADMIN_ROLES,
+  USER_ROLE.MANAGER,
+  USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
+  USER_ROLE.COPILOT_MANAGER,
+];
 
 export const EVENT = {
   ROUTING_KEY: {
@@ -162,5 +167,8 @@ export const INVITE_STATUS = {
   PENDING: 'pending',
   ACCEPTED: 'accepted',
   REFUSED: 'refused',
+  REQUESTED: 'requested',
+  REQUEST_REJECTED: 'request_rejected',
+  REQUEST_APPROVED: 'request_approved',
   CANCELED: 'canceled',
 };

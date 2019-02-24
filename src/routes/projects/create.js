@@ -7,7 +7,8 @@ import config from 'config';
 import moment from 'moment';
 
 import models from '../../models';
-import { PROJECT_MEMBER_ROLE, PROJECT_STATUS, PROJECT_PHASE_STATUS, USER_ROLE, EVENT, REGEX } from '../../constants';
+import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, PROJECT_STATUS, PROJECT_PHASE_STATUS,
+  EVENT, REGEX } from '../../constants';
 import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
 import directProject from '../../services/directProject';
@@ -197,7 +198,7 @@ module.exports = [
   (req, res, next) => {
     const project = req.body.param;
     // by default connect admin and managers joins projects as manager
-    const userRole = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.MANAGER])
+    const userRole = util.hasRoles(req, MANAGER_ROLES)
       ? PROJECT_MEMBER_ROLE.MANAGER
       : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults

@@ -8,7 +8,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT, USER_ROLE } from '../../constants';
 import { createEvent } from '../../services/busApi';
 
 
@@ -224,7 +224,11 @@ module.exports = [
           const data = {
             projectId,
             role: invite.role,
-            status: INVITE_STATUS.PENDING,
+            // invite directly if user is admin or copilot manager
+            status: (invite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
+                    util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER]))
+                      ? INVITE_STATUS.PENDING
+                      : INVITE_STATUS.REQUESTED,
             createdBy: req.authUser.userId,
             updatedBy: req.authUser.userId,
           };
@@ -243,6 +247,7 @@ module.exports = [
                       req,
                       userId: v.userId,
                       email: v.email,
+                      status: v.status,
                       role: v.role,
                     });
                     req.app.services.pubsub.publish(
@@ -251,7 +256,7 @@ module.exports = [
                             { correlationId: req.id },
                         );
                     // send email invite (async)
-                    if (v.email && !v.userId && v.role !== PROJECT_MEMBER_ROLE.COPILOT) {
+                    if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
                       sendInviteEmail(req, projectId, v);
                     }
                   });

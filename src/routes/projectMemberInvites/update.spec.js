@@ -62,7 +62,7 @@ describe('Project member invite update', () => {
               });
               models.ProjectMemberInvite.create({
                 projectId: project1.id,
-                userId: 40051332,
+                userId: 40051334,
                 email: null,
                 role: PROJECT_MEMBER_ROLE.MANAGER,
                 status: INVITE_STATUS.PENDING,
@@ -79,7 +79,7 @@ describe('Project member invite update', () => {
                   userId: 40051332,
                   email: null,
                   role: PROJECT_MEMBER_ROLE.COPILOT,
-                  status: INVITE_STATUS.PENDING,
+                  status: INVITE_STATUS.REQUESTED,
                   createdBy: 1,
                   updatedBy: 1,
                   createdAt: '2016-06-30 00:33:07+00',
@@ -298,7 +298,7 @@ describe('Project member invite update', () => {
             should.exist(resJson);
             res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, 'Only Connect copilot manager can add copilots');
+            sinon.assert.match(errorMessage, 'Requested invites can only be updated by Copilot manager');
             done();
           }
         });
