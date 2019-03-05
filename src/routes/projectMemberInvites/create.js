@@ -216,7 +216,7 @@ module.exports = [
         });
         if (forbidUserList.length > 0) {
           const message = 'cannot be added with a Manager role to the project';
-          failed = _.concat(failed, _.map(forbidUserList, id => _.assign({}, { id, message })));
+          failed = _.concat(failed, _.map(forbidUserList, id => _.assign({}, { userId: id, message })));
           updatedInvite.userIds = _.filter(invite.userIds, userId => !_.includes(forbidUserList, userId));
         }
       }
