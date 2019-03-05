@@ -202,7 +202,6 @@ module.exports = [
       promises.push(Promise.resolve());
     }
     return Promise.all(promises).then((rolesList) => {
-      const updatedInvite = invite;
       if (!!invite.userIds && _.includes(PROJECT_MEMBER_MANAGER_ROLES, invite.role)) {
         req.log.debug('Chekcing if userId is allowed as manager');
         const forbidUserList = [];
@@ -217,16 +216,16 @@ module.exports = [
         if (forbidUserList.length > 0) {
           const message = 'cannot be added with a Manager role to the project';
           failed = _.concat(failed, _.map(forbidUserList, id => _.assign({}, { userId: id, message })));
-          updatedInvite.userIds = _.filter(invite.userIds, userId => !_.includes(forbidUserList, userId));
+          invite.userIds = _.filter(invite.userIds, userId => !_.includes(forbidUserList, userId));
         }
       }
       return models.ProjectMemberInvite.getPendingInvitesForProject(projectId)
         .then((invites) => {
           const data = {
             projectId,
-            role: updatedInvite.role,
+            role: invite.role,
             // invite directly if user is admin or copilot manager
-            status: (updatedInvite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
+            status: (invite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
                     util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER]))
                       ? INVITE_STATUS.PENDING
                       : INVITE_STATUS.REQUESTED,
@@ -235,7 +234,7 @@ module.exports = [
           };
 
           req.log.debug('Creating invites');
-          return models.sequelize.Promise.all(buildCreateInvitePromises(req, updatedInvite, invites, data, failed))
+          return models.sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
             .then((values) => {
               values.forEach((v) => {
                 req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
