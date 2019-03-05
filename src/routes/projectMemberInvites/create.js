@@ -35,12 +35,12 @@ const addMemberValidations = {
  * @param {Object} invite  invite to process
  * @param {Array}  invites existent invites from DB
  * @param {Object} data    template for new invites to be put in DB
+ * @param {Array}  failed  failed invites error message
  *
  * @returns {Promise<Promise[]>} list of promises
  */
-const buildCreateInvitePromises = (req, invite, invites, data) => {
+const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
   const invitePromises = [];
-
   if (invite.userIds) {
     // remove invites for users that are invited already
     _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
@@ -91,15 +91,15 @@ const buildCreateInvitePromises = (req, invite, invites, data) => {
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
-
-        return Promise.resolve(invitePromises);
+        return invitePromises;
       }).catch((error) => {
         req.log.error(error);
-        return Promise.reject(invitePromises);
+        _.forEach(invite.emails, email => failed.push(_.assign({}, { email, message: error.statusText })));
+        return invitePromises;
       });
   }
 
-  return Promise.resolve(invitePromises);
+  return invitePromises;
 };
 
 const sendInviteEmail = (req, projectId, invite) => {
@@ -157,6 +157,7 @@ module.exports = [
   validate(addMemberValidations),
   permissions('projectMemberInvite.create'),
   (req, res, next) => {
+    let failed = [];
     const invite = req.body.param;
 
     if (!invite.userIds && !invite.emails) {
@@ -192,16 +193,16 @@ module.exports = [
     if (invite.emails) {
         // email invites can only be used for CUSTOMER role
       if (invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {  // eslint-disable-line no-lonely-if
-        const err = new Error(`Emails can only be used for ${PROJECT_MEMBER_ROLE.CUSTOMER}`);
-        err.status = 400;
-        return next(err);
+        const message = `Emails can only be used for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
+        failed = _.concat(failed, _.map(invite.emails, email => _.assign({}, { email, message })));
+        delete invite.emails;
       }
     }
-
     if (promises.length === 0) {
       promises.push(Promise.resolve());
     }
     return Promise.all(promises).then((rolesList) => {
+      const updatedInvite = invite;
       if (!!invite.userIds && _.includes(PROJECT_MEMBER_MANAGER_ROLES, invite.role)) {
         req.log.debug('Chekcing if userId is allowed as manager');
         const forbidUserList = [];
@@ -209,23 +210,23 @@ module.exports = [
           const [userId, roles] = data;
           req.log.debug(roles);
 
-          if (!util.hasIntersection(MANAGER_ROLES, roles)) {
+          if (roles && !util.hasIntersection(MANAGER_ROLES, roles)) {
             forbidUserList.push(userId);
           }
         });
         if (forbidUserList.length > 0) {
-          const err = new Error(`${forbidUserList.join()} cannot be added with a Manager role to the project`);
-          err.status = 403;
-          return next(err);
+          const message = 'cannot be added with a Manager role to the project';
+          failed = _.concat(failed, _.map(forbidUserList, id => _.assign({}, { id, message })));
+          updatedInvite.userIds = _.filter(invite.userIds, userId => !_.includes(forbidUserList, userId));
         }
       }
       return models.ProjectMemberInvite.getPendingInvitesForProject(projectId)
         .then((invites) => {
           const data = {
             projectId,
-            role: invite.role,
+            role: updatedInvite.role,
             // invite directly if user is admin or copilot manager
-            status: (invite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
+            status: (updatedInvite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
                     util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER]))
                       ? INVITE_STATUS.PENDING
                       : INVITE_STATUS.REQUESTED,
@@ -233,39 +234,39 @@ module.exports = [
             updatedBy: req.authUser.userId,
           };
 
-          return buildCreateInvitePromises(req, invite, invites, data)
-            .then((invitePromises) => {
-              if (invitePromises.length === 0) {
-                return [];
-              }
-
-              req.log.debug('Creating invites');
-              return models.sequelize.Promise.all(invitePromises)
-                .then((values) => {
-                  values.forEach((v) => {
-                    req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
-                      req,
-                      userId: v.userId,
-                      email: v.email,
-                      status: v.status,
-                      role: v.role,
-                    });
-                    req.app.services.pubsub.publish(
-                            EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
-                            v,
-                            { correlationId: req.id },
-                        );
-                    // send email invite (async)
-                    if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
-                      sendInviteEmail(req, projectId, v);
-                    }
-                  });
-                  return values;
-                }); // models.sequelize.Promise.all
-            }); // buildCreateInvitePromises
+          req.log.debug('Creating invites');
+          return models.sequelize.Promise.all(buildCreateInvitePromises(req, updatedInvite, invites, data, failed))
+            .then((values) => {
+              values.forEach((v) => {
+                req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
+                  req,
+                  userId: v.userId,
+                  email: v.email,
+                  status: v.status,
+                  role: v.role,
+                });
+                req.app.services.pubsub.publish(
+                        EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
+                        v,
+                        { correlationId: req.id },
+                    );
+                // send email invite (async)
+                if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
+                  sendInviteEmail(req, projectId, v);
+                }
+              });
+              return values;
+            }); // models.sequelize.Promise.all
         }); // models.ProjectMemberInvite.getPendingInvitesForProject
     })
-    .then(values => res.status(201).json(util.wrapResponse(req.id, values, null, 201)))
+    .then((values) => {
+      const success = _.assign({}, { success: values });
+      if (failed.length) {
+        res.status(403).json(util.wrapResponse(req.id, _.assign({}, success, { failed }), null, 403));
+      } else {
+        res.status(201).json(util.wrapResponse(req.id, success, null, 201));
+      }
+    })
     .catch(err => next(err));
   },
 ];

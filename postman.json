@@ -1042,6 +1042,31 @@
 					"response": []
 				},
 				{
+					"name": "Invite with userIds and emails - both success and failed",
+					"request": {
+						"url": "{{api-url}}/v4/projects/1/members/invite",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331, 40051334],\n\t\t\"emails\": [\"divyalife526@gmail.com\"],\n\t\t\"role\": \"manager\"\n\t}\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
 					"name": "Update invite status with userId",
 					"request": {
 						"method": "PUT",
