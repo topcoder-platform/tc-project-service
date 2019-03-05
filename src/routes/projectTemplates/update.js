@@ -64,7 +64,11 @@ module.exports = [
         }
 
         // Merge JSON fields
-        entityToUpdate.scope = util.mergeJsonObjects(projectTemplate.scope, entityToUpdate.scope, ['priceConfig']);
+        entityToUpdate.scope = util.mergeJsonObjects(
+          projectTemplate.scope,
+          entityToUpdate.scope,
+          ['priceConfig', 'addonPriceConfig', 'preparedConditions', 'buildingBlocks']
+        );
         entityToUpdate.phases = util.mergeJsonObjects(projectTemplate.phases, entityToUpdate.phases);
         // removes null phase templates
         entityToUpdate.phases = _.omitBy(entityToUpdate.phases, _.isNull);
