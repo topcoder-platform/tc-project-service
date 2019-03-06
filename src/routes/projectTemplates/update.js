@@ -67,7 +67,7 @@ module.exports = [
         entityToUpdate.scope = util.mergeJsonObjects(
           projectTemplate.scope,
           entityToUpdate.scope,
-          ['priceConfig', 'addonPriceConfig', 'preparedConditions', 'buildingBlocks']
+          ['priceConfig', 'addonPriceConfig', 'preparedConditions', 'buildingBlocks'],
         );
         entityToUpdate.phases = util.mergeJsonObjects(projectTemplate.phases, entityToUpdate.phases);
         // removes null phase templates
