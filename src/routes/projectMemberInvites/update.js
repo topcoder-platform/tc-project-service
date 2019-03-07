@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT } from '../../constants';
+import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT, USER_ROLE } from '../../constants';
 
 /**
  * API to update invite member to project.
@@ -44,13 +44,17 @@ module.exports = [
     }
 
     let invite;
+    let requestedInvite;
     return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(
       projectId,
       putInvite.email,
       putInvite.userId,
     ).then((_invite) => {
       invite = _invite;
-      if (!invite) {
+    }).then(() => models.ProjectMemberInvite.getRequestedInvite(projectId, putInvite.userId))
+    .then((_requestedInvite) => {
+      requestedInvite = _requestedInvite;
+      if (!invite && !requestedInvite) {
         // check there is an existing invite for the user with status PENDING
         // handle 404
         const err = new Error(
@@ -60,14 +64,20 @@ module.exports = [
         return next(err);
       }
 
+      invite = invite || requestedInvite;
+
       req.log.debug('Chekcing user permission for updating invite');
       let error = null;
-      if (putInvite.status === INVITE_STATUS.CANCELED) {
+      if (invite.status === INVITE_STATUS.REQUESTED &&
+          !util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER])) {
+        error = 'Requested invites can only be updated by Copilot manager';
+      } else if (putInvite.status === INVITE_STATUS.CANCELED) {
         if (!util.hasRoles(req, MANAGER_ROLES) && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
           error = `Project members can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
         }
-      } else if ((!!putInvite.userId && putInvite.userId !== req.authUser.userId) ||
-                 (!!putInvite.email && putInvite.email !== req.authUser.email)) {
+      } else if (((!!putInvite.userId && putInvite.userId !== req.authUser.userId) ||
+                 (!!putInvite.email && putInvite.email !== req.authUser.email)) &&
+                 !util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER])) {
         error = 'Project members can only update invites for themselves';
       }
 
@@ -88,6 +98,8 @@ module.exports = [
             userId: updatedInvite.userId,
             email: updatedInvite.email,
             status: updatedInvite.status,
+            role: updatedInvite.role,
+            createdBy: updatedInvite.createdBy,
           });
           req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, updatedInvite, {
             correlationId: req.id,
@@ -95,7 +107,8 @@ module.exports = [
 
           req.log.debug('Adding user to project');
           // add user to project if accept invite
-          if (updatedInvite.status === INVITE_STATUS.ACCEPTED) {
+          if (updatedInvite.status === INVITE_STATUS.ACCEPTED ||
+              updatedInvite.status === INVITE_STATUS.REQUEST_APPROVED) {
             return models.ProjectMember.getActiveProjectMembers(projectId)
               .then((members) => {
                 req.context = req.context || {};
@@ -103,7 +116,7 @@ module.exports = [
                 const member = {
                   projectId,
                   role: updatedInvite.role,
-                  userId: req.authUser.userId,
+                  userId: updatedInvite.userId,
                   createdBy: req.authUser.userId,
                   updatedBy: req.authUser.userId,
                 };

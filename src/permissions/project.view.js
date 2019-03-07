@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
-import { USER_ROLE, PROJECT_STATUS, PROJECT_MEMBER_ROLE } from '../constants';
+import { USER_ROLE, PROJECT_STATUS, PROJECT_MEMBER_ROLE, MANAGER_ROLES } from '../constants';
 
 /**
  * Super admin, Topcoder Managers are allowed to view any projects
@@ -21,7 +21,7 @@ module.exports = freq => new Promise((resolve, reject) => {
         req.context.currentProjectMembers = members;
         // check if auth user has acecss to this project
         const hasAccess = util.hasAdminRole(req)
-          || util.hasRole(req, USER_ROLE.MANAGER)
+          || util.hasRoles(req, MANAGER_ROLES)
           || !_.isUndefined(_.find(members, m => m.userId === currentUserId));
 
         // if user is co-pilot and the project doesn't have any copilots then

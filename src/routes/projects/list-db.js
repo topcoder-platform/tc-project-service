@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import models from '../../models';
-import { USER_ROLE } from '../../constants';
+import { USER_ROLE, MANAGER_ROLES } from '../../constants';
 import util from '../../util';
 
 /**
@@ -125,7 +125,7 @@ module.exports = [
 
     if (!memberOnly
       && (util.hasAdminRole(req)
-          || util.hasRole(req, USER_ROLE.MANAGER))) {
+          || util.hasRoles(req, MANAGER_ROLES))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))

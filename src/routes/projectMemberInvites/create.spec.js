@@ -42,6 +42,15 @@ describe('Project Member Invite create', () => {
             createdBy: 1,
             updatedBy: 1,
           });
+
+          models.ProjectMember.create({
+            userId: 40051334,
+            projectId: project1.id,
+            role: 'manager',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          });
         }).then(() =>
           models.Project.create({
             type: 'generic',
@@ -87,6 +96,7 @@ describe('Project Member Invite create', () => {
       sinon.stub(server.services.pubsub, 'init', () => {});
       sinon.stub(server.services.pubsub, 'publish', () => {});
       // by default mock lookupUserEmails return nothing so all the cases are not broken
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([]));
       sandbox.stub(util, 'lookupUserEmails', () => Promise.resolve([]));
       sandbox.stub(util, 'getMemberDetailsByUserIds', () => Promise.resolve([{
         userId: 40051333,
@@ -246,9 +256,11 @@ describe('Project Member Invite create', () => {
             result: {
               success: true,
               status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
+              content: {
+                success: [{
+                  roleName: USER_ROLE.COPILOT,
+                }],
+              },
             },
           },
         }),
@@ -271,7 +283,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content[0];
+            const resJson = res.body.result.content.success[0];
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
@@ -292,9 +304,11 @@ describe('Project Member Invite create', () => {
             result: {
               success: true,
               status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
+              content: {
+                success: [{
+                  roleName: USER_ROLE.COPILOT,
+                }],
+              },
             },
           },
         }),
@@ -322,7 +336,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content[0];
+            const resJson = res.body.result.content.success[0];
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
@@ -344,9 +358,11 @@ describe('Project Member Invite create', () => {
             result: {
               success: true,
               status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
+              content: {
+                success: [{
+                  roleName: USER_ROLE.COPILOT,
+                }],
+              },
             },
           },
         }),
@@ -369,7 +385,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content[0];
+            const resJson = res.body.result.content.success[0];
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
@@ -390,9 +406,11 @@ describe('Project Member Invite create', () => {
             result: {
               success: true,
               status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
+              content: {
+                success: [{
+                  roleName: USER_ROLE.COPILOT,
+                }],
+              },
             },
           },
         }),
@@ -415,7 +433,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body.result.content.success;
             should.exist(resJson);
             resJson.length.should.equal(0);
             server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
@@ -484,16 +502,18 @@ describe('Project Member Invite create', () => {
     it('should return 201 if try to create manager with MANAGER_ROLES', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         get: () => Promise.resolve({
-          status: 200,
+          status: 403,
           data: {
             id: 'requesterId',
             version: 'v3',
             result: {
               success: true,
-              status: 200,
-              content: [{
-                roleName: USER_ROLE.MANAGER,
-              }],
+              status: 403,
+              content: {
+                failed: [{
+                  message: 'cannot be added with a Manager role to the project',
+                }],
+              },
             },
           },
         }),
@@ -511,16 +531,57 @@ describe('Project Member Invite create', () => {
           },
         })
         .expect('Content-Type', /json/)
+        .expect(403)
+        .end((err, res) => {
+          const failed = res.body.result.content.failed[0];
+          should.exist(failed);
+          failed.message.should.equal('cannot be added with a Manager role to the project');
+          done();
+        });
+    });
+
+    it('should return 201 if try to create customer with COPILOT', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                success: [{
+                  roleName: USER_ROLE.COPILOT,
+                }],
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userIds: [40051331],
+            role: 'copilot',
+          },
+        })
+        .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content[0];
+            const resJson = res.body.result.content.success[0];
             should.exist(resJson);
-            resJson.role.should.equal('manager');
+            resJson.role.should.equal('copilot');
             resJson.projectId.should.equal(project1.id);
-            resJson.userId.should.equal(40152855);
+            resJson.userId.should.equal(40051331);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }

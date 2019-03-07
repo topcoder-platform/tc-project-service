@@ -37,6 +37,8 @@ const data = [
         userId: 40051331,
         projectId: 1,
         role: 'customer',
+        firstName: 'Firstname',
+        lastName: 'Lastname',
         handle: 'test_tourist_handle',
         isPrimary: true,
         createdBy: 1,
@@ -101,6 +103,19 @@ const data = [
     updatedBy: 1,
     lastActivityAt: 3,
     lastActivityUserId: '1',
+    members: [{
+      id: 5,
+      userId: 40051334,
+      projectId: 2,
+      role: 'manager',
+      firstName: 'first',
+      lastName: 'last',
+      handle: 'manager_handle',
+      isPrimary: true,
+      createdBy: 1,
+      updatedBy: 1,
+    },
+    ],
   },
 ];
 
@@ -193,7 +208,18 @@ describe('LIST Project', () => {
           lastActivityUserId: '1',
         }).then((p) => {
           project3 = p;
-          return Promise.resolve();
+          // create members
+          return models.ProjectMember.create({
+            userId: 40051334,
+            projectId: project3.id,
+            role: 'manager',
+            firstName: 'first',
+            lastName: 'last',
+            handle: 'manager_handle',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          });
         });
 
         return Promise.all([p1, p2, p3]).then(() => {
@@ -482,6 +508,160 @@ describe('LIST Project', () => {
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
+            done();
+          }
+        });
+    });
+
+    it('should return project that match when filtering by id (exact)', (done) => {
+      request(server)
+        .get('/v4/projects/?filter=id%3D1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].id.should.equal(1);
+            resJson[0].name.should.equal('test1');
+            done();
+          }
+        });
+    });
+
+    it('should return project that match when filtering by name', (done) => {
+      request(server)
+        .get('/v4/projects/?filter=name%3Dtest1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            done();
+          }
+        });
+    });
+
+    it('should return project that match when filtering by name\'s substring', (done) => {
+      request(server)
+        .get('/v4/projects/?filter=name%3D*st1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by details code', (done) => {
+      request(server)
+        .get('/v4/projects/?filter=code%3Dcode1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].details.utm.code.should.equal('code1');
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by details code\'s substring', (done) => {
+      request(server)
+        .get('/v4/projects/?filter=code%3D*de1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].details.utm.code.should.equal('code1');
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by customer', (done) => {
+      request(server)
+        .get('/v4/projects/?filter=customer%3Dfirst*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members[0].userId.should.equal(40051331);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager', (done) => {
+      request(server)
+        .get('/v4/projects/?filter=manager%3D*ast')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test3');
+            resJson[0].members.should.have.deep.property('[0].role', 'manager');
+            resJson[0].members[0].userId.should.equal(40051334);
             done();
           }
         });

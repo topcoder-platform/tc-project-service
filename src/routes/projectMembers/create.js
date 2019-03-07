@@ -1,9 +1,9 @@
-
-
 import _ from 'lodash';
+import Joi from 'joi';
+import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
-import { USER_ROLE, PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS } from '../../constants';
+import { INVITE_STATUS, MANAGER_ROLES, PROJECT_MEMBER_ROLE, USER_ROLE } from '../../constants';
 import models from '../../models';
 
 /**
@@ -13,14 +13,49 @@ import models from '../../models';
  */
 const permissions = tcMiddleware.permissions;
 
+const createProjectMemberValidations = {
+  body: {
+    param: Joi.object()
+      .keys({
+        role: Joi.any()
+          .valid(PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER, PROJECT_MEMBER_ROLE.COPILOT),
+      }),
+  },
+};
+
 module.exports = [
   // handles request validations
+  validate(createProjectMemberValidations),
   permissions('project.addMember'),
   (req, res, next) => {
     let targetRole;
-    if (util.hasRoles(req, [USER_ROLE.MANAGER])) {
+    if (_.get(req, 'body.param.role')) {
+      targetRole = _.get(req, 'body.param.role');
+
+      if (PROJECT_MEMBER_ROLE.MANAGER === targetRole &&
+        !util.hasRoles(req, [USER_ROLE.MANAGER])) {
+        const err = new Error(`Only manager is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+
+      if (PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER === targetRole &&
+        !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ACCOUNT_MANAGER])) {
+        const err = new Error(`Only manager  or account manager is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+
+      if (targetRole === PROJECT_MEMBER_ROLE.COPILOT && !util.hasRoles(req, [USER_ROLE.COPILOT])) {
+        const err = new Error(`Only copilot is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+    } else if (util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.MANAGER;
-    } else if (util.hasRoles(req, [USER_ROLE.COPILOT])) {
+    } else if (util.hasRoles(req, [USER_ROLE.TOPCODER_ACCOUNT_MANAGER])) {
+      targetRole = PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER;
+    } else if (util.hasRoles(req, [USER_ROLE.COPILOT, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.COPILOT;
     } else {
       const err = new Error('Only copilot or manager is able to call this endpoint');
@@ -60,13 +95,17 @@ module.exports = [
             .then((_invite) => {
               invite = _invite;
               if (!invite) {
-                return res.status(201).json(util.wrapResponse(req.id, newMember, 1, 201));
+                return res.status(201)
+                  .json(util.wrapResponse(req.id, newMember, 1, 201));
               }
               return invite.update({
                 status: INVITE_STATUS.ACCEPTED,
-              }).then(() => res.status(201).json(util.wrapResponse(req.id, newMember, 1, 201)));
+              })
+                .then(() => res.status(201)
+                  .json(util.wrapResponse(req.id, newMember, 1, 201)));
             });
         });
-    }).catch(err => next(err));
+    })
+      .catch(err => next(err));
   },
 ];

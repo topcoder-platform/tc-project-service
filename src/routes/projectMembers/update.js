@@ -17,7 +17,7 @@ const updateProjectMemberValdiations = {
     param: Joi.object().keys({
       isPrimary: Joi.boolean(),
       role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER,
-        PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.OBSERVER).required(),
+        PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER, PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.OBSERVER).required(),
     }),
   },
 };

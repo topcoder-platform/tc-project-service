@@ -55,6 +55,10 @@ paths:
              - type
              - memberOnly
              - keyword
+             - name
+             - code
+             - customer
+             - manager
         - name: sort
           required: false
           description: |
@@ -4067,6 +4071,16 @@ definitions:
         description: READ-ONLY. User that last updated this task
         readOnly: true
 
+  ProjectMemberInviteSuccessAndFailure:
+    type: object
+    properties:
+      success:
+        $ref: "#/definitions/ProjectMemberInvite"
+      failed:
+        type: array
+        items:
+          type: object
+
   AddProjectMemberInvitesRequest:
     title: Add project member invites request object
     type: object
@@ -4129,4 +4143,4 @@ definitions:
           metadata:
             $ref: "#/definitions/ResponseMetadata"
           content:
-            $ref: "#/definitions/ProjectMemberInvite"
+            $ref: "#/definitions/ProjectMemberInviteSuccessAndFailure"

@@ -55,6 +55,15 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
           raw: true,
         });
       },
+      getPendingAndReguestedInvitesForProject(projectId) {
+        return this.findAll({
+          where: {
+            projectId,
+            status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
+          },
+          raw: true,
+        });
+      },
       getPendingInviteByEmailOrUserId(projectId, email, userId) {
         const where = { projectId, status: INVITE_STATUS.PENDING };
 
@@ -63,6 +72,16 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
         } else if (email) {
           _.assign(where, { email });
         } else if (userId) {
+          _.assign(where, { userId });
+        }
+        return this.findOne({
+          where,
+        });
+      },
+      getRequestedInvite(projectId, userId) {
+        const where = { projectId, status: INVITE_STATUS.REQUESTED };
+
+        if (userId) {
           _.assign(where, { userId });
         }
         return this.findOne({

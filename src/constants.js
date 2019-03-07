@@ -18,6 +18,7 @@ export const PROJECT_MEMBER_ROLE = {
   OBSERVER: 'observer',
   CUSTOMER: 'customer',
   COPILOT: 'copilot',
+  ACCOUNT_MANAGER: 'account_manager',
 };
 
 export const PROJECT_MEMBER_MANAGER_ROLES = [PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.OBSERVER];
@@ -25,13 +26,20 @@ export const PROJECT_MEMBER_MANAGER_ROLES = [PROJECT_MEMBER_ROLE.MANAGER, PROJEC
 export const USER_ROLE = {
   TOPCODER_ADMIN: 'administrator',
   MANAGER: 'Connect Manager',
+  TOPCODER_ACCOUNT_MANAGER: 'Connect Account Manager',
   COPILOT: 'Connect Copilot',
   CONNECT_ADMIN: 'Connect Admin',
+  COPILOT_MANAGER: 'Connect Copilot Manager',
 };
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
 
-export const MANAGER_ROLES = [...ADMIN_ROLES, USER_ROLE.MANAGER];
+export const MANAGER_ROLES = [
+  ...ADMIN_ROLES,
+  USER_ROLE.MANAGER,
+  USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
+  USER_ROLE.COPILOT_MANAGER,
+];
 
 export const EVENT = {
   ROUTING_KEY: {
@@ -130,7 +138,10 @@ export const BUS_API_EVENT = {
 
   // Project Member Invites
   PROJECT_MEMBER_INVITE_CREATED: 'notifications.connect.project.member.invite.created',
+  PROJECT_MEMBER_INVITE_REQUESTED: 'notifications.connect.project.member.invite.requested',
   PROJECT_MEMBER_INVITE_UPDATED: 'notifications.connect.project.member.invite.updated',
+  PROJECT_MEMBER_INVITE_APPROVED: 'notifications.connect.project.member.invite.approved',
+  PROJECT_MEMBER_INVITE_REJECTED: 'notifications.connect.project.member.invite.rejected',
   PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.action.email.project.member.invite.created',
 };
 
@@ -156,5 +167,8 @@ export const INVITE_STATUS = {
   PENDING: 'pending',
   ACCEPTED: 'accepted',
   REFUSED: 'refused',
+  REQUESTED: 'requested',
+  REQUEST_REJECTED: 'request_rejected',
+  REQUEST_APPROVED: 'request_approved',
   CANCELED: 'canceled',
 };
