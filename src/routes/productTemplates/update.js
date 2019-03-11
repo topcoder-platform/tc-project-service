@@ -64,7 +64,7 @@ module.exports = [
         }
 
         // Merge JSON fields
-        entityToUpdate.aliases = util.mergeJsonObjects(productTemplate.aliases, entityToUpdate.aliases);
+        // entityToUpdate.aliases = util.mergeJsonObjects(productTemplate.aliases, entityToUpdate.aliases);
         entityToUpdate.template = util.mergeJsonObjects(productTemplate.template, entityToUpdate.template);
 
         return productTemplate.update(entityToUpdate);
