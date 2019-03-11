@@ -1112,8 +1112,8 @@ describe('UPDATE Milestone', () => {
             param: {
               // duration: 1,
               details: {
-                metadata: { waitingForCustomer : true }
-              }
+                metadata: { waitingForCustomer: true },
+              },
             },
           })
           .expect(200)
