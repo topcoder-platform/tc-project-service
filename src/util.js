@@ -390,7 +390,7 @@ _.assignIn(util, {
   */
   mergeJsonObjects: (targetObj, sourceObj, mergeExceptions) =>
     // eslint-disable-next-line consistent-return
-    _.mergeWith(targetObj, sourceObj, (target, source, key) => {
+    _.mergeWith({}, targetObj, sourceObj, (target, source, key) => {
       // Overwrite the array or merge exception keys
       if (_.isArray(source) || (mergeExceptions && mergeExceptions.indexOf(key) !== -1)) {
         return source;
