@@ -43,32 +43,9 @@ Run `npm run sync:es` from the root of project to execute the script.
 
 **NOTE**: In production these dependencies / services are hosted & managed outside tc-projects-service.
 
-#### Kafka
-Kafka must be installed and configured prior starting the application.
-Following topics must be created:
-```
-notifications.connect.project.updated
-notifications.connect.project.files.updated
-notifications.connect.project.team.updated
-notifications.connect.project.plan.updated
-notifications.connect.project.topic.created
-notifications.connect.project.topic.updated
-notifications.connect.project.post.created
-notifications.connect.project.post.edited
-```
+### Import sample metadata
 
-New Kafka related configuration options has been introduced:
-```
-"kafkaConfig": {
-    "hosts": List of Kafka brokers. Default: localhost: 9092
-    "clientCert": SSL certificate
-    "clientCertKey": Certificate key
-}
-```
-Environment variables:
-- `KAFKA_HOSTS` - same as "hosts"
-- `KAFKA_CLIENT_CERT` - same as "clientCert"
-- `KAFKA_CLIENT_CERT_KEY` - same as "clientCertKey"
+To create sample metadata entries (duplicate what is currently in development environment) run `node migrations/seedMetadata.js`
 
 ### Test
 
@@ -104,4 +81,4 @@ You may replace 172.17.0.1 with your docker0 IP.
 You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) or import **postman.json** and **postman_environment.json** to verify endpoints.
 
 #### Deploying without docker
-If you don't want to use docker to deploy to localhost. You can simply run `npm run start` from root of project. This should start the server on default port `3000`.
+If you don't want to use docker to deploy to localhost. You can simply run `npm run start:dev` from root of project. This should start the server on default port `8001`.
