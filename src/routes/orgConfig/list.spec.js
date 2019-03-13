@@ -110,12 +110,18 @@ describe('LIST organization config', () => {
     it('should return 422 without filter query param', (done) => {
       request(server)
         .get(`${orgConfigPath}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .expect(422, done);
     });
 
     it('should return 422 with filter query param but without orgId defined', (done) => {
       request(server)
         .get(`${orgConfigPath}?filter=configName=${configs[0].configName}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .expect(422, done);
     });
   });
