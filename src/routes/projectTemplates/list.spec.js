@@ -104,10 +104,10 @@ describe('LIST project templates', () => {
         });
     });
 
-    it('should return 200 for anonymous user', (done) => {
+    it('should return 403 for anonymous user', (done) => {
       request(server)
         .get('/v4/projects/metadata/projectTemplates')
-        .expect(200, done);
+        .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {

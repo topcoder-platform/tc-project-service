@@ -84,10 +84,10 @@ describe('GET project type', () => {
         });
     });
 
-    it('should return 200 even if user is not authenticated', (done) => {
+    it('should return 403 if user is not authenticated', (done) => {
       request(server)
         .get(`/v4/projects/metadata/projectTypes/${key}`)
-        .expect(200, done);
+        .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
