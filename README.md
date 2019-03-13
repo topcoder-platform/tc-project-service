@@ -4,48 +4,98 @@ Microservice to manage CRUD operations for all things Projects.
 
 ### Note : Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.
 
-### Local Development
+## Local Development
 
-* We use docker-compose for running dependencies locally. Instructions for Docker compose setup - https://docs.docker.com/compose/install/
+### Requirements
+
+* [docker-compose](https://docs.docker.com/compose/install/) - We use docker-compose for running dependencies locally.
 * Nodejs 8.9.4 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
 * Install [libpg](https://www.npmjs.com/package/pg-native)
-* Install node dependencies
-`npm install`
 
-* Start local services
-```~/Projects/tc-projects-service
-> cd local/
-~/Projects/tc-projects-service/local
-> docker-compose up
-```
-Copy config/sample.local.js as config/local.js, update the properties and according to your env setup
+### Steps to run locally
+1. Install node dependencies
+   ```bash
+   npm install
+   ```
 
-#### Database
-Once you start your PostgreSQL database through docker, it will create a projectsdb.
-*To create tables - note this will drop tables if they already exist*
-```
-NODE_ENV=development npm run sync:db
-```
+* Run docker with dependant services
+  ```bash
+  cd local/
+  docker-compose up
+  ```
+  This will run several services locally:
+  - `postgres`
+  - `elasticsearch`
+  - `rabbitmq`
+  - `mock-services` - mocks some Topcoder API
 
-#### Redis
-Docker compose command will start a local redis instance as well. You should be able to connect to this instance using url `$(docker-machine ip):6379`
+  *NOTE: In production these dependencies / services are hosted & managed outside tc-projects-service.*
 
-#### Elasticsearch
-Docker compose includes elasticsearch instance as well. It will open ports 9200 & 9300 (kibana)
+* Local config
+  ```bash
+  # in the tc-project-service root folder, not inside local/ as above
+  cp config/sample.local.js config/local.js
+  ```
+  Copy `config/sample.local.js` as `config/local.js`.<br>
+  As project service depend on many third-party services we have to config how to access them.  Some services are run locally and some services are used from Topcoder DEV environment. `config/local.js` has a prepared configuration which would replace values no matter what `NODE_ENV` value is.
 
-#### Sync indices and mappings
+  **IMPORTANT** This configuration file assumes that services run by docker use domain `dockerhost`. Depend on your system you have to make sure that domain `dockerhost` points to the IP address of docker.
+  For example, you can add a the next line to your `/etc/hosts` file, if docker is run on IP `127.0.0.1`.
+  ```
+  127.0.0.1       dockerhost
+  ```
+  Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.<br>
+  You may try using command `docker-machine ip` to get your docker IP, but it works not for all systems.
 
-There is a helper script to sync the indices and mappings with the elasticsearch.
+* Create tables in DB
+  ```bash
+  NODE_ENV=development npm run sync:db
+  ```
+ This command will crate tables in `postgres` db.
 
-Run `npm run sync:es` from the root of project to execute the script.
+ *NOTE: this will drop tables if they already exist.*
 
-> NOTE: This will first clear all the indices and than recreate them. So use with caution.
+* Sync ES indices
+  ```bash
+  NODE_ENV=development npm run sync:es
+  ```
+  Helper script to sync the indices and mappings with the elasticsearch.
 
-**NOTE**: In production these dependencies / services are hosted & managed outside tc-projects-service.
+  *NOTE: This will first clear all the indices and than recreate them. So use with caution.*
+
+* Run
+  ```bash
+  npm run start:dev
+  ```
+  Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
+  The project service will be served on `http://localhost:8001`.
 
 ### Import sample metadata
+```bash
+node migrations/seedMetadata.js
+```
+To create sample metadata entries (duplicate what is currently in development environment).
 
-To create sample metadata entries (duplicate what is currently in development environment) run `node migrations/seedMetadata.js`
+### Run Connect App with Project Service locally
+
+To be able to run [Connect App](https://github.com/appirio-tech/connect-app) with the local setup of Project Service we have to do two things:
+1. Configurate Connect App to use locally deployed Project service inside `connect-app/config/constants/dev.js` set
+
+   ```js
+   PROJECTS_API_URL: 'http://localhost:8001'
+   ```
+2. Bypass token validation in Project Service.
+
+   In `tc-project-service/node_modules/tc-core-library-js/lib/auth/verifier.js` add this to line 23:
+   ```js
+   callback(undefined, decodedToken.payload);
+   return;
+   ```
+   Connect App when making requests to the Project Service uses token retrieved from the Topcoder service deployed online. Project Service validates the token. For this purpose Project Service have to know the `secret` which has been used to generate the token. But we don't know the `secret` which is used by Topcoder for both DEV and PROD environment. So to bypass token validation we change these lines in the auth library.
+
+   *NOTE: this change only let us bypass validation during local development process*.
+
+3. Restart both Connect App and Project Service if they were running.
 
 ### Test
 
