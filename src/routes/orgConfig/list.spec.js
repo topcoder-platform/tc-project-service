@@ -63,10 +63,10 @@ describe('LIST organization config', () => {
         });
     });
 
-    it('should return 200 even if user is not authenticated with filter', (done) => {
+    it('should return 403 if user is not authenticated with filter', (done) => {
       request(server)
         .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
-        .expect(200, done);
+        .expect(403, done);
     });
 
     it('should return 200 for connect admin with filter', (done) => {
@@ -110,12 +110,18 @@ describe('LIST organization config', () => {
     it('should return 422 without filter query param', (done) => {
       request(server)
         .get(`${orgConfigPath}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .expect(422, done);
     });
 
     it('should return 422 with filter query param but without orgId defined', (done) => {
       request(server)
         .get(`${orgConfigPath}?filter=configName=${configs[0].configName}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .expect(422, done);
     });
   });

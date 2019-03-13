@@ -27,6 +27,13 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
+router.all(
+  RegExp(`\\/${apiVersion}\\/(projects|timelines|orgConfig)(?!\\/health).*`), (req, res, next) => (
+    // JWT authentication
+    jwtAuth(config)(req, res, next)
+  ),
+);
+
 router.route('/v4/projects/metadata/projectTemplates')
   .get(require('./projectTemplates/list'));
 router.route('/v4/projects/metadata/projectTemplates/:templateId(\\d+)')
@@ -57,13 +64,6 @@ router.route('/v4/projects/metadata/productCategories/:key')
 router.use('/v4/projects/metadata', compression());
 router.route('/v4/projects/metadata')
   .get(require('./metadata/list'));
-
-router.all(
-  RegExp(`\\/${apiVersion}\\/(projects|timelines|orgConfig)(?!\\/health).*`), (req, res, next) => (
-    // JWT authentication
-    jwtAuth(config)(req, res, next)
-  ),
-);
 
 // Register all the routes
 router.use('/v4/projects', compression());

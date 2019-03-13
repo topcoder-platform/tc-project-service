@@ -95,9 +95,28 @@ describe('GET all metadata', () => {
   after(testUtil.clearDb);
 
   describe('GET /projects/metadata', () => {
-    it('should return 200 even if user is not authenticated', (done) => {
+    it('should return 403 if user is not authenticated', (done) => {
       request(server)
         .get('/v4/projects/metadata')
+        .expect(403, done);
+    });
+
+    it('should return 200 for admin', (done) => {
+      request(server)
+        .get('/v4/projects/metadata')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end(done);
+    });
+
+    it('should return 200 for admin', (done) => {
+      request(server)
+        .get('/v4/projects/metadata')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .expect(200)
         .end((err, res) => {
           const resJson = res.body.result.content;
@@ -110,26 +129,6 @@ describe('GET all metadata', () => {
 
           done();
         });
-    });
-
-    it('should return 200 for admin', (done) => {
-      request(server)
-        .get('/v4/projects/metadata')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(200)
-        .end(done);
-    });
-
-    it('should return 200 for admin', (done) => {
-      request(server)
-        .get('/v4/projects/metadata')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(200)
-        .end(done);
     });
 
     it('should return 200 for connect manager', (done) => {
