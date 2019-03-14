@@ -24,7 +24,7 @@ Microservice to manage CRUD operations for all things Projects.
   docker-compose up
   ```
   This will run several services locally:
-  - `postgres`
+  - `postgres` - two instances: for app and for unit tests
   - `elasticsearch`
   - `rabbitmq`
   - `mock-services` - mocks some Topcoder API
