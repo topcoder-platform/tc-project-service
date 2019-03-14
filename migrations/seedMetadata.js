@@ -80,5 +80,5 @@ axios.get(url, {
     // handle success
     console.log('Done');
   }).catch(err=>{
-    console.log(err.response.data);
+    console.log(err && err.response ? err.response.data : err);
   });
