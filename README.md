@@ -98,21 +98,12 @@ To be able to run [Connect App](https://github.com/appirio-tech/connect-app) wit
 3. Restart both Connect App and Project Service if they were running.
 
 ### Test
+```bash
+npm run test
+```
+Tests are being executed with the `NODE_ENV` environment variable has a value `test` and `config/test.js` configuration is loaded.
 
 Each of the individual modules/services are unit tested.
-
-To run unit tests run `npm run test` from root of project.
-
-While tests are being executed the `NODE_ENV` environment variable has a value `test` and `config/test.js` configuration is loaded. The default test configuration refers to `projectsdb_test` postgres database. So make sure that this database exists before running the tests. Since we are using docker-compose for local deployment change `local/docker-compose.yaml` postgres service with updated database name and re-create the containers.
-
-```
-// stop already executing containers if any
-docker-compose stop -t 1
-// clear the containers
-docker-compose rm -f
-// re-run the services with build flag
-docker-compose up --build
-```
 
 #### JWT Authentication
 Authentication is handled via Authorization (Bearer) token header field. Token is a JWT token. Here is a sample token that is valid for a very long time for a user with administrator role.
