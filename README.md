@@ -34,7 +34,7 @@ Microservice to manage CRUD operations for all things Projects.
 * Local config
 
   There are two prepared configs:
-  - if you have M2M environment variables provided: `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE` then use `config/m2m.local.js`
+  - if you have M2M environment variables provided: `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL` then use `config/m2m.local.js`
   - otherwise use `config/mock.local.js`.
 
   To apply any of these config copy it to `config/local.js`:
@@ -57,7 +57,7 @@ Microservice to manage CRUD operations for all things Projects.
 
   Explanation of configs:
   - `config/mock.local.js` - Use local `mock-services` from docker to mock Identity and Member services instead of using deployed at Topcoder dev environment.
-  - `config/m2m.local.js` - Use Identity and Member services deployed at Topcoder dev environment. This can be used only if you have M2M environment variables (`AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`) provided to access Topcoder DEV environment services.
+  - `config/m2m.local.js` - Use Identity and Member services deployed at Topcoder dev environment. This can be used only if you have M2M environment variables (`AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`) provided to access Topcoder DEV environment services.
 
 * Create tables in DB
   ```bash
