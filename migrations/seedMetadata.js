@@ -75,8 +75,6 @@ axios.get(url, {
       })
     });
 
-
-
     // handle success
     console.log('Done');
   }).catch(err=>{
