@@ -32,20 +32,32 @@ Microservice to manage CRUD operations for all things Projects.
   *NOTE: In production these dependencies / services are hosted & managed outside tc-projects-service.*
 
 * Local config
-  ```bash
-  # in the tc-project-service root folder, not inside local/ as above
-  cp config/sample.local.js config/local.js
-  ```
-  Copy `config/sample.local.js` as `config/local.js`.<br>
-  As project service depend on many third-party services we have to config how to access them.  Some services are run locally and some services are used from Topcoder DEV environment. `config/local.js` has a prepared configuration which would replace values no matter what `NODE_ENV` value is.
 
-  **IMPORTANT** This configuration file assumes that services run by docker use domain `dockerhost`. Depend on your system you have to make sure that domain `dockerhost` points to the IP address of docker.
+  There are two prepared configs:
+  - if you have M2M environment variables provided: `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE` then use `config/m2m.local.js`
+  - otherwise use `config/mock.local.js`.
+
+  To apply any of these config copy it to `config/local.js`:
+
+  ```bash
+  cp config/mock.local.js config/local.js
+  # or
+  cp config/m2m.local.js config/local.js
+  ```
+
+  `config/local.js` has a prepared configuration which would replace values no matter what `NODE_ENV` value is.
+
+  **IMPORTANT** These configuration files assume that docker containers are run on domain `dockerhost`. Depend on your system you have to make sure that domain `dockerhost` points to the IP address of docker.
   For example, you can add a the next line to your `/etc/hosts` file, if docker is run on IP `127.0.0.1`.
   ```
   127.0.0.1       dockerhost
   ```
   Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.<br>
   You may try using command `docker-machine ip` to get your docker IP, but it works not for all systems.
+
+  Explanation of configs:
+  - `config/mock.local.js` - Use local `mock-services` from docker to mock Identity and Member services instead of using deployed at Topcoder dev environment.
+  - `config/m2m.local.js` - Use Identity and Member services deployed at Topcoder dev environment. This can be used only if you have M2M environment variables (`AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`) provided to access Topcoder DEV environment services.
 
 * Create tables in DB
   ```bash

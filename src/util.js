@@ -339,7 +339,7 @@ _.assignIn(util, {
    */
   getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
     try {
-      const token = yield this.getSystemUserToken(logger);
+      const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       if (logger) {
         logger.trace(userIds);
@@ -364,7 +364,7 @@ _.assignIn(util, {
    */
   getUserRoles: Promise.coroutine(function* (userId, logger, requestId) { // eslint-disable-line func-names
     try {
-      const token = yield this.getSystemUserToken(logger);
+      const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       return httpClient.get(`${config.identityServiceEndpoint}roles`, {
         params: {
@@ -449,7 +449,7 @@ _.assignIn(util, {
       filter += '&like=true';
     }
     req.log.trace('filter for users api call', filter);
-    return util.getSystemUserToken(req.log)
+    return util.getM2MToken()
     .then((token) => {
       req.log.debug(`Bearer ${token}`);
       const httpClient = util.getHttpClient({ id: req.id, log: req.log });
