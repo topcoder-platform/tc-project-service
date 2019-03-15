@@ -25,8 +25,6 @@
     "timelineIndexName": "timelines",
     "timelineDocType": "timelineV4"
   },
-  "systemUserClientId": "",
-  "systemUserClientSecret": "",
   "connectProjectUrl":"",
   "dbConfig": {
     "masterUrl": "",
