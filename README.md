@@ -51,9 +51,9 @@ Microservice to manage CRUD operations for all things Projects.
   ```bash
   NODE_ENV=development npm run sync:db
   ```
- This command will crate tables in `postgres` db.
+  This command will crate tables in `postgres` db.
 
- *NOTE: this will drop tables if they already exist.*
+  *NOTE: this will drop tables if they already exist.*
 
 * Sync ES indices
   ```bash
@@ -72,9 +72,11 @@ Microservice to manage CRUD operations for all things Projects.
 
 ### Import sample metadata
 ```bash
-node migrations/seedMetadata.js
+CONNECT_USER_TOKEN=<connect user token> node migrations/seedMetadata.js
 ```
-To create sample metadata entries (duplicate what is currently in development environment).
+This command will create sample metadata entries in the DB (duplicate what is currently in development environment).
+
+To retrieve data from DEV env we need to provide a valid user token. You may login to http://connect.topcoder-dev.com and find the Bearer token in the request headers using browser dev tools.
 
 ### Run Connect App with Project Service locally
 
