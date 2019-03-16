@@ -82,9 +82,9 @@ Microservice to manage CRUD operations for all things Projects.
   Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
   The project service will be served on `http://localhost:8001`.
 
-### Import sample metadata
+### Import sample metadata & projects
 ```bash
-CONNECT_USER_TOKEN=<connect user token> node migrations/seedMetadata.js
+CONNECT_USER_TOKEN=<connect user token> npm run demo-data
 ```
 This command will create sample metadata entries in the DB (duplicate what is currently in development environment).
 
