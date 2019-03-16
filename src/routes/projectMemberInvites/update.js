@@ -116,7 +116,7 @@ module.exports = [
                 const member = {
                   projectId,
                   role: updatedInvite.role,
-                  userId: updatedInvite.userId,
+                  userId: _.get(updatedInvite, 'userId', req.authUser.userId),
                   createdBy: req.authUser.userId,
                   updatedBy: req.authUser.userId,
                 };
