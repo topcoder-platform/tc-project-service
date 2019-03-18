@@ -1,6 +1,7 @@
 config/local.js
 config/mock.local.js
 config/m2m.local.js
+local/seed/
 node_modules
 dist
 .ebextensions
