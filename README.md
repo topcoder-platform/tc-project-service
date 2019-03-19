@@ -76,6 +76,8 @@ Microservice to manage CRUD operations for all things Projects.
   *NOTE: This will first clear all the indices and than recreate them. So use with caution.*
 
 * Run
+
+  **NOTE** If you use `config/m2m.local.js` config, you should set M2M environment variables before running the next command.
   ```bash
   npm run start:dev
   ```
@@ -127,6 +129,9 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI
 It's been signed with the secret 'secret'. This secret should match your entry in config/local.js. You can generate your own token using https://jwt.io
 
 ### Local Deployment
+
+**NOTE: This part of README may contain inconsistencies and requires update. Don't follow it unless you know how to properly make configuration for these steps. It's not needed for regular development process.**
+
 Build image:
 `docker build -t tc_projects_services .`
 Run image:
