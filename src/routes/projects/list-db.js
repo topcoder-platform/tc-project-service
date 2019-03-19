@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import models from '../../models';
-import { USER_ROLE, MANAGER_ROLES } from '../../constants';
+import { MANAGER_ROLES } from '../../constants';
 import util from '../../util';
 
 /**
@@ -131,13 +131,9 @@ module.exports = [
         .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
         .catch(err => next(err));
     }
-      // If user requested projects where he/she is a member or
-      // if they are not a copilot then return projects that they are members in.
-      // Copilots can view projects that they are members in or they are invited
-      //
-    const getProjectIds = !memberOnly && util.hasRole(req, USER_ROLE.COPILOT) ?
-        models.Project.getProjectIdsForCopilot(req.authUser.userId) :
-        models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
+
+    // regular users can only see projects they are members of (or invited, handled bellow)
+    const getProjectIds = models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
 
     return getProjectIds
         .then((accessibleProjectIds) => {

@@ -71,9 +71,6 @@ module.exports = function defineProject(sequelize, DataTypes) {
         return this.findAll({
           where: {
             $or: [
-              ['"Project".status=? AND EXISTS(SELECT * FROM "project_member_invites" WHERE "deletedAt" ' +
-              'IS NULL AND "projectId" = "Project".id ' +
-              'AND "status" IN (\'requested\', \'pending\') AND "userId" = ? )', PROJECT_STATUS.REVIEWED, userId],
               ['EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" ' +
               'IS NULL AND "projectId" = "Project".id AND "userId" = ? )', userId],
             ],
