@@ -24,8 +24,7 @@ module.exports = freq => new Promise((resolve, reject) => {
           || util.hasRoles(req, MANAGER_ROLES)
           || !_.isUndefined(_.find(members, m => m.userId === currentUserId));
 
-        // if user is co-pilot and the project doesn't have any copilots then
-        // user can access the project
+        // if user is co-pilot and he is a member or if project is in "reviewed" status and he is invited
         if (!hasAccess && util.hasRole(req, USER_ROLE.COPILOT)) {
           return models.Project.getProjectIdsForCopilot(currentUserId)
             .then((ids) => {
@@ -53,7 +52,7 @@ module.exports = freq => new Promise((resolve, reject) => {
                 .then((project) => {
                   if (!project || [PROJECT_STATUS.DRAFT, PROJECT_STATUS.IN_REVIEW].indexOf(project.status) >= 0) {
                     errorMessage = 'Copilot: Project is not yet available to copilots';
-                  } else {
+                  } else if (project.status !== PROJECT_STATUS.REVIEWED) {
                     // project status is 'active' or higher so it's not available to copilots
                     errorMessage = 'Copilot: Project has already started';
                   }

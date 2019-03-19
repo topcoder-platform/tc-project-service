@@ -60,7 +60,7 @@ describe('Project Members create', () => {
         .expect(403, done);
     });
 
-    it('should return 201 and then 400 if user is already registered', (done) => {
+    it('should return 201 when invited then accepted and then 404 if user is already as a member', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         get: () => Promise.resolve({
           status: 200,
@@ -79,9 +79,15 @@ describe('Project Members create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-      .post(`/v4/projects/${project1.id}/members/`)
+      .post(`/v4/projects/${project1.id}/members/invite`)
       .set({
-        Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send({
+        param: {
+          userIds: [40051332],
+          role: 'copilot',
+        },
       })
       .expect('Content-Type', /json/)
       .expect(201)
@@ -89,26 +95,59 @@ describe('Project Members create', () => {
         if (err) {
           done(err);
         } else {
-          const resJson = res.body.result.content;
+          const resJson = res.body.result.content.success[0];
           should.exist(resJson);
           resJson.role.should.equal('copilot');
           resJson.projectId.should.equal(project1.id);
           resJson.userId.should.equal(40051332);
-          server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
 
           request(server)
-          .post(`/v4/projects/${project1.id}/members/`)
+          .put(`/v4/projects/${project1.id}/members/invite`)
           .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .send({
+            param: {
+              userId: 40051332,
+              status: 'accepted',
+            },
           })
           .expect('Content-Type', /json/)
-          .expect(400)
+          .expect(200)
           .end((err2, res2) => {
             if (err2) {
-              done(err);
+              done(err2);
             } else {
-              res2.body.result.status.should.equal(400);
-              done();
+              const resJson2 = res2.body.result.content;
+              should.exist(resJson2);
+              resJson2.role.should.equal('copilot');
+              resJson2.projectId.should.equal(project1.id);
+              resJson2.userId.should.equal(40051332);
+              server.services.pubsub.publish.calledWith('project.member.invite.updated').should.be.true;
+              server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+
+              request(server)
+                .put(`/v4/projects/${project1.id}/members/invite`)
+                .set({
+                  Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+                })
+                .send({
+                  param: {
+                    userId: 40051332,
+                    status: 'accepted',
+                  },
+                })
+                .expect('Content-Type', /json/)
+                .expect(404)
+                .end((err3, res3) => {
+                  if (err3) {
+                    done(err3);
+                  } else {
+                    res3.body.result.status.should.equal(404);
+                    done();
+                  }
+                });
             }
           });
         }
@@ -238,28 +277,53 @@ describe('Project Members create', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when copilot added', (done) => {
         request(server)
-        .post(`/v4/projects/${project1.id}/members/`)
+        .post(`/v4/projects/${project1.id}/members/invite`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
+          param: {
+            userIds: [40051332],
+            role: 'copilot',
+          },
         })
         .expect(201)
         .end((err) => {
           if (err) {
             done(err);
           } else {
-            testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_JOINED_COPILOT);
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+            request(server)
+            .put(`/v4/projects/${project1.id}/members/invite`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+            })
+            .send({
+              param: {
                 userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
-              done();
+                status: 'accepted',
+              },
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err2) => {
+              if (err2) {
+                done(err2);
+              } else {
+                testUtil.wait(() => {
+                  createEventSpy.callCount.should.equal(4);
+                  createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED);
+                  createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED);
+                  createEventSpy.thirdCall.calledWith(BUS_API_EVENT.MEMBER_JOINED_COPILOT);
+                  createEventSpy.lastCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                    projectId: project1.id,
+                    projectName: project1.name,
+                    projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                    userId: 40051336,
+                    initiatorUserId: 40051336,
+                  })).should.be.true;
+                  done();
+                });
+              }
             });
           }
         });

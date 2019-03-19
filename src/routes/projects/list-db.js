@@ -133,11 +133,12 @@ module.exports = [
     }
       // If user requested projects where he/she is a member or
       // if they are not a copilot then return projects that they are members in.
-      // Copilots can view projects that they are members in or they have
+      // Copilots can view projects that they are members in or they are invited
       //
     const getProjectIds = !memberOnly && util.hasRole(req, USER_ROLE.COPILOT) ?
         models.Project.getProjectIdsForCopilot(req.authUser.userId) :
         models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
+
     return getProjectIds
         .then((accessibleProjectIds) => {
           let allowedProjectIds = accessibleProjectIds;
