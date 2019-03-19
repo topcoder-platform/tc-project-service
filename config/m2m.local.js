@@ -5,7 +5,7 @@ if (process.env.NODE_ENV === 'test') {
   config = require('./test.json');
 } else {
   config = {
-    identityServiceEndpoint: "https://api.topcoder-dev.com/",
+    identityServiceEndpoint: "https://api.topcoder-dev.com/v3/",
     authSecret: 'secret',
     authDomain: 'topcoder-dev.com',
     logLevel: 'debug',
