@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
-import { USER_ROLE, PROJECT_STATUS, PROJECT_MEMBER_ROLE, MANAGER_ROLES } from '../constants';
+import { MANAGER_ROLES } from '../constants';
 
 /**
  * Super admin, Topcoder Managers are allowed to view any projects
@@ -24,47 +24,11 @@ module.exports = freq => new Promise((resolve, reject) => {
           || util.hasRoles(req, MANAGER_ROLES)
           || !_.isUndefined(_.find(members, m => m.userId === currentUserId));
 
-        // if user is co-pilot and he is a member or if project is in "reviewed" status and he is invited
-        if (!hasAccess && util.hasRole(req, USER_ROLE.COPILOT)) {
-          return models.Project.getProjectIdsForCopilot(currentUserId)
-            .then((ids) => {
-              req.context.accessibleProjectIds = ids;
-              return Promise.resolve(_.indexOf(ids, projectId) > -1);
-            });
-        }
         return Promise.resolve(hasAccess);
       })
       .then((hasAccess) => {
         if (!hasAccess) {
-          let errorMessage = 'You do not have permissions to perform this action';
-          // customize error message for copilots
-          if (util.hasRole(freq, USER_ROLE.COPILOT)) {
-            if (_.findIndex(freq.context.currentProjectMembers, m => m.role === PROJECT_MEMBER_ROLE.COPILOT) >= 0) {
-              errorMessage = 'Copilot: Project is already claimed by another copilot';
-              return Promise.resolve(errorMessage);
-            }
-            return models.Project
-                .find({
-                  where: { id: projectId },
-                  attributes: ['status'],
-                  raw: true,
-                })
-                .then((project) => {
-                  if (!project || [PROJECT_STATUS.DRAFT, PROJECT_STATUS.IN_REVIEW].indexOf(project.status) >= 0) {
-                    errorMessage = 'Copilot: Project is not yet available to copilots';
-                  } else if (project.status !== PROJECT_STATUS.REVIEWED) {
-                    // project status is 'active' or higher so it's not available to copilots
-                    errorMessage = 'Copilot: Project has already started';
-                  }
-                  return Promise.resolve(errorMessage);
-                });
-          }
-            // user is not an admin nor is a registered project member
-          return Promise.resolve(errorMessage);
-        }
-        return Promise.resolve(null);
-      }).then((errorMessage) => {
-        if (errorMessage) {
+          const errorMessage = 'You do not have permissions to perform this action';
           // user is not an admin nor is a registered project member
           return reject(new Error(errorMessage));
         }
