@@ -74,14 +74,18 @@ module.exports = (targetUrl, token) => {
 
   return Promise.all(projectPromises)
     .then((createdProjects) => {
-      console.log('Updating statuses');
-      return Promise.all(
-        createdProjects.map(({ projectId, status, cancelReason }) =>
-          updateProjectStatus(projectId, { status, cancelReason }, targetUrl, headers).catch((ex) => {
-            console.log(`Failed to update project status of project with id ${projectId}: ${ex.message}`);
-          }),
-        ),
-      );
+      console.log('Wait 5 seconds to give time ES to index created projects...');
+      return Promise.delay(5000).then(() => {
+        console.log('Updating statuses...');
+
+        return Promise.all(
+          createdProjects.map(({ projectId, status, cancelReason }) =>
+            updateProjectStatus(projectId, { status, cancelReason }, targetUrl, headers).catch((ex) => {
+              console.log(`Failed to update project status of project with id ${projectId}: ${ex.message}`);
+            }),
+          ),
+        )
+      });
     })
     .then(() => console.log('Done project seed.'))
     .catch(ex => console.error(ex));
