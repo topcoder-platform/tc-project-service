@@ -5,6 +5,9 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 const projects = require('./projects.json');
 
+// we make delay after requests which has to be indexed in ES asynchronous
+const ES_INDEX_DELAY = 3000;
+
 /**
  * Create projects and update their statuses.
  */
@@ -12,12 +15,12 @@ module.exports = (targetUrl, token) => {
   let projectPromises;
 
   const projectsUrl = `${targetUrl}projects`;
-  const headers = {
+  const adminHeaders = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   };
 
-  const adminHeaders = {
+  const connectAdminHeaders = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${util.jwts.connectAdmin}`,
   };
@@ -35,18 +38,32 @@ module.exports = (targetUrl, token) => {
     delete project.param.acceptInvitation;
 
     return axios
-      .post(projectsUrl, project, { headers })
+      .post(projectsUrl, project, { headers: adminHeaders })
       .catch((err) => {
         console.log(`Failed to create project ${i}: ${err.message}`);
       })
       .then(async (response) => {
         const projectId = _.get(response, 'data.result.content.id');
 
+        // updating status
+        if (status !== _.get(response, 'data.result.content.status')) {
+          console.log(`Project #${projectId}: Wait a bit to give time ES to index before updating status...`);
+          await Promise.delay(ES_INDEX_DELAY);
+          await updateProjectStatus(projectId, { status, cancelReason }, targetUrl, adminHeaders).catch((ex) => {
+            console.error(`Project #${projectId}: Failed to update project status: ${ex.message}`);
+          });
+        }
+
+        // creating invitations
         if (Array.isArray(invites)) {
           let promises = []
           invites.forEach(invite => {
-            promises.push(createProjectMemberInvite(projectId, invite, targetUrl, headers))
+            promises.push(createProjectMemberInvite(projectId, invite, targetUrl, connectAdminHeaders))
           })
+
+          // accepting invitations
+          console.log(`Project #${projectId}: Wait a bit to give time ES to index before creating invitation...`);
+          await Promise.delay(ES_INDEX_DELAY);
           const responses = await Promise.all(promises)
           if (acceptInvitation) {
             let acceptInvitationPromises = []
@@ -57,9 +74,11 @@ module.exports = (targetUrl, token) => {
                   userId,
                   status: 'accepted'
                 }
-              }, targetUrl, adminHeaders))
+              }, targetUrl, connectAdminHeaders))
             })
 
+            console.log(`Project #${projectId}: Wait a bit to give time ES to index before accepting invitation...`);
+            await Promise.delay(ES_INDEX_DELAY);
             await Promise.all(acceptInvitationPromises)
           }
         }
@@ -73,20 +92,6 @@ module.exports = (targetUrl, token) => {
   });
 
   return Promise.all(projectPromises)
-    .then((createdProjects) => {
-      console.log('Wait 5 seconds to give time ES to index created projects...');
-      return Promise.delay(5000).then(() => {
-        console.log('Updating statuses...');
-
-        return Promise.all(
-          createdProjects.map(({ projectId, status, cancelReason }) =>
-            updateProjectStatus(projectId, { status, cancelReason }, targetUrl, headers).catch((ex) => {
-              console.log(`Failed to update project status of project with id ${projectId}: ${ex.message}`);
-            }),
-          ),
-        )
-      });
-    })
     .then(() => console.log('Done project seed.'))
     .catch(ex => console.error(ex));
 };
