@@ -113,10 +113,23 @@ module.exports = [
               .then((members) => {
                 req.context = req.context || {};
                 req.context.currentProjectMembers = members;
+                let userId = updatedInvite.userId;
+                // if the requesting user is updating his/her own invite
+                if (!userId && req.authUser.email === updatedInvite.email) {
+                  userId = req.authUser.userId;
+                }
+                // if we are not able to identify the user yet, it must be something wrong and we should not create
+                // project member
+                if (!userId) {
+                  const err = new Error(
+                    `Unable to find userId for the invite. ${updatedInvite.email} has not joined topcoder yet.`);
+                  err.status = 400;
+                  return next(err);
+                }
                 const member = {
                   projectId,
                   role: updatedInvite.role,
-                  userId: _.get(updatedInvite, 'userId', req.authUser.userId),
+                  userId,
                   createdBy: req.authUser.userId,
                   updatedBy: req.authUser.userId,
                 };
