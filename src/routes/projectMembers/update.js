@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants';
+import { EVENT, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES } from '../../constants';
 
 /**
  * API to update a project member.
@@ -62,26 +62,35 @@ module.exports = [
             return Promise.resolve();
           }
 
-          projectMember.updatedBy = req.authUser.userId;
-          const operations = [];
-          operations.push(projectMember.save());
+          return util.getUserRoles(projectMember.userId, req.log, req.id).then((roles) => {
+            if (_.includes(PROJECT_MEMBER_MANAGER_ROLES, updatedProps.role)
+                && !util.hasIntersection(MANAGER_ROLES, roles)) {
+              const err = new Error('User role can not be updated to Manager role');
+              err.status = 401;
+              return Promise.reject(err);
+            }
 
-          if (updatedProps.isPrimary) {
-            // if set as primary, other users with same role should no longer be primary
-            operations.push(models.ProjectMember.update({ isPrimary: false,
-              updatedBy: req.authUser.userId },
-              {
-                where: {
-                  projectId,
-                  isPrimary: true,
-                  role: updatedProps.role,
-                  id: {
-                    $ne: projectMember.id,
+            projectMember.updatedBy = req.authUser.userId;
+            const operations = [];
+            operations.push(projectMember.save());
+
+            if (updatedProps.isPrimary) {
+              // if set as primary, other users with same role should no longer be primary
+              operations.push(models.ProjectMember.update({ isPrimary: false,
+                updatedBy: req.authUser.userId },
+                {
+                  where: {
+                    projectId,
+                    isPrimary: true,
+                    role: updatedProps.role,
+                    id: {
+                      $ne: projectMember.id,
+                    },
                   },
-                },
-              }));
-          }
-          return Promise.all(operations);
+                }));
+            }
+            return Promise.all(operations);
+          });
         })
         // .then(() => {
         //   // TODO move this to an event
