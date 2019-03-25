@@ -176,6 +176,21 @@ describe('Project members update', () => {
     });
 
     it('should return 200 if valid user and data(no isPrimary and no updates)', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{ roleName: 'administrator' }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
         .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
         .set({
@@ -204,6 +219,21 @@ describe('Project members update', () => {
     });
 
     it('should return 200 if valid user(not copilot any more) for project without direct project id', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{ roleName: 'administrator' }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       models.Project.update({
         directProjectId: null,
       }, {
@@ -467,6 +497,21 @@ describe('Project members update', () => {
       });
 
       it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when user role updated', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          get: () => Promise.resolve({
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: [{ roleName: 'administrator' }],
+              },
+            },
+          }),
+        });
+        sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
         .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
         .set({
