@@ -61,25 +61,6 @@ module.exports = function defineProject(sequelize, DataTypes) {
       { fields: ['directProjectId'] },
     ],
     classMethods: {
-      /*
-       * @Co-pilots should be able to view projects any of the following conditions are met:
-       * a. they are registered active project members on the project
-       * b. any project that is in 'reviewed' state AND copilot is invited
-       * @param userId the id of user
-       */
-      getProjectIdsForCopilot(userId) {
-        return this.findAll({
-          where: {
-            $or: [
-              ['EXISTS(SELECT * FROM "project_members" WHERE "deletedAt" ' +
-              'IS NULL AND "projectId" = "Project".id AND "userId" = ? )', userId],
-            ],
-          },
-          attributes: ['id'],
-          raw: true,
-        })
-        .then(res => _.map(res, 'id'));
-      },
       /**
        * Get direct project id
        * @param id the id of project
