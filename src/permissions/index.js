@@ -36,6 +36,7 @@ module.exports = () => {
   Authorizer.setPolicy('productTemplate.create', projectAdmin);
   Authorizer.setPolicy('productTemplate.edit', projectAdmin);
   Authorizer.setPolicy('productTemplate.delete', projectAdmin);
+  Authorizer.setPolicy('projectTemplate.upgrade', projectAdmin);
   Authorizer.setPolicy('productTemplate.view', true);
 
   Authorizer.setPolicy('project.addProjectPhase', copilotAndAbove);
@@ -81,4 +82,19 @@ module.exports = () => {
   Authorizer.setPolicy('projectMemberInvite.create', projectView);
   Authorizer.setPolicy('projectMemberInvite.put', true);
   Authorizer.setPolicy('projectMemberInvite.get', true);
+
+  Authorizer.setPolicy('form.create', projectAdmin);
+  Authorizer.setPolicy('form.edit', projectAdmin);
+  Authorizer.setPolicy('form.delete', projectAdmin);
+  Authorizer.setPolicy('form.view', true); // anyone can view form
+
+  Authorizer.setPolicy('priceConfig.create', projectAdmin);
+  Authorizer.setPolicy('priceConfig.edit', projectAdmin);
+  Authorizer.setPolicy('priceConfig.delete', projectAdmin);
+  Authorizer.setPolicy('priceConfig.view', true); // anyone can view plan config
+
+  Authorizer.setPolicy('planConfig.create', projectAdmin);
+  Authorizer.setPolicy('planConfig.edit', projectAdmin);
+  Authorizer.setPolicy('planConfig.delete', projectAdmin);
+  Authorizer.setPolicy('planConfig.view', true); // anyone can view price config
 };

@@ -48,6 +48,7 @@ describe('UPDATE project template', () => {
     updatedBy: 1,
   };
 
+
   let templateId;
 
   beforeEach(() => testUtil.clearDb()
@@ -112,6 +113,46 @@ describe('UPDATE project template', () => {
               anyDetails: 'any details 3',
             },
             others: ['others 31', 'others 32'],
+          },
+        },
+      },
+    };
+
+    const newModelBody = {
+      param: {
+        name: 'template 1',
+        key: 'key 1',
+        category: 'generic',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 1',
+        info: 'info 1',
+        aliases: ['key-1', 'key_1'],
+        disabled: true,
+        hidden: true,
+        form: {
+          scope1: {
+            subScope1A: 1,
+            subScope1B: 2,
+          },
+          scope2: [1, 2, 3],
+        },
+        priceConfig: {
+          first: '$800',
+        },
+        planConfig: {
+          phase1: {
+            name: 'phase 1',
+            details: {
+              anyDetails: 'any details 1',
+            },
+            others: ['others 11', 'others 12'],
+          },
+          phase2: {
+            name: 'phase 2',
+            details: {
+              anyDetails: 'any details 2',
+            },
+            others: ['others 21', 'others 22'],
           },
         },
       },
@@ -241,6 +282,37 @@ describe('UPDATE project template', () => {
               others: ['others 31', 'others 32'],
             },
           });
+          resJson.disabled.should.be.eql(true);
+          resJson.hidden.should.be.eql(true);
+          resJson.createdBy.should.be.eql(template.createdBy);
+          should.exist(resJson.createdAt);
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 200 for new model', (done) => {
+      request(server)
+        .patch(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newModelBody)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.id.should.be.eql(templateId);
+          resJson.name.should.be.eql(newModelBody.param.name);
+          resJson.key.should.be.eql(newModelBody.param.key);
+          resJson.category.should.be.eql(newModelBody.param.category);
+          resJson.form.should.be.eql(newModelBody.param.form);
+          resJson.priceConfig.should.be.eql(newModelBody.param.priceConfig);
+          resJson.planConfig.should.be.eql(newModelBody.param.planConfig);
+
           resJson.disabled.should.be.eql(true);
           resJson.hidden.should.be.eql(true);
           resJson.createdBy.should.be.eql(template.createdBy);
