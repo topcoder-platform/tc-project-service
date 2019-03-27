@@ -19,7 +19,7 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('priceConfig.view'),
-  (req, res, next) => models.PriceConfig.latestRevisionofLatestVersion(req.params.key)
+  (req, res, next) => models.PriceConfig.latestRevisionOfLatestVersion(req.params.key)
   .then((form) => {
     if (form == null) {
       const apiErr = new Error(`PriceConfig not found for key ${req.params.key} version ${req.params.version}`);

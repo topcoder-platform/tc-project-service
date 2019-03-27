@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
   PriceConfig.newVersionNumber = classMethods.newVersionNumber;
   PriceConfig.createNewVersion = classMethods.createNewVersion;
   PriceConfig.latestVersion = classMethods.latestVersion;
-  PriceConfig.latestRevisionofLatestVersion = classMethods.latestRevisionofLatestVersion;
+  PriceConfig.latestRevisionOfLatestVersion = classMethods.latestRevisionOfLatestVersion;
   PriceConfig.latestVersionIncludeUsed = classMethods.latestVersionIncludeUsed;
 
   return PriceConfig;

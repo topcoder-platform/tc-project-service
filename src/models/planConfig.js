@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
   PlanConfig.newVersionNumber = classMethods.newVersionNumber;
   PlanConfig.createNewVersion = classMethods.createNewVersion;
   PlanConfig.latestVersion = classMethods.latestVersion;
-  PlanConfig.latestRevisionofLatestVersion = classMethods.latestRevisionofLatestVersion;
+  PlanConfig.latestRevisionOfLatestVersion = classMethods.latestRevisionOfLatestVersion;
   PlanConfig.latestVersionIncludeUsed = classMethods.latestVersionIncludeUsed;
 
   return PlanConfig;

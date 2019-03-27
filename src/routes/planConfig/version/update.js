@@ -53,10 +53,10 @@ module.exports = [
       return Promise.resolve(planConfigs[0]);
     })
     .then((planConfig) => {
-      const revisison = planConfig.revision + 1;
+      const revision = planConfig.revision + 1;
       const entity = {
         version: req.params.version,
-        revision: revisison,
+        revision,
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
         key: req.params.key,

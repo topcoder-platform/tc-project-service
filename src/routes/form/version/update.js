@@ -53,10 +53,10 @@ module.exports = [
       return Promise.resolve(forms[0]);
     })
     .then((form) => {
-      const revisison = form.revision + 1;
+      const revision = form.revision + 1;
       const entity = {
         version: req.params.version,
-        revision: revisison,
+        revision,
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
         key: req.params.key,

@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
   Form.newVersionNumber = classMethods.newVersionNumber;
   Form.createNewVersion = classMethods.createNewVersion;
   Form.latestVersion = classMethods.latestVersion;
-  Form.latestRevisionofLatestVersion = classMethods.latestRevisionofLatestVersion;
+  Form.latestRevisionOfLatestVersion = classMethods.latestRevisionOfLatestVersion;
   Form.latestVersionIncludeUsed = classMethods.latestVersionIncludeUsed;
 
   return Form;

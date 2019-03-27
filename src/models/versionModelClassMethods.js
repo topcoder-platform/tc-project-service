@@ -65,7 +65,7 @@ function versionModelClassMethods(model, jsonField) {
           return Promise.resolve(Object.values(keys));
         });
     },
-    latestRevisionofLatestVersion(key) {
+    latestRevisionOfLatestVersion(key) {
       return model.findAll({
         where: {
           key,

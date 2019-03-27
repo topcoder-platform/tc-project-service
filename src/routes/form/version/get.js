@@ -20,7 +20,7 @@ module.exports = [
   validate(schema),
   permissions('form.view'),
   (req, res, next) =>
-    models.Form.latestRevisionofLatestVersion(req.params.key)
+    models.Form.latestRevisionOfLatestVersion(req.params.key)
       .then((form) => {
         if (form == null) {
           const apiErr = new Error(`Form not found for key ${req.params.key} version ${req.params.version}`);

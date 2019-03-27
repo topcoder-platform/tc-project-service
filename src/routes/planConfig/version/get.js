@@ -19,7 +19,7 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('planConfig.view'),
-  (req, res, next) => models.PlanConfig.latestRevisionofLatestVersion(req.params.key)
+  (req, res, next) => models.PlanConfig.latestRevisionOfLatestVersion(req.params.key)
     .then((form) => {
       if (form == null) {
         const apiErr = new Error(`PlanConfig not found for key ${req.params.key} version ${req.params.version}`);

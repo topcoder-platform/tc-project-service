@@ -53,10 +53,10 @@ module.exports = [
       return Promise.resolve(priceConfigs[0]);
     })
     .then((priceConfig) => {
-      const revisison = priceConfig.revision + 1;
+      const revision = priceConfig.revision + 1;
       const entity = {
         version: req.params.version,
-        revision: revisison,
+        revision,
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
         key: req.params.key,
