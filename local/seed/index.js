@@ -10,4 +10,4 @@ async function seed() {
   await seedProjects(targetUrl, token);
 }
 
-seed();
+seed().then(() => process.exit());

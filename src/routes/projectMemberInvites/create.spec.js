@@ -65,18 +65,27 @@ describe('Project Member Invite create', () => {
             lastActivityUserId: '1',
           }).then((p2) => {
             project2 = p2;
-            models.ProjectMemberInvite.create({
-              projectId: project1.id,
-              userId: 40051335,
-              email: null,
-              role: PROJECT_MEMBER_ROLE.MANAGER,
-              status: INVITE_STATUS.PENDING,
+            models.ProjectMember.create({
+              userId: 40051332,
+              projectId: project2.id,
+              role: 'copilot',
+              isPrimary: true,
               createdBy: 1,
               updatedBy: 1,
-              createdAt: '2016-06-30 00:33:07+00',
-              updatedAt: '2016-06-30 00:33:07+00',
             }).then(() => {
-              done();
+              models.ProjectMemberInvite.create({
+                projectId: project1.id,
+                userId: 40051335,
+                email: null,
+                role: PROJECT_MEMBER_ROLE.MANAGER,
+                status: INVITE_STATUS.PENDING,
+                createdBy: 1,
+                updatedBy: 1,
+                createdAt: '2016-06-30 00:33:07+00',
+                updatedAt: '2016-06-30 00:33:07+00',
+              }).then(() => {
+                done();
+              });
             });
           }));
       });
