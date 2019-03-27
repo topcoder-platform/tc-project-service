@@ -184,8 +184,7 @@ describe('LIST Project db', () => {
         });
     });
 
-    it('should return the project when project that is in reviewed state AND does not yet' +
-      'have a co-pilot assigned', (done) => {
+    it('should return the project when project that is in reviewed state in which the copilot is its member or has been invited', (done) => {
       request(server)
           .get('/v4/projects/db/')
           .set({
@@ -198,9 +197,9 @@ describe('LIST Project db', () => {
               done(err);
             } else {
               const resJson = res.body.result.content;
-              res.body.result.metadata.totalCount.should.equal(3);
+              res.body.result.metadata.totalCount.should.equal(2);
               should.exist(resJson);
-              resJson.should.have.lengthOf(3);
+              resJson.should.have.lengthOf(2);
               done();
             }
           });
