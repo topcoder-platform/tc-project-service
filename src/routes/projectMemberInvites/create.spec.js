@@ -509,25 +509,8 @@ describe('Project Member Invite create', () => {
     });
 
     it('should return 201 if try to create manager with MANAGER_ROLES', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 403,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 403,
-              content: {
-                failed: [{
-                  message: 'cannot be added with a Manager role to the project',
-                }],
-              },
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      util.getUserRoles.restore();
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
       request(server)
         .post(`/v4/projects/${project1.id}/members/invite`)
         .set({
@@ -540,12 +523,72 @@ describe('Project Member Invite create', () => {
           },
         })
         .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          const resJson = res.body.result.content.success[0];
+          should.exist(resJson);
+          resJson.role.should.equal('manager');
+          resJson.projectId.should.equal(project1.id);
+          resJson.userId.should.equal(40152855);
+          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
+          done();
+        });
+    });
+
+    it('should return 201 if try to create account_manager with MANAGER_ROLES', (done) => {
+      util.getUserRoles.restore();
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userIds: [40152855],
+            role: 'account_manager',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          const resJson = res.body.result.content.success[0];
+          should.exist(resJson);
+          resJson.role.should.equal('account_manager');
+          resJson.projectId.should.equal(project1.id);
+          resJson.userId.should.equal(40152855);
+          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
+          done();
+        });
+    });
+
+    it('should return 403 if try to create account_manager with CUSTOMER_ROLE', (done) => {
+      util.getUserRoles.restore();
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve(['Topcoder User']));
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          param: {
+            userIds: [40152855],
+            role: 'account_manager',
+          },
+        })
+        .expect('Content-Type', /json/)
         .expect(403)
         .end((err, res) => {
-          const failed = res.body.result.content.failed[0];
-          should.exist(failed);
-          failed.message.should.equal('cannot be added with a Manager role to the project');
-          done();
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content.failed[0];
+            should.exist(resJson);
+            res.body.result.status.should.equal(403);
+            const errorMessage = _.get(resJson, 'message', '');
+            sinon.assert.match(errorMessage, /.*cannot be added with a Manager role to the project/);
+            done();
+          }
         });
     });
 
