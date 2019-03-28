@@ -18,7 +18,7 @@ const schema = {
   body: {
     param: Joi.object().keys({
       id: Joi.any().strip(),
-      name: Joi.string().max(45).required(),
+      name: Joi.string().max(255).required(),
       description: Joi.string().max(255),
       startDate: Joi.date().required(),
       endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
