@@ -119,13 +119,13 @@ module.exports = function defineProject(sequelize, DataTypes) {
           query += `AND projects."projectFullText" ~ lower('${parameters.filters.keyword}')`;
         }
 
-        let innerQuery = '';
+        let joinQuery = '';
         if (_.has(parameters.filters, 'userId') || _.has(parameters.filters, 'email')) {
           query += ` AND (members."userId" = ${parameters.filters.userId}
           OR invites."userId" = ${parameters.filters.userId}
           OR invites."email" = '${parameters.filters.email}') GROUP BY projects.id`;
 
-          innerQuery = `LEFT OUTER JOIN project_members AS members ON projects.id = members."projectId"
+          joinQuery = `LEFT OUTER JOIN project_members AS members ON projects.id = members."projectId"
           LEFT OUTER JOIN project_member_invites AS invites ON projects.id = invites."projectId"`;
         }
 
@@ -135,7 +135,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
 
         // select count of projects
         return sequelize.query(`SELECT COUNT(1) FROM projects AS projects
-          ${innerQuery}
+          ${joinQuery}
           WHERE ${query}`,
           { type: sequelize.QueryTypes.SELECT,
             logging: (str) => { log.debug(str); },
@@ -149,7 +149,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
 
             // select project attributes
             return sequelize.query(`SELECT ${attributesStr} FROM projects AS projects
-              ${innerQuery}
+              ${joinQuery}
               WHERE ${query} ORDER BY ` +
               ` projects.${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
               { type: sequelize.QueryTypes.SELECT,
