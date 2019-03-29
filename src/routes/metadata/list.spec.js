@@ -21,6 +21,9 @@ const projectTemplates = [
     aliases: ['key-1', 'key_1'],
     scope: {},
     phases: {},
+    form: { key: 'key1', version: 1 },
+    planConfig: { key: 'key1', version: 1 },
+    priceConfig: { key: 'key1', version: 1 },
     createdBy: 1,
     updatedBy: 1,
   },
@@ -83,6 +86,72 @@ const productCategories = [
     updatedBy: 1,
   },
 ];
+const forms = [
+  {
+    key: 'key1',
+    scope: {
+      hello: 'world',
+    },
+    version: 1,
+    revision: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+  {
+    key: 'key1',
+    scope: {
+      hello: 'world',
+    },
+    version: 2,
+    revision: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+];
+const priceConfigs = [
+  {
+    key: 'key1',
+    config: {
+      hello: 'world',
+    },
+    version: 1,
+    revision: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+  {
+    key: 'key1',
+    config: {
+      hello: 'world',
+    },
+    version: 2,
+    revision: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+];
+const planConfigs = [
+  {
+    key: 'key1',
+    phases: {
+      hello: 'world',
+    },
+    version: 1,
+    revision: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+  {
+    key: 'key1',
+    phases: {
+      hello: 'world',
+    },
+    version: 2,
+    revision: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+];
 
 describe('GET all metadata', () => {
   beforeEach(() => testUtil.clearDb()
@@ -90,7 +159,10 @@ describe('GET all metadata', () => {
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
     .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates))
     .then(() => models.ProjectType.bulkCreate(projectTypes))
-    .then(() => models.ProductCategory.bulkCreate(productCategories)),
+    .then(() => models.ProductCategory.bulkCreate(productCategories))
+    .then(() => models.Form.bulkCreate(forms))
+    .then(() => models.PriceConfig.bulkCreate(priceConfigs))
+    .then(() => models.PlanConfig.bulkCreate(planConfigs)),
   );
   after(testUtil.clearDb);
 
@@ -126,7 +198,36 @@ describe('GET all metadata', () => {
           resJson.milestoneTemplates.should.have.length(1);
           resJson.projectTypes.should.have.length(1);
           resJson.productCategories.should.have.length(1);
+          resJson.forms.should.have.length(1);
+          resJson.planConfigs.should.have.length(1);
+          resJson.priceConfigs.should.have.length(1);
 
+          resJson.forms[0].version.should.be.eql(2);
+          resJson.planConfigs[0].version.should.be.eql(2);
+          resJson.priceConfigs[0].version.should.be.eql(2);
+
+          done();
+        });
+    });
+
+    it('should return all used model when request with includeAllReferred query', (done) => {
+      request(server)
+        .get('/v4/projects/metadata?includeAllReferred=true')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          should.exist(resJson);
+          resJson.projectTemplates.should.have.length(1);
+          resJson.productTemplates.should.have.length(1);
+          resJson.milestoneTemplates.should.have.length(1);
+          resJson.projectTypes.should.have.length(1);
+          resJson.productCategories.should.have.length(1);
+          resJson.forms.should.have.length(2);
+          resJson.planConfigs.should.have.length(2);
+          resJson.priceConfigs.should.have.length(2);
           done();
         });
     });

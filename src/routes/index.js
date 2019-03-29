@@ -49,6 +49,9 @@ router.route('/v4/projects/metadata/projectTypes')
 router.route('/v4/projects/metadata/projectTypes/:key')
   .get(require('./projectTypes/get'));
 
+router.route('/v4/projects/metadata/projectTemplates/:templateId(\\d+)/upgrade')
+.post(require('./projectTemplates/upgrade'));
+
 router.route('/v4/projects/metadata/orgConfig')
   .get(require('./orgConfig/list'));
 
@@ -194,6 +197,71 @@ router.route('/v4/projects/metadata/orgConfig')
 router.route('/v4/projects/metadata/orgConfig/:id(\\d+)')
   .patch(require('./orgConfig/update'))
   .delete(require('./orgConfig/delete'));
+
+// form
+
+router.route('/v4/projects/metadata/form/:key/versions/:version(\\d+)/revisions/:revision(\\d+)')
+  .get(require('./form/revision/get'))
+  .delete(require('./form/revision/delete'));
+
+router.route('/v4/projects/metadata/form/:key/versions/:version(\\d+)/revisions')
+  .get(require('./form/revision/list'))
+  .post(require('./form/revision/create'));
+
+router.route('/v4/projects/metadata/form/:key')
+  .get(require('./form/version/get'));
+
+router.route('/v4/projects/metadata/form/:key/versions')
+  .get(require('./form/version/list'))
+  .post(require('./form/version/create'));
+
+router.route('/v4/projects/metadata/form/:key/versions/:version(\\d+)')
+  .get(require('./form/version/getVersion'))
+  .patch(require('./form/version/update'))
+  .delete(require('./form/version/delete'));
+
+// price config
+
+router.route('/v4/projects/metadata/priceConfig/:key/versions/:version(\\d+)/revisions/:revision(\\d+)')
+  .get(require('./priceConfig/revision/get'))
+  .delete(require('./priceConfig/revision/delete'));
+
+router.route('/v4/projects/metadata/priceConfig/:key/versions/:version(\\d+)/revisions')
+  .get(require('./priceConfig/revision/list'))
+  .post(require('./priceConfig/revision/create'));
+
+router.route('/v4/projects/metadata/priceConfig/:key')
+.get(require('./priceConfig/version/get'));
+
+router.route('/v4/projects/metadata/priceConfig/:key/versions')
+.get(require('./priceConfig/version/list'))
+.post(require('./priceConfig/version/create'));
+
+router.route('/v4/projects/metadata/priceConfig/:key/versions/:version(\\d+)')
+.get(require('./priceConfig/version/getVersion'))
+.patch(require('./priceConfig/version/update'))
+.delete(require('./priceConfig/version/delete'));
+
+// plan config
+router.route('/v4/projects/metadata/planConfig/:key/versions/:version(\\d+)/revisions/:revision(\\d+)')
+  .get(require('./planConfig/revision/get'))
+  .delete(require('./planConfig/revision/delete'));
+
+router.route('/v4/projects/metadata/planConfig/:key/versions/:version(\\d+)/revisions')
+  .get(require('./planConfig/revision/list'))
+  .post(require('./planConfig/revision/create'));
+
+router.route('/v4/projects/metadata/planConfig/:key')
+  .get(require('./planConfig/version/get'));
+
+router.route('/v4/projects/metadata/planConfig/:key/versions')
+  .get(require('./planConfig/version/list'))
+  .post(require('./planConfig/version/create'));
+
+router.route('/v4/projects/metadata/planConfig/:key/versions/:version(\\d+)')
+  .get(require('./planConfig/version/getVersion'))
+  .patch(require('./planConfig/version/update'))
+  .delete(require('./planConfig/version/delete'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

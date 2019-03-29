@@ -1,5 +1,6 @@
 {
     "AUTH_SECRET": "secret",
+    "MAX_REVISION_NUMBER": 2,
     "logLevel": "debug",
     "captureLogs": "false",
     "logentriesToken": "",
