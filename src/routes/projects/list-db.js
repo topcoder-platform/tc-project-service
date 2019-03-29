@@ -133,30 +133,10 @@ module.exports = [
     }
 
     // regular users can only see projects they are members of (or invited, handled bellow)
-    const getProjectIds = models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
-
-    return getProjectIds
-        .then((accessibleProjectIds) => {
-          let allowedProjectIds = accessibleProjectIds;
-          // get projects with pending invite for current user
-          const invites = models.ProjectMemberInvite.getProjectInvitesForUser(
-            req.authUser.email,
-            req.authUser.userId);
-          if (invites) {
-            allowedProjectIds = _.union(allowedProjectIds, invites);
-          }
-          // filter based on accessible
-          if (_.get(criteria.filters, 'id', null)) {
-            criteria.filters.id.$in = _.intersection(
-              allowedProjectIds,
-              criteria.filters.id.$in,
-            );
-          } else {
-            criteria.filters.id = { $in: allowedProjectIds };
-          }
-          return retrieveProjects(req, criteria, sort, req.query.fields);
-        })
-        .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
-        .catch(err => next(err));
+    criteria.filters.userId = req.authUser.userId;
+    criteria.filters.email = req.authUser.email;
+    return retrieveProjects(req, criteria, sort, req.query.fields)
+      .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+      .catch(err => next(err));
   },
 ];

@@ -103,6 +103,56 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
 };
 
 /**
+ * Build ES query search request body based on userId and email
+ *
+ * @param  {String}     userId          the user id
+ * @param  {String}     email           the email
+ * @return {Array}                      query
+ */
+const buildEsShouldQuery = (userId, email) => {
+  const should = [];
+  if (userId) {
+    should.push({
+      nested: {
+        path: 'members',
+        query: {
+          query_string: {
+            query: userId,
+            fields: ['members.userId'],
+          },
+        },
+      },
+    });
+    should.push({
+      nested: {
+        path: 'invites',
+        query: {
+          query_string: {
+            query: userId,
+            fields: ['invites.userId'],
+          },
+        },
+      },
+    });
+  }
+
+  if (email) {
+    should.push({
+      nested: {
+        path: 'invites',
+        query: {
+          query_string: {
+            query: email,
+            fields: ['invites.email'],
+          },
+        },
+      },
+    });
+  }
+  return should;
+};
+
+/**
  * Build ES query search request body based on value, keyword, matchType and fieldName
  *
  * @param  {String}     value          the value to build request body for
@@ -234,6 +284,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   // prepare the elasticsearch filter criteria
   const boolQuery = [];
   let mustQuery = [];
+  let shouldQuery = [];
   let fullTextQuery;
   if (_.has(criteria, 'filters.id.$in')) {
     boolQuery.push({
@@ -267,6 +318,10 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     mustQuery = _.concat(mustQuery, setFilter('manager',
       criteria.filters.manager,
       ['members.firstName', 'members.lastName']));
+  }
+
+  if (_.has(criteria, 'filters.userId') || _.has(criteria, 'filters.email')) {
+    shouldQuery = buildEsShouldQuery(criteria.filters.userId, criteria.filters.email);
   }
 
   if (_.has(criteria, 'filters.status.$in')) {
@@ -348,6 +403,21 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
       must: mustQuery,
     });
   }
+
+  if (shouldQuery.length > 0) {
+    const newBody = { query: { bool: { must: [] } } };
+    newBody.query.bool.must.push({
+      bool: {
+        should: shouldQuery,
+      },
+    });
+    if (mustQuery.length > 0 || boolQuery.length > 0) {
+      newBody.query.bool.must.push(body.query);
+    }
+
+    body.query = newBody.query;
+  }
+
   if (fullTextQuery) {
     body.query = _.merge(body.query, fullTextQuery);
     if (body.query.bool) {
@@ -355,7 +425,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     }
   }
 
-  if (fullTextQuery || boolQuery.length > 0 || mustQuery.length > 0) {
+  if (fullTextQuery || boolQuery.length > 0 || mustQuery.length > 0 || shouldQuery.length > 0) {
     searchCriteria.body = body;
   }
   return searchCriteria;
@@ -427,7 +497,6 @@ module.exports = [
       offset: req.query.offset || 0,
     };
     req.log.info(criteria);
-
     if (!memberOnly
       && (util.hasAdminRole(req)
           || util.hasRoles(req, MANAGER_ROLES))) {
@@ -437,32 +506,11 @@ module.exports = [
         .catch(err => next(err));
     }
 
-    // regular users can only see projects they are members of (or invited, handled bellow)
-    const getProjectIds = models.ProjectMember.getProjectIdsForUser(req.authUser.userId);
-
-    return getProjectIds
-        .then((accessibleProjectIds) => {
-          const allowedProjectIds = accessibleProjectIds;
-          // get projects with pending invite for current user
-          const invites = models.ProjectMemberInvite.getProjectInvitesForUser(
-            req.authUser.email,
-            req.authUser.userId);
-
-          return invites.then((ids => _.union(allowedProjectIds, ids)));
-        })
-        .then((allowedProjectIds) => {
-          // filter based on accessible
-          if (_.get(criteria.filters, 'id', null)) {
-            criteria.filters.id.$in = _.intersection(
-              allowedProjectIds,
-              criteria.filters.id.$in,
-            );
-          } else {
-            criteria.filters.id = { $in: allowedProjectIds };
-          }
-          return retrieveProjects(req, criteria, sort, req.query.fields);
-        })
-        .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
-        .catch(err => next(err));
+    // regular users can only see projects they are members of (or invited, handled below)
+    criteria.filters.email = req.authUser.email;
+    criteria.filters.userId = req.authUser.userId;
+    return retrieveProjects(req, criteria, sort, req.query.fields)
+      .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+      .catch(err => next(err));
   },
 ];

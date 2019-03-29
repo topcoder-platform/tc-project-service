@@ -98,7 +98,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
             if (parameters.filters.id.$in.length === 0) {
               parameters.filters.id.$in.push(-1);
             }
-            query += `AND id IN (${parameters.filters.id.$in}) `;
+            query += `AND projects.id IN (${parameters.filters.id.$in}) `;
           } else if (_.isString(parameters.filters.id) || _.isNumber(parameters.filters.id)) {
             query += `AND id = ${parameters.filters.id} `;
           }
@@ -107,32 +107,51 @@ module.exports = function defineProject(sequelize, DataTypes) {
           const statusFilter = parameters.filters.status;
           if (_.isObject(statusFilter)) {
             const statuses = statusFilter.$in.join("','");
-            query += `AND status IN ('${statuses}') `;
+            query += `AND projects.status IN ('${statuses}') `;
           } else if (_.isString(statusFilter)) {
-            query += `AND status ='${statusFilter}'`;
+            query += `AND projects.status ='${statusFilter}'`;
           }
         }
         if (_.has(parameters.filters, 'type')) {
-          query += `AND type = '${parameters.filters.type}' `;
+          query += `AND projects.type = '${parameters.filters.type}' `;
         }
         if (_.has(parameters.filters, 'keyword')) {
-          query += `AND "projectFullText" ~ lower('${parameters.filters.keyword}')`;
+          query += `AND projects."projectFullText" ~ lower('${parameters.filters.keyword}')`;
         }
 
-        const attributesStr = `"${parameters.attributes.join('","')}"`;
+        let joinQuery = '';
+        if (_.has(parameters.filters, 'userId') || _.has(parameters.filters, 'email')) {
+          query += ` AND (members."userId" = ${parameters.filters.userId}
+          OR invites."userId" = ${parameters.filters.userId}
+          OR invites."email" = '${parameters.filters.email}') GROUP BY projects.id`;
+
+          joinQuery = `LEFT OUTER JOIN project_members AS members ON projects.id = members."projectId"
+          LEFT OUTER JOIN project_member_invites AS invites ON projects.id = invites."projectId"`;
+        }
+
+        let attributesStr = _.map(parameters.attributes, attr => `projects."${attr}"`);
+        attributesStr = `${attributesStr.join(',')}`;
         const orderStr = `"${parameters.order[0][0]}" ${parameters.order[0][1]}`;
 
         // select count of projects
-        return sequelize.query(`SELECT COUNT(1) FROM projects WHERE ${query}`,
+        return sequelize.query(`SELECT COUNT(1) FROM projects AS projects
+          ${joinQuery}
+          WHERE ${query}`,
           { type: sequelize.QueryTypes.SELECT,
             logging: (str) => { log.debug(str); },
             raw: true,
           })
           .then((fcount) => {
-            const count = fcount[0].count;
+            let count = fcount.length;
+            if (fcount.length === 1) {
+              count = fcount[0].count;
+            }
+
             // select project attributes
-            return sequelize.query(`SELECT ${attributesStr} FROM projects WHERE ${query} ORDER BY ` +
-              ` ${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
+            return sequelize.query(`SELECT ${attributesStr} FROM projects AS projects
+              ${joinQuery}
+              WHERE ${query} ORDER BY ` +
+              ` projects.${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
               { type: sequelize.QueryTypes.SELECT,
                 logging: (str) => { log.debug(str); },
                 raw: true,
