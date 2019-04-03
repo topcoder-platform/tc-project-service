@@ -46,8 +46,15 @@ jobs:
           command: |
             apk add --no-cache jq py-pip sudo
             sudo pip install awscli --upgrade
-      - run: ./build.sh DEV
-      - run: ./deploy.sh DEV
+      - run:
+          name: Building
+          command: |
+            set +e
+            ./build.sh DEV
+      - run:
+          name: Deploying
+          command: |
+            ./deploy.sh DEV
   deployProd:
     docker:
       - image: docker:17.06.1-ce-git
@@ -64,8 +71,15 @@ jobs:
           command: |
             apk add --no-cache jq py-pip sudo
             sudo pip install awscli --upgrade
-      - run: ./build.sh PROD
-      - run: ./deploy.sh PROD
+      - run:
+          name: Building
+          command: |
+            set +e
+            ./build.sh PROD
+      - run:
+          name: Deploying
+          command: |
+            ./deploy.sh PROD
 workflows:
   version: 2
   build:
