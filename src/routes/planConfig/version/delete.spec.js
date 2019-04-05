@@ -36,7 +36,7 @@ describe('DELETE planConfig version', () => {
   const planConfigs = [
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test1',
       },
       version: 1,
@@ -46,7 +46,7 @@ describe('DELETE planConfig version', () => {
     },
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test2',
       },
       version: 1,

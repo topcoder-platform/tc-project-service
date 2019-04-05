@@ -15,7 +15,7 @@ describe('LIST planConfig revisions', () => {
   const planConfigs = [
     {
       key: 'dev',
-      phases: {
+      config: {
         'test': 'test1',
       },
       version: 1,
@@ -25,7 +25,7 @@ describe('LIST planConfig revisions', () => {
     },
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test2',
       },
       version: 1,
@@ -56,7 +56,7 @@ describe('LIST planConfig revisions', () => {
           resJson.should.have.length(2);
 
           resJson[0].key.should.be.eql(planConfig.key);
-          resJson[0].phases.should.be.eql(planConfig.phases);
+          resJson[0].config.should.be.eql(planConfig.config);
           resJson[0].version.should.be.eql(planConfig.version);
           resJson[0].revision.should.be.eql(planConfig.revision);
           should.exist(resJson[0].createdAt);

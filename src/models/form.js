@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     key: { type: DataTypes.STRING(45), allowNull: false },
     version: { type: DataTypes.BIGINT, allowNull: false, defaultValue: 1 },
     revision: { type: DataTypes.BIGINT, allowNull: false, defaultValue: 1 },
-    scope: { type: DataTypes.JSON, allowNull: false },
+    config: { type: DataTypes.JSON, allowNull: false },
 
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     ],
   });
 
-  const classMethods = versionModelClassMethods(Form, 'scope');
+  const classMethods = versionModelClassMethods(Form, 'config');
   Form.deleteOldestRevision = classMethods.deleteOldestRevision;
   Form.newVersionNumber = classMethods.newVersionNumber;
   Form.createNewVersion = classMethods.createNewVersion;

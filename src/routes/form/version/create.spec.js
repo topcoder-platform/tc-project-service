@@ -15,7 +15,7 @@ describe('CREATE Form version', () => {
   const forms = [
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test1',
       },
       version: 1,
@@ -25,7 +25,7 @@ describe('CREATE Form version', () => {
     },
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test2',
       },
       version: 1,
@@ -45,7 +45,7 @@ describe('CREATE Form version', () => {
   describe('Post /projects/metadata/form/{key}/versions/', () => {
     const body = {
       param: {
-        scope: {
+        config: {
           'test create': 'test create',
         },
       },
@@ -58,10 +58,10 @@ describe('CREATE Form version', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if missing scope', (done) => {
+    it('should return 422 if missing config', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
-          scope: undefined,
+          config: undefined,
         }),
       };
 
@@ -87,7 +87,7 @@ describe('CREATE Form version', () => {
         .end((err, res) => {
           const resJson = res.body.result.content;
           should.exist(resJson.id);
-          resJson.scope.should.be.eql(body.param.scope);
+          resJson.config.should.be.eql(body.param.config);
           resJson.key.should.be.eql('dev');
           resJson.revision.should.be.eql(1);
           resJson.version.should.be.eql(2);

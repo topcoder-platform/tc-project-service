@@ -15,7 +15,7 @@ describe('UPDATE PlanConfig version', () => {
   const planConfigs = [
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test1',
       },
       version: 1,
@@ -25,7 +25,7 @@ describe('UPDATE PlanConfig version', () => {
     },
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test2',
       },
       version: 1,
@@ -45,7 +45,7 @@ describe('UPDATE PlanConfig version', () => {
   describe('Post /projects/metadata/planConfig/{key}/versions/{version}', () => {
     const body = {
       param: {
-        phases: {
+        config: {
           'test create': 'test create',
         },
       },
@@ -58,10 +58,10 @@ describe('UPDATE PlanConfig version', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if missing phases', (done) => {
+    it('should return 422 if missing config', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
-          phases: undefined,
+          config: undefined,
         }),
       };
       request(server)
@@ -86,7 +86,7 @@ describe('UPDATE PlanConfig version', () => {
         .end((err, res) => {
           const resJson = res.body.result.content;
           should.exist(resJson.id);
-          resJson.phases.should.be.eql(body.param.phases);
+          resJson.config.should.be.eql(body.param.config);
           resJson.key.should.be.eql('dev');
           resJson.revision.should.be.eql(3);
           resJson.version.should.be.eql(1);

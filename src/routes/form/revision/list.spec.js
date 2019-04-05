@@ -15,7 +15,7 @@ describe('LIST form revisions', () => {
   const forms = [
     {
       key: 'dev',
-      scope: {
+      config: {
         'test': 'test1',
       },
       version: 1,
@@ -25,7 +25,7 @@ describe('LIST form revisions', () => {
     },
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test2',
       },
       version: 1,
@@ -56,7 +56,7 @@ describe('LIST form revisions', () => {
           resJson.should.have.length(2);
 
           resJson[0].key.should.be.eql(form.key);
-          resJson[0].scope.should.be.eql(form.scope);
+          resJson[0].config.should.be.eql(form.config);
           resJson[0].version.should.be.eql(form.version);
           resJson[0].revision.should.be.eql(form.revision);
           should.exist(resJson[0].createdAt);

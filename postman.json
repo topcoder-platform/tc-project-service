@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b2fedaf2-e077-4351-ac5b-72be7f46e3ed",
+		"_postman_id": "db83f8a1-5b3f-4276-a371-aa3c3497542d",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -5306,7 +5306,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"scope\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions",
@@ -5349,7 +5349,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"scope\": {\r\n    \t\t\"hello\": \"test111\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test111\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1",
@@ -5519,7 +5519,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"scope\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions",
@@ -5564,7 +5564,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"scope\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/no-exist-2222key36/versions/1/revisions",
@@ -6252,7 +6252,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"phases\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions",
@@ -6295,7 +6295,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"phases\": {\r\n    \t\t\"hello\": \"test111\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test111\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1",
@@ -6465,7 +6465,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"phases\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions",
@@ -6510,7 +6510,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \t\"phases\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/no-exist-key/versions/1/revisions",
