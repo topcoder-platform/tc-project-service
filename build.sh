@@ -6,7 +6,7 @@ JQ="jq --raw-output --exit-status"
 ENV=$1
 #AWS_REGION=$(eval "echo \$${ENV}_AWS_REGION")
 #ACCOUNT_ID=$(eval "echo \$${ENV}_AWS_ACCOUNT_ID")
-#AWS_REPOSITORY=$(eval "echo \$${ENV}_AWS_REPOSITORY")
+AWS_REPOSITORY=$(eval "echo \$${ENV}_AWS_REPOSITORY")
 
 build() {
   docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY:$CIRCLE_SHA1 .
