@@ -17,7 +17,7 @@ const schema = {
   },
   body: {
     param: Joi.object().keys({
-      phases: Joi.object().required(),
+      config: Joi.object().required(),
 
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
@@ -49,7 +49,7 @@ module.exports = [
           createdBy: req.authUser.userId,
           updatedBy: req.authUser.userId,
           key: req.params.key,
-          phases: req.body.param.phases,
+          config: req.body.param.config,
         });
         return models.PlanConfig.create(entity);
       }

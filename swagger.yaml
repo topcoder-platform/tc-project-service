@@ -5076,8 +5076,8 @@ definitions:
         description: revision identifier
         type: integer
         format: int64
-      scope:
-        description: scope json
+      config:
+        description: config json
         type: object
       key:
         description: key of form
@@ -5146,7 +5146,7 @@ definitions:
       param:
         type: object
         properties:
-          scope:
+          config:
             type: object
   PriceConfig:
     type: object
@@ -5251,7 +5251,7 @@ definitions:
         description: revision identifier
         type: integer
         format: int64
-      phases:
+      config:
         description: content json
         type: object
       key:
@@ -5321,6 +5321,6 @@ definitions:
       param:
         type: object
         properties:
-          phases:
+          config:
             description: config json
             type: object

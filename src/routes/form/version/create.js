@@ -16,7 +16,7 @@ const schema = {
   },
   body: {
     param: Joi.object().keys({
-      scope: Joi.object().required(),
+      config: Joi.object().required(),
 
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
@@ -51,7 +51,7 @@ module.exports = [
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
         key: req.params.key,
-        scope: req.body.param.scope,
+        config: req.body.param.config,
       });
       return models.Form.create(entity);
     }).then((createdEntity) => {

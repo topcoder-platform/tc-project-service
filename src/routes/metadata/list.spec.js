@@ -89,7 +89,7 @@ const productCategories = [
 const forms = [
   {
     key: 'key1',
-    scope: {
+    config: {
       hello: 'world',
     },
     version: 1,
@@ -99,7 +99,7 @@ const forms = [
   },
   {
     key: 'key1',
-    scope: {
+    config: {
       hello: 'world',
     },
     version: 2,
@@ -133,7 +133,7 @@ const priceConfigs = [
 const planConfigs = [
   {
     key: 'key1',
-    phases: {
+    config: {
       hello: 'world',
     },
     version: 1,
@@ -143,7 +143,7 @@ const planConfigs = [
   },
   {
     key: 'key1',
-    phases: {
+    config: {
       hello: 'world',
     },
     version: 2,

@@ -40,7 +40,7 @@ describe('DELETE form revision', () => {
   const forms = [
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test1',
       },
       version: 1,
@@ -50,7 +50,7 @@ describe('DELETE form revision', () => {
     },
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test2',
       },
       version: 1,

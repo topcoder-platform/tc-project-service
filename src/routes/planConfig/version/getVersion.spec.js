@@ -14,7 +14,7 @@ describe('GET a particular version of specific key of PlanConfig', () => {
   const planConfigs = [
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test1',
       },
       version: 1,
@@ -24,7 +24,7 @@ describe('GET a particular version of specific key of PlanConfig', () => {
     },
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test2',
       },
       version: 2,
@@ -34,7 +34,7 @@ describe('GET a particular version of specific key of PlanConfig', () => {
     },
     {
       key: 'dev',
-      phases: {
+      config: {
         test: 'test3',
       },
       version: 2,
@@ -65,7 +65,7 @@ describe('GET a particular version of specific key of PlanConfig', () => {
           const resJson = res.body.result.content;
 
           resJson.key.should.be.eql(planConfig.key);
-          resJson.phases.should.be.eql(planConfig.phases);
+          resJson.config.should.be.eql(planConfig.config);
           resJson.version.should.be.eql(planConfig.version);
           resJson.revision.should.be.eql(planConfig.revision);
           should.exist(resJson.createdAt);

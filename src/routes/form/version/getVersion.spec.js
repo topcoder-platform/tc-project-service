@@ -14,7 +14,7 @@ describe('GET a particular version of specific key of Form', () => {
   const forms = [
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test1',
       },
       version: 1,
@@ -24,7 +24,7 @@ describe('GET a particular version of specific key of Form', () => {
     },
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test2',
       },
       version: 2,
@@ -34,7 +34,7 @@ describe('GET a particular version of specific key of Form', () => {
     },
     {
       key: 'dev',
-      scope: {
+      config: {
         test: 'test3',
       },
       version: 2,
@@ -65,7 +65,7 @@ describe('GET a particular version of specific key of Form', () => {
           const resJson = res.body.result.content;
 
           resJson.key.should.be.eql(form.key);
-          resJson.scope.should.be.eql(form.scope);
+          resJson.config.should.be.eql(form.config);
           resJson.version.should.be.eql(form.version);
           resJson.revision.should.be.eql(form.revision);
           should.exist(resJson.createdAt);
