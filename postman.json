@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "db83f8a1-5b3f-4276-a371-aa3c3497542d",
+		"_postman_id": "d9ea7b0f-1d2c-4d48-a693-fe7b51b1e2ea",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -3081,7 +3081,106 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n      \"param\": {\r\n        \"name\": \"name 1\",\r\n        \"productKey\": \"productKey 1\",\r\n        \"category\": \"key1\",\r\n        \"icon\": \"http://example.com/icon1.ico\",\r\n        \"brief\": \"brief 1\",\r\n        \"details\": \"details 1\",\r\n        \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n        \"template\": {\r\n          \"template1\": {\r\n            \"name\": \"template 1\",\r\n            \"details\": {\r\n              \"anyDetails\": \"any details 1\"\r\n            },\r\n            \"others\": [\"others 11\", \"others 12\"]\r\n          },\r\n          \"template2\": {\r\n            \"name\": \"template 2\",\r\n            \"details\": {\r\n              \"anyDetails\": \"any details 2\"\r\n            },\r\n            \"others\": [\"others 21\", \"others 22\"]\r\n          }\r\n        }\r\n      }\r\n    }"
+							"raw": "{\r\n  \"param\": {\r\n    \"name\": \"name 1\",\r\n    \"productKey\": \"productKey 1\",\r\n    \"category\": \"key1\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"brief\": \"brief 1\",\r\n    \"details\": \"details 1\",\r\n    \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n    \"template\": {\r\n      \"template1\": {\r\n        \"name\": \"template 1\",\r\n        \"details\": {\r\n          \"anyDetails\": \"any details 1\"\r\n        },\r\n        \"others\": [\"others 11\", \"others 12\"]\r\n      },\r\n      \"template2\": {\r\n        \"name\": \"template 2\",\r\n        \"details\": {\r\n          \"anyDetails\": \"any details 2\"\r\n        },\r\n        \"others\": [\"others 21\", \"others 22\"]\r\n      }\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/productTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"productTemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product template with form",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\": {\r\n    \"name\": \"name 1\",\r\n    \"productKey\": \"productKey 1\",\r\n    \"category\": \"key1\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"brief\": \"brief 1\",\r\n    \"details\": \"details 1\",\r\n    \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n    \"form\": {\r\n\t\t\"key\": \"dev\",\r\n\t\t\"version\": 1\r\n\t}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/productTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"productTemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product template with wrong form key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\": {\r\n    \"name\": \"name 1\",\r\n    \"productKey\": \"productKey 1\",\r\n    \"category\": \"key1\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"brief\": \"brief 1\",\r\n    \"details\": \"details 1\",\r\n    \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n    \"form\": {\r\n\t\t\"key\": \"wrong-key\"\r\n\t}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/productTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"productTemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create product template with wrong model version",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\": {\r\n    \"name\": \"name 1\",\r\n    \"productKey\": \"productKey 1\",\r\n    \"category\": \"key1\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"brief\": \"brief 1\",\r\n    \"details\": \"details 1\",\r\n    \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n    \"form\": {\r\n\t\t\"key\": \"dev\",\r\n\t\t\"version\": 1123\r\n\t}\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productTemplates",
@@ -3228,6 +3327,117 @@
 								"metadata",
 								"productTemplates",
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upgrade a product template with form",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\t\r\n    \t\"version\": 2\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/productTemplates/2/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"productTemplates",
+								"2",
+								"upgrade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upgrade a product template with wrong model version",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\t\r\n    \t\"version\": 1234\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/productTemplates/1/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"productTemplates",
+								"1",
+								"upgrade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upgrade a product template without define form",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{ \r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/productTemplates/3/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"productTemplates",
+								"3",
+								"upgrade"
 							]
 						}
 					},

@@ -23,7 +23,8 @@ const schema = {
       brief: Joi.string().max(45).required(),
       details: Joi.string().max(255).required(),
       aliases: Joi.array().required(),
-      template: Joi.object().required(),
+      template: Joi.object(),
+      form: Joi.object(),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
@@ -41,16 +42,22 @@ module.exports = [
   permissions('productTemplate.create'),
   fieldLookupValidation(models.ProductCategory, 'key', 'body.param.category', 'Category'),
   (req, res, next) => {
-    const entity = _.assign(req.body.param, {
-      createdBy: req.authUser.userId,
-      updatedBy: req.authUser.userId,
-    });
+    const param = req.body.param;
+    const { form } = param;
+    return util.checkModel(form, 'Form', models.Form, 'product template')
+      .then(() => {
+        const entity = _.assign(param, {
+          createdBy: req.authUser.userId,
+          updatedBy: req.authUser.userId,
+        });
 
-    return models.ProductTemplate.create(entity)
-      .then((createdEntity) => {
-        // Omit deletedAt, deletedBy
-        res.status(201).json(util.wrapResponse(
-          req.id, _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'), 1, 201));
+        return models.ProductTemplate.create(entity)
+          .then((createdEntity) => {
+            // Omit deletedAt, deletedBy
+            res.status(201).json(util.wrapResponse(
+              req.id, _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'), 1, 201));
+          })
+          .catch(next);
       })
       .catch(next);
   },

@@ -467,6 +467,56 @@ _.assignIn(util, {
    * @return {Array} tpcoder project members
    */
   getTopcoderProjectMembers: members => _(members).filter(m => m.role !== PROJECT_MEMBER_ROLE.CUSTOMER),
+
+  /**
+   * Check if the following model exist
+   * @param {Object} keyInfo key information, it includes version and key
+   * @param {String} modelName name of model
+   * @param {Object} model model that will be checked
+   * @param {String} referredEntityName entity that referred by this model
+   * @return {Promise} promise whether the record exists or not
+   */
+  checkModel: (keyInfo, modelName, model, referredEntityName) => {
+    if (_.isNil(keyInfo)) {
+      return Promise.resolve(null);
+    }
+
+    const { version, key } = keyInfo;
+    let errorMessage = '';
+
+    if (!_.isNil(version) && !_.isNil(key)) {
+      errorMessage = `${modelName} with key ${key} and version ${version}`
+        + ` referred in the ${referredEntityName} is not found`;
+      return (model.findOne({
+        where: {
+          key,
+          version,
+        },
+      })).then((record) => {
+        if (_.isNil(record)) {
+          const apiErr = new Error(errorMessage);
+          apiErr.status = 422;
+          throw apiErr;
+        }
+      });
+    } else if (_.isNil(version) && !_.isNil(key)) {
+      errorMessage = `${modelName} with key ${key}`
+        + ` referred in ${referredEntityName} is not found`;
+      return (model.findOne({
+        where: {
+          key,
+        },
+      })).then((record) => {
+        if (_.isNil(record)) {
+          const apiErr = new Error(errorMessage);
+          apiErr.status = 422;
+          throw apiErr;
+        }
+      });
+    }
+
+    return Promise.resolve(null);
+  },
 });
 
 export default util;
