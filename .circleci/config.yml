@@ -1,4 +1,43 @@
 version: 2
+python_env: &python_env
+  docker:
+    - image: circleci/python:2.7-stretch-browsers
+    
+install_awscli: &install_awscli
+  name: "Install awscli"
+  command: |
+    sudo pip install awscli --upgrade
+install_deploysuite: &install_deploysuite
+          name: Installation of install_deploysuite.
+          command: |
+            git clone --branch master https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+            cp ./../buildscript/master_deploy.sh .
+            cp ./../buildscript/buildenv.sh .
+            cp ./../buildscript/awsconfiguration.sh .
+            
+# Instructions of deployment
+deploy_steps: &deploy_steps
+  - checkout
+  - attach_workspace:
+      at: ./workspace
+  - run: *install_awscli
+  - run: *install_deploysuite
+  - setup_remote_docker
+  - run: docker build -t tc-project-service:latest .
+  - deploy:
+      name: "Running Masterscript -  deploy tc-project-service " 
+      command: |
+        ./awsconfiguration.sh $DEPLOY_ENV  
+        source awsenvconf
+        ./buildenv.sh -e $DEPLOY_ENV -b ${VAR_ENV}-tc-project-service-deployvar
+        source buildenvvar
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${VAR_ENV}-global-appvar,${VAR_ENV}-tc-project-service-appvar -i tc-project-service -p FARGATE 
+        echo "======= Running Masterscript - deploy tc-project-service-consumers ==========="
+        if [ -e ${VAR_ENV}-tc-project-service-appvar.json ]; then  sudo rm -vf ${VAR_ENV}-tc-project-service-appvar.json; fi
+        ./buildenv.sh -e $DEPLOY_ENV -b ${VAR_ENV}-tc-project-service-consumers-deployvar
+        source buildenvvar
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${VAR_ENV}-global-appvar,${VAR_ENV}-tc-project-service-appvar -i tc-project-service -p FARGATE
+        
 jobs:
   test:
     docker:
@@ -30,70 +69,37 @@ jobs:
           root: .
           paths:
             - dist
-  deployDev:
-    docker:
-      - image: docker:17.06.1-ce-git
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Installation of build dependencies.
-          command: apk add --no-cache bash
-      - attach_workspace:
-          at: ./workspace
-      - run:
-          name: Installing AWS client
-          command: |
-            apk add --no-cache jq py-pip sudo
-            sudo pip install awscli --upgrade
-      - run:
-          name: Building
-          command: |
-            set +e
-            ./build.sh DEV
-      - run:
-          name: Deploying
-          command: |
-            ./deploy.sh DEV
+            
   deployProd:
-    docker:
-      - image: docker:17.06.1-ce-git
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Installation of build dependencies.
-          command: apk add --no-cache bash
-      - attach_workspace:
-          at: ./workspace
-      - run:
-          name: Installing AWS client
-          command: |
-            apk add --no-cache jq py-pip sudo
-            sudo pip install awscli --upgrade
-      - run:
-          name: Building
-          command: |
-            set +e
-            ./build.sh PROD
-      - run:
-          name: Deploying
-          command: |
-            ./deploy.sh PROD
+    <<: *python_env
+    environment:
+      DEPLOY_ENV: "PROD"
+      VAR_ENV: "prod"
+    steps: *deploy_steps
+
+  deployDev:
+    <<: *python_env
+    environment:
+      DEPLOY_ENV: "DEV"
+      VAR_ENV: "dev"
+    steps: *deploy_steps 
+    
 workflows:
   version: 2
   build:
     jobs:
       - test
       - deployDev:
+          context : org-global
           requires:
             - test
           filters:
             branches:
-              only: ['dev', 'feature/attachmentPermissions']
+              only: ['dev', 'dev-sts']
       - deployProd:
+          context : org-global
           requires:
             - test
           filters:
             branches:
-              only: 'master'
+              only: ['master']

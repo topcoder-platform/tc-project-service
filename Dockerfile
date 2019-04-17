@@ -1,6 +1,7 @@
 FROM node:8.2.1
 LABEL version="1.2"
 LABEL description="Projects microservice"
+RUN sed -i '/jessie-updates/d' /etc/apt/sources.list
 
 RUN apt-get update && \
     apt-get upgrade -y
