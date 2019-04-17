@@ -11,7 +11,7 @@ install_awscli: &install_awscli
 install_deploysuite: &install_deploysuite
           name: Installation of install_deploysuite.
           command: |
-            git clone --branch v1.3 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+            git clone --branch master https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
             cp ./../buildscript/master_deploy.sh .
             cp ./../buildscript/buildenv.sh .
             cp ./../buildscript/awsconfiguration.sh .
@@ -24,21 +24,22 @@ deploy_steps: &deploy_steps
   - run: *install_awscli
   - run: *install_deploysuite
   - setup_remote_docker
-  - run:
-      name: "configuring aws environment"
-      command: |
-        ./awsconfiguration.sh $DEPLOY_ENV
-  - run:
-      name: "Building image for deploy"
-      command: |
-        source awsenvconf
-        ./build.sh $DEPLOY_ENV
+  - run: docker build -t tc-project-service:latest .
   - deploy:
-      name: "Deploying software"
+      name: "Running Masterscript -  deploy tc-project-service " 
       command: |
+        ./awsconfiguration.sh $DEPLOY_ENV  
         source awsenvconf
-        ./deploy.sh $DEPLOY_ENV
+        ./buildenv.sh -e $DEPLOY_ENV -b ${VAR_ENV}-tc-project-service-deployvar
+        source buildenvvar
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${VAR_ENV}-global-appvar,${VAR_ENV}-tc-project-service-appvar -i tc-project-service -p FARGATE 
 
+        echo "======= Running Masterscript - deploy tc-project-service-consumers ==========="
+        if [ -e ${VAR_ENV}-tc-project-service-appvar.json ]; then  sudo rm -vf ${VAR_ENV}-tc-project-service-appvar.json; fi
+
+        ./buildenv.sh -e $DEPLOY_ENV -b ${VAR_ENV}-tc-project-service-consumers-deployvar
+        source buildenvvar
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${VAR_ENV}-global-appvar,${VAR_ENV}-tc-project-service-appvar -i tc-project-service -p FARGATE
         
 jobs:
   test:
@@ -71,18 +72,19 @@ jobs:
           root: .
           paths:
             - dist
-
-      
+            
   deployProd:
     <<: *python_env
     environment:
       DEPLOY_ENV: "PROD"
+      VAR_ENV: "prod"
     steps: *deploy_steps
 
   deployDev:
     <<: *python_env
     environment:
       DEPLOY_ENV: "DEV"
+      VAR_ENV: "dev"
     steps: *deploy_steps 
     
 workflows:
@@ -96,7 +98,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'feature/attachmentPermissions']
+              only: ['dev', 'dev-sts']
       - deployProd:
           context : org-global
           requires:
