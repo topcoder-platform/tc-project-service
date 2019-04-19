@@ -261,6 +261,20 @@ _.assignIn(util, {
       });
   },
 
+  getSystemUserToken: (logger, id = 'system') => {
+    const httpClient = util.getHttpClient({ id, log: logger });
+    const url = `${config.get('identityServiceEndpoint')}authorizations`;
+    const formData = `clientId=${config.get('systemUserClientId')}&` +
+      `secret=${encodeURIComponent(config.get('systemUserClientSecret'))}`;
+    return httpClient.post(url, formData,
+      {
+        timeout: 4000,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
+    )
+      .then(res => res.data.result.content.token);
+  },
+
   /**
    * Get machine to machine token.
    * @returns {Promise} promise which resolves to the m2m token

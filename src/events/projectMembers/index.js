@@ -48,7 +48,7 @@ const projectMemberAddedHandler = Promise.coroutine(function* a(logger, msg, cha
         // add copilot/update manager permissions operation promise
         const directProjectId = yield models.Project.getDirectProjectId(projectId);
         if (directProjectId) {
-          const token = yield util.getM2MToken();
+          const token = yield util.getSystemUserToken(logger);
           const req = {
             id: origRequestId,
             log: logger,
@@ -119,7 +119,7 @@ const projectMemberRemovedHandler = Promise.coroutine(function* (logger, msg, ch
       if (_.indexOf([PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.MANAGER], member.role) > -1) {
         const directProjectId = yield models.Project.getDirectProjectId(projectId);
         if (directProjectId) {
-          const token = yield util.getM2MToken();
+          const token = yield util.getSystemUserToken(logger);
           const req = {
             id: origRequestId,
             log: logger,

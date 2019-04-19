@@ -65,8 +65,12 @@ async function getClient(logger) {
 function createTopic(topic, logger) {
   logger.debug(`createTopic for topic: ${JSON.stringify(topic)}`);
   return getClient(logger).then((msgClient) => {
+  // return util.getSystemUserToken(logger).then((adminToken) => {
     logger.debug('calling message service');
     return msgClient.post('/topics/create', topic)
+    // const httpClient = util.getHttpClient({ id: `topic#create#${topic.referenceId}`, log: logger });
+    // httpClient.defaults.headers.common.Authorization = `Bearer ${adminToken}`;
+    // return httpClient.post(`${config.get('messageApiUrl')}/topics/create`, topic)
       .then((resp) => {
         logger.debug('Topic created successfully');
         logger.debug(`Topic created successfully [status]: ${resp.status}`);
