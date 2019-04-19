@@ -3703,6 +3703,9 @@ definitions:
       template:
         type: object
         description: the product template template
+      isAddOn:
+        type: boolean
+        description: the flag that shows if the product template is an add on
   ProductTemplateBodyParam:
     title: Product template body param
     type: object

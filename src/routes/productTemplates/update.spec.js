@@ -22,6 +22,7 @@ describe('UPDATE product template', () => {
     aliases: ['productTemplate-1', 'productTemplate_1'],
     disabled: true,
     hidden: true,
+    isAddOn: true,
     template: {
       template1: {
         name: 'template 1',
