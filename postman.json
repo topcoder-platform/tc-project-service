@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "4fc2b7cf-404a-4fd7-b6d2-4828a3994859",
+		"_postman_id": "db83f8a1-5b3f-4276-a371-aa3c3497542d",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -278,123 +278,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\",\n\t\t\"allowedUsers\": [40051331]\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\"\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/1/attachments",
+							"raw": "{{api-url}}/v4/projects/7/attachments",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"1",
+								"7",
 								"attachments"
-							]
-						},
-						"description": "Create an project attachment"
-					},
-					"response": []
-				},
-				{
-					"name": "Download attachment",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/attachments/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"attachments",
-								"2"
-							]
-						},
-						"description": "Create an project attachment"
-					},
-					"response": []
-				},
-				{
-					"name": "Download attachment admin",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-admin-40051333}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/attachments/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"attachments",
-								"2"
-							]
-						},
-						"description": "Create an project attachment"
-					},
-					"response": []
-				},
-				{
-					"name": "Download attachment - No access",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/attachments/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"attachments",
-								"2"
 							]
 						},
 						"description": "Create an project attachment"
@@ -420,49 +315,14 @@
 							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\"\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/1/attachments/2",
+							"raw": "{{api-url}}/v4/projects/7/attachments/2",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"1",
-								"attachments",
-								"2"
-							]
-						},
-						"description": "Update project attachment"
-					},
-					"response": []
-				},
-				{
-					"name": "Update attachment - No access",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\",\n\t\t\"allowedUsers\": null\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/attachments/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
+								"7",
 								"attachments",
 								"2"
 							]
@@ -498,41 +358,6 @@
 								"v4",
 								"projects",
 								"7",
-								"attachments",
-								"2"
-							]
-						},
-						"description": "Delete a project attachment"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete attachment - No access",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/attachments/2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
 								"attachments",
 								"2"
 							]
@@ -614,13 +439,13 @@
 			"name": "Project Members",
 			"item": [
 				{
-					"name": "Create project manager with valid values",
+					"name": "Create project member with no payload",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token-manager-40051334}}"
+								"value": "Bearer {{jwt-token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -643,7 +468,177 @@
 								"members"
 							]
 						},
+						"description": "Request payload is mandatory while creating project. If no request payload is specified this should result in 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project copilot with invalid userId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"param\":{\n\t\"role\": \"copilot\"\n}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid fields are specified this should result in 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project copilot with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"userId\": 40051331,\n\t\t\"isPrimary\": true\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/7/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"7",
+								"members"
+							]
+						},
 						"description": "If the request payload is valid, than project member should be created."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project member, if user already registered",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"userId\": 40051331,\n\t\t\"isPrimary\": true\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members"
+							]
+						},
+						"description": "If the request payload is valid and user is already registered with the specified role than this should result in 400."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project manager with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"manager\",\n\t\t\"userId\": 40051330,\n\t\t\"isPrimary\": true\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/7/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"7",
+								"members"
+							]
+						},
+						"description": "If the request payload is valid, than project manager should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project customer with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"customer\",\n\t\t\"userId\": 40051332,\n\t\t\"isPrimary\": true\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/7/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"7",
+								"members"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
 					},
 					"response": []
 				},
@@ -770,16 +765,16 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/40051331",
+							"raw": "{{api-url}}/v4/projects/3/members/5",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"1",
+								"3",
 								"members",
-								"40051331"
+								"5"
 							]
 						},
 						"description": "Delete a project's member"
@@ -815,399 +810,6 @@
 								"1",
 								"members",
 								"2"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Project Member Invites",
-			"item": [
-				{
-					"name": "Invite valid userIds",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331],\n\t\t\"role\": \"customer\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite valid emails",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"emails\": [\"hello@world.com\"],\n\t\t\"role\": \"customer\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite email with manager role",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"emails\": [\"hello@world.com\"],\n\t\t\"role\": \"manager\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite manager and target has no MANAGER_ROLES",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331],\n\t\t\"role\": \"manager\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite manager and requester has no MANAGER_ROLES",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-member2-40051335}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331],\n\t\t\"role\": \"manager\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite with both userIds and emails",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331],\n\t\t\"emails\": [\"hello@world.com\"],\n\t\t\"role\": \"manager\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invite with userIds and emails - both success and failed",
-					"request": {
-						"url": "{{api-url}}/v4/projects/1/members/invite",
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-manager-40051334}}",
-								"description": ""
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"description": ""
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331, 40051334],\n\t\t\"emails\": [\"divyalife526@gmail.com\"],\n\t\t\"role\": \"manager\"\n\t}\n}"
-						},
-						"description": ""
-					},
-					"response": []
-				},
-				{
-					"name": "Update invite status with userId",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"userId\": \"40051331\",\n\t\t\"status\": \"accepted\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update invite status with email",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"email\": \"hello@world.com\",\n\t\t\"status\": \"canceled\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update invite with both userId and email",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"userId\": \"40051331\",\n\t\t\"email\": \"hello@world.com\",\n\t\t\"status\": \"accepted\"\n\t}\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Retrieve current user invite",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-member-40051331}}"
-							},
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/1/members/invite",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"1",
-								"members",
-								"invite"
 							]
 						}
 					},
@@ -1298,7 +900,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"param\": {\n        \"name\": \"Test 3\",\n        \"details\": {\n            \"utm\": {\n                \"code\": \"\"\n            },\n            \"appDefinition\": {\n                \"primaryTarget\": \"phone\",\n                \"goal\": {\n                    \"value\": \"Nothing\"\n                },\n                \"users\": {\n                    \"value\": \"No one\"\n                },\n                \"notes\": \"\"\n            },\n            \"hideDiscussions\": true\n        },\n        \"description\": \"Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message\",\n        \"templateId\": 3,\n        \"type\": \"app\"\n    }\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",
@@ -1361,14 +963,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/1",
+							"raw": "{{api-url}}/v4/projects/7",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"1"
+								"7"
 							]
 						},
 						"description": "Get a project by id. project members and attachments should also be returned."
@@ -1477,7 +1079,7 @@
 					"response": []
 				},
 				{
-					"name": "List projects with filters - type (exact)",
+					"name": "List projects with filters applied",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1491,7 +1093,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects?filter=type%3Dapp",
+							"raw": "{{api-url}}/v4/projects?filter=type%3Dgeneric",
 							"host": [
 								"{{api-url}}"
 							],
@@ -1502,109 +1104,7 @@
 							"query": [
 								{
 									"key": "filter",
-									"value": "type%3Dapp"
-								}
-							]
-						},
-						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects with filters - id (exact)",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects?filter=id%3D1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							],
-							"query": [
-								{
-									"key": "filter",
-									"value": "id%3D1"
-								}
-							]
-						},
-						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects with filters - name, code, customer, manager",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects?filter=id%3D1*%26name%3Dtes*%26code=test*%26customer%3DDiya*%26manager=first*",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							],
-							"query": [
-								{
-									"key": "filter",
-									"value": "id%3D1*%26name%3Dtes*%26code=test*%26customer%3DDiya*%26manager=first*"
-								}
-							]
-						},
-						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects with filters - code",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects?filter=code%3Dtest*",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects"
-							],
-							"query": [
-								{
-									"key": "filter",
-									"value": "code%3Dtest*"
+									"value": "type%3Dgeneric"
 								}
 							]
 						},
@@ -2542,17 +2042,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2019-02-15T00:00:00\",\n\t\t\"endDate\": \"2019-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/2/phases",
+							"raw": "{{api-url}}/v4/projects/1/phases",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"v4",
 								"projects",
-								"2",
+								"1",
 								"phases"
 							]
 						}
@@ -2896,7 +2396,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/v4/projects/1/phases/2",
+							"raw": "{{api-url}}/v4/projects/1/phases/3",
 							"host": [
 								"{{api-url}}"
 							],
@@ -2905,7 +2405,7 @@
 								"projects",
 								"1",
 								"phases",
-								"2"
+								"3"
 							]
 						}
 					},
@@ -2932,7 +2432,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test phase product\",\n\t\t\"type\": \"application_development\",\n\t\t\"estimatedPrice\": 10000\n\t}\n}"
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test phase product\",\n\t\t\"type\": \"type 1\",\n\t\t\"estimatedPrice\": 10\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products",
@@ -3121,6 +2621,138 @@
 					"response": []
 				},
 				{
+					"name": "Create project template with form, priceConfig, planConfig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project template with only form key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project template with wrong form key",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"wrong-key\"\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project template with wrong model version",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "List project templates",
 					"request": {
 						"method": "GET",
@@ -3188,6 +2820,111 @@
 					"response": []
 				},
 				{
+					"name": "Upgrade a project template with from, priceConfig, planConfig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\t\r\n    \t \"version\": 2\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\t\r\n    \t \"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"qa\",\t\r\n    \t \"version\": 2\t\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/2/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates",
+								"2",
+								"upgrade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upgrade a project template with wrong model version",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\t\r\n    \t \"version\": 1234\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\t\r\n    \t \"version\": 1234\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\t\r\n    \t \"version\": 1234\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/1/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates",
+								"1",
+								"upgrade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upgrade a project template without define form, priceConfig, planConfig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{ \r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/3/upgrade",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates",
+								"3",
+								"upgrade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Update project template",
 					"request": {
 						"method": "PATCH",
@@ -3204,6 +2941,74 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\",\r\n      \"scope2\": [\"a\"]\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\",\r\n      \"phase2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project template with define form, priceConfig, planConfig",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"form\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"projectTemplates",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project template with wrong form, priceConfig, planConfig",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n\t\"form\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1123\r\n    },\r\n    \"priceConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1123\r\n    },\r\n    \"planConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1123\r\n    }\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/1",
@@ -3449,7 +3254,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"app\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTypes",
@@ -3604,216 +3409,6 @@
 			]
 		},
 		{
-			"name": "Organization Config",
-			"item": [
-				{
-					"name": "Create organization config",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n        \"orgId\": \"20000013\",\r\n        \"configName\": \"project_catalog_url\",\r\n        \"configValue\": \"/projects/1\"\r\n  }\r\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/metadata/orgConfig",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"metadata",
-								"orgConfig"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List organization config - error without filter",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/metadata/orgConfig",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"metadata",
-								"orgConfig"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List organization config - filter",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/orgConfig?filter=orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"orgConfig"
-							],
-							"query": [
-								{
-									"key": "filter",
-									"value": "orgId=in(20000010,20000013,20000015)%26configName%3Dproject_catalog_url"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get organization config",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/metadata/orgConfig/1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"metadata",
-								"orgConfig",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update organization config",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"configName\": \"project_catalog_url\"\r\n  }\r\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/metadata/orgConfig/1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"metadata",
-								"orgConfig",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete organization config",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/projects/metadata/orgConfig/1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"projects",
-								"metadata",
-								"orgConfig",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "Product Category",
 			"item": [
 				{
@@ -3832,7 +3427,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"app\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"icon\",\r\n        \"question\": \"question\",\r\n        \"info\": \"info\",\r\n        \"aliases\": [\"key-1\", \"key-2\"]\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n        \"key\": \"generic\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"icon\",\r\n        \"question\": \"question\",\r\n        \"info\": \"info\",\r\n        \"aliases\": [\"key-1\", \"key-2\"]\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productCategories",
@@ -4175,7 +3770,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2019-02-29T00:00:00.000Z\",\r\n    \"endDate\": \"2019-04-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines",
@@ -4206,7 +3801,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2019-02-29T00:00:00.000Z\",\r\n    \"endDate\": \"2019-04-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1,\r\n    \"templateId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1,\r\n    \"templateId\": 1\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines",
@@ -5499,8 +5094,24 @@
 				{
 					"name": "Get all metadata",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": ""
@@ -5514,6 +5125,1453 @@
 								"v4",
 								"projects",
 								"metadata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all metadata with includeAllVersion",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata?includeAllReferred=true",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata"
+							],
+							"query": [
+								{
+									"key": "includeAllReferred",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Form Version",
+			"item": [
+				{
+					"name": "List forms",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a particular version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get latest version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create form",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update form",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test111\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete form",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Form Revision",
+			"item": [
+				{
+					"name": "List all revision for version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a particular revision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions",
+								"1",
+								"revisions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create form",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create for no exist key",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/no-exist-2222key36/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"no-exist-2222key36",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete revision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"form",
+								"dev",
+								"versions",
+								"1",
+								"revisions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Price Config Version",
+			"item": [
+				{
+					"name": "List price configs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a particular version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get latest version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create priceConfig",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update priceConfig",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test111\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete priceConfig",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "59182724-4332-4d76-90ea-f7520a7b1be9",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "abc13dca-e8a4-4995-970f-00e5889a5f2d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Price Config Revision",
+			"item": [
+				{
+					"name": "List all revision for version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/3/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions",
+								"3",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a particular revision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions",
+								"1",
+								"revisions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create price config",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create for no exist key",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/no-exist-key/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"no-exist-key",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete revision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"priceConfig",
+								"dev",
+								"versions",
+								"1",
+								"revisions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Plan Config Version",
+			"item": [
+				{
+					"name": "List plan configs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a particular version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/3",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get latest version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create plan config",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update plan config",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test111\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete plan config",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Plan Config Revision",
+			"item": [
+				{
+					"name": "List all revision for version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a particular revision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions",
+								"1",
+								"revisions",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create plan config",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create for no exist key",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \t\"config\": {\r\n    \t\t\"hello\": \"test\"\r\n    \t}\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/no-exist-key/versions/1/revisions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"no-exist-key",
+								"versions",
+								"1",
+								"revisions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete revision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"planConfig",
+								"dev",
+								"versions",
+								"1",
+								"revisions",
+								"1"
 							]
 						}
 					},

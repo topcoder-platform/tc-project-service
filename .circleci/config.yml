@@ -32,6 +32,7 @@ deploy_steps: &deploy_steps
         ./buildenv.sh -e $DEPLOY_ENV -b ${VAR_ENV}-tc-project-service-deployvar
         source buildenvvar
         ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${VAR_ENV}-global-appvar,${VAR_ENV}-tc-project-service-appvar -i tc-project-service -p FARGATE 
+
         echo "======= Running Masterscript - deploy tc-project-service-consumers ==========="
         if [ -e ${VAR_ENV}-tc-project-service-appvar.json ]; then  sudo rm -vf ${VAR_ENV}-tc-project-service-appvar.json; fi
         ./buildenv.sh -e $DEPLOY_ENV -b ${VAR_ENV}-tc-project-service-consumers-deployvar

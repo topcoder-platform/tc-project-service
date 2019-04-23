@@ -58,6 +58,6 @@
   "inviteEmailSubject": "You are invited to Topcoder",
   "inviteEmailSectionTitle": "Project Invitation",
   "connectUrl":"https://connect.topcoder-dev.com",
-  "accountsAppUrl": "https://accounts.topcoder-dev.com"
-
+  "accountsAppUrl": "https://accounts.topcoder-dev.com",
+  "MAX_REVISION_NUMBER": 100
 }

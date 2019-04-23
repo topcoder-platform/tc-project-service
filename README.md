@@ -4,88 +4,122 @@ Microservice to manage CRUD operations for all things Projects.
 
 ### Note : Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.
 
-### Local Development
+## Local Development
 
-* We use docker-compose for running dependencies locally. Instructions for Docker compose setup - https://docs.docker.com/compose/install/
+### Requirements
+
+* [docker-compose](https://docs.docker.com/compose/install/) - We use docker-compose for running dependencies locally.
 * Nodejs 8.9.4 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
 * Install [libpg](https://www.npmjs.com/package/pg-native)
-* Install node dependencies
-`npm install`
 
-* Start local services
-```~/Projects/tc-projects-service
-> cd local/
-~/Projects/tc-projects-service/local
-> docker-compose up
+### Steps to run locally
+1. Install node dependencies
+   ```bash
+   npm install
+   ```
+
+* Run docker with dependant services
+  ```bash
+  cd local/
+  docker-compose up
+  ```
+  This will run several services locally:
+  - `postgres` - two instances: for app and for unit tests
+  - `elasticsearch`
+  - `rabbitmq`
+  - `mock-services` - mocks some Topcoder API
+
+  *NOTE: In production these dependencies / services are hosted & managed outside tc-projects-service.*
+
+* Local config
+
+  There are two prepared configs:
+  - if you have M2M environment variables provided: `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL` then use `config/m2m.local.js`
+  - otherwise use `config/mock.local.js`.
+
+  To apply any of these config copy it to `config/local.js`:
+
+  ```bash
+  cp config/mock.local.js config/local.js
+  # or
+  cp config/m2m.local.js config/local.js
+  ```
+
+  `config/local.js` has a prepared configuration which would replace values no matter what `NODE_ENV` value is.
+
+  **IMPORTANT** These configuration files assume that docker containers are run on domain `dockerhost`. Depend on your system you have to make sure that domain `dockerhost` points to the IP address of docker.
+  For example, you can add a the next line to your `/etc/hosts` file, if docker is run on IP `127.0.0.1`.
+  ```
+  127.0.0.1       dockerhost
+  ```
+  Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.<br>
+  You may try using command `docker-machine ip` to get your docker IP, but it works not for all systems.
+
+  Explanation of configs:
+  - `config/mock.local.js` - Use local `mock-services` from docker to mock Identity and Member services instead of using deployed at Topcoder dev environment.
+  - `config/m2m.local.js` - Use Identity and Member services deployed at Topcoder dev environment. This can be used only if you have M2M environment variables (`AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`) provided to access Topcoder DEV environment services.
+
+* Create tables in DB
+  ```bash
+  NODE_ENV=development npm run sync:db
+  ```
+  This command will crate tables in `postgres` db.
+
+  *NOTE: this will drop tables if they already exist.*
+
+* Sync ES indices
+  ```bash
+  NODE_ENV=development npm run sync:es
+  ```
+  Helper script to sync the indices and mappings with the elasticsearch.
+
+  *NOTE: This will first clear all the indices and than recreate them. So use with caution.*
+
+* Run
+
+  **NOTE** If you use `config/m2m.local.js` config, you should set M2M environment variables before running the next command.
+  ```bash
+  npm run start:dev
+  ```
+  Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
+  The project service will be served on `http://localhost:8001`.
+
+### Import sample metadata & projects
+```bash
+CONNECT_USER_TOKEN=<connect user token> npm run demo-data
 ```
-Copy config/sample.local.js as config/local.js, update the properties and according to your env setup
+This command will create sample metadata entries in the DB (duplicate what is currently in development environment).
 
-#### Database
-Once you start your PostgreSQL database through docker, it will create a projectsdb.
-*To create tables - note this will drop tables if they already exist*
-```
-NODE_ENV=development npm run sync:db
-```
+To retrieve data from DEV env we need to provide a valid user token. You may login to http://connect.topcoder-dev.com and find the Bearer token in the request headers using browser dev tools.
 
-#### Redis
-Docker compose command will start a local redis instance as well. You should be able to connect to this instance using url `$(docker-machine ip):6379`
+### Run Connect App with Project Service locally
 
-#### Elasticsearch
-Docker compose includes elasticsearch instance as well. It will open ports 9200 & 9300 (kibana)
+To be able to run [Connect App](https://github.com/appirio-tech/connect-app) with the local setup of Project Service we have to do two things:
+1. Configurate Connect App to use locally deployed Project service inside `connect-app/config/constants/dev.js` set
 
-#### Sync indices and mappings
+   ```js
+   PROJECTS_API_URL: 'http://localhost:8001'
+   ```
+2. Bypass token validation in Project Service.
 
-There is a helper script to sync the indices and mappings with the elasticsearch.
+   In `tc-project-service/node_modules/tc-core-library-js/lib/auth/verifier.js` add this to line 23:
+   ```js
+   callback(undefined, decodedToken.payload);
+   return;
+   ```
+   Connect App when making requests to the Project Service uses token retrieved from the Topcoder service deployed online. Project Service validates the token. For this purpose Project Service have to know the `secret` which has been used to generate the token. But we don't know the `secret` which is used by Topcoder for both DEV and PROD environment. So to bypass token validation we change these lines in the auth library.
 
-Run `npm run sync:es` from the root of project to execute the script.
+   *NOTE: this change only let us bypass validation during local development process*.
 
-> NOTE: This will first clear all the indices and than recreate them. So use with caution.
-
-**NOTE**: In production these dependencies / services are hosted & managed outside tc-projects-service.
-
-#### Kafka
-Kafka must be installed and configured prior starting the application.
-Following topics must be created:
-```
-notifications.connect.project.updated
-notifications.connect.project.files.updated
-notifications.connect.project.team.updated
-notifications.connect.project.plan.updated
-notifications.connect.project.topic.created
-notifications.connect.project.topic.updated
-notifications.connect.project.post.created
-notifications.connect.project.post.edited
-```
-
-New Kafka related configuration options has been introduced:
-```
-"kafkaConfig": {
-    "hosts": List of Kafka brokers. Default: localhost: 9092
-    "clientCert": SSL certificate
-    "clientCertKey": Certificate key
-}
-```
-Environment variables:
-- `KAFKA_HOSTS` - same as "hosts"
-- `KAFKA_CLIENT_CERT` - same as "clientCert"
-- `KAFKA_CLIENT_CERT_KEY` - same as "clientCertKey"
+3. Restart both Connect App and Project Service if they were running.
 
 ### Test
+```bash
+npm run test
+```
+Tests are being executed with the `NODE_ENV` environment variable has a value `test` and `config/test.js` configuration is loaded.
 
 Each of the individual modules/services are unit tested.
-
-To run unit tests run `npm run test` from root of project.
-
-While tests are being executed the `NODE_ENV` environment variable has a value `test` and `config/test.js` configuration is loaded. The default test configuration refers to `projectsdb_test` postgres database. So make sure that this database exists before running the tests. Since we are using docker-compose for local deployment change `local/docker-compose.yaml` postgres service with updated database name and re-create the containers.
-
-```
-// stop already executing containers if any
-docker-compose stop -t 1
-// clear the containers
-docker-compose rm -f
-// re-run the services with build flag
-docker-compose up --build
-```
 
 #### JWT Authentication
 Authentication is handled via Authorization (Bearer) token header field. Token is a JWT token. Here is a sample token that is valid for a very long time for a user with administrator role.
@@ -95,6 +129,9 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI
 It's been signed with the secret 'secret'. This secret should match your entry in config/local.js. You can generate your own token using https://jwt.io
 
 ### Local Deployment
+
+**NOTE: This part of README may contain inconsistencies and requires update. Don't follow it unless you know how to properly make configuration for these steps. It's not needed for regular development process.**
+
 Build image:
 `docker build -t tc_projects_services .`
 Run image:
@@ -104,4 +141,4 @@ You may replace 172.17.0.1 with your docker0 IP.
 You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) or import **postman.json** and **postman_environment.json** to verify endpoints.
 
 #### Deploying without docker
-If you don't want to use docker to deploy to localhost. You can simply run `npm run start` from root of project. This should start the server on default port `3000`.
+If you don't want to use docker to deploy to localhost. You can simply run `npm run start:dev` from root of project. This should start the server on default port `8001`.

@@ -260,6 +260,39 @@ function getRequestBody(indexName) {
           },
         },
       },
+      invites: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          email: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          role: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+          userId: {
+            type: 'long',
+          },
+        },
+      },
       name: {
         type: 'string',
       },

@@ -26,6 +26,7 @@ const schema = {
       template: Joi.object().required(),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
+      isAddOn: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),

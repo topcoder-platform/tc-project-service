@@ -1,5 +1,6 @@
 {
     "AUTH_SECRET": "secret",
+    "MAX_REVISION_NUMBER": 2,
     "logLevel": "debug",
     "captureLogs": "false",
     "logentriesToken": "",
@@ -14,7 +15,7 @@
     "rabbitmqUrl": "amqp://localhost:5672",
     "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
     "dbConfig": {
-        "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",
+        "masterUrl": "postgres://coder:mysecretpassword@localhost:5433/projectsdb_test",
         "maxPoolSize": 50,
         "minPoolSize": 4,
         "idleTimeout": 1000

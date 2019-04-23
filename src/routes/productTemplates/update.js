@@ -29,6 +29,7 @@ const schema = {
       template: Joi.object(),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
+      isAddOn: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),
@@ -64,7 +65,7 @@ module.exports = [
         }
 
         // Merge JSON fields
-        entityToUpdate.aliases = util.mergeJsonObjects(productTemplate.aliases, entityToUpdate.aliases);
+        // entityToUpdate.aliases = util.mergeJsonObjects(productTemplate.aliases, entityToUpdate.aliases);
         entityToUpdate.template = util.mergeJsonObjects(productTemplate.template, entityToUpdate.template);
 
         return productTemplate.update(entityToUpdate);

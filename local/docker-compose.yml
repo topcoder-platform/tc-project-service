@@ -12,6 +12,14 @@ services:
       - POSTGRES_PASSWORD=mysecretpassword
       - POSTGRES_USER=coder
       - POSTGRES_DB=projectsdb
+  db_test:
+    image: "postgres:9.5"
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=coder
+      - POSTGRES_DB=projectsdb_test
   esearch:
     image: "elasticsearch:2.3"
     ports:

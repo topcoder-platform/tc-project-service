@@ -73,6 +73,27 @@ server.get('/v3/members/_search', (req, res) => {
   res.status(200).json(response);
 });
 
+
+// add filter route for project members
+server.get('/users', (req, res) => {
+  const filter = req.query.filter.replace('%2520', ' ').replace('%20', ' ').replace('%3D', ' ');
+  const allEmails = filter.split('=')[1];
+  const emails = allEmails.split('OR');
+  const cloned = _.cloneDeep(members);
+  const response = {
+    id: 'res1',
+    result: {
+      success: true,
+      status: 200,
+    },
+  };
+  const users = _.filter(cloned, single => _.includes(emails, single.result.content.email));
+  response.result.content = _.map(users,
+    single => _.assign(single.result.content, { id: single.result.content.userId }));
+  response.result.metadata = { totalCount: response.result.content.length };
+  res.status(200).json(response);
+});
+
 // add additional search route for project members
 server.get('/roles', (req, res) => {
   const filter = _.isString(req.query.filter) ?
