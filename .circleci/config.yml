@@ -7,7 +7,6 @@ install_awscli: &install_awscli
   name: "Install awscli"
   command: |
     sudo pip install awscli --upgrade
-
 install_deploysuite: &install_deploysuite
           name: Installation of install_deploysuite.
           command: |
@@ -36,7 +35,6 @@ deploy_steps: &deploy_steps
 
         echo "======= Running Masterscript - deploy tc-project-service-consumers ==========="
         if [ -e ${VAR_ENV}-tc-project-service-appvar.json ]; then  sudo rm -vf ${VAR_ENV}-tc-project-service-appvar.json; fi
-
         ./buildenv.sh -e $DEPLOY_ENV -b ${VAR_ENV}-tc-project-service-consumers-deployvar
         source buildenvvar
         ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${VAR_ENV}-global-appvar,${VAR_ENV}-tc-project-service-appvar -i tc-project-service -p FARGATE
@@ -105,4 +103,4 @@ workflows:
             - test
           filters:
             branches:
-              only: 'master'
+              only: ['master']
