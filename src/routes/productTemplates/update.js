@@ -27,6 +27,7 @@ const schema = {
       details: Joi.string().max(255),
       aliases: Joi.array(),
       template: Joi.object(),
+      form: Joi.object(),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
       isAddOn: Joi.boolean().optional(),
@@ -45,34 +46,41 @@ module.exports = [
   permissions('productTemplate.edit'),
   fieldLookupValidation(models.ProductCategory, 'key', 'body.param.category', 'Category'),
   (req, res, next) => {
-    const entityToUpdate = _.assign(req.body.param, {
-      updatedBy: req.authUser.userId,
-    });
+    const param = req.body.param;
+    const { form } = param;
+    return util.checkModel(form, 'Form', models.Form, 'product template')
+      .then(() => {
+        const entityToUpdate = _.assign(req.body.param, {
+          updatedBy: req.authUser.userId,
+        });
 
-    return models.ProductTemplate.findOne({
-      where: {
-        deletedAt: { $eq: null },
-        id: req.params.templateId,
-      },
-      attributes: { exclude: ['deletedAt', 'deletedBy'] },
-    })
-      .then((productTemplate) => {
-        // Not found
-        if (!productTemplate) {
-          const apiErr = new Error(`Product template not found for template id ${req.params.templateId}`);
-          apiErr.status = 404;
-          return Promise.reject(apiErr);
-        }
+        return models.ProductTemplate.findOne({
+          where: {
+            deletedAt: { $eq: null },
+            id: req.params.templateId,
+          },
+          attributes: { exclude: ['deletedAt', 'deletedBy'] },
+        })
+          .then((productTemplate) => {
+            // Not found
+            if (!productTemplate) {
+              const apiErr = new Error(`Product template not found for template id ${req.params.templateId}`);
+              apiErr.status = 404;
+              return Promise.reject(apiErr);
+            }
 
-        // Merge JSON fields
-        // entityToUpdate.aliases = util.mergeJsonObjects(productTemplate.aliases, entityToUpdate.aliases);
-        entityToUpdate.template = util.mergeJsonObjects(productTemplate.template, entityToUpdate.template);
+            if (entityToUpdate.template) {
+              // Merge JSON fields
+              entityToUpdate.template = util.mergeJsonObjects(productTemplate.template, entityToUpdate.template);
+            }
 
-        return productTemplate.update(entityToUpdate);
-      })
-      .then((productTemplate) => {
-        res.json(util.wrapResponse(req.id, productTemplate));
-        return Promise.resolve();
+            return productTemplate.update(entityToUpdate);
+          })
+          .then((productTemplate) => {
+            res.json(util.wrapResponse(req.id, productTemplate));
+            return Promise.resolve();
+          })
+          .catch(next);
       })
       .catch(next);
   },

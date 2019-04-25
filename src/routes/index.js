@@ -43,6 +43,8 @@ router.route('/v4/projects/metadata/productTemplates')
   .get(require('./productTemplates/list'));
 router.route('/v4/projects/metadata/productTemplates/:templateId(\\d+)')
   .get(require('./productTemplates/get'));
+router.route('/v4/projects/metadata/productTemplates/:templateId(\\d+)/upgrade')
+  .post(require('./productTemplates/upgrade'));
 
 router.route('/v4/projects/metadata/projectTypes')
   .get(require('./projectTypes/list'));
@@ -50,7 +52,7 @@ router.route('/v4/projects/metadata/projectTypes/:key')
   .get(require('./projectTypes/get'));
 
 router.route('/v4/projects/metadata/projectTemplates/:templateId(\\d+)/upgrade')
-.post(require('./projectTemplates/upgrade'));
+  .post(require('./projectTemplates/upgrade'));
 
 router.route('/v4/projects/metadata/orgConfig')
   .get(require('./orgConfig/list'));

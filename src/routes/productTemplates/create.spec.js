@@ -12,22 +12,49 @@ import models from '../../models';
 const should = chai.should();
 
 describe('CREATE product template', () => {
-  before((done) => {
-    testUtil.clearDb()
-      .then(() => models.ProductCategory.bulkCreate([
-        {
-          key: 'generic',
-          displayName: 'Generic',
-          icon: 'http://example.com/icon1.ico',
-          question: 'question 1',
-          info: 'info 1',
-          aliases: ['key-1', 'key_1'],
-          createdBy: 1,
-          updatedBy: 1,
-        },
-      ]))
-      .then(() => done());
-  });
+  const productCategories = [
+    {
+      key: 'generic',
+      displayName: 'Generic',
+      icon: 'http://example.com/icon1.ico',
+      question: 'question 1',
+      info: 'info 1',
+      aliases: ['key-1', 'key_1'],
+      createdBy: 1,
+      updatedBy: 1,
+    },
+  ];
+
+  const forms = [
+    {
+      key: 'dev',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    },
+    {
+      key: 'dev',
+      config: {
+        test: 'test2',
+      },
+      version: 2,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    },
+  ];
+
+  beforeEach(() => testUtil.clearDb()
+    .then(() => models.ProductCategory.bulkCreate(productCategories))
+    .then(() => models.Form.create(forms[0]))
+    .then(() => models.Form.create(forms[1]))
+    .then(() => Promise.resolve()),
+  );
+  after(testUtil.clearDb);
 
   describe('POST /projects/metadata/productTemplates', () => {
     const body = {
@@ -60,6 +87,19 @@ describe('CREATE product template', () => {
           },
         },
       },
+    };
+
+    const bodyWithForm = _.cloneDeep(body);
+    bodyWithForm.param.form = {
+      version: 1,
+      key: 'dev',
+    };
+    delete bodyWithForm.param.template;
+
+    const bodyInvalidForm = _.cloneDeep(body);
+    bodyInvalidForm.param.form = {
+      version: 1,
+      key: 'wrongKey',
     };
 
     it('should return 403 if user is not authenticated', (done) => {
@@ -192,6 +232,50 @@ describe('CREATE product template', () => {
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();
         });
+    });
+
+    it('should return 201 with form data', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/productTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithForm)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          should.exist(resJson.id);
+          resJson.name.should.be.eql(bodyWithForm.param.name);
+          resJson.productKey.should.be.eql(bodyWithForm.param.productKey);
+          resJson.category.should.be.eql(bodyWithForm.param.category);
+          resJson.icon.should.be.eql(bodyWithForm.param.icon);
+          resJson.brief.should.be.eql(bodyWithForm.param.brief);
+          resJson.details.should.be.eql(bodyWithForm.param.details);
+          resJson.aliases.should.be.eql(bodyWithForm.param.aliases);
+          resJson.form.should.be.eql(bodyWithForm.param.form);
+          resJson.disabled.should.be.eql(true);
+          resJson.hidden.should.be.eql(true);
+
+          resJson.createdBy.should.be.eql(40051333); // admin
+          should.exist(resJson.createdAt);
+          resJson.updatedBy.should.be.eql(40051333); // admin
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
+    it('should return 422 when form is invalid', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/productTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyInvalidForm)
+        .expect(422, done);
     });
   });
 });

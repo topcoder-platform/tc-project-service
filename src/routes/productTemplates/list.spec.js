@@ -15,7 +15,7 @@ const validateProductTemplates = (count, resJson, expectedTemplates) => {
   resJson.should.have.length(count);
   resJson.forEach((pt, idx) => {
     pt.should.have.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
-    'aliases', 'template', 'disabled', 'hidden', 'isAddOn', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
+    'aliases', 'template', 'disabled', 'form', 'hidden', 'isAddOn', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
     pt.should.not.have.all.keys('deletedAt', 'deletedBy');
     pt.name.should.be.eql(expectedTemplates[idx].name);
     pt.productKey.should.be.eql(expectedTemplates[idx].productKey);

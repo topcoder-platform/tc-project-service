@@ -825,12 +825,12 @@ paths:
           description: If project is not found
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/projects/metadata/productTemplates/{templateId}/upgrade':
+  '/projects/metadata/projectTemplates/{templateId}/upgrade':
     post:
       tags:
-        - productTemplate
+        - projectTemplate
       description: >-
-        upgrade projectTemplate model,
+        upgrade projectTemplate model
       security:
         - Bearer: []
       parameters:
@@ -842,13 +842,13 @@ paths:
             $ref: '#/definitions/ProjectTemplateUpgradeBodyParam'
       responses:
         '200':
-          description: Product template successfully upgrade
+          description: Project template successfully upgrade
         '403':
           description: No permission or wrong token
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
-          description: If product template is not found
+          description: If project template is not found
           schema:
             $ref: '#/definitions/ErrorModel'
         '422':
@@ -985,6 +985,40 @@ paths:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If product is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/productTemplates/{templateId}/upgrade':
+    post:
+      tags:
+        - productTemplate
+      description: >-
+        upgrade productTemplate model
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProductTemplateUpgradeBodyParam'
+      responses:
+        '200':
+          description: Product template successfully upgraded
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If product template is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /projects/metadata/productCategories:
@@ -3555,7 +3589,7 @@ definitions:
       priceConfig:
         $ref: '#/definitions/VersionModelParam'
       planConfig:
-         $ref: '#/definitions/VersionModelParam'
+        $ref: '#/definitions/VersionModelParam'
   ProjectTemplateUpgradeBodyParam:
     title: Project template
     type: object
@@ -3564,11 +3598,20 @@ definitions:
         type: object
         properties:
           form:
-              $ref: '#/definitions/VersionModelParam'
+            $ref: '#/definitions/VersionModelParam'
           priceConfig:
-              $ref: '#/definitions/VersionModelParam'
+            $ref: '#/definitions/VersionModelParam'
           planConfig:
-              $ref: '#/definitions/VersionModelParam'
+            $ref: '#/definitions/VersionModelParam'
+  ProductTemplateUpgradeBodyParam:
+    title: Product template
+    type: object
+    properties:
+      param:
+        type: object
+        properties:
+          form:
+            $ref: '#/definitions/VersionModelParam'
   VersionModelParam:
     title: version model param
     type: object
@@ -3703,6 +3746,8 @@ definitions:
       template:
         type: object
         description: the product template template
+      form:
+        $ref: '#/definitions/VersionModelParam'
       isAddOn:
         type: boolean
         description: the flag that shows if the product template is an add on
