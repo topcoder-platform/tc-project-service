@@ -22,6 +22,8 @@
   "fileServiceEndpoint": "FILE_SERVICE_ENDPOINT",
   "identityServiceEndpoint": "IDENTITY_SERVICE_ENDPOINT",
   "memberServiceEndpoint": "MEMBER_SERVICE_ENDPOINT",
+  "systemUserClientId": "SYSTEM_USER_CLIENT_ID",
+  "systemUserClientSecret": "SYSTEM_USER_CLIENT_SECRET",
   "connectProjectsUrl": "CONNECT_PROJECTS_URL",
   "dbConfig": {
     "masterUrl": "DB_MASTER_URL",

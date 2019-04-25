@@ -69,6 +69,7 @@ describe('CREATE product template', () => {
         aliases: ['product key 1', 'product_key_1'],
         disabled: true,
         hidden: true,
+        isAddOn: true,
         template: {
           template1: {
             name: 'template 1',

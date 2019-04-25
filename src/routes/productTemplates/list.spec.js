@@ -15,7 +15,7 @@ const validateProductTemplates = (count, resJson, expectedTemplates) => {
   resJson.should.have.length(count);
   resJson.forEach((pt, idx) => {
     pt.should.have.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
-    'aliases', 'template', 'disabled', 'form', 'hidden', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
+    'aliases', 'template', 'disabled', 'form', 'hidden', 'isAddOn', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
     pt.should.not.have.all.keys('deletedAt', 'deletedBy');
     pt.name.should.be.eql(expectedTemplates[idx].name);
     pt.productKey.should.be.eql(expectedTemplates[idx].productKey);
@@ -30,6 +30,7 @@ const validateProductTemplates = (count, resJson, expectedTemplates) => {
     pt.updatedBy.should.be.eql(expectedTemplates[idx].updatedBy);
     pt.disabled.should.be.eql(_.get(expectedTemplates[idx], 'disabled', false));
     pt.hidden.should.be.eql(_.get(expectedTemplates[idx], 'hidden', false));
+    pt.isAddOn.should.be.eql(_.get(expectedTemplates[idx], 'isAddOn', false));
   });
 };
 
@@ -52,6 +53,7 @@ describe('LIST product templates', () => {
       },
       disabled: true,
       hidden: true,
+      isAddOn: true,
       template: {
         template1: {
           name: 'template 1',

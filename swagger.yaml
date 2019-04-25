@@ -3748,6 +3748,9 @@ definitions:
         description: the product template template
       form:
         $ref: '#/definitions/VersionModelParam'
+      isAddOn:
+        type: boolean
+        description: the flag that shows if the product template is an add on
   ProductTemplateBodyParam:
     title: Product template body param
     type: object

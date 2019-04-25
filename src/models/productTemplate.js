@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     deletedAt: DataTypes.DATE,
     disabled: { type: DataTypes.BOOLEAN, defaultValue: false },
     hidden: { type: DataTypes.BOOLEAN, defaultValue: false },
+    isAddOn: { type: DataTypes.BOOLEAN, defaultValue: false },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     deletedBy: DataTypes.BIGINT,

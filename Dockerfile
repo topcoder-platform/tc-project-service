@@ -2,6 +2,7 @@ FROM node:8.2.1
 LABEL version="1.2"
 LABEL description="Projects microservice"
 RUN sed -i '/jessie-updates/d' /etc/apt/sources.list
+
 RUN apt-get update && \
     apt-get upgrade -y
 
@@ -26,4 +27,5 @@ RUN npm install
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+ENTRYPOINT ["npm","run"]
+#CMD ["npm", "start"]
