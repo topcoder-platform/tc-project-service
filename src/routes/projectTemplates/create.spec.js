@@ -108,6 +108,17 @@ describe('CREATE project template', () => {
       },
     };
 
+    const bodyDefinedFormScope = _.cloneDeep(body);
+    bodyDefinedFormScope.param.form = {
+      scope1: {
+        subScope1A: 1,
+        subScope1B: 2,
+      },
+      scope2: [1, 2, 3],
+    };
+    const bodyMissingFormScope = _.cloneDeep(body);
+    delete bodyMissingFormScope.param.scope;
+
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
         .post('/v4/projects/metadata/projectTemplates')
@@ -269,6 +280,28 @@ describe('CREATE project template', () => {
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();
         });
+    });
+
+    it('should return 422 if both scope and form are defined', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/projectTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyDefinedFormScope)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if both scope and form are missing', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/projectTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyMissingFormScope)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
     });
   });
 });

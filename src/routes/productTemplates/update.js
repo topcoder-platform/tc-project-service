@@ -37,7 +37,9 @@ const schema = {
       createdBy: Joi.any().strip(),
       updatedBy: Joi.any().strip(),
       deletedBy: Joi.any().strip(),
-    }).required(),
+    })
+      .xor('form', 'template')
+      .required(),
   },
 };
 
