@@ -22,11 +22,20 @@ const schema = {
       question: Joi.string().max(255).required(),
       info: Joi.string().max(255).required(),
       aliases: Joi.array().required(),
-      scope: Joi.object().optional().allow(null),
-      phases: Joi.object().optional().allow(null),
-      form: Joi.object().optional().allow(null),
-      planConfig: Joi.object().optional().allow(null),
-      priceConfig: Joi.object().optional().allow(null),
+      scope: Joi.object().empty(null),
+      phases: Joi.object().empty(null),
+      form: Joi.object().keys({
+        key: Joi.string().required(),
+        version: Joi.number(),
+      }).empty(null),
+      planConfig: Joi.object().keys({
+        key: Joi.string().required(),
+        version: Joi.number(),
+      }).empty(null),
+      priceConfig: Joi.object().keys({
+        key: Joi.string().required(),
+        version: Joi.number(),
+      }).empty(null),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
@@ -35,7 +44,11 @@ const schema = {
       createdBy: Joi.any().strip(),
       updatedBy: Joi.any().strip(),
       deletedBy: Joi.any().strip(),
-    }).required(),
+    })
+      .xor('form', 'scope')
+      .xor('phases', 'planConfig')
+      .nand('priceConfig', 'scope')
+      .required(),
   },
 };
 
@@ -47,54 +60,12 @@ module.exports = [
     const param = req.body.param;
     const { form, priceConfig, planConfig } = param;
 
-    const checkModel = (keyInfo, modelName, model) => {
-      let errorMessage = '';
-      if (keyInfo == null) {
-        return Promise.resolve(null);
-      }
-      if ((keyInfo.version != null) && (keyInfo.key != null)) {
-        errorMessage = `${modelName} with key ${keyInfo.key} and version ${keyInfo.version}`
-          + ' referred in the project template is not found';
-        return (model.findOne({
-          where: {
-            key: keyInfo.key,
-            version: keyInfo.version,
-          },
-        })).then((record) => {
-          if (record == null) {
-            return Promise.resolve(errorMessage);
-          }
-          return Promise.resolve(null);
-        });
-      } else if ((keyInfo.version == null) && (keyInfo.key != null)) {
-        errorMessage = `${modelName} with key ${keyInfo.key}`
-          + ' referred in the project template is not found';
-        return model.findOne({
-          where: {
-            key: keyInfo.key,
-          },
-        }).then((record) => {
-          if (record == null) {
-            return Promise.resolve(errorMessage);
-          }
-          return Promise.resolve(null);
-        });
-      }
-      return Promise.resolve(null);
-    };
-
     return Promise.all([
-      checkModel(form, 'Form', models.Form, next),
-      checkModel(priceConfig, 'PriceConfig', models.PriceConfig, next),
-      checkModel(planConfig, 'PlanConfig', models.PlanConfig, next),
+      util.checkModel(form, 'Form', models.Form, 'project template'),
+      util.checkModel(priceConfig, 'PriceConfig', models.PriceConfig, 'project template'),
+      util.checkModel(planConfig, 'PlanConfig', models.PlanConfig, 'project template'),
     ])
-      .then((errorMessages) => {
-        const errorMessage = errorMessages.find(e => e && e.length > 0);
-        if (errorMessage) {
-          const apiErr = new Error(errorMessage);
-          apiErr.status = 422;
-          throw apiErr;
-        }
+      .then(() => {
         const entity = _.assign(req.body.param, {
           createdBy: req.authUser.userId,
           updatedBy: req.authUser.userId,

@@ -89,12 +89,17 @@ describe('CREATE product template', () => {
       },
     };
 
-    const bodyWithForm = _.cloneDeep(body);
-    bodyWithForm.param.form = {
+    const bodyDefinedFormTemplate = _.cloneDeep(body);
+    bodyDefinedFormTemplate.param.form = {
       version: 1,
       key: 'dev',
     };
+
+    const bodyWithForm = _.cloneDeep(bodyDefinedFormTemplate);
     delete bodyWithForm.param.template;
+
+    const bodyMissingFormTemplate = _.cloneDeep(bodyWithForm);
+    delete bodyMissingFormTemplate.param.form;
 
     const bodyInvalidForm = _.cloneDeep(body);
     bodyInvalidForm.param.form = {
@@ -275,6 +280,28 @@ describe('CREATE product template', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(bodyInvalidForm)
+        .expect(422, done);
+    });
+
+    it('should return 422 if both form or template field are defined', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/productTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyDefinedFormTemplate)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if both form or template field are missing', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/productTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyMissingFormTemplate)
+        .expect('Content-Type', /json/)
         .expect(422, done);
     });
   });
