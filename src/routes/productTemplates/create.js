@@ -24,7 +24,10 @@ const schema = {
       details: Joi.string().max(255).required(),
       aliases: Joi.array().required(),
       template: Joi.object().empty(null),
-      form: Joi.object().empty(null),
+      form: Joi.object().keys({
+        key: Joi.string().required(),
+        version: Joi.number(),
+      }).empty(null),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
       isAddOn: Joi.boolean().optional(),

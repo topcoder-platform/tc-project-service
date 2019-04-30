@@ -81,7 +81,37 @@ describe('UPDATE project template', () => {
     .then((createdTemplate) => {
       templateId = createdTemplate.id;
       return Promise.resolve();
-    }),
+    })
+    .then(() => models.Form.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    }))
+    .then(() => models.PlanConfig.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    }))
+    .then(() => models.PriceConfig.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    })),
   );
   after(testUtil.clearDb);
 
@@ -131,30 +161,14 @@ describe('UPDATE project template', () => {
         disabled: true,
         hidden: true,
         form: {
-          scope1: {
-            subScope1A: 1,
-            subScope1B: 2,
-          },
-          scope2: [1, 2, 3],
+          key: 'test',
+          version: 1,
         },
         priceConfig: {
-          first: '$800',
+          key: 'test',
         },
         planConfig: {
-          phase1: {
-            name: 'phase 1',
-            details: {
-              anyDetails: 'any details 1',
-            },
-            others: ['others 11', 'others 12'],
-          },
-          phase2: {
-            name: 'phase 2',
-            details: {
-              anyDetails: 'any details 2',
-            },
-            others: ['others 21', 'others 22'],
-          },
+          key: 'test',
         },
       },
     };

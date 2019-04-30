@@ -24,9 +24,18 @@ const schema = {
       aliases: Joi.array().required(),
       scope: Joi.object().empty(null),
       phases: Joi.object().empty(null),
-      form: Joi.object().empty(null),
-      planConfig: Joi.object().empty(null),
-      priceConfig: Joi.object().empty(null),
+      form: Joi.object().keys({
+        key: Joi.string().required(),
+        version: Joi.number(),
+      }).empty(null),
+      planConfig: Joi.object().keys({
+        key: Joi.string().required(),
+        version: Joi.number(),
+      }).empty(null),
+      priceConfig: Joi.object().keys({
+        key: Joi.string().required(),
+        version: Joi.number(),
+      }).empty(null),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
