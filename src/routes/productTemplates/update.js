@@ -26,8 +26,8 @@ const schema = {
       brief: Joi.string().max(45),
       details: Joi.string().max(255),
       aliases: Joi.array(),
-      template: Joi.object(),
-      form: Joi.object(),
+      template: Joi.object().empty(null),
+      form: Joi.object().empty(null),
       disabled: Joi.boolean().optional(),
       hidden: Joi.boolean().optional(),
       isAddOn: Joi.boolean().optional(),
@@ -37,7 +37,9 @@ const schema = {
       createdBy: Joi.any().strip(),
       updatedBy: Joi.any().strip(),
       deletedBy: Joi.any().strip(),
-    }).required(),
+    })
+      .xor('form', 'template')
+      .required(),
   },
 };
 
