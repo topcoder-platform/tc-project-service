@@ -1,5 +1,3 @@
-
-
 module.exports = function definePhaseProduct(sequelize, DataTypes) {
   const PhaseProduct = sequelize.define('PhaseProduct', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
@@ -37,6 +35,25 @@ module.exports = function definePhaseProduct(sequelize, DataTypes) {
           },
           raw: true,
         });
+      },
+      /**
+       * Search Phase Products
+       * @param {Object} parameters the replacements for sequelize
+       *                 - projectId id of the project
+       *                 - phaseId id of phase
+       * @param {Object} log the request log
+       * @return {Object} the result rows and count
+       */
+      async search(parameters = {}, log) {
+        const whereQuery = 'phase_products."projectId"= :projectId AND phase_products."phaseId" = :phaseId';
+        const dbQuery = `SELECT * FROM phase_products WHERE ${whereQuery}`;
+        return sequelize.query(dbQuery,
+          { type: sequelize.QueryTypes.SELECT,
+            replacements: parameters,
+            logging: (str) => { log.debug(str); },
+            raw: true,
+          })
+          .then(phases => ({ rows: phases, count: phases.length }));
       },
     },
   });
