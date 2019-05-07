@@ -294,112 +294,112 @@ describe('Status resume Milestone', () => {
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-          .patch('/v4/timelines/1/milestones/1/status/resume')
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member2}`,
-          })
-          .send(body)
-          .expect(403, done);
+        .patch('/v4/timelines/1/milestones/1/status/resume')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .send(body)
+        .expect(403, done);
     });
 
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
-          .patch('/v4/timelines/1234/milestones/1/status/resume')
-          .send(body)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, done);
+        .patch('/v4/timelines/1234/milestones/1/status/resume')
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(404, done);
     });
 
     it('should return 404 for deleted timeline', (done) => {
       request(server)
-          .patch('/v4/timelines/3/milestones/1/status/resume')
-          .send(body)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, done);
+        .patch('/v4/timelines/3/milestones/1/status/resume')
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(404, done);
     });
 
     it('should return 404 for non-existed Milestone', (done) => {
       request(server)
-          .patch('/v4/timelines/1/milestones/111/status/resume')
-          .send(body)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, done);
+        .patch('/v4/timelines/1/milestones/111/status/resume')
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(404, done);
     });
 
     it('should return 404 for deleted Milestone', (done) => {
       request(server)
-          .patch('/v4/timelines/1/milestones/5/status/resume')
-          .send(body)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, done);
+        .patch('/v4/timelines/1/milestones/5/status/resume')
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(404, done);
     });
 
     it('should return 422 for invalid timelineId param', (done) => {
       request(server)
-          .patch('/v4/timelines/0/milestones/1/status/resume')
-          .send(body)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(422, done);
+        .patch('/v4/timelines/0/milestones/1/status/resume')
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(422, done);
     });
 
     it('should return 422 for invalid milestoneId param', (done) => {
       request(server)
-          .patch('/v4/timelines/1/milestones/0/status/resume')
-          .send(body)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(422, done);
+        .patch('/v4/timelines/1/milestones/0/status/resume')
+        .send(body)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(422, done);
     });
 
     it('should return 200 and status should update to last status', (done) => {
       request(server)
-              .patch('/v4/timelines/1/milestones/1/status/resume')
-              .set({
-                Authorization: `Bearer ${testUtil.jwts.admin}`,
-              })
-              .send(body)
-              .expect(200)
-              .end(() => {
-                models.Milestone.findById(1)
-                  .then((milestone) => {
-                    milestone.status.should.be.eql('active');
-                    done();
-                  });
-              });
+        .patch('/v4/timelines/1/milestones/1/status/resume')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(body)
+        .expect(200)
+        .end(() => {
+          models.Milestone.findById(1)
+            .then((milestone) => {
+              milestone.status.should.be.eql('active');
+              done();
+            });
+        });
     });
 
     it('should have one status history created with multiple sequencial status resumed messages', function fn(done) {
       this.timeout(10000);
       request(server)
-              .patch('/v4/timelines/1/milestones/1/status/resume')
-              .set({
-                Authorization: `Bearer ${testUtil.jwts.admin}`,
-              })
-              .send(body)
-              .expect(200)
-              .end(() => {
-                request(server)
-                .patch('/v4/timelines/1/milestones/1/status/resume')
-                .set({
-                  Authorization: `Bearer ${testUtil.jwts.admin}`,
-                })
-                .send(body)
-                .expect(422)
-                .end(() => {
-                  done();
-                });
-              });
+        .patch('/v4/timelines/1/milestones/1/status/resume')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(body)
+        .expect(200)
+        .end(() => {
+          request(server)
+          .patch('/v4/timelines/1/milestones/1/status/resume')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(body)
+          .expect(422)
+          .end(() => {
+            done();
+          });
+        });
     });
   });
 });

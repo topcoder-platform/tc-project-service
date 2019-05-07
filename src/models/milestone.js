@@ -91,10 +91,10 @@ module.exports = (sequelize, DataTypes) => {
         comment: null,
         createdBy: milestone.createdBy,
         updatedBy: milestone.updatedBy,
-      },
-        {
-          transaction: options.transaction,
-        }),
+      }, {
+        transaction: options.transaction,
+      }),
+
       afterUpdate: (milestone, options) => {
         if (milestone.changed().includes('status')) {
           return models.StatusHistory.create({
@@ -104,10 +104,9 @@ module.exports = (sequelize, DataTypes) => {
             comment: options.comment || null,
             createdBy: milestone.createdBy,
             updatedBy: milestone.updatedBy,
-          },
-            {
-              transaction: options.transaction,
-            });
+          }, {
+            transaction: options.transaction,
+          });
         }
         return Promise.resolve();
       },
