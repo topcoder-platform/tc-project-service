@@ -5,13 +5,16 @@
 import chai from 'chai';
 import _ from 'lodash';
 import request from 'supertest';
+import sinon from 'sinon';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+import { BUS_API_EVENT } from '../../constants';
 
 chai.should();
 
-describe('Status Pause Milestone', () => {
+describe('PAUSE Milestone', () => {
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {
@@ -254,6 +257,7 @@ describe('Status Pause Milestone', () => {
   });
 
   after(testUtil.clearDb);
+
   describe('PATCH /timelines/{timelineId}/milestones/{milestoneId}/status/pause', () => {
     const body = {
       param: {
@@ -368,8 +372,7 @@ describe('Status Pause Milestone', () => {
         });
     });
 
-    it('should have one status history created with multiple sequencial status paused messages', function fn(done) {
-      this.timeout(10000);
+    it('should have one status history created with multiple sequential status paused messages', (done) => {
       request(server)
         .patch('/v4/timelines/1/milestones/1/status/pause')
         .set({
@@ -389,6 +392,58 @@ describe('Status Pause Milestone', () => {
             done();
           });
         });
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should send messages MILESTONE_UPDATED and MILESTONE_TRANSITION_PAUSED', (done) => {
+        request(server)
+        .patch('/v4/timelines/1/milestones/1/status/pause')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(body)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledTwice.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+                createEventSpy.secondCall.calledWith(BUS_API_EVENT.MILESTONE_TRANSITION_PAUSED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
     });
   });
 });

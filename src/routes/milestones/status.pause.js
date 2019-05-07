@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
-import { MILESTONE_STATUS, BUS_API_EVENT } from '../../constants';
+import { MILESTONE_STATUS, EVENT } from '../../constants';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -74,12 +74,12 @@ module.exports = [
       .then(() => {
         // Send event to bus
         req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
-        req.app.services.pubsub.publish(BUS_API_EVENT.MILESTONE_TRANSITION_PAUSED,
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_PAUSED,
           { original, updated },
           { correlationId: req.id },
         );
 
-        req.app.emit(BUS_API_EVENT.MILESTONE_TRANSITION_PAUSED,
+        req.app.emit(EVENT.ROUTING_KEY.MILESTONE_PAUSED,
           { req, original, updated });
 
         res.json(util.wrapResponse(req.id));

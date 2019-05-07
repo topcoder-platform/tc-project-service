@@ -529,6 +529,8 @@ module.exports = (app, logger) => {
         event = BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED;
       } else if (updated.status === MILESTONE_STATUS.ACTIVE) {
         event = BUS_API_EVENT.MILESTONE_TRANSITION_ACTIVE;
+      } else if (updated.status === MILESTONE_STATUS.PAUSED) {
+        event = BUS_API_EVENT.MILESTONE_TRANSITION_PAUSED;
       }
 
       if (event) {
@@ -592,12 +594,24 @@ module.exports = (app, logger) => {
       .catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
-  /**
+ /**
   * MILESTONE_UPDATED.
   */
-  // eslint-disable-next-line no-unused-vars
-  app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, ({ req, original, updated, cascadedUpdates }) => {
-    logger.debug(`receive MILESTONE_UPDATED event for milestone ${original.id}`);
+
+  /**
+   * Handlers for updated milestones which sends events to Kafka
+   *
+   * @param {String} eventName              event name which causes calling this method
+   * @param {Object} params                 params
+   * @param {Object} params.req             request object
+   * @param {Object} params.original        original milestone object
+   * @param {Object} params.updated         updated milestone object
+   * @param {Object} params.cascadedUpdates milestones updated cascaded
+   *
+   * @return {undefined}
+   */
+  function handleMilestoneUpdated(eventName, { req, original, updated, cascadedUpdates }) {
+    logger.debug(`receive ${eventName} event for milestone ${original.id}`);
 
     const projectId = _.parseInt(req.params.projectId);
     const timeline = _.omit(req.timeline.toJSON(), 'deletedAt', 'deletedBy');
@@ -640,7 +654,11 @@ module.exports = (app, logger) => {
         }
       });
     }).catch(err => null);    // eslint-disable-line no-unused-vars
-  });
+  }
+
+  app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, handleMilestoneUpdated.bind(null, EVENT.ROUTING_KEY.MILESTONE_UPDATED));
+  app.on(EVENT.ROUTING_KEY.MILESTONE_PAUSED, handleMilestoneUpdated.bind(null, EVENT.ROUTING_KEY.MILESTONE_PAUSED));
+  app.on(EVENT.ROUTING_KEY.MILESTONE_RESUMED, handleMilestoneUpdated.bind(null, EVENT.ROUTING_KEY.MILESTONE_RESUMED));
 
  /**
   * MILESTONE_REMOVED.

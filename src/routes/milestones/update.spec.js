@@ -166,7 +166,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 2',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
-                    status: 'draft',
+                    status: 'reviewed',
                     type: 'type2',
                     order: 2,
                     plannedText: 'plannedText 2',

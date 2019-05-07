@@ -74,6 +74,8 @@ export const EVENT = {
     MILESTONE_ADDED: 'milestone.added',
     MILESTONE_UPDATED: 'milestone.updated',
     MILESTONE_REMOVED: 'milestone.removed',
+    MILESTONE_PAUSED: 'milestone.paused',
+    MILESTONE_RESUMED: 'milestone.resumed',
 
     PROJECT_MEMBER_INVITE_CREATED: 'project.member.invite.created',
     PROJECT_MEMBER_INVITE_UPDATED: 'project.member.invite.updated',
