@@ -1,4 +1,5 @@
 import moment from 'moment';
+import models from '../models';
 /* eslint-disable valid-jsdoc */
 
 /**
@@ -80,6 +81,35 @@ module.exports = (sequelize, DataTypes) => {
           }
           return Promise.resolve({ duration, progress });
         });
+      },
+    },
+    hooks: {
+      afterCreate: (milestone, options) => models.StatusHistory.create({
+        reference: 'milestone',
+        referenceId: milestone.id,
+        status: milestone.status,
+        comment: null,
+        createdBy: milestone.createdBy,
+        updatedBy: milestone.updatedBy,
+      },
+        {
+          transaction: options.transaction,
+        }),
+      afterUpdate: (milestone, options) => {
+        if (milestone.changed().includes('status')) {
+          return models.StatusHistory.create({
+            reference: 'milestone',
+            referenceId: milestone.id,
+            status: milestone.status,
+            comment: options.comment || null,
+            createdBy: milestone.createdBy,
+            updatedBy: milestone.updatedBy,
+          },
+            {
+              transaction: options.transaction,
+            });
+        }
+        return Promise.resolve();
       },
     },
   });

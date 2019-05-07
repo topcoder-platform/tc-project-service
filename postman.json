@@ -4253,6 +4253,78 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Pause Milestone",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"comment\": \"Comment\"\r\n\t}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/2/status/pause",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"2",
+								"status",
+								"pause"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resume Milestone",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"comment\": \"Comment\"\r\n\t}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/2/status/resume",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"2",
+								"status",
+								"resume"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

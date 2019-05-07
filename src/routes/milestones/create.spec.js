@@ -146,7 +146,7 @@ describe('CREATE milestone', () => {
                     name: 'milestone 1',
                     duration: 2,
                     startDate: '2018-05-03T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type1',
                     details: {
                       detail1: {
@@ -168,7 +168,7 @@ describe('CREATE milestone', () => {
                     name: 'milestone 2',
                     duration: 3,
                     startDate: '2018-05-04T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type2',
                     order: 2,
                     plannedText: 'plannedText 2',
@@ -183,7 +183,7 @@ describe('CREATE milestone', () => {
                     name: 'milestone 3',
                     duration: 4,
                     startDate: '2018-05-04T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type3',
                     order: 3,
                     plannedText: 'plannedText 3',
@@ -211,7 +211,7 @@ describe('CREATE milestone', () => {
         startDate: '2018-05-05T00:00:00.000Z',
         endDate: '2018-05-07T00:00:00.000Z',
         completionDate: '2018-05-08T00:00:00.000Z',
-        status: 'open',
+        status: 'draft',
         type: 'type4',
         details: {
           detail1: {

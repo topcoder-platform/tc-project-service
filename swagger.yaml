@@ -1715,6 +1715,86 @@ paths:
           description: Invalid input
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/timelines/{timelineId}/milestones/{milestoneId}/status/pause':
+      parameters:
+        - $ref: '#/parameters/timelineIdParam'
+        - $ref: '#/parameters/milestoneIdParam'    
+      patch:
+        tags:
+          - milestone
+        operationId: pauseMilestone
+        security:
+          - Bearer: []
+        description: >-
+          Update a milestone Status to Paused. All users who can edit the timeline can access this
+          endpoint. If the status is alread paused it doesnt allow.
+        responses:
+          '200':
+            description: Successfully updated status.
+            schema:
+              $ref: '#/definitions/StatusPauseResumeResponse'
+          '403':
+            description: No permission or wrong token
+            schema:
+              $ref: '#/definitions/ErrorModel'
+          '404':
+            description: Not found
+            schema:
+              $ref: '#/definitions/ErrorModel'
+          '422':
+            description: Invalid input or invalid previous status
+            schema:
+              $ref: '#/definitions/ErrorModel'
+          default:
+            description: error payload
+            schema:
+              $ref: '#/definitions/ErrorModel'
+        parameters:
+          - name: body
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/MilestonePatchPauseStatus'     
+  '/timelines/{timelineId}/milestones/{milestoneId}/status/resume':
+        parameters:
+          - $ref: '#/parameters/timelineIdParam'
+          - $ref: '#/parameters/milestoneIdParam'    
+        patch:
+          tags:
+            - milestone
+          operationId: resumeMilestone
+          security:
+            - Bearer: []
+          description: >-
+            Update a milestone Status to Active. All users who can edit the timeline can access this
+            endpoint. If the status is different than paused it doesnt allow.
+          responses:
+            '200':
+              description: Successfully updated status.
+              schema:
+                $ref: '#/definitions/StatusPauseResumeResponse'
+            '403':
+              description: No permission or wrong token
+              schema:
+                $ref: '#/definitions/ErrorModel'
+            '404':
+              description: Not found
+              schema:
+                $ref: '#/definitions/ErrorModel'
+            '422':
+              description: Invalid input or invalid previous status
+              schema:
+                $ref: '#/definitions/ErrorModel'
+            default:
+              description: error payload
+              schema:
+                $ref: '#/definitions/ErrorModel'
+          parameters:
+            - name: body
+              in: body
+              required: false
+              schema:
+                $ref: '#/definitions/MilestonePatchResumeStatus'                 
   /timelines/metadata/milestoneTemplates:
     get:
       tags:
@@ -4632,6 +4712,22 @@ definitions:
       blockedText:
         type: string
         description: the milestone blocked text
+  MilestonePauseStatusRequest:
+    title: Milestone Pause Status object
+    type: object
+    required:
+      - comment
+    properties:
+      comment:
+        type: string
+        description: the status comment         
+  MilestoneResumeStatusRequest:
+    title: Milestone Resume Status object
+    type: object
+    properties:
+      comment:
+        type: string
+        description: the status comment                
   MilestonePatchRequest:
     title: Milestone request object
     type: object
@@ -4701,6 +4797,22 @@ definitions:
     properties:
       param:
         $ref: '#/definitions/MilestonePatchRequest'
+  MilestonePatchPauseStatus:
+    title: Milestone Pause status body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: '#/definitions/MilestonePauseStatusRequest'      
+  MilestonePatchResumeStatus:
+      title: Milestone REsume status body param
+      type: object
+      required:
+        - param
+      properties:
+        param:
+          $ref: '#/definitions/MilestoneResumeStatusRequest'
   Milestone:
     title: Milestone object
     allOf:
@@ -4756,6 +4868,25 @@ definitions:
             $ref: '#/definitions/ResponseMetadata'
           content:
             $ref: '#/definitions/Milestone'
+  StatusPauseResumeResponse:
+    title: Milestone status pause and resume object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'          
   MilestoneListResponse:
     title: Milestone list response object
     type: object
