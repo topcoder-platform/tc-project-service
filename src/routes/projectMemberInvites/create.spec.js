@@ -73,17 +73,40 @@ describe('Project Member Invite create', () => {
               createdBy: 1,
               updatedBy: 1,
             }).then(() => {
-              models.ProjectMemberInvite.create({
-                projectId: project1.id,
-                userId: 40051335,
-                email: null,
-                role: PROJECT_MEMBER_ROLE.MANAGER,
-                status: INVITE_STATUS.PENDING,
-                createdBy: 1,
-                updatedBy: 1,
-                createdAt: '2016-06-30 00:33:07+00',
-                updatedAt: '2016-06-30 00:33:07+00',
-              }).then(() => {
+              const promises = [
+                models.ProjectMemberInvite.create({
+                  projectId: project1.id,
+                  userId: 40051335,
+                  email: null,
+                  role: PROJECT_MEMBER_ROLE.MANAGER,
+                  status: INVITE_STATUS.PENDING,
+                  createdBy: 1,
+                  updatedBy: 1,
+                  createdAt: '2016-06-30 00:33:07+00',
+                  updatedAt: '2016-06-30 00:33:07+00',
+                }),
+                models.ProjectMemberInvite.create({
+                  projectId: project1.id,
+                  email: 'duplicate_lowercase@gmail.com',
+                  role: PROJECT_MEMBER_ROLE.MANAGER,
+                  status: INVITE_STATUS.PENDING,
+                  createdBy: 1,
+                  updatedBy: 1,
+                  createdAt: '2016-06-30 00:33:07+00',
+                  updatedAt: '2016-06-30 00:33:07+00',
+                }),
+                models.ProjectMemberInvite.create({
+                  projectId: project1.id,
+                  email: 'DUPLICATE_UPPERCASE@gmail.com',
+                  role: PROJECT_MEMBER_ROLE.MANAGER,
+                  status: INVITE_STATUS.PENDING,
+                  createdBy: 1,
+                  updatedBy: 1,
+                  createdAt: '2016-06-30 00:33:07+00',
+                  updatedAt: '2016-06-30 00:33:07+00',
+                }),
+              ];
+              Promise.all(promises).then(() => {
                 done();
               });
             });
@@ -635,6 +658,98 @@ describe('Project Member Invite create', () => {
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40051331);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 201 and empty response when trying add already invited member by lowercase email', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                success: [{
+                  roleName: USER_ROLE.COPILOT,
+                }],
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            emails: ['DUPLICATE_LOWERCASE@gmail.com'],
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content.success;
+            should.exist(resJson);
+            resJson.length.should.equal(0);
+            server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 201 and empty response when trying add already invited member by uppercase email', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                success: [{
+                  roleName: USER_ROLE.COPILOT,
+                }],
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v4/projects/${project1.id}/members/invite`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            emails: ['duplicate_uppercase@gmail.com'],
+            role: 'customer',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content.success;
+            should.exist(resJson);
+            resJson.length.should.equal(0);
+            server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
             done();
           }
         });

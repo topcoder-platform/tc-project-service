@@ -83,7 +83,8 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
         });
 
         // remove invites for users that are invited already
-        _.remove(nonExistentUserEmails, email => _.some(invites, i => i.email === email));
+        _.remove(nonExistentUserEmails, email =>
+          _.some(invites, i => _.toLower(i.email) === _.toLower(email)));
         nonExistentUserEmails.forEach((email) => {
           const dataNew = _.clone(data);
 
