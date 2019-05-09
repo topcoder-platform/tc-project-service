@@ -37,16 +37,15 @@ const addMemberValidations = {
  *
  * @returns {Boolean} true if two emails are same
  */
-const compareEmail = (email1, email2, options = {}) => {
-  const opts = _.assign({
-    UNIQUE_GMAIL_VALIDATION: config.get('UNIQUE_GMAIL_VALIDATION'),
-  }, options);
-  if (opts.UNIQUE_GMAIL_VALIDATION) {
+const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false }) => {
+  if (options.UNIQUE_GMAIL_VALIDATION) {
     // email is gmail
-    const emailSplit = /(^[\w.+\-]+)@gmail\.(.*.)$/g.exec(email1); // eslint-disable-line
+    const emailSplit = /(^[\w.+-]+)(@gmail\..*.)$/g.exec(email1);
     if (emailSplit) {
       const address = emailSplit[1];
-      const regex = new RegExp(_.toLower(address).replace('.', '').split('').join('.?'));
+      const emailDomain = emailSplit[2];
+      const regexAddress = _.toLower(address).replace('.', '').split('').join('\.?'); // eslint-disable-line no-useless-escape
+      const regex = new RegExp(`${regexAddress}${emailDomain}`);
       return regex.test(_.toLower(email2));
     }
   }
@@ -110,7 +109,8 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
 
         // remove invites for users that are invited already
         _.remove(nonExistentUserEmails, email =>
-          _.some(invites, i => compareEmail(i.email, email)));
+          _.some(invites, i =>
+            compareEmail(i.email, email, { UNIQUE_GMAIL_VALIDATION: config.get('UNIQUE_GMAIL_VALIDATION') })));
         nonExistentUserEmails.forEach((email) => {
           const dataNew = _.clone(data);
 
