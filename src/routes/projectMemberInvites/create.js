@@ -44,8 +44,8 @@ const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false
     if (emailSplit) {
       const address = emailSplit[1];
       const emailDomain = emailSplit[2];
-      const regexAddress = _.toLower(address).replace('.', '').split('').join('\.?'); // eslint-disable-line no-useless-escape
-      const regex = new RegExp(`${regexAddress}${emailDomain}`);
+      const regexAddress = address.replace('.', '').split('').join('\.?'); // eslint-disable-line no-useless-escape
+      const regex = new RegExp(_.toLower(`${regexAddress}${emailDomain}`));
       return regex.test(_.toLower(email2));
     }
   }
