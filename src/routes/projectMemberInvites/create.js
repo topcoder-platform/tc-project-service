@@ -29,6 +29,30 @@ const addMemberValidations = {
 };
 
 /**
+ * Helper method to check the uniqueness of two emails
+ *
+ * @param {String} email1    first email to compare
+ * @param {String} email2    second email to compare
+ * @param {Object} options  the options
+ *
+ * @returns {Boolean} true if two emails are same
+ */
+const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false }) => {
+  if (options.UNIQUE_GMAIL_VALIDATION) {
+    // email is gmail
+    const emailSplit = /(^[\w.+-]+)(@gmail\.com|@googlemail\.com)$/g.exec(_.toLower(email1));
+    if (emailSplit) {
+      const address = emailSplit[1].replace('.', '');
+      const emailDomain = emailSplit[2].replace('.', '\\.');
+      const regexAddress = address.split('').join('\\.?');
+      const regex = new RegExp(`${regexAddress}${emailDomain}`);
+      return regex.test(_.toLower(email2));
+    }
+  }
+  return _.toLower(email1) === _.toLower(email2);
+};
+
+/**
  * Helper method to build promises for creating new invites in DB
  *
  * @param {Object} req     express request object
@@ -68,7 +92,8 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
         });
         // non-existent users we will invite them by email only
         const nonExistentUserEmails = invite.emails.filter(inviteEmail =>
-          !_.find(existentUsers, { email: inviteEmail }),
+          !_.find(existentUsers, existentUser =>
+            compareEmail(existentUser.email, inviteEmail, { UNIQUE_GMAIL_VALIDATION: false })),
         );
 
         // remove invites for users that are invited already
@@ -84,7 +109,8 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
 
         // remove invites for users that are invited already
         _.remove(nonExistentUserEmails, email =>
-          _.some(invites, i => _.toLower(i.email) === _.toLower(email)));
+          _.some(invites, i =>
+            compareEmail(i.email, email, { UNIQUE_GMAIL_VALIDATION: config.get('UNIQUE_GMAIL_VALIDATION') })));
         nonExistentUserEmails.forEach((email) => {
           const dataNew = _.clone(data);
 
