@@ -40,12 +40,12 @@ const addMemberValidations = {
 const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false }) => {
   if (options.UNIQUE_GMAIL_VALIDATION) {
     // email is gmail
-    const emailSplit = /(^[\w.+-]+)(@gmail\..*.)$/g.exec(email1);
+    const emailSplit = /(^[\w.+-]+)(@gmail\.com|@googlemail\.com)$/g.exec(_.toLower(email1));
     if (emailSplit) {
-      const address = emailSplit[1];
-      const emailDomain = emailSplit[2];
-      const regexAddress = address.replace('.', '').split('').join('\.?'); // eslint-disable-line no-useless-escape
-      const regex = new RegExp(_.toLower(`${regexAddress}${emailDomain}`));
+      const address = emailSplit[1].replace('.', '');
+      const emailDomain = emailSplit[2].replace('.', '\\.');
+      const regexAddress = address.split('').join('\\.?');
+      const regex = new RegExp(`${regexAddress}${emailDomain}`);
       return regex.test(_.toLower(email2));
     }
   }
