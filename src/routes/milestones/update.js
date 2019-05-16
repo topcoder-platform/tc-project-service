@@ -168,7 +168,7 @@ module.exports = [
           const today = moment.utc().hours(0).minutes(0).seconds(0)
             .milliseconds(0);
 
-          if (durationChanged && entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
+          if (durationChanged && milestone.status === MILESTONE_STATUS.COMPLETED) {
             const apiErr = new Error('Duration cannot be updated for already completed milestone.');
             apiErr.status = 422;
             return Promise.reject(apiErr);
