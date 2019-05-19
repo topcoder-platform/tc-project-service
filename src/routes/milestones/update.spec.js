@@ -251,24 +251,6 @@ describe('UPDATE Milestone', () => {
                     createdAt: '2018-05-11T00:00:00.000Z',
                     updatedAt: '2018-05-11T00:00:00.000Z',
                   },
-                  {
-                    id: 7,
-                    timelineId: 1, // Timeline 1
-                    name: 'Milestone 7',
-                    duration: 3,
-                    startDate: '2018-05-14T00:00:00.000Z',
-                    status: 'completed',
-                    type: 'type5',
-                    order: 1,
-                    plannedText: 'plannedText 7',
-                    activeText: 'activeText 7',
-                    completedText: 'completedText 7',
-                    blockedText: 'blockedText 7',
-                    createdBy: 2,
-                    updatedBy: 3,
-                    createdAt: '2018-05-11T00:00:00.000Z',
-                    updatedAt: '2018-05-11T00:00:00.000Z',
-                  },
                 ])))
               .then(() => done());
           });
@@ -374,16 +356,6 @@ describe('UPDATE Milestone', () => {
       request(server)
         .patch('/v4/timelines/1/milestones/0')
         .send(body)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(422, done);
-    });
-
-    it('should return 422 for modifying already completed milestones duration', (done) => {
-      request(server)
-        .patch('/v4/timelines/1/milestones/7')
-        .send({param: {...body.param,status: 'completed'}})
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
