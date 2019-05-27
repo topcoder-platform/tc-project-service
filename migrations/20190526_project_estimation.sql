@@ -7,7 +7,7 @@ CREATE TABLE project_estimations
 (
     id bigint NOT NULL,
     "buildingBlockKey" character varying(255) NOT NULL,
-    conditions character varying(255) NOT NULL,
+    conditions character varying(512) NOT NULL,
     price double precision NOT NULL,
     "minTime" integer NOT NULL,
     "maxTime" integer NOT NULL,
