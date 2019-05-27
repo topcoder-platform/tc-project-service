@@ -57,6 +57,14 @@ const createProjectValdiations = {
       })).allow(null),
       templateId: Joi.number().integer().positive(),
       version: Joi.string(),
+      estimation: Joi.array().items(Joi.object().keys({
+        conditions: Joi.string().required(),
+        price: Joi.number().required(),
+        minTime: Joi.number().integer().required(),
+        maxTime: Joi.number().integer().required(),
+        buildingBlockKey: Joi.string().required(),
+        metadata: Joi.object().optional(),
+      })).optional(),
     }).required(),
   },
 };
@@ -81,6 +89,17 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       model: models.ProjectMember,
       as: 'members',
     }],
+  }).then((newProject) => {
+    if (project.estimation && (project.estimation.length > 0)) {
+      req.log.debug('creating project estimation');
+      const estimations = project.estimation.map(estimation => Object.assign({
+        projectId: newProject.id,
+        createdBy: req.authUser.userId,
+        updatedBy: req.authUser.userId,
+      }, estimation));
+      return models.ProjectEstimation.bulkCreate(estimations).then(() => Promise.resolve(newProject));
+    }
+    return Promise.resolve(newProject);
   }).then((newProject) => {
     result.newProject = newProject;
 
@@ -212,7 +231,10 @@ module.exports = [
       utm: null,
     });
     traverse(project).forEach(function (x) { // eslint-disable-line func-names
-      if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+      // keep the raw '&&' string in conditions string in estimation
+      const isEstimationCondition =
+        (this.path.length === 3) && (this.path[0] === 'estimation') && (this.key === 'conditions');
+      if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
     });
     // override values
     _.assign(project, {
