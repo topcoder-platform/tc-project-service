@@ -3161,6 +3161,32 @@ definitions:
           data:
             type: string
             description: 300 Char length text blob for customer provided data
+      estimation:
+        type: array
+        items:
+          type: object
+          required:
+            - conditions
+            - price
+            - maxTime
+            - minTime
+            - buildingBlockKey
+          properties:
+            conditions:
+                type: string
+            price:
+              type: number
+              format: float
+            maxTime:
+              type: number
+              format: integer
+            minTime:
+              type: integer
+              format: integer
+            metadata:
+              type: object
+            buildingBlockKey:
+                type: string
       type:
         type: string
         description: project type
