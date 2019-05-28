@@ -97,7 +97,11 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
       }, estimation));
-      return models.ProjectEstimation.bulkCreate(estimations).then(() => Promise.resolve(newProject));
+      return models.ProjectEstimation.bulkCreate(estimations).then((projectEstimations) => {
+        result.estimations = _.map(projectEstimations, estimation =>
+          _.omit(estimation.toJSON(), ['deletedAt', 'deletedBy']));
+        Promise.resolve(newProject)
+      });
     }
     return Promise.resolve(newProject);
   }).then((newProject) => {
@@ -269,6 +273,7 @@ module.exports = [
       .then((createdProjectAndPhases) => {
         newProject = createdProjectAndPhases.newProject;
         newPhases = createdProjectAndPhases.newPhases;
+        projectEstimations = createProjectAndPhases.estimations;
 
         req.log.debug('new project created (id# %d, name: %s)', newProject.id, newProject.name);
         // create direct project with name and description
@@ -313,6 +318,8 @@ module.exports = [
       newProject.attachments = [];
       // set phases array
       newProject.phases = newPhases;
+      // sets estimations array
+      newProject.estimations = projectEstimations;
 
       req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
