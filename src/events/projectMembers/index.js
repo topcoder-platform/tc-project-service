@@ -152,7 +152,7 @@ const projectMemberRemovedHandler = Promise.coroutine(function* (logger, msg, ch
 
     const updateDocPromise = (doc) => {
       const members = _.filter(doc._source.members, single => single.id !== member.id);   // eslint-disable-line no-underscore-dangle
-      return Promise.resolve(_.merge(doc._source, { members }));    // eslint-disable-line no-underscore-dangle
+      return Promise.resolve(_.set(doc._source, 'members', members));    // eslint-disable-line no-underscore-dangle
     };
     yield Promise.all([
       updateDirectProjectPromise(),
