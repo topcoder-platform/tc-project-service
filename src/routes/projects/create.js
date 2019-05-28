@@ -274,7 +274,7 @@ module.exports = [
       .then((createdProjectAndPhases) => {
         newProject = createdProjectAndPhases.newProject;
         newPhases = createdProjectAndPhases.newPhases;
-        projectEstimations = createProjectAndPhases.estimations;
+        projectEstimations = createdProjectAndPhases.estimations;
 
         req.log.debug('new project created (id# %d, name: %s)', newProject.id, newProject.name);
         // create direct project with name and description
