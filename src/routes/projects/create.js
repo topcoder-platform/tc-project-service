@@ -100,7 +100,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       return models.ProjectEstimation.bulkCreate(estimations).then((projectEstimations) => {
         result.estimations = _.map(projectEstimations, estimation =>
           _.omit(estimation.toJSON(), ['deletedAt', 'deletedBy']));
-        Promise.resolve(newProject)
+        return Promise.resolve(newProject);
       });
     }
     return Promise.resolve(newProject);
@@ -261,6 +261,7 @@ module.exports = [
     }
     let newProject = null;
     let newPhases;
+    let projectEstimations;
     models.sequelize.transaction(() => {
       req.log.debug('Create Project - Starting transaction');
       // Validate the templates
@@ -319,7 +320,9 @@ module.exports = [
       // set phases array
       newProject.phases = newPhases;
       // sets estimations array
-      newProject.estimations = projectEstimations;
+      if (projectEstimations) {
+        newProject.estimations = projectEstimations;
+      }
 
       req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
