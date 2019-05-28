@@ -97,7 +97,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
       }, estimation));
-      return models.ProjectEstimation.bulkCreate(estimations).then((projectEstimations) => {
+      return models.ProjectEstimation.bulkCreate(estimations, { returning: true }).then((projectEstimations) => {
         result.estimations = _.map(projectEstimations, estimation =>
           _.omit(estimation.toJSON(), ['deletedAt', 'deletedBy']));
         return Promise.resolve(newProject);
