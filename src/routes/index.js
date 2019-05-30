@@ -176,12 +176,6 @@ router.route('/v4/timelines/:timelineId(\\d+)/milestones/:milestoneId(\\d+)')
   .patch(require('./milestones/update'))
   .delete(require('./milestones/delete'));
 
-router.route('/v4/timelines/:timelineId(\\d+)/milestones/:milestoneId(\\d+)/status/pause')
-  .patch(require('./milestones/status.pause'));
-
-router.route('/v4/timelines/:timelineId(\\d+)/milestones/:milestoneId(\\d+)/status/resume')
-  .patch(require('./milestones/status.resume'));
-
 router.route('/v4/timelines/metadata/milestoneTemplates')
   .post(require('./milestoneTemplates/create'))
   .get(require('./milestoneTemplates/list'));

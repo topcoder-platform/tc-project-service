@@ -657,8 +657,6 @@ module.exports = (app, logger) => {
   }
 
   app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, handleMilestoneUpdated.bind(null, EVENT.ROUTING_KEY.MILESTONE_UPDATED));
-  app.on(EVENT.ROUTING_KEY.MILESTONE_PAUSED, handleMilestoneUpdated.bind(null, EVENT.ROUTING_KEY.MILESTONE_PAUSED));
-  app.on(EVENT.ROUTING_KEY.MILESTONE_RESUMED, handleMilestoneUpdated.bind(null, EVENT.ROUTING_KEY.MILESTONE_RESUMED));
 
  /**
   * MILESTONE_REMOVED.

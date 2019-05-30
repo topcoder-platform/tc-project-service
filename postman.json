@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d9ea7b0f-1d2c-4d48-a693-fe7b51b1e2ea",
+		"_postman_id": "32160a15-9405-4b42-95ff-26a0d0e58c0d",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -118,10 +118,6 @@
 										"value": "application/json"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/v4/projects/2",
 									"host": [
@@ -242,10 +238,6 @@
 										"value": "Bearer {{jwt-token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/v4/projects",
 									"host": [
@@ -958,10 +950,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/7",
 							"host": [
@@ -987,10 +975,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1?fields=id,name,description,members.id,members.projectId",
 							"host": [
@@ -1022,10 +1006,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",
 							"host": [
@@ -1050,10 +1030,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?limit=1&offset=1",
 							"host": [
@@ -1088,10 +1064,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?filter=type%3Dgeneric",
 							"host": [
@@ -1122,10 +1094,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?sort=type%20desc",
 							"host": [
@@ -1156,10 +1124,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?fields=id,name,description",
 							"host": [
@@ -1190,10 +1154,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",
 							"host": [
@@ -1781,10 +1741,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.topcoder-dev.com/v3/direct/projects",
 							"protocol": "https",
@@ -2139,10 +2095,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases",
 							"host": [
@@ -2172,10 +2124,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases?fields=status,name,budget",
 							"host": [
@@ -2211,10 +2159,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases?sort=status desc",
 							"host": [
@@ -2250,10 +2194,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases?sort=order desc",
 							"host": [
@@ -2289,10 +2229,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1",
 							"host": [
@@ -2461,10 +2397,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products",
 							"host": [
@@ -2492,10 +2424,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products/1",
 							"host": [
@@ -2766,10 +2694,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates",
 							"host": [
@@ -2799,10 +2723,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/1",
 							"host": [
@@ -3211,10 +3131,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productTemplates",
 							"host": [
@@ -3244,10 +3160,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productTemplates/3",
 							"host": [
@@ -3495,10 +3407,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTypes",
 							"host": [
@@ -3528,10 +3436,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTypes/generic",
 							"host": [
@@ -3668,10 +3572,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productCategories",
 							"host": [
@@ -3701,10 +3601,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productCategories/generic",
 							"host": [
@@ -4071,10 +3967,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines?filter=reference%3Dphase%26referenceId%3D1",
 							"host": [
@@ -4108,10 +4000,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1",
 							"host": [
@@ -4411,10 +4299,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones",
 							"host": [
@@ -4444,10 +4328,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones?sort=order desc",
 							"host": [
@@ -4483,10 +4363,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
 							"host": [
@@ -4520,6 +4396,74 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-09-28T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone - paused",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"status\": \"paused\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"statusComment\": \"milestone paused\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone - resume",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"status\": \"resume\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"statusComment\": \"milestone resume\"\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
@@ -4995,10 +4939,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates",
 							"host": [
@@ -5028,10 +4968,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1",
 							"host": [
@@ -5067,10 +5003,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1&sort=order desc",
 							"host": [
@@ -5110,10 +5042,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
 							"host": [
@@ -5394,10 +5322,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata",
 							"host": [
@@ -5427,10 +5351,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata?includeAllReferred=true",
 							"host": [
@@ -5471,10 +5391,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions",
 							"host": [
@@ -5507,10 +5423,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1",
 							"host": [
@@ -5544,10 +5456,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev",
 							"host": [
@@ -5715,10 +5623,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions",
 							"host": [
@@ -5753,10 +5657,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions/1",
 							"host": [
@@ -5933,10 +5833,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions",
 							"host": [
@@ -5969,10 +5865,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1",
 							"host": [
@@ -6006,10 +5898,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev",
 							"host": [
@@ -6199,10 +6087,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/3/revisions",
 							"host": [
@@ -6237,10 +6121,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1",
 							"host": [
@@ -6417,10 +6297,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions",
 							"host": [
@@ -6453,10 +6329,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/3",
 							"host": [
@@ -6490,10 +6362,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev",
 							"host": [
@@ -6661,10 +6529,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions",
 							"host": [
@@ -6699,10 +6563,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions/1",
 							"host": [

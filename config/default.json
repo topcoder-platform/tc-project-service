@@ -59,5 +59,6 @@
   "inviteEmailSectionTitle": "Project Invitation",
   "connectUrl":"https://connect.topcoder-dev.com",
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
-  "MAX_REVISION_NUMBER": 100
+  "MAX_REVISION_NUMBER": 100,
+  "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]"
 }

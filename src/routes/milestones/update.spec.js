@@ -1085,6 +1085,164 @@ describe('UPDATE Milestone', () => {
         .end(done);
     });
 
+    it('should return 422 if try to pause and statusComment is missed', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.status = 'paused';
+      request(server)
+      .patch('/v4/timelines/1/milestones/1')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(422, done);
+    });
+
+    it('should return 422 if try to pause not active milestone', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.status = 'paused';
+      newBody.param.statusComment = 'milestone paused';
+      request(server)
+      .patch('/v4/timelines/1/milestones/2')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(422, done);
+    });
+
+    it('should return 200 if try to pause and should have one status history created', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.status = 'paused';
+      newBody.param.statusComment = 'milestone paused';
+      request(server)
+      .patch('/v4/timelines/1/milestones/1')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(200)
+      .end((err) => {
+        if (err) {
+          done(err);
+        } else {
+          models.Milestone.findById(1).then((milestone) => {
+            milestone.status.should.be.eql('paused');
+            return models.StatusHistory.findAll({
+              where: {
+                reference: 'milestone',
+                referenceId: milestone.id.toString(),
+                status: milestone.status,
+                comment: 'milestone paused',
+              },
+              paranoid: false,
+            }).then((statusHistories) => {
+              statusHistories.length.should.be.eql(1);
+              done();
+            });
+          });
+        }
+      });
+    });
+
+    it('should return 422 if try to resume not paused milestone', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.status = 'resume';
+      request(server)
+      .patch('/v4/timelines/1/milestones/2')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(422, done);
+    });
+
+    it('should return 200 if try to resume then status should update to last status and ' +
+        'should have one status history created', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.status = 'resume';
+      newBody.param.statusComment = 'new comment';
+      models.Milestone.bulkCreate([
+        {
+          id: 7,
+          timelineId: 1,
+          name: 'Milestone 1 [paused]',
+          duration: 2,
+          startDate: '2018-05-13T00:00:00.000Z',
+          endDate: '2018-05-14T00:00:00.000Z',
+          completionDate: '2018-05-15T00:00:00.000Z',
+          status: 'paused',
+          type: 'type1',
+          details: {
+            detail1: {
+              subDetail1A: 1,
+              subDetail1B: 2,
+            },
+            detail2: [1, 2, 3],
+          },
+          order: 1,
+          plannedText: 'plannedText 1',
+          activeText: 'activeText 1',
+          completedText: 'completedText 1',
+          blockedText: 'blockedText 1',
+          createdBy: 1,
+          updatedBy: 2,
+          createdAt: '2018-05-11T00:00:00.000Z',
+          updatedAt: '2018-05-11T00:00:00.000Z',
+        },
+      ]).then(() => models.StatusHistory.bulkCreate([
+        {
+          reference: 'milestone',
+          referenceId: '7',
+          status: 'active',
+          comment: 'comment',
+          createdBy: 1,
+          createdAt: '2018-05-15T00:00:00Z',
+          updatedBy: 1,
+          updatedAt: '2018-05-15T00:00:00Z',
+        },
+        {
+          reference: 'milestone',
+          referenceId: '7',
+          status: 'paused',
+          comment: 'comment',
+          createdBy: 1,
+          createdAt: '2018-05-16T00:00:00Z',
+          updatedBy: 1,
+          updatedAt: '2018-05-16T00:00:00Z',
+        },
+      ]).then(() => {
+        request(server)
+        .patch('/v4/timelines/1/milestones/7')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            models.Milestone.findById(7).then((milestone) => {
+              milestone.status.should.be.eql('active');
+
+              return models.StatusHistory.findAll({
+                where: {
+                  reference: 'milestone',
+                  referenceId: milestone.id.toString(),
+                  status: 'active',
+                  comment: 'new comment',
+                },
+                paranoid: false,
+              }).then((statusHistories) => {
+                statusHistories.length.should.be.eql(1);
+                done();
+              });
+            });
+          }
+        });
+      }));
+    });
+
     describe('Bus api', () => {
       let createEventSpy;
       const sandbox = sinon.sandbox.create();
