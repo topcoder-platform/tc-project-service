@@ -262,6 +262,23 @@ describe('Project create', () => {
         .expect(422, done);
     });
 
+    it('should return 422 with wrong format estimation field', (done) => {
+      const invalidBody = _.cloneDeep(body);
+      invalidBody.param.estimation = [
+        {
+
+        },
+      ];
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(invalidBody)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
     it('should return 201 if error to create direct project', (done) => {
       const validBody = _.cloneDeep(body);
       validBody.param.templateId = 3;
@@ -465,6 +482,143 @@ describe('Project create', () => {
             phases[0].products[0].templateId.should.be.eql(21);
             server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
+          }
+        });
+    });
+
+    it('should return 201 if valid user and data (with estimation)', (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.param.estimation = [
+        {
+          conditions: '( HAS_DESIGN_DELIVERABLE && HAS_ZEPLIN_APP_ADDON && CA_NEEDED)',
+          price: 6,
+          minTime: 2,
+          maxTime: 2,
+          metadata: {
+            deliverable: 'design',
+          },
+          buildingBlockKey: 'ZEPLIN_APP_ADDON_CA',
+        },
+        {
+          conditions: '( HAS_DESIGN_DELIVERABLE && COMPREHENSIVE_DESIGN && TWO_TARGET_DEVICES'
+            + ' && SCREENS_COUNT_SMALL && CA_NEEDED )',
+          price: 95,
+          minTime: 14,
+          maxTime: 14,
+          metadata: {
+            deliverable: 'design',
+          },
+          buildingBlockKey: 'SMALL_COMP_DESIGN_TWO_DEVICE_CA',
+        },
+        {
+          conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE || ONLY_ONE_OS_DESKTOP'
+            + ' || ONLY_ONE_OS_PROGRESSIVE) && SCREENS_COUNT_SMALL && CA_NEEDED)',
+          price: 50,
+          minTime: 35,
+          maxTime: 35,
+          metadata: {
+            deliverable: 'dev-qa',
+          },
+          buildingBlockKey: 'SMALL_DEV_ONE_OS_CA',
+        },
+        {
+          conditions: '( HAS_DEV_DELIVERABLE && HAS_SSO_INTEGRATION_ADDON && CA_NEEDED)',
+          price: 80,
+          minTime: 5,
+          maxTime: 5,
+          metadata: {
+            deliverable: 'dev-qa',
+          },
+          buildingBlockKey: 'HAS_SSO_INTEGRATION_ADDON_CA',
+        },
+        {
+          conditions: '( HAS_DEV_DELIVERABLE && HAS_CHECKMARX_SCANNING_ADDON && CA_NEEDED)',
+          price: 4,
+          minTime: 10,
+          maxTime: 10,
+          metadata: {
+            deliverable: 'dev-qa',
+          },
+          buildingBlockKey: 'HAS_CHECKMARX_SCANNING_ADDON_CA',
+        },
+        {
+          conditions: '( HAS_DEV_DELIVERABLE && HAS_UNIT_TESTING_ADDON && CA_NEEDED)',
+          price: 90,
+          minTime: 12,
+          maxTime: 12,
+          metadata: {
+            deliverable: 'dev-qa',
+          },
+          buildingBlockKey: 'HAS_UNIT_TESTING_ADDON_CA',
+        },
+      ];
+      validBody.param.templateId = 3;
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.directProjectId.should.be.eql(128);
+            resJson.status.should.be.eql('draft');
+            resJson.type.should.be.eql(body.param.type);
+            resJson.version.should.be.eql('v3');
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            // Check that activity fields are set
+            resJson.lastActivityUserId.should.be.eql('40051331');
+            resJson.lastActivityAt.should.be.not.null;
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+
+            // Check new ProjectEstimation records are created.
+            models.ProjectEstimation.findAll({
+              where: {
+                projectId: resJson.id,
+              },
+            }).then((projectEstimations) => {
+              projectEstimations.length.should.be.eql(6);
+              projectEstimations[0].conditions.should.be.eql(
+                '( HAS_DESIGN_DELIVERABLE && HAS_ZEPLIN_APP_ADDON && CA_NEEDED)');
+              projectEstimations[0].price.should.be.eql(6);
+              projectEstimations[0].minTime.should.be.eql(2);
+              projectEstimations[0].maxTime.should.be.eql(2);
+              projectEstimations[0].metadata.deliverable.should.be.eql('design');
+              projectEstimations[0].buildingBlockKey.should.be.eql('ZEPLIN_APP_ADDON_CA');
+              done();
+            });
           }
         });
     });

@@ -57,6 +57,14 @@ const createProjectValdiations = {
       })).allow(null),
       templateId: Joi.number().integer().positive(),
       version: Joi.string(),
+      estimation: Joi.array().items(Joi.object().keys({
+        conditions: Joi.string().required(),
+        price: Joi.number().required(),
+        minTime: Joi.number().integer().required(),
+        maxTime: Joi.number().integer().required(),
+        buildingBlockKey: Joi.string().required(),
+        metadata: Joi.object().optional(),
+      })).optional(),
     }).required(),
   },
 };
@@ -81,6 +89,21 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       model: models.ProjectMember,
       as: 'members',
     }],
+  }).then((newProject) => {
+    if (project.estimation && (project.estimation.length > 0)) {
+      req.log.debug('creating project estimation');
+      const estimations = project.estimation.map(estimation => Object.assign({
+        projectId: newProject.id,
+        createdBy: req.authUser.userId,
+        updatedBy: req.authUser.userId,
+      }, estimation));
+      return models.ProjectEstimation.bulkCreate(estimations, { returning: true }).then((projectEstimations) => {
+        result.estimations = _.map(projectEstimations, estimation =>
+          _.omit(estimation.toJSON(), ['deletedAt', 'deletedBy']));
+        return Promise.resolve(newProject);
+      });
+    }
+    return Promise.resolve(newProject);
   }).then((newProject) => {
     result.newProject = newProject;
 
@@ -212,7 +235,10 @@ module.exports = [
       utm: null,
     });
     traverse(project).forEach(function (x) { // eslint-disable-line func-names
-      if (this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+      // keep the raw '&&' string in conditions string in estimation
+      const isEstimationCondition =
+        (this.path.length === 3) && (this.path[0] === 'estimation') && (this.key === 'conditions');
+      if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
     });
     // override values
     _.assign(project, {
@@ -235,6 +261,7 @@ module.exports = [
     }
     let newProject = null;
     let newPhases;
+    let projectEstimations;
     models.sequelize.transaction(() => {
       req.log.debug('Create Project - Starting transaction');
       // Validate the templates
@@ -247,6 +274,7 @@ module.exports = [
       .then((createdProjectAndPhases) => {
         newProject = createdProjectAndPhases.newProject;
         newPhases = createdProjectAndPhases.newPhases;
+        projectEstimations = createdProjectAndPhases.estimations;
 
         req.log.debug('new project created (id# %d, name: %s)', newProject.id, newProject.name);
         // create direct project with name and description
@@ -291,6 +319,10 @@ module.exports = [
       newProject.attachments = [];
       // set phases array
       newProject.phases = newPhases;
+      // sets estimations array
+      if (projectEstimations) {
+        newProject.estimations = projectEstimations;
+      }
 
       req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,

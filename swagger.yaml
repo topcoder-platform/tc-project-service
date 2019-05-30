@@ -16,7 +16,53 @@ securityDefinitions:
     name: Authorization
     in: header
 paths:
-  /projects:
+  '/projects/db':
+    get:
+      tags:
+        - project
+      operationId: findProjectsDB
+      security:
+        - Bearer: []
+      description: Retrieve projects that match the filter directly from database
+      responses:
+        '200':
+          description: A list of projects
+          schema:
+            $ref: '#/definitions/ProjectListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/offsetParam'
+        - $ref: '#/parameters/limitParam'
+        - name: filter
+          required: true
+          type: string
+          in: query
+          description: |
+            Url encoded list of Supported filters
+             - id
+             - status
+             - type
+             - memberOnly
+             - keyword
+             - name
+             - code
+             - customer
+             - manager
+        - name: sort
+          required: false
+          description: >
+            sort projects by status, name, type, createdAt, updatedAt. Default
+            is createdAt asc
+          in: query
+          type: string
+  '/projects':
     get:
       tags:
         - project
@@ -63,6 +109,8 @@ paths:
           in: query
           type: string
     post:
+      tags:
+        - project
       operationId: addProject
       security:
         - Bearer: []
@@ -88,6 +136,8 @@ paths:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}':
     get:
+      tags:
+        - project
       description: Retrieve project by id
       security:
         - Bearer: []
@@ -120,6 +170,8 @@ paths:
             allowed.
       operationId: getProject
     patch:
+      tags:
+        - project
       operationId: updateProject
       security:
         - Bearer: []
@@ -160,6 +212,8 @@ paths:
           schema:
             $ref: '#/definitions/ProjectBodyParam'
     delete:
+      tags:
+        - project
       description: remove an existing project
       security:
         - Bearer: []
@@ -178,6 +232,8 @@ paths:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/attachments':
     post:
+      tags:
+        - project
       description: add a new project attachment
       security:
         - Bearer: []
@@ -203,6 +259,8 @@ paths:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/attachments/{id}':
     patch:
+      tags:
+        - project
       description: Update an existing attachment
       security:
         - Bearer: []
@@ -237,6 +295,8 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
+      tags:
+        - project
       description: remove an existing attachment
       security:
         - Bearer: []
@@ -260,6 +320,8 @@ paths:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/members':
     post:
+      tags:
+        - project
       description: add a new project member
       security:
         - Bearer: []
@@ -285,6 +347,8 @@ paths:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/members/{id}':
     delete:
+      tags:
+        - project
       description: Delete a project member
       security:
         - Bearer: []
@@ -302,6 +366,8 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
     patch:
+      tags:
+        - project
       security:
         - Bearer: []
       description: Support editing project member roles & primary option.
@@ -339,6 +405,41 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/UpdateProjectMemberBodyParam'
+  '/projects/{projectId}/phases/db':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - phase
+      operationId: findProjectPhasesDB
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project phases directly from database. All users who can edit project can access
+        this endpoint.
+      parameters:
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: |
+            Comma separated list of project phase fields to return.
+        - name: sort
+          required: false
+          description: >
+            sort project phases by startDate, endDate, status, order. Default is
+            startDate asc
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of project phases
+          schema:
+            $ref: '#/definitions/ProjectPhaseListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases':
     parameters:
       - $ref: '#/parameters/projectIdParam'
@@ -501,6 +602,28 @@ paths:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/phases/{phaseId}/products/db':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+    get:
+      tags:
+        - phase product
+      operationId: findPhaseProductsDB
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all phase products directly from database. All users who can edit project can access
+        this endpoint.
+      responses:
+        '200':
+          description: A list of phase products
+          schema:
+            $ref: '#/definitions/PhaseProductListResponse'
+        '403':
+          description: No permission or wrong token
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases/{phaseId}/products':
@@ -3038,6 +3161,32 @@ definitions:
           data:
             type: string
             description: 300 Char length text blob for customer provided data
+      estimation:
+        type: array
+        items:
+          type: object
+          required:
+            - conditions
+            - price
+            - maxTime
+            - minTime
+            - buildingBlockKey
+          properties:
+            conditions:
+                type: string
+            price:
+              type: number
+              format: float
+            maxTime:
+              type: number
+              format: integer
+            minTime:
+              type: integer
+              format: integer
+            metadata:
+              type: object
+            buildingBlockKey:
+                type: string
       type:
         type: string
         description: project type

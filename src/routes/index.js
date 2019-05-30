@@ -130,6 +130,9 @@ router.route('/v4/projects/:projectId(\\d+)/phases')
   .get(require('./phases/list'))
   .post(require('./phases/create'));
 
+router.route('/v4/projects/:projectId(\\d+)/phases/db')
+  .get(require('./phases/list-db'));
+
 router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
   .get(require('./phases/get'))
   .patch(require('./phases/update'))
@@ -138,6 +141,9 @@ router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
 router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products')
   .get(require('./phaseProducts/list'))
   .post(require('./phaseProducts/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/db')
+  .get(require('./phaseProducts/list-db'));
 
 router.route('/v4/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/:productId(\\d+)')
   .get(require('./phaseProducts/get'))

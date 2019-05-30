@@ -1,5 +1,3 @@
-/* eslint-disable valid-jsdoc */
-
 import _ from 'lodash';
 
 module.exports = function defineProjectPhase(sequelize, DataTypes) {
@@ -44,62 +42,32 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
         ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
       },
       /**
-       * Search name or status
-       * @param parameters the parameters
-       *          - filters: the filters contains keyword
-       *          - order: the order
-       *          - limit: the limit
-       *          - offset: the offset
-       *          - attributes: the attributes to get
-       * @param log the request log
-       * @return the result rows and count
+       * Search project phases
+       * @param {Object} parameters the parameters
+       *          - sortField: the field that will be references when sorting
+       *          - sortType: ASC or DESC
+       *          - fields: the fields to retrieved
+       *          - projectId: the id of project
+       * @param {Object} log the request log
+       * @return {Object} the result rows and count
        */
-      searchText(parameters, log) {
-        // special handling for keyword filter
-        let query = '1=1 ';
-        if (_.has(parameters.filters, 'id')) {
-          if (_.isObject(parameters.filters.id)) {
-            if (parameters.filters.id.$in.length === 0) {
-              parameters.filters.id.$in.push(-1);
-            }
-            query += `AND id IN (${parameters.filters.id.$in}) `;
-          } else if (_.isString(parameters.filters.id) || _.isNumber(parameters.filters.id)) {
-            query += `AND id = ${parameters.filters.id} `;
-          }
+      async search(parameters = {}, log) {
+        let fieldsStr = _.map(parameters.fields, field => `project_phases."${field}"`);
+        fieldsStr = `${fieldsStr.join(',')}`;
+        const replacements = {
+          projectId: parameters.projectId,
+        };
+        let dbQuery = `SELECT ${fieldsStr} FROM project_phases WHERE project_phases."projectId" = :projectId`;
+        if (_.has(parameters, 'sortField') && _.has(parameters, 'sortType')) {
+          dbQuery = `${dbQuery} ORDER BY project_phases."${parameters.sortField}" ${parameters.sortType}`;
         }
-        if (_.has(parameters.filters, 'status')) {
-          const statusFilter = parameters.filters.status;
-          if (_.isObject(statusFilter)) {
-            const statuses = statusFilter.$in.join("','");
-            query += `AND status IN ('${statuses}') `;
-          } else if (_.isString(statusFilter)) {
-            query += `AND status ='${statusFilter}'`;
-          }
-        }
-        if (_.has(parameters.filters, 'name')) {
-          query += `AND name like '%${parameters.filters.name}%' `;
-        }
-
-        const attributesStr = `"${parameters.attributes.join('","')}"`;
-        const orderStr = `"${parameters.order[0][0]}" ${parameters.order[0][1]}`;
-
-        // select count of project_phases
-        return sequelize.query(`SELECT COUNT(1) FROM project_phases WHERE ${query}`,
+        return sequelize.query(dbQuery,
           { type: sequelize.QueryTypes.SELECT,
             logging: (str) => { log.debug(str); },
+            replacements,
             raw: true,
           })
-          .then((fcount) => {
-            const count = fcount[0].count;
-            // select project attributes
-            return sequelize.query(`SELECT ${attributesStr} FROM project_phases WHERE ${query} ORDER BY ` +
-              ` ${orderStr} LIMIT ${parameters.limit} OFFSET ${parameters.offset}`,
-              { type: sequelize.QueryTypes.SELECT,
-                logging: (str) => { log.debug(str); },
-                raw: true,
-              })
-              .then(phases => ({ rows: phases, count }));
-          });
+          .then(phases => ({ rows: phases, count: phases.length }));
       },
     },
   });

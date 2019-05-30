@@ -25,8 +25,6 @@
     "timelineIndexName": "timelines",
     "timelineDocType": "timelineV4"
   },
-  "systemUserClientId": "",
-  "systemUserClientSecret": "",
   "connectProjectUrl":"",
   "dbConfig": {
     "masterUrl": "",
@@ -60,5 +58,6 @@
   "connectUrl":"https://connect.topcoder-dev.com",
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
   "MAX_REVISION_NUMBER": 100,
+  "UNIQUE_GMAIL_VALIDATION": true,
   "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]"
 }
