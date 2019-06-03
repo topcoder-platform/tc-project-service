@@ -58,5 +58,5 @@
   "connectUrl":"https://connect.topcoder-dev.com",
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
   "MAX_REVISION_NUMBER": 100,
-  "UNIQUE_GMAIL_VALIDATION": true
+  "UNIQUE_GMAIL_VALIDATION": false
 }
