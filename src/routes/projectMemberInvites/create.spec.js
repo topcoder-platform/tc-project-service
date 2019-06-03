@@ -735,7 +735,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 201 and empty response when trying add already invited member by gmail email with dot',
+    xit('should return 201 and empty response when trying add already invited member by gmail email with dot',
       (done) => {
         request(server)
           .post(`/v4/projects/${project1.id}/members/invite`)
@@ -762,7 +762,7 @@ describe('Project Member Invite create', () => {
           });
       });
 
-    it('should return 201 and empty response when trying add already invited member by gmail email without dot',
+    xit('should return 201 and empty response when trying add already invited member by gmail email without dot',
       (done) => {
         request(server)
           .post(`/v4/projects/${project1.id}/members/invite`)
