@@ -12,23 +12,51 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 describe('CREATE project template', () => {
-  before((done) => {
-    testUtil.clearDb()
-      .then(() => models.ProjectType.bulkCreate([
-        {
-          key: 'generic',
-          displayName: 'Generic',
-          icon: 'http://example.com/icon1.ico',
-          question: 'question 1',
-          info: 'info 1',
-          aliases: ['key-1', 'key_1'],
-          metadata: {},
-          createdBy: 1,
-          updatedBy: 1,
-        },
-      ]))
-      .then(() => done());
-  });
+  before(() => testUtil.clearDb()
+    .then(() => models.ProjectType.bulkCreate([
+      {
+        key: 'generic',
+        displayName: 'Generic',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 1',
+        info: 'info 1',
+        aliases: ['key-1', 'key_1'],
+        metadata: {},
+        createdBy: 1,
+        updatedBy: 1,
+      },
+    ]))
+    .then(() => models.Form.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    }))
+    .then(() => models.PlanConfig.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    }))
+    .then(() => models.PriceConfig.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    })),
+  );
 
   describe('POST /projects/metadata/projectTemplates', () => {
     const body = {
@@ -80,33 +108,28 @@ describe('CREATE project template', () => {
         disabled: true,
         hidden: true,
         form: {
-          scope1: {
-            subScope1A: 1,
-            subScope1B: 2,
-          },
-          scope2: [1, 2, 3],
+          key: 'test',
+          version: 1,
         },
         priceConfig: {
-          first: '$800',
+          key: 'test',
         },
         planConfig: {
-          phase1: {
-            name: 'phase 1',
-            details: {
-              anyDetails: 'any details 1',
-            },
-            others: ['others 11', 'others 12'],
-          },
-          phase2: {
-            name: 'phase 2',
-            details: {
-              anyDetails: 'any details 2',
-            },
-            others: ['others 21', 'others 22'],
-          },
+          key: 'test',
         },
       },
     };
+
+    const bodyDefinedFormScope = _.cloneDeep(body);
+    bodyDefinedFormScope.param.form = {
+      scope1: {
+        subScope1A: 1,
+        subScope1B: 2,
+      },
+      scope2: [1, 2, 3],
+    };
+    const bodyMissingFormScope = _.cloneDeep(body);
+    delete bodyMissingFormScope.param.scope;
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
@@ -269,6 +292,28 @@ describe('CREATE project template', () => {
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();
         });
+    });
+
+    it('should return 422 if both scope and form are defined', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/projectTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyDefinedFormScope)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
+    });
+
+    it('should return 422 if both scope and form are missing', (done) => {
+      request(server)
+        .post('/v4/projects/metadata/projectTemplates')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyMissingFormScope)
+        .expect('Content-Type', /json/)
+        .expect(422, done);
     });
   });
 });

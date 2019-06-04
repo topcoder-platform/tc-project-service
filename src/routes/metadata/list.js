@@ -30,27 +30,39 @@ function getUsedModel() {
     attributes: { exclude: ['deletedAt', 'deletedBy'] },
     raw: true,
   };
-  return models.ProjectTemplate.findAll(query)
-      .then((templates) => {
-        templates.forEach((template) => {
-          const { form, planConfig, priceConfig } = template;
-          if ((form) && (form.key) && (form.version)) {
-            modelUsed.form[form.key] = modelUsed.form[form.key] ? modelUsed.form[form.key] : {};
-            modelUsed.form[form.key][form.version] = true;
-          }
-          if ((priceConfig) && (priceConfig.key) && (priceConfig.version)) {
-            modelUsed.priceConfig[priceConfig.key] = modelUsed.priceConfig[priceConfig.key] ?
-              modelUsed.priceConfig[priceConfig.key] : {};
-            modelUsed.priceConfig[priceConfig.key][priceConfig.version] = true;
-          }
-          if ((planConfig) && (planConfig.key) && (planConfig.version)) {
-            modelUsed.planConfig[planConfig.key] = modelUsed.planConfig[planConfig.key] ?
-              modelUsed.planConfig[planConfig.key] : {};
-            modelUsed.planConfig[planConfig.key][planConfig.version] = true;
-          }
-        });
-        return Promise.resolve(modelUsed);
-      });
+
+  return Promise.all([
+    models.ProjectTemplate.findAll(query),
+    models.ProductTemplate.findAll(query),
+  ]).then(([projectTemplates, productTemplates]) => {
+    projectTemplates.forEach((template) => {
+      const { form, planConfig, priceConfig } = template;
+      if ((form) && (form.key) && (form.version)) {
+        modelUsed.form[form.key] = modelUsed.form[form.key] ? modelUsed.form[form.key] : {};
+        modelUsed.form[form.key][form.version] = true;
+      }
+      if ((priceConfig) && (priceConfig.key) && (priceConfig.version)) {
+        modelUsed.priceConfig[priceConfig.key] = modelUsed.priceConfig[priceConfig.key] ?
+          modelUsed.priceConfig[priceConfig.key] : {};
+        modelUsed.priceConfig[priceConfig.key][priceConfig.version] = true;
+      }
+      if ((planConfig) && (planConfig.key) && (planConfig.version)) {
+        modelUsed.planConfig[planConfig.key] = modelUsed.planConfig[planConfig.key] ?
+          modelUsed.planConfig[planConfig.key] : {};
+        modelUsed.planConfig[planConfig.key][planConfig.version] = true;
+      }
+    });
+
+    productTemplates.forEach((template) => {
+      const { form } = template;
+      if ((form) && (form.key) && (form.version)) {
+        modelUsed.form[form.key] = modelUsed.form[form.key] ? modelUsed.form[form.key] : {};
+        modelUsed.form[form.key][form.version] = true;
+      }
+    });
+
+    return Promise.resolve(modelUsed);
+  });
 }
 
 

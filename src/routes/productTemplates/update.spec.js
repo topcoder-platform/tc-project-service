@@ -1,6 +1,7 @@
 /**
  * Tests for get.js
  */
+import _ from 'lodash';
 import chai from 'chai';
 import request from 'supertest';
 
@@ -43,9 +44,34 @@ describe('UPDATE product template', () => {
     updatedBy: 2,
   };
 
+  const forms = [
+    {
+      key: 'dev',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    },
+    {
+      key: 'dev',
+      config: {
+        test: 'test2',
+      },
+      version: 2,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    },
+  ];
+
   let templateId;
 
   beforeEach(() => testUtil.clearDb()
+    .then(() => models.Form.create(forms[0]))
+    .then(() => models.Form.create(forms[1]))
     .then(() => models.ProductCategory.bulkCreate([
       {
         key: 'generic',
@@ -105,6 +131,24 @@ describe('UPDATE product template', () => {
           },
         },
       },
+    };
+
+    const bodyDefinedFormTemplate = _.cloneDeep(body);
+    bodyDefinedFormTemplate.param.form = {
+      version: 1,
+      key: 'dev',
+    };
+
+    const bodyWithForm = _.cloneDeep(bodyDefinedFormTemplate);
+    delete bodyWithForm.param.template;
+
+    const bodyMissingFormTemplate = _.cloneDeep(bodyWithForm);
+    delete bodyMissingFormTemplate.param.form;
+
+    const bodyInvalidForm = _.cloneDeep(body);
+    bodyInvalidForm.param.form = {
+      version: 1,
+      key: 'wrongKey',
     };
 
     it('should return 403 if user is not authenticated', (done) => {
@@ -248,6 +292,51 @@ describe('UPDATE product template', () => {
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    it('should return 200 when update form', (done) => {
+      request(server)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithForm)
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.form.should.be.eql(bodyWithForm.param.form);
+          done();
+        });
+    });
+
+    it('should return 422 when form is invalid', (done) => {
+      request(server)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyInvalidForm)
+        .expect(422, done);
+    });
+
+    it('should return 422 if both form or template field are defined', (done) => {
+      request(server)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyDefinedFormTemplate)
+        .expect(422, done);
+    });
+
+    it('should return 422 if both form or template field are missing', (done) => {
+      request(server)
+        .patch(`/v4/projects/metadata/productTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyMissingFormTemplate)
+        .expect(422, done);
     });
   });
 });

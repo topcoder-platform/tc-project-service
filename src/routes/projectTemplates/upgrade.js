@@ -44,36 +44,13 @@ module.exports = [
       if (pt == null) {
         const apiErr = new Error(`project template not found for id ${req.body.param.templateId}`);
         apiErr.status = 404;
-        return Promise.reject(apiErr);
+        throw apiErr;
       }
       if ((pt.scope == null) || (pt.phases == null)) {
         const apiErr = new Error('Current project template\'s scope or phases is null');
         apiErr.status = 422;
-        return Promise.reject(apiErr);
+        throw apiErr;
       }
-
-      const checkModel = (keyInfo, modelName, model) => {
-        let errorMessage = '';
-        errorMessage = `${modelName} with key ${keyInfo.key} and version ${keyInfo.version}`
-          + ' referred in param is not found';
-        return (model.findOne({
-          where: {
-            key: keyInfo.key,
-            version: keyInfo.version,
-          },
-        })).then((record) => {
-          if (record == null) {
-            return Promise.resolve(errorMessage);
-          }
-          return Promise.resolve(null);
-        });
-      };
-
-      const reportError = (errorMessage) => {
-        const apiErr = new Error(errorMessage);
-        apiErr.status = 422;
-        return Promise.reject(apiErr).catch(next);
-      };
 
       // get form field
       let newForm = {};
@@ -90,10 +67,7 @@ module.exports = [
         };
       } else {
         newForm = req.body.param.form;
-        const err = await checkModel(newForm, 'Form', models.Form);
-        if (err != null) {
-          reportError(err);
-        }
+        await util.checkModel(newForm, 'Form', models.Form, 'project template');
       }
       // get price config field
       let newPriceConfig = {};
@@ -111,10 +85,7 @@ module.exports = [
         };
       } else {
         newPriceConfig = req.body.param.priceConfig;
-        const err = await checkModel(newPriceConfig, 'PriceConfig', models.PriceConfig);
-        if (err != null) {
-          reportError(err);
-        }
+        await util.checkModel(newPriceConfig, 'PriceConfig', models.PriceConfig, 'project template');
       }
       // get plan config field
       let newPlanConfig = {};
@@ -126,10 +97,7 @@ module.exports = [
         };
       } else {
         newPlanConfig = req.body.param.planConfig;
-        const err = await checkModel(newPlanConfig, 'PlanConfig', models.PlanConfig);
-        if (err != null) {
-          reportError(err);
-        }
+        await util.checkModel(newPlanConfig, 'PlanConfig', models.PlanConfig, 'project template');
       }
 
       const updateInfo = {

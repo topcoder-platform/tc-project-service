@@ -2,6 +2,7 @@
  * Tests for get.js
  */
 import chai from 'chai';
+import _ from 'lodash';
 import request from 'supertest';
 
 import models from '../../models';
@@ -80,7 +81,37 @@ describe('UPDATE project template', () => {
     .then((createdTemplate) => {
       templateId = createdTemplate.id;
       return Promise.resolve();
-    }),
+    })
+    .then(() => models.Form.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    }))
+    .then(() => models.PlanConfig.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    }))
+    .then(() => models.PriceConfig.create({
+      key: 'test',
+      config: {
+        test: 'test1',
+      },
+      version: 1,
+      revision: 1,
+      createdBy: 1,
+      updatedBy: 1,
+    })),
   );
   after(testUtil.clearDb);
 
@@ -130,33 +161,28 @@ describe('UPDATE project template', () => {
         disabled: true,
         hidden: true,
         form: {
-          scope1: {
-            subScope1A: 1,
-            subScope1B: 2,
-          },
-          scope2: [1, 2, 3],
+          key: 'test',
+          version: 1,
         },
         priceConfig: {
-          first: '$800',
+          key: 'test',
         },
         planConfig: {
-          phase1: {
-            name: 'phase 1',
-            details: {
-              anyDetails: 'any details 1',
-            },
-            others: ['others 11', 'others 12'],
-          },
-          phase2: {
-            name: 'phase 2',
-            details: {
-              anyDetails: 'any details 2',
-            },
-            others: ['others 21', 'others 22'],
-          },
+          key: 'test',
         },
       },
     };
+
+    const bodyDefinedFormScope = _.cloneDeep(body);
+    bodyDefinedFormScope.param.form = {
+      scope1: {
+        subScope1A: 1,
+        subScope1B: 2,
+      },
+      scope2: [1, 2, 3],
+    };
+    const bodyMissingFormScope = _.cloneDeep(body);
+    delete bodyMissingFormScope.param.scope;
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
@@ -335,6 +361,26 @@ describe('UPDATE project template', () => {
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    it('should return 422 if both scope and form are defined', (done) => {
+      request(server)
+        .patch(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyDefinedFormScope)
+        .expect(422, done);
+    });
+
+    it('should return 422 if both scope and form are missing', (done) => {
+      request(server)
+        .patch(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyMissingFormScope)
+        .expect(422, done);
     });
   });
 });

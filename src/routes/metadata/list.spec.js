@@ -38,7 +38,8 @@ const productTemplates = [
     brief: 'brief 1',
     details: 'details 1',
     aliases: {},
-    template: {},
+    form: { key: 'productKey 1', version: 1 },
+    template: null,
     createdBy: 1,
     updatedBy: 2,
   },
@@ -101,6 +102,30 @@ const forms = [
     key: 'key1',
     config: {
       hello: 'world',
+    },
+    version: 2,
+    revision: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+  {
+    key: 'productKey 1',
+    config: {
+      questions: [{
+        id: 'appDefinition',
+        title: 'Sample Project',
+        required: true,
+        description: 'Please answer a few basic questions',
+        subSections: [{
+          id: 'projectName',
+          required: true,
+          validationError: 'Please provide a name for your project',
+          fieldName: 'name',
+          description: '',
+          title: 'Project Name',
+          type: 'project-name',
+        }],
+      }],
     },
     version: 2,
     revision: 1,
@@ -198,7 +223,7 @@ describe('GET all metadata', () => {
           resJson.milestoneTemplates.should.have.length(1);
           resJson.projectTypes.should.have.length(1);
           resJson.productCategories.should.have.length(1);
-          resJson.forms.should.have.length(1);
+          resJson.forms.should.have.length(2);
           resJson.planConfigs.should.have.length(1);
           resJson.priceConfigs.should.have.length(1);
 
@@ -225,7 +250,7 @@ describe('GET all metadata', () => {
           resJson.milestoneTemplates.should.have.length(1);
           resJson.projectTypes.should.have.length(1);
           resJson.productCategories.should.have.length(1);
-          resJson.forms.should.have.length(2);
+          resJson.forms.should.have.length(3);
           resJson.planConfigs.should.have.length(2);
           resJson.priceConfigs.should.have.length(2);
           done();
