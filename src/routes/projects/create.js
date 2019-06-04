@@ -60,6 +60,7 @@ const createProjectValdiations = {
       estimation: Joi.array().items(Joi.object().keys({
         conditions: Joi.string().required(),
         price: Joi.number().required(),
+        quantity: Joi.number().optional(),
         minTime: Joi.number().integer().required(),
         maxTime: Joi.number().integer().required(),
         buildingBlockKey: Joi.string().required(),

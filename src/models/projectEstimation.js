@@ -6,6 +6,7 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
       buildingBlockKey: { type: DataTypes.STRING, allowNull: false },
       conditions: { type: DataTypes.STRING, allowNull: false },
       price: { type: DataTypes.DOUBLE, allowNull: false },
+      quantity: { type: DataTypes.INTEGER, allowNull: true },
       minTime: { type: DataTypes.INTEGER, allowNull: false },
       maxTime: { type: DataTypes.INTEGER, allowNull: false },
       metadata: { type: DataTypes.JSON, allowNull: false, defaultValue: {} },
