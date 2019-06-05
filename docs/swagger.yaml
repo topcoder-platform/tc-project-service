@@ -1,9 +1,18 @@
 swagger: '2.0'
 info:
-  version: v4
+  version: v5
   title: Projects API
+  description: |
+    Project API
+
+    ### Pagination
+      Requests that return multiple items will be paginated to 20 items by default.
+      You can specify further pages with the `page` parameter.
+      You can also set a custom page size up to 100 with the `perPage` parameter.
+
+      Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
 host: 'localhost:3000'
-basePath: /v4
+basePath: /v5
 schemes:
   - http
 produces:
@@ -28,33 +37,55 @@ paths:
         '200':
           description: A list of projects
           schema:
-            $ref: '#/definitions/ProjectListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/Project'
+          headers:
+            X-Next-Page:
+              type: integer
+              description: The index of the next page
+            X-Page:
+              type: integer
+              description: The index of the current page (starting at 1)
+            X-Per-Page:
+              type: integer
+              description: The number of items to list per page
+            X-Prev-Page:
+              type: integer
+              description: The index of the previous page
+            X-Total:
+              type: integer
+              description: The total number of items
+            X-Total-Pages:
+              type: integer
+              description: The total number of pages
+            Link:
+              type: string
+              description: Pagination link header.
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
-        - $ref: '#/parameters/offsetParam'
-        - $ref: '#/parameters/limitParam'
-        - name: filter
-          required: true
-          type: string
-          in: query
-          description: |
-            Url encoded list of Supported filters
-             - id
-             - status
-             - type
-             - memberOnly
-             - keyword
-             - name
-             - code
-             - customer
-             - manager
+        - $ref: '#/parameters/pageParam'
+        - $ref: '#/parameters/perPageParam'
+        - $ref: '#/parameters/idQueryParam'
+        - $ref: '#/parameters/statusQueryParam'
+        - $ref: '#/parameters/typeQueryParam'
+        - $ref: '#/parameters/memberOnlyQueryParam'
+        - $ref: '#/parameters/keywordQueryParam'
+        - $ref: '#/parameters/nameQueryParam'
+        - $ref: '#/parameters/codeQueryParam'
+        - $ref: '#/parameters/customerQueryParam'
+        - $ref: '#/parameters/managerQueryParam'
         - name: sort
           required: false
           description: >
@@ -74,33 +105,55 @@ paths:
         '200':
           description: A list of projects
           schema:
-            $ref: '#/definitions/ProjectListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/Project'
+          headers:
+            X-Next-Page:
+              type: integer
+              description: The index of the next page
+            X-Page:
+              type: integer
+              description: The index of the current page (starting at 1)
+            X-Per-Page:
+              type: integer
+              description: The number of items to list per page
+            X-Prev-Page:
+              type: integer
+              description: The index of the previous page
+            X-Total:
+              type: integer
+              description: The total number of items
+            X-Total-Pages:
+              type: integer
+              description: The total number of pages
+            Link:
+              type: string
+              description: Pagination link header.
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
-        - $ref: '#/parameters/offsetParam'
-        - $ref: '#/parameters/limitParam'
-        - name: filter
-          required: true
-          type: string
-          in: query
-          description: |
-            Url encoded list of Supported filters
-             - id
-             - status
-             - type
-             - memberOnly
-             - keyword
-             - name
-             - code
-             - customer
-             - manager
+        - $ref: '#/parameters/pageParam'
+        - $ref: '#/parameters/perPageParam'
+        - $ref: '#/parameters/idQueryParam'
+        - $ref: '#/parameters/statusQueryParam'
+        - $ref: '#/parameters/typeQueryParam'
+        - $ref: '#/parameters/memberOnlyQueryParam'
+        - $ref: '#/parameters/keywordQueryParam'
+        - $ref: '#/parameters/nameQueryParam'
+        - $ref: '#/parameters/codeQueryParam'
+        - $ref: '#/parameters/customerQueryParam'
+        - $ref: '#/parameters/managerQueryParam'
         - name: sort
           required: false
           description: >
@@ -120,18 +173,22 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewProjectBodyParam'
+            $ref: '#/definitions/NewProject'
       responses:
-        '201':
+        '200':
           description: Returns the newly created project
           schema:
-            $ref: '#/definitions/ProjectResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/Project'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}':
@@ -145,13 +202,21 @@ paths:
         '200':
           description: a project
           schema:
-            $ref: '#/definitions/ProjectResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/Project'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -184,21 +249,25 @@ paths:
             Successfully updated project. Returns original and updated project
             object
           schema:
-            $ref: '#/definitions/UpdateProjectResponse'
+            $ref: '#/definitions/Project'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -210,7 +279,7 @@ paths:
             Only specify those properties that needs to be updated.
             `cancelReason` is mandatory if status is cancelled
           schema:
-            $ref: '#/definitions/ProjectBodyParam'
+            $ref: '#/definitions/NewProject'
     delete:
       tags:
         - project
@@ -222,18 +291,30 @@ paths:
       responses:
         '204':
           description: Project successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
           schema:
             $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/attachments':
     post:
       tags:
-        - project
+        - project attachments
       description: add a new project attachment
       security:
         - Bearer: []
@@ -243,24 +324,32 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewProjectAttachmentBodyParam'
+            $ref: '#/definitions/NewProjectAttachment'
       responses:
-        '201':
+        '200':
           description: Returns the newly created project attachment
           schema:
-            $ref: '#/definitions/NewProjectAttachmentResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProjectAttachment'
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/attachments/{id}':
     patch:
       tags:
-        - project
+        - project attachments
       description: Update an existing attachment
       security:
         - Bearer: []
@@ -276,27 +365,35 @@ paths:
           required: true
           description: Specify only those properties that needs to be updated
           schema:
-            $ref: '#/definitions/NewProjectAttachmentBodyParam'
+            $ref: '#/definitions/NewProjectAttachment'
       responses:
-        '201':
+        '200':
           description: Returns the newly created project
           schema:
-            $ref: '#/definitions/NewProjectAttachmentResponse'
+            $ref: '#/definitions/ProjectAttachment'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project attachment is not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
       tags:
-        - project
+        - project attachments
       description: remove an existing attachment
       security:
         - Bearer: []
@@ -310,18 +407,30 @@ paths:
       responses:
         '204':
           description: Attachment successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If attachment is not found
           schema:
             $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/members':
     post:
       tags:
-        - project
+        - project members
       description: add a new project member
       security:
         - Bearer: []
@@ -331,24 +440,32 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewProjectMemberBodyParam'
+            $ref: '#/definitions/NewProjectMember'
       responses:
-        '201':
+        '200':
           description: Returns the newly created project
           schema:
-            $ref: '#/definitions/NewProjectMemberResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProjectMember'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/members/{id}':
     delete:
       tags:
-        - project
+        - project members
       description: Delete a project member
       security:
         - Bearer: []
@@ -361,13 +478,29 @@ paths:
       responses:
         '204':
           description: Member successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If Project doesn't contain such Member
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     patch:
       tags:
-        - project
+        - project members
       security:
         - Bearer: []
       description: Support editing project member roles & primary option.
@@ -377,21 +510,25 @@ paths:
             Successfully updated project member. Returns entire project member
             object
           schema:
-            $ref: '#/definitions/UpdateProjectMemberResponse'
+            $ref: '#/definitions/ProjectMember'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -404,7 +541,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/UpdateProjectMemberBodyParam'
+            $ref: '#/definitions/UpdateProjectMember'
   '/projects/{projectId}/phases/db':
     parameters:
       - $ref: '#/parameters/projectIdParam'
@@ -435,9 +572,23 @@ paths:
         '200':
           description: A list of project phases
           schema:
-            $ref: '#/definitions/ProjectPhaseListResponse'
+            type: array
+            items:
+              $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases':
@@ -470,9 +621,23 @@ paths:
         '200':
           description: A list of project phases
           schema:
-            $ref: '#/definitions/ProjectPhaseListResponse'
+            type: array
+            items:
+              $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -492,28 +657,33 @@ paths:
           schema:
             type: object
             allOf:
-              - $ref: '#/definitions/ProjectPhaseBodyParam'
+              - $ref: '#/definitions/ProjectPhaseRequest'
             properties:
-              param:
-                type: object
-                properties:
-                  productTemplateId:
-                    type: number
-                    format: long
-                    description: >-
-                      the optional productTemplateId used to populate a new
-                      phase product for the created phase
+              productTemplateId:
+                type: number
+                format: long
+                description: >-
+                  the optional productTemplateId used to populate a new
+                  phase product for the created phase
       responses:
-        '201':
+        '200':
           description: Returns the newly created project phase
           schema:
-            $ref: '#/definitions/ProjectPhaseResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProjectPhase'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases/{phaseId}':
@@ -532,13 +702,25 @@ paths:
         '200':
           description: a project phase
           schema:
-            $ref: '#/definitions/ProjectPhaseResponse'
+            $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -559,21 +741,25 @@ paths:
         '200':
           description: Successfully updated project phase.
           schema:
-            $ref: '#/definitions/ProjectPhaseResponse'
+            $ref: '#/definitions/ProjectPhase'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -582,7 +768,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectPhaseBodyParam'
+            $ref: '#/definitions/ProjectPhaseRequest'
     delete:
       tags:
         - phase
@@ -596,12 +782,24 @@ paths:
       responses:
         '204':
           description: Project phase successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases/{phaseId}/products/db':
@@ -621,9 +819,23 @@ paths:
         '200':
           description: A list of phase products
           schema:
-            $ref: '#/definitions/PhaseProductListResponse'
+            type: array
+            items:
+              $ref: '#/definitions/PhaseProduct'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases/{phaseId}/products':
@@ -643,9 +855,23 @@ paths:
         '200':
           description: A list of phase products
           schema:
-            $ref: '#/definitions/PhaseProductListResponse'
+            type: array
+            items:
+              $ref: '#/definitions/PhaseProduct'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -660,18 +886,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/PhaseProductBodyParam'
+            $ref: '#/definitions/PhaseProductRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created phase product
           schema:
-            $ref: '#/definitions/PhaseProductResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/PhaseProduct'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases/{phaseId}/products/{productId}':
@@ -691,13 +925,25 @@ paths:
         '200':
           description: a phase product
           schema:
-            $ref: '#/definitions/PhaseProductResponse'
+            $ref: '#/definitions/PhaseProduct'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -716,21 +962,25 @@ paths:
         '200':
           description: Successfully updated phase product.
           schema:
-            $ref: '#/definitions/PhaseProductResponse'
+            $ref: '#/definitions/PhaseProduct'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -739,7 +989,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/PhaseProductBodyParam'
+            $ref: '#/definitions/PhaseProductRequest'
     delete:
       tags:
         - phase product
@@ -753,12 +1003,24 @@ paths:
       responses:
         '204':
           description: Project phase successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/upgrade':
@@ -778,18 +1040,22 @@ paths:
           required: true
           description: Project upgrade body
           schema:
-            $ref: '#/definitions/ProjectUpgradeBodyParam'
+            $ref: '#/definitions/ProjectUpgrade'
       responses:
         '200':
           description: Project migrated successfully
           schema:
-            $ref: '#/definitions/ProjectUpgradeResponse'
+            $ref: '#/definitions/ProjectUpgrade'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '400':
-          description: Invalid input
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -797,7 +1063,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /projects/metadata:
@@ -816,8 +1082,12 @@ paths:
           description: The metadata
           schema:
             $ref: '#/definitions/AllMetadataResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /projects/metadata/projectTemplates:
@@ -832,9 +1102,15 @@ paths:
         '200':
           description: A list of project templates
           schema:
-            $ref: '#/definitions/ProjectTemplateListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/ProjectTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -849,18 +1125,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectTemplateBodyParam'
+            $ref: '#/definitions/ProjectTemplateRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created project template
           schema:
-            $ref: '#/definitions/ProjectTemplateResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProjectTemplate'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/projectTemplates/{templateId}':
@@ -876,13 +1160,21 @@ paths:
         '200':
           description: a project template
           schema:
-            $ref: '#/definitions/ProjectTemplateResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProjectTemplate'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -903,21 +1195,25 @@ paths:
         '200':
           description: Successfully updated project template.
           schema:
-            $ref: '#/definitions/ProjectTemplateResponse'
+            $ref: '#/definitions/ProjectTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -926,7 +1222,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectTemplateBodyParam'
+            $ref: '#/definitions/ProjectTemplateRequest'
     delete:
       tags:
         - projectTemplate
@@ -940,12 +1236,24 @@ paths:
       responses:
         '204':
           description: Project template successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/projectTemplates/{templateId}/upgrade':
@@ -962,24 +1270,28 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectTemplateUpgradeBodyParam'
+            $ref: '#/definitions/ProjectTemplateUpgradeBody'
       responses:
         '200':
           description: Project template successfully upgrade
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project template is not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Server Error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /projects/metadata/productTemplates:
@@ -994,9 +1306,15 @@ paths:
         '200':
           description: A list of product templates
           schema:
-            $ref: '#/definitions/ProductTemplateListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/ProductTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -1011,18 +1329,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProductTemplateBodyParam'
+            $ref: '#/definitions/ProductTemplateRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created product template
           schema:
-            $ref: '#/definitions/ProductTemplateResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProductTemplate'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/productTemplates/{templateId}':
@@ -1038,13 +1364,21 @@ paths:
         '200':
           description: a product template
           schema:
-            $ref: '#/definitions/ProductTemplateResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProductTemplate'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1065,21 +1399,25 @@ paths:
         '200':
           description: Successfully updated product template.
           schema:
-            $ref: '#/definitions/ProductTemplateResponse'
+            $ref: '#/definitions/ProductTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1088,7 +1426,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/ProductTemplateBodyParam'
+            $ref: '#/definitions/ProductTemplateRequest'
     delete:
       tags:
         - productTemplate
@@ -1102,12 +1440,24 @@ paths:
       responses:
         '204':
           description: Product template successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If product is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/productTemplates/{templateId}/upgrade':
@@ -1124,24 +1474,28 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProductTemplateUpgradeBodyParam'
+            $ref: '#/definitions/ProductTemplateUpgradeBody'
       responses:
         '200':
           description: Product template successfully upgraded
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If product template is not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Server Error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /projects/metadata/productCategories:
@@ -1158,9 +1512,15 @@ paths:
         '200':
           description: A list of product categories
           schema:
-            $ref: '#/definitions/ProductCategoryListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/ProductCategory'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -1177,18 +1537,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProductCategoryCreateBodyParam'
+            $ref: '#/definitions/ProductCategoryCreateRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created product category
           schema:
-            $ref: '#/definitions/ProductCategoryResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProductCategory'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/productCategories/{key}':
@@ -1204,13 +1572,21 @@ paths:
         '200':
           description: a product category
           schema:
-            $ref: '#/definitions/ProductCategoryResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProductCategory'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1229,21 +1605,25 @@ paths:
         '200':
           description: Successfully updated product category.
           schema:
-            $ref: '#/definitions/ProductCategoryResponse'
+            $ref: '#/definitions/ProductCategory'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1252,7 +1632,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/ProductCategoryBodyParam'
+            $ref: '#/definitions/ProductCategoryRequest'
     delete:
       tags:
         - productCategory
@@ -1266,12 +1646,24 @@ paths:
       responses:
         '204':
           description: Product category successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If product category is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /projects/metadata/projectTypes:
@@ -1286,9 +1678,15 @@ paths:
         '200':
           description: A list of project types
           schema:
-            $ref: '#/definitions/ProjectTypeListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/ProjectType'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -1305,18 +1703,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectTypeCreateBodyParam'
+            $ref: '#/definitions/ProjectTypeCreateRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created project type
           schema:
-            $ref: '#/definitions/ProjectTypeResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProjectType'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/projectTypes/{key}':
@@ -1330,13 +1736,21 @@ paths:
         '200':
           description: a project type
           schema:
-            $ref: '#/definitions/ProjectTypeResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/ProjectType'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1355,21 +1769,25 @@ paths:
         '200':
           description: Successfully updated project type.
           schema:
-            $ref: '#/definitions/ProjectTypeResponse'
+            $ref: '#/definitions/ProjectType'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1378,7 +1796,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/ProjectTypeBodyParam'
+            $ref: '#/definitions/ProjectTypeRequest'
     delete:
       tags:
         - projectType
@@ -1392,12 +1810,24 @@ paths:
       responses:
         '204':
           description: Project type successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /projects/metadata/orgConfig:
@@ -1411,21 +1841,33 @@ paths:
         Retrieve all organization configs. All user roles can access this
         endpoint.
       parameters:
-        - name: filter
+        - name: orgId
           required: true
           type: string
           in: query
-          description: |
-            Url encoded list of Supported filters
-             - orgId (required)
-             - configName
+          description: organization id
+        - name: configName
+          required: false
+          type: string
+          in: query
+          description: configuration name
       responses:
         '200':
           description: A list of organization configs
           schema:
-            $ref: '#/definitions/OrgConfigListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/OrgConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -1442,18 +1884,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/OrgConfigCreateBodyParam'
+            $ref: '#/definitions/OrgConfigCreateRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created organization config
           schema:
-            $ref: '#/definitions/OrgConfigResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/OrgConfig'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/orgConfig/{id}':
@@ -1467,13 +1917,21 @@ paths:
         '200':
           description: a project type
           schema:
-            $ref: '#/definitions/OrgConfigResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/OrgConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1492,21 +1950,25 @@ paths:
         '200':
           description: Successfully updated organization config.
           schema:
-            $ref: '#/definitions/OrgConfigResponse'
+            $ref: '#/definitions/OrgConfig'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1515,7 +1977,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/OrgConfigCreateBodyParam'
+            $ref: '#/definitions/OrgConfigCreateRequest'
     delete:
       tags:
         - orgConfig
@@ -1529,12 +1991,24 @@ paths:
       responses:
         '204':
           description: Organization config successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If organization config is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /timelines:
@@ -1546,25 +2020,37 @@ paths:
         - Bearer: []
       description: Retrieve timelines which its projects are accessible by the user.
       parameters:
-        - name: filter
+        - name: reference
           required: false
           type: string
           in: query
-          description: |
-            Url encoded list of supported filters
-             - reference
-             - referenceId
+          description: the reference filter
+        - name: referenceId
+          required: false
+          type: string
+          in: query
+          description: the reference id filter
       responses:
         '200':
           description: A list of timelines
           schema:
-            $ref: '#/definitions/TimelineListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -1581,18 +2067,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/TimelineBodyParam'
+            $ref: '#/definitions/TimelineRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created timeline
           schema:
-            $ref: '#/definitions/TimelineResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/timelines/{timelineId}':
@@ -1608,17 +2102,25 @@ paths:
         '200':
           description: a timeline
           schema:
-            $ref: '#/definitions/TimelineResponse'
+            $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1637,21 +2139,25 @@ paths:
         '200':
           description: Successfully updated timeline.
           schema:
-            $ref: '#/definitions/TimelineResponse'
+            $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1660,7 +2166,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/TimelineBodyParam'
+            $ref: '#/definitions/TimelineRequest'
     delete:
       tags:
         - timeline
@@ -1674,16 +2180,24 @@ paths:
       responses:
         '204':
           description: Timeline successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/timelines/{timelineId}/milestones':
@@ -1708,13 +2222,23 @@ paths:
         '200':
           description: A list of milestones
           schema:
-            $ref: '#/definitions/MilestoneListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -1733,18 +2257,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/MilestonePostBodyParam'
+            $ref: '#/definitions/MilestonePostRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created milestone
           schema:
-            $ref: '#/definitions/MilestoneResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/timelines/{timelineId}/milestones/{milestoneId}':
@@ -1763,17 +2295,25 @@ paths:
         '200':
           description: a milestone
           schema:
-            $ref: '#/definitions/MilestoneResponse'
+            $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       operationId: getMilestone
@@ -1792,21 +2332,25 @@ paths:
         '200':
           description: Successfully updated milestone.
           schema:
-            $ref: '#/definitions/MilestoneResponse'
+            $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -1814,7 +2358,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/MilestonePatchBodyParam'
+            $ref: '#/definitions/MilestonePatchRequest'
     delete:
       tags:
         - milestone
@@ -1826,16 +2370,24 @@ paths:
       responses:
         '204':
           description: Milestone successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /timelines/metadata/milestoneTemplates:
@@ -1854,25 +2406,33 @@ paths:
           description: sort by `order`. Default is `order asc`
           in: query
           type: string
-        - name: filter
+        - name: reference
           required: false
-          type: string
+          description: the reference filter
           in: query
-          description: |
-            Url encoded list of supported filters
-             - reference
-             - referenceId
+          type: string
+        - name: referenceId
+          required: false
+          description: the reference id filter
+          in: query
+          type: string
       responses:
         '200':
           description: A list of milestone templates
           schema:
-            $ref: '#/definitions/MilestoneTemplateListResponse'
-        '403':
-          description: No permission or wrong token
+            type: array
+            items:
+              $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -1891,18 +2451,26 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/MilestoneTemplateBodyParam'
+            $ref: '#/definitions/MilestoneTemplate'
       responses:
-        '201':
+        '200':
           description: Returns the newly created milestone template
           schema:
-            $ref: '#/definitions/MilestoneTemplateResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   /timelines/metadata/milestoneTemplates/clone:
@@ -1922,20 +2490,30 @@ paths:
           schema:
             $ref: '#/definitions/MilestoneCloneTemplateRequest'
       responses:
-        '201':
+        '200':
           description: Returns the list of cloned milestone templates
           schema:
-            $ref: '#/definitions/MilestoneTemplateListResponse'
+            type: array
+            items:
+              $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/timelines/metadata/milestoneTemplates/{milestoneTemplateId}':
@@ -1953,17 +2531,21 @@ paths:
         '200':
           description: a milestone template
           schema:
-            $ref: '#/definitions/MilestoneTemplateResponse'
-        '403':
-          description: No permission or wrong token
+            $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       operationId: getMilestoneTemplate
@@ -1980,21 +2562,25 @@ paths:
         '200':
           description: Successfully updated milestone template.
           schema:
-            $ref: '#/definitions/MilestoneTemplateResponse'
+            $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        default:
-          description: error payload
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
       parameters:
@@ -2002,7 +2588,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/MilestoneTemplateBodyParam'
+            $ref: '#/definitions/MilestoneTemplate'
     delete:
       tags:
         - milestoneTemplates
@@ -2014,16 +2600,24 @@ paths:
       responses:
         '204':
           description: Milestone template successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/members/invite':
@@ -2040,13 +2634,13 @@ paths:
         '200':
           description: The invite for current user
           schema:
-            $ref: '#/definitions/ProjectMemberInviteResponse'
+            $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
         '400':
-          description: Invalid input
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        '403':
-          description: No permission or wrong token
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2054,7 +2648,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -2074,20 +2668,24 @@ paths:
           schema:
             $ref: '#/definitions/AddProjectMemberInvitesRequest'
       responses:
-        '201':
+        '200':
           description: Returns the newly created invite
           schema:
-            $ref: '#/definitions/ProjectMemberInviteResponse'
+            $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
         '400':
-          description: Invalid input
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     put:
@@ -2110,17 +2708,21 @@ paths:
         '200':
           description: Returns the newly updated invite
           schema:
-            $ref: '#/definitions/ProjectMemberInviteResponse'
+            $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
         '400':
-          description: Invalid input
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '403':
-          description: No permission or wrong token
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
 
@@ -2137,9 +2739,13 @@ paths:
         '200':
           description: The model for the latest revision of latest version
           schema:
-            $ref: '#/definitions/FormResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2147,7 +2753,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/form/{key}/versions':
@@ -2163,9 +2769,15 @@ paths:
         '200':
           description: The model list for the all version
           schema:
-            $ref: '#/definitions/FormListResponse'
-        '422':
-          description: Invalid input
+            type: array
+            items:
+              $ref: '#/definitions/Form'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2173,7 +2785,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -2188,14 +2800,18 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewFormParam'
+            $ref: '#/definitions/NewForm'
       responses:
-        '201':
+        '200':
           description: The model created
           schema:
-            $ref: '#/definitions/FormResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2203,7 +2819,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/form/{key}/versions/{version}':
@@ -2220,9 +2836,13 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/FormResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2230,7 +2850,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     patch:
@@ -2246,14 +2866,18 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewFormParam'
+            $ref: '#/definitions/NewForm'
       responses:
-        '201':
+        '200':
           description: The model updated
           schema:
-            $ref: '#/definitions/FormResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/Form'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2261,7 +2885,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
@@ -2276,8 +2900,12 @@ paths:
       responses:
         '204':
           description: Delete succuessful
-        '422':
-          description: Invalid input
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2285,7 +2913,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/form/{key}/versions/{version}/revisions':
@@ -2302,9 +2930,15 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/FormListResponse'
-        '422':
-          description: Invalid input
+            type: array
+            items:
+              $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2312,7 +2946,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -2328,14 +2962,18 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewFormParam'
+            $ref: '#/definitions/NewForm'
       responses:
-        '201':
+        '200':
           description: The model created
           schema:
-            $ref: '#/definitions/FormResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2343,7 +2981,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/form/{key}/versions/{version}/revisions/{revision}':
@@ -2361,9 +2999,13 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/FormResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2371,7 +3013,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
@@ -2387,8 +3029,12 @@ paths:
       responses:
         '204':
           description: Delete succuessful
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2396,7 +3042,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
 
@@ -2413,9 +3059,13 @@ paths:
         '200':
           description: The model for the latest revision of latest version
           schema:
-            $ref: '#/definitions/PriceConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2423,7 +3073,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/priceConfig/{key}/versions':
@@ -2439,9 +3089,15 @@ paths:
         '200':
           description: The model list for the all version
           schema:
-            $ref: '#/definitions/PriceConfigListResponse'
-        '422':
-          description: Invalid input
+            type: array
+            items:
+              $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2449,7 +3105,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -2464,18 +3120,22 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewPriceConfigParam'
+            $ref: '#/definitions/NewPriceConfig'
       responses:
-        '201':
+        '200':
           description: The model created
           schema:
-            $ref: '#/definitions/PriceConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/priceConfig/{key}/versions/{version}':
@@ -2492,9 +3152,13 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/PriceConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2502,7 +3166,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     patch:
@@ -2518,14 +3182,18 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewPriceConfigParam'
+            $ref: '#/definitions/NewPriceConfig'
       responses:
-        '201':
+        '200':
           description: The model updated
           schema:
-            $ref: '#/definitions/PriceConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2533,7 +3201,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
@@ -2548,8 +3216,12 @@ paths:
       responses:
         '204':
           description: Delete succuessful
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2557,7 +3229,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/priceConfig/{key}/versions/{version}/revisions':
@@ -2574,9 +3246,15 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/PriceConfigListResponse'
-        '422':
-          description: Invalid input
+            type: array
+            items:
+              $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2584,7 +3262,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -2600,14 +3278,18 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewPriceConfigParam'
+            $ref: '#/definitions/NewPriceConfig'
       responses:
-        '201':
+        '200':
           description: The model created
           schema:
-            $ref: '#/definitions/PriceConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2615,7 +3297,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/priceConfig/{key}/versions/{version}/revisions/{revision}':
@@ -2633,9 +3315,13 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/PriceConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2643,7 +3329,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
@@ -2659,8 +3345,12 @@ paths:
       responses:
         '204':
           description: Delete succuessful
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2668,7 +3358,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
 
@@ -2685,9 +3375,13 @@ paths:
         '200':
           description: The model for the latest revision of latest version
           schema:
-            $ref: '#/definitions/PlanConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2695,7 +3389,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/planConfig/{key}/versions':
@@ -2711,9 +3405,15 @@ paths:
         '200':
           description: The model list for the all version
           schema:
-            $ref: '#/definitions/PlanConfigListResponse'
-        '422':
-          description: Invalid input
+            type: array
+            items:
+              $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2721,7 +3421,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -2736,18 +3436,22 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewPlanConfigParam'
+            $ref: '#/definitions/NewPlanConfig'
       responses:
-        '201':
+        '200':
           description: The model created
           schema:
-            $ref: '#/definitions/PlanConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/planConfig/{key}/versions/{version}':
@@ -2764,9 +3468,13 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/PlanConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2774,7 +3482,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     patch:
@@ -2790,14 +3498,18 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewPlanConfigParam'
+            $ref: '#/definitions/NewPlanConfig'
       responses:
-        '201':
+        '200':
           description: The model updated
           schema:
-            $ref: '#/definitions/PlanConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2805,7 +3517,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
@@ -2820,8 +3532,12 @@ paths:
       responses:
         '204':
           description: Delete succuessful
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2829,7 +3545,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/planConfig/{key}/versions/{version}/revisions':
@@ -2846,9 +3562,15 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/PlanConfigListResponse'
-        '422':
-          description: Invalid input
+            type: array
+            items:
+              $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2856,7 +3578,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
@@ -2872,14 +3594,18 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/NewPlanConfigParam'
+            $ref: '#/definitions/NewPlanConfig'
       responses:
-        '201':
+        '200':
           description: The model created
           schema:
-            $ref: '#/definitions/PlanConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2887,7 +3613,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/metadata/planConfig/{key}/versions/{version}/revisions/{revision}':
@@ -2905,9 +3631,13 @@ paths:
         '200':
           description: The model for the particular version
           schema:
-            $ref: '#/definitions/PlanConfigResponse'
-        '422':
-          description: Invalid input
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2915,7 +3645,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
@@ -2931,8 +3661,12 @@ paths:
       responses:
         '204':
           description: Delete succuessful
-        '422':
-          description: Invalid input
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '404':
@@ -2940,7 +3674,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
-          description: Invalid server state or unknown error
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
 
@@ -3021,20 +3755,21 @@ parameters:
     required: true
     type: integer
     format: int64
-  offsetParam:
-    name: offset
-    description: number of items to skip. Defaults to 0
+  pageParam:
+    name: page
     in: query
+    description: The page number.
     required: false
     type: integer
-    format: int32
-  limitParam:
-    name: limit
-    description: max records to return. Defaults to 20
+    default: 1
+  perPageParam:
+    name: perPage
     in: query
+    description: The number of items to list per page.
     required: false
     type: integer
-    format: int32
+    default: 20
+    maximum: 100
   modelKeyParam:
     name: key
     in: path
@@ -3069,6 +3804,60 @@ parameters:
     required: true
     type: integer
     format: int64
+  idQueryParam:
+    name: id
+    in: query
+    description: id filter
+    required: false
+    type: string
+  statusQueryParam:
+    name: status
+    in: query
+    description: status filter
+    required: false
+    type: string
+  typeQueryParam:
+    name: type
+    in: query
+    description: type filter
+    required: false
+    type: string
+  memberOnlyQueryParam:
+    name: memberOnly
+    in: query
+    description: memberOnly filter
+    required: false
+    type: boolean
+  keywordQueryParam:
+    name: keyword
+    in: query
+    description: keyword filter
+    required: false
+    type: string
+  nameQueryParam:
+    name: name
+    in: query
+    description: name filter
+    required: false
+    type: string
+  codeQueryParam:
+    name: code
+    in: query
+    description: code filter
+    required: false
+    type: string
+  customerQueryParam:
+    name: customer
+    in: query
+    description: customer filter
+    required: false
+    type: string
+  managerQueryParam:
+    name: manager
+    in: query
+    description: manager filter
+    required: false
+    type: string
 definitions:
   ResponseMetadata:
     title: Metadata object for a response
@@ -3081,24 +3870,8 @@ definitions:
   ErrorModel:
     type: object
     properties:
-      id:
+      message:
         type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            description: http status code
-            type: integer
-            format: int32
-          debug:
-            type: object
-          content:
-            type: object
   ProjectBookMark:
     title: Project bookmark
     type: object
@@ -3107,16 +3880,6 @@ definitions:
         type: string
       address:
         type: string
-  ProjectBodyParam:
-    type: object
-    properties:
-      param:
-        $ref: '#/definitions/Project'
-  ProjectUpgradeBodyParam:
-    type: object
-    properties:
-      param:
-        $ref: '#/definitions/ProjectUpgrade'
   NewProject:
     type: object
     required:
@@ -3215,11 +3978,6 @@ definitions:
         description: the project template identifier
         type: number
         format: long
-  NewProjectBodyParam:
-    type: object
-    properties:
-      param:
-        $ref: '#/definitions/NewProject'
   ChallengeEligibility:
     description: Object describing who is eligible to work on this task
     type: object
@@ -3431,11 +4189,6 @@ definitions:
           - customer
           - manager
           - copilot
-  NewProjectMemberBodyParam:
-    type: object
-    properties:
-      param:
-        $ref: '#/definitions/NewProjectMember'
   UpdateProjectMember:
     title: Project Member object
     type: object
@@ -3452,11 +4205,6 @@ definitions:
           - customer
           - manager
           - copilot
-  UpdateProjectMemberBodyParam:
-    type: object
-    properties:
-      param:
-        $ref: '#/definitions/UpdateProjectMember'
   NewProjectAttachment:
     title: Project attachment request
     type: object
@@ -3494,30 +4242,6 @@ definitions:
           type: integer
           format: int64
           description: Users allowed to access the attachment
-  NewProjectAttachmentBodyParam:
-    type: object
-    properties:
-      param:
-        $ref: '#/definitions/NewProjectAttachment'
-  NewProjectAttachmentResponse:
-    title: Project attachment object response
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            $ref: '#/definitions/ProjectAttachment'
   ProjectAttachment:
     title: Project attachment
     type: object
@@ -3605,111 +4329,6 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this task
         readOnly: true
-  NewProjectMemberResponse:
-    title: Project member object response
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            $ref: '#/definitions/ProjectMember'
-  UpdateProjectMemberResponse:
-    title: Project member object response
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            $ref: '#/definitions/ProjectMember'
-  ProjectResponse:
-    title: Single project object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            $ref: '#/definitions/Project'
-  UpdateProjectResponse:
-    title: response with original and updated project object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            type: object
-            properties:
-              original:
-                $ref: '#/definitions/Project'
-              updated:
-                $ref: '#/definitions/Project'
-  ProjectListResponse:
-    title: List response
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/Project'
   ProjectTemplateRequest:
     title: Project template request object
     type: object
@@ -3739,28 +4358,22 @@ definitions:
         $ref: '#/definitions/VersionModelParam'
       planConfig:
         $ref: '#/definitions/VersionModelParam'
-  ProjectTemplateUpgradeBodyParam:
+  ProjectTemplateUpgradeBody:
     title: Project template
     type: object
     properties:
-      param:
-        type: object
-        properties:
-          form:
-            $ref: '#/definitions/VersionModelParam'
-          priceConfig:
-            $ref: '#/definitions/VersionModelParam'
-          planConfig:
-            $ref: '#/definitions/VersionModelParam'
-  ProductTemplateUpgradeBodyParam:
+      form:
+        $ref: '#/definitions/VersionModelParam'
+      priceConfig:
+        $ref: '#/definitions/VersionModelParam'
+      planConfig:
+        $ref: '#/definitions/VersionModelParam'
+  ProductTemplateUpgradeBody:
     title: Product template
     type: object
     properties:
-      param:
-        type: object
-        properties:
-          form:
-            $ref: '#/definitions/VersionModelParam'
+      form:
+        $ref: '#/definitions/VersionModelParam'
   VersionModelParam:
     title: version model param
     type: object
@@ -3771,14 +4384,6 @@ definitions:
       version:
         type: number
         description: the version for model
-  ProjectTemplateBodyParam:
-    title: Project template body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/ProjectTemplateRequest'
   ProjectTemplate:
     title: Project template object
     allOf:
@@ -3813,51 +4418,6 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/ProjectTemplateRequest'
-  ProjectTemplateResponse:
-    title: Single project template response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/ProjectTemplate'
-  ProjectTemplateListResponse:
-    title: Project template list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/ProjectTemplate'
   ProductTemplateRequest:
     title: Product template request object
     type: object
@@ -3900,14 +4460,6 @@ definitions:
       isAddOn:
         type: boolean
         description: the flag that shows if the product template is an add on
-  ProductTemplateBodyParam:
-    title: Product template body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/ProductTemplateRequest'
   ProductTemplate:
     title: Product template object
     allOf:
@@ -3946,70 +4498,6 @@ definitions:
             type: string
             description: The product category of the product template
       - $ref: '#/definitions/ProductTemplateRequest'
-  ProjectUpgradeResponse:
-    title: Project upgrade response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-  ProductTemplateResponse:
-    title: Single product template response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/ProductTemplate'
-  ProductTemplateListResponse:
-    title: Product template list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/ProductTemplate'
   ProjectPhaseRequest:
     title: Project phase request object
     type: object
@@ -4046,14 +4534,6 @@ definitions:
         type: number
         format: integer
         description: the project phase order
-  ProjectPhaseBodyParam:
-    title: Project phase body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/ProjectPhaseRequest'
   ProjectPhase:
     title: Project phase object
     allOf:
@@ -4088,51 +4568,6 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/ProjectPhaseRequest'
-  ProjectPhaseResponse:
-    title: Single project phase response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/ProjectPhase'
-  ProjectPhaseListResponse:
-    title: Project phase list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/ProjectPhase'
   PhaseProductRequest:
     title: Phase product request object
     type: object
@@ -4161,14 +4596,6 @@ definitions:
       details:
         type: object
         description: the phase product details
-  PhaseProductBodyParam:
-    title: Phase product body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/PhaseProductRequest'
   PhaseProduct:
     title: Phase product object
     allOf:
@@ -4203,51 +4630,6 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/PhaseProductRequest'
-  PhaseProductResponse:
-    title: Single phase product response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/PhaseProduct'
-  PhaseProductListResponse:
-    title: Phase product list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/PhaseProduct'
   ProductCategoryRequest:
     title: Product category request object
     type: object
@@ -4257,14 +4639,6 @@ definitions:
       displayName:
         type: string
         description: the product category display name
-  ProductCategoryBodyParam:
-    title: Product category body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/ProductCategoryRequest'
   ProductCategoryCreateRequest:
     title: Product category creation request object
     type: object
@@ -4277,14 +4651,6 @@ definitions:
             type: string
             description: the product category key
       - $ref: '#/definitions/ProductCategoryRequest'
-  ProductCategoryCreateBodyParam:
-    title: Product category creation body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/ProductCategoryCreateRequest'
   ProductCategory:
     title: Product category object
     allOf:
@@ -4317,51 +4683,6 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/ProductCategoryCreateRequest'
-  ProductCategoryResponse:
-    title: Single product category response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/ProductCategory'
-  ProductCategoryListResponse:
-    title: Product category list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/ProductCategory'
   ProjectTypeRequest:
     title: Project type request object
     type: object
@@ -4371,14 +4692,6 @@ definitions:
       displayName:
         type: string
         description: the project type display name
-  ProjectTypeBodyParam:
-    title: Project type body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/ProjectTypeRequest'
   ProjectTypeCreateRequest:
     title: Project type creation request object
     type: object
@@ -4391,14 +4704,6 @@ definitions:
             type: string
             description: the project type key
       - $ref: '#/definitions/ProjectTypeRequest'
-  ProjectTypeCreateBodyParam:
-    title: Project type creation body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/ProjectTypeCreateRequest'
   ProjectType:
     title: Project type object
     allOf:
@@ -4454,14 +4759,6 @@ definitions:
             type: string
             description: the organization config id
       - $ref: '#/definitions/OrgConfigRequest'
-  OrgConfigCreateBodyParam:
-    title: Organization config creation body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/OrgConfigCreateRequest'
   OrgConfig:
     title: Organization config object
     allOf:
@@ -4507,96 +4804,6 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/OrgConfigCreateRequest'
-  OrgConfigResponse:
-    title: Single organization config response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/OrgConfig'
-  OrgConfigListResponse:
-    title: Organization confige list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/OrgConfig'
-  ProjectTypeResponse:
-    title: Single project type response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/ProjectType'
-  ProjectTypeListResponse:
-    title: Project type list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/ProjectType'
   TimelineRequest:
     title: Timeline request object
     type: object
@@ -4632,14 +4839,6 @@ definitions:
         description: >-
           the timeline reference id (project id or phase id, corresponding to
           the `reference`)
-  TimelineBodyParam:
-    title: Timeline body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/TimelineRequest'
   Timeline:
     title: Timeline object
     allOf:
@@ -4674,51 +4873,6 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/TimelineRequest'
-  TimelineResponse:
-    title: Single timeline response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/Timeline'
-  TimelineListResponse:
-    title: Timeline list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/Timeline'
   MilestonePostRequest:
     title: Milestone request object
     type: object
@@ -4834,22 +4988,6 @@ definitions:
       blockedText:
         type: string
         description: the milestone blocked text
-  MilestonePostBodyParam:
-    title: Milestone body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/MilestonePostRequest'
-  MilestonePatchBodyParam:
-    title: Milestone body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/MilestonePatchRequest'
   Milestone:
     title: Milestone object
     allOf:
@@ -4884,51 +5022,6 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/MilestonePostRequest'
-  MilestoneResponse:
-    title: Single milestone response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/Milestone'
-  MilestoneListResponse:
-    title: Milestone list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/Milestone'
   MilestoneTemplateRequest:
     title: Milestone template request object
     type: object
@@ -4971,14 +5064,6 @@ definitions:
       metadata:
         type: object
         description: the milestone template metadata
-  MilestoneTemplateBodyParam:
-    title: Milestone template body param
-    type: object
-    required:
-      - param
-    properties:
-      param:
-        $ref: '#/definitions/MilestoneTemplateRequest'
   MilestoneCloneTemplateRequest:
     title: Milestone clone template request object
     type: object
@@ -5042,94 +5127,30 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/MilestoneTemplateRequest'
-  MilestoneTemplateResponse:
-    title: Single milestone template response object
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/MilestoneTemplate'
-  MilestoneTemplateListResponse:
-    title: Milestone template list response object
-    type: object
-    properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/MilestoneTemplate'
   AllMetadataResponse:
     title: All metadata response object
     type: object
     properties:
-      id:
-        type: string
-        readOnly: true
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            type: object
-            properties:
-              projectTemplates:
-                type: array
-                items:
-                  $ref: '#/definitions/ProjectTemplate'
-              productTemplates:
-                type: array
-                items:
-                  $ref: '#/definitions/ProductTemplate'
-              milestoneTemplates:
-                type: array
-                items:
-                  $ref: '#/definitions/MilestoneTemplate'
-              projectTypes:
-                type: array
-                items:
-                  $ref: '#/definitions/ProjectType'
-              productCategories:
-                type: array
-                items:
-                  $ref: '#/definitions/ProductCategory'
+      projectTemplates:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectTemplate'
+      productTemplates:
+        type: array
+        items:
+          $ref: '#/definitions/ProductTemplate'
+      milestoneTemplates:
+        type: array
+        items:
+          $ref: '#/definitions/MilestoneTemplate'
+      projectTypes:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectType'
+      productCategories:
+        type: array
+        items:
+          $ref: '#/definitions/ProductCategory'
   ProjectMemberInvite:
     type: object
     properties:
@@ -5194,70 +5215,43 @@ definitions:
     title: Add project member invites request object
     type: object
     properties:
-      param:
-        type: object
-        properties:
-          userIds:
-            description: 'The user Id list, could not present with emails'
-            type: array
-            items:
-              type: integer
-              format: int64
-          emails:
-            type: array
-            items:
-              type: string
-            description: 'The user email list, could not present with userIds'
-          role:
-            description: The target role in the project
-            type: string
-            enum:
-              - manager
-              - customer
-              - copilot
+      userIds:
+        description: 'The user Id list, could not present with emails'
+        type: array
+        items:
+          type: integer
+          format: int64
+      emails:
+        type: array
+        items:
+          type: string
+        description: 'The user email list, could not present with userIds'
+      role:
+        description: The target role in the project
+        type: string
+        enum:
+          - manager
+          - customer
+          - copilot
   UpdateProjectMemberInviteRequest:
     title: Update project member invite request object
     type: object
     properties:
-      param:
-        type: object
-        properties:
-          userId:
-            type: integer
-            format: int64
-            description: 'The user Id, could not present with email'
-          email:
-            type: string
-            description: 'The user email, could not present with userId'
-          status:
-            description: The invite status
-            type: string
-            enum:
-              - pending
-              - accepted
-              - refused
-              - canceled
-  ProjectMemberInviteResponse:
-    title: Project member invite response object
-    type: object
-    properties:
-      id:
+      userId:
+        type: integer
+        format: int64
+        description: 'The user Id, could not present with email'
+      email:
         type: string
-        description: unique id identifying the request
-      version:
+        description: 'The user email, could not present with userId'
+      status:
+        description: The invite status
         type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          metadata:
-            $ref: '#/definitions/ResponseMetadata'
-          content:
-            $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
+        enum:
+          - pending
+          - accepted
+          - refused
+          - canceled
   Form:
     type: object
     properties:
@@ -5297,54 +5291,11 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this task
         readOnly: true
-  FormResponse:
-    title: Form response
+  NewForm:
     type: object
     properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
+      config:
         type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            $ref: '#/definitions/Form'
-  FormListResponse:
-    title: From list response
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/Form'
-  NewFormParam:
-    type: object
-    properties:
-      param:
-        type: object
-        properties:
-          config:
-            type: object
   PriceConfig:
     type: object
     properties:
@@ -5384,55 +5335,12 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this task
         readOnly: true
-  PriceConfigResponse:
-    title: PriceConfig response
+  NewPriceConfig:
     type: object
     properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
+      config:
+        description: config json
         type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            $ref: '#/definitions/PriceConfig'
-  PriceConfigListResponse:
-    title: PriceConfig list response
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/Form'
-  NewPriceConfigParam:
-    type: object
-    properties:
-      param:
-        type: object
-        properties:
-          config:
-            description: config json
-            type: object
   PlanConfig:
     type: object
     properties:
@@ -5472,52 +5380,9 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this task
         readOnly: true
-  PlanConfigResponse:
-    title: PlanConfig response
+  NewPlanConfig:
     type: object
     properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
+      config:
+        description: config json
         type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            $ref: '#/definitions/PlanConfig'
-  PlanConfigListResponse:
-    title: PlanConfig list response
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique id identifying the request
-      version:
-        type: string
-      result:
-        type: object
-        properties:
-          success:
-            type: boolean
-          status:
-            type: string
-            description: http status code
-          content:
-            type: array
-            items:
-              $ref: '#/definitions/PlanConfig'
-  NewPlanConfigParam:
-    type: object
-    properties:
-      param:
-        type: object
-        properties:
-          config:
-            description: config json
-            type: object
