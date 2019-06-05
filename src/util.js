@@ -28,6 +28,8 @@ const m2m = tcCoreLibAuth.m2m(config);
 
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
 
+const ssoRefCodes = JSON.parse(config.get('SSO_REFCODES'));
+
 // the client modifies the config object, so always passed the cloned object
 let esClient = null;
 
@@ -467,6 +469,13 @@ _.assignIn(util, {
    * @return {Array} tpcoder project members
    */
   getTopcoderProjectMembers: members => _(members).filter(m => m.role !== PROJECT_MEMBER_ROLE.CUSTOMER),
+
+  /**
+   * Check if project is for SSO users
+   * @param {Object}  project        project
+   * @return {Boolean} is SSO project
+   */
+  isSSO: project => ssoRefCodes.indexOf(_.get(project, 'details.utm.code')) > -1,
 
   /**
    * Check if the following model exist
