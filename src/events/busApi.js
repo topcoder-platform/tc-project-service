@@ -5,7 +5,7 @@ import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEM
   from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
-import { getTopcoderProjectMembers, isSSO } from '../util';
+import util from '../util';
 
 /**
  * Map of project status and event name sent to bus api
@@ -367,7 +367,7 @@ module.exports = (app, logger) => {
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
           allowedUsers: created.status === PROJECT_PHASE_STATUS.DRAFT ?
-            getTopcoderProjectMembers(project.members) : null,
+            util.getTopcoderProjectMembers(project.members) : null,
         }, logger);
         return sendPlanReadyEventIfNeeded(req, project, created);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
@@ -393,7 +393,7 @@ module.exports = (app, logger) => {
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
           allowedUsers: deleted.status === PROJECT_PHASE_STATUS.DRAFT ?
-            getTopcoderProjectMembers(project.members) : null,
+          util.getTopcoderProjectMembers(project.members) : null,
         }, logger);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -446,7 +446,7 @@ module.exports = (app, logger) => {
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
               allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
-                getTopcoderProjectMembers(project.members) : null,
+              util.getTopcoderProjectMembers(project.members) : null,
             }, logger));
             events.forEach((event) => { eventsMap[event] = true; });
           }
@@ -493,7 +493,7 @@ module.exports = (app, logger) => {
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
             allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
-              getTopcoderProjectMembers(project.members) : null,
+            util.getTopcoderProjectMembers(project.members) : null,
           }, logger);
         }
       }).catch(err => null);    // eslint-disable-line no-unused-vars
@@ -704,6 +704,7 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
     .then((project) => {
+      logger.debug(util.isSSO);
       if (status === INVITE_STATUS.REQUESTED) {
         createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED, {
           projectId,
@@ -711,20 +712,28 @@ module.exports = (app, logger) => {
           email,
           role,
           initiatorUserId: req.authUser.userId,
-          isSSO: isSSO(project),
+          isSSO: util.isSSO(project),
         }, logger);
       } else {
         // send event to bus api
+        logger.debug(JSON.stringify({
+          projectId,
+          userId,
+          email,
+          role,
+          initiatorUserId: req.authUser.userId,
+          isSSO: util.isSSO(project),
+        }));
         createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
           projectId,
           userId,
           email,
           role,
           initiatorUserId: req.authUser.userId,
-          isSSO: isSSO(project),
+          isSSO: util.isSSO(project),
         }, logger);
       }
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+    }).catch(err => logger.error(err));    // eslint-disable-line no-unused-vars
   });
 
   app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, ({ req, userId, email, status, role, createdBy }) => {
@@ -735,6 +744,7 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
     .then((project) => {
+      logger.debug(util.isSSO);
       if (status === INVITE_STATUS.REQUEST_APPROVED) {
         // send event to bus api
         createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_APPROVED, {
@@ -745,7 +755,7 @@ module.exports = (app, logger) => {
           role,
           status,
           initiatorUserId: req.authUser.userId,
-          isSSO: isSSO(project),
+          isSSO: util.isSSO(project),
         }, logger);
       } else if (status === INVITE_STATUS.REQUEST_REJECTED) {
         // send event to bus api
@@ -757,7 +767,7 @@ module.exports = (app, logger) => {
           role,
           status,
           initiatorUserId: req.authUser.userId,
-          isSSO: isSSO(project),
+          isSSO: util.isSSO(project),
         }, logger);
       } else {
         // send event to bus api
@@ -768,7 +778,7 @@ module.exports = (app, logger) => {
           role,
           status,
           initiatorUserId: req.authUser.userId,
-          isSSO: isSSO(project),
+          isSSO: util.isSSO(project),
         }, logger);
       }
     }).catch(err => null);    // eslint-disable-line no-unused-vars
