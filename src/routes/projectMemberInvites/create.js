@@ -162,6 +162,7 @@ const sendInviteEmail = (req, projectId, invite) => {
               projectName: project.name,
               projectId,
               initiator,
+              isSSO: util.isSSO(project),
             },
           ],
         }],
