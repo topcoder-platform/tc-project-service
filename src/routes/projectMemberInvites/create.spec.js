@@ -841,7 +841,7 @@ describe('Project Member Invite create', () => {
                 projectId: project1.id,
                 userId: 3,
                 email: null,
-                isSSO: false
+                isSSO: false,
               })).should.be.true;
               done();
             });
@@ -889,7 +889,7 @@ describe('Project Member Invite create', () => {
                 projectId: project1.id,
                 userId: null,
                 email: 'hello@world.com',
-                isSSO: false
+                isSSO: false,
               })).should.be.true;
               done();
             });
