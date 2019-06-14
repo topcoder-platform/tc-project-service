@@ -28,7 +28,7 @@ const expectAfterDelete = (id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/timelines/${id}`)
+          .get(`/v5/timelines/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -208,19 +208,21 @@ describe('DELETE timeline', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
 
   describe('DELETE /timelines/{timelineId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete('/v4/timelines/1')
+        .delete('/v5/timelines/1')
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .delete('/v4/timelines/1')
+        .delete('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -229,7 +231,7 @@ describe('DELETE timeline', () => {
 
     it('should return 403 for member who is not in the project (timeline refers to a phase)', (done) => {
       request(server)
-        .delete('/v4/timelines/2')
+        .delete('/v5/timelines/2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -238,7 +240,7 @@ describe('DELETE timeline', () => {
 
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
-        .delete('/v4/timelines/1234')
+        .delete('/v5/timelines/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -247,20 +249,20 @@ describe('DELETE timeline', () => {
 
     it('should return 404 for deleted timeline', (done) => {
       request(server)
-        .delete('/v4/timelines/3')
+        .delete('/v5/timelines/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(404, done);
     });
 
-    it('should return 422 for invalid param', (done) => {
+    it('should return 400 for invalid param', (done) => {
       request(server)
-        .delete('/v4/timelines/0')
+        .delete('/v5/timelines/0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     // eslint-disable-next-line func-names
@@ -272,7 +274,7 @@ describe('DELETE timeline', () => {
           results.should.have.length(2);
 
           request(server)
-            .delete('/v4/timelines/1')
+            .delete('/v5/timelines/1')
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -298,7 +300,7 @@ describe('DELETE timeline', () => {
 
     it('should return 204, for connect admin, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1')
+        .delete('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -308,7 +310,7 @@ describe('DELETE timeline', () => {
 
     it('should return 204, for connect manager, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1')
+        .delete('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -318,7 +320,7 @@ describe('DELETE timeline', () => {
 
     it('should return 204, for copilot, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1')
+        .delete('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -328,7 +330,7 @@ describe('DELETE timeline', () => {
 
     it('should return 204, for member, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1')
+        .delete('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })

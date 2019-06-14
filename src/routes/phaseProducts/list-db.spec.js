@@ -112,7 +112,7 @@ describe('Phase Products', () => {
   describe('GET /projects/{id}/phases/{phaseId}/products/db', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products/db`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products/db`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -123,7 +123,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/999/phases/${phaseId}/products/db`)
+        .get(`/v5/projects/999/phases/${phaseId}/products/db`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -134,7 +134,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/99999/products/db`)
+        .get(`/v5/projects/${projectId}/phases/99999/products/db`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -145,7 +145,7 @@ describe('Phase Products', () => {
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products/db`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products/db`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -166,7 +166,7 @@ describe('Phase Products', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products/db`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products/db`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

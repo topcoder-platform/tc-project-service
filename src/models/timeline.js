@@ -25,12 +25,11 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
-    classMethods: {
-      associate: (models) => {
-        Timeline.hasMany(models.Milestone, { as: 'milestones', foreignKey: 'timelineId', onDelete: 'cascade' });
-      },
-    },
   });
+
+  Timeline.associate = (models) => {
+    Timeline.hasMany(models.Milestone, { as: 'milestones', foreignKey: 'timelineId', onDelete: 'cascade' });
+  };
 
   return Timeline;
 };

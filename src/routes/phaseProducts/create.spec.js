@@ -101,7 +101,7 @@ describe('Phase Products', () => {
   describe('POST /projects/{projectId}/phases/{phaseId}/products', () => {
     it('should return 403 if user does not have permissions (non team member)', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -112,7 +112,7 @@ describe('Phase Products', () => {
 
     it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -121,61 +121,61 @@ describe('Phase Products', () => {
         .expect(403, done);
     });
 
-    it('should return 422 when name not provided', (done) => {
+    it('should return 400 when name not provided', (done) => {
       const reqBody = _.cloneDeep(body);
       delete reqBody.name;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({ param: reqBody })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when type not provided', (done) => {
+    it('should return 400 when type not provided', (done) => {
       const reqBody = _.cloneDeep(body);
       delete reqBody.type;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({ param: reqBody })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when estimatedPrice is negative', (done) => {
+    it('should return 400 when estimatedPrice is negative', (done) => {
       const reqBody = _.cloneDeep(body);
       reqBody.estimatedPrice = -20;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({ param: reqBody })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when actualPrice is negative', (done) => {
+    it('should return 400 when actualPrice is negative', (done) => {
       const reqBody = _.cloneDeep(body);
       reqBody.actualPrice = -20;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({ param: reqBody })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 when project is not found', (done) => {
       request(server)
-        .post(`/v4/projects/99999/phases/${phaseId}/products`)
+        .post(`/v5/projects/99999/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -186,7 +186,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when project phase is not found', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/99999/products`)
+        .post(`/v5/projects/${projectId}/phases/99999/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -197,7 +197,7 @@ describe('Phase Products', () => {
 
     it('should return 201 if payload is valid', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -239,7 +239,7 @@ describe('Phase Products', () => {
 
       it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when product phase created', (done) => {
         request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

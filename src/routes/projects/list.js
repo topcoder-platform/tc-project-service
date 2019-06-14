@@ -286,10 +286,10 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   let mustQuery = [];
   let shouldQuery = [];
   let fullTextQuery;
-  if (_.has(criteria, 'filters.id.$in')) {
+  if (_.has(criteria, 'filters.id') && _.isArray(criteria.filters.id)) {
     boolQuery.push({
       ids: {
-        values: criteria.filters.id.$in,
+        values: criteria.filters.id,
       },
     });
   } else if (_.has(criteria, 'filters.id')) {
@@ -431,6 +431,68 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   return searchCriteria;
 };
 
+const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
+  // order by
+  const order = sort ? [sort.split(' ')] : [['createdAt', 'asc']];
+  let fields = ffields ? ffields.split(',') : [];
+    // parse the fields string to determine what fields are to be returned
+  fields = util.parseFields(fields, {
+    projects: PROJECT_ATTRIBUTES,
+    project_members: PROJECT_MEMBER_ATTRIBUTES,
+  });
+  // make sure project.id is part of fields
+  if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
+  const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
+  const retrieveMembers = !req.query.fields || !!fields.project_members.length;
+
+  return models.Project.searchText({
+    filters: criteria.filters,
+    order,
+    limit: criteria.limit,
+    offset: criteria.offset,
+    attributes: _.get(fields, 'projects', null),
+  }, req.log)
+  .then(({ rows, count }) => {
+    const projectIds = _.map(rows, 'id');
+    const promises = [];
+    // retrieve members
+    if (projectIds.length && retrieveMembers) {
+      promises.push(
+        models.ProjectMember.findAll({
+          attributes: _.get(fields, 'ProjectMembers'),
+          where: { projectId: { $in: projectIds } },
+          raw: true,
+        }),
+      );
+    }
+    if (projectIds.length && retrieveAttachments) {
+      promises.push(
+        models.ProjectAttachment.findAll({
+          attributes: PROJECT_ATTACHMENT_ATTRIBUTES,
+          where: { projectId: { $in: projectIds } },
+          raw: true,
+        }),
+      );
+    }
+    // return results after promise(s) have resolved
+    return Promise.all(promises)
+      .then((values) => {
+        const allMembers = retrieveMembers ? values.shift() : [];
+        const allAttachments = retrieveAttachments ? values.shift() : [];
+        _.forEach(rows, (fp) => {
+          const p = fp;
+          // if values length is 1 it could be either attachments or members
+          if (retrieveMembers) {
+            p.members = _.filter(allMembers, m => m.projectId === p.id);
+          }
+          if (retrieveAttachments) {
+            p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
+          }
+        });
+        return { rows, count };
+      });
+  });
+};
 
 const retrieveProjects = (req, criteria, sort, ffields) => {
   // order by
@@ -467,7 +529,8 @@ module.exports = [
    */
   (req, res, next) => {
     // handle filters
-    let filters = util.parseQueryFilter(req.query.filter);
+    let filters = _.omit(req.query, 'sort', 'perPage', 'page', 'fields', 'limit', 'offset');
+
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
@@ -502,7 +565,13 @@ module.exports = [
           || util.hasRoles(req, MANAGER_ROLES))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
-        .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+      .then((result) => {
+        if (result.rows.length === 0) {
+          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
+            .then(r => res.json(r.rows));
+        }
+        return res.json(result.rows);
+      })
         .catch(err => next(err));
     }
 
@@ -510,7 +579,13 @@ module.exports = [
     criteria.filters.email = req.authUser.email;
     criteria.filters.userId = req.authUser.userId;
     return retrieveProjects(req, criteria, sort, req.query.fields)
-      .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+      .then((result) => {
+        if (result.rows.length === 0) {
+          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
+            .then(r => res.json(r.rows));
+        }
+        return res.json(result.rows);
+      })
       .catch(err => next(err));
   },
 ];

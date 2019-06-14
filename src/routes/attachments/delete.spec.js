@@ -73,7 +73,7 @@ describe('Project Attachments delete', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .delete(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
@@ -83,7 +83,7 @@ describe('Project Attachments delete', () => {
 
     it('should return 404 if attachment was not found', (done) => {
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/8888888`)
+          .delete(`/v5/projects/${project1.id}/attachments/8888888`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -109,7 +109,7 @@ describe('Project Attachments delete', () => {
       const deleteSpy = sinon.spy(mockHttpClient, 'delete');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .delete(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -136,7 +136,7 @@ describe('Project Attachments delete', () => {
                       chai.assert.isNotNull(res.deletedBy);
 
                       request(server)
-                        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+                        .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
                         .set({
                           Authorization: `Bearer ${testUtil.jwts.admin}`,
                         })
@@ -149,7 +149,7 @@ describe('Project Attachments delete', () => {
 
     it('should return 204 if ADMIN deletes the attachment successfully', (done) => {
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .delete(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -160,7 +160,7 @@ describe('Project Attachments delete', () => {
               done(err);
             } else {
               request(server)
-              .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+              .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
               .set({
                 Authorization: `Bearer ${testUtil.jwts.admin}`,
               })
@@ -183,7 +183,7 @@ describe('Project Attachments delete', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment deleted', (done) => {
         request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .delete(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })

@@ -186,7 +186,9 @@ describe('UPDATE timeline', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('PATCH /timelines/{timelineId}', () => {
     const body = {
@@ -202,14 +204,14 @@ describe('UPDATE timeline', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -219,7 +221,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 403 for member who is not in the project (timeline refers to a phase)', (done) => {
       request(server)
-        .patch('/v4/timelines/2')
+        .patch('/v5/timelines/2')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
@@ -229,7 +231,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
-        .patch('/v4/timelines/1234')
+        .patch('/v5/timelines/1234')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
@@ -239,7 +241,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 404 for deleted timeline', (done) => {
       request(server)
-        .patch('/v4/timelines/3')
+        .patch('/v5/timelines/3')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
@@ -247,19 +249,19 @@ describe('UPDATE timeline', () => {
         .expect(404, done);
     });
 
-    it('should return 422 for invalid param', (done) => {
+    it('should return 400 for invalid param', (done) => {
       request(server)
-        .patch('/v4/timelines/0')
+        .patch('/v5/timelines/0')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .patch('/v4/timelines/1234')
+        .patch('/v5/timelines/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -269,7 +271,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 404 for deleted template', (done) => {
       request(server)
-        .patch('/v4/timelines/3')
+        .patch('/v5/timelines/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -277,7 +279,7 @@ describe('UPDATE timeline', () => {
         .expect(404, done);
     });
 
-    it('should return 422 if missing name', (done) => {
+    it('should return 400 if missing name', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           name: undefined,
@@ -285,16 +287,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing startDate', (done) => {
+    it('should return 400 if missing startDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: undefined,
@@ -302,16 +304,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is after endDate', (done) => {
+    it('should return 400 if startDate is after endDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: '2018-05-29T00:00:00.000Z',
@@ -320,16 +322,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing reference', (done) => {
+    it('should return 400 if missing reference', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: undefined,
@@ -337,16 +339,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing referenceId', (done) => {
+    it('should return 400 if missing referenceId', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: undefined,
@@ -354,16 +356,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if invalid reference', (done) => {
+    it('should return 400 if invalid reference', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: 'invalid',
@@ -371,16 +373,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if invalid referenceId', (done) => {
+    it('should return 400 if invalid referenceId', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: 0,
@@ -388,16 +390,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project does not exist', (done) => {
+    it('should return 400 if project does not exist', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: 1110,
@@ -405,16 +407,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project was deleted', (done) => {
+    it('should return 400 if project was deleted', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: 2,
@@ -422,16 +424,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if phase does not exist', (done) => {
+    it('should return 400 if phase does not exist', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: 'phase',
@@ -440,16 +442,16 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if phase was deleted', (done) => {
+    it('should return 400 if phase was deleted', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: 'phase',
@@ -458,18 +460,18 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -504,7 +506,7 @@ describe('UPDATE timeline', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -517,12 +519,12 @@ describe('UPDATE timeline', () => {
         .expect(200)
         .end(() => {
           setTimeout(() => {
-            models.Milestone.findById(1)
+            models.Milestone.findByPk(1)
               .then((milestone) => {
                 milestone.startDate.should.be.eql(new Date('2018-05-15T00:00:00.000Z'));
                 milestone.endDate.should.be.eql(new Date('2018-05-16T00:00:00.000Z'));
               })
-              .then(() => models.Milestone.findById(2))
+              .then(() => models.Milestone.findByPk(2))
               .then((milestone) => {
                 milestone.startDate.should.be.eql(new Date('2018-05-17T00:00:00.000Z'));
                 milestone.endDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
@@ -538,7 +540,7 @@ describe('UPDATE timeline', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -551,12 +553,12 @@ describe('UPDATE timeline', () => {
         .expect(200)
         .end(() => {
           setTimeout(() => {
-            models.Milestone.findById(1)
+            models.Milestone.findByPk(1)
               .then((milestone) => {
                 milestone.startDate.should.be.eql(new Date('2018-05-12T00:00:00.000Z'));
                 milestone.endDate.should.be.eql(new Date('2018-05-13T00:00:00.000Z'));
               })
-              .then(() => models.Milestone.findById(2))
+              .then(() => models.Milestone.findByPk(2))
               .then((milestone) => {
                 milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
                 milestone.endDate.should.be.eql(new Date('2018-05-16T00:00:00.000Z'));
@@ -570,7 +572,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -581,7 +583,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -592,7 +594,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -603,7 +605,7 @@ describe('UPDATE timeline', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -621,7 +623,7 @@ describe('UPDATE timeline', () => {
       };
 
       request(server)
-        .patch('/v4/timelines/1')
+        .patch('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -651,7 +653,7 @@ describe('UPDATE timeline', () => {
       // thus TIMELINE_ADJUSTED will be always sent
       it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when timeline updated', (done) => {
         request(server)
-          .patch('/v4/timelines/1')
+          .patch('/v5/timelines/1')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })

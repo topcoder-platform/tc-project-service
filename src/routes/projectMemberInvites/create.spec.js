@@ -163,7 +163,7 @@ describe('Project Member Invite create', () => {
     it('should return 201 if userIds and emails are presented the same time',
         (done) => {
           request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -189,7 +189,7 @@ describe('Project Member Invite create', () => {
     it('should return 400 if neither userIds or email is presented',
         (done) => {
           request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -204,7 +204,8 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            res.body.result.status.should.equal(400);
+            const errorMessage = _.get(res.body, 'message', '');
+            sinon.assert.match(errorMessage, /.*Either userIds or emails are required/);
             done();
           }
         });
@@ -229,7 +230,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -245,9 +246,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
-            res.body.result.status.should.equal(403);
-            const errorMessage = _.get(resJson, 'message', '');
+            const errorMessage = _.get(res.body, 'message', '');
             sinon.assert.match(errorMessage, /.*You are not allowed to invite user as/);
             done();
           }
@@ -273,7 +272,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -289,9 +288,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
-            res.body.result.status.should.equal(403);
-            const errorMessage = _.get(resJson, 'message', '');
+            const errorMessage = _.get(res.body, 'message', '');
             sinon.assert.match(errorMessage, /.*You are not allowed to invite user as/);
             done();
           }
@@ -319,7 +316,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -372,7 +369,7 @@ describe('Project Member Invite create', () => {
         email: 'hello@world.com',
       }]));
       request(server)
-        .post(`/v4/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -421,7 +418,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -469,7 +466,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -525,7 +522,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -541,9 +538,8 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
             sinon.assert.match(errorMessage, /.*not allowed to invite user as/);
             done();
@@ -555,7 +551,7 @@ describe('Project Member Invite create', () => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -582,7 +578,7 @@ describe('Project Member Invite create', () => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -609,7 +605,7 @@ describe('Project Member Invite create', () => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve(['Topcoder User']));
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -656,7 +652,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -685,7 +681,7 @@ describe('Project Member Invite create', () => {
 
     it('should return 201 and empty response when trying add already invited member by lowercase email', (done) => {
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -711,7 +707,7 @@ describe('Project Member Invite create', () => {
 
     it('should return 201 and empty response when trying add already invited member by uppercase email', (done) => {
       request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -738,7 +734,7 @@ describe('Project Member Invite create', () => {
     xit('should return 201 and empty response when trying add already invited member by gmail email with dot',
       (done) => {
         request(server)
-          .post(`/v4/projects/${project1.id}/members/invite`)
+          .post(`/v5/projects/${project1.id}/members/invite`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -765,7 +761,7 @@ describe('Project Member Invite create', () => {
     xit('should return 201 and empty response when trying add already invited member by gmail email without dot',
       (done) => {
         request(server)
-          .post(`/v4/projects/${project1.id}/members/invite`)
+          .post(`/v5/projects/${project1.id}/members/invite`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -820,7 +816,7 @@ describe('Project Member Invite create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -867,7 +863,7 @@ describe('Project Member Invite create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })

@@ -65,19 +65,22 @@ describe('LIST project templates', () => {
 
   let templateId;
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProjectTemplate.create(templates[0]))
-    .then((createdTemplate) => {
-      templateId = createdTemplate.id;
-      return models.ProjectTemplate.create(templates[1]);
-    }).then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProjectTemplate.create(templates[0]))
+      .then((createdTemplate) => {
+        templateId = createdTemplate.id;
+        return models.ProjectTemplate.create(templates[1]).then(() => done());
+      });
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/projectTemplates', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata/projectTemplates')
+        .get('/v5/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -85,7 +88,7 @@ describe('LIST project templates', () => {
         .end((err, res) => {
           const template = templates[0];
 
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].id.should.be.eql(templateId);
           resJson[0].name.should.be.eql(template.name);
@@ -106,13 +109,13 @@ describe('LIST project templates', () => {
 
     it('should return 403 for anonymous user', (done) => {
       request(server)
-        .get('/v4/projects/metadata/projectTemplates')
+        .get('/v5/projects/metadata/projectTemplates')
         .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata/projectTemplates')
+        .get('/v5/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -122,7 +125,7 @@ describe('LIST project templates', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/projects/metadata/projectTemplates')
+        .get('/v5/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -132,7 +135,7 @@ describe('LIST project templates', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/projects/metadata/projectTemplates')
+        .get('/v5/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -141,7 +144,7 @@ describe('LIST project templates', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/projects/metadata/projectTemplates')
+        .get('/v5/projects/metadata/projectTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

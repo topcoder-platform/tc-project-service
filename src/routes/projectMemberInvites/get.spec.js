@@ -76,13 +76,13 @@ describe('GET Project', () => {
   describe('GET /projects/{id}/members/invite', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-          .get(`/v4/projects/${project2.id}/members/invite`)
+          .get(`/v5/projects/${project2.id}/members/invite`)
           .expect(403, done);
     });
 
     it('should return 404 if requested project doesn\'t exist', (done) => {
       request(server)
-          .get('/v4/projects/14343323/members/invite')
+          .get('/v5/projects/14343323/members/invite')
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -91,7 +91,7 @@ describe('GET Project', () => {
 
     it('should return the invite if user is invited to this project', (done) => {
       request(server)
-          .get(`/v4/projects/${project1.id}/members/invite`)
+          .get(`/v5/projects/${project1.id}/members/invite`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
@@ -113,7 +113,7 @@ describe('GET Project', () => {
 
     it('should return 404 if user is not invited to this project', (done) => {
       request(server)
-          .get(`/v4/projects/${project2.id}/members/invite`)
+          .get(`/v5/projects/${project2.id}/members/invite`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })

@@ -37,7 +37,7 @@ module.exports = [
     ];
     if (sort && _.indexOf(sortableProps, sort) < 0) {
       const apiErr = new Error('Invalid sort criteria');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
     const sortColumnAndOrder = sort.split(' ');

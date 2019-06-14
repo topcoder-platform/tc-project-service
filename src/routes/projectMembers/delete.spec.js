@@ -93,7 +93,7 @@ describe('Project members delete', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -109,7 +109,7 @@ describe('Project members delete', () => {
 
     it('should return 403 if user not found', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/8888888`)
+        .delete(`/v5/projects/${project1.id}/members/8888888`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -125,7 +125,7 @@ describe('Project members delete', () => {
 
     it('should return 204 if copilot user has access to the project', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -184,7 +184,7 @@ describe('Project members delete', () => {
         updatedAt: '2016-08-30 00:33:07+00',
       }]).then(() => {
         request(server)
-          .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+          .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -242,7 +242,7 @@ describe('Project members delete', () => {
       const postSpy = sinon.spy(mockHttpClient, 'post');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -289,7 +289,7 @@ describe('Project members delete', () => {
       })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+            .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
@@ -313,7 +313,7 @@ describe('Project members delete', () => {
 
     it('should return 403 if copilot user is trying to remove a manager', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -349,7 +349,7 @@ describe('Project members delete', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-          .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+          .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
@@ -376,7 +376,7 @@ describe('Project members delete', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when copilot removed', (done) => {
         request(server)
-          .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+          .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })

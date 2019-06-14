@@ -45,10 +45,8 @@ describe('Project', () => {
   });
   describe('PATCH /projects', () => {
     const body = {
-      param: {
-        name: 'updatedProject name',
-        type: 'generic',
-      },
+      name: 'updatedProject name',
+      type: 'generic',
     };
     let sandbox;
     afterEach(() => {
@@ -125,14 +123,14 @@ describe('Project', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 400 if update completed project', (done) => {
       request(server)
-        .patch(`/v4/projects/${project2.id}`)
+        .patch(`/v5/projects/${project2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -143,10 +141,7 @@ describe('Project', () => {
           if (err) {
             done(err);
           } else {
-            const result = res.body.result;
-            result.success.should.be.false;
-            result.status.should.equal(400);
-            result.content.message.should.equal('Unable to update project');
+            res.body.message.should.equal('Unable to update project');
             done();
           }
         });
@@ -154,14 +149,12 @@ describe('Project', () => {
 
     it('should return 403 if invalid user will update a project', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            status: 'active',
-          },
+          status: 'active',
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -169,10 +162,7 @@ describe('Project', () => {
           if (err) {
             done(err);
           } else {
-            const result = res.body.result;
-            result.success.should.be.false;
-            result.status.should.equal(403);
-            result.content.message.should.equal('Only assigned topcoder-managers or topcoder admins' +
+            res.body.message.should.equal('Only assigned topcoder-managers or topcoder admins' +
               ' should be allowed to launch a project');
             done();
           }
@@ -181,25 +171,19 @@ describe('Project', () => {
 
     it('should return 200 if topcoder manager user will update a project', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            status: 'active',
-          },
+          status: 'active',
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err, res) => {
+        .end((err) => {
           if (err) {
             done(err);
           } else {
-            const result = res.body.result;
-            result.success.should.be.true;
-            result.status.should.equal(200);
-            result.content.status.should.equal('active');
             server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }
@@ -208,7 +192,7 @@ describe('Project', () => {
 
     it('should return 200 if valid user and data', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -232,13 +216,12 @@ describe('Project', () => {
 
     it('should return 200 and project history should be updated (status is not set)', (done) => {
       const mbody = {
-        param: {
-          name: 'updatedProject name',
-          status: PROJECT_STATUS.IN_REVIEW,
-        },
+
+        name: 'updatedProject name',
+        status: PROJECT_STATUS.IN_REVIEW,
       };
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -280,13 +263,11 @@ describe('Project', () => {
 
     it('should return 200 and project history should not be updated (status is not updated)', (done) => {
       const mbody = {
-        param: {
-          name: 'updatedProject name',
-          status: PROJECT_STATUS.DRAFT,
-        },
+        name: 'updatedProject name',
+        status: PROJECT_STATUS.DRAFT,
       };
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -317,59 +298,51 @@ describe('Project', () => {
         });
     });
 
-    it('should return 422 as cancel reason is mandatory if project status is cancelled', (done) => {
+    it('should return 400 as cancel reason is mandatory if project status is cancelled', (done) => {
       const mbody = {
-        param: {
-          name: 'updatedProject name',
-          status: PROJECT_STATUS.CANCELLED,
-        },
+        name: 'updatedProject name',
+        status: PROJECT_STATUS.CANCELLED,
       };
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(mbody)
         .expect('Content-Type', /json/)
-        .expect(422)
+        .expect(400)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const result = res.body.result;
-            result.success.should.be.false;
-            result.status.should.equal(422);
+            res.body.message.should.equal('validation error: "cancelReason" is required');
             done();
           }
         });
     });
 
-    it('should return 422 if project type does not exist', (done) => {
+    it('should return 400 if project type does not exist', (done) => {
       const mbody = {
-        param: {
-          type: 'not_exist',
-        },
+        type: 'not_exist',
       };
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(mbody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 and project history should be updated for cancelled project', (done) => {
       const mbody = {
-        param: {
-          name: 'updatedProject name',
-          status: PROJECT_STATUS.CANCELLED,
-          cancelReason: 'price/cost',
-        },
+        name: 'updatedProject name',
+        status: PROJECT_STATUS.CANCELLED,
+        cancelReason: 'price/cost',
       };
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -416,13 +389,11 @@ describe('Project', () => {
       })
         .then(() => {
           const mbody = {
-            param: {
-              name: 'updatedProject name',
-              status: PROJECT_STATUS.ACTIVE,
-            },
+            name: 'updatedProject name',
+            status: PROJECT_STATUS.ACTIVE,
           };
           request(server)
-            .patch(`/v4/projects/${project1.id}`)
+            .patch(`/v5/projects/${project1.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
@@ -469,13 +440,12 @@ describe('Project', () => {
       })
         .then(() => {
           const mbody = {
-            param: {
-              name: 'updatedProject name',
-              status: PROJECT_STATUS.ACTIVE,
-            },
+            name: 'updatedProject name',
+            status: PROJECT_STATUS.ACTIVE,
+
           };
           request(server)
-            .patch(`/v4/projects/${project1.id}`)
+            .patch(`/v5/projects/${project1.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -522,13 +492,12 @@ describe('Project', () => {
       })
         .then(() => {
           const mbody = {
-            param: {
-              name: 'updatedProject name',
-              status: PROJECT_STATUS.ACTIVE,
-            },
+            name: 'updatedProject name',
+            status: PROJECT_STATUS.ACTIVE,
+
           };
           request(server)
-            .patch(`/v4/projects/${project1.id}`)
+            .patch(`/v5/projects/${project1.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.copilot}`,
             })
@@ -539,9 +508,11 @@ describe('Project', () => {
               if (err) {
                 done(err);
               } else {
-                const result = res.body.result;
-                result.success.should.be.false;
-                result.status.should.equal(403);
+                res
+                  .body
+                  .message
+                  .should
+                  .equal('Only assigned topcoder-managers or topcoder admins should be allowed to launch a project');
                 done();
               }
             });
@@ -550,7 +521,7 @@ describe('Project', () => {
 
     it('should return 200 and project history should not be updated', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -587,14 +558,13 @@ describe('Project', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            billingAccountId: 123,
-          },
+          billingAccountId: 123,
+
         })
         .expect('Content-Type', /json/)
         .expect(500)
@@ -602,10 +572,7 @@ describe('Project', () => {
           if (err) {
             done(err);
           } else {
-            const result = res.body.result;
-            result.success.should.be.false;
-            result.status.should.equal(500);
-            result.content.message.should.equal('error message');
+            res.body.message.should.equal('error message');
             done();
           }
         });
@@ -631,14 +598,13 @@ describe('Project', () => {
       const postSpy = sinon.spy(mockHttpClient, 'post');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            billingAccountId: 123,
-          },
+          billingAccountId: 123,
+
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -660,14 +626,13 @@ describe('Project', () => {
 
     it('should return 200 and not sync same billing account id', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            billingAccountId: 1,
-          },
+          billingAccountId: 1,
+
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -687,14 +652,12 @@ describe('Project', () => {
 
     it('should return 200 and not sync same billing account id for project without direct project id', (done) => {
       request(server)
-        .patch(`/v4/projects/${project3.id}`)
+        .patch(`/v5/projects/${project3.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            billingAccountId: 1,
-          },
+          billingAccountId: 1,
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -715,17 +678,15 @@ describe('Project', () => {
 
     it.skip('should return 200 and update bookmarks', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            bookmarks: [{
-              title: 'title1',
-              address: 'address1',
-            }],
-          },
+          bookmarks: [{
+            title: 'title1',
+            address: 'address1',
+          }],
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -739,14 +700,13 @@ describe('Project', () => {
             resJson.bookmarks[0].title.should.be.eql('title1');
             resJson.bookmarks[0].address.should.be.eql('address1');
             request(server)
-              .patch(`/v4/projects/${project1.id}`)
+              .patch(`/v5/projects/${project1.id}`)
               .set({
                 Authorization: `Bearer ${testUtil.jwts.copilot}`,
               })
               .send({
-                param: {
-                  bookmarks: null,
-                },
+                bookmarks: null,
+
               })
               .expect('Content-Type', /json/)
               .expect(200)
@@ -776,13 +736,13 @@ describe('Project', () => {
         })
           .then(() => {
             const mbody = {
-              param: {
-                name: 'updatedProject name',
-                status: PROJECT_STATUS.ACTIVE,
-              },
+
+              name: 'updatedProject name',
+              status: PROJECT_STATUS.ACTIVE,
+
             };
             request(server)
-              .patch(`/v4/projects/${project1.id}`)
+              .patch(`/v5/projects/${project1.id}`)
               .set({
                 Authorization: `Bearer ${testUtil.jwts.admin}`,
               })
@@ -834,14 +794,13 @@ describe('Project', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project status update', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            status: PROJECT_STATUS.COMPLETED,
-          },
+          status: PROJECT_STATUS.COMPLETED,
+
         })
         .expect(200)
         .end((err) => {
@@ -849,15 +808,7 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_COMPLETED);
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051333,
-                initiatorUserId: 40051333,
-              })).should.be.true;
+              createEventSpy.calledOnce.should.be.true;
               done();
             });
           }
@@ -866,15 +817,13 @@ describe('Project', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project details update', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            details: {
-              info: 'something',
-            },
+          details: {
+            info: 'something',
           },
         })
         .expect(200)
@@ -883,15 +832,15 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED);
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051333,
-                initiatorUserId: 40051333,
-              })).should.be.true;
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ resource: 'project' })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ id: project1.id })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ details: { info: 'something' } })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
               done();
             });
           }
@@ -900,14 +849,13 @@ describe('Project', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project name update', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            name: 'New project name',
-          },
+          name: 'New project name',
+
         })
         .expect(200)
         .end((err) => {
@@ -915,15 +863,15 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED);
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: 'New project name',
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051333,
-                initiatorUserId: 40051333,
-              })).should.be.true;
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ resource: 'project' })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ id: project1.id })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ name: 'New project name' })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
               done();
             });
           }
@@ -932,14 +880,13 @@ describe('Project', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project description update', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            description: 'Updated description',
-          },
+          description: 'Updated description',
+
         })
         .expect(200)
         .end((err) => {
@@ -947,14 +894,15 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051333,
-                initiatorUserId: 40051333,
-              })).should.be.true;
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ resource: 'project' })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ id: project1.id })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                 sinon.match({ description: 'Updated description' })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                 sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
               done();
             });
           }
@@ -963,17 +911,15 @@ describe('Project', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project bookmarks update', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            bookmarks: [{
-              title: 'title1',
-              address: 'http://someurl.com',
-            }],
-          },
+          bookmarks: [{
+            title: 'title1',
+            address: 'http://someurl.com',
+          }],
         })
         .expect(200)
         .end((err) => {
@@ -981,31 +927,30 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED);
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051333,
-                initiatorUserId: 40051333,
-              })).should.be.true;
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ resource: 'project' })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ id: project1.id })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ bookmarks: [{ title: 'title1', address: 'http://someurl.com' }] })).should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
+                sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
               done();
             });
           }
         });
       });
 
-      it('should not send BUS_API_EVENT.PROJECT_UPDATED message when project estimatedPrice is updated', (done) => {
+      it('should send BUS_API_EVENT.PROJECT_UPDATED message when project estimatedPrice is updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            estimatedPrice: 123,
-          },
+          estimatedPrice: 123,
+
         })
         .expect(200)
         .end((err) => {
@@ -1013,23 +958,22 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.notCalled.should.be.true;
+              createEventSpy.called.should.be.true;
               done();
             });
           }
         });
       });
 
-      it('should not send BUS_API_EVENT.PROJECT_UPDATED message when project actualPrice is updated', (done) => {
+      it('should send BUS_API_EVENT.PROJECT_UPDATED message when project actualPrice is updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            actualPrice: 123,
-          },
+          actualPrice: 123,
+
         })
         .expect(200)
         .end((err) => {
@@ -1037,23 +981,22 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.notCalled.should.be.true;
+              createEventSpy.called.should.be.true;
               done();
             });
           }
         });
       });
 
-      it('should not send BUS_API_EVENT.PROJECT_UPDATED message when project terms are updated', (done) => {
+      it('should send BUS_API_EVENT.PROJECT_UPDATED message when project terms are updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${project1.id}`)
+        .patch(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            terms: [1, 2, 3],
-          },
+          terms: [1, 2, 3],
+
         })
         .expect(200)
         .end((err) => {
@@ -1061,7 +1004,7 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.notCalled.should.be.true;
+              createEventSpy.called.should.be.true;
               done();
             });
           }

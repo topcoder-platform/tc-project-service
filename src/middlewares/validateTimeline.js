@@ -27,7 +27,7 @@ async function validateReference(sourceObject, req, validateProjectExists) {
       });
       if (!project) {
         const apiErr = new Error(`Project not found for project id ${req.params.projectId}`);
-        apiErr.status = 422;
+        apiErr.status = 400;
         throw apiErr;
       }
     }
@@ -45,7 +45,7 @@ async function validateReference(sourceObject, req, validateProjectExists) {
     });
     if (!product) {
       const apiErr = new Error(`Product not found for product id ${sourceObject.referenceId}`);
-      apiErr.status = 422;
+      apiErr.status = 400;
       throw apiErr;
     }
 
@@ -63,7 +63,7 @@ async function validateReference(sourceObject, req, validateProjectExists) {
   });
   if (!phase) {
     const apiErr = new Error(`Phase not found for phase id ${sourceObject.referenceId}`);
-    apiErr.status = 422;
+    apiErr.status = 400;
     throw apiErr;
   }
 
@@ -107,27 +107,27 @@ const validateTimeline = {
 
     if (!util.isValidFilter(filter, ['reference', 'referenceId'])) {
       const apiErr = new Error('Only allowed to filter by reference and referenceId');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
     // Verify required filters are present
     if (!filter.reference || !filter.referenceId) {
       const apiErr = new Error('Please provide reference and referenceId filter parameters');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
     // Verify reference is a valid value
     if (!_.includes(TIMELINE_REFERENCES, filter.reference)) {
       const apiErr = new Error(`reference filter must be in ${TIMELINE_REFERENCES}`);
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
     if (_.lt(filter.referenceId, 1)) {
       const apiErr = new Error('referenceId filter must be a positive integer');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
@@ -146,7 +146,7 @@ const validateTimeline = {
    */
   // eslint-disable-next-line valid-jsdoc
   validateTimelineIdParam: (req, res, next) => {
-    models.Timeline.findById(req.params.timelineId)
+    models.Timeline.findByPk(req.params.timelineId)
       .then((timeline) => {
         if (!timeline) {
           const apiErr = new Error(`Timeline not found for timeline id ${req.params.timelineId}`);

@@ -8,8 +8,7 @@ import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import busApi from '../../services/busApi';
-import { USER_ROLE, BUS_API_EVENT } from '../../constants';
+import { USER_ROLE } from '../../constants';
 
 const should = chai.should();
 
@@ -52,7 +51,7 @@ describe('Project Members create', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .post(`/v4/projects/${project1.id}/members/`)
+        .post(`/v5/projects/${project1.id}/members/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -79,7 +78,7 @@ describe('Project Members create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-      .post(`/v4/projects/${project1.id}/members/invite`)
+      .post(`/v5/projects/${project1.id}/members/invite`)
       .set({
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
@@ -101,9 +100,8 @@ describe('Project Members create', () => {
           resJson.projectId.should.equal(project1.id);
           resJson.userId.should.equal(40051332);
           server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
-
           request(server)
-          .put(`/v4/projects/${project1.id}/members/invite`)
+          .put(`/v5/projects/${project1.id}/members/invite`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
@@ -128,7 +126,7 @@ describe('Project Members create', () => {
               server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
 
               request(server)
-                .put(`/v4/projects/${project1.id}/members/invite`)
+                .put(`/v5/projects/${project1.id}/members/invite`)
                 .set({
                   Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
                 })
@@ -144,7 +142,8 @@ describe('Project Members create', () => {
                   if (err3) {
                     done(err3);
                   } else {
-                    res3.body.result.status.should.equal(404);
+                    const errorMessage = _.get(res3.body, 'message', '');
+                    sinon.assert.match(errorMessage, /.*invite not found for project id 1, email undefined and userId/);
                     done();
                   }
                 });
@@ -185,7 +184,7 @@ describe('Project Members create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v4/projects/${project1.id}/members/`)
+        .post(`/v5/projects/${project1.id}/members/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -205,129 +204,6 @@ describe('Project Members create', () => {
             done();
           }
         });
-    });
-
-    describe('Bus api', () => {
-      let createEventSpy;
-
-      before((done) => {
-        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
-        testUtil.wait(done);
-      });
-
-      beforeEach(() => {
-        createEventSpy = sandbox.spy(busApi, 'createEvent');
-      });
-
-      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when manager added', (done) => {
-        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-          get: () => Promise.resolve({
-            status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: [{
-                  roleName: USER_ROLE.MANAGER,
-                }],
-              },
-            },
-          }),
-          post: () => Promise.resolve({
-            status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: {},
-              },
-            },
-          }),
-        });
-        sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-        request(server)
-        .post(`/v4/projects/${project1.id}/members/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_JOINED_MANAGER);
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051334,
-                initiatorUserId: 40051334,
-              })).should.be.true;
-              done();
-            });
-          }
-        });
-      });
-
-      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when copilot added', (done) => {
-        request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          param: {
-            userIds: [40051332],
-            role: 'copilot',
-          },
-        })
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            request(server)
-            .put(`/v4/projects/${project1.id}/members/invite`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-            })
-            .send({
-              param: {
-                userId: 40051332,
-                status: 'accepted',
-              },
-            })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end((err2) => {
-              if (err2) {
-                done(err2);
-              } else {
-                testUtil.wait(() => {
-                  createEventSpy.callCount.should.equal(4);
-                  createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED);
-                  createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED);
-                  createEventSpy.thirdCall.calledWith(BUS_API_EVENT.MEMBER_JOINED_COPILOT);
-                  createEventSpy.lastCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                    projectId: project1.id,
-                    projectName: project1.name,
-                    projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                    userId: 40051336,
-                    initiatorUserId: 40051336,
-                  })).should.be.true;
-                  done();
-                });
-              }
-            });
-          }
-        });
-      });
     });
   });
 });

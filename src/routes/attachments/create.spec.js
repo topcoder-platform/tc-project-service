@@ -103,7 +103,7 @@ describe('Project Attachments', () => {
   describe('POST /projects/{id}/attachments/', () => {
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .post(`/v4/projects/${project1.id}/attachments/`)
+          .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
@@ -114,7 +114,7 @@ describe('Project Attachments', () => {
 
     it('should return 201 return attachment record', (done) => {
       request(server)
-          .post(`/v4/projects/${project1.id}/attachments/`)
+          .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -152,7 +152,7 @@ describe('Project Attachments', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment added', (done) => {
         request(server)
-          .post(`/v4/projects/${project1.id}/attachments/`)
+          .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })

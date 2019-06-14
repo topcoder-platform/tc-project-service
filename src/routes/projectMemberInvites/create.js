@@ -95,7 +95,6 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
           !_.find(existentUsers, existentUser =>
             compareEmail(existentUser.email, inviteEmail, { UNIQUE_GMAIL_VALIDATION: false })),
         );
-
         // remove invites for users that are invited already
         _.remove(existentUsersWithNumberId, user => _.some(invites, i => i.userId === user.id));
         existentUsersWithNumberId.forEach((user) => {
@@ -103,10 +102,8 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
 
           dataNew.userId = user.id;
           dataNew.email = user.email;
-
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
-
         // remove invites for users that are invited already
         _.remove(nonExistentUserEmails, email =>
           _.some(invites, i =>
@@ -115,7 +112,6 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
           const dataNew = _.clone(data);
 
           dataNew.email = email;
-
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
         return invitePromises;
@@ -125,7 +121,6 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
         return invitePromises;
       });
   }
-
   return invitePromises;
 };
 
@@ -133,7 +128,7 @@ const sendInviteEmail = (req, projectId, invite) => {
   req.log.debug(req.authUser);
   const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
-    models.Project.find({
+    models.Project.findOne({
       where: { id: projectId },
       raw: true,
     }),
@@ -261,7 +256,8 @@ module.exports = [
           };
 
           req.log.debug('Creating invites');
-          return models.sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
+          return models.Sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
+          // return Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
             .then((values) => {
               values.forEach((v) => {
                 req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {

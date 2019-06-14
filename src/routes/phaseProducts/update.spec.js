@@ -120,7 +120,7 @@ describe('Phase Products', () => {
   describe('PATCH /projects/{id}/phases/{phaseId}/products/{productId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -131,7 +131,7 @@ describe('Phase Products', () => {
 
     it('should return 403 when user have no permission (customer)', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -142,7 +142,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .patch(`/v4/projects/999/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -153,7 +153,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/99999/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -164,7 +164,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no product with specific productId', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -173,9 +173,9 @@ describe('Phase Products', () => {
         .expect(404, done);
     });
 
-    it('should return 422 when parameters are invalid', (done) => {
+    it('should return 400 when parameters are invalid', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -185,13 +185,13 @@ describe('Phase Products', () => {
           },
         })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
 
     it('should return updated product when user have permission and parameters are valid', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -233,7 +233,7 @@ describe('Phase Products', () => {
 
       it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when name updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -265,7 +265,7 @@ describe('Phase Products', () => {
 
       it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when estimatedPrice updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -297,7 +297,7 @@ describe('Phase Products', () => {
 
       it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when actualPrice updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -329,7 +329,7 @@ describe('Phase Products', () => {
 
       it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -362,7 +362,7 @@ describe('Phase Products', () => {
 
       it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when type updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })

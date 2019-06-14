@@ -19,26 +19,37 @@ module.exports = [
   validate(schema),
   permissions('orgConfig.view'),
   (req, res, next) => {
-    // handle filters
-    const filters = util.parseQueryFilter(req.query.filter);
-    // Throw error if orgId is not present in filter
-    if (!filters.orgId) {
-      return next(util.buildApiError('Missing filter orgId', 422));
-    }
-    if (!util.isValidFilter(filters, ['orgId', 'configName'])) {
-      return util.handleError('Invalid filters', null, req, next);
-    }
-    req.log.debug(filters);
-    // Get all organization config
-    const where = filters || {};
-    return models.OrgConfig.findAll({
-      where,
-      attributes: { exclude: ['deletedAt', 'deletedBy'] },
-      raw: true,
-    })
-    .then((orgConfigs) => {
-      res.json(util.wrapResponse(req.id, orgConfigs));
-    })
-    .catch(next);
+    util.fetchFromES('orgConfigs')
+    .then((data) => {
+      // handle filters
+      const filters = util.parseQueryFilter(req.query.filter);
+      // Throw error if orgId is not present in filter
+      if (!filters.orgId) {
+        next(util.buildApiError('Missing filter orgId', 400));
+      }
+      if (!util.isValidFilter(filters, ['orgId', 'configName'])) {
+        util.handleError('Invalid filters', null, req, next);
+      }
+      req.log.debug(filters);
+
+      if (data.orgConfigs.length === 0) {
+        req.log.debug('No orgConfig found in ES');
+
+        // Get all organization config
+        const where = filters || {};
+        models.OrgConfig.findAll({
+          where,
+          attributes: { exclude: ['deletedAt', 'deletedBy'] },
+          raw: true,
+        })
+        .then((orgConfigs) => {
+          res.json(orgConfigs);
+        })
+        .catch(next);
+      } else {
+        req.log.debug('orgConfigs found in ES');
+        res.json(data.orgConfigs);
+      }
+    });
   },
 ];

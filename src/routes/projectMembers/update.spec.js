@@ -104,7 +104,7 @@ describe('Project members update', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -112,21 +112,21 @@ describe('Project members update', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if no role', (done) => {
+    it('should return 400 if no role', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
           param: {},
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if role is invalid', (done) => {
+    it('should return 400 if role is invalid', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -135,12 +135,12 @@ describe('Project members update', () => {
             role: 'wrong',
           },
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if isPrimary is invalid', (done) => {
+    it('should return 400 if isPrimary is invalid', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -149,12 +149,12 @@ describe('Project members update', () => {
             isPrimary: 'wrong',
           },
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 if not exist id', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/999999`)
+        .patch(`/v5/projects/${project1.id}/members/999999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -165,10 +165,7 @@ describe('Project members update', () => {
           if (err) {
             done(err);
           } else {
-            const result = res.body.result;
-            result.success.should.be.false;
-            result.status.should.equal(404);
-            result.content.message.should.equal('project member not found for project id' +
+            res.body.message.should.equal('project member not found for project id' +
               ` ${project1.id} and member id 999999`);
             done();
           }
@@ -192,7 +189,7 @@ describe('Project members update', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -243,7 +240,7 @@ describe('Project members update', () => {
       })
         .then(() => {
           request(server)
-            .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+            .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.copilot}`,
             })
@@ -284,7 +281,7 @@ describe('Project members update', () => {
       const deleteSpy = sinon.spy(mockHttpClient, 'delete');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -314,7 +311,7 @@ describe('Project members update', () => {
       const deleteSpy = sinon.spy(mockHttpClient, 'delete');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -353,7 +350,7 @@ describe('Project members update', () => {
       const postSpy = sinon.spy(mockHttpClient, 'post');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member3.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member3.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -407,7 +404,7 @@ describe('Project members update', () => {
           const postSpy = sinon.spy(mockHttpClient, 'post');
           sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
           request(server)
-            .patch(`/v4/projects/${project1.id}/members/${member3.id}`)
+            .patch(`/v5/projects/${project1.id}/members/${member3.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
@@ -456,7 +453,7 @@ describe('Project members update', () => {
       const postSpy = sinon.spy(mockHttpClient, 'post');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member1.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -513,7 +510,7 @@ describe('Project members update', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

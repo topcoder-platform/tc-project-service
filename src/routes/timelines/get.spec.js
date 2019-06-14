@@ -182,18 +182,20 @@ describe('GET timeline', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines/{timelineId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines/1')
+        .get('/v5/timelines/1')
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .get('/v4/timelines/1')
+        .get('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -202,7 +204,7 @@ describe('GET timeline', () => {
 
     it('should return 403 for member who is not in the project (timeline refers to a phase)', (done) => {
       request(server)
-        .get('/v4/timelines/2')
+        .get('/v5/timelines/2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -211,7 +213,7 @@ describe('GET timeline', () => {
 
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
-        .get('/v4/timelines/1234')
+        .get('/v5/timelines/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -220,25 +222,25 @@ describe('GET timeline', () => {
 
     it('should return 404 for deleted timeline', (done) => {
       request(server)
-        .get('/v4/timelines/3')
+        .get('/v5/timelines/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(404, done);
     });
 
-    it('should return 422 for invalid param', (done) => {
+    it('should return 400 for invalid param', (done) => {
       request(server)
-        .get('/v4/timelines/0')
+        .get('/v5/timelines/0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines/1')
+        .get('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -269,7 +271,7 @@ describe('GET timeline', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines/1')
+        .get('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -279,7 +281,7 @@ describe('GET timeline', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines/1')
+        .get('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -289,7 +291,7 @@ describe('GET timeline', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines/1')
+        .get('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -298,7 +300,7 @@ describe('GET timeline', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines/1')
+        .get('/v5/timelines/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

@@ -321,6 +321,39 @@ _.assignIn(util, {
   },
 
   /**
+   * Return the searched resource from elastic search
+   * @return {Object}           the searched resource
+   */
+  fetchFromES: Promise.coroutine(function* () { // eslint-disable-line func-names
+    const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
+    const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
+    const data = (yield esClient.search({ index: ES_METADATA_INDEX, type: ES_METADATA_TYPE }));
+    return data.hits.hits.length > 0 ? data.hits.hits[0]._source : {  // eslint-disable-line no-underscore-dangle
+      productTemplates: [],
+      forms: [],
+      projectTemplates: [],
+      planConfigs: [],
+      priceConfigs: [],
+      projectTypes: [],
+      productCategories: [],
+      orgConfigs: [] };
+  }),
+
+  /**
+   * Return the searched resource from elastic search
+   * @return {Array}           the searched resource
+   */
+  fetchByIdFromES: Promise.coroutine(function* (resource, query) { // eslint-disable-line func-names
+    const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
+    const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
+    return (yield esClient.search({ index: ES_METADATA_INDEX,
+      type: ES_METADATA_TYPE,
+      _source: false,
+      body: query,
+    })).hits.hits;
+  }),
+
+  /**
    * Retrieve member details from userIds
    */
   getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
@@ -383,6 +416,19 @@ _.assignIn(util, {
       }
     }),
 
+    /**
+     * Send resource to kafka bus
+     * @param  {object} req  Request object
+     * @param  {String} key  the event key
+     * @param  {String} name  the resource name
+     * @param  {object} resource  the resource
+    */
+    sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource) {    // eslint-disable-line
+      req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
+      // emit event
+      req.app.emit(key, { req, resource: _.assign({ resource: name }, resource) });
+    }),
+
   /**
    * Add userId to project
    * @param  {object} req  Request object that should contain project info and user info
@@ -412,7 +458,7 @@ _.assignIn(util, {
         newMember,
         { correlationId: req.id },
       );
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, { req, member: newMember });
+
       return newMember;
     })
     .catch((err) => {
@@ -495,7 +541,7 @@ _.assignIn(util, {
       })).then((record) => {
         if (_.isNil(record)) {
           const apiErr = new Error(errorMessage);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
       });
@@ -509,7 +555,7 @@ _.assignIn(util, {
       })).then((record) => {
         if (_.isNil(record)) {
           const apiErr = new Error(errorMessage);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
       });

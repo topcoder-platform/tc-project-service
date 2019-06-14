@@ -28,49 +28,48 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     indexes: [],
-    classMethods: {
-      getActiveProjectPhases(projectId) {
-        return this.findAll({
-          where: {
-            deletedAt: { $eq: null },
-            projectId,
-          },
-          raw: true,
-        });
-      },
-      associate: (models) => {
-        ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
-      },
-      /**
-       * Search project phases
-       * @param {Object} parameters the parameters
-       *          - sortField: the field that will be references when sorting
-       *          - sortType: ASC or DESC
-       *          - fields: the fields to retrieved
-       *          - projectId: the id of project
-       * @param {Object} log the request log
-       * @return {Object} the result rows and count
-       */
-      async search(parameters = {}, log) {
-        let fieldsStr = _.map(parameters.fields, field => `project_phases."${field}"`);
-        fieldsStr = `${fieldsStr.join(',')}`;
-        const replacements = {
-          projectId: parameters.projectId,
-        };
-        let dbQuery = `SELECT ${fieldsStr} FROM project_phases WHERE project_phases."projectId" = :projectId`;
-        if (_.has(parameters, 'sortField') && _.has(parameters, 'sortType')) {
-          dbQuery = `${dbQuery} ORDER BY project_phases."${parameters.sortField}" ${parameters.sortType}`;
-        }
-        return sequelize.query(dbQuery,
-          { type: sequelize.QueryTypes.SELECT,
-            logging: (str) => { log.debug(str); },
-            replacements,
-            raw: true,
-          })
-          .then(phases => ({ rows: phases, count: phases.length }));
-      },
-    },
   });
+
+  ProjectPhase.getActiveProjectPhases = projectId => ProjectPhase.findAll({
+    where: {
+      deletedAt: { $eq: null },
+      projectId,
+    },
+    raw: true,
+  });
+
+  ProjectPhase.associate = (models) => {
+    ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
+  };
+
+  /**
+   * Search project phases
+   * @param {Object} parameters the parameters
+   *          - sortField: the field that will be references when sorting
+   *          - sortType: ASC or DESC
+   *          - fields: the fields to retrieved
+   *          - projectId: the id of project
+   * @param {Object} log the request log
+   * @return {Object} the result rows and count
+   */
+  ProjectPhase.search = async (parameters = {}, log) => {
+    let fieldsStr = _.map(parameters.fields, field => `project_phases."${field}"`);
+    fieldsStr = `${fieldsStr.join(',')}`;
+    const replacements = {
+      projectId: parameters.projectId,
+    };
+    let dbQuery = `SELECT ${fieldsStr} FROM project_phases WHERE project_phases."projectId" = :projectId`;
+    if (_.has(parameters, 'sortField') && _.has(parameters, 'sortType')) {
+      dbQuery = `${dbQuery} ORDER BY project_phases."${parameters.sortField}" ${parameters.sortType}`;
+    }
+    return sequelize.query(dbQuery,
+      { type: sequelize.QueryTypes.SELECT,
+        logging: (str) => { log.debug(str); },
+        replacements,
+        raw: true,
+      })
+      .then(phases => ({ rows: phases, count: phases.length }));
+  };
 
   return ProjectPhase;
 };

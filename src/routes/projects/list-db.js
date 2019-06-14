@@ -53,7 +53,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
       promises.push(
         models.ProjectMember.findAll({
           attributes: _.get(fields, 'ProjectMembers'),
-          where: { projectId: { in: projectIds } },
+          where: { projectId: { $in: projectIds } },
           raw: true,
         }),
       );
@@ -62,7 +62,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
       promises.push(
         models.ProjectAttachment.findAll({
           attributes: PROJECT_ATTACHMENT_ATTRIBUTES,
-          where: { projectId: { in: projectIds } },
+          where: { projectId: { $in: projectIds } },
           raw: true,
         }),
       );
@@ -94,7 +94,8 @@ module.exports = [
    */
   (req, res, next) => {
     // handle filters
-    let filters = util.parseQueryFilter(req.query.filter);
+    let filters = _.omit(req.query, 'sort', 'perPage', 'page', 'fields', 'limit', 'offset');
+
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
@@ -108,7 +109,8 @@ module.exports = [
       'name', 'name asc', 'name desc',
       'type', 'type asc', 'type desc',
     ];
-    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'keyword']) ||
+    // TODO Add customer and manager filters
+    if (!util.isValidFilter(filters, ['id', 'status', 'type', 'memberOnly', 'keyword', 'name', 'code']) ||
       (sort && _.indexOf(sortableProps, sort) < 0)) {
       return util.handleError('Invalid filters or sort', null, req, next);
     }
@@ -128,7 +130,7 @@ module.exports = [
           || util.hasRoles(req, MANAGER_ROLES))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
-        .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+        .then(result => res.json(result.rows))
         .catch(err => next(err));
     }
 
@@ -136,7 +138,7 @@ module.exports = [
     criteria.filters.userId = req.authUser.userId;
     criteria.filters.email = req.authUser.email;
     return retrieveProjects(req, criteria, sort, req.query.fields)
-      .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+      .then(result => res.json(result.rows))
       .catch(err => next(err));
   },
 ];

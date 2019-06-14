@@ -75,13 +75,13 @@ describe('GET Project', () => {
   describe('GET /projects/{id}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-          .get(`/v4/projects/${project2.id}`)
+          .get(`/v5/projects/${project2.id}`)
           .expect(403, done);
     });
 
     it('should return 404 if requested project doesn\'t exist', (done) => {
       request(server)
-          .get('/v4/projects/14343323')
+          .get('/v5/projects/14343323')
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -90,7 +90,7 @@ describe('GET Project', () => {
 
     it('should return 404 if user does not have access to the project', (done) => {
       request(server)
-          .get(`/v4/projects/${project2.id}`)
+          .get(`/v5/projects/${project2.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
@@ -99,7 +99,7 @@ describe('GET Project', () => {
 
     it('should return the project when registerd member attempts to access the project', (done) => {
       request(server)
-          .get(`/v4/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`)
+          .get(`/v5/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
@@ -109,7 +109,7 @@ describe('GET Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               should.not.exist(resJson.deletedAt);
               should.not.exist(resJson.billingAccountId);
@@ -123,7 +123,7 @@ describe('GET Project', () => {
 
     it('should return the project for administrator ', (done) => {
       request(server)
-          .get(`/v4/projects/${project1.id}`)
+          .get(`/v5/projects/${project1.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -133,7 +133,7 @@ describe('GET Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               done();
             }
@@ -142,7 +142,7 @@ describe('GET Project', () => {
 
     it('should return the project for connect admin ', (done) => {
       request(server)
-          .get(`/v4/projects/${project1.id}`)
+          .get(`/v5/projects/${project1.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
@@ -152,7 +152,7 @@ describe('GET Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               done();
             }
@@ -188,7 +188,7 @@ describe('GET Project', () => {
         const stub = sinon.stub(util, 'getHttpClient', () => mockHttpClient);
 
         request(server)
-            .get(`/v4/projects/${project1.id}`)
+            .get(`/v5/projects/${project1.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -199,7 +199,7 @@ describe('GET Project', () => {
               if (err) {
                 done(err);
               } else {
-                const resJson = res.body.result.content;
+                const resJson = res.body;
                 should.exist(resJson);
                 spy.should.have.been.calledOnce;
                 resJson.attachments.should.have.lengthOf(1);

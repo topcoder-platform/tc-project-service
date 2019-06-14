@@ -156,7 +156,7 @@ module.exports = [
 
           if (entityToUpdate.completionDate && entityToUpdate.completionDate < milestone.startDate) {
             const apiErr = new Error('The milestone completionDate should be greater or equal than the startDate.');
-            apiErr.status = 422;
+            apiErr.status = 400;
             return Promise.reject(apiErr);
           }
 

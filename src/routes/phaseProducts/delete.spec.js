@@ -27,7 +27,7 @@ const expectAfterDelete = (projectId, phaseId, id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/${projectId}/phases/${phaseId}/products/${id}`)
+          .get(`/v5/projects/${projectId}/phases/${phaseId}/products/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -134,7 +134,7 @@ describe('Phase Products', () => {
   describe('DELETE /projects/{id}/phases/{phaseId}/products/{productId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -144,7 +144,7 @@ describe('Phase Products', () => {
 
     it('should return 403 when user have no permission (customer)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -154,7 +154,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .delete(`/v4/projects/999/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -164,7 +164,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/99999/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -174,7 +174,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no product with specific productId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -184,7 +184,7 @@ describe('Phase Products', () => {
 
     it('should return 204 when user have project permission', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -211,7 +211,7 @@ describe('Phase Products', () => {
 
       it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when product phase removed', (done) => {
         request(server)
-          .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })

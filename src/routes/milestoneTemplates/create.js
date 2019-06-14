@@ -50,7 +50,6 @@ module.exports = [
       updatedBy: req.authUser.userId,
     });
     let result;
-
     return models.sequelize.transaction(tx =>
       // Create the milestone template
       models.MilestoneTemplate.create(entity, { transaction: tx })

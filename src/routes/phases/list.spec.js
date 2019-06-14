@@ -110,7 +110,7 @@ describe('Project Phases', () => {
   describe('GET /projects/{id}/phases/', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -121,7 +121,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get('/v4/projects/999/phases/')
+        .get('/v5/projects/999/phases/')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -132,7 +132,7 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -153,7 +153,7 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

@@ -76,7 +76,7 @@ describe('Project Attachments download', () => {
 
     it('should return 403 if USER does not have permissions', (done) => {
       request(server)
-        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -86,7 +86,7 @@ describe('Project Attachments download', () => {
 
     it('should return 403 if MANAGER does not have permissions', (done) => {
       request(server)
-        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -96,7 +96,7 @@ describe('Project Attachments download', () => {
 
     it('should return 404 if attachment was not found', (done) => {
       request(server)
-        .get(`/v4/projects/${project1.id}/attachments/8888888`)
+        .get(`/v5/projects/${project1.id}/attachments/8888888`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -106,7 +106,7 @@ describe('Project Attachments download', () => {
 
     it('should return 200 when the CREATOR can download attachment successfully', (done) => {
       request(server)
-        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -116,7 +116,7 @@ describe('Project Attachments download', () => {
 
     it('should return 200 when the USER with permission can download attachment successfully', (done) => {
       request(server)
-        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -126,7 +126,7 @@ describe('Project Attachments download', () => {
 
     it('should return 200 when ADMIN can download attachment successfully', (done) => {
       request(server)
-        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

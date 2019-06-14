@@ -23,7 +23,7 @@ export default function (model, modelKey, path, errorEntityName) {
             next();
           } else {
             const err = new Error(`${errorEntityName} not found for key "${value}"`);
-            err.status = 422;
+            err.status = 400;
             next(err);
           }
         });

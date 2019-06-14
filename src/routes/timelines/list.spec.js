@@ -207,48 +207,50 @@ describe('LIST timelines', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v5/timelines')
         .expect(403, done);
     });
 
-    it('should return 422 for invalid filter key', (done) => {
+    it('should return 400 for invalid filter key', (done) => {
       request(server)
-        .get('/v4/timelines?filter=invalid%3Dproject')
+        .get('/v5/timelines?filter=invalid%3Dproject')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422)
+        .expect(400)
         .end(done);
     });
 
-    it('should return 422 for invalid reference filter', (done) => {
+    it('should return 400 for invalid reference filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dinvalid%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dinvalid%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422)
+        .expect(400)
         .end(done);
     });
 
-    it('should return 422 for invalid referenceId filter', (done) => {
+    it('should return 400 for invalid referenceId filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dinvalid%26referenceId%3D0')
+        .get('/v5/timelines?filter=reference%3Dinvalid%26referenceId%3D0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422)
+        .expect(400)
         .end(done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -283,7 +285,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -298,7 +300,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -313,7 +315,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -327,7 +329,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -341,7 +343,7 @@ describe('LIST timelines', () => {
 
     it('should return 403 for member with not accessible project', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -350,7 +352,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 with reference and referenceId filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?filter=reference%3Dproject%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

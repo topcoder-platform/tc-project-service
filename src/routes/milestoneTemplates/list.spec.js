@@ -113,40 +113,44 @@ const milestoneTemplates = [
 ];
 
 describe('LIST milestone template', () => {
-  beforeEach(() => testUtil.clearDb()
+  beforeEach((done) => {
+    testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
+  },
   );
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines/metadata/milestoneTemplates', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates')
+        .get('/v5/timelines/metadata/milestoneTemplates')
         .expect(403, done);
     });
 
-    it('should return 422 for invalid sort column', (done) => {
+    it('should return 400 for invalid sort column', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates?sort=id')
+        .get('/v5/timelines/metadata/milestoneTemplates?sort=id')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for invalid sort order', (done) => {
+    it('should return 400 for invalid sort order', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates?sort=order%20invalid')
+        .get('/v5/timelines/metadata/milestoneTemplates?sort=order%20invalid')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates')
+        .get('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -180,7 +184,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for connect admin with filter', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1')
+        .get('/v5/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -190,7 +194,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates')
+        .get('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -200,7 +204,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates')
+        .get('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -209,7 +213,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates')
+        .get('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -218,7 +222,7 @@ describe('LIST milestone template', () => {
 
     it('should return 200 with sort desc', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates?sort=order%20desc')
+        .get('/v5/timelines/metadata/milestoneTemplates?sort=order%20desc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

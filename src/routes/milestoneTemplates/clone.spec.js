@@ -113,11 +113,15 @@ const milestoneTemplates = [
 ];
 
 describe('CLONE milestone template', () => {
-  beforeEach(() => testUtil.clearDb()
+  beforeEach((done) => {
+    testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
+  },
   );
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /timelines/metadata/milestoneTemplates/clone', () => {
     const body = {
@@ -131,14 +135,14 @@ describe('CLONE milestone template', () => {
 
     it('should return 403 if user is not authenticated/clone', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -148,7 +152,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -158,7 +162,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -166,7 +170,7 @@ describe('CLONE milestone template', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for non-existent product template', (done) => {
+    it('should return 400 for non-existent product template', (done) => {
       const invalidBody = {
         param: {
           sourceReference: 'productTemplate',
@@ -177,15 +181,15 @@ describe('CLONE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for non-existent source product template', (done) => {
+    it('should return 400 for non-existent source product template', (done) => {
       const invalidBody = {
         param: {
           sourceReference: 'product',
@@ -196,15 +200,15 @@ describe('CLONE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing sourceReference', (done) => {
+    it('should return 400 if missing sourceReference', (done) => {
       const invalidBody = {
         param: {
           sourceReferenceId: 1000,
@@ -214,18 +218,18 @@ describe('CLONE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -260,7 +264,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

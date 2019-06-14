@@ -128,7 +128,7 @@ describe('Project Phases', () => {
   describe('PATCH /projects/{projectId}/phases/{phaseId}', () => {
     it('should return 403 if user does not have permissions (non team member)', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -139,7 +139,7 @@ describe('Project Phases', () => {
 
     it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -150,7 +150,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .patch(`/v4/projects/999/phases/${phaseId}`)
+        .patch(`/v5/projects/999/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -161,7 +161,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/999`)
+        .patch(`/v5/projects/${projectId}/phases/999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -170,9 +170,9 @@ describe('Project Phases', () => {
         .expect(404, done);
     });
 
-    it('should return 422 when parameters are invalid', (done) => {
+    it('should return 400 when parameters are invalid', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -182,12 +182,12 @@ describe('Project Phases', () => {
           },
         })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 400 when startDate > endDate', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -202,7 +202,7 @@ describe('Project Phases', () => {
 
     it('should return updated phase when user have permission and parameters are valid', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -227,7 +227,7 @@ describe('Project Phases', () => {
       bodyWithZeros.budget = 0.0;
       bodyWithZeros.progress = 0.0;
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -247,7 +247,7 @@ describe('Project Phases', () => {
 
     it('should return updated phase if the order is specified', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -291,7 +291,7 @@ describe('Project Phases', () => {
 
       it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when spentBudget updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -318,7 +318,7 @@ describe('Project Phases', () => {
 
       it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when progress updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -345,7 +345,7 @@ describe('Project Phases', () => {
 
       it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -373,7 +373,7 @@ describe('Project Phases', () => {
 
       it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (completed)', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -399,7 +399,7 @@ describe('Project Phases', () => {
 
       it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when budget updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -424,7 +424,7 @@ describe('Project Phases', () => {
 
       it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when startDate updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -458,7 +458,7 @@ describe('Project Phases', () => {
 
       it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when duration updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -490,7 +490,7 @@ describe('Project Phases', () => {
 
       it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when order updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -515,7 +515,7 @@ describe('Project Phases', () => {
 
       it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when endDate updated', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

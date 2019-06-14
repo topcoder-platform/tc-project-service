@@ -24,7 +24,7 @@ const expectAfterDelete = (id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/metadata/orgConfig/${id}`)
+          .get(`/v5/projects/metadata/orgConfig/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -36,28 +36,31 @@ const expectAfterDelete = (id, err, next) => {
 describe('DELETE organization config', () => {
   const id = 1;
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.OrgConfig.create({
-      id: 1,
-      orgId: 'ORG1',
-      configName: 'project_category_url',
-      configValue: '/projects/1',
-      createdBy: 1,
-      updatedBy: 1,
-    })).then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.OrgConfig.create({
+        id: 1,
+        orgId: 'ORG1',
+        configName: 'project_category_url',
+        configValue: '/projects/1',
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /orgConfig/{id}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/orgConfig/${id}`)
+        .delete(`/v5/projects/metadata/orgConfig/${id}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/orgConfig/${id}`)
+        .delete(`/v5/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -66,7 +69,7 @@ describe('DELETE organization config', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/orgConfig/${id}`)
+        .delete(`/v5/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -75,7 +78,7 @@ describe('DELETE organization config', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/orgConfig/${id}`)
+        .delete(`/v5/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -84,7 +87,7 @@ describe('DELETE organization config', () => {
 
     it('should return 404 for non-existed config', (done) => {
       request(server)
-        .delete('/v4/projects/metadata/orgConfig/not_existed')
+        .delete('/v5/projects/metadata/orgConfig/not_existed')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -95,7 +98,7 @@ describe('DELETE organization config', () => {
       models.OrgConfig.destroy({ where: { id } })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/metadata/orgConfig/${id}`)
+            .delete(`/v5/projects/metadata/orgConfig/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -105,7 +108,7 @@ describe('DELETE organization config', () => {
 
     it('should return 204, for admin, if config was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/orgConfig/${id}`)
+        .delete(`/v5/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -115,7 +118,7 @@ describe('DELETE organization config', () => {
 
     it('should return 204, for connect admin, if config was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/orgConfig/${id}`)
+        .delete(`/v5/projects/metadata/orgConfig/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

@@ -186,18 +186,20 @@ describe('LIST timelines', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines/{timelineId}/milestones', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v5/timelines')
         .expect(403, done);
     });
 
     it('should return 403 for member with no accessible project', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -206,34 +208,34 @@ describe('LIST timelines', () => {
 
     it('should return 404 for not-existed timeline', (done) => {
       request(server)
-        .get('/v4/timelines/11/milestones')
+        .get('/v5/timelines/11/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(404, done);
     });
 
-    it('should return 422 for invalid sort column', (done) => {
+    it('should return 400 for invalid sort column', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones?sort=id%20asc')
+        .get('/v5/timelines/1/milestones?sort=id%20asc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for invalid sort order', (done) => {
+    it('should return 400 for invalid sort order', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones?sort=order%20invalid')
+        .get('/v5/timelines/1/milestones?sort=order%20invalid')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -251,7 +253,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -266,7 +268,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -281,7 +283,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -295,7 +297,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -309,7 +311,7 @@ describe('LIST timelines', () => {
 
     it('should return 200 with sort by order desc', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones?sort=order%20desc')
+        .get('/v5/timelines/1/milestones?sort=order%20desc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

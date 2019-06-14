@@ -11,7 +11,7 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 describe('LIST organization config', () => {
-  const orgConfigPath = '/v4/projects/metadata/orgConfig';
+  const orgConfigPath = '/v5/projects/metadata/orgConfig';
   const configs = [
     {
       id: 1,
@@ -31,10 +31,13 @@ describe('LIST organization config', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.OrgConfig.bulkCreate(configs)),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.OrgConfig.bulkCreate(configs).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /orgConfig', () => {
     it('should return 200 for admin with filter', (done) => {
@@ -47,7 +50,7 @@ describe('LIST organization config', () => {
         .end((err, res) => {
           const config = configs[0];
 
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(1);
           resJson[0].id.should.be.eql(config.id);
           resJson[0].orgId.should.be.eql(config.orgId);
@@ -107,22 +110,22 @@ describe('LIST organization config', () => {
         .expect(200, done);
     });
 
-    it('should return 422 without filter query param', (done) => {
+    it('should return 400 without filter query param', (done) => {
       request(server)
         .get(`${orgConfigPath}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 with filter query param but without orgId defined', (done) => {
+    it('should return 400 with filter query param but without orgId defined', (done) => {
       request(server)
         .get(`${orgConfigPath}?filter=configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
   });
 });

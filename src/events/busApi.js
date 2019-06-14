@@ -8,19 +8,6 @@ import models from '../models';
 import getTopcoderProjectMembers from '../util';
 
 /**
- * Map of project status and event name sent to bus api
- */
-const mapEventTypes = {
-  [PROJECT_STATUS.DRAFT]: BUS_API_EVENT.PROJECT_CREATED,
-  [PROJECT_STATUS.IN_REVIEW]: BUS_API_EVENT.PROJECT_SUBMITTED_FOR_REVIEW,
-  [PROJECT_STATUS.REVIEWED]: BUS_API_EVENT.PROJECT_APPROVED,
-  [PROJECT_STATUS.COMPLETED]: BUS_API_EVENT.PROJECT_COMPLETED,
-  [PROJECT_STATUS.CANCELLED]: BUS_API_EVENT.PROJECT_CANCELED,
-  [PROJECT_STATUS.PAUSED]: BUS_API_EVENT.PROJECT_PAUSED,
-  [PROJECT_STATUS.ACTIVE]: BUS_API_EVENT.PROJECT_ACTIVE,
-};
-
-/**
  * Builds the connect project attachment url for the given project and attachment ids.
  *
  * @param {string|number} projectId the project id
@@ -45,74 +32,63 @@ module.exports = (app, logger) => {
   /**
    * PROJECT_DRAFT_CREATED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, ({ req, project }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, ({ req, project }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_DRAFT_CREATED event');
 
     // send event to bus api
-    createEvent(BUS_API_EVENT.PROJECT_CREATED, {
-      projectId: project.id,
-      projectName: project.name,
+    createEvent(BUS_API_EVENT.PROJECT_CREATED, _.assign(project, {
       refCode: _.get(project, 'details.utm.code'),
       projectUrl: connectProjectUrl(project.id),
-      userId: req.authUser.userId,
-      initiatorUserId: req.authUser.userId,
-    }, logger);
+    }), logger);
   });
 
   /**
    * PROJECT_UPDATED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_UPDATED, ({ req, original, updated }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_UPDATED, ({ req, updated }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_UPDATED event');
 
-    if (original.status !== updated.status) {
-      logger.debug(`project status is updated from ${original.status} to ${updated.status}`);
-      createEvent(mapEventTypes[updated.status], {
-        projectId: updated.id,
-        projectName: updated.name,
-        refCode: _.get(updated, 'details.utm.code'),
-        projectUrl: connectProjectUrl(updated.id),
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else if (
-      !_.isEqual(original.details, updated.details) ||
-      !_.isEqual(original.name, updated.name) ||
-      !_.isEqual(original.description, updated.description)) {
-      logger.debug('project spec is updated');
-      createEvent(BUS_API_EVENT.PROJECT_SPECIFICATION_MODIFIED, {
-        projectId: updated.id,
-        projectName: updated.name,
-        refCode: _.get(updated, 'details.utm.code'),
-        projectUrl: connectProjectUrl(updated.id),
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else if (!_.isEqual(original.bookmarks, updated.bookmarks)) {
-      logger.debug('project bookmarks is updated');
-      createEvent(BUS_API_EVENT.PROJECT_LINK_CREATED, {
-        projectId: updated.id,
-        projectName: updated.name,
-        refCode: _.get(updated, 'details.utm.code'),
-        projectUrl: connectProjectUrl(updated.id),
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }
+    createEvent(BUS_API_EVENT.PROJECT_UPDATED, _.assign(updated, {
+      refCode: _.get(updated, 'details.utm.code'),
+      projectUrl: connectProjectUrl(updated.id),
+    }), logger);
+  });
 
-    // send PROJECT_UPDATED Kafka message when one of the specified below properties changed
-    const watchProperties = ['status', 'details', 'name', 'description', 'bookmarks'];
-    if (!_.isEqual(_.pick(original, watchProperties),
-                   _.pick(updated, watchProperties))) {
-      createEvent(BUS_API_EVENT.PROJECT_UPDATED, {
-        projectId: updated.id,
-        projectName: updated.name,
-        refCode: _.get(updated, 'details.utm.code'),
-        projectUrl: connectProjectUrl(updated.id),
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }
+  /**
+   * PROJECT_DELETED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_DELETED, ({ req, project }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_DELETED event');
+
+    createEvent(BUS_API_EVENT.PROJECT_DELETED, project, logger);
+  });
+
+  /**
+   * PROJECT_METADATA_CREATE
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_METADATA_CREATE event');
+
+    // send event to bus api
+    createEvent(BUS_API_EVENT.PROJECT_METADATA_CREATE, resource, logger);
+  });
+
+  /**
+   * PROJECT_METADATA_UPDATE
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_METADATA_UPDATE event');
+
+    createEvent(BUS_API_EVENT.PROJECT_METADATA_UPDATE, resource, logger);
+  });
+
+  /**
+   * PROJECT_METADATA_DELETE
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_METADATA_DELETE event');
+
+    createEvent(BUS_API_EVENT.PROJECT_METADATA_DELETE, resource, logger);
   });
 
   /**

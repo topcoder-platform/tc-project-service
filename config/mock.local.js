@@ -25,9 +25,9 @@ if (process.env.NODE_ENV === 'test') {
     elasticsearchConfig: {
       host: 'dockerhost:9200',
       // target elasticsearch 2.3 version
-      apiVersion: '2.3',
+      apiVersion: '7.0',
       indexName: 'projects',
-      docType: 'projectV4'
+      docType: 'projectV5'
     },
     whitelistedOriginsForUserIdAuth: "[\"\"]",
   };

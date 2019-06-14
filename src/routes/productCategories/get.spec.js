@@ -26,16 +26,18 @@ describe('GET product category', () => {
 
   const key = productCategory.key;
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProductCategory.create(productCategory))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProductCategory.create(productCategory).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/productCategories/{key}', () => {
     it('should return 404 for non-existed product category', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productCategories/1234')
+        .get('/v5/projects/metadata/productCategories/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -46,7 +48,7 @@ describe('GET product category', () => {
       models.ProductCategory.destroy({ where: { key } })
         .then(() => {
           request(server)
-            .get(`/v4/projects/metadata/productCategories/${key}`)
+            .get(`/v5/projects/metadata/productCategories/${key}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -56,13 +58,13 @@ describe('GET product category', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/productCategories/${key}`)
+        .get(`/v5/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.key.should.be.eql(productCategory.key);
           resJson.displayName.should.be.eql(productCategory.displayName);
           resJson.icon.should.be.eql(productCategory.icon);
@@ -84,13 +86,13 @@ describe('GET product category', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/productCategories/${key}`)
+        .get(`/v5/projects/metadata/productCategories/${key}`)
         .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/productCategories/${key}`)
+        .get(`/v5/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -100,7 +102,7 @@ describe('GET product category', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/productCategories/${key}`)
+        .get(`/v5/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -110,7 +112,7 @@ describe('GET product category', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/productCategories/${key}`)
+        .get(`/v5/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -119,7 +121,7 @@ describe('GET product category', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/productCategories/${key}`)
+        .get(`/v5/projects/metadata/productCategories/${key}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

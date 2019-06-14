@@ -90,25 +90,28 @@ describe('LIST product templates', () => {
 
   let templateId;
 
-  beforeEach(() => testUtil.clearDb()
+  beforeEach((done) => {
+    testUtil.clearDb()
     .then(() => models.ProductTemplate.create(templates[0]))
     .then((createdTemplate) => {
       templateId = createdTemplate.id;
-      return models.ProductTemplate.create(templates[1]);
-    }).then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+      return models.ProductTemplate.create(templates[1]).then(() => done());
+    });
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/productTemplates', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productTemplates')
+        .get('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           validateProductTemplates(2, resJson, templates);
           resJson[0].id.should.be.eql(templateId);
           done();
@@ -117,19 +120,19 @@ describe('LIST product templates', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productTemplates')
+        .get('/v5/projects/metadata/productTemplates')
         .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productTemplates')
+        .get('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           validateProductTemplates(2, resJson, templates);
           resJson[0].id.should.be.eql(templateId);
           done();
@@ -138,13 +141,13 @@ describe('LIST product templates', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productTemplates')
+        .get('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           validateProductTemplates(2, resJson, templates);
           resJson[0].id.should.be.eql(templateId);
           done();
@@ -153,12 +156,12 @@ describe('LIST product templates', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productTemplates')
+        .get('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           validateProductTemplates(2, resJson, templates);
           resJson[0].id.should.be.eql(templateId);
           done();
@@ -167,12 +170,12 @@ describe('LIST product templates', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productTemplates')
+        .get('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           validateProductTemplates(2, resJson, templates);
           resJson[0].id.should.be.eql(templateId);
           done();
@@ -181,13 +184,13 @@ describe('LIST product templates', () => {
 
     it('should return filtered templates', (done) => {
       request(server)
-        .get('/v4/projects/metadata/productTemplates?filter=productKey%3DproductKey-2')
+        .get('/v5/projects/metadata/productTemplates?filter=productKey%3DproductKey-2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           validateProductTemplates(1, resJson, [templates[1]]);
           done();
         });

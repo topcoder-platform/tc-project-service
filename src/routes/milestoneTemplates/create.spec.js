@@ -94,11 +94,15 @@ const milestoneTemplates = [
 ];
 
 describe('CREATE milestone template', () => {
-  beforeEach(() => testUtil.clearDb()
+  beforeEach((done) => {
+    testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
+  },
   );
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /timelines/metadata/milestoneTemplates', () => {
     const body = {
@@ -121,14 +125,14 @@ describe('CREATE milestone template', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -138,7 +142,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -148,7 +152,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -156,21 +160,21 @@ describe('CREATE milestone template', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for non-existed product template', (done) => {
+    it('should return 400 for non-existed product template', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, { referenceId: 1000 }),
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing name', (done) => {
+    it('should return 400 if missing name', (done) => {
       const invalidBody = {
         param: {
           name: undefined,
@@ -178,16 +182,16 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing duration', (done) => {
+    it('should return 400 if missing duration', (done) => {
       const invalidBody = {
         param: {
           duration: undefined,
@@ -195,16 +199,16 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing type', (done) => {
+    it('should return 400 if missing type', (done) => {
       const invalidBody = {
         param: {
           type: undefined,
@@ -212,16 +216,16 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing order', (done) => {
+    it('should return 400 if missing order', (done) => {
       const invalidBody = {
         param: {
           order: undefined,
@@ -229,18 +233,18 @@ describe('CREATE milestone template', () => {
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -295,7 +299,7 @@ describe('CREATE milestone template', () => {
       const minimalBody = _.cloneDeep(body);
       delete minimalBody.param.hidden;
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -311,7 +315,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates')
+        .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

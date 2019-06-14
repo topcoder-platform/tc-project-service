@@ -10,7 +10,7 @@
     "host": "PROJECTS_ES_URL",
     "apiVersion": "2.3",
     "indexName": "PROJECTS_ES_INDEX_NAME",
-    "docType": "projectV4",
+    "docType": "projectV5",
     "timelineIndexName": "TIMELINES_ES_INDEX_NAME",
     "timelineDocType": "TIMELINES_ES_DOC_TYPE"
   },

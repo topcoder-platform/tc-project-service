@@ -77,18 +77,29 @@ export const EVENT = {
 
     PROJECT_MEMBER_INVITE_CREATED: 'project.member.invite.created',
     PROJECT_MEMBER_INVITE_UPDATED: 'project.member.invite.updated',
+
+    // project metadata
+    PROJECT_METADATA_CREATE: 'project.metadata.create',
+    PROJECT_METADATA_UPDATE: 'project.metadata.update',
+    PROJECT_METADATA_DELETE: 'project.metadata.delete',
+
+    // project template
+    PROJECT_TEMPLATE_CREATED: 'project.template.created',
+    PROJECT_TEMPLATE_UPDATED: 'project.template.updated',
+    PROJECT_TEMPLATE_DELETED: 'project.template.deleted',
   },
 };
 
 export const BUS_API_EVENT = {
-  PROJECT_CREATED: 'notifications.connect.project.created',
-  PROJECT_UPDATED: 'connect.action.project.updated',
-  PROJECT_SUBMITTED_FOR_REVIEW: 'notifications.connect.project.submittedForReview',
-  PROJECT_APPROVED: 'notifications.connect.project.approved',
-  PROJECT_PAUSED: 'notifications.connect.project.paused',
-  PROJECT_COMPLETED: 'notifications.connect.project.completed',
-  PROJECT_CANCELED: 'notifications.connect.project.canceled',
-  PROJECT_ACTIVE: 'notifications.connect.project.active',
+  PROJECT_CREATED: 'project.notification.create', // 'notifications.connect.project.created',
+  PROJECT_UPDATED: 'project.notification.update', // 'connect.action.project.updated',
+  PROJECT_DELETED: 'project.notification.delete', // 'project deleted'
+  PROJECT_SUBMITTED_FOR_REVIEW: 'project.notification.update', // 'notifications.connect.project.submittedForReview',
+  PROJECT_APPROVED: 'project.notification.update', // 'notifications.connect.project.approved',
+  PROJECT_PAUSED: 'project.notification.update', // 'notifications.connect.project.paused',
+  PROJECT_COMPLETED: 'project.notification.update', // 'notifications.connect.project.completed',
+  PROJECT_CANCELED: 'project.notification.update', // 'notifications.connect.project.canceled',
+  PROJECT_ACTIVE: 'project.notification.update', // 'notifications.connect.project.active',
 
   PROJECT_PHASE_TRANSITION_ACTIVE: 'notifications.connect.project.phase.transition.active',
   PROJECT_PHASE_TRANSITION_COMPLETED: 'notifications.connect.project.phase.transition.completed',
@@ -147,6 +158,11 @@ export const BUS_API_EVENT = {
   PROJECT_MEMBER_INVITE_APPROVED: 'notifications.connect.project.member.invite.approved',
   PROJECT_MEMBER_INVITE_REJECTED: 'notifications.connect.project.member.invite.rejected',
   PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.action.email.project.member.invite.created',
+
+  // metadata
+  PROJECT_METADATA_CREATE: 'project.notification.create',
+  PROJECT_METADATA_UPDATE: 'project.notification.update',
+  PROJECT_METADATA_DELETE: 'project.notification.delete',
 };
 
 export const REGEX = {
@@ -175,4 +191,19 @@ export const INVITE_STATUS = {
   REQUEST_REJECTED: 'request_rejected',
   REQUEST_APPROVED: 'request_approved',
   CANCELED: 'canceled',
+};
+
+export const RESOURCES = {
+  PROJECT: 'project',
+  PROJECT_TEMPLATE: 'project.template',
+  PROJECT_TYPE: 'project.type',
+  ORG_CONFIG: 'project.orgConfig',
+  FORM_VERSION: 'project.form.version',
+  FORM_REVISION: 'project.form.revision',
+  PRICE_CONFIG_VERSION: 'project.priceConfig.version',
+  PRICE_CONFIG_REVISION: 'project.priceConfig.revision',
+  PLAN_CONFIG_VERSION: 'project.planConfig.version',
+  PLAN_CONFIG_REVISION: 'project.planConfig.revision',
+  PRODUCT_TEMPLATE: 'product.template',
+  PRODUCT_CATEGORY: 'product.category',
 };

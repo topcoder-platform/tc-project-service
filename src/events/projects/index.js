@@ -159,7 +159,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
 
   // Find project by id and update activity. Single update is used as there is no need to wrap it into transaction
   const projectId = payload.projectId;
-  const project = await models.Project.findById(projectId);
+  const project = await models.Project.findByPk(projectId);
   if (!project) {
     throw new Error(`Project with id ${projectId} not found`);
   }

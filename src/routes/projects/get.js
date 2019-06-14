@@ -37,7 +37,7 @@ module.exports = [
     });
     let project;
     return models.Project
-      .find({
+      .findOne({
         where: { id: projectId },
         attributes: _.get(fields, 'projects', null),
         raw: true,
@@ -68,7 +68,7 @@ module.exports = [
       })
       .then((invites) => {
         project.invites = invites;
-        res.status(200).json(util.wrapResponse(req.id, project));
+        res.status(200).json(project);
       })
       .catch(err => next(err));
   },

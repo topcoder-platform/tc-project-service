@@ -29,7 +29,7 @@ const expectAfterDelete = (timelineId, id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/timelines/${timelineId}/milestones/${id}`)
+          .get(`/v5/timelines/${timelineId}/milestones/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -220,18 +220,20 @@ describe('DELETE milestone', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /timelines/{timelineId}/milestones/{milestoneId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/1')
+        .delete('/v5/timelines/1/milestones/1')
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/1')
+        .delete('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -240,7 +242,7 @@ describe('DELETE milestone', () => {
 
     it('should return 403 for member who is not in the project (timeline refers to a phase)', (done) => {
       request(server)
-        .delete('/v4/timelines/2/milestones/1')
+        .delete('/v5/timelines/2/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -249,7 +251,7 @@ describe('DELETE milestone', () => {
 
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
-        .delete('/v4/timelines/1234/milestones/1')
+        .delete('/v5/timelines/1234/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -258,7 +260,7 @@ describe('DELETE milestone', () => {
 
     it('should return 404 for deleted timeline', (done) => {
       request(server)
-        .delete('/v4/timelines/3/milestones/1')
+        .delete('/v5/timelines/3/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -267,7 +269,7 @@ describe('DELETE milestone', () => {
 
     it('should return 404 for non-existed milestone', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/100')
+        .delete('/v5/timelines/1/milestones/100')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -276,34 +278,34 @@ describe('DELETE milestone', () => {
 
     it('should return 404 for deleted milestone', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/3')
+        .delete('/v5/timelines/1/milestones/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(404, done);
     });
 
-    it('should return 422 for invalid timelineId param', (done) => {
+    it('should return 400 for invalid timelineId param', (done) => {
       request(server)
-        .delete('/v4/timelines/0/milestones/1')
+        .delete('/v5/timelines/0/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for invalid milestoneId param', (done) => {
+    it('should return 400 for invalid milestoneId param', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/0')
+        .delete('/v5/timelines/1/milestones/0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 204, for admin, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/1')
+        .delete('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -317,7 +319,7 @@ describe('DELETE milestone', () => {
 
     it('should return 204, for connect admin, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/1')
+        .delete('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -327,7 +329,7 @@ describe('DELETE milestone', () => {
 
     it('should return 204, for connect manager, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/1')
+        .delete('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -337,7 +339,7 @@ describe('DELETE milestone', () => {
 
     it('should return 204, for copilot, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/1')
+        .delete('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -347,7 +349,7 @@ describe('DELETE milestone', () => {
 
     it('should return 204, for member, if timeline was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/1/milestones/1')
+        .delete('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -376,7 +378,7 @@ describe('DELETE milestone', () => {
       // thus TIMELINE_ADJUSTED will be always sent
       it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone removed', (done) => {
         request(server)
-          .delete('/v4/timelines/1/milestones/1')
+          .delete('/v5/timelines/1/milestones/1')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })

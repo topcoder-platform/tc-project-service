@@ -12,36 +12,37 @@ import models from '../../models';
 const should = chai.should();
 
 describe('CREATE organization config', () => {
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.OrgConfig.create({
-      orgId: 'ORG1',
-      configName: 'project_catefory_url',
-      configValue: 'http://localhost/url',
-      createdBy: 1,
-      updatedBy: 1,
-    })).then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.OrgConfig.create({
+        orgId: 'ORG1',
+        configName: 'project_catefory_url',
+        configValue: 'http://localhost/url',
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /orgConfig', () => {
     const body = {
-      param: {
-        orgId: 'ORG2',
-        configName: 'project_catefory_url',
-        configValue: 'http://localhost/url',
-      },
+      orgId: 'ORG2',
+      configName: 'project_catefory_url',
+      configValue: 'http://localhost/url',
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -51,7 +52,7 @@ describe('CREATE organization config', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -61,7 +62,7 @@ describe('CREATE organization config', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -69,52 +70,52 @@ describe('CREATE organization config', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for missing orgId', (done) => {
+    it('should return 400 for missing orgId', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.orgId;
+      delete invalidBody.orgId;
 
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing configName', (done) => {
+    it('should return 400 for missing configName', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.configName;
+      delete invalidBody.configName;
 
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for duplicated orgId and configName', (done) => {
+    it('should return 400 for duplicated orgId and configName', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.orgId = 'ORG1';
-      invalidBody.param.configName = 'project_catefory_url';
+      invalidBody.orgId = 'ORG1';
+      invalidBody.configName = 'project_catefory_url';
 
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -122,10 +123,10 @@ describe('CREATE organization config', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.orgId.should.be.eql(body.param.orgId);
-          resJson.configName.should.be.eql(body.param.configName);
-          resJson.configValue.should.be.eql(body.param.configValue);
+          const resJson = res.body;
+          resJson.orgId.should.be.eql(body.orgId);
+          resJson.configName.should.be.eql(body.configName);
+          resJson.configValue.should.be.eql(body.configValue);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -140,7 +141,7 @@ describe('CREATE organization config', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/projects/metadata/orgConfig')
+        .post('/v5/projects/metadata/orgConfig')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -148,10 +149,10 @@ describe('CREATE organization config', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.orgId.should.be.eql(body.param.orgId);
-          resJson.configName.should.be.eql(body.param.configName);
-          resJson.configValue.should.be.eql(body.param.configValue);
+          const resJson = res.body;
+          resJson.orgId.should.be.eql(body.orgId);
+          resJson.configName.should.be.eql(body.configName);
+          resJson.configValue.should.be.eql(body.configValue);
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();

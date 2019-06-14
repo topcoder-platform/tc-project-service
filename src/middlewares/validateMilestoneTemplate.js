@@ -18,11 +18,12 @@ async function validateReference(sourceObject) {
         id: sourceObject.referenceId,
         deletedAt: { $eq: null },
       },
+      raw: true,
     });
     if (!productTemplate) {
       const apiErr = new Error(
         `Product template not found for product template id ${sourceObject.referenceId}`);
-      apiErr.status = 422;
+      apiErr.status = 400;
       throw apiErr;
     }
   }
@@ -78,27 +79,27 @@ const validateMilestoneTemplate = {
 
     if (!util.isValidFilter(filter, ['reference', 'referenceId'])) {
       const apiErr = new Error('Only allowed to filter by reference and referenceId');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
     // Verify required filters are present
     if (!filter.reference || !filter.referenceId) {
       const apiErr = new Error('Please provide reference and referenceId filter parameters');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
     // Verify reference is a valid value
     if (!_.includes(MILESTONE_TEMPLATE_REFERENCES, filter.reference)) {
       const apiErr = new Error(`reference filter must be in ${MILESTONE_TEMPLATE_REFERENCES}`);
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
     if (_.lt(filter.referenceId, 1)) {
       const apiErr = new Error('referenceId filter must be a positive integer');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 
@@ -117,7 +118,7 @@ const validateMilestoneTemplate = {
    */
   // eslint-disable-next-line valid-jsdoc
   validateIdParam: (req, res, next) => {
-    models.MilestoneTemplate.findById(req.params.milestoneTemplateId)
+    models.MilestoneTemplate.findByPk(req.params.milestoneTemplateId)
       .then((milestoneTemplate) => {
         if (!milestoneTemplate) {
           const apiErr = new Error(

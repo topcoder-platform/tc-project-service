@@ -26,37 +26,35 @@ module.exports = function definePhaseProduct(sequelize, DataTypes) {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     indexes: [],
-    classMethods: {
-      getActivePhaseProducts(phaseId) {
-        return this.findAll({
-          where: {
-            deletedAt: { $eq: null },
-            phaseId,
-          },
-          raw: true,
-        });
-      },
-      /**
-       * Search Phase Products
-       * @param {Object} parameters the replacements for sequelize
-       *                 - projectId id of the project
-       *                 - phaseId id of phase
-       * @param {Object} log the request log
-       * @return {Object} the result rows and count
-       */
-      async search(parameters = {}, log) {
-        const whereQuery = 'phase_products."projectId"= :projectId AND phase_products."phaseId" = :phaseId';
-        const dbQuery = `SELECT * FROM phase_products WHERE ${whereQuery}`;
-        return sequelize.query(dbQuery,
-          { type: sequelize.QueryTypes.SELECT,
-            replacements: parameters,
-            logging: (str) => { log.debug(str); },
-            raw: true,
-          })
-          .then(phases => ({ rows: phases, count: phases.length }));
-      },
-    },
   });
+
+  PhaseProduct.getActivePhaseProducts = phaseId => PhaseProduct.findAll({
+    where: {
+      deletedAt: { $eq: null },
+      phaseId,
+    },
+    raw: true,
+  });
+
+  /**
+   * Search Phase Products
+   * @param {Object} parameters the replacements for sequelize
+   *                 - projectId id of the project
+   *                 - phaseId id of phase
+   * @param {Object} log the request log
+   * @return {Object} the result rows and count
+   */
+  PhaseProduct.search = async (parameters = {}, log) => {
+    const whereQuery = 'phase_products."projectId"= :projectId AND phase_products."phaseId" = :phaseId';
+    const dbQuery = `SELECT * FROM phase_products WHERE ${whereQuery}`;
+    return sequelize.query(dbQuery,
+      { type: sequelize.QueryTypes.SELECT,
+        replacements: parameters,
+        logging: (str) => { log.debug(str); },
+        raw: true,
+      })
+      .then(phases => ({ rows: phases, count: phases.length }));
+  };
 
   return PhaseProduct;
 };

@@ -58,7 +58,7 @@ module.exports = [
           }
           if (data.startDate !== null && data.endDate !== null && data.startDate > data.endDate) {
             const err = new Error('startDate must not be after endDate.');
-            err.status = 422;
+            err.status = 400;
             throw err;
           }
           return models.ProjectPhase
@@ -95,11 +95,11 @@ module.exports = [
           }
 
           // Get the product template
-          return models.ProductTemplate.findById(data.productTemplateId)
+          return models.ProductTemplate.findByPk(data.productTemplateId)
             .then((productTemplate) => {
               if (!productTemplate) {
                 const err = new Error(`Product template does not exist with id = ${data.productTemplateId}`);
-                err.status = 422;
+                err.status = 400;
                 throw err;
               }
 

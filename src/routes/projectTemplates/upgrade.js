@@ -5,29 +5,27 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { EVENT, RESOURCES } from '../../constants';
 import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
 
-
 const schema = {
-  body: {
-    param: Joi.object().keys({
-      form: Joi.object().keys({
-        version: Joi.number().integer().positive().required(),
-        key: Joi.string().required(),
-      }).optional(),
-      priceConfig: Joi.object().keys({
-        version: Joi.number().integer().positive().required(),
-        key: Joi.string().required(),
-      }).optional(),
-      planConfig: Joi.object().keys({
-        version: Joi.number().integer().positive().required(),
-        key: Joi.string().required(),
-      }).optional(),
+  body: Joi.object().keys({
+    form: Joi.object().keys({
+      version: Joi.number().integer().positive().required(),
+      key: Joi.string().required(),
     }).optional(),
-  },
+    priceConfig: Joi.object().keys({
+      version: Joi.number().integer().positive().required(),
+      key: Joi.string().required(),
+    }).optional(),
+    planConfig: Joi.object().keys({
+      version: Joi.number().integer().positive().required(),
+      key: Joi.string().required(),
+    }).optional(),
+  }).optional(),
 };
 
 
@@ -42,19 +40,19 @@ module.exports = [
     // eslint-disable-next-line consistent-return
     }).then(async (pt) => {
       if (pt == null) {
-        const apiErr = new Error(`project template not found for id ${req.body.param.templateId}`);
+        const apiErr = new Error(`project template not found for id ${req.body.templateId}`);
         apiErr.status = 404;
         throw apiErr;
       }
       if ((pt.scope == null) || (pt.phases == null)) {
         const apiErr = new Error('Current project template\'s scope or phases is null');
-        apiErr.status = 422;
+        apiErr.status = 400;
         throw apiErr;
       }
 
       // get form field
       let newForm = {};
-      if (req.body.param.form == null) {
+      if (req.body.form == null) {
         const scope = {
           sections: pt.scope ? pt.scope.sections : null,
           wizard: pt.scope ? pt.scope.wizard : null,
@@ -66,12 +64,12 @@ module.exports = [
           key: pt.key,
         };
       } else {
-        newForm = req.body.param.form;
+        newForm = req.body.form;
         await util.checkModel(newForm, 'Form', models.Form, 'project template');
       }
       // get price config field
       let newPriceConfig = {};
-      if (req.body.param.priceConfig == null) {
+      if (req.body.priceConfig == null) {
         const config = {};
         if (pt.scope) {
           Object.keys(pt.scope).filter(key => (key !== 'wizard') && (key !== 'sections')).forEach((key) => {
@@ -84,19 +82,19 @@ module.exports = [
           key: pt.key,
         };
       } else {
-        newPriceConfig = req.body.param.priceConfig;
+        newPriceConfig = req.body.priceConfig;
         await util.checkModel(newPriceConfig, 'PriceConfig', models.PriceConfig, 'project template');
       }
       // get plan config field
       let newPlanConfig = {};
-      if (req.body.param.planConfig == null) {
+      if (req.body.planConfig == null) {
         const planConfig = await models.PlanConfig.createNewVersion(pt.key, pt.phases, req.authUser.userId);
         newPlanConfig = {
           version: planConfig.version,
           key: pt.key,
         };
       } else {
-        newPlanConfig = req.body.param.planConfig;
+        newPlanConfig = req.body.planConfig;
         await util.checkModel(newPlanConfig, 'PlanConfig', models.PlanConfig, 'project template');
       }
 
@@ -111,8 +109,14 @@ module.exports = [
 
       const newPt = await pt.update(updateInfo);
 
-      res.status(201).json(util.wrapResponse(
-        req.id, _.omit(newPt.toJSON(), 'deletedAt', 'deletedBy'), 1, 201));
+      // emit event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
+        RESOURCES.PROJECT_TEMPLATE,
+        updateInfo);
+
+      res.status(201).json(_.omit(newPt.toJSON(), 'deletedAt', 'deletedBy'));
     })
     .catch(next));
   },

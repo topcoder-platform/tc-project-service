@@ -73,7 +73,7 @@ describe('Project Attachments update', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .patch(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -83,7 +83,7 @@ describe('Project Attachments update', () => {
 
     it('should return 404 if attachment was not found', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/attachments/8888888`)
+        .patch(`/v5/projects/${project1.id}/attachments/8888888`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -93,7 +93,7 @@ describe('Project Attachments update', () => {
 
     it('should return 200 if attachment was successfully updated', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .patch(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -114,7 +114,7 @@ describe('Project Attachments update', () => {
 
     it('should return 200 if admin updates the attachment', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .patch(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -147,7 +147,7 @@ describe('Project Attachments update', () => {
 
       it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .patch(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })

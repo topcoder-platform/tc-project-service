@@ -25,7 +25,7 @@ const addAttachmentValidations = {
       filePath: Joi.string().required(),
       s3Bucket: Joi.string().required(),
       contentType: Joi.string().required(),
-      allowedUsers: Joi.array(Joi.number().integer().positive()).allow(null).default(null),
+      allowedUsers: Joi.array().items(Joi.number().integer().positive()).allow(null).default(null),
     }).required(),
   },
 };

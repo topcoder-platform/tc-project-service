@@ -69,7 +69,7 @@ module.exports = [
     }
     if (error) {
       const apiErr = new Error(error);
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
 

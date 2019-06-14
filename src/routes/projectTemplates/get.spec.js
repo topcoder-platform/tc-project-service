@@ -48,19 +48,21 @@ describe('GET project template', () => {
 
   let templateId;
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProjectTemplate.create(template))
-    .then((createdTemplate) => {
-      templateId = createdTemplate.id;
-      return Promise.resolve();
-    }),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProjectTemplate.create(template).then((createdTemplate) => {
+        templateId = createdTemplate.id;
+        done();
+      }));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/projectTemplates/{templateId}', () => {
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .get('/v4/projects/metadata/projectTemplates/1234')
+        .get('/v5/projects/metadata/projectTemplates/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -71,7 +73,7 @@ describe('GET project template', () => {
       models.ProjectTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-            .get(`/v4/projects/metadata/projectTemplates/${templateId}`)
+            .get(`/v5/projects/metadata/projectTemplates/${templateId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -81,13 +83,13 @@ describe('GET project template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .get(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(templateId);
           resJson.name.should.be.eql(template.name);
           resJson.key.should.be.eql(template.key);
@@ -107,13 +109,13 @@ describe('GET project template', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .get(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .get(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -123,7 +125,7 @@ describe('GET project template', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .get(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -133,7 +135,7 @@ describe('GET project template', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .get(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -142,7 +144,7 @@ describe('GET project template', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .get(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

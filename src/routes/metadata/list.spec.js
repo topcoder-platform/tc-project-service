@@ -179,7 +179,8 @@ const planConfigs = [
 ];
 
 describe('GET all metadata', () => {
-  beforeEach(() => testUtil.clearDb()
+  before((done) => {
+    testUtil.clearDb()
     .then(() => models.ProjectTemplate.bulkCreate(projectTemplates))
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
     .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates))
@@ -187,20 +188,23 @@ describe('GET all metadata', () => {
     .then(() => models.ProductCategory.bulkCreate(productCategories))
     .then(() => models.Form.bulkCreate(forms))
     .then(() => models.PriceConfig.bulkCreate(priceConfigs))
-    .then(() => models.PlanConfig.bulkCreate(planConfigs)),
-  );
-  after(testUtil.clearDb);
+    .then(() => models.PlanConfig.bulkCreate(planConfigs).then(() => done()));
+  });
+
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/projects/metadata')
+        .get('/v5/projects/metadata')
         .expect(403, done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata')
+        .get('/v5/projects/metadata')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -210,13 +214,13 @@ describe('GET all metadata', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata')
+        .get('/v5/projects/metadata')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson);
           resJson.projectTemplates.should.have.length(1);
           resJson.productTemplates.should.have.length(1);
@@ -237,13 +241,13 @@ describe('GET all metadata', () => {
 
     it('should return all used model when request with includeAllReferred query', (done) => {
       request(server)
-        .get('/v4/projects/metadata?includeAllReferred=true')
+        .get('/v5/projects/metadata?includeAllReferred=true')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson);
           resJson.projectTemplates.should.have.length(1);
           resJson.productTemplates.should.have.length(1);
@@ -259,7 +263,7 @@ describe('GET all metadata', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/projects/metadata')
+        .get('/v5/projects/metadata')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -269,7 +273,7 @@ describe('GET all metadata', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/projects/metadata')
+        .get('/v5/projects/metadata')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -278,7 +282,7 @@ describe('GET all metadata', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/projects/metadata')
+        .get('/v5/projects/metadata')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

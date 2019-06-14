@@ -2,8 +2,11 @@
  * API to add a project type
  */
 import validate from 'express-validation';
+import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { EVENT, RESOURCES } from '../../../constants';
+import util from '../../../util';
 import models from '../../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -46,7 +49,21 @@ module.exports = [
         key: req.params.key,
         version: req.params.version,
       },
-    })).then(() => {
+    }))
+    .then(deleted => models.PriceConfig.findAll({
+      where: {
+        key: req.params.key,
+        version: req.params.version,
+      },
+      paranoid: false,
+      order: [['deletedAt', 'DESC']],
+      limit: deleted,
+    }))
+    .then((priceConfigs) => {
+      _.map(priceConfigs, priceConfig => util.sendResourceToKafkaBus(req,
+        EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
+        RESOURCES.PRICE_CONFIG_VERSION,
+        _.pick(priceConfig.toJSON(), 'id')));
       res.status(204).end();
     })
     .catch(next));

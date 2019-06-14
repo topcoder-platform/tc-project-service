@@ -60,7 +60,8 @@ describe('UPGRADE product template', () => {
   let templateId;
   let missingTemplateId;
 
-  beforeEach(() => testUtil.clearDb()
+  beforeEach((done) => {
+    testUtil.clearDb()
     .then(() => models.ProductCategory.bulkCreate([
       {
         key: 'generic',
@@ -122,47 +123,45 @@ describe('UPGRADE product template', () => {
     .then((createdTemplate) => {
       templateId = createdTemplate.id;
     })
-    .then(() => models.ProductTemplate.create(productTemplateMissed))
-    .then((createdTemplate) => {
+    .then(() => models.ProductTemplate.create(productTemplateMissed).then((createdTemplate) => {
       missingTemplateId = createdTemplate.id;
-    }),
-  );
-  after(testUtil.clearDb);
+      done();
+    }));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /projects/metadata/productTemplates/{templateId}/upgrade', () => {
     const body = {
-      param: {
-        form: {
-          key: 'newKey',
-          version: 1,
-        },
+
+      form: {
+        key: 'newKey',
+        version: 1,
       },
+
     };
 
     const bodyInvalidForm = {
-      param: {
-        form: {
-          key: 'wrongKey',
-          version: 1,
-        },
+      form: {
+        key: 'wrongKey',
+        version: 1,
       },
     };
 
     const emptyBody = {
-      param: {
-      },
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -172,7 +171,7 @@ describe('UPGRADE product template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -182,7 +181,7 @@ describe('UPGRADE product template', () => {
 
     it('should return 403 for connect manager', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
@@ -190,28 +189,26 @@ describe('UPGRADE product template', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for invalid request', (done) => {
+    it('should return 400 for invalid request', (done) => {
       const invalidBody = {
-        param: {
-          form: {
-            key: 'notvalid',
-            version: 1,
-          },
+        form: {
+          key: 'notvalid',
+          version: 1,
         },
       };
 
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates/1234/upgrade')
+        .post('/v5/projects/metadata/productTemplates/1234/upgrade')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -223,7 +220,7 @@ describe('UPGRADE product template', () => {
       models.ProductTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-            .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+            .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -234,14 +231,14 @@ describe('UPGRADE product template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(templateId);
           should.not.exist(resJson.template);
 
@@ -260,16 +257,16 @@ describe('UPGRADE product template', () => {
         });
     });
 
-    it('should create new version of model if param not given model key and version', (done) => {
+    it('should create new version of model if body not given model key and version', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(emptyBody)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
 
           should.not.exist(resJson.scope);
           should.not.exist(resJson.phases);
@@ -290,24 +287,24 @@ describe('UPGRADE product template', () => {
         });
     });
 
-    it('should return 422 when form is invalid', (done) => {
+    it('should return 400 when form is invalid', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${templateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${templateId}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(bodyInvalidForm)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when template is missing', (done) => {
+    it('should return 400 when template is missing', (done) => {
       request(server)
-        .post(`/v4/projects/metadata/productTemplates/${missingTemplateId}/upgrade`)
+        .post(`/v5/projects/metadata/productTemplates/${missingTemplateId}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
-        .expect(422, done);
+        .expect(400, done);
     });
   });
 });

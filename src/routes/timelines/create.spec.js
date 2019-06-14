@@ -185,7 +185,9 @@ describe('CREATE timeline', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /timelines', () => {
     const body = {
@@ -201,14 +203,14 @@ describe('CREATE timeline', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -225,7 +227,7 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -233,7 +235,7 @@ describe('CREATE timeline', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if missing name', (done) => {
+    it('should return 400 if missing name', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           name: undefined,
@@ -241,16 +243,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing startDate', (done) => {
+    it('should return 400 if missing startDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: undefined,
@@ -258,16 +260,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is after endDate', (done) => {
+    it('should return 400 if startDate is after endDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: '2018-05-29T00:00:00.000Z',
@@ -276,16 +278,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing reference', (done) => {
+    it('should return 400 if missing reference', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: undefined,
@@ -293,16 +295,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing referenceId', (done) => {
+    it('should return 400 if missing referenceId', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: undefined,
@@ -310,16 +312,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if invalid reference', (done) => {
+    it('should return 400 if invalid reference', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: 'invalid',
@@ -327,16 +329,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if invalid referenceId', (done) => {
+    it('should return 400 if invalid referenceId', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: 0,
@@ -344,16 +346,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project does not exist', (done) => {
+    it('should return 400 if project does not exist', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: 1110,
@@ -361,16 +363,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project was deleted', (done) => {
+    it('should return 400 if project was deleted', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           referenceId: 2,
@@ -378,16 +380,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if phase does not exist', (done) => {
+    it('should return 400 if phase does not exist', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: 'phase',
@@ -396,16 +398,16 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if phase was deleted', (done) => {
+    it('should return 400 if phase was deleted', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           reference: 'phase',
@@ -414,18 +416,18 @@ describe('CREATE timeline', () => {
       };
 
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -460,7 +462,7 @@ describe('CREATE timeline', () => {
       const withMilestones = _.cloneDeep(body);
       withMilestones.param.templateId = 1;
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -540,7 +542,7 @@ describe('CREATE timeline', () => {
 
     it('should return 201 for connect manager', (done) => {
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -557,7 +559,7 @@ describe('CREATE timeline', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -574,7 +576,7 @@ describe('CREATE timeline', () => {
 
     it('should return 201 for copilot', (done) => {
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -591,7 +593,7 @@ describe('CREATE timeline', () => {
 
     it('should return 201 for member', (done) => {
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -614,7 +616,7 @@ describe('CREATE timeline', () => {
         },
       });
       request(server)
-        .post('/v4/timelines')
+        .post('/v5/timelines')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })

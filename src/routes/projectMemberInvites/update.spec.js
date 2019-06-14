@@ -118,14 +118,14 @@ describe('Project member invite update', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/invite`)
+        .patch(`/v5/projects/${project1.id}/members/invite`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 404 if user has no invite', (done) => {
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .put(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -144,7 +144,7 @@ describe('Project member invite update', () => {
 
     it('should return 400 no userId or email is presented', (done) => {
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .put(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -159,9 +159,8 @@ describe('Project member invite update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            res.body.result.status.should.equal(400);
             const errorMessage = _.get(resJson, 'message', '');
             sinon.assert.match(errorMessage, /.*userId or email should be provided/);
             done();
@@ -188,7 +187,7 @@ describe('Project member invite update', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .put(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -204,9 +203,8 @@ describe('Project member invite update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
             sinon.assert.match(errorMessage, /.*Project members can cancel invites only for customer/);
             done();
@@ -233,7 +231,7 @@ describe('Project member invite update', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .put(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -249,9 +247,8 @@ describe('Project member invite update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
             sinon.assert.match(errorMessage, /.*Project members can cancel invites only for customer/);
             done();
@@ -278,7 +275,7 @@ describe('Project member invite update', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .put(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -294,9 +291,8 @@ describe('Project member invite update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
             sinon.assert.match(errorMessage, 'Requested invites can only be updated by Copilot manager');
             done();
@@ -336,7 +332,7 @@ describe('Project member invite update', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .put(`/v5/projects/${project1.id}/members/invite`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -353,24 +349,12 @@ describe('Project member invite update', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledThrice.should.be.true;
+              createEventSpy.calledOnce.should.be.true;
               createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
                 projectId: project1.id,
                 userId: invite1.userId,
                 status: INVITE_STATUS.ACCEPTED,
                 email: null,
-              })).should.be.true;
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.MEMBER_JOINED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: invite1.userId,
-                initiatorUserId: 40051331,
-              })).should.be.true;
-              createEventSpy.thirdCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: invite1.userId,
-                initiatorUserId: 40051331,
               })).should.be.true;
               done();
             });

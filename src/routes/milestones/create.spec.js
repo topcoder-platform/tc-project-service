@@ -200,7 +200,9 @@ describe('CREATE milestone', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /timelines/{timelineId}/milestones', () => {
     const body = {
@@ -234,14 +236,14 @@ describe('CREATE milestone', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -249,7 +251,7 @@ describe('CREATE milestone', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if missing name', (done) => {
+    it('should return 400 if missing name', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           name: undefined,
@@ -257,16 +259,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing duration', (done) => {
+    it('should return 400 if missing duration', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           duration: undefined,
@@ -274,16 +276,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing type', (done) => {
+    it('should return 400 if missing type', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           type: undefined,
@@ -291,16 +293,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing order', (done) => {
+    it('should return 400 if missing order', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           order: undefined,
@@ -308,16 +310,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing plannedText', (done) => {
+    it('should return 400 if missing plannedText', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           plannedText: undefined,
@@ -325,16 +327,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing activeText', (done) => {
+    it('should return 400 if missing activeText', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           activeText: undefined,
@@ -342,16 +344,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing completedText', (done) => {
+    it('should return 400 if missing completedText', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           completedText: undefined,
@@ -359,16 +361,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing blockedText', (done) => {
+    it('should return 400 if missing blockedText', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           blockedText: undefined,
@@ -376,16 +378,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is after endDate', (done) => {
+    it('should return 400 if startDate is after endDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: '2018-05-29T00:00:00.000Z',
@@ -394,16 +396,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is after completionDate', (done) => {
+    it('should return 400 if startDate is after completionDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: '2018-05-29T00:00:00.000Z',
@@ -412,16 +414,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is before the timeline startDate', (done) => {
+    it('should return 400 if startDate is before the timeline startDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: '2018-05-01T00:00:00.000Z',
@@ -429,16 +431,16 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if endDate is after the timeline endDate', (done) => {
+    it('should return 400 if endDate is after the timeline endDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           endDate: '2018-06-13T00:00:00.000Z',
@@ -446,29 +448,29 @@ describe('CREATE milestone', () => {
       };
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if invalid timelineId param', (done) => {
+    it('should return 400 if invalid timelineId param', (done) => {
       request(server)
-        .post('/v4/timelines/0/milestones')
+        .post('/v5/timelines/0/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 if timeline does not exist', (done) => {
       request(server)
-        .post('/v4/timelines/1000/milestones')
+        .post('/v5/timelines/1000/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -479,7 +481,7 @@ describe('CREATE milestone', () => {
 
     it('should return 404 if timeline was deleted', (done) => {
       request(server)
-        .post('/v4/timelines/3/milestones')
+        .post('/v5/timelines/3/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -490,7 +492,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -546,7 +548,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for connect manager', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -563,7 +565,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -580,7 +582,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for copilot', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -597,7 +599,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for member', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -631,7 +633,7 @@ describe('CREATE milestone', () => {
 
       it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone created', (done) => {
         request(server)
-          .post('/v4/timelines/1/milestones')
+          .post('/v5/timelines/1/milestones')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })

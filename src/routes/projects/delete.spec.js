@@ -25,7 +25,7 @@ const expectAfterDelete = (id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/${id}`)
+          .get(`/v5/projects/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -106,7 +106,7 @@ describe('Project delete test', () => {
   describe('DELETE /projects/{id}/', () => {
     it('should return 403 if copilot tries to delete the project', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -115,7 +115,7 @@ describe('Project delete test', () => {
 
     it('should return 204 if project was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -127,7 +127,7 @@ describe('Project delete test', () => {
 
     it('should return 204, for connect admin, if project was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -139,7 +139,7 @@ describe('Project delete test', () => {
 
     it('should return 204, for connect admin, if project was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

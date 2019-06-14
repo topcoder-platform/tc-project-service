@@ -30,7 +30,7 @@ const expectAfterDelete = (projectId, id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/${projectId}/phases/${id}`)
+          .get(`/v5/projects/${projectId}/phases/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -123,7 +123,7 @@ describe('Project Phases', () => {
   describe('DELETE /projects/{projectId}/phases/{phaseId}', () => {
     it('should return 403 if user does not have permissions (non team member)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -133,7 +133,7 @@ describe('Project Phases', () => {
 
     it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -143,7 +143,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .delete(`/v4/projects/999/phases/${phaseId}`)
+        .delete(`/v5/projects/999/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -153,7 +153,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/999`)
+        .delete(`/v5/projects/${projectId}/phases/999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -163,7 +163,7 @@ describe('Project Phases', () => {
 
     it('should return 204 when user have project permission', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -189,7 +189,7 @@ describe('Project Phases', () => {
 
       it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when phase removed', (done) => {
         request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

@@ -4,7 +4,6 @@
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import Joi from 'joi';
 import validate from 'express-validation';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -103,7 +102,7 @@ module.exports = [
             Promise.resolve(latestVersion[2]),
           ]);
         }).then((queryAllResult) => {
-          res.json(util.wrapResponse(req.id, {
+          res.json({
             projectTemplates: queryAllResult[0],
             productTemplates: queryAllResult[1],
             milestoneTemplates: queryAllResult[2],
@@ -112,7 +111,7 @@ module.exports = [
             forms: queryAllResult[5],
             priceConfigs: queryAllResult[6],
             planConfigs: queryAllResult[7],
-          }));
+          });
         })
         .catch(next);
     }
@@ -127,7 +126,7 @@ module.exports = [
       models.PlanConfig.latestVersion(),
     ])
       .then((results) => {
-        res.json(util.wrapResponse(req.id, {
+        res.json({
           projectTemplates: results[0],
           productTemplates: results[1],
           milestoneTemplates: results[2],
@@ -136,7 +135,7 @@ module.exports = [
           forms: results[5],
           priceConfigs: results[6],
           planConfigs: results[7],
-        }));
+        });
       })
       .catch(next);
   },
