@@ -170,7 +170,8 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
         });
       });
     }));
-  }).then(() => Promise.resolve(result));
+  })
+  .then(() => Promise.resolve(result));
 }
 
 /**
