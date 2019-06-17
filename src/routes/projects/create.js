@@ -66,6 +66,14 @@ const createProjectValdiations = {
         buildingBlockKey: Joi.string().required(),
         metadata: Joi.object().optional(),
       })).optional(),
+      attachments: Joi.array().items(Joi.object().keys({
+        category: Joi.string().required(),
+        contentType: Joi.string().required(),
+        description: Joi.string().optional(),
+        filePath: Joi.string().required(),
+        size: Joi.number().required(),
+        title: Joi.string().required(),
+      })).optional(),
     }).required(),
   },
 };
