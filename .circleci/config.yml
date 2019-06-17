@@ -96,7 +96,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'dev-sts']
+              only: ['dev', 'dev-sts', 'feature/adding_attachments_during_project_creation']
       - deployProd:
           context : org-global
           requires:
