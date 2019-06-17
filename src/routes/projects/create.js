@@ -69,7 +69,7 @@ const createProjectValdiations = {
       attachments: Joi.array().items(Joi.object().keys({
         category: Joi.string().required(),
         contentType: Joi.string().required(),
-        description: Joi.string().optional(),
+        description: Joi.string().allow(null).allow('').optional(),
         filePath: Joi.string().required(),
         size: Joi.number().required(),
         title: Joi.string().required(),
