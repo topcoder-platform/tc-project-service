@@ -49,5 +49,6 @@
   "connectUrl": "CONNECT_URL",
   "accountsAppUrl": "ACCOUNTS_APP_URL",
   "inviteEmailSubject": "INVITE_EMAIL_SUBJECT",
-  "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE"
+  "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE",
+  "SSO_REFCODES": "SSO_REFCODES"
 }

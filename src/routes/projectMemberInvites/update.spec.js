@@ -359,6 +359,7 @@ describe('Project member invite update', () => {
                 userId: invite1.userId,
                 status: INVITE_STATUS.ACCEPTED,
                 email: null,
+                isSSO: false,
               })).should.be.true;
               createEventSpy.secondCall.calledWith(BUS_API_EVENT.MEMBER_JOINED, sinon.match({
                 projectId: project1.id,
