@@ -107,7 +107,7 @@ describe('Project upgrade', () => {
           alias2: [1, 2, 3],
         },
         template: {
-          questions: [
+          sections: [
             {
               subSections: [
                 { fieldName: 'details.name' },
