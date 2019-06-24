@@ -8,7 +8,7 @@ import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 import {
-  BUS_API_EVENT,
+  BUS_API_EVENT, RESOURCES,
 } from '../../constants';
 
 const should = chai.should();
@@ -38,7 +38,6 @@ const validatePhase = (resJson, expectedPhase) => {
 
 describe('Project Phases', () => {
   let projectId;
-  let projectName;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -71,7 +70,6 @@ describe('Project Phases', () => {
           lastActivityUserId: '1',
         }).then((p) => {
           projectId = p.id;
-          projectName = p.name;
           // create members
           models.ProjectMember.bulkCreate([{
             id: 1,
@@ -139,7 +137,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
@@ -150,7 +148,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
@@ -163,7 +161,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -176,7 +174,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -189,7 +187,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -202,7 +200,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -215,7 +213,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -226,7 +224,7 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
@@ -237,14 +235,14 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             validatePhase(resJson, body);
             done();
           }
@@ -262,14 +260,14 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: bodyWithZeros })
+        .send(bodyWithZeros)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             validatePhase(resJson, bodyWithZeros);
             done();
           }
@@ -282,14 +280,14 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: _.assign({ order: 1 }, body) })
+        .send(_.assign({ order: 1 }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             validatePhase(resJson, body);
             resJson.order.should.be.eql(1);
 
@@ -301,11 +299,11 @@ describe('Project Phases', () => {
               .set({
                 Authorization: `Bearer ${testUtil.jwts.copilot}`,
               })
-              .send({ param: _.assign({ order: 1 }, body) })
+              .send(_.assign({ order: 1 }, body))
               .expect('Content-Type', /json/)
               .expect(201)
               .end((err2, res2) => {
-                const resJson2 = res2.body.result.content;
+                const resJson2 = res2.body;
                 validatePhase(resJson2, body);
                 resJson2.order.should.be.eql(1);
 
@@ -325,14 +323,14 @@ describe('Project Phases', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: _.assign({ productTemplateId }, body) })
+        .send(_.assign({ productTemplateId }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             validatePhase(resJson, body);
             resJson.products.should.have.length(1);
 
@@ -364,13 +362,13 @@ describe('Project Phases', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when phase added', (done) => {
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_ADDED when phase added', (done) => {
         request(server)
         .post(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err) => {
@@ -379,13 +377,18 @@ describe('Project Phases', () => {
           } else {
             testUtil.wait(() => {
               createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
+                sinon.match({ resource: RESOURCES.PHASE })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
+                sinon.match({ name: body.name })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
+                sinon.match({ status: body.status })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
+                sinon.match({ budget: body.budget })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
+                sinon.match({ progress: body.progress })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
+                sinon.match({ projectId })).should.be.true;
               done();
             });
           }

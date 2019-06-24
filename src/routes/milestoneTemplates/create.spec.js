@@ -106,21 +106,19 @@ describe('CREATE milestone template', () => {
 
   describe('POST /timelines/metadata/milestoneTemplates', () => {
     const body = {
-      param: {
-        name: 'milestoneTemplate 3',
-        description: 'description 3',
-        duration: 33,
-        type: 'type3',
-        order: 1,
-        plannedText: 'text to be shown in planned stage - 3',
-        blockedText: 'text to be shown in blocked stage - 3',
-        activeText: 'text to be shown in active stage - 3',
-        completedText: 'text to be shown in completed stage - 3',
-        hidden: true,
-        reference: 'productTemplate',
-        referenceId: 1,
-        metadata: {},
-      },
+      name: 'milestoneTemplate 3',
+      description: 'description 3',
+      duration: 33,
+      type: 'type3',
+      order: 1,
+      plannedText: 'text to be shown in planned stage - 3',
+      blockedText: 'text to be shown in blocked stage - 3',
+      activeText: 'text to be shown in active stage - 3',
+      completedText: 'text to be shown in completed stage - 3',
+      hidden: true,
+      reference: 'productTemplate',
+      referenceId: 1,
+      metadata: {},
     };
 
     it('should return 403 if user is not authenticated', (done) => {
@@ -161,9 +159,7 @@ describe('CREATE milestone template', () => {
     });
 
     it('should return 400 for non-existed product template', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, { referenceId: 1000 }),
-      };
+      const invalidBody = _.assign({}, body, { referenceId: 1000 });
 
       request(server)
         .post('/v5/timelines/metadata/milestoneTemplates')
@@ -176,9 +172,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 400 if missing name', (done) => {
       const invalidBody = {
-        param: {
-          name: undefined,
-        },
+        name: undefined,
       };
 
       request(server)
@@ -193,9 +187,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 400 if missing duration', (done) => {
       const invalidBody = {
-        param: {
-          duration: undefined,
-        },
+        duration: undefined,
       };
 
       request(server)
@@ -210,9 +202,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 400 if missing type', (done) => {
       const invalidBody = {
-        param: {
-          type: undefined,
-        },
+        type: undefined,
       };
 
       request(server)
@@ -227,9 +217,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 400 if missing order', (done) => {
       const invalidBody = {
-        param: {
-          order: undefined,
-        },
+        order: undefined,
       };
 
       request(server)
@@ -252,20 +240,20 @@ describe('CREATE milestone template', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.duration.should.be.eql(body.param.duration);
-          resJson.type.should.be.eql(body.param.type);
-          resJson.order.should.be.eql(body.param.order);
-          resJson.plannedText.should.be.eql(body.param.plannedText);
-          resJson.blockedText.should.be.eql(body.param.blockedText);
-          resJson.activeText.should.be.eql(body.param.activeText);
-          resJson.completedText.should.be.eql(body.param.completedText);
-          resJson.reference.should.be.eql(body.param.reference);
-          resJson.referenceId.should.be.eql(body.param.referenceId);
-          resJson.metadata.should.be.eql(body.param.metadata);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.duration.should.be.eql(body.duration);
+          resJson.type.should.be.eql(body.type);
+          resJson.order.should.be.eql(body.order);
+          resJson.plannedText.should.be.eql(body.plannedText);
+          resJson.blockedText.should.be.eql(body.blockedText);
+          resJson.activeText.should.be.eql(body.activeText);
+          resJson.completedText.should.be.eql(body.completedText);
+          resJson.reference.should.be.eql(body.reference);
+          resJson.referenceId.should.be.eql(body.referenceId);
+          resJson.metadata.should.be.eql(body.metadata);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -277,8 +265,8 @@ describe('CREATE milestone template', () => {
           // Verify 'order' of the other milestones
           models.MilestoneTemplate.findAll({
             where: {
-              reference: body.param.reference,
-              referenceId: body.param.referenceId,
+              reference: body.reference,
+              referenceId: body.referenceId,
             },
           }).then((milestones) => {
             _.each(milestones, (milestone) => {
@@ -297,7 +285,7 @@ describe('CREATE milestone template', () => {
 
     it('should return 201 for admin without optional fields', (done) => {
       const minimalBody = _.cloneDeep(body);
-      delete minimalBody.param.hidden;
+      delete minimalBody.hidden;
       request(server)
         .post('/v5/timelines/metadata/milestoneTemplates')
         .set({
@@ -307,7 +295,7 @@ describe('CREATE milestone template', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.hidden.should.be.eql(false); // default of hidden field
           done();
         });
@@ -323,7 +311,7 @@ describe('CREATE milestone template', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();

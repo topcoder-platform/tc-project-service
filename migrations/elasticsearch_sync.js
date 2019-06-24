@@ -17,6 +17,7 @@ import util from '../src/util';
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
+const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
 const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
 
@@ -291,6 +292,9 @@ function getRequestBody(indexName) {
             type: 'integer',
           },
           userId: {
+            type: 'long',
+          },
+          projectId: {
             type: 'long',
           },
         },
@@ -623,8 +627,45 @@ function getRequestBody(indexName) {
           },
         },
       },
+
+      milestoneTemplates: {
+        type: 'nested',
+        properties: {
+          referenceId: {
+            type: 'long',
+          },
+          reference: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          order: {
+            type: 'long',
+          },
+        },
+      },
     },
   };
+
+  const timelineMapping = {
+    _all: { enabled: false },
+    properties: {
+      milestones: {
+        type: 'nested',
+        properties: {
+          id: {
+            type: 'long',
+          },
+          timelineId: {
+            type: 'long',
+          },
+        },
+      },
+    },
+  };
+
   switch (indexName) {
     case ES_PROJECT_INDEX:
       result = {
@@ -646,6 +687,16 @@ function getRequestBody(indexName) {
       };
       result.body.mappings[ES_METADATA_TYPE] = metadataMapping;
       break;
+    case ES_TIMELINE_INDEX:
+      result = {
+        index: indexName,
+        updateAllTypes: true,
+        body: {
+          mappings: { },
+        },
+      };
+      result.body.mappings[ES_TIMELINE_TYPE] = timelineMapping;
+      break;
     default:
       throw new Error(`Invalid index name '${indexName}'`);
   }
@@ -661,7 +712,7 @@ esClient.indices.delete({
 .then(() => esClient.indices.create(getRequestBody(ES_PROJECT_INDEX)))
 // Re-create timeline index
 .then(() => esClient.indices.delete({ index: ES_TIMELINE_INDEX, ignore: [404] }))
-.then(() => esClient.indices.create({ index: ES_TIMELINE_INDEX }))
+.then(() => esClient.indices.create(getRequestBody(ES_TIMELINE_INDEX)))
 // Re-create metadata index
 .then(() => esClient.indices.delete({ index: ES_METADATA_INDEX, ignore: [404] }))
 .then(() => esClient.indices.create(getRequestBody(ES_METADATA_INDEX)))

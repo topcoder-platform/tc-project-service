@@ -40,7 +40,7 @@ module.exports = [
         },
       },
       sort: { 'forms.revision': 'desc' },
-    })
+    }, 'metadata')
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No form found in ES');

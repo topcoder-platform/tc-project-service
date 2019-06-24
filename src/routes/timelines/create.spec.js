@@ -191,14 +191,12 @@ describe('CREATE timeline', () => {
 
   describe('POST /timelines', () => {
     const body = {
-      param: {
-        name: 'new name',
-        description: 'new description',
-        startDate: '2018-05-29T00:00:00.000Z',
-        endDate: '2018-05-30T00:00:00.000Z',
-        reference: 'project',
-        referenceId: 1,
-      },
+      name: 'new name',
+      description: 'new description',
+      startDate: '2018-05-29T00:00:00.000Z',
+      endDate: '2018-05-30T00:00:00.000Z',
+      reference: 'project',
+      referenceId: 1,
     };
 
     it('should return 403 if user is not authenticated', (done) => {
@@ -219,12 +217,10 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 403 for member who is not in the project (timeline refers to a phase)', (done) => {
-      const bodyWithPhase = {
-        param: _.assign({}, body.param, {
-          reference: 'phase',
-          referenceId: 1,
-        }),
-      };
+      const bodyWithPhase = _.assign({}, body, {
+        reference: 'phase',
+        referenceId: 1,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -236,11 +232,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if missing name', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          name: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        name: undefined,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -253,11 +247,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if missing startDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        startDate: undefined,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -270,12 +262,10 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if startDate is after endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          endDate: '2018-05-28T00:00:00.000Z',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        startDate: '2018-05-29T00:00:00.000Z',
+        endDate: '2018-05-28T00:00:00.000Z',
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -288,11 +278,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if missing reference', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: undefined,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -305,11 +293,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if missing referenceId', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: undefined,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -322,11 +308,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if invalid reference', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: 'invalid',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: 'invalid',
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -339,11 +323,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if invalid referenceId', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: 0,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: 0,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -356,11 +338,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if project does not exist', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: 1110,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: 1110,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -373,11 +353,9 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if project was deleted', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: 2,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: 2,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -390,12 +368,10 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if phase does not exist', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: 'phase',
-          referenceId: 2222,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: 'phase',
+        referenceId: 2222,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -408,12 +384,10 @@ describe('CREATE timeline', () => {
     });
 
     it('should return 400 if phase was deleted', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: 'phase',
-          referenceId: 2,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: 'phase',
+        referenceId: 2,
+      });
 
       request(server)
         .post('/v5/timelines')
@@ -435,14 +409,14 @@ describe('CREATE timeline', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.startDate.should.be.eql(body.param.startDate);
-          resJson.endDate.should.be.eql(body.param.endDate);
-          resJson.reference.should.be.eql(body.param.reference);
-          resJson.referenceId.should.be.eql(body.param.referenceId);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.startDate.should.be.eql(body.startDate);
+          resJson.endDate.should.be.eql(body.endDate);
+          resJson.reference.should.be.eql(body.reference);
+          resJson.referenceId.should.be.eql(body.referenceId);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -460,7 +434,7 @@ describe('CREATE timeline', () => {
 
     it('should return 201 for admin (with milestones)', (done) => {
       const withMilestones = _.cloneDeep(body);
-      withMilestones.param.templateId = 1;
+      withMilestones.templateId = 1;
       request(server)
         .post('/v5/timelines')
         .set({
@@ -470,14 +444,14 @@ describe('CREATE timeline', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.startDate.should.be.eql(body.param.startDate);
-          resJson.endDate.should.be.eql(body.param.endDate);
-          resJson.reference.should.be.eql(body.param.reference);
-          resJson.referenceId.should.be.eql(body.param.referenceId);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.startDate.should.be.eql(body.startDate);
+          resJson.endDate.should.be.eql(body.endDate);
+          resJson.reference.should.be.eql(body.reference);
+          resJson.referenceId.should.be.eql(body.referenceId);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -550,7 +524,7 @@ describe('CREATE timeline', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051334); // manager
           resJson.updatedBy.should.be.eql(40051334); // manager
           done();
@@ -567,7 +541,7 @@ describe('CREATE timeline', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();
@@ -584,7 +558,7 @@ describe('CREATE timeline', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051332); // copilot
           resJson.updatedBy.should.be.eql(40051332); // copilot
           done();
@@ -601,7 +575,7 @@ describe('CREATE timeline', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051331); // member
           resJson.updatedBy.should.be.eql(40051331); // member
           done();
@@ -610,10 +584,8 @@ describe('CREATE timeline', () => {
 
     it('should return 201 for member (timeline refers to a phase)', (done) => {
       const bodyWithPhase = _.merge({}, body, {
-        param: {
-          reference: 'phase',
-          referenceId: 1,
-        },
+        reference: 'phase',
+        referenceId: 1,
       });
       request(server)
         .post('/v5/timelines')
@@ -624,7 +596,7 @@ describe('CREATE timeline', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051331); // member
           resJson.updatedBy.should.be.eql(40051331); // member
           done();

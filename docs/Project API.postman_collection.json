@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e76a2541-aafc-4944-92c5-e7bde5bf7930",
+		"_postman_id": "a47f8b92-7ae6-4e66-b8db-f5bcbe073ed9",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -116,13 +116,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{api-url}}/projects/2",
+									"raw": "{{api-url}}/projects/{{projectId}}",
 									"host": [
 										"{{api-url}}"
 									],
 									"path": [
 										"projects",
-										"2"
+										"{{projectId}}"
 									]
 								}
 							},
@@ -144,16 +144,16 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\",\n         \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }]\n      }\n}"
+									"raw": "{\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\",\n         \"bookmarks\":[{\n            \"title\":\"title1\",\n            \"address\":\"address1\"\n        },{\n            \"title\":\"title2\",\n            \"address\":\"address2\"\n        }]\n}"
 								},
 								"url": {
-									"raw": "{{api-url}}/projects/2",
+									"raw": "{{api-url}}/projects/{{projectId}}",
 									"host": [
 										"{{api-url}}"
 									],
 									"path": [
 										"projects",
-										"2"
+										"{{projectId}}"
 									]
 								}
 							},
@@ -175,16 +175,16 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":null\n      }\n}"
+									"raw": "{\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":null\n}"
 								},
 								"url": {
-									"raw": "{{api-url}}/projects/2",
+									"raw": "{{api-url}}/projects/{{projectId}}",
 									"host": [
 										"{{api-url}}"
 									],
 									"path": [
 										"projects",
-										"2"
+										"{{projectId}}"
 									]
 								}
 							},
@@ -206,16 +206,16 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n      \"param\": {\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":3\n      }\n}"
+									"raw": "{\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name2\",\n         \"bookmarks\":3\n}"
 								},
 								"url": {
-									"raw": "{{api-url}}/projects/2",
+									"raw": "{{api-url}}/projects/{{projectId}}",
 									"host": [
 										"{{api-url}}"
 									],
 									"path": [
 										"projects",
-										"2"
+										"{{projectId}}"
 									]
 								}
 							},
@@ -248,6 +248,21 @@
 				},
 				{
 					"name": "Upload attachment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6547ada6-53f5-4e2d-bda0-f0ec5bfbe38f",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"attachmentId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -262,16 +277,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"asdjshdasdas/asdsadj/asdasd.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\"\n\t}\n}"
+							"raw": "{\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"/home/phoenix/a.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\"\n\t}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/7/attachments",
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"7",
+								"{{projectId}}",
 								"attachments"
 							]
 						},
@@ -295,18 +310,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\"\n\t}\n}"
+							"raw": "{\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\"\n\t}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/7/attachments/2",
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{attachmentId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"7",
+								"{{projectId}}",
 								"attachments",
-								"2"
+								"{{attachmentId}}"
 							]
 						},
 						"description": "Update project attachment"
@@ -332,15 +347,52 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/7/attachments/2",
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{attachmentId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"7",
+								"{{projectId}}",
 								"attachments",
-								"2"
+								"{{attachmentId}}"
+							]
+						},
+						"description": "Delete a project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Download attachment",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{attachmentId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"attachments",
+								"{{attachmentId}}"
 							]
 						},
 						"description": "Delete a project attachment"
@@ -384,6 +436,21 @@
 				},
 				{
 					"name": "Create project with templateId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ed52d7f8-829b-40ec-8583-7e8dbcc6741c",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"projectId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -398,7 +465,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": 3\n  }"
+							"raw": "{\n    \"name\": \"test project with templateId\",\n    \"description\": \"Hello I am a test project with templateId\",\n    \"type\": \"generic\",\n    \"templateId\": {{projectTemplateId}}\n  }"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects",
@@ -436,13 +503,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"members"
 							]
 						},
@@ -466,16 +533,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\"param\":{\n\t\"role\": \"copilot\"\n}\n}"
+							"raw": "{\n\t\"role\": \"copilot\"\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"members"
 							]
 						},
@@ -485,12 +552,27 @@
 				},
 				{
 					"name": "Create project copilot with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "82218ddf-4bd4-485f-bcd4-1d653c674680",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"memberId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							},
 							{
 								"key": "Content-Type",
@@ -499,16 +581,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"userId\": 40051331,\n\t\t\"isPrimary\": true\n\t}\n}"
+							"raw": "{\n\t\"role\": \"copilot\"\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/7/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"7",
+								"{{projectId}}",
 								"members"
 							]
 						},
@@ -532,16 +614,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"userId\": 40051331,\n\t\t\"isPrimary\": true\n\t}\n}"
+							"raw": "{\n\t\t\"role\": \"copilot\"\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"members"
 							]
 						},
@@ -551,6 +633,21 @@
 				},
 				{
 					"name": "Create project manager with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ba7b3265-aaba-4cca-8a53-819c9e96cfae",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"memberId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -565,16 +662,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"manager\",\n\t\t\"userId\": 40051330,\n\t\t\"isPrimary\": true\n\t}\n}"
+							"raw": "{\n\t\"role\": \"manager\"\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/7/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"7",
+								"{{projectId}}",
 								"members"
 							]
 						},
@@ -584,6 +681,21 @@
 				},
 				{
 					"name": "Create project customer with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "87ab173c-8a4b-4d12-bfe7-ebcd272289f1",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"memberId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -598,16 +710,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"customer\",\n\t\t\"userId\": 40051332,\n\t\t\"isPrimary\": true\n\t}\n}"
+							"raw": "{\n\t\t\"role\": \"copilot\"\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/7/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"7",
+								"{{projectId}}",
 								"members"
 							]
 						},
@@ -631,18 +743,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": true\n\t}\n}"
+							"raw": "{\n\t\"role\": \"copilot\",\n\t\"isPrimary\": true\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/members/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"members",
-								"1"
+								"{{memberId}}"
 							]
 						},
 						"description": "Update a project's member."
@@ -665,18 +777,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"role\": \"copilot\",\n\t\t\"isPrimary\": false\n\t}\n}"
+							"raw": "{\n\t\"role\": \"copilot\",\n\t\"isPrimary\": false\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/members/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"members",
-								"1"
+								"{{memberId}}"
 							]
 						},
 						"description": "Update a project's member."
@@ -699,18 +811,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": " {\n \"param\": {\n    \"role\": \"wrong\"\n   }\n } "
+							"raw": " {\n\t\"role\": \"wrong\"\n } "
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/3/members/5",
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"3",
+								"{{projectId}}",
 								"members",
-								"5"
+								"{{memberId}}"
 							]
 						}
 					},
@@ -735,15 +847,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/3/members/5",
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"3",
+								"{{projectId}}",
 								"members",
-								"5"
+								"{{memberId}}"
 							]
 						},
 						"description": "Delete a project's member"
@@ -766,22 +878,221 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": " {\n \"param\": {\n    \"role\": \"manager\",\n    \"isPrimary\": true\n   }\n } "
+							"raw": " {\n    \"role\": \"manager\",\n    \"isPrimary\": true\n } "
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/members/2",
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"members",
-								"2"
+								"{{memberId}}"
 							]
 						}
 					},
 					"response": []
+				}
+			]
+		},
+		{
+			"name": "Project Members Invites",
+			"item": [
+				{
+					"name": "Create project member with no payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "Request payload is mandatory while creating project. If no request payload is specified this should result in 400 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project customer with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"role\": \"customer\",\n\t\"emails\": [\"test@topcoder.com\"]\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Get project member invite",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "Update a project's member."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project member invite",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"status\": \"accepted\",\n\t\"email\": \"test@topcoder.com\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "Update a project's member."
+					},
+					"response": []
+				},
+				{
+					"name": "wrong status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n\t\"status\": \"wrong\"\n } "
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "522949a9-3d94-4103-92b2-976af332f203",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "df2755ee-59a5-4d8d-a6ad-6416b697c894",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		},
@@ -881,7 +1192,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}"
+							"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects",
@@ -912,7 +1223,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}"
+							"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects",
@@ -1006,7 +1317,7 @@
 					"response": []
 				},
 				{
-					"name": "List projects DB with limit and offset",
+					"name": "List projects DB with page and perPage",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1016,7 +1327,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/db?limit=1&offset=1",
+							"raw": "{{api-url}}/projects/db?perPage=1&page=1",
 							"host": [
 								"{{api-url}}"
 							],
@@ -1026,11 +1337,11 @@
 							],
 							"query": [
 								{
-									"key": "limit",
+									"key": "perPage",
 									"value": "1"
 								},
 								{
-									"key": "offset",
+									"key": "page",
 									"value": "1"
 								}
 							]
@@ -1114,7 +1425,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/db?sort=type%20desc",
+							"raw": "{{api-url}}/projects/db?sort=type desc",
 							"host": [
 								"{{api-url}}"
 							],
@@ -1125,7 +1436,7 @@
 							"query": [
 								{
 									"key": "sort",
-									"value": "type%20desc"
+									"value": "type desc"
 								}
 							]
 						},
@@ -1210,7 +1521,7 @@
 					"response": []
 				},
 				{
-					"name": "List projects with limit and offset",
+					"name": "List projects with perPage and page",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1220,7 +1531,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects?limit=1&offset=1",
+							"raw": "{{api-url}}/projects?perPage=1&page=1",
 							"host": [
 								"{{api-url}}"
 							],
@@ -1229,11 +1540,11 @@
 							],
 							"query": [
 								{
-									"key": "limit",
+									"key": "perPage",
 									"value": "1"
 								},
 								{
-									"key": "offset",
+									"key": "page",
 									"value": "1"
 								}
 							]
@@ -1428,7 +1739,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"project name updated\"\n  }"
+							"raw": "{\n    \"name\": \"project name updated\"\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}",
@@ -2004,16 +2315,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"userId\": 2, \n        \"role\": \"copilot\"\n      }\n}"
+							"raw": "{\n\n        \"role\": \"copilot\"\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"members"
 							]
 						}
@@ -2036,16 +2347,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n      \"param\": {\n        \"userId\": 2, \n        \"role\": \"copilot\"\n      }\n}"
+							"raw": "{\n\t\"role\": \"copilot\"\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/2/members",
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"2",
+								"{{projectId}}",
 								"members"
 							]
 						}
@@ -2068,18 +2379,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": " {\n \"param\": {\n    \"role\": \"customer\",\n    \"isPrimary\": true\n   }\n } "
+							"raw": " {\n    \"role\": \"customer\",\n    \"isPrimary\": true\n } "
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/2/members/4",
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"2",
+								"{{projectId}}",
 								"members",
-								"4"
+								"{{memberId}}"
 							]
 						}
 					},
@@ -2104,13 +2415,13 @@
 							"raw": "{\n        \"billingAccountId\": 9999, \n        \"name\": \"new project name\"\n      }"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/2",
+							"raw": "{{api-url}}/projects/{{projectId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"2"
+								"{{projectId}}"
 							]
 						}
 					},
@@ -2135,15 +2446,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/2/members/4",
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"2",
+								"{{projectId}}",
 								"members",
-								"4"
+								"{{memberId}}"
 							]
 						}
 					},
@@ -2178,6 +2489,21 @@
 			"item": [
 				{
 					"name": "Create Phase",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7050133a-b934-4faf-8101-d2e80b5c0710",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2192,16 +2518,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases"
 							]
 						}
@@ -2210,6 +2536,21 @@
 				},
 				{
 					"name": "Create Phase with order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2f771afe-7b4e-4260-b04d-324e880eb61b",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2224,16 +2565,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t},\n\t\t\"order\": 1\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t},\n\t\"order\": 1\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases"
 							]
 						}
@@ -2242,6 +2583,21 @@
 				},
 				{
 					"name": "Create Phase with productTemplateId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8415ad98-b3f6-4330-88b6-e1830da2e4f9",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2256,16 +2612,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t},\n\t\t\"order\": 1,\n\t\t\"productTemplateId\": 1\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t},\n\t\"order\": 1,\n\t\"productTemplateId\": {{productTemplateId}}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases"
 							]
 						}
@@ -2287,13 +2643,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/db",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
 								"db"
 							]
@@ -2316,13 +2672,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/db?fields=status,name,budget",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?fields=status,name,budget",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
 								"db"
 							],
@@ -2351,13 +2707,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/db?sort=status desc",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=status desc",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
 								"db"
 							],
@@ -2386,13 +2742,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/db?sort=order desc",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=order desc",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
 								"db"
 							],
@@ -2421,13 +2777,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases"
 							]
 						}
@@ -2449,13 +2805,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases?fields=status,name,budget",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?fields=status,name,budget",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases"
 							],
 							"query": [
@@ -2483,13 +2839,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases?sort=status desc",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=status desc",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases"
 							],
 							"query": [
@@ -2517,13 +2873,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases?sort=order desc",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=order desc",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases"
 							],
 							"query": [
@@ -2551,15 +2907,15 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1"
+								"{{phaseId}}"
 							]
 						}
 					},
@@ -2581,18 +2937,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase xxx\",\n\t\t\"status\": \"inactive\",\n\t\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\t\"budget\": 30,\n\t\t\"progress\": 15,\n\t\t\"details\": {\n\t\t\t\"message\": \"phase details\"\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"inactive\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1"
+								"{{phaseId}}"
 							]
 						}
 					},
@@ -2614,18 +2970,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase xxx\",\n\t\t\"status\": \"inactive\",\n\t\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\t\"budget\": 30,\n\t\t\"progress\": 15,\n\t\t\"details\": {\n\t\t\t\"message\": \"phase details\"\n\t\t},\n\t\t\"order\": 1\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"inactive\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n\t\"order\": 1\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1"
+								"{{phaseId}}"
 							]
 						}
 					},
@@ -2650,15 +3006,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/3",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"3"
+								"{{phaseId}}"
 							]
 						}
 					},
@@ -2671,6 +3027,21 @@
 			"item": [
 				{
 					"name": "Create Phase Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "77f089b3-cbe6-4fb4-b54f-2a52d138a050",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"phaseProductId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2685,18 +3056,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test phase product\",\n\t\t\"type\": \"type 1\",\n\t\t\"estimatedPrice\": 10\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test phase product\",\n\t\"type\": \"type 1\",\n\t\"estimatedPrice\": 10\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1/products",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1",
+								"{{phaseId}}",
 								"products"
 							]
 						}
@@ -2714,15 +3085,15 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1/products/db",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/db",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1",
+								"{{phaseId}}",
 								"products",
 								"db"
 							]
@@ -2741,15 +3112,15 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1/products",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1",
+								"{{phaseId}}",
 								"products"
 							]
 						}
@@ -2767,17 +3138,17 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1/products/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1",
+								"{{phaseId}}",
 								"products",
-								"1"
+								"{{phaseProductId}}"
 							]
 						}
 					},
@@ -2799,20 +3170,20 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test phase product xxx\",\n\t\t\"type\": \"type 2\",\n\t\t\"templateId\": 10,\n\t\t\"estimatedPrice\": 1.234567,\n\t\t\"actualPrice\": 2.34567,\n\t\t\"details\": {\n\t\t\t\"message\": \"this is a JSON type. You can use any json\"\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test phase product xxx\",\n\t\"type\": \"type 2\",\n\t\"templateId\": 10,\n\t\"estimatedPrice\": 1.234567,\n\t\"actualPrice\": 2.34567,\n\t\"details\": {\n\t\t\"message\": \"this is a JSON type. You can use any json\"\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1/products/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1",
+								"{{phaseId}}",
 								"products",
-								"1"
+								"{{phaseProductId}}"
 							]
 						}
 					},
@@ -2833,17 +3204,17 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/1/phases/1/products/1",
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
-								"1",
+								"{{projectId}}",
 								"phases",
-								"1",
+								"{{phaseId}}",
 								"products",
-								"1"
+								"{{phaseProductId}}"
 							]
 						}
 					},
@@ -3200,7 +3571,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{ \r\n  }\r\n}"
+							"raw": "{\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates/{{projectTemplateId}}/upgrade",
@@ -3386,7 +3757,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"name 1\",\r\n    \"productKey\": \"productKey 1\",\r\n    \"category\": \"key1\",\r\n    \"subCategory\": \"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"brief\": \"brief 1\",\r\n    \"details\": \"details 1\",\r\n    \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n    \"template\": {\r\n      \"template1\": {\r\n        \"name\": \"template 1\",\r\n        \"details\": {\r\n          \"anyDetails\": \"any details 1\"\r\n        },\r\n        \"others\": [\"others 11\", \"others 12\"]\r\n      },\r\n      \"template2\": {\r\n        \"name\": \"template 2\",\r\n        \"details\": {\r\n          \"anyDetails\": \"any details 2\"\r\n        },\r\n        \"others\": [\"others 21\", \"others 22\"]\r\n      }\r\n    }\r\n  }"
+							"raw": "{\r\n    \"name\": \"name 1\",\r\n    \"productKey\": \"productKey 1\",\r\n    \"category\": \"{{productCategoryId}}\",\r\n    \"subCategory\": \"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"brief\": \"brief 1\",\r\n    \"details\": \"details 1\",\r\n    \"aliases\": [\"product key 1\", \"product_key_1\"],\r\n    \"template\": {\r\n      \"template1\": {\r\n        \"name\": \"template 1\",\r\n        \"details\": {\r\n          \"anyDetails\": \"any details 1\"\r\n        },\r\n        \"others\": [\"others 11\", \"others 12\"]\r\n      },\r\n      \"template2\": {\r\n        \"name\": \"template 2\",\r\n        \"details\": {\r\n          \"anyDetails\": \"any details 2\"\r\n        },\r\n        \"others\": [\"others 21\", \"others 22\"]\r\n      }\r\n    }\r\n  }"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productTemplates",
@@ -4267,6 +4638,21 @@
 			"item": [
 				{
 					"name": "Create timeline",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c066e7d4-537f-406e-a768-ec4bf73a2634",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"timelineId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -4281,7 +4667,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n\t\"name\":\"new name\",\r\n\t\"description\":\"new description\",\r\n\t\"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n\t\"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n\t\"reference\": \"project\",\r\n\t\"referenceId\": {{projectId}}\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines",
@@ -4297,6 +4683,21 @@
 				},
 				{
 					"name": "Create timeline with templateId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ee729ed9-0072-4821-9141-3615ff66f728",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"timelineId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -4311,7 +4712,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1,\r\n    \"templateId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"description\":\"new description\",\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1,\r\n    \"templateId\": 1\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines",
@@ -4341,7 +4742,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-28T00:00:00.000Z\",\r\n    \"reference\": \"invalid\",\r\n    \"referenceId\": 0\r\n  }\r\n}"
+							"raw": "{\r\n    \"startDate\":\"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-28T00:00:00.000Z\",\r\n    \"reference\": \"invalid\",\r\n    \"referenceId\": 0\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines",
@@ -4366,11 +4767,17 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
+								"value": "Bearer {{jwt-token-copilot-40051332}}",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}",
+								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines?filter=reference%3Dphase%26referenceId%3D1",
+							"raw": "{{api-url}}/timelines?reference=project&referenceId={{projectId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -4379,8 +4786,12 @@
 							],
 							"query": [
 								{
-									"key": "filter",
-									"value": "reference%3Dphase%26referenceId%3D1"
+									"key": "reference",
+									"value": "project"
+								},
+								{
+									"key": "referenceId",
+									"value": "{{projectId}}"
 								}
 							]
 						}
@@ -4402,13 +4813,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1"
+								"{{timelineId}}"
 							]
 						}
 					},
@@ -4430,16 +4841,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-01T00:00:00.000Z\",\r\n    \"endDate\": null,\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-01T00:00:00.000Z\",\r\n    \"endDate\": null,\r\n    \"reference\": \"project\",\r\n    \"referenceId\": {{projectId}}\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1"
+								"{{timelineId}}"
 							]
 						}
 					},
@@ -4461,16 +4872,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"endDate\": null,\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1"
+								"{{timelineId}}"
 							]
 						}
 					},
@@ -4492,16 +4903,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-04T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"timeline 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"startDate\": \"2018-05-04T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"reference\": \"project\",\r\n    \"referenceId\": 1\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1"
+								"{{timelineId}}"
 							]
 						}
 					},
@@ -4526,13 +4937,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/4",
+							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"4"
+								"{{timelineId}}"
 							]
 						}
 					},
@@ -4545,6 +4956,21 @@
 			"item": [
 				{
 					"name": "Create milestone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8fd1d5e9-8e6e-4cd7-9010-b855308be069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"milestoneId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -4554,21 +4980,21 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token-member-40051331}}"
+								"value": "Bearer {{jwt-token-admin-40051333}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 4,\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-08T00:00:00.000Z\",\r\n    \"status\": \"open\",\r\n    \"type\": \"type3\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            2,\r\n            3,\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 3\",\r\n    \"activeText\": \"activeText 3\",\r\n    \"completedText\": \"completedText 3\",\r\n    \"blockedText\": \"blockedText 3\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 4,\r\n    \"startDate\": \"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-31T00:00:00.000Z\",\r\n    \"status\": \"open\",\r\n    \"type\": \"type3\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            2,\r\n            3,\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 3\",\r\n    \"activeText\": \"activeText 3\",\r\n    \"completedText\": \"completedText 3\",\r\n    \"blockedText\": \"blockedText 3\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones"
 							]
 						}
@@ -4591,16 +5017,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-04T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-04T00:00:00.000Z\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"startDate\": \"2018-05-05T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-04T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-04T00:00:00.000Z\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones"
 							]
 						}
@@ -4618,17 +5044,18 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
+								"value": "Bearer {{jwt-token}}",
+								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones"
 							]
 						}
@@ -4650,13 +5077,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones?sort=order desc",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones?sort=order desc",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones"
 							],
 							"query": [
@@ -4684,15 +5111,15 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"1"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4714,18 +5141,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-09-28T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-09-28T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"1"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4747,18 +5174,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"active\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"active\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/2",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"2"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4780,18 +5207,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"completed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 2-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-10-28T00:00:00.000Z\",\r\n    \"status\": \"completed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/2",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"2"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4813,18 +5240,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 2,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 2,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"1"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4846,18 +5273,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"1"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4879,18 +5306,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 3,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 3,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"1"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4912,18 +5339,18 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-05-07T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/1",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"1"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4948,15 +5375,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/1/milestones/2",
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"timelines",
-								"1",
+								"{{timelineId}}",
 								"milestones",
-								"2"
+								"{{milestoneId}}"
 							]
 						}
 					},
@@ -4969,6 +5396,21 @@
 			"item": [
 				{
 					"name": "Create milestone template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3dbf8b29-2498-4b05-93de-14d809ccc285",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"milestoneTemplateId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -4983,7 +5425,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {}\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestoneTemplate 1\",\r\n    \"description\": \"description 1\",\r\n    \"duration\": 11,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": {{productTemplateId}},\r\n\t\"metadata\": {}\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates",
@@ -5015,7 +5457,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1000,\r\n\t\"metadata\": {}\r\n  }\r\n}"
+							"raw": "{\r\n    \"name\": \"milestoneTemplate 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 33,\r\n    \"type\": \"type3\",\r\n    \"order\": 1,\r\n    \"activeText\": \"activeText 1\",\r\n    \"completedText\": \"completedText 1\",\r\n    \"blockedText\": \"blockedText 1\",\r\n    \"plannedText\": \"planned Text 1\",\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1000,\r\n\t\"metadata\": {}\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates",
@@ -5047,7 +5489,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n\r\n  }\r\n}"
+							"raw": "{\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates",
@@ -5079,7 +5521,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2\r\n  }\r\n}"
+							"raw": "{\r\n   \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/clone",
@@ -5112,7 +5554,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2000\r\n  }\r\n}"
+							"raw": "{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2000\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/clone",
@@ -5145,7 +5587,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1000,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2\r\n  }\r\n}"
+							"raw": "{\r\n    \"sourceReference\": \"productTemplate\",\r\n    \"sourceReferenceId\": 1000,\r\n    \"reference\": \"productTemplate\",\r\n    \"referenceId\": 2\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/clone",
@@ -5205,7 +5647,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?reference=productTemplate&referenceId={{productTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5216,8 +5658,12 @@
 							],
 							"query": [
 								{
-									"key": "filter",
-									"value": "reference%3DproductTemplate%26referenceId%3D1"
+									"key": "reference",
+									"value": "productTemplate"
+								},
+								{
+									"key": "referenceId",
+									"value": "{{productTemplateId}}"
 								}
 							]
 						}
@@ -5239,7 +5685,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1&sort=order desc",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?reference=productTemplate&referenceId={{productTemplateId}}&sort=order desc",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5250,8 +5696,12 @@
 							],
 							"query": [
 								{
-									"key": "filter",
-									"value": "reference%3DproductTemplate%26referenceId%3D1"
+									"key": "reference",
+									"value": "productTemplate"
+								},
+								{
+									"key": "referenceId",
+									"value": "{{productTemplateId}}"
 								},
 								{
 									"key": "sort",
@@ -5277,7 +5727,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5285,7 +5735,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"1"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5307,10 +5757,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5318,7 +5768,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"1"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5340,10 +5790,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 2,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 2,\r\n  \"reference\": \"productTemplate\",\r\n  \"referenceId\": {{productTemplateId}}\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5351,7 +5801,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"1"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5373,10 +5823,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n\t\"name\": \"milestoneTemplate 1-updated\",\r\n\t\"description\": \"description 1-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type1-updated\",\r\n\t\"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5384,7 +5834,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"1"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5406,10 +5856,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 3,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 3,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5417,7 +5867,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"1"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5439,10 +5889,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n  }\r\n}"
+							"raw": "{\r\n  \"name\": \"milestoneTemplate 1-updated\",\r\n  \"description\": \"description 1-updated\",\r\n  \"duration\": 34,\r\n  \"type\": \"type1-updated\",\r\n  \"order\": 1,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5450,7 +5900,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"1"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5472,10 +5922,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n\t\"name\": \"milestoneTemplate 5-updated\",\r\n\t\"description\": \"description 5-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type5-updated\",\r\n\t\"order\": 5,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {\r\n        \"metadata1\": {\r\n          \"name\": \"metadata 1 - update\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 1 - update\",\r\n            \"newDetails\": \"new\"\r\n          },\r\n          \"others\": [\"others new\"]\r\n        },\r\n        \"metadata3\": {\r\n          \"name\": \"metadata 3\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 3\"\r\n          },\r\n          \"others\": [\"others 31\", \"others 32\"]\r\n        }\r\n      }\r\n  }\r\n}"
+							"raw": "{\r\n\t\"name\": \"milestoneTemplate 5-updated\",\r\n\t\"description\": \"description 5-updated\",\r\n\t\"duration\": 34,\r\n\t\"type\": \"type5-updated\",\r\n\t\"order\": 5,\r\n\t\"reference\": \"productTemplate\",\r\n\t\"referenceId\": 1,\r\n\t\"metadata\": {\r\n        \"metadata1\": {\r\n          \"name\": \"metadata 1 - update\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 1 - update\",\r\n            \"newDetails\": \"new\"\r\n          },\r\n          \"others\": [\"others new\"]\r\n        },\r\n        \"metadata3\": {\r\n          \"name\": \"metadata 3\",\r\n          \"details\": {\r\n            \"anyDetails\": \"any details 3\"\r\n          },\r\n          \"others\": [\"others 31\", \"others 32\"]\r\n        }\r\n      }\r\n}"
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/1",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5483,7 +5933,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"1"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5508,7 +5958,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/2",
+							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5516,7 +5966,7 @@
 								"timelines",
 								"metadata",
 								"milestoneTemplates",
-								"2"
+								"{{milestoneTemplateId}}"
 							]
 						}
 					},
@@ -5616,7 +6066,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api-url}}/projects/metadata/form/dev/versions",
+							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5624,7 +6074,7 @@
 								"projects",
 								"metadata",
 								"form",
-								"dev",
+								"{{formKey}}",
 								"versions"
 							]
 						}
@@ -5858,7 +6308,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api-url}}/projects/metadata/form/dev/versions/1/revisions",
+							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions/{{formVersion}}/revisions",
 							"host": [
 								"{{api-url}}"
 							],
@@ -5866,9 +6316,9 @@
 								"projects",
 								"metadata",
 								"form",
-								"dev",
+								"{{formKey}}",
 								"versions",
-								"1",
+								"{{formVersion}}",
 								"revisions"
 							]
 						}

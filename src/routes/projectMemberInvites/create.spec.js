@@ -9,7 +9,7 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { USER_ROLE, PROJECT_MEMBER_ROLE, INVITE_STATUS, BUS_API_EVENT } from '../../constants';
+import { USER_ROLE, PROJECT_MEMBER_ROLE, INVITE_STATUS, BUS_API_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should();
 
@@ -168,11 +168,9 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            userIds: [40051332],
-            emails: ['hello@world.com'],
-            role: 'customer',
-          },
+          userIds: [40051332],
+          emails: ['hello@world.com'],
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -180,7 +178,12 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            res.body.result.status.should.equal(201);
+            const resJson = res.body.success[0];
+            should.exist(resJson);
+            resJson.role.should.equal('customer');
+            resJson.projectId.should.equal(project1.id);
+            resJson.email.should.equal('hello@world.com');
+            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
@@ -194,9 +197,7 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            role: 'customer',
-          },
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(400)
@@ -235,10 +236,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userIds: [40152855],
-            role: 'copilot',
-          },
+          userIds: [40152855],
+          role: 'copilot',
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -277,10 +276,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userIds: [40152855],
-            role: 'copilot',
-          },
+          userIds: [40152855],
+          role: 'copilot',
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -321,10 +318,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            emails: ['hello@world.com'],
-            role: 'customer',
-          },
+          emails: ['hello@world.com'],
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -332,7 +327,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success[0];
+            const resJson = res.body.success[0];
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
@@ -374,10 +369,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            emails: ['hello@world.com'],
-            role: 'customer',
-          },
+          emails: ['hello@world.com'],
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -385,7 +378,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success[0];
+            const resJson = res.body.success[0];
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
@@ -423,10 +416,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userIds: [40152855],
-            role: 'customer',
-          },
+          userIds: [40152855],
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -434,7 +425,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success[0];
+            const resJson = res.body.success[0];
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
@@ -471,10 +462,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userIds: [40051335],
-            role: 'customer',
-          },
+          userIds: [40051335],
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -482,7 +471,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success;
+            const resJson = res.body.success;
             should.exist(resJson);
             resJson.length.should.equal(0);
             server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
@@ -527,10 +516,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userIds: [40152855],
-            role: 'manager',
-          },
+          userIds: [40152855],
+          role: 'manager',
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -556,15 +543,13 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            userIds: [40152855],
-            role: 'manager',
-          },
+          userIds: [40152855],
+          role: 'manager',
         })
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content.success[0];
+          const resJson = res.body.success[0];
           should.exist(resJson);
           resJson.role.should.equal('manager');
           resJson.projectId.should.equal(project1.id);
@@ -583,15 +568,13 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            userIds: [40152855],
-            role: 'account_manager',
-          },
+          userIds: [40152855],
+          role: 'account_manager',
         })
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content.success[0];
+          const resJson = res.body.success[0];
           should.exist(resJson);
           resJson.role.should.equal('account_manager');
           resJson.projectId.should.equal(project1.id);
@@ -610,10 +593,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            userIds: [40152855],
-            role: 'account_manager',
-          },
+          userIds: [40152855],
+          role: 'account_manager',
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -621,9 +602,8 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.failed[0];
+            const resJson = res.body.failed[0];
             should.exist(resJson);
-            res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
             sinon.assert.match(errorMessage, /.*cannot be added with a Manager role to the project/);
             done();
@@ -657,10 +637,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            userIds: [40051331],
-            role: 'copilot',
-          },
+          userIds: [40051331],
+          role: 'copilot',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -668,7 +646,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success[0];
+            const resJson = res.body.success[0];
             should.exist(resJson);
             resJson.role.should.equal('copilot');
             resJson.projectId.should.equal(project1.id);
@@ -686,10 +664,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            emails: ['DUPLICATE_LOWERCASE@test.com'],
-            role: 'customer',
-          },
+          emails: ['DUPLICATE_LOWERCASE@test.com'],
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -697,7 +673,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success;
+            const resJson = res.body.success;
             should.exist(resJson);
             resJson.length.should.equal(0);
             done();
@@ -712,10 +688,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            emails: ['duplicate_uppercase@test.com'],
-            role: 'customer',
-          },
+          emails: ['duplicate_uppercase@test.com'],
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(201)
@@ -723,7 +697,7 @@ describe('Project Member Invite create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success;
+            const resJson = res.body.success;
             should.exist(resJson);
             resJson.length.should.equal(0);
             done();
@@ -739,10 +713,8 @@ describe('Project Member Invite create', () => {
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              emails: ['WITHdot@gmail.com'],
-              role: 'customer',
-            },
+            emails: ['WITHdot@gmail.com'],
+            role: 'customer',
           })
           .expect('Content-Type', /json/)
           .expect(201)
@@ -750,7 +722,7 @@ describe('Project Member Invite create', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content.success;
+              const resJson = res.body.success;
               should.exist(resJson);
               resJson.length.should.equal(0);
               done();
@@ -766,10 +738,8 @@ describe('Project Member Invite create', () => {
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              emails: ['WITHOUT.dot@gmail.com'],
-              role: 'customer',
-            },
+            emails: ['WITHOUT.dot@gmail.com'],
+            role: 'customer',
           })
           .expect('Content-Type', /json/)
           .expect(201)
@@ -777,7 +747,7 @@ describe('Project Member Invite create', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content.success;
+              const resJson = res.body.success;
               should.exist(resJson);
               resJson.length.should.equal(0);
               done();
@@ -797,7 +767,7 @@ describe('Project Member Invite create', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED message when userId invite added', (done) => {
+      it('sends BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED message when userId invite added', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
@@ -821,10 +791,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            userIds: [3],
-            role: PROJECT_MEMBER_ROLE.CUSTOMER,
-          },
+          userIds: [3],
+          role: PROJECT_MEMBER_ROLE.CUSTOMER,
         })
         .expect(201)
         .end((err) => {
@@ -833,18 +801,22 @@ describe('Project Member Invite create', () => {
           } else {
             testUtil.wait(() => {
               createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                projectId: project1.id,
-                userId: 3,
-                email: null,
-              })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                sinon.match({ resource: RESOURCES.PROJECT_MEMBER_INVITE })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                sinon.match({ projectId: project1.id })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                sinon.match({ userId: 3 })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                  sinon.match({ email: null })).should.be.true;
               done();
             });
           }
         });
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED message when email invite added', (done) => {
+      it('sends BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED message when email invite added', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
@@ -868,10 +840,8 @@ describe('Project Member Invite create', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            emails: ['hello@world.com'],
-            role: PROJECT_MEMBER_ROLE.CUSTOMER,
-          },
+          emails: ['hello@world.com'],
+          role: PROJECT_MEMBER_ROLE.CUSTOMER,
         })
         .expect(201)
         .end((err) => {
@@ -879,12 +849,16 @@ describe('Project Member Invite create', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                projectId: project1.id,
-                userId: null,
-                email: 'hello@world.com',
-              })).should.be.true;
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                sinon.match({ resource: RESOURCES.PROJECT_MEMBER_INVITE })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                sinon.match({ projectId: project1.id })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                sinon.match({ userId: null })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
+                  sinon.match({ email: 'hello@world.com' })).should.be.true;
               done();
             });
           }

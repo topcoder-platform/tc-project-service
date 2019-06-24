@@ -140,7 +140,7 @@ describe('GET milestone template', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(milestoneTemplates[0].id);
           resJson.name.should.be.eql(milestoneTemplates[0].name);
           resJson.duration.should.be.eql(milestoneTemplates[0].duration);

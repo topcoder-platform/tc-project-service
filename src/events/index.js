@@ -59,7 +59,7 @@ export const rabbitHandlers = {
 };
 
 export const kafkaHandlers = {
-  // Events defined by project-service
+  // Events defined by project-api
   [BUS_API_EVENT.PROJECT_UPDATED]: projectUpdatedKafkaHandler,
   [BUS_API_EVENT.PROJECT_FILES_UPDATED]: projectUpdatedKafkaHandler,
   [BUS_API_EVENT.PROJECT_TEAM_UPDATED]: projectUpdatedKafkaHandler,

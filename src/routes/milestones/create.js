@@ -9,7 +9,7 @@ import Sequelize from 'sequelize';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -17,33 +17,31 @@ const schema = {
   params: {
     timelineId: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      id: Joi.any().strip(),
-      name: Joi.string().max(255).required(),
-      description: Joi.string().max(255),
-      duration: Joi.number().integer().required(),
-      startDate: Joi.date().required(),
-      actualStartDate: Joi.date().allow(null),
-      endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      completionDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      status: Joi.string().max(45).required(),
-      type: Joi.string().max(45).required(),
-      details: Joi.object(),
-      order: Joi.number().integer().required(),
-      plannedText: Joi.string().max(512).required(),
-      activeText: Joi.string().max(512).required(),
-      completedText: Joi.string().max(512).required(),
-      blockedText: Joi.string().max(512).required(),
-      hidden: Joi.boolean().optional(),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    id: Joi.any().strip(),
+    name: Joi.string().max(255).required(),
+    description: Joi.string().max(255),
+    duration: Joi.number().integer().required(),
+    startDate: Joi.date().required(),
+    actualStartDate: Joi.date().allow(null),
+    endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
+    completionDate: Joi.date().min(Joi.ref('startDate')).allow(null),
+    status: Joi.string().max(45).required(),
+    type: Joi.string().max(45).required(),
+    details: Joi.object(),
+    order: Joi.number().integer().required(),
+    plannedText: Joi.string().max(512).required(),
+    activeText: Joi.string().max(512).required(),
+    completedText: Joi.string().max(512).required(),
+    blockedText: Joi.string().max(512).required(),
+    hidden: Joi.boolean().optional(),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
 };
 
 module.exports = [
@@ -53,7 +51,7 @@ module.exports = [
   validateTimeline.validateTimelineIdParam,
   permissions('milestone.create'),
   (req, res, next) => {
-    const entity = _.assign(req.body.param, {
+    const entity = _.assign(req.body, {
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       timelineId: req.params.timelineId,
@@ -62,9 +60,9 @@ module.exports = [
 
     // Validate startDate and endDate to be within the timeline startDate and endDate
     let error;
-    if (req.body.param.startDate < req.timeline.startDate) {
+    if (req.body.startDate < req.timeline.startDate) {
       error = 'Milestone startDate must not be before the timeline startDate';
-    } else if (req.body.param.endDate && req.timeline.endDate && req.body.param.endDate > req.timeline.endDate) {
+    } else if (req.body.endDate && req.timeline.endDate && req.body.endDate > req.timeline.endDate) {
       error = 'Milestone endDate must not be after the timeline endDate';
     }
     if (error) {
@@ -90,9 +88,24 @@ module.exports = [
             },
             transaction: tx,
           });
+        })
+        .then((updatedCount) => {
+          if (updatedCount) {
+            return models.Milestone.findAll({
+              where: {
+                timelineId: result.timelineId,
+                id: { $ne: result.id },
+                order: { $gte: result.order + 1 },
+              },
+              order: [['updatedAt', 'DESC']],
+              limit: updatedCount[0],
+              transaction: tx,
+            });
+          }
+          return Promise.resolve();
         }),
     )
-    .then(() => {
+    .then((otherUpdated) => {
       // Do not send events for the updated milestones here,
       // because it will make 'version conflict' error in ES.
       // The order of the other milestones need to be updated in the MILESTONE_ADDED event handler
@@ -104,11 +117,25 @@ module.exports = [
         { correlationId: req.id },
       );
 
-      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        { req, created: result });
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.MILESTONE_ADDED,
+        RESOURCES.MILESTONE,
+        result);
+
+
+      // emit the event for other milestone order updated
+      _.map(otherUpdated, milestone =>
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+          RESOURCES.MILESTONE,
+          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+      );
 
       // Write to the response
-      res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
+      res.status(201).json(result);
       return Promise.resolve();
     })
     .catch(next);

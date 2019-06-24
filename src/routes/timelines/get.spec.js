@@ -246,7 +246,7 @@ describe('GET timeline', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(1);
           resJson.name.should.be.eql('name 1');
           resJson.description.should.be.eql('description 1');

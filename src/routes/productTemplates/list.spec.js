@@ -1,22 +1,23 @@
 /**
  * Tests for list.js
  */
-// import chai from 'chai';
+
 import _ from 'lodash';
 import request from 'supertest';
-
+import chai from 'chai';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
-// const should = chai.should();
+const should = chai.should();
 
 const validateProductTemplates = (count, resJson, expectedTemplates) => {
-  resJson.should.have.length(count);
+  should.exist(resJson);
+  resJson.length.should.be.eql(count);
   resJson.forEach((pt, idx) => {
-    pt.should.have.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
+    pt.should.include.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
     'aliases', 'template', 'disabled', 'form', 'hidden', 'isAddOn', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
-    pt.should.not.have.all.keys('deletedAt', 'deletedBy');
+    pt.should.not.include.all.keys('deletedAt', 'deletedBy');
     pt.name.should.be.eql(expectedTemplates[idx].name);
     pt.productKey.should.be.eql(expectedTemplates[idx].productKey);
     pt.category.should.be.eql(expectedTemplates[idx].category);
@@ -184,7 +185,7 @@ describe('LIST product templates', () => {
 
     it('should return filtered templates', (done) => {
       request(server)
-        .get('/v5/projects/metadata/productTemplates?filter=productKey%3DproductKey-2')
+        .get('/v5/projects/metadata/productTemplates?productKey=productKey-2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })

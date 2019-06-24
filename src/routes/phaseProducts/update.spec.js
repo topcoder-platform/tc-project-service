@@ -7,7 +7,7 @@ import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should();
 
@@ -124,7 +124,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
@@ -135,7 +135,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
@@ -146,7 +146,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
@@ -157,7 +157,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
@@ -168,7 +168,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
@@ -180,9 +180,7 @@ describe('Phase Products', () => {
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            estimatedPrice: -15,
-          },
+          estimatedPrice: -15,
         })
         .expect('Content-Type', /json/)
         .expect(400, done);
@@ -195,14 +193,14 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(updateBody.name);
             resJson.type.should.be.eql(updateBody.type);
@@ -231,16 +229,14 @@ describe('Phase Products', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when name updated', (done) => {
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when name updated', (done) => {
         request(server)
           .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              name: 'new name',
-            },
+            name: 'new name',
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -250,29 +246,24 @@ describe('Phase Products', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ resource: RESOURCES.PHASE_PRODUCT })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ name: 'new name' })).should.be.true;
                 done();
               });
             }
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when estimatedPrice updated', (done) => {
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when estimatedPrice updated', (done) => {
         request(server)
           .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              estimatedPrice: 123,
-            },
+            estimatedPrice: 123,
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -282,29 +273,24 @@ describe('Phase Products', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ resource: RESOURCES.PHASE_PRODUCT })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ estimatedPrice: 123 })).should.be.true;
                 done();
               });
             }
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when actualPrice updated', (done) => {
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when actualPrice updated', (done) => {
         request(server)
           .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              actualPrice: 123,
-            },
+            actualPrice: 123,
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -314,29 +300,24 @@ describe('Phase Products', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ resource: RESOURCES.PHASE_PRODUCT })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ actualPrice: 123 })).should.be.true;
                 done();
               });
             }
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when details updated', (done) => {
         request(server)
           .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              details: 'something',
-            },
+            details: 'something',
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -345,31 +326,25 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED);
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ resource: RESOURCES.PHASE_PRODUCT })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ details: 'something' })).should.be.true;
                 done();
               });
             }
           });
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when type updated', (done) => {
+      it('should not send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when type updated', (done) => {
         request(server)
           .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              type: 'another type',
-            },
+            type: 'another type',
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -378,7 +353,11 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.notCalled.should.be.true;
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ resource: RESOURCES.PHASE_PRODUCT })).should.be.true;
+                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
+                  sinon.match({ type: 'another type' })).should.be.true;
                 done();
               });
             }

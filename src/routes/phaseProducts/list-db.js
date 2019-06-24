@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -36,8 +35,8 @@ module.exports = [
     };
 
     try {
-      const { rows, count } = await models.PhaseProduct.search(parameters, req.log);
-      return res.json(util.wrapResponse(req.id, rows, count));
+      const { rows } = await models.PhaseProduct.search(parameters, req.log);
+      return res.json(rows);
     } catch (err) {
       return next(err);
     }

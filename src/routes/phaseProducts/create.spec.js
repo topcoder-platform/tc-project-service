@@ -105,7 +105,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
@@ -116,7 +116,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
@@ -129,7 +129,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -142,7 +142,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -155,7 +155,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -168,7 +168,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
     });
@@ -179,7 +179,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
@@ -190,7 +190,7 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
@@ -201,14 +201,14 @@ describe('Phase Products', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);
@@ -237,13 +237,13 @@ describe('Phase Products', () => {
         sandbox.restore();
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when product phase created', (done) => {
+      it('should not send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_ADDED when product phase created', (done) => {
         request(server)
         .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
           .end((err) => {
@@ -251,7 +251,7 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.notCalled.should.be.true;
+                createEventSpy.calledOnce.should.be.true;
                 done();
               });
             }

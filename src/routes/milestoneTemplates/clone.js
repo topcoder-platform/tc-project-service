@@ -7,20 +7,18 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
-import { MILESTONE_TEMPLATE_REFERENCES } from '../../constants';
+import { EVENT, RESOURCES, MILESTONE_TEMPLATE_REFERENCES } from '../../constants';
 import validateMilestoneTemplate from '../../middlewares/validateMilestoneTemplate';
 
 const permissions = tcMiddleware.permissions;
 
 const schema = {
-  body: {
-    param: Joi.object().keys({
-      sourceReference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
-      sourceReferenceId: Joi.number().integer().positive().required(),
-      reference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
-      referenceId: Joi.number().integer().positive().required(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    sourceReference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
+    sourceReferenceId: Joi.number().integer().positive().required(),
+    reference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
+    referenceId: Joi.number().integer().positive().required(),
+  }).required(),
 };
 
 module.exports = [
@@ -30,12 +28,12 @@ module.exports = [
   (req, res, next) => {
     let result;
 
-    return models.sequelize.transaction(tx =>
+    return models.sequelize.transaction(tx => // eslint-disable-line no-unused-vars
       // Find the product template
       models.MilestoneTemplate.findAll({
         where: {
-          reference: req.body.param.sourceReference,
-          referenceId: req.body.param.sourceReferenceId,
+          reference: req.body.sourceReference,
+          referenceId: req.body.sourceReferenceId,
         },
         attributes: { exclude: ['id', 'deletedAt', 'createdAt', 'updatedAt', 'deletedBy'] },
         raw: true,
@@ -43,18 +41,18 @@ module.exports = [
         .then((milestoneTemplatesToClone) => {
           const newMilestoneTemplates = _.cloneDeep(milestoneTemplatesToClone);
           _.each(newMilestoneTemplates, (milestone) => {
-            milestone.reference = req.body.param.reference; // eslint-disable-line no-param-reassign
-            milestone.referenceId = req.body.param.referenceId; // eslint-disable-line no-param-reassign
+            milestone.reference = req.body.reference; // eslint-disable-line no-param-reassign
+            milestone.referenceId = req.body.referenceId; // eslint-disable-line no-param-reassign
             milestone.createdBy = req.authUser.userId; // eslint-disable-line no-param-reassign
             milestone.updatedBy = req.authUser.userId; // eslint-disable-line no-param-reassign
           });
-          return models.MilestoneTemplate.bulkCreate(newMilestoneTemplates, { transaction: tx });
+          return models.MilestoneTemplate.bulkCreate(newMilestoneTemplates);
         })
         .then(() => { // eslint-disable-line arrow-body-style
           return models.MilestoneTemplate.findAll({
             where: {
-              reference: req.body.param.reference,
-              referenceId: req.body.param.referenceId,
+              reference: req.body.reference,
+              referenceId: req.body.referenceId,
             },
             attributes: { exclude: ['deletedAt', 'deletedBy'] },
             raw: true,
@@ -66,8 +64,15 @@ module.exports = [
         }),
     )
       .then(() => {
+        // emit the event
+        _.map(result, r => util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_ADDED,
+          RESOURCES.MILESTONE_TEMPLATE,
+          r));
+
         // Write to response
-        res.status(201).json(util.wrapResponse(req.id, result, result.length, 201));
+        res.status(201).json(result);
       })
       .catch(next);
   },

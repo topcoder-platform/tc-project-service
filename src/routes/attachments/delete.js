@@ -6,8 +6,9 @@ import {
   middleware as tcMiddleware,
 } from 'tc-core-library-js';
 import models from '../../models';
+import util from '../../util';
 import fileService from '../../services/fileService';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 /**
  * API to delete a project member.
@@ -54,7 +55,13 @@ module.exports = [
             pattachment,
             { correlationId: req.id },
           );
-          req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED, { req, pattachment });
+          // req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED, { req, pattachment });
+          // emit the event
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED,
+            RESOURCES.ATTACHMENT,
+            { id: attachmentId });
           res.status(204).json({});
         })
         .catch(err => next(err));

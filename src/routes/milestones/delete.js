@@ -5,7 +5,8 @@ import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import { EVENT } from '../../constants';
+import util from '../../util';
+import { EVENT, RESOURCES } from '../../constants';
 import validateTimeline from '../../middlewares/validateTimeline';
 
 const permissions = tcMiddleware.permissions;
@@ -46,8 +47,7 @@ module.exports = [
           // Update the deletedBy, and soft delete
           return milestone.update({ deletedBy: req.authUser.userId }, { transaction: tx })
             .then(() => milestone.destroy({ transaction: tx }));
-        }),
-    )
+        })
     .then((deleted) => {
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', deleted.id);
@@ -55,13 +55,18 @@ module.exports = [
         deleted,
         { correlationId: req.id },
       );
-      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_REMOVED,
-        { req, deleted });
+
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.MILESTONE_REMOVED,
+        RESOURCES.MILESTONE,
+        { id: deleted.id });
 
       // Write to response
       res.status(204).end();
       return Promise.resolve();
     })
-    .catch(next);
+    .catch(next));
   },
 ];

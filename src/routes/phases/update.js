@@ -6,26 +6,24 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 
 const permissions = tcMiddleware.permissions;
 
 const updateProjectPhaseValidation = {
-  body: {
-    param: Joi.object().keys({
-      name: Joi.string().optional(),
-      status: Joi.string().optional(),
-      startDate: Joi.date().optional(),
-      endDate: Joi.date().optional(),
-      duration: Joi.number().min(0).optional(),
-      budget: Joi.number().min(0).optional(),
-      spentBudget: Joi.number().min(0).optional(),
-      progress: Joi.number().min(0).optional(),
-      details: Joi.any().optional(),
-      order: Joi.number().integer().optional(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    name: Joi.string().optional(),
+    status: Joi.string().optional(),
+    startDate: Joi.date().optional(),
+    endDate: Joi.date().optional(),
+    duration: Joi.number().min(0).optional(),
+    budget: Joi.number().min(0).optional(),
+    spentBudget: Joi.number().min(0).optional(),
+    progress: Joi.number().min(0).optional(),
+    details: Joi.any().optional(),
+    order: Joi.number().integer().optional(),
+  }).required(),
 };
 
 
@@ -39,7 +37,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
 
-    const updatedProps = req.body.param;
+    const updatedProps = req.body;
     updatedProps.updatedBy = req.authUser.userId;
 
     let previousValue;
@@ -157,10 +155,15 @@ module.exports = [
           { original: previousValue, updated, allPhases },
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { req, original: previousValue, updated: _.clone(updated.get({ plain: true })) });
 
-        res.json(util.wrapResponse(req.id, updated));
+        //  emit event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+          RESOURCES.PHASE,
+          _.assign(updatedProps, _.pick(updated, 'id', 'updatedAt')));
+
+        res.json(updated);
       })
       .catch(err => next(err));
   },

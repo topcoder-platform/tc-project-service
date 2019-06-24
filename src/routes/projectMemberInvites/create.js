@@ -8,9 +8,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT, USER_ROLE } from '../../constants';
-import { createEvent } from '../../services/busApi';
-
+  MANAGER_ROLES, INVITE_STATUS, EVENT, RESOURCES, USER_ROLE } from '../../constants';
 
 /**
  * API to create member invite to project.
@@ -19,13 +17,11 @@ import { createEvent } from '../../services/busApi';
 const permissions = tcMiddleware.permissions;
 
 const addMemberValidations = {
-  body: {
-    param: Joi.object().keys({
-      userIds: Joi.array().items(Joi.number()).optional().min(1),
-      emails: Joi.array().items(Joi.string().email()).optional().min(1),
-      role: Joi.any().valid(_.values(PROJECT_MEMBER_ROLE)).required(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    userIds: Joi.array().items(Joi.number()).optional().min(1),
+    emails: Joi.array().items(Joi.string().email()).optional().min(1),
+    role: Joi.any().valid(_.values(PROJECT_MEMBER_ROLE)).required(),
+  }).required(),
 };
 
 /**
@@ -124,9 +120,8 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
   return invitePromises;
 };
 
-const sendInviteEmail = (req, projectId, invite) => {
+const sendInviteEmail = (req, projectId) => {
   req.log.debug(req.authUser);
-  const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
     models.Project.findOne({
       where: { id: projectId },
@@ -136,39 +131,6 @@ const sendInviteEmail = (req, projectId, invite) => {
   ];
   return Promise.all(promises).then((responses) => {
     req.log.debug(responses);
-    const project = responses[0];
-    const initiator = responses[1] && responses[1].length ? responses[1][0] : {
-      userId: req.authUser.userId,
-      firstName: 'Connect',
-      lastName: 'User',
-    };
-    createEvent(emailEventType, {
-      data: {
-        connectURL: config.get('connectUrl'),
-        accountsAppURL: config.get('accountsAppUrl'),
-        subject: config.get('inviteEmailSubject'),
-        projects: [{
-          name: project.name,
-          projectId,
-          sections: [
-            {
-              EMAIL_INVITES: true,
-              title: config.get('inviteEmailSectionTitle'),
-              projectName: project.name,
-              projectId,
-              initiator,
-            },
-          ],
-        }],
-      },
-      recipients: [invite.email],
-      version: 'v3',
-      from: {
-        name: config.get('EMAIL_INVITE_FROM_NAME'),
-        email: config.get('EMAIL_INVITE_FROM_EMAIL'),
-      },
-      categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
-    }, req.log);
   }).catch((error) => {
     req.log.error(error);
   });
@@ -180,7 +142,7 @@ module.exports = [
   permissions('projectMemberInvite.create'),
   (req, res, next) => {
     let failed = [];
-    const invite = req.body.param;
+    const invite = req.body;
 
     if (!invite.userIds && !invite.emails) {
       const err = new Error('Either userIds or emails are required');
@@ -257,16 +219,15 @@ module.exports = [
 
           req.log.debug('Creating invites');
           return models.Sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
-          // return Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
             .then((values) => {
               values.forEach((v) => {
-                req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
+                // emit the event
+                util.sendResourceToKafkaBus(
                   req,
-                  userId: v.userId,
-                  email: v.email,
-                  status: v.status,
-                  role: v.role,
-                });
+                  EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
+                  RESOURCES.PROJECT_MEMBER_INVITE,
+                  v.toJSON());
+
                 req.app.services.pubsub.publish(
                         EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
                         v,
@@ -274,7 +235,7 @@ module.exports = [
                     );
                 // send email invite (async)
                 if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
-                  sendInviteEmail(req, projectId, v);
+                  sendInviteEmail(req, projectId);
                 }
               });
               return values;
@@ -284,9 +245,9 @@ module.exports = [
     .then((values) => {
       const success = _.assign({}, { success: values });
       if (failed.length) {
-        res.status(403).json(util.wrapResponse(req.id, _.assign({}, success, { failed }), null, 403));
+        res.status(403).json(_.assign({}, success, { failed }));
       } else {
-        res.status(201).json(util.wrapResponse(req.id, success, null, 201));
+        res.status(201).json(success);
       }
     })
     .catch(err => next(err));

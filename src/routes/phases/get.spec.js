@@ -131,7 +131,7 @@ describe('Project Phases', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql('test project phase');
             resJson.status.should.be.eql('active');
@@ -155,7 +155,7 @@ describe('Project Phases', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql('test project phase');
             resJson.status.should.be.eql('active');

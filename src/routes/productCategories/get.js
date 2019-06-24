@@ -29,7 +29,7 @@ module.exports = [
           inner_hits: {},
         },
       },
-    })
+    }, 'metadata')
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No productCategory found in ES');

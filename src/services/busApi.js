@@ -49,7 +49,7 @@ function createEvent(topic, payload, logger) {
     logger.debug('calling bus-api');
     return busClient.post('/bus/events', {
       topic,
-      originator: 'tc-project-service',
+      originator: 'project-api',
       timestamp: (new Date()).toISOString(),
       'mime-type': 'application/json',
       payload,

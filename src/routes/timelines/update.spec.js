@@ -9,7 +9,7 @@ import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { EVENT, BUS_API_EVENT } from '../../constants';
+import { EVENT, BUS_API_EVENT, RESOURCES } from '../../constants';
 import busApi from '../../services/busApi';
 
 const should = chai.should();
@@ -192,14 +192,12 @@ describe('UPDATE timeline', () => {
 
   describe('PATCH /timelines/{timelineId}', () => {
     const body = {
-      param: {
-        name: 'new name 1',
-        description: 'new description 1',
-        startDate: '2018-06-01T00:00:00.000Z',
-        endDate: '2018-06-02T00:00:00.000Z',
-        reference: 'project',
-        referenceId: 1,
-      },
+      name: 'new name 1',
+      description: 'new description 1',
+      startDate: '2018-06-01T00:00:00.000Z',
+      endDate: '2018-06-02T00:00:00.000Z',
+      reference: 'project',
+      referenceId: 1,
     };
 
     it('should return 403 if user is not authenticated', (done) => {
@@ -280,11 +278,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if missing name', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          name: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        name: undefined,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -297,11 +293,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if missing startDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        startDate: undefined,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -314,12 +308,10 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if startDate is after endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          endDate: '2018-05-28T00:00:00.000Z',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        startDate: '2018-05-29T00:00:00.000Z',
+        endDate: '2018-05-28T00:00:00.000Z',
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -332,11 +324,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if missing reference', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: undefined,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -349,11 +339,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if missing referenceId', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: undefined,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -366,11 +354,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if invalid reference', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: 'invalid',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: 'invalid',
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -383,11 +369,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if invalid referenceId', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: 0,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: 0,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -400,11 +384,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if project does not exist', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: 1110,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: 1110,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -417,11 +399,9 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if project was deleted', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          referenceId: 2,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        referenceId: 2,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -434,12 +414,10 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if phase does not exist', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: 'phase',
-          referenceId: 2222,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: 'phase',
+        referenceId: 2222,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -452,12 +430,10 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 400 if phase was deleted', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          reference: 'phase',
-          referenceId: 2,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        reference: 'phase',
+        referenceId: 2,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -478,14 +454,14 @@ describe('UPDATE timeline', () => {
         .send(body)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.startDate.should.be.eql(body.param.startDate);
-          resJson.endDate.should.be.eql(body.param.endDate);
-          resJson.reference.should.be.eql(body.param.reference);
-          resJson.referenceId.should.be.eql(body.param.referenceId);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.startDate.should.be.eql(body.startDate);
+          resJson.endDate.should.be.eql(body.endDate);
+          resJson.reference.should.be.eql(body.reference);
+          resJson.referenceId.should.be.eql(body.referenceId);
 
           resJson.createdBy.should.be.eql(1);
           should.exist(resJson.createdAt);
@@ -510,12 +486,10 @@ describe('UPDATE timeline', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({
-          param: _.assign({}, body.param, {
-            startDate: '2018-05-15T00:00:00.000Z',
-            endDate: '2018-05-17T00:00:00.000Z', // no affect to milestones
-          }),
-        })
+        .send(_.assign({}, body, {
+          startDate: '2018-05-15T00:00:00.000Z',
+          endDate: '2018-05-17T00:00:00.000Z', // no affect to milestones
+        }))
         .expect(200)
         .end(() => {
           setTimeout(() => {
@@ -544,12 +518,10 @@ describe('UPDATE timeline', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({
-          param: _.assign({}, body.param, {
-            startDate: '2018-05-12T00:00:00.000Z', // no affect to milestones
-            endDate: '2018-05-15T00:00:00.000Z',
-          }),
-        })
+        .send(_.assign({}, body, {
+          startDate: '2018-05-12T00:00:00.000Z', // no affect to milestones
+          endDate: '2018-05-15T00:00:00.000Z',
+        }))
         .expect(200)
         .end(() => {
           setTimeout(() => {
@@ -615,12 +587,10 @@ describe('UPDATE timeline', () => {
     });
 
     it('should return 200 if changing reference and referenceId', (done) => {
-      const newBody = {
-        param: _.assign({}, body.param, {
-          reference: 'phase',
-          referenceId: 1,
-        }),
-      };
+      const newBody = _.assign({}, body, {
+        reference: 'phase',
+        referenceId: 1,
+      });
 
       request(server)
         .patch('/v5/timelines/1')
@@ -651,7 +621,7 @@ describe('UPDATE timeline', () => {
 
       // not testing fields separately as startDate is required parameter,
       // thus TIMELINE_ADJUSTED will be always sent
-      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when timeline updated', (done) => {
+      it('should send message BUS_API_EVENT.TIMELINE_UPDATED when timeline updated', (done) => {
         request(server)
           .patch('/v5/timelines/1')
           .set({
@@ -665,13 +635,8 @@ describe('UPDATE timeline', () => {
             } else {
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.TIMELINE_UPDATED,
+                  sinon.match({ resource: RESOURCES.TIMELINE })).should.be.true;
                 done();
               });
             }

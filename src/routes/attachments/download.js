@@ -11,39 +11,74 @@ import util from '../../util';
 
 const permissions = tcMiddleware.permissions;
 
+const getFileDownloadUrl = (req, filePath) => {
+  if (process.env.NODE_ENV === 'development' || config.get('enableFileUpload') === false) {
+    return ['dummy://url'];
+  }
+  return util.getFileDownloadUrl(req, filePath);
+};
+
 module.exports = [
   permissions('project.downloadAttachment'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const attachmentId = _.parseInt(req.params.id);
 
-    models.ProjectAttachment.findOne(
-      {
-        where: {
-          id: attachmentId,
-          projectId,
+    util.fetchByIdFromES('attachments', {
+      query: {
+        nested: {
+          path: 'attachments',
+          query:
+          {
+            filtered: {
+              filter: {
+                bool: {
+                  must: [
+                    { term: { 'attachments.id': attachmentId } },
+                    { term: { 'attachments.projectId': projectId } },
+                  ],
+                },
+              },
+            },
+          },
+          inner_hits: {},
         },
-      })
-    .then((attachment) => {
-      if (!attachment) {
-        const err = new Error('Record not found');
-        err.status = 404;
-        return Promise.reject(err);
+      },
+    })
+    .then((data) => {
+      if (data.length === 0) {
+        req.log.debug('No attachment found in ES');
+        return models.ProjectAttachment.findOne(
+          {
+            where: {
+              id: attachmentId,
+              projectId,
+            },
+          })
+        .then((attachment) => {
+          if (!attachment) {
+            const err = new Error('Record not found');
+            err.status = 404;
+            return Promise.reject(err);
+          }
+
+          return getFileDownloadUrl(req, attachment.filePath);
+        })
+        .catch((error) => {
+          req.log.error('Error fetching attachment', error);
+          const rerr = error;
+          rerr.status = rerr.status || 500;
+          next(rerr);
+        });
       }
-      if (process.env.NODE_ENV === 'development' || config.get('enableFileUpload') === false) {
-        return ['dummy://url'];
-      }
-      return util.getFileDownloadUrl(req, attachment.filePath);
+      req.log.debug('attachment found in ES');
+      const attachment = data[0].inner_hits.attachments.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
+      return getFileDownloadUrl(req, attachment.filePath);
     })
     .then((result) => {
       const url = result[1];
-      res.status(200).json(util.wrapResponse(req.id, { url }));
+      return res.json({ url });
     })
-    .catch((error) => {
-      req.log.error('Error fetching attachment', error);
-      const rerr = error;
-      rerr.status = rerr.status || 500;
-      next(rerr);
-    });
+    .catch(next);
   },
 ];

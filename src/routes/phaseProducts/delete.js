@@ -3,7 +3,8 @@
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import { EVENT } from '../../constants';
+import util from '../../util';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -45,7 +46,12 @@ module.exports = [
           deleted,
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED, { req, deleted });
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED,
+          RESOURCES.PHASE_PRODUCT,
+          _.pick(deleted.toJSON(), 'id'));
 
         res.status(204).json({});
       })

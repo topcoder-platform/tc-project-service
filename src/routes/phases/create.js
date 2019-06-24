@@ -5,27 +5,25 @@ import Sequelize from 'sequelize';
 
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
 
 const addProjectPhaseValidations = {
-  body: {
-    param: Joi.object().keys({
-      name: Joi.string().required(),
-      status: Joi.string().required(),
-      startDate: Joi.date().optional(),
-      endDate: Joi.date().optional(),
-      duration: Joi.number().min(0).optional(),
-      budget: Joi.number().min(0).optional(),
-      spentBudget: Joi.number().min(0).optional(),
-      progress: Joi.number().min(0).optional(),
-      details: Joi.any().optional(),
-      order: Joi.number().integer().optional(),
-      productTemplateId: Joi.number().integer().positive().optional(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    name: Joi.string().required(),
+    status: Joi.string().required(),
+    startDate: Joi.date().optional(),
+    endDate: Joi.date().optional(),
+    duration: Joi.number().min(0).optional(),
+    budget: Joi.number().min(0).optional(),
+    spentBudget: Joi.number().min(0).optional(),
+    progress: Joi.number().min(0).optional(),
+    details: Joi.any().optional(),
+    order: Joi.number().integer().optional(),
+    productTemplateId: Joi.number().integer().positive().optional(),
+  }).required(),
 };
 
 module.exports = [
@@ -35,7 +33,7 @@ module.exports = [
   permissions('project.addProjectPhase'),
   // do the real work
   (req, res, next) => {
-    const data = req.body.param;
+    const data = req.body;
     // default values
     const projectId = _.parseInt(req.params.projectId);
     _.assign(data, {
@@ -45,6 +43,7 @@ module.exports = [
     });
 
     let newProjectPhase = null;
+    let otherUpdated = null;
     models.sequelize.transaction(() => {
       req.log.debug('Create Phase - Starting transaction');
       return models.Project.findOne({
@@ -89,7 +88,22 @@ module.exports = [
             },
           });
         })
-        .then(() => {
+        .then((updatedCount) => {
+          if (updatedCount) {
+            return models.ProjectPhase.findAll({
+              where: {
+                projectId,
+                id: { $ne: newProjectPhase.id },
+                order: { $gte: newProjectPhase.order },
+              },
+              order: [['updatedAt', 'DESC']],
+              limit: updatedCount[0],
+            });
+          }
+          return Promise.resolve();
+        })
+        .then((_otherUpdated) => {
+          otherUpdated = _otherUpdated || [];
           if (_.isNil(data.productTemplateId)) {
             return Promise.resolve();
           }
@@ -128,10 +142,24 @@ module.exports = [
           newProjectPhase,
           { correlationId: req.id },
         );
-        req.log.debug('Sending event to Kafka bus for project phase %d', newProjectPhase.id);
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: newProjectPhase });
 
-        res.status(201).json(util.wrapResponse(req.id, newProjectPhase, 1, 201));
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
+          RESOURCES.PHASE,
+          newProjectPhase);
+
+        // emit the event for other phase order updated
+        _.map(otherUpdated, phase =>
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+            RESOURCES.PHASE,
+            _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+        );
+
+        res.status(201).json(newProjectPhase);
       })
       .catch((err) => {
         util.handleError('Error creating project phase', err, req, next);

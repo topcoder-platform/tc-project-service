@@ -9,7 +9,7 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should();
 
@@ -98,11 +98,9 @@ describe('Project members delete', () => {
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send({
-          param: {
-            userId: 1,
-            projectId: project1.id,
-            role: 'customer',
-          },
+          userId: 1,
+          projectId: project1.id,
+          role: 'customer',
         })
         .expect(403, done);
     });
@@ -114,11 +112,9 @@ describe('Project members delete', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userId: 1,
-            projectId: project1.id,
-            role: 'customer',
-          },
+          userId: 1,
+          projectId: project1.id,
+          role: 'customer',
         })
         .expect(403, done);
     });
@@ -332,7 +328,7 @@ describe('Project members delete', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when manager removed', (done) => {
+      it('sends BUS_API_EVENT.PROJECT_MEMBER_REMOVED message when manager removed', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           post: () => Promise.resolve({
             status: 200,
@@ -359,22 +355,19 @@ describe('Project members delete', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_LEFT);
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                  projectId: project1.id,
-                  projectName: project1.name,
-                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                  userId: 40051334,
-                  initiatorUserId: 40051334,
-                })).should.be.true;
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
+                  sinon.match({ resource: RESOURCES.PROJECT_MEMBER })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
+                  sinon.match({ id: member2.id })).should.be.true;
                 done();
               });
             }
           });
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when copilot removed', (done) => {
+      it('sends BUS_API_EVENT.PROJECT_MEMBER_REMOVED message when copilot removed', (done) => {
         request(server)
           .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
           .set({
@@ -386,15 +379,12 @@ describe('Project members delete', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_REMOVED);
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                  projectId: project1.id,
-                  projectName: project1.name,
-                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                  userId: 40051334,
-                  initiatorUserId: 40051334,
-                })).should.be.true;
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
+                  sinon.match({ resource: RESOURCES.PROJECT_MEMBER })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
+                  sinon.match({ id: member1.id })).should.be.true;
                 done();
               });
             }

@@ -26,16 +26,22 @@ module.exports = (targetUrl, token) => {
   };
 
   console.log('Creating projects');
-  projectPromises = projects.map((project, i) => {
-    const status = _.get(project, 'param.status');
-    const cancelReason = _.get(project, 'param.cancelReason');
-    const invites = _.cloneDeep(_.get(project, 'param.invites'));
-    const acceptInvitation = _.get(project, 'param.acceptInvitation');
+  projectPromises = projects.map(async (project, i) => {
+    const status = _.get(project, 'status');
+    const cancelReason = _.get(project, 'cancelReason');
+    const invites = _.cloneDeep(_.get(project, 'invites'));
+    const acceptInvitation = _.get(project, 'acceptInvitation');
 
-    delete project.param.status;
-    delete project.param.cancelReason;
-    delete project.param.invites;
-    delete project.param.acceptInvitation;
+    if(project.templateId) {
+      await findProjectTemplate(project.templateId, targetUrl, adminHeaders).catch((ex) => {
+        delete project.templateId;
+      });
+    }
+
+    delete project.status;
+    delete project.cancelReason;
+    delete project.invites;
+    delete project.acceptInvitation;
 
     return axios
       .post(projectsUrl, project, { headers: adminHeaders })
@@ -43,10 +49,10 @@ module.exports = (targetUrl, token) => {
         console.log(`Failed to create project ${i}: ${err.message}`);
       })
       .then(async (response) => {
-        const projectId = _.get(response, 'data.result.content.id');
+        const projectId = _.get(response, 'data.id');
 
         // updating status
-        if (status !== _.get(response, 'data.result.content.status')) {
+        if (status !== _.get(response, 'data.status')) {
           console.log(`Project #${projectId}: Wait a bit to give time ES to index before updating status...`);
           await Promise.delay(ES_INDEX_DELAY);
           await updateProjectStatus(projectId, { status, cancelReason }, targetUrl, adminHeaders).catch((ex) => {
@@ -68,12 +74,10 @@ module.exports = (targetUrl, token) => {
           if (acceptInvitation) {
             let acceptInvitationPromises = []
             responses.forEach(response => {
-              const userId = _.get(response, 'data.result.content.success[0].userId')
+              const userId = _.get(response, 'data.success[0].userId')
               acceptInvitationPromises.push(updateProjectMemberInvite(projectId, {
-                param: {
-                  userId,
-                  status: 'accepted'
-                }
+                userId,
+                status: 'accepted'
               }, targetUrl, connectAdminHeaders))
             })
 
@@ -106,9 +110,7 @@ function updateProjectStatus(project, updateParams, targetUrl, headers) {
 
   return axios.patch(
     projectUpdateUrl,
-    {
-      param: updateParams,
-    },
+    updateParams,
     {
       headers,
     },
@@ -135,3 +137,11 @@ function updateProjectMemberInvite(projectId, params, targetUrl, headers) {
     })
 }
 
+function findProjectTemplate(templateId, targetUrl, headers) {
+  const projectTemplateUrl = `${targetUrl}projects/metadata/projectTemplates/${templateId}`;
+
+  return axios({
+    url: projectTemplateUrl,
+    headers,
+  })
+}

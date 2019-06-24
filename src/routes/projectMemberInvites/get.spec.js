@@ -101,7 +101,7 @@ describe('GET Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               should.exist(resJson.projectId);
               resJson.userId.should.be.eql(40051331);

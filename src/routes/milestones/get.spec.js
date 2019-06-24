@@ -275,7 +275,7 @@ describe('GET milestone', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(1);
           resJson.timelineId.should.be.eql(1);
           resJson.name.should.be.eql('milestone 1');

@@ -7,7 +7,7 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should();
 
@@ -77,7 +77,7 @@ describe('Project Attachments update', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: { title: 'updated title', description: 'updated description' } })
+        .send({ title: 'updated title', description: 'updated description' })
         .expect(403, done);
     });
 
@@ -87,7 +87,7 @@ describe('Project Attachments update', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: { title: 'updated title', description: 'updated description' } })
+        .send({ title: 'updated title', description: 'updated description' })
         .expect(404, done);
     });
 
@@ -97,13 +97,13 @@ describe('Project Attachments update', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: { title: 'updated title', description: 'updated description' } })
+        .send({ title: 'updated title', description: 'updated description' })
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.title.should.equal('updated title');
             resJson.description.should.equal('updated description');
@@ -118,13 +118,13 @@ describe('Project Attachments update', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: { title: 'updated title 1', description: 'updated description 1' } })
+        .send({ title: 'updated title 1', description: 'updated description 1' })
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.title.should.equal('updated title 1');
             resJson.description.should.equal('updated description 1');
@@ -151,7 +151,7 @@ describe('Project Attachments update', () => {
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .send({ param: { title: 'updated title', description: 'updated description' } })
+          .send({ title: 'updated title', description: 'updated description' })
           .expect(200)
           .end((err) => {
             if (err) {
@@ -160,13 +160,12 @@ describe('Project Attachments update', () => {
               // Wait for app message handler to complete
               testUtil.wait(() => {
                 createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_FILES_UPDATED, sinon.match({
-                  projectId: project1.id,
-                  projectName: project1.name,
-                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                  userId: 40051333,
-                  initiatorUserId: 40051333,
-                })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_UPDATED,
+                  sinon.match({ resource: RESOURCES.ATTACHMENT })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_UPDATED,
+                  sinon.match({ title: 'updated title' })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_UPDATED,
+                  sinon.match({ description: 'updated description' })).should.be.true;
                 done();
               });
             }

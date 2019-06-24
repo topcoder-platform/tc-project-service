@@ -79,7 +79,7 @@ const milestones = [
   },
 ];
 
-describe('LIST timelines', () => {
+describe('LIST milestones', () => {
   before(function beforeHook(done) {
     this.timeout(10000);
     testUtil.clearDb()
@@ -241,7 +241,7 @@ describe('LIST timelines', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           resJson[0].should.be.eql(milestones[0]);
@@ -259,7 +259,7 @@ describe('LIST timelines', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -274,7 +274,7 @@ describe('LIST timelines', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -288,7 +288,7 @@ describe('LIST timelines', () => {
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -302,7 +302,7 @@ describe('LIST timelines', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -317,7 +317,7 @@ describe('LIST timelines', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           resJson[0].should.be.eql(milestones[1]);

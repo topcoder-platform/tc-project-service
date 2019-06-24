@@ -173,21 +173,19 @@ describe('UPDATE milestone template', () => {
 
   describe('PATCH /timelines/metadata/milestoneTemplates/{milestoneTemplateId}', () => {
     const body = {
-      param: {
-        name: 'milestoneTemplate 1-updated',
-        description: 'description-updated',
-        duration: 6,
-        type: 'type1-updated',
-        order: 5,
-        plannedText: 'text to be shown in planned stage',
-        blockedText: 'text to be shown in blocked stage',
-        activeText: 'text to be shown in active stage',
-        completedText: 'text to be shown in completed stage',
-        hidden: true,
-        reference: 'productTemplate',
-        referenceId: 1,
-        metadata: {},
-      },
+      name: 'milestoneTemplate 1-updated',
+      description: 'description-updated',
+      duration: 6,
+      type: 'type1-updated',
+      order: 5,
+      plannedText: 'text to be shown in planned stage',
+      blockedText: 'text to be shown in blocked stage',
+      activeText: 'text to be shown in active stage',
+      completedText: 'text to be shown in completed stage',
+      hidden: true,
+      reference: 'productTemplate',
+      referenceId: 1,
+      metadata: {},
     };
 
     it('should return 403 if user is not authenticated', (done) => {
@@ -256,20 +254,20 @@ describe('UPDATE milestone template', () => {
         .send(body)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(1);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.duration.should.be.eql(body.param.duration);
-          resJson.type.should.be.eql(body.param.type);
-          resJson.order.should.be.eql(body.param.order);
-          resJson.plannedText.should.be.eql(body.param.plannedText);
-          resJson.blockedText.should.be.eql(body.param.blockedText);
-          resJson.activeText.should.be.eql(body.param.activeText);
-          resJson.completedText.should.be.eql(body.param.completedText);
-          resJson.reference.should.be.eql(body.param.reference);
-          resJson.referenceId.should.be.eql(body.param.referenceId);
-          resJson.metadata.should.be.eql(body.param.metadata);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.duration.should.be.eql(body.duration);
+          resJson.type.should.be.eql(body.type);
+          resJson.order.should.be.eql(body.order);
+          resJson.plannedText.should.be.eql(body.plannedText);
+          resJson.blockedText.should.be.eql(body.blockedText);
+          resJson.activeText.should.be.eql(body.activeText);
+          resJson.completedText.should.be.eql(body.completedText);
+          resJson.reference.should.be.eql(body.reference);
+          resJson.referenceId.should.be.eql(body.referenceId);
+          resJson.metadata.should.be.eql(body.metadata);
 
           should.exist(resJson.createdBy);
           should.exist(resJson.createdAt);
@@ -291,7 +289,7 @@ describe('UPDATE milestone template', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 3 }) }) // 1 to 3
+        .send(_.assign({}, body, { order: 3 })) // 1 to 3
         .expect(200)
         .end(() => {
           // Milestone 1: order 3
@@ -323,7 +321,7 @@ describe('UPDATE milestone template', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 4 }) }) // 1 to 4
+        .send(_.assign({}, body, { order: 4 })) // 1 to 4
         .expect(200)
         .end(() => {
           // Milestone 1: order 4
@@ -355,7 +353,7 @@ describe('UPDATE milestone template', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 1 }) }) // 3 to 1
+        .send(_.assign({}, body, { order: 1 })) // 3 to 1
         .expect(200)
         .end(() => {
           // Milestone 1: order 2
@@ -387,7 +385,7 @@ describe('UPDATE milestone template', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 0 }) }) // 3 to 0
+        .send(_.assign({}, body, { order: 0 })) // 3 to 0
         .expect(200)
         .end(() => {
           // Milestone 1: order 1
@@ -412,7 +410,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing name', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.name;
+      delete partialBody.name;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -424,7 +422,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing type', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.type;
+      delete partialBody.type;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -436,7 +434,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing duration', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.duration;
+      delete partialBody.duration;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -448,7 +446,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing order', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.order;
+      delete partialBody.order;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -460,7 +458,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing plannedText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.plannedText;
+      delete partialBody.plannedText;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -472,7 +470,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing blockedText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.blockedText;
+      delete partialBody.blockedText;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -484,7 +482,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing activeText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.activeText;
+      delete partialBody.activeText;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -496,7 +494,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing completedText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.completedText;
+      delete partialBody.completedText;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -508,7 +506,7 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for missing hidden field', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.hidden;
+      delete partialBody.hidden;
       request(server)
         .patch('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
@@ -531,35 +529,33 @@ describe('UPDATE milestone template', () => {
 
     it('should return 200 for admin - updating metadata', (done) => {
       const bodyWithMetadata = {
-        param: {
-          name: 'milestoneTemplate 5-updated',
-          description: 'description-updated',
-          duration: 6,
-          type: 'type5-updated',
-          order: 5,
-          plannedText: 'text to be shown in planned stage',
-          blockedText: 'text to be shown in blocked stage',
-          activeText: 'text to be shown in active stage',
-          completedText: 'text to be shown in completed stage',
-          hidden: true,
-          reference: 'productTemplate',
-          referenceId: 1,
-          metadata: {
-            metadata1: {
-              name: 'metadata 1 - update',
-              details: {
-                anyDetails: 'any details 1 - update',
-                newDetails: 'new',
-              },
-              others: ['others new'],
+        name: 'milestoneTemplate 5-updated',
+        description: 'description-updated',
+        duration: 6,
+        type: 'type5-updated',
+        order: 5,
+        plannedText: 'text to be shown in planned stage',
+        blockedText: 'text to be shown in blocked stage',
+        activeText: 'text to be shown in active stage',
+        completedText: 'text to be shown in completed stage',
+        hidden: true,
+        reference: 'productTemplate',
+        referenceId: 1,
+        metadata: {
+          metadata1: {
+            name: 'metadata 1 - update',
+            details: {
+              anyDetails: 'any details 1 - update',
+              newDetails: 'new',
             },
-            metadata3: {
-              name: 'metadata 3',
-              details: {
-                anyDetails: 'any details 3',
-              },
-              others: ['others 31', 'others 32'],
+            others: ['others new'],
+          },
+          metadata3: {
+            name: 'metadata 3',
+            details: {
+              anyDetails: 'any details 3',
             },
+            others: ['others 31', 'others 32'],
           },
         },
       };
@@ -572,7 +568,7 @@ describe('UPDATE milestone template', () => {
         .send(bodyWithMetadata)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.metadata.should.be.eql({
             metadata1: {
               name: 'metadata 1 - update',

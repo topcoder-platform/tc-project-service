@@ -83,7 +83,7 @@ const validateTimeline = {
    */
   // eslint-disable-next-line valid-jsdoc
   validateTimelineRequestBody: (req, res, next) => {
-    validateReference(req.body.param, req, true)
+    validateReference(req.body, req, true)
       .then(next)
       .catch(next);
   },
@@ -100,10 +100,7 @@ const validateTimeline = {
   // eslint-disable-next-line valid-jsdoc
   validateTimelineQueryFilter: (req, res, next) => {
     // Validate the filter
-    const filter = util.parseQueryFilter(req.query.filter);
-
-    // Save the parsed filter for later
-    req.params.filter = filter;
+    const filter = req.query;
 
     if (!util.isValidFilter(filter, ['reference', 'referenceId'])) {
       const apiErr = new Error('Only allowed to filter by reference and referenceId');

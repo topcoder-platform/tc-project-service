@@ -42,7 +42,7 @@ describe('LIST organization config', () => {
   describe('GET /orgConfig', () => {
     it('should return 200 for admin with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
+        .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -68,13 +68,13 @@ describe('LIST organization config', () => {
 
     it('should return 403 if user is not authenticated with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
+        .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
         .expect(403, done);
     });
 
     it('should return 200 for connect admin with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
+        .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -84,7 +84,7 @@ describe('LIST organization config', () => {
 
     it('should return 200 for connect manager with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
+        .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -94,7 +94,7 @@ describe('LIST organization config', () => {
 
     it('should return 200 for member with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
+        .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -103,7 +103,7 @@ describe('LIST organization config', () => {
 
     it('should return 200 for copilot with filter', (done) => {
       request(server)
-        .get(`${orgConfigPath}?filter=orgId%3Din%28${configs[0].orgId}%29%26configName=${configs[0].configName}`)
+        .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

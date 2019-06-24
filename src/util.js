@@ -11,7 +11,6 @@
 
 
 import _ from 'lodash';
-import querystring from 'querystring';
 import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
@@ -167,26 +166,6 @@ _.assignIn(util, {
   },
 
   /**
-   * Parse the query filters
-   * @param  {String}   fqueryFilter        the query filter string
-   * @return {Object}                       the parsed array
-   */
-  parseQueryFilter: (fqueryFilter) => {
-    let queryFilter = querystring.parse(fqueryFilter);
-    // convert in to array
-    queryFilter = _.mapValues(queryFilter, (val) => {
-      if (val.indexOf('in(') > -1) {
-        return { $in: val.substring(3, val.length - 1).split(',') };
-      }
-      return val;
-    });
-    if (queryFilter.id && queryFilter.id.$in) {
-      queryFilter.id.$in = _.map(queryFilter.id.$in, _.parseInt);
-    }
-    return queryFilter;
-  },
-
-  /**
    * Moves file from source to destination
    * @param  {object} req    request object
    * @param  {object} source source object
@@ -322,12 +301,28 @@ _.assignIn(util, {
 
   /**
    * Return the searched resource from elastic search
+   * @param resource resource name
+   * @param query    search query
+   * @param index    index to search from
    * @return {Object}           the searched resource
    */
-  fetchFromES: Promise.coroutine(function* () { // eslint-disable-line func-names
-    const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
-    const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
-    const data = (yield esClient.search({ index: ES_METADATA_INDEX, type: ES_METADATA_TYPE }));
+  fetchFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+    let INDEX = config.get('elasticsearchConfig.metadataIndexName');
+    let TYPE = config.get('elasticsearchConfig.metadataDocType');
+    if (index === 'timeline') {
+      INDEX = config.get('elasticsearchConfig.timelineIndexName');
+      TYPE = config.get('elasticsearchConfig.timelineDocType');
+    } else if (index === 'project') {
+      INDEX = config.get('elasticsearchConfig.indexName');
+      TYPE = config.get('elasticsearchConfig.docType');
+    }
+
+    const data = query ? (yield esClient.search({ index: INDEX, type: TYPE, body: query })) :
+    (yield esClient.search({ index: INDEX, type: TYPE }));
+    if (data.hits.hits.length > 0 && data.hits.hits[0].inner_hits) {
+      return data.hits.hits[0].inner_hits;
+    }
+
     return data.hits.hits.length > 0 ? data.hits.hits[0]._source : {  // eslint-disable-line no-underscore-dangle
       productTemplates: [],
       forms: [],
@@ -336,22 +331,37 @@ _.assignIn(util, {
       priceConfigs: [],
       projectTypes: [],
       productCategories: [],
-      orgConfigs: [] };
+      orgConfigs: [],
+      milestoneTemplates: [],
+    };
   }),
 
   /**
-   * Return the searched resource from elastic search
+   * Return the searched resource from elastic search PROJECT index
+   * @param resource resource name
+   * @param query    search query
+   * @param index    index to search from
    * @return {Array}           the searched resource
    */
-  fetchByIdFromES: Promise.coroutine(function* (resource, query) { // eslint-disable-line func-names
-    const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
-    const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
-    return (yield esClient.search({ index: ES_METADATA_INDEX,
-      type: ES_METADATA_TYPE,
+  fetchByIdFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+    let INDEX = config.get('elasticsearchConfig.indexName');
+    let TYPE = config.get('elasticsearchConfig.docType');
+    if (index === 'timeline') {
+      INDEX = config.get('elasticsearchConfig.timelineIndexName');
+      TYPE = config.get('elasticsearchConfig.timelineDocType');
+    } else if (index === 'metadata') {
+      INDEX = config.get('elasticsearchConfig.metadataIndexName');
+      TYPE = config.get('elasticsearchConfig.metadataDocType');
+    }
+
+    return (yield esClient.search({
+      index: INDEX,
+      type: TYPE,
       _source: false,
       body: query,
     })).hits.hits;
   }),
+
 
   /**
    * Retrieve member details from userIds
@@ -513,6 +523,61 @@ _.assignIn(util, {
    * @return {Array} tpcoder project members
    */
   getTopcoderProjectMembers: members => _(members).filter(m => m.role !== PROJECT_MEMBER_ROLE.CUSTOMER),
+
+  /**
+  * Set paginated header and respond with data
+  * @param {Object} req HTTP request
+  * @param {Object} res HTTP response
+  * @param {Object} data Data for which pagination need to be applied
+  * @return {Array} data rows to be returned
+  */
+  setPaginationHeaders: (req, res, data) => {
+    const totalPages = Math.ceil(data.count / data.pageSize);
+    let fullUrl = `${req.protocol}://${req.get('host')}${req.url.replace(`&page=${data.page}`, '')}`;
+  // URL formatting to add pagination parameters accordingly
+    if (fullUrl.indexOf('?') === -1) {
+      fullUrl += '?';
+    } else {
+      fullUrl += '&';
+    }
+
+  // Pagination follows github style
+    if (data.count > 0) { // Set Pagination headers only if there is data to paginate
+      let link = ''; // Content for Link header
+
+    // Set first and last page in Link header
+      link += `<${fullUrl}page=1>; rel="first"`;
+      link += `, <${fullUrl}page=${totalPages}>; rel="last"`;
+
+    // Set Prev-Page only if it's not first page and within page limits
+      if (data.page > 1 && data.page <= totalPages) {
+        const prevPage = (data.page - 1);
+        res.set({
+          'X-Prev-Page': prevPage,
+        });
+        link += `, <${fullUrl}page=${prevPage}>; rel="prev"`;
+      }
+
+    // Set Next-Page only if it's not Last page and within page limits
+      if (data.page < totalPages) {
+        const nextPage = (_.parseInt(data.page) + 1);
+        res.set({
+          'X-Next-Page': (_.parseInt(data.page) + 1),
+        });
+        link += `, <${fullUrl}page=${nextPage}>; rel="next"`;
+      }
+
+      res.set({
+        'X-Page': data.page,
+        'X-Per-Page': data.pageSize,
+        'X-Total': data.count,
+        'X-Total-Pages': totalPages,
+        Link: link,
+      });
+    }
+  // Return the data after setting pagination headers
+    res.json(data.rows);
+  },
 
   /**
    * Check if the following model exist

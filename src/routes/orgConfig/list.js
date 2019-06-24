@@ -11,7 +11,8 @@ const permissions = tcMiddleware.permissions;
 
 const schema = {
   query: {
-    filter: Joi.string().required(),
+    orgId: Joi.string().required(),
+    configName: Joi.string().optional(),
   },
 };
 
@@ -22,7 +23,7 @@ module.exports = [
     util.fetchFromES('orgConfigs')
     .then((data) => {
       // handle filters
-      const filters = util.parseQueryFilter(req.query.filter);
+      const filters = req.query;
       // Throw error if orgId is not present in filter
       if (!filters.orgId) {
         next(util.buildApiError('Missing filter orgId', 400));

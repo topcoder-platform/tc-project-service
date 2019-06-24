@@ -40,7 +40,7 @@ module.exports = [
         },
       },
       sort: { 'planConfigs.version': 'desc' },
-    })
+    }, 'metadata')
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No planConfig found in ES');

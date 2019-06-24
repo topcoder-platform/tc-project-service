@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT, USER_ROLE } from '../../constants';
+import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT, RESOURCES, USER_ROLE } from '../../constants';
 
 /**
  * API to update invite member to project.
@@ -13,8 +13,7 @@ import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT, USER_ROLE } f
 const permissions = tcMiddleware.permissions;
 
 const updateMemberValidations = {
-  body: {
-    param: Joi.object()
+  body: Joi.object()
       .keys({
         userId: Joi.number().optional(),
         email: Joi.string()
@@ -25,7 +24,6 @@ const updateMemberValidations = {
           .required(),
       })
       .required(),
-  },
 };
 
 module.exports = [
@@ -33,7 +31,7 @@ module.exports = [
   validate(updateMemberValidations),
   permissions('projectMemberInvite.put'),
   (req, res, next) => {
-    const putInvite = req.body.param;
+    const putInvite = req.body;
     const projectId = _.parseInt(req.params.projectId);
 
     // userId or email should be provided
@@ -93,14 +91,13 @@ module.exports = [
           status: putInvite.status,
         })
         .then((updatedInvite) => {
-          req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, {
+          // emit the event
+          util.sendResourceToKafkaBus(
             req,
-            userId: updatedInvite.userId,
-            email: updatedInvite.email,
-            status: updatedInvite.status,
-            role: updatedInvite.role,
-            createdBy: updatedInvite.createdBy,
-          });
+            EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED,
+            RESOURCES.PROJECT_MEMBER_INVITE,
+            updatedInvite.toJSON());
+
           req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, updatedInvite, {
             correlationId: req.id,
           });
@@ -135,11 +132,11 @@ module.exports = [
                 };
                 return util
                   .addUserToProject(req, member)
-                  .then(() => res.json(util.wrapResponse(req.id, updatedInvite)))
+                  .then(() => res.json(updatedInvite))
                   .catch(err => next(err));
               });
           }
-          return res.json(util.wrapResponse(req.id, updatedInvite));
+          return res.json(updatedInvite);
         });
     });
   },

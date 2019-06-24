@@ -42,7 +42,7 @@ module.exports = [
           inner_hits: {},
         },
       },
-    })
+    }, 'metadata')
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No plan config found in ES');

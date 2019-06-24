@@ -10,7 +10,7 @@ import server from '../../app';
 import testUtil from '../../tests/util';
 import models from '../../models';
 import busApi from '../../services/busApi';
-import { EVENT, BUS_API_EVENT } from '../../constants';
+import { EVENT, RESOURCES, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -206,32 +206,30 @@ describe('CREATE milestone', () => {
 
   describe('POST /timelines/{timelineId}/milestones', () => {
     const body = {
-      param: {
-        name: 'milestone 4',
-        description: 'description 4',
-        duration: 4,
-        startDate: '2018-05-05T00:00:00.000Z',
-        endDate: '2018-05-07T00:00:00.000Z',
-        completionDate: '2018-05-08T00:00:00.000Z',
-        status: 'open',
-        type: 'type4',
-        details: {
-          detail1: {
-            subDetail1C: 4,
-          },
-          detail2: [
-            3,
-            4,
-            5,
-          ],
+      name: 'milestone 4',
+      description: 'description 4',
+      duration: 4,
+      startDate: '2018-05-05T00:00:00.000Z',
+      endDate: '2018-05-07T00:00:00.000Z',
+      completionDate: '2018-05-08T00:00:00.000Z',
+      status: 'open',
+      type: 'type4',
+      details: {
+        detail1: {
+          subDetail1C: 4,
         },
-        order: 2,
-        plannedText: 'plannedText 4',
-        activeText: 'activeText 4',
-        completedText: 'completedText 4',
-        blockedText: 'blockedText 4',
-        hidden: true,
+        detail2: [
+          3,
+          4,
+          5,
+        ],
       },
+      order: 2,
+      plannedText: 'plannedText 4',
+      activeText: 'activeText 4',
+      completedText: 'completedText 4',
+      blockedText: 'blockedText 4',
+      hidden: true,
     };
 
     it('should return 403 if user is not authenticated', (done) => {
@@ -252,11 +250,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing name', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          name: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        name: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -269,11 +265,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing duration', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          duration: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        duration: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -286,11 +280,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing type', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          type: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        type: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -303,11 +295,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing order', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          order: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        order: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -320,11 +310,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing plannedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          plannedText: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        plannedText: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -337,11 +325,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing activeText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          activeText: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        activeText: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -354,11 +340,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing completedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          completedText: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        completedText: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -371,11 +355,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if missing blockedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          blockedText: undefined,
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        blockedText: undefined,
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -388,12 +370,10 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if startDate is after endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          endDate: '2018-05-28T00:00:00.000Z',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        startDate: '2018-05-29T00:00:00.000Z',
+        endDate: '2018-05-28T00:00:00.000Z',
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -406,12 +386,10 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if startDate is after completionDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          completionDate: '2018-05-28T00:00:00.000Z',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        startDate: '2018-05-29T00:00:00.000Z',
+        completionDate: '2018-05-28T00:00:00.000Z',
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -424,11 +402,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if startDate is before the timeline startDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-01T00:00:00.000Z',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        startDate: '2018-05-01T00:00:00.000Z',
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -441,11 +417,9 @@ describe('CREATE milestone', () => {
     });
 
     it('should return 400 if endDate is after the timeline endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          endDate: '2018-06-13T00:00:00.000Z',
-        }),
-      };
+      const invalidBody = _.assign({}, body, {
+        endDate: '2018-06-13T00:00:00.000Z',
+      });
 
       request(server)
         .post('/v5/timelines/1/milestones')
@@ -500,23 +474,23 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.duration.should.be.eql(body.param.duration);
-          resJson.startDate.should.be.eql(body.param.startDate);
-          resJson.endDate.should.be.eql(body.param.endDate);
-          resJson.completionDate.should.be.eql(body.param.completionDate);
-          resJson.status.should.be.eql(body.param.status);
-          resJson.type.should.be.eql(body.param.type);
-          resJson.details.should.be.eql(body.param.details);
-          resJson.order.should.be.eql(body.param.order);
-          resJson.plannedText.should.be.eql(body.param.plannedText);
-          resJson.activeText.should.be.eql(body.param.activeText);
-          resJson.completedText.should.be.eql(body.param.completedText);
-          resJson.blockedText.should.be.eql(body.param.blockedText);
-          resJson.hidden.should.be.eql(body.param.hidden);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.duration.should.be.eql(body.duration);
+          resJson.startDate.should.be.eql(body.startDate);
+          resJson.endDate.should.be.eql(body.endDate);
+          resJson.completionDate.should.be.eql(body.completionDate);
+          resJson.status.should.be.eql(body.status);
+          resJson.type.should.be.eql(body.type);
+          resJson.details.should.be.eql(body.details);
+          resJson.order.should.be.eql(body.order);
+          resJson.plannedText.should.be.eql(body.plannedText);
+          resJson.activeText.should.be.eql(body.activeText);
+          resJson.completedText.should.be.eql(body.completedText);
+          resJson.blockedText.should.be.eql(body.blockedText);
+          resJson.hidden.should.be.eql(body.hidden);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -556,7 +530,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051334); // manager
           resJson.updatedBy.should.be.eql(40051334); // manager
           done();
@@ -573,7 +547,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();
@@ -590,7 +564,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051332); // copilot
           resJson.updatedBy.should.be.eql(40051332); // copilot
           done();
@@ -607,7 +581,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051331); // member
           resJson.updatedBy.should.be.eql(40051331); // member
           done();
@@ -631,7 +605,7 @@ describe('CREATE milestone', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone created', (done) => {
+      it('should send message BUS_API_EVENT.MILESTONE_ADDED when milestone created', (done) => {
         request(server)
           .post('/v5/timelines/1/milestones')
           .set({
@@ -645,14 +619,13 @@ describe('CREATE milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
+                createEventSpy.callCount.should.be.eql(3);
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED,
+                  sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED,
+                  sinon.match({ name: 'milestone 4' })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED,
+                  sinon.match({ description: 'description 4' })).should.be.true;
                 done();
               });
             }

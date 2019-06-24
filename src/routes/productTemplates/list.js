@@ -12,7 +12,7 @@ module.exports = [
   (req, res, next) => {
     util.fetchFromES('productTemplates')
     .then((data) => {
-      const filters = util.parseQueryFilter(req.query.filter);
+      const filters = req.query;
       if (!util.isValidFilter(filters, ['productKey'])) {
         util.handleError('Invalid filters', null, req, next);
       }

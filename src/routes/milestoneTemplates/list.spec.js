@@ -141,7 +141,7 @@ describe('LIST milestone template', () => {
 
     it('should return 400 for invalid sort order', (done) => {
       request(server)
-        .get('/v5/timelines/metadata/milestoneTemplates?sort=order%20invalid')
+        .get('/v5/timelines/metadata/milestoneTemplates?sort=order invalid')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -156,7 +156,7 @@ describe('LIST milestone template', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].id.should.be.eql(milestoneTemplates[0].id);
           resJson[0].name.should.be.eql(milestoneTemplates[0].name);
@@ -182,9 +182,9 @@ describe('LIST milestone template', () => {
         });
     });
 
-    it('should return 200 for connect admin with filter', (done) => {
+    it('should return 200 for connect admin with reference and referenceId filters', (done) => {
       request(server)
-        .get('/v5/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1')
+        .get('/v5/timelines/metadata/milestoneTemplates?reference=productTemplate&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -228,7 +228,7 @@ describe('LIST milestone template', () => {
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].id.should.be.eql(2);
           resJson[1].id.should.be.eql(1);

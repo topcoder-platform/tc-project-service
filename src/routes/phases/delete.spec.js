@@ -10,7 +10,10 @@ import busApi from '../../services/busApi';
 
 import {
   BUS_API_EVENT,
+  RESOURCES,
 } from '../../constants';
+
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 const expectAfterDelete = (projectId, id, err, next) => {
   if (err) throw err;
@@ -28,14 +31,8 @@ const expectAfterDelete = (projectId, id, err, next) => {
       } else {
         chai.assert.isNotNull(res.deletedAt);
         chai.assert.isNotNull(res.deletedBy);
-
-        request(server)
-          .get(`/v5/projects/${projectId}/phases/${id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, next);
       }
+      next();
     }), 500);
 };
 const body = {
@@ -54,7 +51,6 @@ const body = {
 
 describe('Project Phases', () => {
   let projectId;
-  let projectName;
   let phaseId;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
@@ -87,7 +83,6 @@ describe('Project Phases', () => {
             lastActivityUserId: '1',
           }).then((p) => {
             projectId = p.id;
-            projectName = p.name;
             // create members
             models.ProjectMember.bulkCreate([{
               id: 1,
@@ -187,7 +182,7 @@ describe('Project Phases', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when phase removed', (done) => {
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_DELETED when phase removed', (done) => {
         request(server)
         .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -199,14 +194,11 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED,
+                sinon.match({ resource: RESOURCES.PHASE })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED,
+                sinon.match({ id: phaseId })).should.be.true;
               done();
             });
           }

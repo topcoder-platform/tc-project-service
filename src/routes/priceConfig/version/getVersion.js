@@ -40,7 +40,7 @@ module.exports = [
         },
       },
       sort: { 'priceConfigs.revision': 'desc' },
-    })
+    }, 'metadata')
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No priceConfig found in ES');

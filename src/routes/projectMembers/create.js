@@ -3,7 +3,7 @@ import Joi from 'joi';
 import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
-import { INVITE_STATUS, MANAGER_ROLES, PROJECT_MEMBER_ROLE, USER_ROLE } from '../../constants';
+import { INVITE_STATUS, MANAGER_ROLES, PROJECT_MEMBER_ROLE, USER_ROLE, EVENT, RESOURCES } from '../../constants';
 import models from '../../models';
 
 /**
@@ -14,13 +14,10 @@ import models from '../../models';
 const permissions = tcMiddleware.permissions;
 
 const createProjectMemberValidations = {
-  body: {
-    param: Joi.object()
-      .keys({
-        role: Joi.any()
+  body: Joi.object().keys({
+    role: Joi.any()
           .valid(PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER, PROJECT_MEMBER_ROLE.COPILOT),
-      }),
-  },
+  }),
 };
 
 module.exports = [
@@ -29,8 +26,8 @@ module.exports = [
   permissions('project.addMember'),
   (req, res, next) => {
     let targetRole;
-    if (_.get(req, 'body.param.role')) {
-      targetRole = _.get(req, 'body.param.role');
+    if (_.get(req, 'body.role')) {
+      targetRole = _.get(req, 'body.role');
 
       if (PROJECT_MEMBER_ROLE.MANAGER === targetRole &&
         !util.hasRoles(req, [USER_ROLE.MANAGER])) {
@@ -95,14 +92,28 @@ module.exports = [
             .then((_invite) => {
               invite = _invite;
               if (!invite) {
+                // emit the event
+                util.sendResourceToKafkaBus(
+                  req,
+                  EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+                  RESOURCES.PROJECT_MEMBER,
+                  newMember);
+
                 return res.status(201)
-                  .json(util.wrapResponse(req.id, newMember, 1, 201));
+                  .json(newMember);
               }
               return invite.update({
                 status: INVITE_STATUS.ACCEPTED,
               })
-                .then(() => res.status(201)
-                  .json(util.wrapResponse(req.id, newMember, 1, 201)));
+                .then(() => {
+                  // emit the event
+                  util.sendResourceToKafkaBus(
+                    req,
+                    EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+                    RESOURCES.PROJECT_MEMBER,
+                    newMember);
+                  return res.status(201).json(newMember);
+                });
             });
         });
     })

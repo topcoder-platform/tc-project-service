@@ -8,7 +8,7 @@ import server from '../../app';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, USER_ROLE, PROJECT_MEMBER_ROLE, INVITE_STATUS } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, USER_ROLE, PROJECT_MEMBER_ROLE, INVITE_STATUS } from '../../constants';
 
 const should = chai.should();
 
@@ -103,9 +103,7 @@ describe('Project member invite update', () => {
 
   describe('PUT /projects/{id}/members/invite', () => {
     const body = {
-      param: {
-        status: 'accepted',
-      },
+      status: 'accepted',
     };
 
     let sandbox;
@@ -130,10 +128,8 @@ describe('Project member invite update', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userId: 123,
-            status: INVITE_STATUS.CANCELED,
-          },
+          userId: 123,
+          status: INVITE_STATUS.CANCELED,
         })
         .expect('Content-Type', /json/)
         .expect(404)
@@ -149,9 +145,7 @@ describe('Project member invite update', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            status: INVITE_STATUS.CANCELED,
-          },
+          status: INVITE_STATUS.CANCELED,
         })
         .expect('Content-Type', /json/)
         .expect(400)
@@ -192,10 +186,8 @@ describe('Project member invite update', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userId: invite2.userId,
-            status: INVITE_STATUS.CANCELED,
-          },
+          userId: invite2.userId,
+          status: INVITE_STATUS.CANCELED,
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -236,10 +228,8 @@ describe('Project member invite update', () => {
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
         .send({
-          param: {
-            userId: invite2.userId,
-            status: INVITE_STATUS.CANCELED,
-          },
+          userId: invite2.userId,
+          status: INVITE_STATUS.CANCELED,
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -280,10 +270,8 @@ describe('Project member invite update', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userId: invite3.userId,
-            status: INVITE_STATUS.ACCEPTED,
-          },
+          userId: invite3.userId,
+          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -337,10 +325,8 @@ describe('Project member invite update', () => {
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send({
-          param: {
-            userId: invite1.userId,
-            status: INVITE_STATUS.ACCEPTED,
-          },
+          userId: invite1.userId,
+          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -350,12 +336,17 @@ describe('Project member invite update', () => {
           } else {
             testUtil.wait(() => {
               createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
-                projectId: project1.id,
-                userId: invite1.userId,
-                status: INVITE_STATUS.ACCEPTED,
-                email: null,
-              })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
+                sinon.match({ resource: RESOURCES.PROJECT_MEMBER_INVITE })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
+                sinon.match({ projectId: project1.id })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
+                sinon.match({ userId: invite1.userId })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
+                  sinon.match({ status: INVITE_STATUS.ACCEPTED })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
+                  sinon.match({ email: null })).should.be.true;
               done();
             });
           }

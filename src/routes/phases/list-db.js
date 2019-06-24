@@ -23,8 +23,8 @@ module.exports = [
     }
 
     // Parse the fields string to determine what fields are to be returned
-    const rawFields = req.query.fields ? decodeURIComponent(req.query.fields).split(',') : PHASE_ATTRIBUTES;
-    let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'startDate';
+    const rawFields = req.query.fields ? req.query.fields.split(',') : PHASE_ATTRIBUTES;
+    let sort = req.query.sort ? req.query.sort : 'startDate';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
@@ -53,8 +53,8 @@ module.exports = [
     };
 
     try {
-      const { rows, count } = await models.ProjectPhase.search(parameters, req.log);
-      return res.json(util.wrapResponse(req.id, rows, count));
+      const { rows } = await models.ProjectPhase.search(parameters, req.log);
+      return res.json(rows);
     } catch (err) {
       return next(err);
     }

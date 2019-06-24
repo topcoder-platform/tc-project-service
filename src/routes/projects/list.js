@@ -489,7 +489,7 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
             p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
           }
         });
-        return { rows, count };
+        return { rows, count, pageSize: criteria.limit, page: criteria.page };
       });
   });
 };
@@ -517,7 +517,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
-      accept({ rows, count: docs.hits.total });
+      accept({ rows, count: docs.hits.total, pageSize: criteria.limit, page: criteria.page });
     }).catch(reject);
   });
 };
@@ -529,9 +529,9 @@ module.exports = [
    */
   (req, res, next) => {
     // handle filters
-    let filters = _.omit(req.query, 'sort', 'perPage', 'page', 'fields', 'limit', 'offset');
+    let filters = _.omit(req.query, 'sort', 'perPage', 'page', 'fields');
 
-    let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt';
+    let sort = req.query.sort ? req.query.sort : 'createdAt';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
@@ -554,10 +554,12 @@ module.exports = [
     const memberOnly = _.get(filters, 'memberOnly', false);
     filters = _.omit(filters, 'memberOnly');
 
+    const limit = Math.min(req.query.perPage || config.pageSize, config.pageSize);
     const criteria = {
       filters,
-      limit: Math.min(req.query.limit || 20, 20),
-      offset: req.query.offset || 0,
+      limit,
+      offset: ((req.query.page - 1) * limit) || 0,
+      page: req.query.page || 1,
     };
     req.log.info(criteria);
     if (!memberOnly
@@ -568,9 +570,10 @@ module.exports = [
       .then((result) => {
         if (result.rows.length === 0) {
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => res.json(r.rows));
+            .then(r => util.setPaginationHeaders(req, res, r));
         }
-        return res.json(result.rows);
+        // set header
+        return util.setPaginationHeaders(req, res, result);
       })
         .catch(err => next(err));
     }
@@ -582,9 +585,9 @@ module.exports = [
       .then((result) => {
         if (result.rows.length === 0) {
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => res.json(r.rows));
+            .then(r => util.setPaginationHeaders(req, res, r));
         }
-        return res.json(result.rows);
+        return util.setPaginationHeaders(req, res, result);
       })
       .catch(err => next(err));
   },

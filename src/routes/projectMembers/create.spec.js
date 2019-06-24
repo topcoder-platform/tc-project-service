@@ -83,10 +83,8 @@ describe('Project Members create', () => {
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
       .send({
-        param: {
-          userIds: [40051332],
-          role: 'copilot',
-        },
+        userIds: [40051332],
+        role: 'copilot',
       })
       .expect('Content-Type', /json/)
       .expect(201)
@@ -94,7 +92,7 @@ describe('Project Members create', () => {
         if (err) {
           done(err);
         } else {
-          const resJson = res.body.result.content.success[0];
+          const resJson = res.body.success[0];
           should.exist(resJson);
           resJson.role.should.equal('copilot');
           resJson.projectId.should.equal(project1.id);
@@ -106,10 +104,8 @@ describe('Project Members create', () => {
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
           .send({
-            param: {
-              userId: 40051332,
-              status: 'accepted',
-            },
+            userId: 40051332,
+            status: 'accepted',
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -117,7 +113,7 @@ describe('Project Members create', () => {
             if (err2) {
               done(err2);
             } else {
-              const resJson2 = res2.body.result.content;
+              const resJson2 = res2.body;
               should.exist(resJson2);
               resJson2.role.should.equal('copilot');
               resJson2.projectId.should.equal(project1.id);
@@ -131,10 +127,8 @@ describe('Project Members create', () => {
                   Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
                 })
                 .send({
-                  param: {
-                    userId: 40051332,
-                    status: 'accepted',
-                  },
+                  userId: 40051332,
+                  status: 'accepted',
                 })
                 .expect('Content-Type', /json/)
                 .expect(404)
@@ -194,7 +188,7 @@ describe('Project Members create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.role.should.equal('manager');
             resJson.isPrimary.should.be.truthy;

@@ -1,22 +1,7 @@
 import _ from 'lodash';
 import config from 'config';
-import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEMBER_ROLE, MILESTONE_STATUS,
-  INVITE_STATUS }
-  from '../constants';
+import { EVENT, BUS_API_EVENT } from '../constants';
 import { createEvent } from '../services/busApi';
-import models from '../models';
-import getTopcoderProjectMembers from '../util';
-
-/**
- * Builds the connect project attachment url for the given project and attachment ids.
- *
- * @param {string|number} projectId the project id
- * @param {string|number} attachmentId the attachment id
- * @returns {string} the connect project attachment url
- */
-function connectProjectAttachmentUrl(projectId, attachmentId) {
-  return `${config.get('connectProjectsUrl')}${projectId}/attachments/${attachmentId}`;
-}
 
 /**
  * Builds the connect project url for the given project id.
@@ -94,645 +79,216 @@ module.exports = (app, logger) => {
   /**
    * PROJECT_MEMBER_ADDED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, ({ req, member }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_MEMBER_ADDED event');
 
-    let eventType;
-    switch (member.role) {
-      case PROJECT_MEMBER_ROLE.MANAGER:
-        eventType = BUS_API_EVENT.MEMBER_JOINED_MANAGER;
-        break;
-      case PROJECT_MEMBER_ROLE.COPILOT:
-        eventType = BUS_API_EVENT.MEMBER_JOINED_COPILOT;
-        break;
-      default:
-        eventType = BUS_API_EVENT.MEMBER_JOINED;
-        break;
-    }
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        createEvent(eventType, {
-          projectId,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(projectId),
-          userId: member.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-
-        createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
-          projectId: project.id,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(project.id),
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_ADDED, resource, logger);
   });
 
   /**
    * PROJECT_MEMBER_REMOVED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, ({ req, member }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_MEMBER_REMOVED event');
 
-    let eventType;
-    if (member.userId === req.authUser.userId) {
-      eventType = BUS_API_EVENT.MEMBER_LEFT;
-    } else {
-      eventType = BUS_API_EVENT.MEMBER_REMOVED;
-    }
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        if (project) {
-          createEvent(eventType, {
-            projectId,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            projectUrl: connectProjectUrl(projectId),
-            userId: member.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-
-          createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
-            projectId: project.id,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            projectUrl: connectProjectUrl(project.id),
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_REMOVED, resource, logger);
   });
 
   /**
    * PROJECT_MEMBER_UPDATED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED, ({ req, original, updated }) => {    // eslint-disable-line no-unused-vars
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED, ({ req, resource }) => {    // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_MEMBER_UPDATED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        if (project) {
-          if (updated.isPrimary && !original.isPrimary) {
-            createEvent(BUS_API_EVENT.MEMBER_ASSIGNED_AS_OWNER, {
-              projectId,
-              projectName: project.name,
-              refCode: _.get(project, 'details.utm.code'),
-              projectUrl: connectProjectUrl(projectId),
-              userId: updated.userId,
-              initiatorUserId: req.authUser.userId,
-            }, logger);
-          }
-
-          createEvent(BUS_API_EVENT.PROJECT_TEAM_UPDATED, {
-            projectId: project.id,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            projectUrl: connectProjectUrl(project.id),
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_UPDATED, resource, logger);
   });
 
   /**
    * PROJECT_ATTACHMENT_ADDED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED, ({ req, attachment }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_ATTACHMENT_ADDED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_FILE_UPLOADED, {
-          projectId,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(projectId),
-          fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
-          fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
-          allowedUsers: attachment.allowedUsers,
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-
-        createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
-          projectId: project.id,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(project.id),
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED, resource, logger);
   });
-
 
   /**
    * PROJECT_ATTACHMENT_UPDATED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED, ({ req }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_ATTACHMENT_UPDATED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-    .then((project) => {
-      createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
-        projectId: project.id,
-        projectName: project.name,
-        refCode: _.get(project, 'details.utm.code'),
-        projectUrl: connectProjectUrl(project.id),
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_ATTACHMENT_UPDATED, resource, logger);
   });
 
   /**
    * PROJECT_ATTACHMENT_REMOVED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED, ({ req }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_ATTACHMENT_REMOVED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-    .then((project) => {
-      createEvent(BUS_API_EVENT.PROJECT_FILES_UPDATED, {
-        projectId: project.id,
-        projectName: project.name,
-        refCode: _.get(project, 'details.utm.code'),
-        projectUrl: connectProjectUrl(project.id),
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_ATTACHMENT_REMOVED, resource, logger);
   });
-
-  /**
-   * If the project is in draft status and the phase is in reviewed status, and it's the
-   * only phase in the project with that status, then send the plan ready event.
-   *
-   * @param {object} req the req
-   * @param {object} project the project
-   * @param {object} phase the phase that was created/updated
-   * @returns {Promise<void>} void
-   */
-  async function sendPlanReadyEventIfNeeded(req, project, phase) {
-    if (project.status === PROJECT_STATUS.DRAFT &&
-      phase.status === PROJECT_PHASE_STATUS.REVIEWED) {
-      await models.ProjectPhase.count({
-        where: { projectId: project.id, status: PROJECT_PHASE_STATUS.REVIEWED },
-      }).then(((count) => {
-        // only send the plan ready event when this is the only reviewed phase in the project
-        if (count === 1) {
-          createEvent(BUS_API_EVENT.PROJECT_PLAN_READY, {
-            projectId: project.id,
-            phaseId: phase.id,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-      }));
-    }
-  }
 
   /**
    * PROJECT_PHASE_ADDED
    */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, ({ req, created }) => { // eslint-disable-line no-unused-vars
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_PHASE_ADDED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
-          projectId,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(projectId),
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-          allowedUsers: created.status === PROJECT_PHASE_STATUS.DRAFT ?
-            getTopcoderProjectMembers(project.members) : null,
-        }, logger);
-        return sendPlanReadyEventIfNeeded(req, project, created);
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_PHASE_CREATED, resource, logger);
   });
 
   /**
   * PROJECT_PHASE_REMOVED
   */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, ({ req, deleted }) => { // eslint-disable-line no-unused-vars
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_PHASE_REMOVED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
-          projectId,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(projectId),
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-          allowedUsers: deleted.status === PROJECT_PHASE_STATUS.DRAFT ?
-            getTopcoderProjectMembers(project.members) : null,
-        }, logger);
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_PHASE_DELETED, resource, logger);
   });
 
   /**
   * PROJECT_PHASE_UPDATED
   */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, ({ req, original, updated }) => { // eslint-disable-line no-unused-vars
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_PHASE_UPDATED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-    const phaseId = _.parseInt(req.params.phaseId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        logger.debug(`Fetched project ${projectId} for the phase ${phaseId}`);
-        const eventsMap = {};
-        [
-          ['duration', BUS_API_EVENT.PROJECT_PLAN_UPDATED],
-          ['startDate', BUS_API_EVENT.PROJECT_PLAN_UPDATED],
-          ['spentBudget', BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT],
-          ['progress', [BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS, BUS_API_EVENT.PROJECT_PROGRESS_MODIFIED]],
-          ['details', BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE],
-          ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE, PROJECT_PHASE_STATUS.ACTIVE],
-          ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED, PROJECT_PHASE_STATUS.COMPLETED],
-          // ideally we should validate the old value being 'DRAFT' but there is no other status from which
-          // we can move phase to REVIEWED status
-          ['status', BUS_API_EVENT.PROJECT_PLAN_UPDATED, PROJECT_PHASE_STATUS.REVIEWED],
-          // ideally we should validate the old value being 'REVIEWED' but there is no other status from which
-          // we can move phase to DRAFT status
-          ['status', BUS_API_EVENT.PROJECT_PLAN_UPDATED, PROJECT_PHASE_STATUS.DRAFT],
-        ].forEach(([key, events, sendIfNewEqual]) => {
-          // eslint-disable-next-line no-param-reassign
-          events = Array.isArray(events) ? events : [events];
-          // eslint-disable-next-line no-param-reassign
-          events = _.filter(events, e => !eventsMap[e]);
-
-          // send event(s) only if the target field's value was updated, or when an update matches a "sendIfNewEqual" value
-          if ((!sendIfNewEqual && !_.isEqual(original[key], updated[key])) ||
-            (original[key] !== sendIfNewEqual && updated[key] === sendIfNewEqual)) {
-            events.forEach(event => createEvent(event, {
-              projectId,
-              phaseId,
-              projectUrl: connectProjectUrl(projectId),
-              originalPhase: original,
-              updatedPhase: updated,
-              projectName: project.name,
-              userId: req.authUser.userId,
-              initiatorUserId: req.authUser.userId,
-              allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
-                getTopcoderProjectMembers(project.members) : null,
-            }, logger));
-            events.forEach((event) => { eventsMap[event] = true; });
-          }
-        });
-
-        return sendPlanReadyEventIfNeeded(req, project, updated);
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.PROJECT_PHASE_UPDATED, resource, logger);
   });
-
-  /**
-  * PROJECT_PHASE_PRODUCT_UPDATED
-  */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED, ({ req, original, updated }) => { // eslint-disable-line no-unused-vars
-    logger.debug('receive PROJECT_PHASE_PRODUCT_UPDATED event');
-
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        // Spec changes
-        if (!_.isEqual(original.details, updated.details)) {
-          logger.debug(`Spec changed for product id ${updated.id}`);
-
-          createEvent(BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED, {
-            projectId,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            projectUrl: connectProjectUrl(projectId),
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-
-        const watchProperties = ['name', 'estimatedPrice', 'actualPrice', 'details'];
-        if (!_.isEqual(_.pick(original, watchProperties),
-                       _.pick(updated, watchProperties))) {
-          createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
-            projectId,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            projectUrl: connectProjectUrl(projectId),
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-            allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
-              getTopcoderProjectMembers(project.members) : null,
-          }, logger);
-        }
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
-  });
-
-  /**
-   * Send milestone notification if needed.
-   * @param {Object} req the request
-   * @param {Object} original the original milestone
-   * @param {Object} updated the updated milestone
-   * @param {Object} project the project
-   * @param {Object} timeline the updated timeline
-   * @returns {Promise<void>} void
-   */
-  function sendMilestoneNotification(req, original, updated, project, timeline) {
-    logger.debug('sendMilestoneNotification', original, updated);
-    // throw generic milestone updated bus api event
-    createEvent(BUS_API_EVENT.MILESTONE_UPDATED, {
-      projectId: project.id,
-      projectName: project.name,
-      refCode: _.get(project, 'details.utm.code'),
-      projectUrl: connectProjectUrl(project.id),
-      timeline,
-      originalMilestone: original,
-      updatedMilestone: updated,
-      userId: req.authUser.userId,
-      initiatorUserId: req.authUser.userId,
-    }, logger);
-    // Send transition events
-    if (original.status !== updated.status) {
-      let event;
-      if (updated.status === MILESTONE_STATUS.COMPLETED) {
-        event = BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED;
-      } else if (updated.status === MILESTONE_STATUS.ACTIVE) {
-        event = BUS_API_EVENT.MILESTONE_TRANSITION_ACTIVE;
-      }
-
-      if (event) {
-        createEvent(event, {
-          projectId: project.id,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(project.id),
-          timeline,
-          originalMilestone: original,
-          updatedMilestone: updated,
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-      }
-    }
-
-    // Send notifications.connect.project.phase.milestone.waiting.customer event
-    const originalWaiting = _.get(original, 'details.metadata.waitingForCustomer', false);
-    const updatedWaiting = _.get(updated, 'details.metadata.waitingForCustomer', false);
-    if (!originalWaiting && updatedWaiting) {
-      createEvent(BUS_API_EVENT.MILESTONE_WAITING_CUSTOMER, {
-        projectId: project.id,
-        projectName: project.name,
-        refCode: _.get(project, 'details.utm.code'),
-        projectUrl: connectProjectUrl(project.id),
-        timeline,
-        originalMilestone: original,
-        updatedMilestone: updated,
-        userId: req.authUser.userId,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }
-  }
 
   /**
    * MILESTONE_ADDED.
    */
-  app.on(EVENT.ROUTING_KEY.MILESTONE_ADDED, ({ req, created }) => {
+  app.on(EVENT.ROUTING_KEY.MILESTONE_ADDED, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
     logger.debug('receive MILESTONE_ADDED event');
 
-    const projectId = _.parseInt(req.params.projectId);
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-      .then((project) => {
-        if (project) {
-          createEvent(BUS_API_EVENT.MILESTONE_ADDED, {
-            projectId,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            projectUrl: connectProjectUrl(projectId),
-            addedMilestone: created,
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-        // sendMilestoneNotification(req, {}, created, project);
-      })
-      .catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.MILESTONE_ADDED, resource, logger);
   });
 
   /**
   * MILESTONE_UPDATED.
   */
-  // eslint-disable-next-line no-unused-vars
-  app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, ({ req, original, updated, cascadedUpdates }) => {
-    logger.debug(`receive MILESTONE_UPDATED event for milestone ${original.id}`);
+  app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
+    logger.debug(`receive MILESTONE_UPDATED event for milestone ${resource.id}`);
 
-    const projectId = _.parseInt(req.params.projectId);
-    const timeline = _.omit(req.timeline.toJSON(), 'deletedAt', 'deletedBy');
-
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-    .then((project) => {
-      logger.debug(`Found project with id ${projectId}`);
-      return models.Milestone.getTimelineDuration(timeline.id)
-      .then(({ duration, progress }) => {
-        timeline.duration = duration;
-        timeline.progress = progress;
-        sendMilestoneNotification(req, original, updated, project, timeline);
-
-        logger.debug('cascadedUpdates', cascadedUpdates);
-        if (cascadedUpdates && cascadedUpdates.milestones && cascadedUpdates.milestones.length > 0) {
-          _.each(cascadedUpdates.milestones, cascadedUpdate =>
-            sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project, timeline),
-          );
-        }
-
-        // if timeline is modified
-        if (cascadedUpdates && cascadedUpdates.timeline) {
-          const cTimeline = cascadedUpdates.timeline;
-          // if endDate of the timeline is modified, raise TIMELINE_ADJUSTED event
-          if (cTimeline.original.endDate !== cTimeline.updated.endDate) {
-            // Raise Timeline changed event
-            createEvent(BUS_API_EVENT.TIMELINE_ADJUSTED, {
-              projectId: project.id,
-              projectName: project.name,
-              refCode: _.get(project, 'details.utm.code'),
-              projectUrl: connectProjectUrl(project.id),
-              originalTimeline: cTimeline.original,
-              updatedTimeline: cTimeline.updated,
-              userId: req.authUser.userId,
-              initiatorUserId: req.authUser.userId,
-            }, logger);
-          }
-        }
-      });
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.MILESTONE_UPDATED, resource, logger);
   });
 
  /**
   * MILESTONE_REMOVED.
   */
-  app.on(EVENT.ROUTING_KEY.MILESTONE_REMOVED, ({ req, deleted }) => {
+  app.on(EVENT.ROUTING_KEY.MILESTONE_REMOVED, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
     logger.debug('receive MILESTONE_REMOVED event');
-    // req.params.projectId is set by validateTimelineIdParam middleware
-    const projectId = _.parseInt(req.params.projectId);
 
-    models.Project.findOne({
-      where: { id: projectId },
-    })
-    .then((project) => {
-      if (project) {
-        createEvent(BUS_API_EVENT.MILESTONE_REMOVED, {
-          projectId,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(projectId),
-          removedMilestone: deleted,
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
-      }
-    }).catch(err => null);    // eslint-disable-line no-unused-vars
+    createEvent(BUS_API_EVENT.MILESTONE_REMOVED, resource, logger);
   });
 
-  app.on(EVENT.ROUTING_KEY.TIMELINE_UPDATED, ({ req, original, updated }) => {
+  /**
+   * MILESTONE_TEMPLATE_ADDED.
+   */
+  app.on(EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_ADDED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive MILESTONE_ADDED event');
+
+    createEvent(BUS_API_EVENT.MILESTONE_TEMPLATE_ADDED, resource, logger);
+  });
+
+  /**
+  * MILESTONE_TEMPLATE_UPDATED.
+  */
+  app.on(EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_UPDATED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug(`receive MILESTONE_TEMPLATE_UPDATED event for milestone ${resource.id}`);
+
+    createEvent(BUS_API_EVENT.MILESTONE_TEMPLATE_UPDATED, resource, logger);
+  });
+
+ /**
+  * MILESTONE_TEMPLATE_REMOVED.
+  */
+  app.on(EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_REMOVED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive MILESTONE_TEMPLATE_REMOVED event');
+
+    createEvent(BUS_API_EVENT.MILESTONE_TEMPLATE_REMOVED, resource, logger);
+  });
+
+  /**
+   * TIMELINE_ADDED
+   */
+  app.on(EVENT.ROUTING_KEY.TIMELINE_ADDED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive TIMELINE_ADDED event');
+
+    createEvent(BUS_API_EVENT.TIMELINE_CREATED, resource, logger);
+  });
+
+  /**
+   * TIMELINE_REMOVED
+   */
+  app.on(EVENT.ROUTING_KEY.TIMELINE_REMOVED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive TIMELINE_REMOVED event');
+
+    createEvent(BUS_API_EVENT.TIMELINE_DELETED, resource, logger);
+  });
+
+  /**
+   * TIMELINE_UPDATED
+   */
+  app.on(EVENT.ROUTING_KEY.TIMELINE_UPDATED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive TIMELINE_UPDATED event');
-    // send PROJECT_UPDATED Kafka message when one of the specified below properties changed
-    const watchProperties = ['startDate', 'endDate'];
-    if (!_.isEqual(_.pick(original, watchProperties),
-                   _.pick(updated, watchProperties))) {
-      // req.params.projectId is set by validateTimelineIdParam middleware
-      const projectId = _.parseInt(req.params.projectId);
 
-      models.Project.findOne({
-        where: { id: projectId },
-      })
-      .then((project) => {
-        if (project) {
-          createEvent(BUS_API_EVENT.TIMELINE_ADJUSTED, {
-            projectId,
-            projectName: project.name,
-            refCode: _.get(project, 'details.utm.code'),
-            projectUrl: connectProjectUrl(projectId),
-            originalTimeline: original,
-            updatedTimeline: updated,
-            userId: req.authUser.userId,
-            initiatorUserId: req.authUser.userId,
-          }, logger);
-        }
-      }).catch(err => null);    // eslint-disable-line no-unused-vars
-    }
+    createEvent(BUS_API_EVENT.TIMELINE_UPDATED, resource, logger);
   });
 
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, ({ req, userId, email, status, role }) => {
+  /**
+   * PROJECT_PHASE_PRODUCT_ADDED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_PRODUCT_ADDED event');
+
+    createEvent(BUS_API_EVENT.TIMELINE_CREATED, resource, logger);
+  });
+
+  /**
+   * PROJECT_PHASE_PRODUCT_REMOVED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_PRODUCT_REMOVED event');
+
+    createEvent(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_REMOVED, resource, logger);
+  });
+
+  /**
+   * PROJECT_PHASE_PRODUCT_UPDATED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_PHASE_PRODUCT_UPDATED event');
+
+    createEvent(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, resource, logger);
+  });
+
+  /**
+   * PROJECT_MEMBER_INVITE_CREATED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_MEMBER_INVITE_CREATED event');
-    const projectId = _.parseInt(req.params.projectId);
 
-    if (status === INVITE_STATUS.REQUESTED) {
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED, {
-        projectId,
-        userId,
-        email,
-        role,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
-        projectId,
-        userId,
-        email,
-        role,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, resource, logger);
   });
 
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, ({ req, userId, email, status, role, createdBy }) => {
+  /**
+   * PROJECT_MEMBER_INVITE_UPDATED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_MEMBER_INVITE_UPDATED event');
-    const projectId = _.parseInt(req.params.projectId);
 
-    if (status === INVITE_STATUS.REQUEST_APPROVED) {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_APPROVED, {
-        projectId,
-        userId,
-        originator: createdBy,
-        email,
-        role,
-        status,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else if (status === INVITE_STATUS.REQUEST_REJECTED) {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REJECTED, {
-        projectId,
-        userId,
-        originator: createdBy,
-        email,
-        role,
-        status,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, {
-        projectId,
-        userId,
-        email,
-        role,
-        status,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, resource, logger);
+  });
+
+  /**
+   * PROJECT_MEMBER_INVITE_REMOVED
+   */
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_REMOVED, ({ req, resource }) => {  // eslint-disable-line no-unused-vars
+    logger.debug('receive PROJECT_MEMBER_INVITE_REMOVED event');
+
+    createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REMOVED, resource, logger);
   });
 };

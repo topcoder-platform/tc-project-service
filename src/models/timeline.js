@@ -3,6 +3,8 @@
 /**
  * The Timeline model
  */
+import _ from 'lodash';
+
 module.exports = (sequelize, DataTypes) => {
   const Timeline = sequelize.define('Timeline', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
@@ -30,6 +32,37 @@ module.exports = (sequelize, DataTypes) => {
   Timeline.associate = (models) => {
     Timeline.hasMany(models.Milestone, { as: 'milestones', foreignKey: 'timelineId', onDelete: 'cascade' });
   };
+
+  /**
+   * Search keyword in name, description, details.utm.code (To be deprecated)
+   * @param filters: the filters contains reference & referenceId
+   * @param log the request log
+   * @return the result rows
+   */
+  Timeline.search = (filters, log) => {
+    // special handling for keyword filter
+    let query = '1=1 ';
+    const replacements = {};
+    if (_.has(filters, 'reference')) {
+      query += 'AND timelines.reference = :reference ';
+      replacements.reference = filters.reference;
+    }
+    if (_.has(filters, 'referenceId')) {
+      query += 'AND timelines."referenceId" = :referenceId';
+      replacements.referenceId = filters.referenceId;
+    }
+
+    // select timelines
+    return sequelize.query(`SELECT * FROM timelines AS timelines
+      WHERE ${query}`,
+      { type: sequelize.QueryTypes.SELECT,
+        replacements,
+        logging: (str) => { log.debug(str); },
+        raw: true,
+      })
+      .then(timelines => timelines);
+  };
+
 
   return Timeline;
 };

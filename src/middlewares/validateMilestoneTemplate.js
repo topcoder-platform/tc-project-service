@@ -41,12 +41,12 @@ const validateMilestoneTemplate = {
    */
   // eslint-disable-next-line valid-jsdoc
   validateRequestBody: (req, res, next) => {
-    validateReference(req.body.param, req)
+    validateReference(req.body, req)
       .then(() => {
-        if (req.body.param.sourceReference) {
+        if (req.body.sourceReference) {
           return validateReference({
-            reference: req.body.param.sourceReference,
-            referenceId: req.body.param.sourceReferenceId,
+            reference: req.body.sourceReference,
+            referenceId: req.body.sourceReferenceId,
           });
         }
 
@@ -72,10 +72,7 @@ const validateMilestoneTemplate = {
     }
 
     // Validate the filter
-    const filter = util.parseQueryFilter(req.query.filter);
-
-    // Save the parsed filter for later
-    req.params.filter = filter;
+    const filter = req.query.filter;
 
     if (!util.isValidFilter(filter, ['reference', 'referenceId'])) {
       const apiErr = new Error('Only allowed to filter by reference and referenceId');

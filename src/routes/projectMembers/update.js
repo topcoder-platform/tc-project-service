@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES } from '../../constants';
+import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES } from '../../constants';
 
 /**
  * API to update a project member.
@@ -13,13 +13,11 @@ import { EVENT, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES
 const permissions = tcMiddleware.permissions;
 
 const updateProjectMemberValdiations = {
-  body: {
-    param: Joi.object().keys({
-      isPrimary: Joi.boolean(),
-      role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER,
+  body: Joi.object().keys({
+    isPrimary: Joi.boolean(),
+    role: Joi.any().valid(PROJECT_MEMBER_ROLE.CUSTOMER, PROJECT_MEMBER_ROLE.MANAGER,
         PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER, PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.OBSERVER).required(),
-    }),
-  },
+  }),
 };
 
 module.exports = [
@@ -31,7 +29,7 @@ module.exports = [
    */
   (req, res, next) => {
     let projectMember;
-    let updatedProps = req.body.param;
+    let updatedProps = req.body;
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
     updatedProps = _.pick(updatedProps, ['isPrimary', 'role']);
@@ -130,10 +128,13 @@ module.exports = [
             { original: previousValue, updated: projectMember },
             { correlationId: req.id },
           );
-          req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
-            { req, original: previousValue, updated: projectMember });
+          util.sendResourceToKafkaBus(
+              req,
+              EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
+              RESOURCES.PROJECT_MEMBER,
+              projectMember);
           req.log.debug('updated project member', projectMember);
-          res.json(util.wrapResponse(req.id, projectMember));
+          res.json(projectMember);
         })
         .catch(err => next(err)));
   },
