@@ -44,9 +44,9 @@ async function findCompletedProjectEndDate(projectId, transaction) {
  */
 function applyTemplate(template, source, destination) {
   if (!template || typeof template !== 'object') { return; }
-  if (!template.questions || !template.questions.length) { return; }
+  if (!template.sections || !template.sections.length) { return; }
   // questions field is actually array of sections
-  const templateQuestions = template.questions;
+  const templateQuestions = template.sections;
   // loop through for every section
   templateQuestions.forEach((section) => {
     // find subsections
