@@ -58,29 +58,6 @@ const milestones = [
   },
 ];
 
-const statusHistories = [
-  {
-    reference: 'milestone',
-    referenceId: '1',
-    status: 'active',
-    comment: 'comment',
-    createdBy: 1,
-    createdAt: '2018-05-15T00:00:00Z',
-    updatedBy: 1,
-    updatedAt: '2018-05-15T00:00:00Z',
-  },
-  {
-    reference: 'milestone',
-    referenceId: '2',
-    status: 'active',
-    comment: 'comment',
-    createdBy: 1,
-    createdAt: '2018-05-15T00:00:00Z',
-    updatedBy: 1,
-    updatedAt: '2018-05-15T00:00:00Z',
-  },
-];
-
 describe('GET timeline', () => {
   before((done) => {
     testUtil.clearDb()
@@ -200,7 +177,6 @@ describe('GET timeline', () => {
                   },
                 ]))
               .then(() => models.Milestone.bulkCreate(milestones))
-              .then(() => models.StatusHistory.bulkCreate(statusHistories))
               .then(() => done());
           });
       });
@@ -290,9 +266,10 @@ describe('GET timeline', () => {
             // validate statusHistory
             should.exist(milestone.statusHistory);
             milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.length.should.be.eql(1);
             milestone.statusHistory.forEach((statusHistory) => {
               statusHistory.reference.should.be.eql('milestone');
-              statusHistory.referenceId.should.be.eql(`${milestone.id}`);
+              statusHistory.referenceId.should.be.eql(milestone.id);
             });
           });
 
