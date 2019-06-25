@@ -27,6 +27,10 @@ function getUsedModel() {
     priceConfig: { },
   };
   const query = {
+    where: {
+      deletedAt: { $eq: null },
+      disabled: false,
+    },
     attributes: { exclude: ['deletedAt', 'deletedBy'] },
     raw: true,
   };
