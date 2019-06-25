@@ -1,6 +1,28 @@
+import _ from 'lodash';
 import moment from 'moment';
 import models from '../models';
 /* eslint-disable valid-jsdoc */
+
+/**
+ * Populate and map milestone model with statusHistory
+ * @param {Object} milestone the milestone
+ * @returns {Promise} promise
+ */
+const mapWithStatusHistory = async (milestone) => {
+  try {
+    const statusHistory = await models.StatusHistory.findAll({
+      where: {
+        referenceId: milestone.id.toString(),
+        reference: 'milestone',
+      },
+      order: [['createdAt', 'desc']],
+      raw: true,
+    });
+    return _.merge(milestone, { dataValues: { statusHistory } });
+  } catch (err) {
+    return _.merge(milestone, { dataValues: { statusHistory: [] } });
+  }
+};
 
 /**
  * The Milestone model
@@ -93,7 +115,7 @@ module.exports = (sequelize, DataTypes) => {
         updatedBy: milestone.updatedBy,
       }, {
         transaction: options.transaction,
-      }),
+      }).then(() => mapWithStatusHistory(milestone)),
 
       afterUpdate: (milestone, options) => {
         if (milestone.changed().includes('status')) {
@@ -106,9 +128,18 @@ module.exports = (sequelize, DataTypes) => {
             updatedBy: milestone.updatedBy,
           }, {
             transaction: options.transaction,
-          });
+          }).then(() => mapWithStatusHistory(milestone));
         }
-        return Promise.resolve();
+        return mapWithStatusHistory(milestone);
+      },
+
+      afterFind: (milestone) => {
+        if (!milestone) return Promise.resolve();
+
+        if (Array.isArray(milestone)) {
+          return Promise.all(milestone.map(mapWithStatusHistory));
+        }
+        return mapWithStatusHistory(milestone);
       },
     },
   });

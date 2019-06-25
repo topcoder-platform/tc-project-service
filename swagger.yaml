@@ -3173,7 +3173,7 @@ definitions:
             - buildingBlockKey
           properties:
             conditions:
-                type: string
+              type: string
             price:
               type: number
               format: float
@@ -3186,7 +3186,7 @@ definitions:
             metadata:
               type: object
             buildingBlockKey:
-                type: string
+              type: string
       type:
         type: string
         description: project type
@@ -4859,6 +4859,7 @@ definitions:
       - type: object
         required:
           - id
+          - statusHistory
           - createdAt
           - createdBy
           - updatedAt
@@ -4868,6 +4869,8 @@ definitions:
             type: number
             format: int64
             description: the id
+          statusHistory:
+            $ref: '#/definitions/StatusHistory'
           createdAt:
             type: string
             description: Datetime (GMT) when object was created
@@ -5524,3 +5527,46 @@ definitions:
           config:
             description: config json
             type: object
+  StatusHistory:
+    title: Status history object
+    type: object
+    required:
+      - id
+      - status
+      - reference
+      - referenceId
+      - comment
+    properties:
+      id:
+        type: string
+        description: the id
+      status:
+        type: string
+        description: the status
+      reference:
+        type: string
+        description: the referenced model
+      referenceId:
+        type: string
+        description: the referenced id
+      comment:
+        type: string
+        description: the comment
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true

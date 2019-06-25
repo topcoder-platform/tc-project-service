@@ -523,6 +523,14 @@ describe('CREATE milestone', () => {
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
 
+          // validate statusHistory
+          should.exist(resJson.statusHistory);
+          resJson.statusHistory.should.be.an('array');
+          resJson.statusHistory.forEach((statusHistory) => {
+            statusHistory.reference.should.be.eql('milestone');
+            statusHistory.referenceId.should.be.eql(`${resJson.id}`);
+          });
+
           // eslint-disable-next-line no-unused-expressions
           server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_ADDED).should.be.true;
 

@@ -5,6 +5,7 @@ import chai from 'chai';
 import request from 'supertest';
 import sleep from 'sleep';
 import config from 'config';
+import _ from 'lodash';
 
 import models from '../../models';
 import server from '../../app';
@@ -58,6 +59,16 @@ const milestones = [
     updatedBy: 2,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
+    statusHistory: [{
+      reference: 'milestone',
+      referenceId: '1',
+      status: 'active',
+      comment: 'comment',
+      createdBy: 1,
+      createdAt: '2018-05-15T00:00:00Z',
+      updatedBy: 1,
+      updatedAt: '2018-05-15T00:00:00Z',
+    }],
   },
   {
     id: 2,
@@ -76,6 +87,16 @@ const milestones = [
     updatedBy: 3,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
+    statusHistory: [{
+      reference: 'milestone',
+      referenceId: '2',
+      status: 'active',
+      comment: 'comment',
+      createdBy: 1,
+      createdAt: '2018-05-15T00:00:00Z',
+      updatedBy: 1,
+      updatedAt: '2018-05-15T00:00:00Z',
+    }],
   },
 ];
 
@@ -165,7 +186,10 @@ describe('LIST timelines', () => {
               .then(() =>
                 // Create timelines and milestones
                 models.Timeline.bulkCreate(timelines)
-                  .then(() => models.Milestone.bulkCreate(milestones)))
+                  .then(() => {
+                    const mappedMilstones = milestones.map(milestone => _.omit(milestone, ['statusHistory']));
+                    return models.Milestone.bulkCreate(mappedMilstones);
+                  }))
               .then(() => {
                 // Index to ES
                 timelines[0].milestones = milestones;
@@ -242,8 +266,15 @@ describe('LIST timelines', () => {
           const resJson = res.body.result.content;
           resJson.should.have.length(2);
 
-          resJson[0].should.be.eql(milestones[0]);
-          resJson[1].should.be.eql(milestones[1]);
+          resJson.forEach((milestone, index) => {
+            milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.forEach((statusHistory) => {
+              statusHistory.reference.should.be.eql('milestone');
+              statusHistory.referenceId.should.be.eql(`${milestone.id}`);
+            });
+
+            milestone.should.be.eql(milestones[index]);
+          });
 
           done();
         });

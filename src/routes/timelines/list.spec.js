@@ -75,6 +75,18 @@ const milestones = [
     updatedBy: 2,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
+    statusHistory: [
+      {
+        reference: 'milestone',
+        referenceId: '1',
+        status: 'active',
+        comment: 'comment',
+        createdBy: 1,
+        createdAt: '2018-05-15T00:00:00Z',
+        updatedBy: 1,
+        updatedAt: '2018-05-15T00:00:00Z',
+      },
+    ],
   },
   {
     id: 2,
@@ -93,6 +105,18 @@ const milestones = [
     updatedBy: 3,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
+    statusHistory: [
+      {
+        reference: 'milestone',
+        referenceId: '2',
+        status: 'active',
+        comment: 'comment',
+        createdBy: 1,
+        createdAt: '2018-05-15T00:00:00Z',
+        updatedBy: 1,
+        updatedAt: '2018-05-15T00:00:00Z',
+      },
+    ],
   },
 ];
 
@@ -276,6 +300,15 @@ describe('LIST timelines', () => {
 
           // Milestones
           resJson[0].milestones.should.have.length(2);
+          resJson[0].milestones.forEach((milestone) => {
+            // validate statusHistory
+            should.exist(milestone.statusHistory);
+            milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.forEach((statusHistory) => {
+              statusHistory.reference.should.be.eql('milestone');
+              statusHistory.referenceId.should.be.eql(`${milestone.id}`);
+            });
+          });
 
           done();
         });

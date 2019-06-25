@@ -252,6 +252,28 @@ describe('UPDATE Milestone', () => {
                     updatedAt: '2018-05-11T00:00:00.000Z',
                   },
                 ])))
+              .then(() => models.StatusHistory.bulkCreate([
+                {
+                  reference: 'milestone',
+                  referenceId: '1',
+                  status: 'active',
+                  comment: 'comment',
+                  createdBy: 1,
+                  createdAt: '2018-05-15T00:00:00Z',
+                  updatedBy: 1,
+                  updatedAt: '2018-05-15T00:00:00Z',
+                },
+                {
+                  reference: 'milestone',
+                  referenceId: '2',
+                  status: 'active',
+                  comment: 'comment',
+                  createdBy: 1,
+                  createdAt: '2018-05-15T00:00:00Z',
+                  updatedBy: 1,
+                  updatedAt: '2018-05-15T00:00:00Z',
+                },
+              ]))
               .then(() => done());
           });
       });
@@ -523,6 +545,14 @@ describe('UPDATE Milestone', () => {
           should.exist(resJson.updatedAt);
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
+
+          // validate statusHistory
+          should.exist(resJson.statusHistory);
+          resJson.statusHistory.should.be.an('array');
+          resJson.statusHistory.forEach((statusHistory) => {
+            statusHistory.reference.should.be.eql('milestone');
+            statusHistory.referenceId.should.be.eql(`${resJson.id}`);
+          });
 
           // eslint-disable-next-line no-unused-expressions
           server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_UPDATED).should.be.true;
