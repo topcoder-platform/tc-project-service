@@ -12,6 +12,7 @@ module.exports = [
   (req, res, next) => models.ProjectTemplate.findAll({
     where: {
       deletedAt: { $eq: null },
+      disabled: false,
     },
     attributes: { exclude: ['deletedAt', 'deletedBy'] },
     raw: true,
