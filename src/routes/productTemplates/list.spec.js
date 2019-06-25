@@ -51,7 +51,7 @@ describe('LIST product templates', () => {
         },
         alias2: [1, 2, 3],
       },
-      disabled: true,
+      disabled: false,
       hidden: true,
       isAddOn: true,
       template: {
