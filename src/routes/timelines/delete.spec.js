@@ -159,6 +159,7 @@ describe('DELETE timeline', () => {
                 // Create milestones
                 models.Milestone.bulkCreate([
                   {
+                    id: 1,
                     timelineId: 1,
                     name: 'milestone 1',
                     duration: 2,
@@ -181,6 +182,7 @@ describe('DELETE timeline', () => {
                     updatedBy: 2,
                   },
                   {
+                    id: 2,
                     timelineId: 1,
                     name: 'milestone 2',
                     duration: 2,

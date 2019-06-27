@@ -7,7 +7,7 @@ module.exports = function defineStatusHistory(sequelize, DataTypes) {
   const StatusHistory = sequelize.define('StatusHistory', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     reference: { type: DataTypes.STRING, allowNull: false },
-    referenceId: { type: DataTypes.STRING, allowNull: false },
+    referenceId: { type: DataTypes.BIGINT, allowNull: false },
     status: {
       type: DataTypes.STRING,
       allowNull: false,

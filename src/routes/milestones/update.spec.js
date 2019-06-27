@@ -252,29 +252,7 @@ describe('UPDATE Milestone', () => {
                     updatedAt: '2018-05-11T00:00:00.000Z',
                   },
                 ])))
-              .then(() => models.StatusHistory.bulkCreate([
-                {
-                  reference: 'milestone',
-                  referenceId: '1',
-                  status: 'active',
-                  comment: 'comment',
-                  createdBy: 1,
-                  createdAt: '2018-05-15T00:00:00Z',
-                  updatedBy: 1,
-                  updatedAt: '2018-05-15T00:00:00Z',
-                },
-                {
-                  reference: 'milestone',
-                  referenceId: '2',
-                  status: 'active',
-                  comment: 'comment',
-                  createdBy: 1,
-                  createdAt: '2018-05-15T00:00:00Z',
-                  updatedBy: 1,
-                  updatedAt: '2018-05-15T00:00:00Z',
-                },
-              ]))
-              .then(() => done());
+                .then(() => done());
           });
       });
   });
@@ -549,9 +527,10 @@ describe('UPDATE Milestone', () => {
           // validate statusHistory
           should.exist(resJson.statusHistory);
           resJson.statusHistory.should.be.an('array');
+          resJson.statusHistory.length.should.be.eql(2);
           resJson.statusHistory.forEach((statusHistory) => {
             statusHistory.reference.should.be.eql('milestone');
-            statusHistory.referenceId.should.be.eql(`${resJson.id}`);
+            statusHistory.referenceId.should.be.eql(resJson.id);
           });
 
           // eslint-disable-next-line no-unused-expressions
@@ -1160,7 +1139,7 @@ describe('UPDATE Milestone', () => {
             return models.StatusHistory.findAll({
               where: {
                 reference: 'milestone',
-                referenceId: milestone.id.toString(),
+                referenceId: milestone.id,
                 status: milestone.status,
                 comment: 'milestone paused',
               },
@@ -1222,7 +1201,7 @@ describe('UPDATE Milestone', () => {
       ]).then(() => models.StatusHistory.bulkCreate([
         {
           reference: 'milestone',
-          referenceId: '7',
+          referenceId: 7,
           status: 'active',
           comment: 'comment',
           createdBy: 1,
@@ -1232,7 +1211,7 @@ describe('UPDATE Milestone', () => {
         },
         {
           reference: 'milestone',
-          referenceId: '7',
+          referenceId: 7,
           status: 'paused',
           comment: 'comment',
           createdBy: 1,
@@ -1258,7 +1237,7 @@ describe('UPDATE Milestone', () => {
               return models.StatusHistory.findAll({
                 where: {
                   reference: 'milestone',
-                  referenceId: milestone.id.toString(),
+                  referenceId: milestone.id,
                   status: 'active',
                   comment: 'new comment',
                 },

@@ -51,6 +51,7 @@ const milestones = [
       detail2: [1, 2, 3],
     },
     order: 1,
+    hidden: false,
     plannedText: 'plannedText 1',
     activeText: 'activeText 1',
     completedText: 'completedText 1',
@@ -59,16 +60,6 @@ const milestones = [
     updatedBy: 2,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
-    statusHistory: [{
-      reference: 'milestone',
-      referenceId: '1',
-      status: 'active',
-      comment: 'comment',
-      createdBy: 1,
-      createdAt: '2018-05-15T00:00:00Z',
-      updatedBy: 1,
-      updatedAt: '2018-05-15T00:00:00Z',
-    }],
   },
   {
     id: 2,
@@ -79,6 +70,7 @@ const milestones = [
     status: 'open',
     type: 'type2',
     order: 2,
+    hidden: false,
     plannedText: 'plannedText 2',
     activeText: 'activeText 2',
     completedText: 'completedText 2',
@@ -87,16 +79,6 @@ const milestones = [
     updatedBy: 3,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
-    statusHistory: [{
-      reference: 'milestone',
-      referenceId: '2',
-      status: 'active',
-      comment: 'comment',
-      createdBy: 1,
-      createdAt: '2018-05-15T00:00:00Z',
-      updatedBy: 1,
-      updatedAt: '2018-05-15T00:00:00Z',
-    }],
   },
 ];
 
@@ -186,13 +168,10 @@ describe('LIST timelines', () => {
               .then(() =>
                 // Create timelines and milestones
                 models.Timeline.bulkCreate(timelines)
-                  .then(() => {
-                    const mappedMilstones = milestones.map(milestone => _.omit(milestone, ['statusHistory']));
-                    return models.Milestone.bulkCreate(mappedMilstones);
-                  }))
-              .then(() => {
+                  .then(() => models.Milestone.bulkCreate(milestones)))
+              .then((mappedMilestones) => {
                 // Index to ES
-                timelines[0].milestones = milestones;
+                timelines[0].milestones = mappedMilestones.map(({ dataValues }) => dataValues);
                 timelines[0].projectId = 1;
                 return server.services.es.index({
                   index: ES_TIMELINE_INDEX,
@@ -268,12 +247,15 @@ describe('LIST timelines', () => {
 
           resJson.forEach((milestone, index) => {
             milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.length.should.be.eql(1);
             milestone.statusHistory.forEach((statusHistory) => {
               statusHistory.reference.should.be.eql('milestone');
-              statusHistory.referenceId.should.be.eql(`${milestone.id}`);
+              statusHistory.referenceId.should.be.eql(milestone.id);
             });
 
-            milestone.should.be.eql(milestones[index]);
+            const m = _.omit(milestone, ['statusHistory']);
+
+            m.should.be.eql(milestones[index]);
           });
 
           done();
@@ -349,8 +331,10 @@ describe('LIST timelines', () => {
           const resJson = res.body.result.content;
           resJson.should.have.length(2);
 
-          resJson[0].should.be.eql(milestones[1]);
-          resJson[1].should.be.eql(milestones[0]);
+          const m1 = _.omit(resJson[0], ['statusHistory']);
+          const m2 = _.omit(resJson[1], ['statusHistory']);
+          m1.should.be.eql(milestones[1]);
+          m2.should.be.eql(milestones[0]);
 
           done();
         });

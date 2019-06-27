@@ -75,18 +75,6 @@ const milestones = [
     updatedBy: 2,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
-    statusHistory: [
-      {
-        reference: 'milestone',
-        referenceId: '1',
-        status: 'active',
-        comment: 'comment',
-        createdBy: 1,
-        createdAt: '2018-05-15T00:00:00Z',
-        updatedBy: 1,
-        updatedAt: '2018-05-15T00:00:00Z',
-      },
-    ],
   },
   {
     id: 2,
@@ -105,18 +93,6 @@ const milestones = [
     updatedBy: 3,
     createdAt: '2018-05-11T00:00:00.000Z',
     updatedAt: '2018-05-11T00:00:00.000Z',
-    statusHistory: [
-      {
-        reference: 'milestone',
-        referenceId: '2',
-        status: 'active',
-        comment: 'comment',
-        createdBy: 1,
-        createdAt: '2018-05-15T00:00:00Z',
-        updatedBy: 1,
-        updatedAt: '2018-05-15T00:00:00Z',
-      },
-    ],
   },
 ];
 
@@ -206,14 +182,17 @@ describe('LIST timelines', () => {
                ]))
               .then(() =>
                 // Create timelines
-                 models.Timeline.bulkCreate(timelines, { returning: true }))
-              .then(createdTimelines =>
+                 Promise.all([
+                   models.Timeline.bulkCreate(timelines, { returning: true }),
+                   models.Milestone.bulkCreate(milestones),
+                 ]))
+              .then(([createdTimelines, mappedMilestones]) =>
                 // Index to ES
                  Promise.all(_.map(createdTimelines, (createdTimeline) => {
                    const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
                    timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
                    if (timelineJson.id === 1) {
-                     timelineJson.milestones = milestones;
+                     timelineJson.milestones = mappedMilestones;
                    }
                    return server.services.es.index({
                      index: ES_TIMELINE_INDEX,
@@ -304,9 +283,10 @@ describe('LIST timelines', () => {
             // validate statusHistory
             should.exist(milestone.statusHistory);
             milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.length.should.be.eql(1);
             milestone.statusHistory.forEach((statusHistory) => {
               statusHistory.reference.should.be.eql('milestone');
-              statusHistory.referenceId.should.be.eql(`${milestone.id}`);
+              statusHistory.referenceId.should.be.eql(milestone.id);
             });
           });
 

@@ -170,7 +170,7 @@ module.exports = [
               return Promise.reject(apiErr);
             }
             const statusHistory = await models.StatusHistory.findAll({
-              where: { referenceId: milestone.id.toString() },
+              where: { referenceId: milestone.id },
               order: [['createdAt', 'desc']],
               attributes: ['status'],
               limit: 2,
