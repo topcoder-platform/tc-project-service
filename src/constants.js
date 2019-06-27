@@ -165,6 +165,10 @@ export const TIMELINE_REFERENCES = {
   PRODUCT: 'product',
 };
 
+export const STATUS_HISTORY_REFERENCES = {
+  MILESTONE: 'milestone',
+};
+
 export const MILESTONE_TEMPLATE_REFERENCES = {
   PRODUCT_TEMPLATE: 'productTemplate',
 };

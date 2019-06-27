@@ -51,9 +51,9 @@ module.exports = [
 
     let result;
     // Save to DB
-    models.sequelize.transaction(() => {
+    models.sequelize.transaction((tx) => {
       req.log.debug('Started transaction');
-      return models.Timeline.create(entity)
+      return models.Timeline.create(entity, { transaction: tx })
         .then((createdEntity) => {
           // Omit deletedAt, deletedBy
           result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
@@ -97,7 +97,7 @@ module.exports = [
                   }
                   return milestone;
                 });
-                return models.Milestone.bulkCreate(milestones, { returning: true })
+                return models.Milestone.bulkCreate(milestones, { returning: true, transaction: tx })
                 .then((createdMilestones) => {
                   req.log.debug('Milestones created for timeline with template id %d', templateId);
                   result.milestones = _.map(createdMilestones, cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'));
