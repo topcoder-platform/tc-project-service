@@ -171,8 +171,8 @@ module.exports = [
             }
             const statusHistory = await models.StatusHistory.findAll({
               where: { referenceId: milestone.id },
-              order: [['createdAt', 'desc']],
-              attributes: ['status'],
+              order: [['createdAt', 'desc'], ['id', 'desc']],
+              attributes: ['status', 'id'],
               limit: 2,
               raw: true,
             });

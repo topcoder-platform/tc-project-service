@@ -9,14 +9,23 @@ import { STATUS_HISTORY_REFERENCES } from '../constants';
  * NOTE that this function mutates milestone
  *
  * @param {Array|Object} milestone one milestone or list of milestones
+ * @param {Object}       options   options which has been used to call main method
  *
  * @returns {Promise} promise
  */
-const populateWithStatusHistory = async (milestone) => {
+const populateWithStatusHistory = async (milestone, options) => {
+  // depend on this option `milestone` is a sequlize ORM object or plain JS object
+  const isRaw = !!_.get(options, 'raw');
+  const getMilestoneId = m => (
+    isRaw ? m.id : m.dataValues.id
+  );
+  const formatMilestone = statusHistory => (
+    isRaw ? { statusHistory } : { dataValues: { statusHistory } }
+  );
   if (Array.isArray(milestone)) {
     const allStatusHistory = await models.StatusHistory.findAll({
       where: {
-        referenceId: { $in: milestone.map(m => m.dataValues.id) },
+        referenceId: { $in: milestone.map(getMilestoneId) },
         reference: 'milestone',
       },
       order: [['createdAt', 'desc']],
@@ -24,20 +33,20 @@ const populateWithStatusHistory = async (milestone) => {
     });
 
     return milestone.map((m, index) => {
-      const statusHistory = allStatusHistory.filter(s => s.referenceId === m.dataValues.id);
-      return _.merge(milestone[index], { dataValues: { statusHistory } });
+      const statusHistory = _.filter(allStatusHistory, { referenceId: getMilestoneId(m) });
+      return _.merge(milestone[index], formatMilestone(statusHistory));
     });
   }
 
   const statusHistory = await models.StatusHistory.findAll({
     where: {
-      referenceId: milestone.dataValues.id,
+      referenceId: getMilestoneId(milestone),
       reference: 'milestone',
     },
     order: [['createdAt', 'desc']],
     raw: true,
   });
-  return _.merge(milestone, { dataValues: { statusHistory } });
+  return _.merge(milestone, formatMilestone(statusHistory));
 };
 
 /**
@@ -131,7 +140,7 @@ module.exports = (sequelize, DataTypes) => {
         updatedBy: milestone.updatedBy,
       }, {
         transaction: options.transaction,
-      }).then(() => populateWithStatusHistory(milestone)),
+      }).then(() => populateWithStatusHistory(milestone, options)),
 
       afterBulkCreate: (milestones, options) => {
         const listStatusHistory = milestones.map(({ dataValues }) => ({
@@ -145,7 +154,7 @@ module.exports = (sequelize, DataTypes) => {
 
         return models.StatusHistory.bulkCreate(listStatusHistory, {
           transaction: options.transaction,
-        }).then(() => populateWithStatusHistory(milestones));
+        }).then(() => populateWithStatusHistory(milestones, options));
       },
 
       afterUpdate: (milestone, options) => {
@@ -161,12 +170,12 @@ module.exports = (sequelize, DataTypes) => {
             transaction: options.transaction,
           }).then(() => populateWithStatusHistory(milestone));
         }
-        return populateWithStatusHistory(milestone);
+        return populateWithStatusHistory(milestone, options);
       },
 
-      afterFind: (milestone) => {
+      afterFind: (milestone, options) => {
         if (!milestone) return Promise.resolve();
-        return populateWithStatusHistory(milestone);
+        return populateWithStatusHistory(milestone, options);
       },
     },
   });

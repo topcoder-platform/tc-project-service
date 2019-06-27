@@ -182,25 +182,31 @@ describe('LIST timelines', () => {
                ]))
               .then(() =>
                 // Create timelines
-                 Promise.all([
-                   models.Timeline.bulkCreate(timelines, { returning: true }),
-                   models.Milestone.bulkCreate(milestones),
-                 ]))
-              .then(([createdTimelines, mappedMilestones]) =>
+                models.Timeline.bulkCreate(timelines, { returning: true })
+                  .then(createdTimelines => (
+                    // create milestones after timelines
+                    models.Milestone.bulkCreate(milestones))
+                      .then(createdMilestones => [createdTimelines, createdMilestones]),
+                  ),
+              ).then(([createdTimelines, createdMilestones]) =>
                 // Index to ES
-                 Promise.all(_.map(createdTimelines, (createdTimeline) => {
-                   const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
-                   timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
-                   if (timelineJson.id === 1) {
-                     timelineJson.milestones = mappedMilestones;
-                   }
-                   return server.services.es.index({
-                     index: ES_TIMELINE_INDEX,
-                     type: ES_TIMELINE_TYPE,
-                     id: timelineJson.id,
-                     body: timelineJson,
-                   });
-                 }))
+                Promise.all(_.map(createdTimelines, (createdTimeline) => {
+                  const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
+                  timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
+                  if (timelineJson.id === 1) {
+                    timelineJson.milestones = _.map(
+                      createdMilestones,
+                      cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'),
+                    );
+                  }
+
+                  return server.services.es.index({
+                    index: ES_TIMELINE_INDEX,
+                    type: ES_TIMELINE_TYPE,
+                    id: timelineJson.id,
+                    body: timelineJson,
+                  });
+                }))
                   .then(() => {
                     // sleep for some time, let elasticsearch indices be settled
                     sleep.sleep(5);

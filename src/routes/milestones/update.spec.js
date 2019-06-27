@@ -1178,8 +1178,8 @@ describe('UPDATE Milestone', () => {
           duration: 2,
           startDate: '2018-05-13T00:00:00.000Z',
           endDate: '2018-05-14T00:00:00.000Z',
-          completionDate: '2018-05-15T00:00:00.000Z',
-          status: 'paused',
+          completionDate: '2018-05-16T00:00:00.000Z',
+          status: 'active',
           type: 'type1',
           details: {
             detail1: {
@@ -1198,28 +1198,10 @@ describe('UPDATE Milestone', () => {
           createdAt: '2018-05-11T00:00:00.000Z',
           updatedAt: '2018-05-11T00:00:00.000Z',
         },
-      ]).then(() => models.StatusHistory.bulkCreate([
-        {
-          reference: 'milestone',
-          referenceId: 7,
-          status: 'active',
-          comment: 'comment',
-          createdBy: 1,
-          createdAt: '2018-05-15T00:00:00Z',
-          updatedBy: 1,
-          updatedAt: '2018-05-15T00:00:00Z',
-        },
-        {
-          reference: 'milestone',
-          referenceId: 7,
-          status: 'paused',
-          comment: 'comment',
-          createdBy: 1,
-          createdAt: '2018-05-16T00:00:00Z',
-          updatedBy: 1,
-          updatedAt: '2018-05-16T00:00:00Z',
-        },
-      ]).then(() => {
+      ]).then(() => models.Milestone.findById(7)
+        // pause milestone before resume
+        .then(milestone => milestone.update(_.assign({}, milestone.toJSON(), { status: 'paused' }))),
+      ).then(() => {
         request(server)
         .patch('/v4/timelines/1/milestones/7')
         .set({
@@ -1245,11 +1227,11 @@ describe('UPDATE Milestone', () => {
               }).then((statusHistories) => {
                 statusHistories.length.should.be.eql(1);
                 done();
-              });
-            });
+              }).catch(done);
+            }).catch(done);
           }
         });
-      }));
+      });
     });
 
     describe('Bus api', () => {

@@ -82,7 +82,7 @@ const milestones = [
   },
 ];
 
-describe('LIST timelines', () => {
+describe('LIST milestones', () => {
   before(function beforeHook(done) {
     this.timeout(10000);
     testUtil.clearDb()
@@ -165,13 +165,12 @@ describe('LIST timelines', () => {
                   updatedBy: 2,
                 },
               ]))
-              .then(() =>
-                // Create timelines and milestones
-                models.Timeline.bulkCreate(timelines)
-                  .then(() => models.Milestone.bulkCreate(milestones)))
-              .then((mappedMilestones) => {
+              // Create timelines and milestones
+              .then(() => models.Timeline.bulkCreate(timelines))
+              .then(() => models.Milestone.bulkCreate(milestones))
+              .then((createdMilestones) => {
                 // Index to ES
-                timelines[0].milestones = mappedMilestones.map(({ dataValues }) => dataValues);
+                timelines[0].milestones = _.map(createdMilestones, cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'));
                 timelines[0].projectId = 1;
                 return server.services.es.index({
                   index: ES_TIMELINE_INDEX,
