@@ -5,6 +5,7 @@ import chai from 'chai';
 import request from 'supertest';
 import sleep from 'sleep';
 import config from 'config';
+import _ from 'lodash';
 
 import models from '../../models';
 import server from '../../app';
@@ -50,6 +51,7 @@ const milestones = [
       detail2: [1, 2, 3],
     },
     order: 1,
+    hidden: false,
     plannedText: 'plannedText 1',
     activeText: 'activeText 1',
     completedText: 'completedText 1',
@@ -68,6 +70,7 @@ const milestones = [
     status: 'open',
     type: 'type2',
     order: 2,
+    hidden: false,
     plannedText: 'plannedText 2',
     activeText: 'activeText 2',
     completedText: 'completedText 2',
@@ -79,7 +82,7 @@ const milestones = [
   },
 ];
 
-describe('LIST timelines', () => {
+describe('LIST milestones', () => {
   before(function beforeHook(done) {
     this.timeout(10000);
     testUtil.clearDb()
@@ -162,13 +165,12 @@ describe('LIST timelines', () => {
                   updatedBy: 2,
                 },
               ]))
-              .then(() =>
-                // Create timelines and milestones
-                models.Timeline.bulkCreate(timelines)
-                  .then(() => models.Milestone.bulkCreate(milestones)))
-              .then(() => {
+              // Create timelines and milestones
+              .then(() => models.Timeline.bulkCreate(timelines))
+              .then(() => models.Milestone.bulkCreate(milestones))
+              .then((createdMilestones) => {
                 // Index to ES
-                timelines[0].milestones = milestones;
+                timelines[0].milestones = _.map(createdMilestones, cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'));
                 timelines[0].projectId = 1;
                 return server.services.es.index({
                   index: ES_TIMELINE_INDEX,
@@ -242,8 +244,18 @@ describe('LIST timelines', () => {
           const resJson = res.body.result.content;
           resJson.should.have.length(2);
 
-          resJson[0].should.be.eql(milestones[0]);
-          resJson[1].should.be.eql(milestones[1]);
+          resJson.forEach((milestone, index) => {
+            milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.length.should.be.eql(1);
+            milestone.statusHistory.forEach((statusHistory) => {
+              statusHistory.reference.should.be.eql('milestone');
+              statusHistory.referenceId.should.be.eql(milestone.id);
+            });
+
+            const m = _.omit(milestone, ['statusHistory']);
+
+            m.should.be.eql(milestones[index]);
+          });
 
           done();
         });
@@ -318,8 +330,10 @@ describe('LIST timelines', () => {
           const resJson = res.body.result.content;
           resJson.should.have.length(2);
 
-          resJson[0].should.be.eql(milestones[1]);
-          resJson[1].should.be.eql(milestones[0]);
+          const m1 = _.omit(resJson[0], ['statusHistory']);
+          const m2 = _.omit(resJson[1], ['statusHistory']);
+          m1.should.be.eql(milestones[1]);
+          m2.should.be.eql(milestones[0]);
 
           done();
         });

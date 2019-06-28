@@ -1,5 +1,53 @@
+import _ from 'lodash';
 import moment from 'moment';
+import models from '../models';
+import { STATUS_HISTORY_REFERENCES } from '../constants';
 /* eslint-disable valid-jsdoc */
+
+/**
+ * Populate and map milestone model with statusHistory
+ * NOTE that this function mutates milestone
+ *
+ * @param {Array|Object} milestone one milestone or list of milestones
+ * @param {Object}       options   options which has been used to call main method
+ *
+ * @returns {Promise} promise
+ */
+const populateWithStatusHistory = async (milestone, options) => {
+  // depend on this option `milestone` is a sequlize ORM object or plain JS object
+  const isRaw = !!_.get(options, 'raw');
+  const getMilestoneId = m => (
+    isRaw ? m.id : m.dataValues.id
+  );
+  const formatMilestone = statusHistory => (
+    isRaw ? { statusHistory } : { dataValues: { statusHistory } }
+  );
+  if (Array.isArray(milestone)) {
+    const allStatusHistory = await models.StatusHistory.findAll({
+      where: {
+        referenceId: { $in: milestone.map(getMilestoneId) },
+        reference: 'milestone',
+      },
+      order: [['createdAt', 'desc']],
+      raw: true,
+    });
+
+    return milestone.map((m, index) => {
+      const statusHistory = _.filter(allStatusHistory, { referenceId: getMilestoneId(m) });
+      return _.merge(milestone[index], formatMilestone(statusHistory));
+    });
+  }
+
+  const statusHistory = await models.StatusHistory.findAll({
+    where: {
+      referenceId: getMilestoneId(milestone),
+      reference: 'milestone',
+    },
+    order: [['createdAt', 'desc']],
+    raw: true,
+  });
+  return _.merge(milestone, formatMilestone(statusHistory));
+};
 
 /**
  * The Milestone model
@@ -80,6 +128,54 @@ module.exports = (sequelize, DataTypes) => {
           }
           return Promise.resolve({ duration, progress });
         });
+      },
+    },
+    hooks: {
+      afterCreate: (milestone, options) => models.StatusHistory.create({
+        reference: STATUS_HISTORY_REFERENCES.MILESTONE,
+        referenceId: milestone.id,
+        status: milestone.status,
+        comment: null,
+        createdBy: milestone.createdBy,
+        updatedBy: milestone.updatedBy,
+      }, {
+        transaction: options.transaction,
+      }).then(() => populateWithStatusHistory(milestone, options)),
+
+      afterBulkCreate: (milestones, options) => {
+        const listStatusHistory = milestones.map(({ dataValues }) => ({
+          reference: STATUS_HISTORY_REFERENCES.MILESTONE,
+          referenceId: dataValues.id,
+          status: dataValues.status,
+          comment: null,
+          createdBy: dataValues.createdBy,
+          updatedBy: dataValues.updatedBy,
+        }));
+
+        return models.StatusHistory.bulkCreate(listStatusHistory, {
+          transaction: options.transaction,
+        }).then(() => populateWithStatusHistory(milestones, options));
+      },
+
+      afterUpdate: (milestone, options) => {
+        if (milestone.changed().includes('status')) {
+          return models.StatusHistory.create({
+            reference: STATUS_HISTORY_REFERENCES.MILESTONE,
+            referenceId: milestone.id,
+            status: milestone.status,
+            comment: options.comment || null,
+            createdBy: milestone.createdBy,
+            updatedBy: milestone.updatedBy,
+          }, {
+            transaction: options.transaction,
+          }).then(() => populateWithStatusHistory(milestone));
+        }
+        return populateWithStatusHistory(milestone, options);
+      },
+
+      afterFind: (milestone, options) => {
+        if (!milestone) return Promise.resolve();
+        return populateWithStatusHistory(milestone, options);
       },
     },
   });
