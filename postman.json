@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "57206894-511c-4ffb-94bb-e50d2dd416fb",
+		"_postman_id": "efae2a9b-b869-4965-b889-3278870b29ea",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1006,10 +1006,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db",
 							"host": [
@@ -1035,10 +1031,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?limit=1&offset=1",
 							"host": [
@@ -1074,10 +1066,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?filter=type%3Dgeneric",
 							"host": [
@@ -1109,10 +1097,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?sort=type%20desc",
 							"host": [
@@ -1144,10 +1128,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?fields=id,name,description",
 							"host": [
@@ -1179,10 +1159,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db",
 							"host": [
@@ -2296,10 +2272,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db",
 							"host": [
@@ -2330,10 +2302,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db?fields=status,name,budget",
 							"host": [
@@ -2370,10 +2338,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db?sort=status desc",
 							"host": [
@@ -2410,10 +2374,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db?sort=order desc",
 							"host": [
@@ -2752,10 +2712,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products/db",
 							"host": [
@@ -4524,78 +4480,6 @@
 								"v4",
 								"timelines",
 								"4"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Pause Milestone",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"comment\": \"Comment\"\r\n\t}\r\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/timelines/1/milestones/2/status/pause",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"timelines",
-								"1",
-								"milestones",
-								"2",
-								"status",
-								"pause"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Resume Milestone",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"param\":{\r\n    \"comment\": \"Comment\"\r\n\t}\r\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/v4/timelines/1/milestones/2/status/resume",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"v4",
-								"timelines",
-								"1",
-								"milestones",
-								"2",
-								"status",
-								"resume"
 							]
 						}
 					},
