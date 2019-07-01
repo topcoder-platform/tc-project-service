@@ -9,6 +9,14 @@ export const PROJECT_STATUS = {
   CANCELLED: 'cancelled',
 };
 
+export const WORKSTREAM_STATUS = {
+  DRAFT: 'draft',
+  REVIEWED: 'reviewed',
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  PAUSED: 'paused',
+};
+
 export const PROJECT_PHASE_STATUS = PROJECT_STATUS;
 
 export const MILESTONE_STATUS = PROJECT_STATUS;

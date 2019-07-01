@@ -40,6 +40,7 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
       },
       associate: (models) => {
         ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
+        ProjectPhase.belongsToMany(models.WorkStream, { through: models.PhaseWorkStream, foreignKey: 'phaseId' });
       },
       /**
        * Search project phases
