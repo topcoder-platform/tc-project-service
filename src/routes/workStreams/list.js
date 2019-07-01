@@ -33,7 +33,9 @@ module.exports = [
       }
 
       return models.WorkStream.findAll({
-        projectId,
+        where: {
+          projectId,
+        },
         attributes: { exclude: ['deletedAt', 'deletedBy'] },
         raw: true,
       });
