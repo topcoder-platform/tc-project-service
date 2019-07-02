@@ -129,8 +129,8 @@ module.exports = [
         .catch(next);
     }
     return Promise.all([
-      models.ProjectTemplate.findAll(query),
-      models.ProductTemplate.findAll(query),
+      models.ProjectTemplate.findAll(projectProductTemplateQuery),
+      models.ProductTemplate.findAll(projectProductTemplateQuery),
       models.MilestoneTemplate.findAll(query),
       models.ProjectType.findAll(query),
       models.ProductCategory.findAll(query),
