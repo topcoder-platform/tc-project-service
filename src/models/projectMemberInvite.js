@@ -70,7 +70,7 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
         if (email && userId) {
           _.assign(where, { $or: [
             { email: { $eq: email.toLowerCase() } },
-            { userId: { $eq: userId } }
+            { userId: { $eq: userId } },
           ] });
         } else if (email) {
           _.assign(where, { email });
