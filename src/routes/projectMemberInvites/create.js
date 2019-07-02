@@ -267,7 +267,7 @@ module.exports = [
                 req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
                   req,
                   userId: v.userId,
-                  email: v.email,
+                  email: v.email ? v.email.toLowerCase() : v.email,
                   status: v.status,
                   role: v.role,
                 });
