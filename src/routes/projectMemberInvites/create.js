@@ -102,7 +102,7 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
           const dataNew = _.clone(data);
 
           dataNew.userId = user.id;
-          dataNew.email = user.email;
+          dataNew.email = user.email ? user.email.toLowerCase() : user.email;
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
@@ -114,7 +114,7 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
         nonExistentUserEmails.forEach((email) => {
           const dataNew = _.clone(data);
 
-          dataNew.email = email;
+          dataNew.email = email.toLowerCase();
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
@@ -267,7 +267,7 @@ module.exports = [
                 req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
                   req,
                   userId: v.userId,
-                  email: v.email ? v.email.toLowerCase() : v.email,
+                  email: v.email,
                   status: v.status,
                   role: v.role,
                 });
