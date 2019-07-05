@@ -147,9 +147,9 @@ describe('Project Member Invite create', () => {
       server.services.pubsub.publish.restore();
       sinon.stub(server.services.pubsub, 'init', () => {});
       sinon.stub(server.services.pubsub, 'publish', () => {});
-      // by default mock lookupUserEmails return nothing so all the cases are not broken
+      // by default mock lookupMultipleUserEmails return nothing so all the cases are not broken
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([]));
-      sandbox.stub(util, 'lookupUserEmails', () => Promise.resolve([]));
+      sandbox.stub(util, 'lookupMultipleUserEmails', () => Promise.resolve([]));
       sandbox.stub(util, 'getMemberDetailsByUserIds', () => Promise.resolve([{
         userId: 40051333,
         firstName: 'Admin',
@@ -366,8 +366,8 @@ describe('Project Member Invite create', () => {
         }),
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      util.lookupUserEmails.restore();
-      sandbox.stub(util, 'lookupUserEmails', () => Promise.resolve([{
+      util.lookupMultipleUserEmails.restore();
+      sandbox.stub(util, 'lookupMultipleUserEmails', () => Promise.resolve([{
         id: '12345',
         email: 'hello@world.com',
       }]));
