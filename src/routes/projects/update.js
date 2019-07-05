@@ -82,13 +82,37 @@ const updateProjectValdiations = {
   },
 };
 
+const isScopeUpdated = (existingProject, updatedProps) => {
+  const template = existingProject.template;
+  if (!template) return false;
+  const scopeFields = template.scope.scopeChangeFields;
+  // TODO handle new refactored scope form
+  if (scopeFields) {
+    for (let idx = 0; idx < scopeFields.length; idx += 1) {
+      const field = scopeFields[idx];
+      const oldFieldValue = _.get(existingProject, field);
+      const updateFieldValue = _.get(updatedProps, field);
+      if (oldFieldValue !== updateFieldValue) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 // NOTE- decided to disable all additional checks for now.
 const validateUpdates = (existingProject, updatedProps, req) => {
   const errors = [];
   switch (existingProject.status) {
     case PROJECT_STATUS.COMPLETED:
-      errors.push(`cannot update a project that is in ${existingProject.status}' state`);
+      errors.push(`cannot update a project that is in '${existingProject.status}' state`);
       break;
+    case PROJECT_STATUS.ACTIVE: {
+      if (isScopeUpdated(existingProject, updatedProps)) {
+        errors.push(`Scope changes are not allowed for '${existingProject.status}' project`);
+      }
+      break;
+    }
     default:
       break;
     // disabling this check for now.
@@ -105,7 +129,6 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
     errors.push('Don\'t have permission to update \'directProjectId\' property');
   }
-
   return errors;
 };
 
@@ -153,14 +176,20 @@ module.exports = [
       lock: { of: models.Project },
     })
       .then((_prj) => {
-        project = _prj;
-        if (!project) {
+        if (!_prj) {
           // handle 404
           const err = new Error(`project not found for id ${projectId}`);
           err.status = 404;
           return Promise.reject(err);
         }
+        if (!_prj.templateId) return Promise.resolve({ _prj });
+        return models.ProjectTemplate.findById(_prj.templateId, { raw: true })
+        .then(template => Promise.resolve({ _prj, template }));
+      })
+      .then(({ _prj, template }) => {
+        project = _prj;
         previousValue = _.clone(project.get({ plain: true }));
+        previousValue.template = template;
         // run additional validations
         const validationErrors = validateUpdates(previousValue, updatedProps, req);
         if (validationErrors.length > 0) {

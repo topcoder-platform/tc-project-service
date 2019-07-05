@@ -182,3 +182,11 @@ export const INVITE_STATUS = {
   REQUEST_APPROVED: 'request_approved',
   CANCELED: 'canceled',
 };
+
+export const SCOPE_CHANGE_REQ_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  ACTIVATED: 'activated',
+  CANCELED: 'canceled',
+};

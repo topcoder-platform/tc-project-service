@@ -94,6 +94,14 @@ router.route('/v4/projects/:projectId(\\d+)')
   .patch(require('./projects/update'))
   .delete(require('./projects/delete'));
 
+router.route('/v4/projects/:projectId(\\d+)/scopeChangeRequests')
+  .post(require('./scopeChangeRequests/create'));
+  // .get(require('./scopeChangeRequests/list'));
+router.route('/v4/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)')
+  // .get(require('./scopeChangeRequests/get'))
+  .patch(require('./scopeChangeRequests/update'));
+  // .delete(require('./scopeChangeRequests/delete'));
+
 router.route('/v4/projects/:projectId(\\d+)/members')
   .post(require('./projectMembers/create'));
 
