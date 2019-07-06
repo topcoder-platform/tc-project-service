@@ -68,7 +68,7 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-  before((done) => {
+  beforeEach((done) => {
     // mocks
     testUtil.clearDb()
       .then(() => {
@@ -101,6 +101,14 @@ describe('Project Phases', () => {
             projectId,
             role: 'customer',
             isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }, {
+            id: 3,
+            userId: testUtil.userIds.manager,
+            projectId,
+            role: 'manager',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
           }]).then(() => {
@@ -152,7 +160,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v4/projects/999/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({ param: updateBody })
         .expect('Content-Type', /json/)
@@ -270,6 +278,46 @@ describe('Project Phases', () => {
               });
           }
         });
+    });
+
+    it('should return 200 if requested by admin', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: _.assign({ order: 1 }, updateBody) })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(done);
+    });
+
+    it('should return 200 if requested by manager which is a member', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({ param: _.assign({ order: 1 }, updateBody) })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(done);
+    });
+
+    it('should return 403 if requested by non-member copilot', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, projectId },
+      }).then(() => {
+        request(server)
+          .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({ param: _.assign({ order: 1 }, updateBody) })
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+      });
     });
 
     describe('Bus api', () => {

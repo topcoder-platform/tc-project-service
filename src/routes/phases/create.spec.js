@@ -54,7 +54,7 @@ describe('Project Phases', () => {
     email: 'some@abc.com',
   };
   let productTemplateId;
-  before((done) => {
+  beforeEach((done) => {
     // mocks
     testUtil.clearDb()
       .then(() => {
@@ -87,6 +87,14 @@ describe('Project Phases', () => {
             projectId,
             role: 'customer',
             isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }, {
+            id: 3,
+            userId: testUtil.userIds.manager,
+            projectId,
+            role: 'manager',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
           }]);
@@ -224,7 +232,7 @@ describe('Project Phases', () => {
       request(server)
         .post('/v4/projects/99999/phases/')
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({ param: body })
         .expect('Content-Type', /json/)
@@ -345,6 +353,47 @@ describe('Project Phases', () => {
             done();
           }
         });
+    });
+
+    it('should return 201 if requested by admin', (done) => {
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end(done);
+    });
+
+    it('should return 201 if requested by manager which is a member', (done) => {
+      request(server)
+        .post(`/v4/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end(done);
+    });
+
+    it('should return 403 if requested by non-member copilot', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, projectId },
+      })
+      .then(() => {
+        request(server)
+          .post(`/v4/projects/${projectId}/phases/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({ param: body })
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+      });
     });
 
     describe('Bus api', () => {
