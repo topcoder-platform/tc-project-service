@@ -2,7 +2,7 @@ import _ from 'lodash';
 import util from '../util';
 import {
   USER_ROLE,
-  PROJECT_MEMBER_MANAGER_ROLES,
+  PROJECT_MEMBER_ROLE,
   ADMIN_ROLES,
 } from '../constants';
 import models from '../models';
@@ -24,9 +24,9 @@ module.exports = req => new Promise((resolve, reject) => {
   }
 
   const isManagerOrCopilot = util.hasRoles(req, [
-    ...PROJECT_MEMBER_MANAGER_ROLES,
+    PROJECT_MEMBER_ROLE.MANAGER,
+    PROJECT_MEMBER_ROLE.COPILOT,
     USER_ROLE.MANAGER,
-    USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
     USER_ROLE.COPILOT,
     USER_ROLE.COPILOT_MANAGER,
   ]);
