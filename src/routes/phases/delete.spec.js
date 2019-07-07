@@ -105,14 +105,6 @@ describe('Project Phases', () => {
               isPrimary: true,
               createdBy: 1,
               updatedBy: 1,
-            }, {
-              id: 3,
-              userId: testUtil.userIds.manager,
-              projectId,
-              role: 'manager',
-              isPrimary: false,
-              createdBy: 1,
-              updatedBy: 1,
             }]).then(() => {
               _.assign(body, { projectId });
               models.ProjectPhase.create(body).then((phase) => {
@@ -163,7 +155,7 @@ describe('Project Phases', () => {
       request(server)
         .delete(`/v4/projects/${projectId}/phases/999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -190,12 +182,32 @@ describe('Project Phases', () => {
     });
 
     it('should return 204 if requested by manager which is a member', (done) => {
+      models.ProjectMember.create({
+        id: 3,
+        userId: testUtil.userIds.manager,
+        projectId,
+        role: 'manager',
+        isPrimary: false,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .expect(204)
+          .end(done);
+      });
+    });
+
+    it('should return 403 if requested by manager which is not a member', (done) => {
       request(server)
         .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .expect(204)
+        .expect(403)
         .end(done);
     });
 

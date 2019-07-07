@@ -57,49 +57,39 @@ describe('Project Phases', () => {
   beforeEach((done) => {
     // mocks
     testUtil.clearDb()
-      .then(() => {
-        models.Project.create({
-          type: 'generic',
-          billingAccountId: 1,
-          name: 'test1',
-          description: 'test project1',
-          status: 'draft',
-          details: {},
+      .then(() => models.Project.create({
+        type: 'generic',
+        billingAccountId: 1,
+        name: 'test1',
+        description: 'test project1',
+        status: 'draft',
+        details: {},
+        createdBy: 1,
+        updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
+      }).then((p) => {
+        projectId = p.id;
+        projectName = p.name;
+          // create members
+        return models.ProjectMember.bulkCreate([{
+          id: 1,
+          userId: copilotUser.userId,
+          projectId,
+          role: 'copilot',
+          isPrimary: false,
           createdBy: 1,
           updatedBy: 1,
-          lastActivityAt: 1,
-          lastActivityUserId: '1',
-        }).then((p) => {
-          projectId = p.id;
-          projectName = p.name;
-          // create members
-          models.ProjectMember.bulkCreate([{
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 2,
-            userId: memberUser.userId,
-            projectId,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 3,
-            userId: testUtil.userIds.manager,
-            projectId,
-            role: 'manager',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }]);
-        });
-      })
+        }, {
+          id: 2,
+          userId: memberUser.userId,
+          projectId,
+          role: 'customer',
+          isPrimary: true,
+          createdBy: 1,
+          updatedBy: 1,
+        }]);
+      }))
       .then(() =>
         models.ProductTemplate.create({
           name: 'name 1',
@@ -136,7 +126,7 @@ describe('Project Phases', () => {
       .then(() => done());
   });
 
-  after((done) => {
+  afterEach((done) => {
     testUtil.clearDb(done);
   });
 
@@ -368,6 +358,28 @@ describe('Project Phases', () => {
     });
 
     it('should return 201 if requested by manager which is a member', (done) => {
+      models.ProjectMember.create({
+        id: 3,
+        userId: testUtil.userIds.manager,
+        projectId,
+        role: 'manager',
+        isPrimary: false,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .post(`/v4/projects/${projectId}/phases/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({ param: body })
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end(done);
+      });
+    });
+
+    it('should return 403 if requested by manager which is not a member', (done) => {
       request(server)
         .post(`/v4/projects/${projectId}/phases/`)
         .set({
@@ -375,15 +387,14 @@ describe('Project Phases', () => {
         })
         .send({ param: body })
         .expect('Content-Type', /json/)
-        .expect(201)
+        .expect(403)
         .end(done);
     });
 
     it('should return 403 if requested by non-member copilot', (done) => {
       models.ProjectMember.destroy({
         where: { userId: testUtil.userIds.copilot, projectId },
-      })
-      .then(() => {
+      }).then(() => {
         request(server)
           .post(`/v4/projects/${projectId}/phases/`)
           .set({
