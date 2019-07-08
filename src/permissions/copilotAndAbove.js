@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import util from '../util';
 import {
-  USER_ROLE,
   PROJECT_MEMBER_ROLE,
   ADMIN_ROLES,
 } from '../constants';
@@ -23,29 +22,24 @@ module.exports = req => new Promise((resolve, reject) => {
     return resolve(true);
   }
 
-  const isManagerOrCopilot = util.hasRoles(req, [
-    PROJECT_MEMBER_ROLE.MANAGER,
-    PROJECT_MEMBER_ROLE.COPILOT,
-    USER_ROLE.MANAGER,
-    USER_ROLE.COPILOT,
-    USER_ROLE.COPILOT_MANAGER,
-  ]);
+  return models.ProjectMember.getActiveProjectMembers(projectId)
+    .then((members) => {
+      req.context = req.context || {};
+      req.context.currentProjectMembers = members;
+      const validMemberProjectRoles = [
+        PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.COPILOT,
+      ];
+      // check if the copilot or manager has access to this project
+      const isMember = _.some(
+        members,
+m => m.userId === req.authUser.userId && validMemberProjectRoles.includes(m.role),
+      );
 
-  if (isManagerOrCopilot) {
-    return models.ProjectMember.getActiveProjectMembers(projectId)
-      .then((members) => {
-        req.context = req.context || {};
-        req.context.currentProjectMembers = members;
-        // check if the copilot or manager has access to this project
-        const isMember = _.some(members, m => m.userId === req.authUser.userId);
-
-        if (!isMember) {
-          // the copilot or manager is not a registered project member
-          return reject(new Error('You do not have permissions to perform this action'));
-        }
-        return resolve(true);
-      });
-  }
-
-  return reject(new Error('You do not have permissions to perform this action'));
+      if (!isMember) {
+        // the copilot or manager is not a registered project member
+        return reject(new Error('You do not have permissions to perform this action'));
+      }
+      return resolve(true);
+    });
 });
