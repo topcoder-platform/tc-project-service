@@ -122,6 +122,12 @@ describe('Project', () => {
             userId: 40051332,
             createdBy: 1,
             updatedBy: 1,
+          }, {
+            projectId: project1.id,
+            role: 'member',
+            userId: 40051331,
+            createdBy: 1,
+            updatedBy: 1,
           }]);
         }).then(() => done());
     });
@@ -190,7 +196,7 @@ describe('Project', () => {
         })
         .send({
           param: {
-            templateId: '2',
+            templateId: 2,
           },
         })
         .expect('Content-Type', /json/)
@@ -202,7 +208,7 @@ describe('Project', () => {
             const result = res.body.result;
             result.success.should.be.true;
             result.status.should.equal(200);
-            result.content.templateId.should.not.equal('2');
+            result.content.templateId.should.equal(project1.templateId);
             done();
           }
         });
@@ -216,7 +222,7 @@ describe('Project', () => {
         })
         .send({
           param: {
-            templateId: '2',
+            templateId: 2,
           },
         })
         .expect('Content-Type', /json/)
@@ -228,7 +234,7 @@ describe('Project', () => {
             const result = res.body.result;
             result.success.should.be.true;
             result.status.should.equal(200);
-            result.content.templateId.should.not.equal('2');
+            result.content.templateId.should.equal(project1.templateId);
             done();
           }
         });
@@ -242,19 +248,19 @@ describe('Project', () => {
         })
         .send({
           param: {
-            templateId: '2',
+            templateId: 2,
           },
         })
         .expect('Content-Type', /json/)
-        .expect(403)
+        .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
             const result = res.body.result;
-            result.success.should.be.false;
-            result.status.should.equal(403);
-            result.content.message.should.equal('You do not have permissions to perform this action');
+            result.success.should.be.true;
+            result.status.should.equal(200);
+            result.content.templateId.should.equal(project1.templateId);
             done();
           }
         });
