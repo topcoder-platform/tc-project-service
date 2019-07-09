@@ -66,7 +66,6 @@ describe('Project', () => {
         details: {},
         createdBy: 1,
         updatedBy: 1,
-        templateId: 1,
         lastActivityAt: 1,
         lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
@@ -80,7 +79,6 @@ describe('Project', () => {
         details: {},
         createdBy: 1,
         updatedBy: 1,
-        templateId: 1,
         lastActivityAt: 1,
         lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
@@ -93,7 +91,6 @@ describe('Project', () => {
         details: {},
         createdBy: 1,
         updatedBy: 1,
-        templateId: 1,
         lastActivityAt: 1,
         lastActivityUserId: '1',
         createdAt: '2016-06-30 00:33:07+00',
@@ -120,12 +117,6 @@ describe('Project', () => {
             projectId: project2.id,
             role: 'copilot',
             userId: 40051332,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            projectId: project1.id,
-            role: 'member',
-            userId: 40051331,
             createdBy: 1,
             updatedBy: 1,
           }]);
@@ -183,84 +174,6 @@ describe('Project', () => {
             result.status.should.equal(403);
             result.content.message.should.equal('Only assigned topcoder-managers or topcoder admins' +
               ' should be allowed to launch a project');
-            done();
-          }
-        });
-    });
-
-    it('should not update the templateId for admin', (done) => {
-      request(server)
-        .patch(`/v4/projects/${project1.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          param: {
-            templateId: 2,
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const result = res.body.result;
-            result.success.should.be.true;
-            result.status.should.equal(200);
-            result.content.templateId.should.equal(project1.templateId);
-            done();
-          }
-        });
-    });
-
-    it('should not update the templateId for manager', (done) => {
-      request(server)
-        .patch(`/v4/projects/${project1.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          param: {
-            templateId: 2,
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const result = res.body.result;
-            result.success.should.be.true;
-            result.status.should.equal(200);
-            result.content.templateId.should.equal(project1.templateId);
-            done();
-          }
-        });
-    });
-
-    it('should not update the templateId for user', (done) => {
-      request(server)
-        .patch(`/v4/projects/${project1.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          param: {
-            templateId: 2,
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const result = res.body.result;
-            result.success.should.be.true;
-            result.status.should.equal(200);
-            result.content.templateId.should.equal(project1.templateId);
             done();
           }
         });
