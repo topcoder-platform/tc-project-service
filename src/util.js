@@ -493,6 +493,10 @@ _.assignIn(util, {
         },
         // set longer timeout as default 3000 could be not enough for identity service response
         timeout: 15000,
+      }).catch(() => {
+        // in case of any error happens during getting user by email
+        // we treat such users as not found and don't return error
+        // as per discussion in issue #334
       });
     };
     // send batch of requests, one batch at one time
