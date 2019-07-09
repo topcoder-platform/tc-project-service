@@ -80,7 +80,7 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
   if (invite.emails) {
     // if for some emails there are already existent users, we will invite them by userId,
     // to avoid sending them registration email
-    return util.lookupUserEmails(req, invite.emails)
+    return util.lookupMultipleUserEmails(req, invite.emails, 5)
       .then((existentUsers) => {
         // existent user we will invite by userId and email
         const existentUsersWithNumberId = existentUsers.map((user) => {
