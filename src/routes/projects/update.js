@@ -107,7 +107,9 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     case PROJECT_STATUS.COMPLETED:
       errors.push(`cannot update a project that is in '${existingProject.status}' state`);
       break;
-    case PROJECT_STATUS.ACTIVE: {
+    case PROJECT_STATUS.REVIEWED:
+    case PROJECT_STATUS.ACTIVE:
+    case PROJECT_STATUS.PAUSED: {
       if (isScopeUpdated(existingProject, updatedProps)) {
         errors.push(`Scope changes are not allowed for '${existingProject.status}' project`);
       }
