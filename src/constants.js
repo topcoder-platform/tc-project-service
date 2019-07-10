@@ -183,4 +183,4 @@ export const INVITE_STATUS = {
   CANCELED: 'canceled',
 };
 
-export const MAX_PARALLEL_REQUEST_QTY = 5;
+export const MAX_PARALLEL_REQUEST_QTY = 10;
