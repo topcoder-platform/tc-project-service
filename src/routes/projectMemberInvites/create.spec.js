@@ -9,7 +9,12 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { USER_ROLE, PROJECT_MEMBER_ROLE, INVITE_STATUS, BUS_API_EVENT } from '../../constants';
+import {
+  USER_ROLE,
+  PROJECT_MEMBER_ROLE,
+  INVITE_STATUS,
+  BUS_API_EVENT,
+} from '../../constants';
 
 const should = chai.should();
 
@@ -161,54 +166,54 @@ describe('Project Member Invite create', () => {
     });
 
     it('should return 201 if userIds and emails are presented the same time',
-        (done) => {
-          request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          param: {
-            userIds: [40051332],
-            emails: ['hello@world.com'],
-            role: 'customer',
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            res.body.result.status.should.equal(201);
-            done();
-          }
-        });
-        });
+      (done) => {
+        request(server)
+          .post(`/v4/projects/${project1.id}/members/invite`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({
+            param: {
+              userIds: [40051332],
+              emails: ['hello@world.com'],
+              role: 'customer',
+            },
+          })
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              res.body.result.status.should.equal(201);
+              done();
+            }
+          });
+      });
 
     it('should return 400 if neither userIds or email is presented',
-        (done) => {
-          request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          param: {
-            role: 'customer',
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            res.body.result.status.should.equal(400);
-            done();
-          }
-        });
-        });
+      (done) => {
+        request(server)
+          .post(`/v4/projects/${project1.id}/members/invite`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({
+            param: {
+              role: 'customer',
+            },
+          })
+          .expect('Content-Type', /json/)
+          .expect(400)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              res.body.result.status.should.equal(400);
+              done();
+            }
+          });
+      });
 
     it('should return 403 if try to create copilot without MANAGER_ROLES', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
@@ -448,7 +453,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 201 and empty response when trying add already invited member', (done) => {
+    it('should return 403 and empty response when trying add already invited member', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         get: () => Promise.resolve({
           status: 200,
@@ -480,14 +485,14 @@ describe('Project Member Invite create', () => {
           },
         })
         .expect('Content-Type', /json/)
-        .expect(201)
+        .expect(403)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success;
+            const resJson = res.body.result.content.failed;
             should.exist(resJson);
-            resJson.length.should.equal(0);
+            resJson.length.should.equal(1);
             server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
             done();
           }
@@ -683,7 +688,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 201 and empty response when trying add already invited member by lowercase email', (done) => {
+    it('should return 403 and empty response when trying add already invited member by lowercase email', (done) => {
       request(server)
         .post(`/v4/projects/${project1.id}/members/invite`)
         .set({
@@ -696,20 +701,20 @@ describe('Project Member Invite create', () => {
           },
         })
         .expect('Content-Type', /json/)
-        .expect(201)
+        .expect(403)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success;
+            const resJson = res.body.result.content.failed;
             should.exist(resJson);
-            resJson.length.should.equal(0);
+            resJson.length.should.equal(1);
             done();
           }
         });
     });
 
-    it('should return 201 and empty response when trying add already invited member by uppercase email', (done) => {
+    it('should return 403 and empty response when trying add already invited member by uppercase email', (done) => {
       request(server)
         .post(`/v4/projects/${project1.id}/members/invite`)
         .set({
@@ -722,20 +727,20 @@ describe('Project Member Invite create', () => {
           },
         })
         .expect('Content-Type', /json/)
-        .expect(201)
+        .expect(403)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content.success;
+            const resJson = res.body.result.content.failed;
             should.exist(resJson);
-            resJson.length.should.equal(0);
+            resJson.length.should.equal(1);
             done();
           }
         });
     });
 
-    xit('should return 201 and empty response when trying add already invited member by gmail email with dot',
+    xit('should return 403 and empty response when trying add already invited member by gmail email with dot',
       (done) => {
         request(server)
           .post(`/v4/projects/${project1.id}/members/invite`)
@@ -749,20 +754,20 @@ describe('Project Member Invite create', () => {
             },
           })
           .expect('Content-Type', /json/)
-          .expect(201)
+          .expect(403)
           .end((err, res) => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content.success;
+              const resJson = res.body.result.content.failed;
               should.exist(resJson);
-              resJson.length.should.equal(0);
+              resJson.length.should.equal(1);
               done();
             }
           });
       });
 
-    xit('should return 201 and empty response when trying add already invited member by gmail email without dot',
+    xit('should return 403 and empty response when trying add already invited member by gmail email without dot',
       (done) => {
         request(server)
           .post(`/v4/projects/${project1.id}/members/invite`)
@@ -776,14 +781,14 @@ describe('Project Member Invite create', () => {
             },
           })
           .expect('Content-Type', /json/)
-          .expect(201)
+          .expect(403)
           .end((err, res) => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content.success;
+              const resJson = res.body.result.content.failed;
               should.exist(resJson);
-              resJson.length.should.equal(0);
+              resJson.length.should.equal(1);
               done();
             }
           });
@@ -820,33 +825,33 @@ describe('Project Member Invite create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          param: {
-            userIds: [3],
-            role: PROJECT_MEMBER_ROLE.CUSTOMER,
-          },
-        })
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                projectId: project1.id,
-                userId: 3,
-                email: null,
-                isSSO: false,
-              })).should.be.true;
-              done();
-            });
-          }
-        });
+          .post(`/v4/projects/${project1.id}/members/invite`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({
+            param: {
+              userIds: [3],
+              role: PROJECT_MEMBER_ROLE.CUSTOMER,
+            },
+          })
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                  projectId: project1.id,
+                  userId: 3,
+                  email: null,
+                  isSSO: false,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
       });
 
       it('sends single BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED message when email invite added', (done) => {
@@ -868,33 +873,33 @@ describe('Project Member Invite create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          param: {
-            emails: ['hello@world.com'],
-            role: PROJECT_MEMBER_ROLE.CUSTOMER,
-          },
-        })
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                projectId: project1.id,
-                userId: null,
-                email: 'hello@world.com',
-                isSSO: false,
-              })).should.be.true;
-              done();
-            });
-          }
-        });
+          .post(`/v4/projects/${project1.id}/members/invite`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({
+            param: {
+              emails: ['hello@world.com'],
+              role: PROJECT_MEMBER_ROLE.CUSTOMER,
+            },
+          })
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledTwice.should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                  projectId: project1.id,
+                  userId: null,
+                  email: 'hello@world.com',
+                  isSSO: false,
+                })).should.be.true;
+                done();
+              });
+            }
+          });
       });
     });
   });

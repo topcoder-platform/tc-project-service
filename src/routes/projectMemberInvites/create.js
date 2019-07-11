@@ -63,11 +63,20 @@ const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false
  *
  * @returns {Promise<Promise[]>} list of promises
  */
-const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
+const buildCreateInvitePromises = (req, invite, invites, data, failed, members) => {
   const invitePromises = [];
   if (invite.userIds) {
     // remove invites for users that are invited already
-    _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
+    const errMessageForAlreadyInvitedUsers = 'User with such email is already invited to this project.';
+    _.remove(invite.userIds, u => _.some(invites, (i) => {
+      if (i.userId === u) {
+        failed.push(_.assign({}, {
+          email: i.email,
+          message: errMessageForAlreadyInvitedUsers,
+        }));
+      }
+      return i.userId === u;
+    }));
     invite.userIds.forEach((userId) => {
       const dataNew = _.clone(data);
 
@@ -96,8 +105,32 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
             compareEmail(existentUser.email, inviteEmail, { UNIQUE_GMAIL_VALIDATION: false })),
         );
 
+        // remove users that are already member of the team
+        const errMessageForAlreadyMemberUsers = 'User with such email is already a member of this project.';
+
+        _.remove(existentUsersWithNumberId, user => _.some(members, (m) => {
+          if (m.userId === Number(user.id)) {
+            failed.push(_.assign({}, {
+              email: user.email,
+              message: errMessageForAlreadyMemberUsers,
+            }));
+          }
+          return m.userId === user.id;
+        }));
+
         // remove invites for users that are invited already
-        _.remove(existentUsersWithNumberId, user => _.some(invites, i => i.userId === user.id));
+        const errMessageForAlreadyInvitedUsers = 'User with such email is already invited to this project.';
+
+        _.remove(existentUsersWithNumberId, user => _.some(invites, (i) => {
+          if (i.userId === Number(user.id)) {
+            failed.push(_.assign({}, {
+              email: i.email,
+              message: errMessageForAlreadyInvitedUsers,
+            }));
+          }
+          return i.userId === user.id;
+        }));
+
         existentUsersWithNumberId.forEach((user) => {
           const dataNew = _.clone(data);
 
@@ -109,8 +142,19 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
 
         // remove invites for users that are invited already
         _.remove(nonExistentUserEmails, email =>
-          _.some(invites, i =>
-            compareEmail(i.email, email, { UNIQUE_GMAIL_VALIDATION: config.get('UNIQUE_GMAIL_VALIDATION') })));
+          _.some(invites, (i) => {
+            const areEmailsSame = compareEmail(i.email, email, {
+              UNIQUE_GMAIL_VALIDATION: config.get('UNIQUE_GMAIL_VALIDATION'),
+            });
+            if (areEmailsSame) {
+              failed.push(_.assign({}, {
+                email: i.email,
+                message: errMessageForAlreadyInvitedUsers,
+              }));
+            }
+            return areEmailsSame;
+          }),
+        );
         nonExistentUserEmails.forEach((email) => {
           const dataNew = _.clone(data);
 
@@ -204,9 +248,18 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
 
     const promises = [];
+    const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
     if (invite.userIds) {
       // remove members already in the team
-      _.remove(invite.userIds, u => _.some(members, m => m.userId === u));
+      _.remove(invite.userIds, u => _.some(members, (m) => {
+        if (m.userId === u) {
+          failed.push(_.assign({}, {
+            userId: m.userId,
+            message: errorMessageForAlreadyMemberUser,
+          }));
+        }
+        return m.userId === u;
+      }));
         // permission:
         // user has to have constants.MANAGER_ROLES role
         // to be invited as PROJECT_MEMBER_ROLE.MANAGER
@@ -262,7 +315,7 @@ module.exports = [
           };
 
           req.log.debug('Creating invites');
-          return models.sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
+          return models.sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed, members))
             .then((values) => {
               values.forEach((v) => {
                 req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
