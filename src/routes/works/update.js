@@ -8,6 +8,7 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { EVENT } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -156,11 +157,29 @@ module.exports = [
               },
             });
           });
-      }),
+      })
+      .then(() =>
+        // To simpify the logic, reload the phases from DB and send to the message queue
+        models.ProjectPhase.findAll({
+          where: {
+            projectId,
+          },
+          include: [{ model: models.PhaseProduct, as: 'products' }],
+        })),
     )
-      .then(() => {
-        req.log.debug('updated work', JSON.stringify(updated, null, 2));
-        res.json(util.wrapResponse(req.id, _.omit(updated.toJSON(), 'WorkStreams')));
+      .then((allPhases) => {
+        req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
+
+        // emit original and updated project phase information
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+          { original: previousValue, updated, allPhases },
+          { correlationId: req.id },
+        );
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+          { req, original: previousValue, updated: _.clone(updated.get({ plain: true })) });
+
+        res.json(util.wrapResponse(req.id, updated));
       })
       .catch(err => next(err));
   },

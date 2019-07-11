@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 import models from '../../models';
 import util from '../../util';
+import { EVENT } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -120,6 +121,15 @@ module.exports = [
       });
     }))
     .then(() => {
+      // Send events to buses
+      req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
+      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
+        newPhaseProduct,
+        { correlationId: req.id },
+      );
+      req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, { req, created: newPhaseProduct });
+
       res.status(201).json(util.wrapResponse(req.id, newPhaseProduct, 1, 201));
     })
     .catch((err) => { next(err); });

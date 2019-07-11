@@ -6,6 +6,7 @@ import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
+import { EVENT } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -65,7 +66,7 @@ module.exports = [
     .then((existing) => {
       if (!existing) {
           // handle 404
-        const err = new Error('No active phase product found for project id ' +
+        const err = new Error('No active work item found for project id ' +
             `${projectId}, phase id ${phaseId} and product id ${productId}`);
         err.status = 404;
         return Promise.reject(err);
@@ -73,7 +74,17 @@ module.exports = [
       return existing.update({ deletedBy: req.authUser.userId });
     })
       .then(entity => entity.destroy()))
-      .then(() => {
+      .then((deleted) => {
+        req.log.debug('deleted work item', JSON.stringify(deleted, null, 2));
+
+        // Send events to buses
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED,
+          deleted,
+          { correlationId: req.id },
+        );
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED, { req, deleted });
+
         res.status(204).json({});
       })
       .catch(err => next(err));

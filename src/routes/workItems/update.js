@@ -7,6 +7,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { EVENT } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -46,6 +47,8 @@ module.exports = [
 
     const updatedProps = req.body.param;
     updatedProps.updatedBy = req.authUser.userId;
+
+    let previousValue;
 
     models.sequelize.transaction(() => models.ProjectPhase.findOne({
       where: {
@@ -88,11 +91,24 @@ module.exports = [
         throw err;
       }
 
+      previousValue = _.clone(existing.get({ plain: true }));
       _.extend(existing, updatedProps);
       return existing.save().catch(next);
     }))
     .then((updated) => {
       req.log.debug('updated work item', JSON.stringify(updated, null, 2));
+
+      const updatedValue = updated.get({ plain: true });
+
+      // emit original and updated project phase information
+      req.app.services.pubsub.publish(
+        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
+        { original: previousValue, updated: updatedValue },
+        { correlationId: req.id },
+      );
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
+        { req, original: previousValue, updated: updatedValue });
+
       res.json(util.wrapResponse(req.id, updated));
     }).catch(err => next(err));
   },
