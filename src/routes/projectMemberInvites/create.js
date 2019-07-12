@@ -60,6 +60,7 @@ const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false
  * @param {Array}  invites existent invites from DB
  * @param {Object} data    template for new invites to be put in DB
  * @param {Array}  failed  failed invites error message
+ * @param {Array} members  already members of the group
  *
  * @returns {Promise<Promise[]>} list of promises
  */
@@ -67,15 +68,16 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed, members) 
   const invitePromises = [];
   if (invite.userIds) {
     // remove invites for users that are invited already
-    const errMessageForAlreadyInvitedUsers = 'User with such email is already invited to this project.';
+    const errMessageForAlreadyInvitedUsers = 'User with such handle is already invited to this project.';
     _.remove(invite.userIds, u => _.some(invites, (i) => {
-      if (i.userId === u) {
+      const isPresent = i.userId === u;
+      if (isPresent) {
         failed.push(_.assign({}, {
-          email: i.email,
+          userId: u,
           message: errMessageForAlreadyInvitedUsers,
         }));
       }
-      return i.userId === u;
+      return isPresent;
     }));
     invite.userIds.forEach((userId) => {
       const dataNew = _.clone(data);
@@ -106,29 +108,31 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed, members) 
         );
 
         // remove users that are already member of the team
-        const errMessageForAlreadyMemberUsers = 'User with such email is already a member of this project.';
+        const errMessageForAlreadyMemberUsers = 'User with such email is already a member of the team.';
 
         _.remove(existentUsersWithNumberId, user => _.some(members, (m) => {
-          if (m.userId === Number(user.id)) {
+          const isPresent = m.userId === Number(user.id);
+          if (isPresent) {
             failed.push(_.assign({}, {
               email: user.email,
               message: errMessageForAlreadyMemberUsers,
             }));
           }
-          return m.userId === user.id;
+          return isPresent;
         }));
 
         // remove invites for users that are invited already
         const errMessageForAlreadyInvitedUsers = 'User with such email is already invited to this project.';
 
         _.remove(existentUsersWithNumberId, user => _.some(invites, (i) => {
-          if (i.userId === Number(user.id)) {
+          const isPresent = i.userId === Number(user.id);
+          if (isPresent) {
             failed.push(_.assign({}, {
               email: i.email,
               message: errMessageForAlreadyInvitedUsers,
             }));
           }
-          return i.userId === user.id;
+          return isPresent;
         }));
 
         existentUsersWithNumberId.forEach((user) => {
@@ -252,13 +256,14 @@ module.exports = [
     if (invite.userIds) {
       // remove members already in the team
       _.remove(invite.userIds, u => _.some(members, (m) => {
-        if (m.userId === u) {
+        const isPresent = m.userId === u;
+        if (isPresent) {
           failed.push(_.assign({}, {
             userId: m.userId,
             message: errorMessageForAlreadyMemberUser,
           }));
         }
-        return m.userId === u;
+        return isPresent;
       }));
         // permission:
         // user has to have constants.MANAGER_ROLES role
