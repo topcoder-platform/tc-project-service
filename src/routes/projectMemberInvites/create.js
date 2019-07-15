@@ -60,7 +60,7 @@ const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false
  * @param {Array}  invites existent invites from DB
  * @param {Object} data    template for new invites to be put in DB
  * @param {Array}  failed  failed invites error message
- * @param {Array} members  already members of the group
+ * @param {Array} members  already members of the project
  *
  * @returns {Promise<Promise[]>} list of promises
  */
