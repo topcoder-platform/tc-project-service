@@ -51,7 +51,7 @@ describe('Phase Products', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-  before((done) => {
+  beforeEach((done) => {
     // mocks
     testUtil.clearDb()
         .then(() => {
@@ -144,7 +144,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v4/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .send({ param: updateBody })
         .expect('Content-Type', /json/)
@@ -155,7 +155,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v4/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({ param: updateBody })
         .expect('Content-Type', /json/)
@@ -166,7 +166,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({ param: updateBody })
         .expect('Content-Type', /json/)
@@ -177,7 +177,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
           param: {
@@ -212,6 +212,68 @@ describe('Phase Products', () => {
             done();
           }
         });
+    });
+
+    it('should return 200 if requested by admin', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+        })
+        .send({ param: updateBody })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(done);
+    });
+
+    it('should return 200 if requested by manager which is a member', (done) => {
+      models.ProjectMember.create({
+        id: 3,
+        userId: testUtil.userIds.manager,
+        projectId,
+        role: 'manager',
+        isPrimary: false,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({ param: updateBody })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(done);
+      });
+    });
+
+    it('should return 403 if requested by manager which is not a member', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({ param: updateBody })
+        .expect('Content-Type', /json/)
+        .expect(403)
+        .end(done);
+    });
+
+    it('should return 403 if requested by non-member copilot', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, projectId },
+      }).then(() => {
+        request(server)
+          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({ param: updateBody })
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+      });
     });
 
     describe('Bus api', () => {

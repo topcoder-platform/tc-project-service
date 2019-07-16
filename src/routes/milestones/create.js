@@ -73,9 +73,9 @@ module.exports = [
       return next(apiErr);
     }
 
-    return models.sequelize.transaction(tx =>
+    return models.sequelize.transaction(() =>
       // Save to DB
-      models.Milestone.create(entity, { transaction: tx })
+      models.Milestone.create(entity)
         .then((createdEntity) => {
           // Omit deletedAt, deletedBy
           result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
@@ -88,7 +88,6 @@ module.exports = [
               id: { $ne: result.id },
               order: { $gte: result.order },
             },
-            transaction: tx,
           });
         }),
     )
