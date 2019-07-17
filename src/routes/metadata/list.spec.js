@@ -26,6 +26,7 @@ const projectTemplates = [
     priceConfig: { key: 'key1', version: 1 },
     createdBy: 1,
     updatedBy: 1,
+    disabled: false,
   },
 ];
 const productTemplates = [
@@ -111,7 +112,7 @@ const forms = [
   {
     key: 'productKey 1',
     config: {
-      questions: [{
+      sections: [{
         id: 'appDefinition',
         title: 'Sample Project',
         required: true,

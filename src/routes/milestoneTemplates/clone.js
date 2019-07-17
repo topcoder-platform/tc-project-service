@@ -30,7 +30,7 @@ module.exports = [
   (req, res, next) => {
     let result;
 
-    return models.sequelize.transaction(tx =>
+    return models.sequelize.transaction(() =>
       // Find the product template
       models.MilestoneTemplate.findAll({
         where: {
@@ -48,7 +48,7 @@ module.exports = [
             milestone.createdBy = req.authUser.userId; // eslint-disable-line no-param-reassign
             milestone.updatedBy = req.authUser.userId; // eslint-disable-line no-param-reassign
           });
-          return models.MilestoneTemplate.bulkCreate(newMilestoneTemplates, { transaction: tx });
+          return models.MilestoneTemplate.bulkCreate(newMilestoneTemplates);
         })
         .then(() => { // eslint-disable-line arrow-body-style
           return models.MilestoneTemplate.findAll({

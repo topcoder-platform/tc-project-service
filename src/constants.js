@@ -131,6 +131,8 @@ export const BUS_API_EVENT = {
   MILESTONE_TRANSITION_ACTIVE: 'connect.action.timeline.milestone.transition.active',
   // When milestone is marked as completed
   MILESTONE_TRANSITION_COMPLETED: 'connect.action.timeline.milestone.transition.completed',
+   // When milestone is marked as paused
+  MILESTONE_TRANSITION_PAUSED: 'connect.action.timeline.milestone.transition.paused',
   // When milestone is waiting for customers's input
   MILESTONE_WAITING_CUSTOMER: 'connect.action.timeline.milestone.waiting.customer',
 
@@ -163,6 +165,10 @@ export const TIMELINE_REFERENCES = {
   PRODUCT: 'product',
 };
 
+export const STATUS_HISTORY_REFERENCES = {
+  MILESTONE: 'milestone',
+};
+
 export const MILESTONE_TEMPLATE_REFERENCES = {
   PRODUCT_TEMPLATE: 'productTemplate',
 };
@@ -176,3 +182,5 @@ export const INVITE_STATUS = {
   REQUEST_APPROVED: 'request_approved',
   CANCELED: 'canceled',
 };
+
+export const MAX_PARALLEL_REQUEST_QTY = 10;

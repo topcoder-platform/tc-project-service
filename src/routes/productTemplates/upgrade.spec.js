@@ -85,7 +85,7 @@ describe('UPGRADE product template', () => {
     ]))
     .then(() => {
       const config = {
-        questions: [{
+        sections: [{
           id: 'appDefinition',
           title: 'Sample Project',
           required: true,

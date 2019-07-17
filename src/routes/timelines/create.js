@@ -51,7 +51,7 @@ module.exports = [
 
     let result;
     // Save to DB
-    models.sequelize.transaction(() => {
+    return models.sequelize.transaction(() => {
       req.log.debug('Started transaction');
       return models.Timeline.create(entity)
         .then((createdEntity) => {
@@ -109,8 +109,7 @@ module.exports = [
             });
           }
           return Promise.resolve();
-        })
-        .catch(next);
+        });
     })
     .then(() => {
       // Send event to bus

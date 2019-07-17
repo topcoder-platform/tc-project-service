@@ -5,7 +5,7 @@ import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEM
   from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
-import getTopcoderProjectMembers from '../util';
+import util from '../util';
 
 /**
  * Map of project status and event name sent to bus api
@@ -367,7 +367,7 @@ module.exports = (app, logger) => {
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
           allowedUsers: created.status === PROJECT_PHASE_STATUS.DRAFT ?
-            getTopcoderProjectMembers(project.members) : null,
+            util.getTopcoderProjectMembers(project.members) : null,
         }, logger);
         return sendPlanReadyEventIfNeeded(req, project, created);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
@@ -393,7 +393,7 @@ module.exports = (app, logger) => {
           userId: req.authUser.userId,
           initiatorUserId: req.authUser.userId,
           allowedUsers: deleted.status === PROJECT_PHASE_STATUS.DRAFT ?
-            getTopcoderProjectMembers(project.members) : null,
+          util.getTopcoderProjectMembers(project.members) : null,
         }, logger);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
@@ -446,7 +446,7 @@ module.exports = (app, logger) => {
               userId: req.authUser.userId,
               initiatorUserId: req.authUser.userId,
               allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
-                getTopcoderProjectMembers(project.members) : null,
+              util.getTopcoderProjectMembers(project.members) : null,
             }, logger));
             events.forEach((event) => { eventsMap[event] = true; });
           }
@@ -493,7 +493,7 @@ module.exports = (app, logger) => {
             userId: req.authUser.userId,
             initiatorUserId: req.authUser.userId,
             allowedUsers: updated.status === PROJECT_PHASE_STATUS.DRAFT ?
-              getTopcoderProjectMembers(project.members) : null,
+            util.getTopcoderProjectMembers(project.members) : null,
           }, logger);
         }
       }).catch(err => null);    // eslint-disable-line no-unused-vars
@@ -529,6 +529,8 @@ module.exports = (app, logger) => {
         event = BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED;
       } else if (updated.status === MILESTONE_STATUS.ACTIVE) {
         event = BUS_API_EVENT.MILESTONE_TRANSITION_ACTIVE;
+      } else if (updated.status === MILESTONE_STATUS.PAUSED) {
+        event = BUS_API_EVENT.MILESTONE_TRANSITION_PAUSED;
       }
 
       if (event) {
@@ -592,12 +594,24 @@ module.exports = (app, logger) => {
       .catch(err => null);    // eslint-disable-line no-unused-vars
   });
 
-  /**
+ /**
   * MILESTONE_UPDATED.
   */
-  // eslint-disable-next-line no-unused-vars
-  app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, ({ req, original, updated, cascadedUpdates }) => {
-    logger.debug(`receive MILESTONE_UPDATED event for milestone ${original.id}`);
+
+  /**
+   * Handlers for updated milestones which sends events to Kafka
+   *
+   * @param {String} eventName              event name which causes calling this method
+   * @param {Object} params                 params
+   * @param {Object} params.req             request object
+   * @param {Object} params.original        original milestone object
+   * @param {Object} params.updated         updated milestone object
+   * @param {Object} params.cascadedUpdates milestones updated cascaded
+   *
+   * @return {undefined}
+   */
+  function handleMilestoneUpdated(eventName, { req, original, updated, cascadedUpdates }) {
+    logger.debug(`receive ${eventName} event for milestone ${original.id}`);
 
     const projectId = _.parseInt(req.params.projectId);
     const timeline = _.omit(req.timeline.toJSON(), 'deletedAt', 'deletedBy');
@@ -640,7 +654,9 @@ module.exports = (app, logger) => {
         }
       });
     }).catch(err => null);    // eslint-disable-line no-unused-vars
-  });
+  }
+
+  app.on(EVENT.ROUTING_KEY.MILESTONE_UPDATED, handleMilestoneUpdated.bind(null, EVENT.ROUTING_KEY.MILESTONE_UPDATED));
 
  /**
   * MILESTONE_REMOVED.
@@ -700,63 +716,87 @@ module.exports = (app, logger) => {
   app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, ({ req, userId, email, status, role }) => {
     logger.debug('receive PROJECT_MEMBER_INVITE_CREATED event');
     const projectId = _.parseInt(req.params.projectId);
-
-    if (status === INVITE_STATUS.REQUESTED) {
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED, {
-        projectId,
-        userId,
-        email,
-        role,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
-        projectId,
-        userId,
-        email,
-        role,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+    .then((project) => {
+      logger.debug(util.isSSO);
+      if (status === INVITE_STATUS.REQUESTED) {
+        createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REQUESTED, {
+          projectId,
+          userId,
+          email,
+          role,
+          initiatorUserId: req.authUser.userId,
+          isSSO: util.isSSO(project),
+        }, logger);
+      } else {
+        // send event to bus api
+        logger.debug(JSON.stringify({
+          projectId,
+          userId,
+          email,
+          role,
+          initiatorUserId: req.authUser.userId,
+          isSSO: util.isSSO(project),
+        }));
+        createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
+          projectId,
+          userId,
+          email,
+          role,
+          initiatorUserId: req.authUser.userId,
+          isSSO: util.isSSO(project),
+        }, logger);
+      }
+    }).catch(err => logger.error(err));    // eslint-disable-line no-unused-vars
   });
 
   app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, ({ req, userId, email, status, role, createdBy }) => {
     logger.debug('receive PROJECT_MEMBER_INVITE_UPDATED event');
     const projectId = _.parseInt(req.params.projectId);
 
-    if (status === INVITE_STATUS.REQUEST_APPROVED) {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_APPROVED, {
-        projectId,
-        userId,
-        originator: createdBy,
-        email,
-        role,
-        status,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else if (status === INVITE_STATUS.REQUEST_REJECTED) {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REJECTED, {
-        projectId,
-        userId,
-        originator: createdBy,
-        email,
-        role,
-        status,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    } else {
-      // send event to bus api
-      createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, {
-        projectId,
-        userId,
-        email,
-        role,
-        status,
-        initiatorUserId: req.authUser.userId,
-      }, logger);
-    }
+    models.Project.findOne({
+      where: { id: projectId },
+    })
+    .then((project) => {
+      logger.debug(util.isSSO);
+      if (status === INVITE_STATUS.REQUEST_APPROVED) {
+        // send event to bus api
+        createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_APPROVED, {
+          projectId,
+          userId,
+          originator: createdBy,
+          email,
+          role,
+          status,
+          initiatorUserId: req.authUser.userId,
+          isSSO: util.isSSO(project),
+        }, logger);
+      } else if (status === INVITE_STATUS.REQUEST_REJECTED) {
+        // send event to bus api
+        createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REJECTED, {
+          projectId,
+          userId,
+          originator: createdBy,
+          email,
+          role,
+          status,
+          initiatorUserId: req.authUser.userId,
+          isSSO: util.isSSO(project),
+        }, logger);
+      } else {
+        // send event to bus api
+        createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, {
+          projectId,
+          userId,
+          email,
+          role,
+          status,
+          initiatorUserId: req.authUser.userId,
+          isSSO: util.isSSO(project),
+        }, logger);
+      }
+    }).catch(err => null);    // eslint-disable-line no-unused-vars
   });
 };

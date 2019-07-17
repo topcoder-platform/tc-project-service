@@ -8,7 +8,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT, USER_ROLE } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT, USER_ROLE, MAX_PARALLEL_REQUEST_QTY } from '../../constants';
 import { createEvent } from '../../services/busApi';
 
 
@@ -80,7 +80,7 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
   if (invite.emails) {
     // if for some emails there are already existent users, we will invite them by userId,
     // to avoid sending them registration email
-    return util.lookupUserEmails(req, invite.emails)
+    return util.lookupMultipleUserEmails(req, invite.emails, MAX_PARALLEL_REQUEST_QTY)
       .then((existentUsers) => {
         // existent user we will invite by userId and email
         const existentUsersWithNumberId = existentUsers.map((user) => {
@@ -162,6 +162,7 @@ const sendInviteEmail = (req, projectId, invite) => {
               projectName: project.name,
               projectId,
               initiator,
+              isSSO: util.isSSO(project),
             },
           ],
         }],

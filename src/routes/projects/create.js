@@ -66,6 +66,14 @@ const createProjectValdiations = {
         buildingBlockKey: Joi.string().required(),
         metadata: Joi.object().optional(),
       })).optional(),
+      attachments: Joi.array().items(Joi.object().keys({
+        category: Joi.string().required(),
+        contentType: Joi.string().required(),
+        description: Joi.string().allow(null).allow('').optional(),
+        filePath: Joi.string().required(),
+        size: Joi.number().required(),
+        title: Joi.string().required(),
+      })).optional(),
     }).required(),
   },
 };
@@ -101,6 +109,21 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       return models.ProjectEstimation.bulkCreate(estimations, { returning: true }).then((projectEstimations) => {
         result.estimations = _.map(projectEstimations, estimation =>
           _.omit(estimation.toJSON(), ['deletedAt', 'deletedBy']));
+        return Promise.resolve(newProject);
+      });
+    }
+    return Promise.resolve(newProject);
+  }).then((newProject) => {
+    if (project.attachments && (project.attachments.length > 0)) {
+      req.log.debug('creating project attachments');
+      const attachments = project.attachments.map(attachment => Object.assign({
+        projectId: newProject.id,
+        createdBy: req.authUser.userId,
+        updatedBy: req.authUser.userId,
+      }, attachment));
+      return models.ProjectAttachment.bulkCreate(attachments, { returning: true }).then((projectAttachments) => {
+        result.attachments = _.map(projectAttachments, attachment =>
+          _.omit(attachment.toJSON(), ['deletedAt', 'deletedBy']));
         return Promise.resolve(newProject);
       });
     }
@@ -155,7 +178,8 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
         });
       });
     }));
-  }).then(() => Promise.resolve(result));
+  })
+  .then(() => Promise.resolve(result));
 }
 
 /**
@@ -263,6 +287,7 @@ module.exports = [
     let newProject = null;
     let newPhases;
     let projectEstimations;
+    let projectAttachments;
     models.sequelize.transaction(() => {
       req.log.debug('Create Project - Starting transaction');
       // Validate the templates
@@ -276,6 +301,7 @@ module.exports = [
         newProject = createdProjectAndPhases.newProject;
         newPhases = createdProjectAndPhases.newPhases;
         projectEstimations = createdProjectAndPhases.estimations;
+        projectAttachments = createdProjectAndPhases.attachments;
 
         req.log.debug('new project created (id# %d, name: %s)', newProject.id, newProject.name);
         // create direct project with name and description
@@ -316,8 +342,8 @@ module.exports = [
       newProject = newProject.get({ plain: true });
       // remove utm details & deletedAt field
       newProject = _.omit(newProject, ['deletedAt', 'utm']);
-      // add an empty attachments array
-      newProject.attachments = [];
+      // adds the project attachments, if any
+      newProject.attachments = projectAttachments;
       // set phases array
       newProject.phases = newPhases;
       // sets estimations array
