@@ -51,9 +51,9 @@ module.exports = [
     });
     let result;
 
-    return models.sequelize.transaction(tx =>
+    return models.sequelize.transaction(() =>
       // Create the milestone template
-      models.MilestoneTemplate.create(entity, { transaction: tx })
+      models.MilestoneTemplate.create(entity)
         .then((createdEntity) => {
           // Omit deletedAt and deletedBy
           result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
@@ -67,7 +67,6 @@ module.exports = [
               id: { $ne: result.id },
               order: { $gte: result.order },
             },
-            transaction: tx,
           });
         }),
     )

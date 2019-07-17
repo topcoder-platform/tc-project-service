@@ -190,3 +190,5 @@ export const INVITE_STATUS = {
   REQUEST_APPROVED: 'request_approved',
   CANCELED: 'canceled',
 };
+
+export const MAX_PARALLEL_REQUEST_QTY = 10;

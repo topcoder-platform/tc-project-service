@@ -26,6 +26,7 @@ const projectTemplates = [
     priceConfig: { key: 'key1', version: 1 },
     createdBy: 1,
     updatedBy: 1,
+    disabled: false,
   },
 ];
 const productTemplates = [
