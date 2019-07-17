@@ -592,6 +592,160 @@ _.assignIn(util, {
 
     return Promise.resolve(null);
   },
+
+  /**
+   * Check if user match the permission rule.
+   *
+   * This method uses permission rule defined in `permissionRule`
+   * and checks that the `user` matches it.
+   *
+   * If we define a rule with `projectRoles` list, we also should provide `projectMembers`
+   * - the list of project members.
+   *
+   * @param {Object}        permissionRule               permission rule
+   * @param {Array<String>} permissionRule.projectRoles  the list of project roles of the user
+   * @param {Array<String>} permissionRule.topcoderRoles the list of Topcoder roles of the user
+   * @param {Object}        user                         user for whom we check permissions
+   * @param {Object}        user.roles                   list of user roles
+   * @param {Object}        user.isMachine               `true` - if it's machine, `false` - real user
+   * @param {Object}        user.scopes                  scopes of user token
+   * @param {Array}         projectMembers               (optional) list of project members - required to check `topcoderRoles`
+   *
+   * @returns {Boolean}     true, if has permission
+   */
+  matchPermissionRule: (permissionRule, user, projectMembers) => {
+    const member = _.find(projectMembers, { userId: user.userId });
+    let hasProjectRole = false;
+    let hasTopcoderRole = false;
+
+    if (permissionRule) {
+      if (permissionRule.projectRoles
+        && permissionRule.projectRoles.length > 0
+        && !!member
+      ) {
+        hasProjectRole = _.includes(permissionRule.projectRoles, member.role);
+      }
+
+      if (permissionRule.topcoderRoles && permissionRule.topcoderRoles.length > 0) {
+        hasTopcoderRole = util.hasRoles({ authUser: user }, permissionRule.topcoderRoles);
+      }
+    }
+
+    return hasProjectRole || hasTopcoderRole;
+  },
+
+  /**
+   * Check if user has permission.
+   *
+   * This method uses permission defined in `permission` and checks that the `user` matches it.
+   *
+   * `permission` may be defined in two ways:
+   *  - **Full** way with defined `allowRule` and optional `denyRule`, example:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       },
+   *       denyRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *    If user matches `denyRule` then the access would be dined even if matches `allowRule`.
+   *  - **Simplified** way may be used if we only want to define `allowRule`.
+   *    We can skip the `allowRule` property and define `allowRule` directly inside `permission` object, example:
+   *    ```js
+   *    {
+   *       projectRoles: [],
+   *       topcoderRoles: []
+   *    }
+   *    ```
+   *    This **simplified** permission is equal to a **full** permission:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *         projectRoles: [],
+   *         topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *
+   * If we define any rule with `projectRoles` list, we also should provide `projectMembers`
+   * - the list of project members.
+   *
+   * @param {Object} permission     permission or permissionRule
+   * @param {Object} user           user for whom we check permissions
+   * @param {Object} user.roles     list of user roles
+   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
+   * @param {Object} user.scopes    scopes of user token
+   * @param {Array}  projectMembers (optional) list of project members - required to check `topcoderRoles`
+   *
+   * @returns {Boolean}     true, if has permission
+   */
+  hasPermission: (permission, user, projectMembers) => {
+    const allowRule = permission.allowRule ? permission.allowRule : permission;
+    const denyRule = permission.denyRule ? permission.denyRule : null;
+
+    const allow = util.matchPermissionRule(allowRule, user, projectMembers);
+    const deny = util.matchPermissionRule(denyRule, user, projectMembers);
+
+    return allow && !deny;
+  },
+
+  /**
+   * Check if user has permission for the project by `projectId`.
+   *
+   * This method uses permission defined in `permission` and checks that the `user` matches it.
+   *
+   * `permission` may be defined in two ways:
+   *  - **Full** way with defined `allowRule` and optional `denyRule`, example:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       },
+   *       denyRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *    If user matches `denyRule` then the access would be dined even if matches `allowRule`.
+   *  - **Simplified** way may be used if we only want to define `allowRule`.
+   *    We can skip the `allowRule` property and define `allowRule` directly inside `permission` object, example:
+   *    ```js
+   *    {
+   *       projectRoles: [],
+   *       topcoderRoles: []
+   *    }
+   *    ```
+   *    This **simplified** permission is equal to a **full** permission:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *         projectRoles: [],
+   *         topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *
+   * @param {Object} permission     permission or permissionRule
+   * @param {Object} user           user for whom we check permissions
+   * @param {Object} user.roles     list of user roles
+   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
+   * @param {Object} user.scopes    scopes of user token
+   * @param {Number} projectId      project id to check permissions for
+   *
+   * @returns {Promise<Boolean>}     true, if has permission
+   */
+  hasPermissionForProject: (permission, user, projectId) => (
+    models.ProjectMember.getActiveProjectMembers(projectId).then(projectMembers =>
+      util.hasPermission(permission, user, projectMembers),
+    )
+  ),
 });
 
 export default util;
