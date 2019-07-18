@@ -82,11 +82,31 @@ const updateProjectValdiations = {
   },
 };
 
+/**
+ * Gets scopechange fields either from
+ * "template.scope" (for old templates) or from "form.scope" (for new templates).
+ *
+ * @param {Object} project The project object
+ *
+ * @returns {Array} - the scopeChangeFields
+ */
+const getScopeChangeFields = (project) => {
+  const scopeChangeFields = _.get(project, 'template.scope.scopeChangeFields');
+
+  const getFromForm = (_project) => {
+    const formRef = _.get(_project, 'template.form');
+    const forms = _.get(_project, 'forms');
+    const form = formRef && _.find(forms, formRef);
+
+    return _.get(form, 'scope.scopeChangeFields');
+  };
+
+  return scopeChangeFields || getFromForm(project);
+};
+
 const isScopeUpdated = (existingProject, updatedProps) => {
-  const template = existingProject.template;
-  if (!template) return false;
-  const scopeFields = template.scope.scopeChangeFields;
-  // TODO handle new refactored scope form
+  const scopeFields = getScopeChangeFields(existingProject);
+
   if (scopeFields) {
     for (let idx = 0; idx < scopeFields.length; idx += 1) {
       const field = scopeFields[idx];

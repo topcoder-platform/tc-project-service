@@ -20,10 +20,6 @@ const updateScopeChangeRequestValidations = {
   body: {
     param: Joi.object()
       .keys({
-        title: Joi.string().max(90),
-        description: Joi.string().max(255),
-        oldScope: Joi.object(),
-        newScope: Joi.object(),
         status: Joi.string().valid(_.values(SCOPE_CHANGE_REQ_STATUS)),
       }),
   },
@@ -45,7 +41,7 @@ module.exports = [
     const isAdmin = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN]);
 
     req.log.debug('finding scope change', requestId);
-    return models.ScopeChangeRequest.findScopeChangeRequest(projectId, requestId)
+    return models.ScopeChangeRequest.findScopeChangeRequest(projectId, { requestId })
     .then((scopeChangeReq) => {
       req.log.debug(scopeChangeReq);
       if (!scopeChangeReq) {
@@ -72,9 +68,18 @@ module.exports = [
         err.status = 401;
         return next(err);
       }
-      return models.ScopeChangeRequest.update(updatedProps, {
-        where: { id: requestId },
-      }).then((_updatedReq) => {
+
+      return (
+        updatedProps.status === SCOPE_CHANGE_REQ_STATUS.ACTIVATED
+          ? models.Project.update({ details: scopeChangeReq.newScope }, { where: { id: projectId } })
+          : Promise.resolve()
+      )
+      .then(() =>
+        models.ScopeChangeRequest.update(updatedProps, {
+          where: { id: requestId },
+        }),
+      )
+      .then((_updatedReq) => {
         res.json(util.wrapResponse(req.id, _updatedReq));
         return Promise.resolve();
       });

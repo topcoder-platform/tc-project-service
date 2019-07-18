@@ -1,4 +1,5 @@
 /* eslint-disable valid-jsdoc */
+import { SCOPE_CHANGE_REQ_STATUS } from '../constants';
 
 /**
  * The ScopeChangeRequest model
@@ -7,8 +8,6 @@
 module.exports = (sequelize, DataTypes) => {
   const ScopeChangeRequest = sequelize.define('ScopeChangeRequest', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-    title: { type: DataTypes.STRING(90), allowNull: false },
-    description: DataTypes.STRING(255),
     projectId: { type: DataTypes.BIGINT, allowNull: false },
     oldScope: { type: DataTypes.JSON, allowNull: false },
     newScope: { type: DataTypes.JSON, allowNull: false },
@@ -30,18 +29,26 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     classMethods: {
-      findScopeChangeRequest(projectId, requestId, status) {
+      findScopeChangeRequest(projectId, { requestId, status }) {
         const where = {
-          id: requestId,
           projectId,
         };
         if (status) {
           where.status = status;
         }
+        if (requestId) {
+          where.id = requestId;
+        }
         return this.findOne({
           where,
           raw: true,
         });
+      },
+      findPendingScopeChangeRequest(projectId) {
+        return this.findScopeChangeRequest(
+          projectId,
+          { status: { $in: [SCOPE_CHANGE_REQ_STATUS.PENDING, SCOPE_CHANGE_REQ_STATUS.APPROVED] } },
+        );
       },
       getProjectScopeChangeRequests(projectId, status) {
         const where = {
