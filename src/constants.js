@@ -184,3 +184,10 @@ export const INVITE_STATUS = {
 };
 
 export const MAX_PARALLEL_REQUEST_QTY = 10;
+
+export const ESTIMATION_TYPE = {
+  FEE: 'fee',
+  COMMUNITY: 'community',
+  TOPCODER_SERVICE: 'topcoder_service',
+  REFERENCE_PROGRAM: 'reference_program',
+};
