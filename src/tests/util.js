@@ -26,6 +26,8 @@ export default {
     member2: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJtZW1iZXIyIiwiZXhwIjoyNTYzMDc2Njg5LCJ1c2VySWQiOiI0MDA1MTMzNSIsImlhdCI6MTQ2MzA3NjA4OSwiZW1haWwiOiJ0ZXN0QHRvcGNvZGVyLmNvbSIsImp0aSI6ImIzM2I3N2NkLWI1MmUtNDBmZS04MzdlLWJlYjhlMGFlNmE0YSJ9.Mh4bw3wm-cn5Kcf96gLFVlD0kySOqqk4xN3qnreAKL4',
     // userId = 40051336, [ 'Connect Admin' ], handle: 'connect_admin1', email: 'connect_admin1@topcoder.com'
     connectAdmin: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJDb25uZWN0IEFkbWluIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJjb25uZWN0X2FkbWluMSIsImV4cCI6MjU2MzA3NjY4OSwidXNlcklkIjoiNDAwNTEzMzYiLCJpYXQiOjE0NjMwNzYwODksImVtYWlsIjoiY29ubmVjdF9hZG1pbjFAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.nSGfXMl02NZ90ZKLiEKPg75iAjU92mfteaY6xgqkM30',
+    // userId = 40158431, [ 'Topcoder user' ], handle: 'romitchoudhary', email: 'romit.choudhary@rivigo.com'
+    romit: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJyb21pdGNob3VkaGFyeSIsImV4cCI6MTU2MjkxOTc5MSwidXNlcklkIjoiNDAxNTg0MzEiLCJpYXQiOjE1NjI5MTkxOTEsImVtYWlsIjoicm9taXQuY2hvdWRoYXJ5QHJpdmlnby5jb20iLCJqdGkiOiJlMmM1ZTc2NS03OTI5LTRiNzgtYjI2OS1iZDRlODA0NDI4YjMifQ.P1CoydCJuQ8Hv_b0-a8V7Wu0pgIt9qv4NYyB7FTbua0',
   },
   userIds: {
     member: 40051331,
@@ -34,6 +36,7 @@ export default {
     manager: 40051334,
     member2: 40051335,
     connectAdmin: 40051336,
+    romit: 40158431,
   },
   getDecodedToken: token => jwt.decode(token),
 
