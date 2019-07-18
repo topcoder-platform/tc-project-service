@@ -530,8 +530,8 @@ describe('Project Member Invite create', () => {
         }),
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      util.lookupUserEmails.restore();
-      sandbox.stub(util, 'lookupUserEmails', () => Promise.resolve([{
+      util.lookupMultipleUserEmails.restore();
+      sandbox.stub(util, 'lookupMultipleUserEmails', () => Promise.resolve([{
         id: '40158431',
         email: 'romit.choudhary@rivigo.com',
       }]));
