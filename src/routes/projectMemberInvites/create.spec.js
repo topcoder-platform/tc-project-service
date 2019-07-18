@@ -563,7 +563,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 403 and empty response when trying add already invited member', (done) => {
+    it('should return 403 and failed list when trying add already invited member by userId', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         get: () => Promise.resolve({
           status: 200,
@@ -800,7 +800,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 403 and failed array when trying add already invited member by lowercase email', (done) => {
+    it('should return 403 and failed list when trying add already invited member by lowercase email', (done) => {
       request(server)
         .post(`/v4/projects/${project1.id}/members/invite`)
         .set({
@@ -828,7 +828,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 403 and empty response when trying add already invited member by uppercase email', (done) => {
+    it('should return 403 and failed list when trying add already invited member by uppercase email', (done) => {
       request(server)
         .post(`/v4/projects/${project1.id}/members/invite`)
         .set({
@@ -856,7 +856,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    xit('should return 403 and empty response when trying add already invited member by gmail email with dot',
+    xit('should return 403 and failed list when trying add already invited member by gmail email with dot',
       (done) => {
         request(server)
           .post(`/v4/projects/${project1.id}/members/invite`)
@@ -884,7 +884,7 @@ describe('Project Member Invite create', () => {
           });
       });
 
-    xit('should return 403 and empty response when trying add already invited member by gmail email without dot',
+    xit('should return 403 and failed list when trying add already invited member by gmail email without dot',
       (done) => {
         request(server)
           .post(`/v4/projects/${project1.id}/members/invite`)

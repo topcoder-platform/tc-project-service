@@ -111,7 +111,7 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed, members) 
         const errMessageForAlreadyMemberUsers = 'User with such email is already a member of the team.';
 
         _.remove(existentUsersWithNumberId, user => _.some(members, (m) => {
-          const isPresent = m.userId === Number(user.id);
+          const isPresent = (m.userId === user.id);
           if (isPresent) {
             failed.push(_.assign({}, {
               email: user.email,
@@ -125,7 +125,7 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed, members) 
         const errMessageForAlreadyInvitedUsers = 'User with such email is already invited to this project.';
 
         _.remove(existentUsersWithNumberId, user => _.some(invites, (i) => {
-          const isPresent = i.userId === Number(user.id);
+          const isPresent = (i.userId === user.id);
           if (isPresent) {
             failed.push(_.assign({}, {
               email: i.email,
