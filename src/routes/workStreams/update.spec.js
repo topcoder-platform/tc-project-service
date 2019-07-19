@@ -35,8 +35,10 @@ describe('UPDATE Work Stream', () => {
         .then((template) => {
           models.WorkManagementPermissions.create({
             policy: 'workStream.edit',
-            allowRule: { projectRoles: ['manager', 'copilot'], topcoderRoles: ['Connect Admin', 'administrator'] },
-            denyRule: { projectRoles: ['copilot'] },
+            permission: {
+              allowRule: { projectRoles: ['manager', 'copilot'], topcoderRoles: ['Connect Admin', 'administrator'] },
+              denyRule: { projectRoles: ['copilot'] },
+            },
             projectTemplateId: template.id,
             details: {},
             createdBy: 1,

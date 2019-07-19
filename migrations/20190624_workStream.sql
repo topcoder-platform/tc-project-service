@@ -41,8 +41,7 @@ ALTER TABLE ONLY work_streams
 CREATE TABLE work_management_permissions (
     id bigint NOT NULL,
     "policy" character varying(255) NOT NULL,
-    "allowRule" json,
-    "denyRule" json,
+    "permission" json NOT NULL,
     "projectTemplateId" bigint NOT NULL,
     "deletedAt" timestamp with time zone,
     "createdAt" timestamp with time zone,

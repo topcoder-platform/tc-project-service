@@ -88,11 +88,13 @@ describe('DELETE Work Item', () => {
         .then((template) => {
           models.WorkManagementPermissions.create({
             policy: 'workItem.delete',
-            allowRule: {
-              projectRoles: ['customer', 'copilot'],
-              topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+            permission: {
+              allowRule: {
+                projectRoles: ['customer', 'copilot'],
+                topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+              },
+              denyRule: { projectRoles: ['copilot'] },
             },
-            denyRule: { projectRoles: ['copilot'] },
             projectTemplateId: template.id,
             details: {},
             createdBy: 1,

@@ -34,12 +34,12 @@ module.exports = policy => req => new Promise((resolve, reject) => {
         },
       });
     })
-    .then((permission) => {
-      if (!permission) {
+    .then((workManagementPermission) => {
+      if (!workManagementPermission) {
         return false;
       }
 
-      return util.hasPermissionForProject(permission, req.authUser, projectId);
+      return util.hasPermissionForProject(workManagementPermission.permission, req.authUser, projectId);
     })
     .then((hasAccess) => {
       if (!hasAccess) {

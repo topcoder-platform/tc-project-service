@@ -7,8 +7,7 @@ module.exports = (sequelize, DataTypes) => {
   const WorkManagementPermissions = sequelize.define('WorkManagementPermissions', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     policy: { type: DataTypes.STRING(255), allowNull: false },
-    allowRule: { type: DataTypes.JSON, allowNull: false },
-    denyRule: DataTypes.JSON,
+    permission: { type: DataTypes.JSON, allowNull: false },
     projectTemplateId: { type: DataTypes.BIGINT, allowNull: false },
 
     deletedAt: { type: DataTypes.DATE, allowNull: true },
