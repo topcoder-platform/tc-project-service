@@ -27,7 +27,7 @@ module.exports = policy => req => new Promise((resolve, reject) => {
         return null;
       }
 
-      return models.WorkManagementPermissions.findOne({
+      return models.WorkManagementPermission.findOne({
         where: {
           policy,
           projectTemplateId: project.templateId,

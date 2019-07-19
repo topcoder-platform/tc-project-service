@@ -33,7 +33,7 @@ describe('UPDATE Work Stream', () => {
           updatedBy: 2,
         })
         .then((template) => {
-          models.WorkManagementPermissions.create({
+          models.WorkManagementPermission.create({
             policy: 'workStream.edit',
             permission: {
               allowRule: { projectRoles: ['manager', 'copilot'], topcoderRoles: ['Connect Admin', 'administrator'] },

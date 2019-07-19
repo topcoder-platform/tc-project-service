@@ -70,7 +70,7 @@ describe('UPDATE Work Item', () => {
           updatedBy: 2,
         })
         .then((template) => {
-          models.WorkManagementPermissions.create({
+          models.WorkManagementPermission.create({
             policy: 'workItem.edit',
             permission: {
               allowRule: {

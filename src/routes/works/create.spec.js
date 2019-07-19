@@ -56,7 +56,7 @@ describe('CREATE work', () => {
           updatedBy: 2,
         })
         .then((template) => {
-          models.WorkManagementPermissions.create({
+          models.WorkManagementPermission.create({
             policy: 'work.create',
             permission: {
               allowRule: {

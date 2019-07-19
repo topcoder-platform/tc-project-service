@@ -86,7 +86,7 @@ describe('DELETE Work Item', () => {
           updatedBy: 2,
         })
         .then((template) => {
-          models.WorkManagementPermissions.create({
+          models.WorkManagementPermission.create({
             policy: 'workItem.delete',
             permission: {
               allowRule: {

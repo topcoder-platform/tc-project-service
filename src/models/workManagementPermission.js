@@ -1,10 +1,10 @@
 /* eslint-disable valid-jsdoc */
 
 /**
- * The WorkManagementPermissions model
+ * The WorkManagementPermission model
  */
 module.exports = (sequelize, DataTypes) => {
-  const WorkManagementPermissions = sequelize.define('WorkManagementPermissions', {
+  const WorkManagementPermission = sequelize.define('WorkManagementPermission', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     policy: { type: DataTypes.STRING(255), allowNull: false },
     permission: { type: DataTypes.JSON, allowNull: false },
@@ -31,5 +31,5 @@ module.exports = (sequelize, DataTypes) => {
     ],
   });
 
-  return WorkManagementPermissions;
+  return WorkManagementPermission;
 };
