@@ -41,7 +41,6 @@ module.exports = (sequelize, DataTypes) => {
         }
         return this.findOne({
           where,
-          raw: true,
         });
       },
       findPendingScopeChangeRequest(projectId) {

@@ -55,11 +55,11 @@ module.exports = [
 
       // If the project is not frozen yet, the changes can be saved directly into projects db.
       // Scope change request workflow is not required.
-      const statesesForNonFrozenProjects = [PROJECT_STATUS.DRAFT, PROJECT_STATUS.IN_REVIEW];
-      if (statesesForNonFrozenProjects.indexOf(project.status) > -1) {
+      const statusesForNonFrozenProjects = [PROJECT_STATUS.DRAFT, PROJECT_STATUS.IN_REVIEW];
+      if (statusesForNonFrozenProjects.indexOf(project.status) > -1) {
         const err = new Error(
           `Cannot create a scope change request for projects with statuses: ${
-            statesesForNonFrozenProjects.join(', ')}`);
+            statusesForNonFrozenProjects.join(', ')}`);
         err.status = 403;
         return Promise.reject(err);
       }

@@ -74,11 +74,7 @@ module.exports = [
           ? models.Project.update({ details: scopeChangeReq.newScope }, { where: { id: projectId } })
           : Promise.resolve()
       )
-      .then(() =>
-        models.ScopeChangeRequest.update(updatedProps, {
-          where: { id: requestId },
-        }),
-      )
+      .then(() => scopeChangeReq.update(updatedProps))
       .then((_updatedReq) => {
         res.json(util.wrapResponse(req.id, _updatedReq));
         return Promise.resolve();
