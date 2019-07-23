@@ -94,11 +94,9 @@ const getScopeChangeFields = (project) => {
   const scopeChangeFields = _.get(project, 'template.scope.scopeChangeFields');
 
   const getFromForm = (_project) => {
-    const formRef = _.get(_project, 'template.form');
-    const forms = _.get(_project, 'forms');
-    const form = formRef && _.find(forms, formRef);
+    const form = _project.form;
 
-    return _.get(form, 'scope.scopeChangeFields');
+    return _.get(form, 'config.scopeChangeFields');
   };
 
   return scopeChangeFields || getFromForm(project);
@@ -209,9 +207,15 @@ module.exports = [
         .then(template => Promise.resolve({ _prj, template }));
       })
       .then(({ _prj, template }) => {
+        const formRef = template.form;
+        return formRef ? models.Form.findOne({ where: formRef })
+          .then(form => ({ _prj, template, form })) : { _prj, template };
+      })
+      .then(({ _prj, template, form }) => {
         project = _prj;
         previousValue = _.clone(project.get({ plain: true }));
         previousValue.template = template;
+        previousValue.form = form;
         // run additional validations
         const validationErrors = validateUpdates(previousValue, updatedProps, req);
         if (validationErrors.length > 0) {

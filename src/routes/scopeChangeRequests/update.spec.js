@@ -81,6 +81,20 @@ function createScopeChangeRequest(project) {
   });
 }
 
+/**
+ * Updates the details json of the project
+ * @param {string} projectId The project id
+ * @param {Object} detailsChange The changes to be merged with details json
+ *
+ * @returns {Promise} A promise to update details json in the project
+ */
+function updateProjectDetails(projectId, detailsChange) {
+  return models.Project.findById(projectId).then((project) => {
+    const updatedDetails = _.merge({}, project.details, detailsChange);
+    return project.update({ details: updatedDetails });
+  });
+}
+
 describe('Update Scope Change Rquest', () => {
   let project;
   let scopeChangeRequest;
@@ -129,33 +143,45 @@ describe('Update Scope Change Rquest', () => {
     });
 
     it('Should activate change request with manager login', (done) => {
-      request(server)
-        .patch(`/v4/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          param: {
-            status: SCOPE_CHANGE_REQ_STATUS.ACTIVATED,
-          },
-        })
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            models.ScopeChangeRequest.findOne({ where: { id: scopeChangeRequest.id } }).then((_scopeChangeRequest) => {
-              assertStatus(_scopeChangeRequest, SCOPE_CHANGE_REQ_STATUS.ACTIVATED);
-              done();
-            });
-          }
-        });
+      // Updating project details before activation. This is used in a later test case
+      updateProjectDetails(project.id, { apiDefinition: { notes: 'Please include swagger docs' } }).then(() => {
+        request(server)
+          .patch(`/v4/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({
+            param: {
+              status: SCOPE_CHANGE_REQ_STATUS.ACTIVATED,
+            },
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              models.ScopeChangeRequest.findOne({ where: { id: scopeChangeRequest.id } })
+                .then((_scopeChangeRequest) => {
+                  assertStatus(_scopeChangeRequest, SCOPE_CHANGE_REQ_STATUS.ACTIVATED);
+                  done();
+                });
+            }
+          });
+      });
     });
 
     it('Should update details field of project on activation', (done) => {
       models.Project.findOne({ where: { id: project.id } }).then((_project) => {
         const numberScreens = _.get(_project, 'details.appDefinition.numberScreens');
         sinon.assert.match(numberScreens, '5-8');
+        done();
+      });
+    });
+
+    it("Should preserve fields of details json that doesn't change the scope on activation", (done) => {
+      models.Project.findOne({ where: { id: project.id } }).then((_project) => {
+        const apiNotes = _.get(_project, 'details.apiDefinition.notes');
+        sinon.assert.match(apiNotes, 'Please include swagger docs');
         done();
       });
     });

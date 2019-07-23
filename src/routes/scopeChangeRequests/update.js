@@ -25,6 +25,26 @@ const updateScopeChangeRequestValidations = {
   },
 };
 
+/**
+ * Merges the new scope that's being activated into the details json of the project and updates the db
+ * @param {Object} newScope The new scope to apply
+ * @param {string} projectId The project id
+ *
+ * @returns {Promise} The promise to update the project with merged data
+ */
+function updateProjectDetails(newScope, projectId) {
+  return models.Project.findById(projectId).then((project) => {
+    if (!project) {
+      const err = new Error('Project not found');
+      err.status = 404;
+      return Promise.reject(err);
+    }
+
+    const updatedDetails = _.merge({}, project.details, newScope);
+    return project.update({ details: updatedDetails });
+  });
+}
+
 module.exports = [
   // handles request validations
   validate(updateScopeChangeRequestValidations),
@@ -71,7 +91,7 @@ module.exports = [
 
       return (
         updatedProps.status === SCOPE_CHANGE_REQ_STATUS.ACTIVATED
-          ? models.Project.update({ details: scopeChangeReq.newScope }, { where: { id: projectId } })
+          ? updateProjectDetails(scopeChangeReq.newScope, projectId)
           : Promise.resolve()
       )
       .then(() => scopeChangeReq.update(updatedProps))
