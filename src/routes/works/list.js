@@ -44,9 +44,23 @@ module.exports = [
     const sortParameters = sort.split(' ');
 
     const fields = _.union(
-      _.intersection(rawFields, [...PHASE_ATTRIBUTES, 'products']),
+      _.intersection(rawFields, [...PHASE_ATTRIBUTES, 'workItems']),
       ['id'], // required fields
     );
+
+    // search condition for ProjectPhase
+    const include = {
+      model: models.ProjectPhase,
+      through: { attributes: [] },
+      where: {
+        projectId,
+      },
+      attributes: fields.filter(f => f !== 'workItems'),
+      required: false,
+    };
+    if (fields.includes('workItems')) {
+      _.set(include, 'include', [{ model: models.PhaseProduct, as: 'products' }]);
+    }
 
     return models.WorkStream.findOne({
       where: {
@@ -54,15 +68,7 @@ module.exports = [
         projectId,
         deletedAt: { $eq: null },
       },
-      include: [{
-        model: models.ProjectPhase,
-        through: { attributes: [] },
-        where: {
-          projectId,
-        },
-        attributes: fields,
-        required: false,
-      }],
+      include: [include],
       order: [[models.ProjectPhase, sortParameters[0], sortParameters[1]]],
     })
     .then((existingWorkStream) => {
@@ -74,7 +80,15 @@ module.exports = [
         throw err;
       }
 
-      return existingWorkStream.ProjectPhases;
+      // rename 'products' to 'workItems'
+      return existingWorkStream.ProjectPhases.map((phase) => {
+        const phaseObj = phase.get({ plain: true });
+        if (_.has(phaseObj, 'products')) {
+          _.set(phaseObj, 'workItems', _.get(phaseObj, 'products'));
+          _.unset(phaseObj, 'products');
+        }
+        return phaseObj;
+      });
     })
     .then(phases => res.json(util.wrapResponse(req.id, phases, phases.length)))
     .catch(next);

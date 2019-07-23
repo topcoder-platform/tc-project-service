@@ -41,6 +41,18 @@ describe('LIST works', () => {
     },
   ];
 
+  const productBody = {
+    name: 'test phase product',
+    type: 'product1',
+    estimatedPrice: 20.0,
+    actualPrice: 1.23456,
+    details: {
+      message: 'This can be any json',
+    },
+    createdBy: 1,
+    updatedBy: 1,
+  };
+
 
   let projectId;
   let workStreamId;
@@ -96,7 +108,13 @@ describe('LIST works', () => {
                       }, {
                         phaseId: p[1].id,
                         workStreamId,
-                      }]).then(() => done());
+                      }]).then((ws) => {
+                        _.assign(productBody, { phaseId: ws[0].phaseId, projectId });
+
+                        models.PhaseProduct.create(productBody).then(() => {
+                          done();
+                        });
+                      });
                     });
                 });
               });
@@ -176,6 +194,29 @@ describe('LIST works', () => {
         })
         .expect(200)
         .end(done);
+    });
+
+    it('should return with populated workItems if fields=workItems is used', (done) => {
+      request(server)
+        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works?fields=workItems`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body.result.content;
+          resJson.should.have.length(2);
+          resJson[0].should.have.property('workItems');
+          resJson[0].workItems.should.be.a('array');
+          resJson[0].workItems.should.have.lengthOf(1);
+          resJson[0].workItems[0].should.have.property('projectId');
+          resJson[0].workItems[0].projectId.should.equal(projectId);
+          resJson[0].workItems[0].name.should.equal(productBody.name);
+          resJson[1].should.have.property('workItems');
+          resJson[1].workItems.should.be.a('array');
+          resJson[1].workItems.should.have.lengthOf(0);
+          done();
+        });
     });
   });
 });
