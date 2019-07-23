@@ -56,6 +56,7 @@ describe('UPDATE work', () => {
   let workStreamId;
   let workId;
   let workId2;
+  let workId3;
 
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
@@ -136,15 +137,20 @@ describe('UPDATE work', () => {
                 const createPhases = [
                   body,
                   _.assign({ order: 1 }, body),
+                  _.assign({}, body, { status: 'draft' }),
                 ];
                 models.ProjectPhase.bulkCreate(createPhases, { returning: true }).then((phases) => {
                   workId = phases[0].id;
                   workId2 = phases[1].id;
+                  workId3 = phases[2].id;
                   models.PhaseWorkStream.bulkCreate([{
                     phaseId: phases[0].id,
                     workStreamId,
                   }, {
                     phaseId: phases[1].id,
+                    workStreamId,
+                  }, {
+                    phaseId: phases[2].id,
                     workStreamId,
                   }]).then(() => {
                     // create members
@@ -429,7 +435,7 @@ describe('UPDATE work', () => {
 
       it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (active)', (done) => {
         request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .patch(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId3}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
