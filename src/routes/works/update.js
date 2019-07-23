@@ -8,7 +8,7 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, ROUTES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -176,8 +176,12 @@ module.exports = [
           { original: previousValue, updated, allPhases },
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { req, original: previousValue, updated: _.clone(updated.get({ plain: true })) });
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
+          req,
+          original: previousValue,
+          updated: _.clone(updated.get({ plain: true })),
+          route: ROUTES.WORKS.UPDATE,
+        });
 
         res.json(util.wrapResponse(req.id, updated));
       })

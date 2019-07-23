@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, ROUTES } from '../../constants';
 
 
 const permissions = tcMiddleware.permissions;
@@ -74,8 +74,12 @@ module.exports = [
         { original: previousValue, updated: updatedValue },
         { correlationId: req.id },
       );
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
-        { req, original: previousValue, updated: updatedValue });
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED, {
+        req,
+        original: previousValue,
+        updated: updatedValue,
+        route: ROUTES.PHASE_PRODUCTS.UPDATE,
+      });
 
       res.json(util.wrapResponse(req.id, updated));
     }).catch(err => next(err));

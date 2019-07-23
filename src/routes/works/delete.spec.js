@@ -1,11 +1,18 @@
+/* eslint-disable no-unused-expressions */
 /**
  * Tests for delete.js
  */
 import request from 'supertest';
 import chai from 'chai';
+import sinon from 'sinon';
+
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+import { BUS_API_EVENT } from '../../constants';
+
+chai.should();
 
 const expectAfterDelete = (workId, projectId, workStreamId, err, next) => {
   if (err) throw err;
@@ -35,6 +42,7 @@ const expectAfterDelete = (workId, projectId, workStreamId, err, next) => {
 
 describe('DELETE work', () => {
   let projectId;
+  let projectName;
   let workStreamId;
   let workId;
 
@@ -103,6 +111,7 @@ describe('DELETE work', () => {
             })
             .then((project) => {
               projectId = project.id;
+              projectName = project.name;
               models.WorkStream.create({
                 name: 'Work Stream',
                 type: 'generic',
@@ -236,6 +245,50 @@ describe('DELETE work', () => {
         })
         .expect(204)
         .end(err => expectAfterDelete(workId, projectId, workStreamId, err, done));
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when work removed', (done) => {
+        request(server)
+        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                userId: 40051336,
+                initiatorUserId: 40051336,
+              })).should.be.true;
+              done();
+            });
+          }
+        });
+      });
     });
   });
 });

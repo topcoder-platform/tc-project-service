@@ -1,12 +1,18 @@
+/* eslint-disable no-unused-expressions */
 /**
  * Tests for delete.js
  */
 import _ from 'lodash';
 import request from 'supertest';
 import chai from 'chai';
+import sinon from 'sinon';
+
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import busApi from '../../services/busApi';
+
+chai.should();
 
 const expectAfterDelete = (projectId, workStreamId, phaseId, id, err, next) => {
   if (err) throw err;
@@ -236,6 +242,43 @@ describe('DELETE Work Item', () => {
         })
         .expect(204)
         .end(err => expectAfterDelete(projectId, workStreamId, workId, productId, err, done));
+    });
+
+    describe('Bus api', () => {
+      let createEventSpy;
+      const sandbox = sinon.sandbox.create();
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(() => {
+        createEventSpy = sandbox.spy(busApi, 'createEvent');
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when work item removed', (done) => {
+        request(server)
+        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.notCalled.should.be.true;
+              done();
+            });
+          }
+        });
+      });
     });
   });
 });
