@@ -8,6 +8,7 @@ import {
     PROJECT_MEMBER_ROLE,
     USER_ROLE,
     PROJECT_MEMBER_MANAGER_ROLES,
+    EVENT,
 } from '../../constants';
 import models from '../../models';
 
@@ -32,8 +33,10 @@ const updateScopeChangeRequestValidations = {
  *
  * @returns {Promise} The promise to update the project with merged data
  */
-function updateProjectDetails(newScope, projectId) {
+function updateProjectDetails(req, newScope, projectId) {
   return models.Project.findById(projectId).then((project) => {
+    const previousValue = _.clone(project.get({ plain: true }));
+
     if (!project) {
       const err = new Error('Project not found');
       err.status = 404;
@@ -41,7 +44,20 @@ function updateProjectDetails(newScope, projectId) {
     }
 
     const updatedDetails = _.merge({}, project.details, newScope);
-    return project.update({ details: updatedDetails });
+    return project.update({ details: updatedDetails }).then((updatedProject) => {
+      const updated = updatedProject.get({ plain: true });
+      const original = _.omit(previousValue, ['deletedAt']);
+
+      // publish original and updated project data
+      req.app.services.pubsub.publish(
+        EVENT.ROUTING_KEY.PROJECT_UPDATED,
+        { original, updated },
+        { correlationId: req.id },
+      );
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, { req, original, updated });
+
+      return updatedProject;
+    });
   });
 }
 
@@ -91,7 +107,7 @@ module.exports = [
 
       return (
         updatedProps.status === SCOPE_CHANGE_REQ_STATUS.ACTIVATED
-          ? updateProjectDetails(scopeChangeReq.newScope, projectId)
+          ? updateProjectDetails(req, scopeChangeReq.newScope, projectId)
           : Promise.resolve()
       )
       .then(() => scopeChangeReq.update(updatedProps))
