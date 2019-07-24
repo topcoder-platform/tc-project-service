@@ -604,6 +604,440 @@ paths:
           description: If project is not found
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - workstream
+      operationId: findWorkStreams
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project workstreams.
+      responses:
+        '200':
+          description: A list of project work streams
+          schema:
+            $ref: '#/definitions/WorkStreamListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - workstream
+      operationId: addWorkStream
+      security:
+        - Bearer: []
+      description: >-
+        Create a work stream.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/WorkStreamBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created project work stream
+          schema:
+            $ref: '#/definitions/WorkStreamResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - workstream
+      description: >-
+        Retrieve work stream by id.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project work stream
+          schema:
+            $ref: '#/definitions/WorkStreamResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/workStreamIdParam'
+      operationId: getWorkStream
+    patch:
+      tags:
+        - workstream
+      operationId: updateWorkStream
+      security:
+        - Bearer: []
+      description: >-
+        Update a project work stream.
+      responses:
+        '200':
+          description: Successfully updated project work stream.
+          schema:
+            $ref: '#/definitions/WorkStreamResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkStreamBodyParam'
+    delete:
+      tags:
+        - workstream
+      description: >-
+        Remove an existing project work stream.
+      security:
+        - Bearer: []
+      responses:
+        '204':
+          description: Project work stream successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work
+      operationId: findWorks
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all works for given project and workstream.
+      parameters:
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: |
+            Comma separated list of project phase fields to return.
+        - name: sort
+          required: false
+          description: >
+            sort project phases by startDate, endDate, status, order. Default is
+            startDate asc
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of project works
+          schema:
+            $ref: '#/definitions/ProjectPhaseListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - work
+      operationId: addWork
+      security:
+        - Bearer: []
+      description: >-
+        Create a work
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectPhaseBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created project work
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work
+      description: >-
+        Retrieve work by id.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project work
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getWork
+    patch:
+      tags:
+        - work
+      operationId: updateWork
+      security:
+        - Bearer: []
+      description: >-
+        Update work for given project and workstream.
+      responses:
+        '200':
+          description: Successfully updated project work.
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectPhaseBodyParam'
+    delete:
+      tags:
+        - work
+      description: >-
+        Remove an existing work by id for given project and workstream.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Work successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}/workitems':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work item
+      operationId: findWorkItems
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all work items for given project, workstream and phase.
+      responses:
+        '200':
+          description: A list of work items
+          schema:
+            $ref: '#/definitions/PhaseProductListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - work item
+      operationId: addWorkItem
+      security:
+        - Bearer: []
+      description: Create a work item for given project, workstream and phase.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created work item
+          schema:
+            $ref: '#/definitions/PhaseProductResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}/workitems/{productId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+      - $ref: '#/parameters/productIdParam'
+    get:
+      tags:
+        - work item
+      description: >-
+        Retrieve work item by id for given project, workstream and phase.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a work item
+          schema:
+            $ref: '#/definitions/PhaseProductResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getWorkItem
+    patch:
+      tags:
+        - work item
+      operationId: updateWorkItem
+      security:
+        - Bearer: []
+      description: >-
+        Update a work item for given project, workstream and phase.
+      responses:
+        '200':
+          description: Successfully updated work item.
+          schema:
+            $ref: '#/definitions/PhaseProductResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductBodyParam'
+    delete:
+      tags:
+        - work item
+      description: >-
+        Remove an existing work item by id for given project, workstream and phase.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Work item successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases/{phaseId}/products/db':
     parameters:
       - $ref: '#/parameters/projectIdParam'
@@ -2960,6 +3394,14 @@ parameters:
     type: integer
     format: int64
     minimum: 1
+  workStreamIdParam:
+    name: workStreamId
+    in: path
+    description: work stream identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
   productIdParam:
     name: productId
     in: path
@@ -3514,7 +3956,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/ProjectAttachment'
@@ -3620,7 +4063,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/ProjectMember'
@@ -3639,7 +4083,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/ProjectMember'
@@ -3658,7 +4103,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/Project'
@@ -3677,7 +4123,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: object
@@ -3702,7 +4149,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3828,7 +4276,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3850,7 +4299,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3961,7 +4411,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3980,7 +4431,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4002,7 +4454,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4088,6 +4541,70 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/ProjectPhaseRequest'
+  WorkStream:
+    title: Work stream object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          projectId:
+            type: number
+            format: int64
+            description: the project id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/WorkStreamRequest'
+
+  WorkStreamRequest:
+    title: Work stream request object
+    type: object
+    required:
+      - name
+      - status
+      - type
+    properties:
+      name:
+        type: string
+        description: the work stream name
+      status:
+        type: string
+        description: the work stream status
+      type:
+        type: string
+        description: the type
+  WorkStreamBodyParam:
+    title: Work stream body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: '#/definitions/WorkStreamRequest'
   ProjectPhaseResponse:
     title: Single project phase response object
     type: object
@@ -4103,7 +4620,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4125,7 +4643,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4133,6 +4652,55 @@ definitions:
             type: array
             items:
               $ref: '#/definitions/ProjectPhase'
+
+  WorkStreamResponse:
+    title: Single project work stream response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            $ref: '#/definitions/WorkStream'
+
+  WorkStreamListResponse:
+    title: Project phase list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/WorkStream'
   PhaseProductRequest:
     title: Phase product request object
     type: object
@@ -4218,7 +4786,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4240,7 +4809,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4332,7 +4902,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4354,7 +4925,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4522,7 +5094,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4544,7 +5117,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4567,7 +5141,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4589,7 +5164,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4689,7 +5265,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4711,7 +5288,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4905,7 +5483,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4927,7 +5506,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5063,7 +5643,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5085,7 +5666,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5109,7 +5691,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5258,7 +5841,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5318,7 +5902,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/Form'
@@ -5337,7 +5922,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: array
@@ -5405,7 +5991,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/PriceConfig'
@@ -5424,7 +6011,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: array
@@ -5493,7 +6081,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/PlanConfig'
@@ -5512,7 +6101,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: array

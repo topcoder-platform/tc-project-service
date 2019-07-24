@@ -1,4 +1,6 @@
-
+/**
+ * API to update work
+ */
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
@@ -8,10 +10,14 @@ import models from '../../models';
 import util from '../../util';
 import { EVENT, ROUTES } from '../../constants';
 
-
 const permissions = tcMiddleware.permissions;
 
-const updateProjectPhaseValidation = {
+const schema = {
+  params: {
+    projectId: Joi.number().integer().positive().required(),
+    workStreamId: Joi.number().integer().positive().required(),
+    id: Joi.number().integer().positive().required(),
+  },
   body: {
     param: Joi.object().keys({
       name: Joi.string().optional(),
@@ -31,13 +37,14 @@ const updateProjectPhaseValidation = {
 
 module.exports = [
   // validate request payload
-  validate(updateProjectPhaseValidation),
+  validate(schema),
   // check permission
-  permissions('project.updateProjectPhase'),
+  permissions('work.edit'),
 
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
-    const phaseId = _.parseInt(req.params.phaseId);
+    const workStreamId = _.parseInt(req.params.workStreamId);
+    const phaseId = _.parseInt(req.params.id);
 
     const updatedProps = req.body.param;
     updatedProps.updatedBy = req.authUser.userId;
@@ -49,15 +56,23 @@ module.exports = [
       where: {
         id: phaseId,
         projectId,
-        deletedAt: { $eq: null },
       },
-    }).then(existing => new Promise((accept, reject) => {
+      include: [{
+        model: models.WorkStream,
+        through: { attributes: [] },
+        where: {
+          id: workStreamId,
+          projectId,
+        },
+      }],
+    })
+    .then((existing) => {
       if (!existing) {
         // handle 404
         const err = new Error('No active project phase found for project id ' +
-          `${projectId} and phase id ${phaseId}`);
+          `${projectId} and work stream ${workStreamId} and phase id ${phaseId}`);
         err.status = 404;
-        reject(err);
+        throw err;
       } else {
         previousValue = _.clone(existing.get({ plain: true }));
 
@@ -79,16 +94,15 @@ module.exports = [
         if (startDate !== null && endDate !== null && startDate > endDate) {
           const err = new Error('startDate must not be after endDate.');
           err.status = 400;
-          reject(err);
+          throw err;
         } else {
           _.extend(existing, updatedProps);
-          existing.save().then(accept).catch(reject);
+          return existing.save().catch(next);
         }
       }
-    }))
+    })
       .then((updatedPhase) => {
         updated = updatedPhase;
-
         // Ignore re-ordering if there's no order specified for this phase
         if (_.isNil(updated.order)) {
           return Promise.resolve();
@@ -101,10 +115,15 @@ module.exports = [
 
         return models.ProjectPhase.count({
           where: {
-            projectId,
-            id: { $ne: updated.id },
-            order: updated.order,
+            id: { $ne: phaseId },
           },
+          include: [{
+            model: models.WorkStream,
+            where: {
+              id: workStreamId,
+              projectId,
+            },
+          }],
         })
           .then((count) => {
             if (count === 0) {
@@ -161,7 +180,7 @@ module.exports = [
           req,
           original: previousValue,
           updated: _.clone(updated.get({ plain: true })),
-          route: ROUTES.PHASES.UPDATE,
+          route: ROUTES.WORKS.UPDATE,
         });
 
         res.json(util.wrapResponse(req.id, updated));
