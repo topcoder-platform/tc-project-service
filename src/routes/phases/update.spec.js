@@ -54,6 +54,7 @@ describe('Project Phases', () => {
   let projectName;
   let phaseId;
   let phaseId2;
+  let phaseId3;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -108,11 +109,13 @@ describe('Project Phases', () => {
             const phases = [
               body,
               _.assign({ order: 1 }, body),
+              _.assign({}, body, { status: 'draft' }),
             ];
             models.ProjectPhase.bulkCreate(phases, { returning: true })
               .then((createdPhases) => {
                 phaseId = createdPhases[0].id;
                 phaseId2 = createdPhases[1].id;
+                phaseId3 = createdPhases[2].id;
 
                 done();
               });
@@ -453,6 +456,32 @@ describe('Project Phases', () => {
             testUtil.wait(() => {
               createEventSpy.calledOnce.should.be.true;
               createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED);
+              done();
+            });
+          }
+        });
+      });
+
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (active)', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId3}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            status: 'active',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE);
               done();
             });
           }

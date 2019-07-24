@@ -104,6 +104,12 @@ export const BUS_API_EVENT = {
   PROJECT_PHASE_UPDATE_PROGRESS: 'notifications.connect.project.phase.update.progress',
   PROJECT_PHASE_UPDATE_SCOPE: 'notifications.connect.project.phase.update.scope',
 
+  PROJECT_WORK_TRANSITION_ACTIVE: 'notifications.connect.project.work.transition.active',
+  PROJECT_WORK_TRANSITION_COMPLETED: 'notifications.connect.project.work.transition.completed',
+  PROJECT_WORK_UPDATE_PAYMENT: 'notifications.connect.project.work.update.payment',
+  PROJECT_WORK_UPDATE_PROGRESS: 'notifications.connect.project.work.update.progress',
+  PROJECT_WORK_UPDATE_SCOPE: 'notifications.connect.project.work.update.scope',
+
   MEMBER_JOINED: 'notifications.connect.project.member.joined',
   MEMBER_LEFT: 'notifications.connect.project.member.left',
   MEMBER_REMOVED: 'notifications.connect.project.member.removed',
@@ -131,6 +137,9 @@ export const BUS_API_EVENT = {
 
   // When specification of a product is modified
   PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'connect.action.project.product.update.spec',
+
+  // When specification of a work item is modified
+  PROJECT_WORKITEM_SPECIFICATION_MODIFIED: 'connect.action.project.workitem.update.spec',
 
   MILESTONE_ADDED: 'connect.action.timeline.milestone.added',
   MILESTONE_REMOVED: 'connect.action.timeline.milestone.removed',
@@ -192,3 +201,18 @@ export const INVITE_STATUS = {
 };
 
 export const MAX_PARALLEL_REQUEST_QTY = 10;
+
+export const ROUTES = {
+  PHASE_PRODUCTS: {
+    UPDATE: 'phase_products.update',
+  },
+  PHASES: {
+    UPDATE: 'phases.update',
+  },
+  WORKS: {
+    UPDATE: 'works.update',
+  },
+  WORK_ITEMS: {
+    UPDATE: 'work_items.update',
+  },
+};
