@@ -83,10 +83,11 @@ const createProjectValdiations = {
  * @param {Object} req the request
  * @param {Object} project the project
  * @param {Object} projectTemplate the project template
- * @param {Array} productTemplates array of the templates of the products used in the projec template
+ * @param {Array}  productTemplates array of the templates of the products used in the project template
+ * @param {Array}  phasesList list phases definitions to create
  * @returns {Promise} the promise that resolves to the created project and phases
  */
-function createProjectAndPhases(req, project, projectTemplate, productTemplates) {
+function createProjectAndPhases(req, project, projectTemplate, productTemplates, phasesList) {
   const result = {
     newProject: null,
     newPhases: [],
@@ -135,12 +136,11 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
     if (!projectTemplate) {
       return Promise.resolve(result);
     }
-    const phases = _.filter(_.values(projectTemplate.phases), p => !!p);
     const productTemplateMap = {};
     productTemplates.forEach((pt) => {
       productTemplateMap[pt.id] = pt;
     });
-    return Promise.all(_.map(phases, (phase, phaseIdx) => {
+    return Promise.all(_.map(phasesList, (phase, phaseIdx) => {
       const duration = _.get(phase, 'duration', 1);
       const startDate = moment.utc().hours(0).minutes(0).seconds(0)
         .milliseconds(0);
@@ -186,7 +186,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
  * Validates the project and product templates for the give project template id.
  *
  * @param {Integer} templateId id of the project template which should be validated
- * @returns {Promise} the promise that resolves to an object containing validated project and product templates
+ * @returns {Promise} the promise that resolves to an object containing validated project, product templates and phases list
  */
 function validateAndFetchTemplates(templateId) {
   // backward compatibility for releasing the service before releasing the front end
@@ -203,9 +203,30 @@ function validateAndFetchTemplates(templateId) {
     return Promise.resolve(existingProjectTemplate);
   })
   .then((projectTemplate) => {
-    const phases = _.values(projectTemplate.phases);
+    // for old projectTemplate with `phases` just get phases config directly from projectTemplate
+    if (projectTemplate.phases) {
+      return { projectTemplate, phasesList: _.values(projectTemplate.phases) };
+    }
+
+    // for new projectTemplates try to get phases from the `planConfig`, if it's defined
+    if (projectTemplate.planConfig) {
+      return models.PlanConfig.findOneWithLatestRevision(projectTemplate.planConfig).then((planConfig) => {
+        if (!planConfig) {
+          const apiErr = new Error(`Cannot find planConfig ${JSON.stringify(projectTemplate.planConfig)}`);
+          apiErr.status = 422;
+          throw apiErr;
+        }
+
+        return { projectTemplate, phasesList: _.values(planConfig.config) };
+      });
+    }
+
+    // if cannot get phasesList in anyway
+    return { projectTemplate, phasesList: [] };
+  })
+  .then(({ projectTemplate, phasesList }) => {
     const productPromises = [];
-    phases.forEach((phase) => {
+    phasesList.forEach((phase) => {
       // Make sure number of products of per phase <= max value
       const productCount = _.isArray(phase.products) ? phase.products.length : 0;
       if (productCount > config.maxPhaseProductCount) {
@@ -227,10 +248,10 @@ function validateAndFetchTemplates(templateId) {
       });
     });
     if (productPromises.length > 0) {
-      return Promise.all(productPromises).then(productTemplates => ({ projectTemplate, productTemplates }));
+      return Promise.all(productPromises).then(productTemplates => ({ projectTemplate, productTemplates, phasesList }));
     }
     // if there is no phase or product in a phase is specified, return empty product templates
-    return Promise.resolve({ projectTemplate, productTemplates: [] });
+    return Promise.resolve({ projectTemplate, productTemplates: [], phasesList });
   });
 }
 
@@ -293,9 +314,9 @@ module.exports = [
       // Validate the templates
       return validateAndFetchTemplates(project.templateId)
       // Create project and phases
-      .then(({ projectTemplate, productTemplates }) => {
+      .then(({ projectTemplate, productTemplates, phasesList }) => {
         req.log.debug('Creating project, phase and products');
-        return createProjectAndPhases(req, project, projectTemplate, productTemplates);
+        return createProjectAndPhases(req, project, projectTemplate, productTemplates, phasesList);
       })
       .then((createdProjectAndPhases) => {
         newProject = createdProjectAndPhases.newProject;
