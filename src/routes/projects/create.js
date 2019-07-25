@@ -352,8 +352,7 @@ module.exports = [
           .then(() => newProject.reload(newProject.id))
           .catch((err) => {
             // log the error and continue
-            req.log.error('Error creating direct project');
-            req.log.error(err);
+            req.log.error('Error creating direct project: %s', _.get(err, 'data.result.content', err));
             return Promise.resolve();
           });
         // return Promise.resolve();
