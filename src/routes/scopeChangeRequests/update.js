@@ -28,6 +28,7 @@ const updateScopeChangeRequestValidations = {
 
 /**
  * Merges the new scope that's being activated into the details json of the project and updates the db
+ * @param {Object} req The request object
  * @param {Object} newScope The new scope to apply
  * @param {string} projectId The project id
  *
@@ -46,7 +47,7 @@ function updateProjectDetails(req, newScope, projectId) {
     const updatedDetails = _.merge({}, project.details, newScope);
     return project.update({ details: updatedDetails }).then((updatedProject) => {
       const updated = updatedProject.get({ plain: true });
-      const original = _.omit(previousValue, ['deletedAt']);
+      const original = _.omit(previousValue, ['deletedAt', 'deletedBy']);
 
       // publish original and updated project data
       req.app.services.pubsub.publish(
