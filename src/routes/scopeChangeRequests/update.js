@@ -8,6 +8,7 @@ import {
     PROJECT_MEMBER_ROLE,
     USER_ROLE,
     PROJECT_MEMBER_MANAGER_ROLES,
+    EVENT,
 } from '../../constants';
 import models from '../../models';
 
@@ -20,14 +21,46 @@ const updateScopeChangeRequestValidations = {
   body: {
     param: Joi.object()
       .keys({
-        title: Joi.string().max(90),
-        description: Joi.string().max(255),
-        oldScope: Joi.object(),
-        newScope: Joi.object(),
         status: Joi.string().valid(_.values(SCOPE_CHANGE_REQ_STATUS)),
       }),
   },
 };
+
+/**
+ * Merges the new scope that's being activated into the details json of the project and updates the db
+ * @param {Object} req The request object
+ * @param {Object} newScope The new scope to apply
+ * @param {string} projectId The project id
+ *
+ * @returns {Promise} The promise to update the project with merged data
+ */
+function updateProjectDetails(req, newScope, projectId) {
+  return models.Project.findById(projectId).then((project) => {
+    const previousValue = _.clone(project.get({ plain: true }));
+
+    if (!project) {
+      const err = new Error('Project not found');
+      err.status = 404;
+      return Promise.reject(err);
+    }
+
+    const updatedDetails = _.merge({}, project.details, newScope);
+    return project.update({ details: updatedDetails }).then((updatedProject) => {
+      const updated = updatedProject.get({ plain: true });
+      const original = _.omit(previousValue, ['deletedAt', 'deletedBy']);
+
+      // publish original and updated project data
+      req.app.services.pubsub.publish(
+        EVENT.ROUTING_KEY.PROJECT_UPDATED,
+        { original, updated },
+        { correlationId: req.id },
+      );
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, { req, original, updated });
+
+      return updatedProject;
+    });
+  });
+}
 
 module.exports = [
   // handles request validations
@@ -45,7 +78,7 @@ module.exports = [
     const isAdmin = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN]);
 
     req.log.debug('finding scope change', requestId);
-    return models.ScopeChangeRequest.findScopeChangeRequest(projectId, requestId)
+    return models.ScopeChangeRequest.findScopeChangeRequest(projectId, { requestId })
     .then((scopeChangeReq) => {
       req.log.debug(scopeChangeReq);
       if (!scopeChangeReq) {
@@ -72,9 +105,14 @@ module.exports = [
         err.status = 401;
         return next(err);
       }
-      return models.ScopeChangeRequest.update(updatedProps, {
-        where: { id: requestId },
-      }).then((_updatedReq) => {
+
+      return (
+        updatedProps.status === SCOPE_CHANGE_REQ_STATUS.ACTIVATED
+          ? updateProjectDetails(req, scopeChangeReq.newScope, projectId)
+          : Promise.resolve()
+      )
+      .then(() => scopeChangeReq.update(updatedProps))
+      .then((_updatedReq) => {
         res.json(util.wrapResponse(req.id, _updatedReq));
         return Promise.resolve();
       });

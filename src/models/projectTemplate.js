@@ -1,4 +1,7 @@
 /* eslint-disable valid-jsdoc */
+import _ from 'lodash';
+
+import models from './';
 
 /**
  * The Project Template model
@@ -33,6 +36,18 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
+    classMethods: {
+      getTemplate(templateId) {
+        return this.findById(templateId, { raw: true })
+          .then((template) => {
+            const formRef = template.form;
+            return formRef
+              ? models.Form.findAll({ where: formRef, raw: true })
+                .then(forms => Object.assign({}, template, { form: _.maxBy(forms, f => f.revision) }))
+              : template;
+          });
+      },
+    },
   });
 
   return ProjectTemplate;
