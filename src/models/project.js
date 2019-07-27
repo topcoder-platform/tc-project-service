@@ -77,7 +77,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
         Project.hasMany(models.ProjectAttachment, { as: 'attachments', foreignKey: 'projectId' });
         Project.hasMany(models.ProjectPhase, { as: 'phases', foreignKey: 'projectId' });
         Project.hasMany(models.ProjectMemberInvite, { as: 'memberInvites', foreignKey: 'projectId' });
-        Project.hasMany(models.WorkStream, { as: 'works', foreignKey: 'projectId' });
+        Project.hasMany(models.WorkStream, { as: 'workStreams', foreignKey: 'projectId' });
       },
 
       /**
