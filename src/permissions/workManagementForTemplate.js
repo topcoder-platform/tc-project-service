@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
+import { MANAGER_ROLES } from '../constants';
 
 /**
  * Based on allowRule and denyRule allow/deny users to execute the policy
@@ -36,7 +37,11 @@ module.exports = policy => req => new Promise((resolve, reject) => {
     })
     .then((workManagementPermission) => {
       if (!workManagementPermission) {
-        return false;
+        // TODO REMOVE THIS!!!
+        // TEMPORARY let all the Topcoder managers to do all the work management
+        // if there are no permission records in the DB for the template
+        return util.hasPermission({ topcoderRoles: MANAGER_ROLES }, req.authUser);
+        // return false;
       }
 
       return util.hasPermissionForProject(workManagementPermission.permission, req.authUser, projectId);
