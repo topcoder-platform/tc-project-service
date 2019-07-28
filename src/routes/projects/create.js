@@ -372,6 +372,11 @@ module.exports = [
       // Create project and phases
       .then(({ projectTemplate, productTemplates, phasesList, workstreamsConfig }) => {
         req.log.debug('Creating project, phase and products');
+        // TEMPORARY keep ability to create project with phases
+        // all projects without some phases we treat as workstream projects
+        if (!(phasesList && phasesList.length > 0)) {
+          _.set(project, 'details.settings.workstreams', true);
+        }
         return createProjectAndPhases(req, project, projectTemplate, productTemplates, phasesList)
           .then(createdProjectAndPhases =>
             createWorkstreams(req, createdProjectAndPhases.newProject, workstreamsConfig)

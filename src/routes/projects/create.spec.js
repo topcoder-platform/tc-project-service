@@ -593,6 +593,9 @@ describe('Project create', () => {
             resJson.phases.should.have.lengthOf(0);
             server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
 
+            // verify that project has been marked to use workstreams
+            resJson.details.settings.workstreams.should.be.true;
+
             // Check Workstreams records are created correctly
             models.WorkStream.findAll({
               where: {
