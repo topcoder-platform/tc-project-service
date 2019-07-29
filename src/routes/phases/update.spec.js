@@ -16,6 +16,8 @@ const should = chai.should();
 
 const body = {
   name: 'test project phase',
+  description: 'test project phase description',
+  requirements: 'test project phase requirements',
   status: 'active',
   startDate: '2018-05-15T00:00:00Z',
   endDate: '2018-05-15T12:00:00Z',
@@ -30,6 +32,8 @@ const body = {
 
 const updateBody = {
   name: 'test project phase xxx',
+  description: 'test project phase description xxx',
+  requirements: 'test project phase requirements xxx',
   status: 'inactive',
   startDate: '2018-05-11T00:00:00Z',
   endDate: '2018-05-12T12:00:00Z',
@@ -43,6 +47,8 @@ const updateBody = {
 const validatePhase = (resJson, expectedPhase) => {
   should.exist(resJson);
   resJson.name.should.be.eql(expectedPhase.name);
+  resJson.description.should.be.eql(expectedPhase.description);
+  resJson.requirements.should.be.eql(expectedPhase.requirements);
   resJson.status.should.be.eql(expectedPhase.status);
   resJson.budget.should.be.eql(expectedPhase.budget);
   resJson.progress.should.be.eql(expectedPhase.progress);
@@ -54,6 +60,7 @@ describe('Project Phases', () => {
   let projectName;
   let phaseId;
   let phaseId2;
+  let phaseId3;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -68,7 +75,7 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-  before((done) => {
+  beforeEach((done) => {
     // mocks
     testUtil.clearDb()
       .then(() => {
@@ -108,11 +115,13 @@ describe('Project Phases', () => {
             const phases = [
               body,
               _.assign({ order: 1 }, body),
+              _.assign({}, body, { status: 'draft' }),
             ];
             models.ProjectPhase.bulkCreate(phases, { returning: true })
               .then((createdPhases) => {
                 phaseId = createdPhases[0].id;
                 phaseId2 = createdPhases[1].id;
+                phaseId3 = createdPhases[2].id;
 
                 done();
               });
@@ -121,7 +130,7 @@ describe('Project Phases', () => {
       });
   });
 
-  after((done) => {
+  afterEach((done) => {
     testUtil.clearDb(done);
   });
 
@@ -152,7 +161,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v4/projects/999/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({ param: updateBody })
         .expect('Content-Type', /json/)
@@ -163,7 +172,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v4/projects/${projectId}/phases/999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({ param: updateBody })
         .expect('Content-Type', /json/)
@@ -174,7 +183,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
           param: {
@@ -189,7 +198,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
           param: {
@@ -270,6 +279,68 @@ describe('Project Phases', () => {
               });
           }
         });
+    });
+
+    it('should return 200 if requested by admin', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ param: _.assign({ order: 1 }, updateBody) })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(done);
+    });
+
+    it('should return 200 if requested by manager which is a member', (done) => {
+      models.ProjectMember.create({
+        id: 3,
+        userId: testUtil.userIds.manager,
+        projectId,
+        role: 'manager',
+        isPrimary: false,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({ param: _.assign({ order: 1 }, updateBody) })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end(done);
+      });
+    });
+
+    it('should return 403 if requested by manager which is not a member', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({ param: _.assign({ order: 1 }, updateBody) })
+        .expect('Content-Type', /json/)
+        .expect(403)
+        .end(done);
+    });
+
+    it('should return 403 if requested by non-member copilot', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, projectId },
+      }).then(() => {
+        request(server)
+          .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({ param: _.assign({ order: 1 }, updateBody) })
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+      });
     });
 
     describe('Bus api', () => {
@@ -391,6 +462,32 @@ describe('Project Phases', () => {
             testUtil.wait(() => {
               createEventSpy.calledOnce.should.be.true;
               createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED);
+              done();
+            });
+          }
+        });
+      });
+
+      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (active)', (done) => {
+        request(server)
+        .patch(`/v4/projects/${projectId}/phases/${phaseId3}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          param: {
+            status: 'active',
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            testUtil.wait(() => {
+              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE);
               done();
             });
           }

@@ -464,6 +464,72 @@ _.assignIn(util, {
   },
 
   /**
+   * Lookup user handles from multiple emails
+   * @param {Object}  req        request
+   * @param {Array}   userEmails user emails
+   * @param {Number} maximumRequests  limit number of request on one batch
+   * @param {Boolean} isPattern  flag to indicate that pattern matching is required or not
+   * @return {Promise} promise
+   */
+  lookupMultipleUserEmails(req, userEmails, maximumRequests, isPattern = false) {
+    req.log.debug(`identityServiceEndpoint: ${config.get('identityServiceEndpoint')}`);
+
+    const httpClient = util.getHttpClient({ id: req.id, log: req.log });
+    // request generator function
+    const generateRequest = ({ token, email }) => {
+      let filter = `email=${email}`;
+      if (isPattern) {
+        filter += '&like=true';
+      }
+      return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        params: {
+          fields: 'handle,id,email',
+          filter,
+        },
+        // set longer timeout as default 3000 could be not enough for identity service response
+        timeout: 15000,
+      }).catch(() => {
+        // in case of any error happens during getting user by email
+        // we treat such users as not found and don't return error
+        // as per discussion in issue #334
+      });
+    };
+    // send batch of requests, one batch at one time
+    const sendBatch = (options) => {
+      const token = options.token;
+      const emails = options.emails;
+      const users = options.users || [];
+      const batch = options.batch || 0;
+      const start = batch * maximumRequests;
+      const end = (batch + 1) * maximumRequests;
+      const requests = emails.slice(start, end).map(userEmail =>
+          generateRequest({ token, email: userEmail }));
+      return Promise.all(requests)
+        .then((responses) => {
+          const data = responses.reduce((contents, response) => {
+            const content = _.get(response, 'data.result.content', []);
+            return _.concat(contents, content);
+          }, users);
+          req.log.debug(`UserHandle response batch-${batch}`, data);
+          if (end < emails.length) {
+            return sendBatch({ token, users: data, emails, batch: batch + 1 });
+          }
+          return data;
+        });
+    };
+    return util.getM2MToken()
+      .then((m2mToken) => {
+        req.log.debug(`Bearer ${m2mToken}`);
+        return sendBatch({ token: m2mToken, emails: userEmails });
+      });
+  },
+
+  /**
    * Filter only members of topcoder team
    * @param {Array}  members        project members
    * @return {Array} tpcoder project members
@@ -526,6 +592,160 @@ _.assignIn(util, {
 
     return Promise.resolve(null);
   },
+
+  /**
+   * Check if user match the permission rule.
+   *
+   * This method uses permission rule defined in `permissionRule`
+   * and checks that the `user` matches it.
+   *
+   * If we define a rule with `projectRoles` list, we also should provide `projectMembers`
+   * - the list of project members.
+   *
+   * @param {Object}        permissionRule               permission rule
+   * @param {Array<String>} permissionRule.projectRoles  the list of project roles of the user
+   * @param {Array<String>} permissionRule.topcoderRoles the list of Topcoder roles of the user
+   * @param {Object}        user                         user for whom we check permissions
+   * @param {Object}        user.roles                   list of user roles
+   * @param {Object}        user.isMachine               `true` - if it's machine, `false` - real user
+   * @param {Object}        user.scopes                  scopes of user token
+   * @param {Array}         projectMembers               (optional) list of project members - required to check `topcoderRoles`
+   *
+   * @returns {Boolean}     true, if has permission
+   */
+  matchPermissionRule: (permissionRule, user, projectMembers) => {
+    const member = _.find(projectMembers, { userId: user.userId });
+    let hasProjectRole = false;
+    let hasTopcoderRole = false;
+
+    if (permissionRule) {
+      if (permissionRule.projectRoles
+        && permissionRule.projectRoles.length > 0
+        && !!member
+      ) {
+        hasProjectRole = _.includes(permissionRule.projectRoles, member.role);
+      }
+
+      if (permissionRule.topcoderRoles && permissionRule.topcoderRoles.length > 0) {
+        hasTopcoderRole = util.hasRoles({ authUser: user }, permissionRule.topcoderRoles);
+      }
+    }
+
+    return hasProjectRole || hasTopcoderRole;
+  },
+
+  /**
+   * Check if user has permission.
+   *
+   * This method uses permission defined in `permission` and checks that the `user` matches it.
+   *
+   * `permission` may be defined in two ways:
+   *  - **Full** way with defined `allowRule` and optional `denyRule`, example:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       },
+   *       denyRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *    If user matches `denyRule` then the access would be dined even if matches `allowRule`.
+   *  - **Simplified** way may be used if we only want to define `allowRule`.
+   *    We can skip the `allowRule` property and define `allowRule` directly inside `permission` object, example:
+   *    ```js
+   *    {
+   *       projectRoles: [],
+   *       topcoderRoles: []
+   *    }
+   *    ```
+   *    This **simplified** permission is equal to a **full** permission:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *         projectRoles: [],
+   *         topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *
+   * If we define any rule with `projectRoles` list, we also should provide `projectMembers`
+   * - the list of project members.
+   *
+   * @param {Object} permission     permission or permissionRule
+   * @param {Object} user           user for whom we check permissions
+   * @param {Object} user.roles     list of user roles
+   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
+   * @param {Object} user.scopes    scopes of user token
+   * @param {Array}  projectMembers (optional) list of project members - required to check `topcoderRoles`
+   *
+   * @returns {Boolean}     true, if has permission
+   */
+  hasPermission: (permission, user, projectMembers) => {
+    const allowRule = permission.allowRule ? permission.allowRule : permission;
+    const denyRule = permission.denyRule ? permission.denyRule : null;
+
+    const allow = util.matchPermissionRule(allowRule, user, projectMembers);
+    const deny = util.matchPermissionRule(denyRule, user, projectMembers);
+
+    return allow && !deny;
+  },
+
+  /**
+   * Check if user has permission for the project by `projectId`.
+   *
+   * This method uses permission defined in `permission` and checks that the `user` matches it.
+   *
+   * `permission` may be defined in two ways:
+   *  - **Full** way with defined `allowRule` and optional `denyRule`, example:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       },
+   *       denyRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *    If user matches `denyRule` then the access would be dined even if matches `allowRule`.
+   *  - **Simplified** way may be used if we only want to define `allowRule`.
+   *    We can skip the `allowRule` property and define `allowRule` directly inside `permission` object, example:
+   *    ```js
+   *    {
+   *       projectRoles: [],
+   *       topcoderRoles: []
+   *    }
+   *    ```
+   *    This **simplified** permission is equal to a **full** permission:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *         projectRoles: [],
+   *         topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *
+   * @param {Object} permission     permission or permissionRule
+   * @param {Object} user           user for whom we check permissions
+   * @param {Object} user.roles     list of user roles
+   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
+   * @param {Object} user.scopes    scopes of user token
+   * @param {Number} projectId      project id to check permissions for
+   *
+   * @returns {Promise<Boolean>}     true, if has permission
+   */
+  hasPermissionForProject: (permission, user, projectId) => (
+    models.ProjectMember.getActiveProjectMembers(projectId).then(projectMembers =>
+      util.hasPermission(permission, user, projectMembers),
+    )
+  ),
 });
 
 export default util;

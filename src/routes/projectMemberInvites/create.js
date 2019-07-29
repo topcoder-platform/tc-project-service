@@ -8,7 +8,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT, USER_ROLE } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT, USER_ROLE, MAX_PARALLEL_REQUEST_QTY } from '../../constants';
 import { createEvent } from '../../services/busApi';
 
 
@@ -60,14 +60,25 @@ const compareEmail = (email1, email2, options = { UNIQUE_GMAIL_VALIDATION: false
  * @param {Array}  invites existent invites from DB
  * @param {Object} data    template for new invites to be put in DB
  * @param {Array}  failed  failed invites error message
+ * @param {Array} members  already members of the project
  *
  * @returns {Promise<Promise[]>} list of promises
  */
-const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
+const buildCreateInvitePromises = (req, invite, invites, data, failed, members) => {
   const invitePromises = [];
   if (invite.userIds) {
     // remove invites for users that are invited already
-    _.remove(invite.userIds, u => _.some(invites, i => i.userId === u));
+    const errMessageForAlreadyInvitedUsers = 'User with such handle is already invited to this project.';
+    _.remove(invite.userIds, u => _.some(invites, (i) => {
+      const isPresent = i.userId === u;
+      if (isPresent) {
+        failed.push(_.assign({}, {
+          userId: u,
+          message: errMessageForAlreadyInvitedUsers,
+        }));
+      }
+      return isPresent;
+    }));
     invite.userIds.forEach((userId) => {
       const dataNew = _.clone(data);
 
@@ -80,7 +91,7 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
   if (invite.emails) {
     // if for some emails there are already existent users, we will invite them by userId,
     // to avoid sending them registration email
-    return util.lookupUserEmails(req, invite.emails)
+    return util.lookupMultipleUserEmails(req, invite.emails, MAX_PARALLEL_REQUEST_QTY)
       .then((existentUsers) => {
         // existent user we will invite by userId and email
         const existentUsersWithNumberId = existentUsers.map((user) => {
@@ -96,25 +107,62 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed) => {
             compareEmail(existentUser.email, inviteEmail, { UNIQUE_GMAIL_VALIDATION: false })),
         );
 
+        // remove users that are already member of the team
+        const errMessageForAlreadyMemberUsers = 'User with such email is already a member of the team.';
+
+        _.remove(existentUsersWithNumberId, user => _.some(members, (m) => {
+          const isPresent = (m.userId === user.id);
+          if (isPresent) {
+            failed.push(_.assign({}, {
+              email: user.email,
+              message: errMessageForAlreadyMemberUsers,
+            }));
+          }
+          return isPresent;
+        }));
+
         // remove invites for users that are invited already
-        _.remove(existentUsersWithNumberId, user => _.some(invites, i => i.userId === user.id));
+        const errMessageForAlreadyInvitedUsers = 'User with such email is already invited to this project.';
+
+        _.remove(existentUsersWithNumberId, user => _.some(invites, (i) => {
+          const isPresent = (i.userId === user.id);
+          if (isPresent) {
+            failed.push(_.assign({}, {
+              email: i.email,
+              message: errMessageForAlreadyInvitedUsers,
+            }));
+          }
+          return isPresent;
+        }));
+
         existentUsersWithNumberId.forEach((user) => {
           const dataNew = _.clone(data);
 
           dataNew.userId = user.id;
-          dataNew.email = user.email;
+          dataNew.email = user.email ? user.email.toLowerCase() : user.email;
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
 
         // remove invites for users that are invited already
         _.remove(nonExistentUserEmails, email =>
-          _.some(invites, i =>
-            compareEmail(i.email, email, { UNIQUE_GMAIL_VALIDATION: config.get('UNIQUE_GMAIL_VALIDATION') })));
+          _.some(invites, (i) => {
+            const areEmailsSame = compareEmail(i.email, email, {
+              UNIQUE_GMAIL_VALIDATION: config.get('UNIQUE_GMAIL_VALIDATION'),
+            });
+            if (areEmailsSame) {
+              failed.push(_.assign({}, {
+                email: i.email,
+                message: errMessageForAlreadyInvitedUsers,
+              }));
+            }
+            return areEmailsSame;
+          }),
+        );
         nonExistentUserEmails.forEach((email) => {
           const dataNew = _.clone(data);
 
-          dataNew.email = email;
+          dataNew.email = email.toLowerCase();
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
@@ -204,9 +252,19 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
 
     const promises = [];
+    const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
     if (invite.userIds) {
       // remove members already in the team
-      _.remove(invite.userIds, u => _.some(members, m => m.userId === u));
+      _.remove(invite.userIds, u => _.some(members, (m) => {
+        const isPresent = m.userId === u;
+        if (isPresent) {
+          failed.push(_.assign({}, {
+            userId: m.userId,
+            message: errorMessageForAlreadyMemberUser,
+          }));
+        }
+        return isPresent;
+      }));
         // permission:
         // user has to have constants.MANAGER_ROLES role
         // to be invited as PROJECT_MEMBER_ROLE.MANAGER
@@ -262,7 +320,7 @@ module.exports = [
           };
 
           req.log.debug('Creating invites');
-          return models.sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed))
+          return models.sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed, members))
             .then((values) => {
               values.forEach((v) => {
                 req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {

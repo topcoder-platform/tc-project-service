@@ -279,6 +279,36 @@ router.route('/v4/projects/metadata/planConfig/:key/versions/:version(\\d+)')
   .patch(require('./planConfig/version/update'))
   .delete(require('./planConfig/version/delete'));
 
+// work streams
+router.route('/v4/projects/:projectId(\\d+)/workstreams')
+  .get(require('./workStreams/list'))
+  .post(require('./workStreams/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:id(\\d+)')
+  .get(require('./workStreams/get'))
+  .patch(require('./workStreams/update'))
+  .delete(require('./workStreams/delete'));
+
+// works
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works')
+  .get(require('./works/list'))
+  .post(require('./works/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:id(\\d+)')
+  .get(require('./works/get'))
+  .patch(require('./works/update'))
+  .delete(require('./works/delete'));
+
+// work items
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:workId(\\d+)/workitems')
+  .get(require('./workItems/list'))
+  .post(require('./workItems/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:workId(\\d+)/workitems/:id(\\d+)')
+  .get(require('./workItems/get'))
+  .patch(require('./workItems/update'))
+  .delete(require('./workItems/delete'));
+
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint

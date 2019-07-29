@@ -41,10 +41,10 @@ module.exports = [
     });
 
     // Check if duplicated key
-    return models.ProductCategory.findById(req.body.param.key)
+    return models.ProductCategory.findById(req.body.param.key, { paranoid: false })
       .then((existing) => {
         if (existing) {
-          const apiErr = new Error(`Product category already exists for key ${req.params.key}`);
+          const apiErr = new Error(`Product category already exists (may be deleted) for key "${req.body.param.key}"`);
           apiErr.status = 422;
           return Promise.reject(apiErr);
         }

@@ -19,15 +19,7 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('form.view'),
-  (req, res, next) => models.Form.findOne({
-    where: {
-      key: req.params.key,
-      version: req.params.version,
-    },
-    order: [['revision', 'DESC']],
-    limit: 1,
-    attributes: { exclude: ['deletedAt', 'deletedBy'] },
-  })
+  (req, res, next) => models.Form.findOneWithLatestRevision(req.params)
     .then((form) => {
       // Not found
       if (!form) {
