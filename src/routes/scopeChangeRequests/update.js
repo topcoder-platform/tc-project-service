@@ -80,7 +80,7 @@ module.exports = [
     req.log.debug('finding scope change', requestId);
     return models.ScopeChangeRequest.findScopeChangeRequest(projectId, { requestId })
     .then((scopeChangeReq) => {
-      req.log.debug(scopeChangeReq);
+      // req.log.debug(scopeChangeReq);
       if (!scopeChangeReq) {
         const err = new Error('Scope change request does not exist');
         err.status = 404;
