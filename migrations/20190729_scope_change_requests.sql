@@ -9,7 +9,7 @@ CREATE TABLE scope_change_requests
     "projectId" bigint NOT NULL,
     "oldScope" json NOT NULL,
     "newScope" json NOT NULL,
-    status character varying(45) COLLATE pg_catalog."default" NOT NULL,
+    status character varying(45) NOT NULL,
     "deletedAt" timestamp with time zone,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,
@@ -17,12 +17,7 @@ CREATE TABLE scope_change_requests
     "deletedBy" integer,
     "createdBy" integer NOT NULL,
     "updatedBy" integer NOT NULL,
-    "approvedBy" integer,
-    CONSTRAINT scope_change_requests_pkey PRIMARY KEY (id),
-    CONSTRAINT "scope_change_requests_projectId_fkey" FOREIGN KEY ("projectId")
-        REFERENCES projects (id) MATCH SIMPLE
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
+    "approvedBy" integer
 );
 
 
@@ -38,3 +33,10 @@ ALTER SEQUENCE scope_change_requests_id_seq OWNED BY scope_change_requests.id;
 
 ALTER TABLE scope_change_requests
     ALTER COLUMN id SET DEFAULT nextval('scope_change_requests_id_seq');
+
+ALTER TABLE ONLY scope_change_requests
+   ADD CONSTRAINT scope_change_requests_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY scope_change_requests
+    ADD CONSTRAINT "scope_change_requests_projectId_fkey" FOREIGN KEY ("projectId")
+    REFERENCES projects(id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
