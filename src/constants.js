@@ -200,6 +200,13 @@ export const INVITE_STATUS = {
   CANCELED: 'canceled',
 };
 
+export const SCOPE_CHANGE_REQ_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  ACTIVATED: 'activated',
+  CANCELED: 'canceled',
+};
 export const MAX_PARALLEL_REQUEST_QTY = 10;
 
 export const ROUTES = {
