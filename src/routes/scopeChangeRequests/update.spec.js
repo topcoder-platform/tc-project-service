@@ -99,7 +99,7 @@ describe('Update Scope Change Rquest', () => {
   let project;
   let scopeChangeRequest;
 
-  before(() =>
+  before((done) =>
     testUtil
       .clearDb()
       .then(() => createProject(PROJECT_STATUS.REVIEWED))
@@ -110,11 +110,12 @@ describe('Update Scope Change Rquest', () => {
       .then(_project => createScopeChangeRequest(_project))
       .then((_scopeChangeRequest) => {
         scopeChangeRequest = _scopeChangeRequest;
-      }),
+      })
+      .then(() => done()),
   );
 
-  after(() => {
-    testUtil.clearDb();
+  after((done) => {
+    testUtil.clearDb(done);
   });
 
   describe('PATCH projects/{projectId}/scopeChangeRequests/{requestId}', () => {

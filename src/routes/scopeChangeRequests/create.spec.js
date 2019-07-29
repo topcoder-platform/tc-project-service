@@ -94,7 +94,7 @@ describe('Create Scope Change Rquest', () => {
   let projectWithPendingChange;
   let projectWithApprovedChange;
 
-  before(() => {
+  before((done) => {
     const projectStatuses = [
       PROJECT_STATUS.DRAFT,
       PROJECT_STATUS.IN_REVIEW,
@@ -106,11 +106,12 @@ describe('Create Scope Change Rquest', () => {
       .then(_projects => _projects.map((project, i) => [projectStatuses[i], project]))
       .then((_projectStatusPairs) => {
         projects = _.fromPairs(_projectStatusPairs);
-      });
+      })
+      .then(() => done());
   });
 
-  after(() => {
-    testUtil.clearDb();
+  after((done) => {
+    testUtil.clearDb(done);
   });
 
   describe('POST projects/{projectId}/scopeChangeRequests', () => {
