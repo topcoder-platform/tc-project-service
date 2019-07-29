@@ -99,7 +99,7 @@ describe('Update Scope Change Rquest', () => {
   let project;
   let scopeChangeRequest;
 
-  before((done) =>
+  before(done =>
     testUtil
       .clearDb()
       .then(() => createProject(PROJECT_STATUS.REVIEWED))
