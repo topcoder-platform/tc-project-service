@@ -96,7 +96,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'dev-sts', 'feature/scope_change_workflow']
+              only: ['dev', 'dev-sts']
       - deployProd:
           context : org-global
           requires:
