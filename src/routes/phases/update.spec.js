@@ -16,6 +16,8 @@ const should = chai.should();
 
 const body = {
   name: 'test project phase',
+  description: 'test project phase description',
+  requirements: 'test project phase requirements',
   status: 'active',
   startDate: '2018-05-15T00:00:00Z',
   endDate: '2018-05-15T12:00:00Z',
@@ -30,6 +32,8 @@ const body = {
 
 const updateBody = {
   name: 'test project phase xxx',
+  description: 'test project phase description xxx',
+  requirements: 'test project phase requirements xxx',
   status: 'inactive',
   startDate: '2018-05-11T00:00:00Z',
   endDate: '2018-05-12T12:00:00Z',
@@ -43,6 +47,8 @@ const updateBody = {
 const validatePhase = (resJson, expectedPhase) => {
   should.exist(resJson);
   resJson.name.should.be.eql(expectedPhase.name);
+  resJson.description.should.be.eql(expectedPhase.description);
+  resJson.requirements.should.be.eql(expectedPhase.requirements);
   resJson.status.should.be.eql(expectedPhase.status);
   resJson.budget.should.be.eql(expectedPhase.budget);
   resJson.progress.should.be.eql(expectedPhase.progress);
