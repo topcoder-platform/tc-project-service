@@ -21,6 +21,8 @@ const schema = {
   body: {
     param: Joi.object().keys({
       name: Joi.string().optional(),
+      description: Joi.string().optional(),
+      requirements: Joi.string().optional(),
       status: Joi.string().optional(),
       startDate: Joi.date().optional(),
       endDate: Joi.date().optional(),

@@ -19,6 +19,8 @@ const should = chai.should();
 const validatePhase = (resJson, expectedPhase) => {
   should.exist(resJson);
   resJson.name.should.be.eql(expectedPhase.name);
+  resJson.description.should.be.eql(expectedPhase.description);
+  resJson.requirements.should.be.eql(expectedPhase.requirements);
   resJson.status.should.be.eql(expectedPhase.status);
   resJson.budget.should.be.eql(expectedPhase.budget);
   resJson.progress.should.be.eql(expectedPhase.progress);
@@ -136,6 +138,8 @@ describe('CREATE work', () => {
     const body = {
       param: {
         name: 'test project phase',
+        description: 'test project phase description',
+        requirements: 'test project phase requirements',
         status: 'active',
         startDate: '2018-05-15T00:00:00Z',
         endDate: '2018-05-15T12:00:00Z',

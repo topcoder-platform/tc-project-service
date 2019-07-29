@@ -4475,6 +4475,12 @@ definitions:
       name:
         type: string
         description: the project phase name
+      description:
+        type: string
+        description: the project phase short description
+      requirements:
+        type: string
+        description: the project phase requirements
       status:
         type: string
         description: the project phase status
