@@ -133,7 +133,7 @@ export const BUS_API_EVENT = {
 
   // When milestone is added/deleted to/from the phase,
   // When milestone is updated for duration/startDate/endDate/status
-  TIMELINE_ADJUSTED: 'connect.notification.timeline.adjusted',
+  TIMELINE_ADJUSTED: 'connect.notification.project.timeline.adjusted',
 
   // When specification of a product is modified
   PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'connect.notification.project.product.update.spec',
@@ -141,17 +141,17 @@ export const BUS_API_EVENT = {
   // When specification of a work item is modified
   PROJECT_WORKITEM_SPECIFICATION_MODIFIED: 'connect.notification.project.workitem.update.spec',
 
-  MILESTONE_ADDED: 'connect.notification.timeline.milestone.added',
-  MILESTONE_REMOVED: 'connect.notification.timeline.milestone.removed',
-  MILESTONE_UPDATED: 'connect.notification.timeline.milestone.updated',
+  MILESTONE_ADDED: 'connect.notification.project.timeline.milestone.added',
+  MILESTONE_REMOVED: 'connect.notification.project.timeline.milestone.removed',
+  MILESTONE_UPDATED: 'connect.notification.project.timeline.milestone.updated',
   // When milestone is marked as active
-  MILESTONE_TRANSITION_ACTIVE: 'connect.notification.timeline.milestone.transition.active',
+  MILESTONE_TRANSITION_ACTIVE: 'connect.notification.project.timeline.milestone.transition.active',
   // When milestone is marked as completed
-  MILESTONE_TRANSITION_COMPLETED: 'connect.notification.timeline.milestone.transition.completed',
+  MILESTONE_TRANSITION_COMPLETED: 'connect.notification.project.timeline.milestone.transition.completed',
    // When milestone is marked as paused
-  MILESTONE_TRANSITION_PAUSED: 'connect.notification.timeline.milestone.transition.paused',
+  MILESTONE_TRANSITION_PAUSED: 'connect.notification.project.timeline.milestone.transition.paused',
   // When milestone is waiting for customers's input
-  MILESTONE_WAITING_CUSTOMER: 'connect.notification.timeline.milestone.waiting.customer',
+  MILESTONE_WAITING_CUSTOMER: 'connect.notification.project.timeline.milestone.waiting.customer',
 
   // TC Message Service events
   TOPIC_CREATED: 'connect.notification.project.topic.created',
