@@ -180,6 +180,7 @@ export const TIMELINE_REFERENCES = {
   PROJECT: 'project',
   PHASE: 'phase',
   PRODUCT: 'product',
+  WORK: 'work',
 };
 
 export const STATUS_HISTORY_REFERENCES = {
