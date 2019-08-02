@@ -44,7 +44,15 @@ function updateProjectDetails(req, newScope, projectId) {
       return Promise.reject(err);
     }
 
-    const updatedDetails = _.merge({}, project.details, newScope);
+    const updatedDetails = _.mergeWith(
+      {}, project.details, newScope,
+      (_objValue, srcValue) => {
+        if (_.isArray(srcValue)) {
+          return srcValue;
+        }
+        return undefined;
+      });
+
     return project.update({ details: updatedDetails }).then((updatedProject) => {
       const updated = updatedProject.get({ plain: true });
       const original = _.omit(previousValue, ['deletedAt', 'deletedBy']);
