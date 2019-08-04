@@ -309,6 +309,9 @@ router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/work
   .patch(require('./workItems/update'))
   .delete(require('./workItems/delete'));
 
+router.route('/v4/projects/:projectId/reports')
+  .get(require('./projectReports/getReport'));
+
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint
