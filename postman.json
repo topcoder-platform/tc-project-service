@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "efae2a9b-b869-4965-b889-3278870b29ea",
+		"_postman_id": "2afc9fa0-06bb-4276-86c2-eb5cbb861d98",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -8348,6 +8348,139 @@
 								"1",
 								"revisions",
 								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Project Reports",
+			"item": [
+				{
+					"name": "get report by admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/reports?reportName=summary",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "reportName",
+									"value": "summary"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get report with invalid project id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/123456/reports?reportName=summary",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"123456",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "reportName",
+									"value": "summary"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get report with invalid report name",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/reports?reportName=summary123",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "reportName",
+									"value": "summary123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get report by member",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member2-40051335}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/reports?reportName=summary",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"reports"
+							],
+							"query": [
+								{
+									"key": "reportName",
+									"value": "summary"
+								}
 							]
 						}
 					},
