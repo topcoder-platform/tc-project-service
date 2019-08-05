@@ -1,6 +1,6 @@
 import util from '../../util';
 
-const summaryJson = require('./mockFiles/summary.json');
+const summaryJson = require('./mockFiles/summary.js/index.js');
 
 module.exports = (projectId, reportName, req, res) => {
   if (Number(projectId) === 123456) {
