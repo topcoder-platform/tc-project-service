@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix || true",
-    "build": "babel src -d dist --presets es2015",
+    "build": "babel src -d dist --presets es2015 --copy-files",
     "sync:db": "./node_modules/.bin/babel-node migrations/sync.js",
     "sync:es": "./node_modules/.bin/babel-node migrations/elasticsearch_sync.js",
     "migrate:es": "./node_modules/.bin/babel-node migrations/seedElasticsearchIndex.js",
