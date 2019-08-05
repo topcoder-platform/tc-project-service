@@ -65,7 +65,10 @@ LookApi.prototype.callApi = function (endpoint, body) {
     let newReq = null;
     if (body) {
       newReq = axios.post(endpoint, body, {
-        headers: { 'Content-Type': 'application/json', 'Authorization': `token ${token}` }
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `token ${token}`,
+        },
       });
     } else {
       newReq = axios.get(endpoint);
