@@ -66,9 +66,10 @@
     "CLIENT_ID": "",
     "CLIENT_SECRET": "",
     "TOKEN": "TOKEN",
-    "USE_MOCK": false,
+    "USE_MOCK": true,
     "QUERIES": {
-      "REG_STATS": 1234
+      "REG_STATS": 1234,
+      "BUDGET": 123
     }
   }
 }

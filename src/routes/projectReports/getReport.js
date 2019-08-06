@@ -7,6 +7,7 @@ import models from '../../models';
 import LookApi from './LookRun';
 import mock from './mock';
 import util from '../../util';
+import { USER_ROLE } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -17,8 +18,7 @@ module.exports = [
     const projectId = Number(req.params.projectId);
     const reportName = req.query.reportName;
 
-
-    if (config.lookerConfig.USE_MOCK === 'true') {
+    if (config.lookerConfig.USE_MOCK === true) {
       req.log.info('using mock');
       // using mock
       return mock(projectId, reportName, req, res);
@@ -34,16 +34,28 @@ module.exports = [
     if (!directProjectId) {
       return res.status(400).send('Direct Project not linked');
     }
-    if (reportName === 'summary') {
-      try {
-        const result = await lookApi.findProjectRegSubmissions(directProjectId);
-        req.log.debug(result);
-        return res.status(200).json(util.wrapResponse(req.id, result));
-      } catch (err) {
-        req.log.error(err);
-        return res.status(500).send(err.toString());
+
+    try {
+      // check if auth user has acecss to this project
+      const isManager = util.hasRole(req, USER_ROLE.MANAGER);
+      // pick the report based on its name
+      let result = {};
+      switch (reportName) {
+        case 'summary':
+          result = await lookApi.findProjectRegSubmissions(directProjectId);
+          break;
+        case 'projectBudget':
+          result = await lookApi.findProjectBudget(projectId, isManager);
+          break;
+        default:
+          return res.status(404).send('Report not found');
       }
+
+      req.log.debug(result);
+      return res.status(200).json(util.wrapResponse(req.id, result));
+    } catch (err) {
+      req.log.error(err);
+      return res.status(500).send(err.toString());
     }
-    return res.status(404).send('Report not found');
   },
 ];
