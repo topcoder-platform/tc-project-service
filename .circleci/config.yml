@@ -96,7 +96,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'dev-sts']
+              only: ['dev', 'dev-sts', 'feature/looker-api-integration']
       - deployProd:
           context : org-global
           requires:
