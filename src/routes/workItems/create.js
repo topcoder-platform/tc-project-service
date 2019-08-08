@@ -3,7 +3,6 @@
  */
 import validate from 'express-validation';
 import _ from 'lodash';
-import config from 'config';
 import Joi from 'joi';
 
 import models from '../../models';
@@ -105,9 +104,9 @@ module.exports = [
     })
     .then((productCount) => {
       // make sure number of products of per phase <= max value
-      if (productCount >= config.maxPhaseProductCount) {
+      if (productCount >= 100) {
         const err = new Error('the number of products per phase cannot exceed ' +
-          `${config.maxPhaseProductCount}`);
+          `${100}`);
         err.status = 400;
         throw err;
       }
