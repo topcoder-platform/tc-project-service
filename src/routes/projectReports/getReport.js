@@ -18,7 +18,7 @@ module.exports = [
     const projectId = Number(req.params.projectId);
     const reportName = req.query.reportName;
 
-    if (config.lookerConfig.USE_MOCK === true) {
+    if (config.lookerConfig.USE_MOCK === 'true') {
       req.log.info('using mock');
       // using mock
       return mock(projectId, reportName, req, res);
