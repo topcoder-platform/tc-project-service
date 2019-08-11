@@ -7,7 +7,7 @@ import models from '../../models';
 import LookApi from './LookRun';
 import mock from './mock';
 import util from '../../util';
-import { USER_ROLE } from '../../constants';
+import { PROJECT_MEMBER_MANAGER_ROLES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -37,7 +37,7 @@ module.exports = [
 
     try {
       // check if auth user has acecss to this project
-      const isManager = util.hasRole(req, USER_ROLE.MANAGER);
+      const isManager = util.hasRoles(req, PROJECT_MEMBER_MANAGER_ROLES);
       // pick the report based on its name
       let result = {};
       switch (reportName) {
