@@ -137,6 +137,7 @@ module.exports = [
       models.Form.latestVersion(),
       models.PriceConfig.latestVersion(),
       models.PlanConfig.latestVersion(),
+      models.BuildingBlock.findAll(query),
     ])
       .then((results) => {
         res.json(util.wrapResponse(req.id, {
@@ -148,6 +149,7 @@ module.exports = [
           forms: results[5],
           priceConfigs: results[6],
           planConfigs: results[7],
+          buildingBlocks: results[8],
         }));
       })
       .catch(next);

@@ -79,6 +79,55 @@ const createProjectValdiations = {
 };
 
 /**
+ * Create ProjectEstimationItem with BuildingBlock.
+ * @param {Array} estimations the project estimations
+ * @param {Number} userId the request user id
+ * @returns {Promise} the promise that resolves to the created ProjectEstimationItem
+ */
+function createEstimationItemsWithBuildingBlock(estimations, userId) {
+  const buildingBlockKeys = _.map(estimations, estimation => estimation.buildingBlockKey);
+  // get all building blocks
+  return models.BuildingBlock.findAll({
+    where: { deletedAt: { $eq: null }, key: buildingBlockKeys },
+    raw: true,
+    includePrivateConfigForInternalUsage: true,
+  }).then((buildingBlocks) => {
+    const blocks = {};
+    _.forEach(buildingBlocks, (block) => {
+      if (block) {
+        blocks[block.key] = block;
+      }
+    });
+    const estimationItems = [];
+    _.forEach(estimations, (estimation) => {
+      const block = blocks[estimation.buildingBlockKey];
+      if (block && _.get(block, 'privateConfig.priceItems')) {
+        _.forOwn(block.privateConfig.priceItems, (item, key) => {
+          let itemPrice;
+          if (_.isString(item) && item.endsWith('%')) {
+            const percent = _.toNumber(item.replace('%', '')) / 100;
+            itemPrice = _.toNumber(estimation.price) * percent;
+          } else {
+            itemPrice = item;
+          }
+          estimationItems.push({
+            projectEstimationId: estimation.id,
+            price: itemPrice,
+            type: key,
+            markupUsedReference: 'buildingBlock',
+            markupUsedReferenceId: block.id,
+            createdBy: userId,
+            updatedBy: userId,
+          });
+        });
+      }
+    });
+
+    return models.ProjectEstimationItem.bulkCreate(estimationItems, { returning: true });
+  });
+}
+
+/**
  * Create the project, project phases and products. This needs to be done before creating direct project.
  * @param {Object} req the request
  * @param {Object} project the project
@@ -114,6 +163,17 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
     }
     return Promise.resolve(newProject);
   }).then((newProject) => {
+    req.log.debug('creating project estimation items with building blocks');
+    if (result.estimations && result.estimations.length > 0) {
+      return createEstimationItemsWithBuildingBlock(result.estimations, req.authUser.userId)
+      .then((estimationItems) => {
+        req.log.debug(`creating ${estimationItems.length} project estimation items`);
+        // ignore project estimation items for now
+        return Promise.resolve(newProject);
+      });
+    }
+    return Promise.resolve(newProject);
+  }).then((newProject) => {
     if (project.attachments && (project.attachments.length > 0)) {
       req.log.debug('creating project attachments');
       const attachments = project.attachments.map(attachment => Object.assign({
@@ -128,7 +188,8 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       });
     }
     return Promise.resolve(newProject);
-  }).then((newProject) => {
+  })
+  .then((newProject) => {
     result.newProject = newProject;
 
     // backward compatibility for releasing the service before releasing the front end

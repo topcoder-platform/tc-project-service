@@ -98,4 +98,6 @@ module.exports = () => {
   Authorizer.setPolicy('planConfig.edit', projectAdmin);
   Authorizer.setPolicy('planConfig.delete', projectAdmin);
   Authorizer.setPolicy('planConfig.view', true); // anyone can view price config
+
+  Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
 };

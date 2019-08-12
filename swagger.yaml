@@ -2943,6 +2943,32 @@ paths:
           description: Invalid server state or unknown error
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/estimations/{estimationId}/items':
+    get:
+      tags:
+        - Project Estimation Item
+      security:
+        - Bearer []
+      description: get project estimation items
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/projectEstimationIdParam'
+      responses:
+        '200':
+          description: List of project estimation items
+          $ref: '#/definitions/ProjectEstimationItemListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: '#/definitions/ErrorModel'
 
 parameters:
   projectIdParam:
@@ -3066,6 +3092,13 @@ parameters:
     name: revisionId
     in: path
     description: revision identifier
+    required: true
+    type: integer
+    format: int64
+  projectEstimationIdParam:
+    name: estimationId
+    in: path
+    description: project estimation identifier
     required: true
     type: integer
     format: int64
@@ -5136,6 +5169,10 @@ definitions:
                 type: array
                 items:
                   $ref: '#/definitions/ProductCategory'
+              buildingBlocks:
+                type: array
+                items:
+                  $ref: '#/definitions/BuildingBlock'
   ProjectMemberInvite:
     type: object
     properties:
@@ -5570,3 +5607,115 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this object
         readOnly: true
+  BuildingBlock:
+    title: BuildingBlock object
+    type: object
+    required:
+      - id
+      - key
+      - config
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: the id
+      key:
+        type: string
+        description: building block key. Unique field.
+      config:
+        type: object
+        description: building block config
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true
+  ProjectEstimationItem:
+    title: ProjectEstimationItem object
+    type: object
+    required:
+      - id
+      - projectEstimationId
+      - price
+      - type
+      - markupUsedReference
+      - markupUsedReferenceId
+      - metadata
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: the id
+      projectEstimationId:
+        type: integer
+        format: int64
+        description: the ProjectEstimation id
+      price:
+        type: number
+        format: float
+        description: the price of this estimation item
+      type:
+        type: string
+        description: the type of this estimation
+      markupUsedReference:
+        type: string
+        description: the reference type of this estimation. Can be "buildingBlock" for example
+      markupUsedReferenceId:
+        type: integer
+        format: int64
+        description: the reference object id
+      metadata:
+        type: object
+        description: the metadata of this item
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true
+  ProjectEstimationItemListResponse:
+    title: ProjectEstimationItem list response
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectEstimationItem'

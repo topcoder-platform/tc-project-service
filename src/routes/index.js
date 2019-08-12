@@ -271,6 +271,9 @@ router.route('/v4/projects/metadata/planConfig/:key/versions/:version(\\d+)')
   .patch(require('./planConfig/version/update'))
   .delete(require('./planConfig/version/delete'));
 
+router.route('/v4/projects/:projectId/estimations/:estimationId/items')
+  .get(require('./projectEstimationItems/list'));
+
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint
