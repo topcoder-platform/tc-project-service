@@ -30,7 +30,7 @@ module.exports = [
         err.status = 404;
         return Promise.reject(err);
       }
-      if (process.env.NODE_ENV === 'development' || config.get('enableFileUpload') === false) {
+      if (process.env.NODE_ENV === 'development' && config.get('enableFileUpload') === 'false') {
         return ['dummy://url'];
       }
       return util.getFileDownloadUrl(req, attachment.filePath);
