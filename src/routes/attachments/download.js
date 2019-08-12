@@ -36,6 +36,7 @@ module.exports = [
       return util.getFileDownloadUrl(req, attachment.filePath);
     })
     .then((result) => {
+      req.log.debug('getFileDownloadUrl result: ', JSON.stringify(result));
       const url = result[1];
       res.status(200).json(util.wrapResponse(req.id, { url }));
     })
