@@ -44,7 +44,7 @@ LookApi.prototype.findProjectBudget = function (connectProjectId, isManager, isA
   const fields = [
     'project_stream.tc_connect_project_id',
     'project_stream.total_invoiced_amount',
-    'project_stream.remaining_invoiced_budget'
+    'project_stream.remaining_invoiced_budget',
   ];
 
   // Manager roles have access to more fields.
