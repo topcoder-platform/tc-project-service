@@ -41,7 +41,11 @@ LookApi.prototype.findProjectRegSubmissions = function (directProjectId) {
 LookApi.prototype.findProjectBudget = function (connectProjectId, isManager, isAdmin) {
   const queryId = config.lookerConfig.QUERIES.BUDGET;
 
-  const fields = ['project_stream.total_invoiced_amount', 'project_stream.remaining_invoiced_budget'];
+  const fields = [
+    'project_stream.tc_connect_project_id',
+    'project_stream.total_invoiced_amount',
+    'project_stream.remaining_invoiced_budget'
+  ];
 
   // Manager roles have access to more fields.
   if (isManager || isAdmin) {
