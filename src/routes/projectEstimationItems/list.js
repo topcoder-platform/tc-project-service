@@ -37,8 +37,8 @@ module.exports = [
       where: {
         projectEstimationId: req.params.estimationId,
         deletedAt: { $eq: null },
-        attributes: { exclude: ['deletedAt', 'deletedBy'] },
       },
+      attributes: { exclude: ['deletedAt', 'deletedBy'] },
       raw: true,
       reqUser: req.authUser,
       members: req.context.currentProjectMembers,
