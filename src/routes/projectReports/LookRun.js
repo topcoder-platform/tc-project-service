@@ -38,13 +38,13 @@ LookApi.prototype.findProjectRegSubmissions = function (directProjectId) {
   return this.runQueryWithFilter(queryId, view, fields, filters);
 };
 
-LookApi.prototype.findProjectBudget = function (connectProjectId, isManager) {
+LookApi.prototype.findProjectBudget = function (connectProjectId, isManager, isAdmin) {
   const queryId = config.lookerConfig.QUERIES.BUDGET;
 
   const fields = ['project_stream.total_invoiced_amount', 'project_stream.remaining_invoiced_budget'];
 
   // Manager roles have access to more fields.
-  if (isManager) {
+  if (isManager || isAdmin) {
     fields.push('project_stream.total_actual_challenge_fee', 'project_stream.total_actual_member_payment');
   }
   const view = 'project_stream';
