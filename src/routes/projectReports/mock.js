@@ -14,7 +14,7 @@ module.exports = (projectId, reportName, req, res) => {
       res.status(200).json(util.wrapResponse(req.id, summaryJson));
       break;
     case 'projectBudget':
-      projectBudgetJson = _.map(pb => ({ ...pb, 'project_stream.tc_connect_project_id' : projectId }));
+      projectBudgetJson = _.map(pb => ({ ...pb, 'project_stream.tc_connect_project_id': projectId }));
       res.status(200).json(util.wrapResponse(req.id, projectBudgetJson));
       break;
     default:
