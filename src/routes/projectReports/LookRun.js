@@ -30,11 +30,11 @@ LookApi.prototype.findByHandle = function (handle) {
   return this.runQueryWithFilter(12345, filter);
 };
 
-LookApi.prototype.findProjectRegSubmissions = function (directProjectId) {
+LookApi.prototype.findProjectRegSubmissions = function (projectId) {
   const queryId = config.lookerConfig.QUERIES.REG_STATS;
-  const fields = ['challenge.track', 'challenge.num_registrations', 'challenge.num_submissions'];
+  const fields = ['connect_project.id', 'challenge.track', 'challenge.num_registrations', 'challenge.num_submissions'];
   const view = 'challenge';
-  const filters = { 'challenge.tc_direct_project_id': directProjectId };
+  const filters = { 'connect_project.id': projectId };
   return this.runQueryWithFilter(queryId, view, fields, filters);
 };
 

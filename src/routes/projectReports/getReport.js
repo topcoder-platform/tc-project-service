@@ -25,15 +25,6 @@ module.exports = [
       // res.status(200).json(util.wrapResponse(req.id, project));
     }
     const lookApi = new LookApi(req.log);
-    const project = await models.Project.find({
-      where: { id: projectId },
-      attributes: ['directProjectId'],
-      raw: true,
-    });
-    const directProjectId = _.get(project, 'directProjectId');
-    if (!directProjectId) {
-      return res.status(400).send('Direct Project not linked');
-    }
 
     try {
       // check if auth user has acecss to this project
@@ -45,7 +36,7 @@ module.exports = [
       let result = {};
       switch (reportName) {
         case 'summary':
-          result = await lookApi.findProjectRegSubmissions(directProjectId);
+          result = await lookApi.findProjectRegSubmissions(projectId);
           break;
         case 'projectBudget':
           result = await lookApi.findProjectBudget(projectId, isManager, isAdmin);
