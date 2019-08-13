@@ -13,11 +13,12 @@ module.exports = (projectId, reportName, req, res) => {
     case 'summary':
       res.status(200).json(util.wrapResponse(req.id, summaryJson));
       break;
-    case 'projectBudget':
-      const augmentProjectId = pb => _.assign(pb, { 'project_stream.tc_connect_project_id': projectId })
+    case 'projectBudget': {
+      const augmentProjectId = pb => _.assign(pb, { 'project_stream.tc_connect_project_id': projectId });
       projectBudgetJson = _.map(projectBudgetJson, augmentProjectId);
       res.status(200).json(util.wrapResponse(req.id, projectBudgetJson));
       break;
+    }
     default:
       res.status(400).json('Invalid report name');
   }
