@@ -5,25 +5,25 @@ if (process.env.NODE_ENV === 'test') {
   config = require('./test.json');
 } else {
   config = {
-    identityServiceEndpoint: "http://0.0.0.0:3001/",
+    identityServiceEndpoint: "http://dockerhost:3001/",
     authSecret: 'secret',
     authDomain: 'topcoder-dev.com',
     logLevel: 'debug',
     captureLogs: 'false',
     logentriesToken: '',
-    rabbitmqURL: 'amqp://0.0.0.0:5672',
+    rabbitmqURL: 'amqp://dockerhost:5672',
     fileServiceEndpoint: 'https://api.topcoder-dev.com/v3/files/',
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',
-    memberServiceEndpoint: 'http://0.0.0.0:3001/v3/members',
+    memberServiceEndpoint: 'http://dockerhost:3001/v3/members',
     dbConfig: {
-      masterUrl: 'postgres://coder:mysecretpassword@0.0.0.0:5432/projectsdb',
+      masterUrl: 'postgres://coder:mysecretpassword@dockerhost:5432/projectsdb',
       maxPoolSize: 50,
       minPoolSize: 4,
       idleTimeout: 1000,
     },
     elasticsearchConfig: {
-      host: '0.0.0.0:9200',
+      host: 'dockerhost:9200',
       // target elasticsearch 2.3 version
       apiVersion: '2.3',
       indexName: 'projects',
