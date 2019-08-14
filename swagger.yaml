@@ -440,6 +440,8 @@ paths:
           description: No permission or wrong token
           schema:
             $ref: '#/definitions/ErrorModel'
+
+
   '/projects/{projectId}/phases':
     parameters:
       - $ref: '#/parameters/projectIdParam'
@@ -596,6 +598,124 @@ paths:
       responses:
         '204':
           description: Project phase successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+
+
+  '/projects/{projectId}/settings':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - setting
+      operationId: findProjectSettings
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project settings. Only users with readPermission can get the setting
+      parameters:
+        - name: includeAllProjectSettingsForInternalUsage
+          required: false
+          description: to return all project settings
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of project phases
+          schema:
+            $ref: '#/definitions/ProjectSettingListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - setting
+      operationId: addProjectSetting
+      security:
+        - Bearer: []
+      description: >-
+        Create a project setting and create project estimation items based on estimation type.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectSettingBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created project phase
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/settings/{settingId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/settingIdParam'
+    patch:
+      tags:
+        - setting
+      operationId: updateProjectSetting
+      security:
+        - Bearer: []
+      description: >-
+        Update a project setting. All user with write permission can edit the setting.
+      responses:
+        '200':
+          description: Successfully updated project setting.
+          schema:
+            $ref: '#/definitions/ProjectSettingResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectSettingBodyParam'
+    delete:
+      tags:
+        - setting
+      description: >-
+        Remove an existing project setting. All users who are connect managers and admins
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/settingIdParam'
+      responses:
+        '204':
+          description: Project setting successfully removed
         '403':
           description: No permission or wrong token
           schema:
@@ -2960,6 +3080,14 @@ parameters:
     type: integer
     format: int64
     minimum: 1
+  settingIdParam:
+    name: settingId
+    in: path
+    description: project setting identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
   productIdParam:
     name: productId
     in: path
@@ -3580,6 +3708,10 @@ definitions:
         type: number
         format: int64
         description: project identifier
+      settingId:
+        type: number
+        format: int64
+        description: project setting identifier
       role:
         type: string
         description: member role on specified project
@@ -4046,6 +4178,37 @@ definitions:
         type: number
         format: integer
         description: the project phase order
+  ProjectSettingRequest:
+    title: Project setting request object
+    type: object
+    required:
+      - key
+      - value
+      - valueType
+      - readPermission
+      - writePermission
+      - metadata
+    properties:
+      key:
+        type: string
+        description: the project setting key
+      value:
+        type: string
+        description: the project setting value
+      valueType:
+        type: string
+        format: date
+        description: the project setting value type
+      readPermission:
+        type: string
+        format: date
+        description: the project setting read Permission
+      writePermission:
+        type: number
+        description: the project setting write Permission
+      metadata:
+        type: number
+        description: the project setting metadata
   ProjectPhaseBodyParam:
     title: Project phase body param
     type: object
@@ -4054,6 +4217,15 @@ definitions:
     properties:
       param:
         $ref: '#/definitions/ProjectPhaseRequest'
+  ProjectSettingBodyParam:
+    title: Project setting body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: '#/definitions/ProjectSettingRequest'
+
   ProjectPhase:
     title: Project phase object
     allOf:
@@ -4088,6 +4260,64 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/ProjectPhaseRequest'
+
+  ProjectSetting:
+    title: Project setting object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/ProjectSettingRequest'
+
+  ProjectSettingResponse:
+    title: Single project setting response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            $ref: '#/definitions/ProjectSetting'
+
   ProjectPhaseResponse:
     title: Single project phase response object
     type: object
@@ -4133,6 +4363,31 @@ definitions:
             type: array
             items:
               $ref: '#/definitions/ProjectPhase'
+  ProjectSettingListResponse:
+    title: Project setting list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectSetting'
+
   PhaseProductRequest:
     title: Phase product request object
     type: object

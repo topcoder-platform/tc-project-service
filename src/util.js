@@ -18,7 +18,7 @@ import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE } from './constants';
+import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -79,6 +79,94 @@ _.assignIn(util, {
       }
     });
     return valid;
+  },
+  /**
+   * Calculate project estimation item price
+   * @param  {object}   valueType       value type can be int, string, double, percentage
+   * @param  {String}   value           value
+   * @param  {Double}   price           price
+   * @return {Double|String}            calculated price value
+   */
+  calculateEstimationItemPrice: (valueType, value, price) => {
+    if (valueType === VALUE_TYPE.PERCENTAGE) {
+      return (value * price) / 100;
+    }
+    return value;
+  },
+  /**
+   * Calculate project estimation item price
+   * @param   {Object}    req               the request
+   * @param  {Number}     projectId         project id
+   * @return {Array}  estimation items
+   */
+  calculateProjectEstimationItems: (req, projectId) => {
+    let settings = null;
+    const or = [];
+
+    return models.ProjectSetting.findAll({
+      includeAllProjectSettingsForInternalUsage: true,
+      where: {
+        $or: _.map(_.values(ESTIMATION_TYPE), type => ({
+          key: `markup_${type}`,
+          projectId,
+        })),
+      },
+    })
+    .then((entities) => {
+      settings = entities;
+      _.each(settings, (s) => {
+        // Check for invalid estimation type
+        if (!_.includes(_.values(ESTIMATION_TYPE), s.key.split('markup_')[1])) {
+          req.log.debug('Invalid estimation type');
+          return;
+        }
+
+        or.push({
+          markupUsedReferenceId: s.id,
+          markupUsedReference: 'projectSetting',
+        });
+      });
+      return models.ProjectEstimationItem.update({ deletedBy: req.authUser.userId }, {
+        where: {
+          $or: or,
+        },
+      });
+    })
+    .then(() => models.ProjectEstimationItem.findAll({
+      where: {
+        $or: or,
+      },
+    }))
+    // Delete all Project Estimation Items for the project
+    .then(items =>
+       _.each((items), item => item.destroy()),
+     )
+    .then(() => models.ProjectEstimation.findAll({
+      where: { projectId: req.params.projectId },
+    }))
+    .then((estimations) => {
+      if (!estimations || estimations.length === 0) {
+        req.log.debug('No price estimation found, therefore no estimation item is created');
+        return Promise.resolve();
+      }
+      const promises = [];
+      _.each(estimations, (estimation) => {
+        _.each(settings, (setting) => {
+          promises.push(models.ProjectEstimationItem.create({
+            projectEstimationId: estimation.id,
+            price: util.calculateEstimationItemPrice(setting.valueType, setting.value, estimation.price),
+            type: setting.key.split('markup_')[1],
+            markupUsedReference: 'projectSetting',
+            markupUsedReferenceId: setting.id,
+            createdBy: req.authUser.userId,
+            updatedBy: req.authUser.userId,
+          }));
+        });
+      });
+
+      return Promise.all(promises);
+    })
+    .then(projectEstimationItems => projectEstimationItems);
   },
   /**
    * Helper funtion to verify if user has specified role

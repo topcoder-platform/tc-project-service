@@ -271,6 +271,14 @@ router.route('/v4/projects/metadata/planConfig/:key/versions/:version(\\d+)')
   .patch(require('./planConfig/version/update'))
   .delete(require('./planConfig/version/delete'));
 
+router.route('/v4/projects/:projectId(\\d+)/settings/:id(\\d+)')
+  .patch(require('./projectSettings/update'))
+  .delete(require('./projectSettings/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/settings')
+  .get(require('./projectSettings/list'))
+  .post(require('./projectSettings/create'));
+
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint

@@ -8,8 +8,9 @@ const projectMemberDelete = require('./projectMember.delete');
 const projectAdmin = require('./admin.ops');
 const projectAttachmentUpdate = require('./project.updateAttachment');
 const projectAttachmentDownload = require('./project.downloadAttachment');
-// const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
+const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
+const projectSettings = require('./projectSetting');
 
 module.exports = () => {
   Authorizer.setDeniedStatusCode(403);
@@ -98,4 +99,9 @@ module.exports = () => {
   Authorizer.setPolicy('planConfig.edit', projectAdmin);
   Authorizer.setPolicy('planConfig.delete', projectAdmin);
   Authorizer.setPolicy('planConfig.view', true); // anyone can view price config
+
+  Authorizer.setPolicy('projectSetting.create', connectManagerOrAdmin);
+  Authorizer.setPolicy('projectSetting.edit', projectSettings);
+  Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);
+  Authorizer.setPolicy('projectSetting.view', projectView);
 };

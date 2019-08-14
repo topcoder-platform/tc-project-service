@@ -1,0 +1,566 @@
+/**
+ * Tests for update.js
+ */
+import _ from 'lodash';
+import chai from 'chai';
+import request from 'supertest';
+
+import server from '../../app';
+import testUtil from '../../tests/util';
+import models from '../../models';
+import { VALUE_TYPE } from '../../constants';
+
+const should = chai.should();
+
+const expectAfterUpdate = (id, projectId, estimation, len, deletedLen, err, next) => {
+  if (err) throw err;
+  setTimeout(() =>
+  models.ProjectSetting.findOne({
+    includeAllProjectSettingsForInternalUsage: true,
+    where: {
+      id,
+      projectId,
+    },
+  })
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
+        models.ProjectEstimationItem.findAll({
+          where: {
+            markupUsedReference: 'projectSetting',
+            markupUsedReferenceId: id,
+            deletedAt: { $ne: null },
+          },
+          paranoid: false,
+        }).then((items) => {
+          // deleted project estimation items
+          items.should.have.lengthOf(deletedLen);
+
+          _.each(items, (item) => {
+            should.exist(item.deletedBy);
+            should.exist(item.deletedAt);
+          });
+
+          return models.ProjectEstimationItem.findAll({
+            where: {
+              markupUsedReference: 'projectSetting',
+              markupUsedReferenceId: id,
+            },
+            paranoid: true,
+          });
+        }).then((entities) => {
+          entities.should.have.lengthOf(len);
+          if (len) {
+            entities[0].projectEstimationId.should.be.eql(estimation.id);
+            if (estimation.valueType === VALUE_TYPE.PERCENTAGE) {
+              entities[0].price.should.be.eql((estimation.price * estimation.value) / 100);
+            } else {
+              entities[0].price.should.be.eql(Number(estimation.value));
+            }
+            entities[0].type.should.be.eql(estimation.key.split('markup_')[1]);
+            entities[0].markupUsedReference.should.be.eql('projectSetting');
+            entities[0].markupUsedReferenceId.should.be.eql(id);
+            should.exist(entities[0].updatedAt);
+            should.not.exist(entities[0].deletedBy);
+            should.not.exist(entities[0].deletedAt);
+          }
+
+          next();
+        });
+      }
+    }), 500);
+};
+
+describe('UPDATE Project Setting', () => {
+  let projectId;
+  let estimationId;
+  let id;
+
+  const memberUser = {
+    handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
+    userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
+    firstName: 'fname',
+    lastName: 'lName',
+    email: 'some@abc.com',
+  };
+  const copilotUser = {
+    handle: testUtil.getDecodedToken(testUtil.jwts.copilot).handle,
+    userId: testUtil.getDecodedToken(testUtil.jwts.copilot).userId,
+    firstName: 'fname',
+    lastName: 'lName',
+    email: 'some@abc.com',
+  };
+
+  const body = {
+    param: {
+      key: 'markup_topcoder_service',
+      value: '5599.96',
+      valueType: 'double',
+      readPermission: {
+        projectRoles: ['customer'],
+        topcoderRoles: ['administrator'],
+      },
+      writePermission: {
+        allowRule: {
+          projectRoles: ['customer', 'copilot'],
+          topcoderRoles: ['administrator', 'Connect Admin'],
+        },
+        denyRule: {
+          projectRoles: ['copilot'],
+          topcoderRoles: ['Connect Admin'],
+        },
+      },
+      createdBy: 1,
+      updatedBy: 1,
+    },
+  };
+
+  const estimation = {
+    buildingBlockKey: 'BLOCK_KEY',
+    conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE || CA_NEEDED)',
+    price: 6500.50,
+    quantity: 10,
+    minTime: 35,
+    maxTime: 35,
+    metadata: {
+      deliverable: 'dev-qa',
+    },
+    createdBy: 1,
+    updatedBy: 1,
+  };
+
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => {
+        // Create projects
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        })
+        .then((project) => {
+          projectId = project.id;
+
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
+            createdBy: 1,
+            updatedBy: 1,
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }])
+          .then(() => {
+            models.ProjectSetting.create(_.assign(body.param, { projectId }))
+            .then((s) => {
+              id = s.id;
+
+              models.ProjectEstimation.create(_.assign(estimation, { projectId }))
+              .then((e) => {
+                estimationId = e.id;
+                done();
+                /* models.ProjectEstimationItem.create({
+                  projectEstimationId: estimationId,
+                  price: body.param.value,
+                  type: body.param.key.split('markup_')[1],
+                  markupUsedReference: 'projectSetting',
+                  markupUsedReferenceId: id,
+                  createdBy: 1,
+                  updatedBy: 1,
+                })
+                .then(() => done()); */
+              });
+            });
+          });
+        });
+      });
+  });
+
+  after(testUtil.clearDb);
+
+  describe('PATCH /projects/{projectId}/settings/{id}', () => {
+    it('should return 403 if user is not authenticated', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .send(body)
+        .expect(403, done);
+    });
+
+    it('should return 403 when user have no permission (non team member)', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .send(body)
+        .expect(403, done);
+    });
+
+    it('should return 403 when copilot is in both denyRule and allowRule', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send(body)
+        .expect(403, done);
+    });
+
+    it('should return 403 when connect admin is in both denyRule and allowRule', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+        })
+        .send(body)
+        .expect(403, done);
+    });
+
+    it('should return 404 for non-existed project', (done) => {
+      request(server)
+        .patch(`/v4/projects/9999/settings/${id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(body)
+        .expect(404, done);
+    });
+
+    it('should return 404 for non-existed project setting', (done) => {
+      request(server)
+        .patch(`/v4/projects/${projectId}/settings/1234`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(body)
+        .expect(404, done);
+    });
+
+    it('should return 404 for deleted project setting', (done) => {
+      models.ProjectSetting.destroy({ where: { id } })
+        .then(() => {
+          request(server)
+            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send(body)
+            .expect(404, done);
+        });
+    });
+
+    it('should return 422, for member, when update key with existing key', (done) => {
+      const existing = _.cloneDeep(body);
+      existing.param.key = 'markup_existing';
+      existing.param.projectId = projectId;
+
+      models.ProjectSetting.create(existing.param).then(() => {
+        request(server)
+            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({
+              param: {
+                key: existing.param.key,
+              },
+            })
+            .expect(422, done);
+      });
+    });
+
+    it('should return 200, for admin, when update key with non-estimation type', (done) => {
+      const noEstimationBody = _.cloneDeep(body);
+      noEstimationBody.param.key = 'markup_no_estimation';
+      noEstimationBody.param.value = '3560';
+
+      models.ProjectEstimationItem.destroy({
+        where: {
+          markupUsedReference: 'projectSetting',
+          markupUsedReferenceId: id,
+        },
+      }).then(() => {
+        request(server)
+            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({
+              param: {
+                key: noEstimationBody.param.key,
+                value: noEstimationBody.param.value,
+              },
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+              const resJson = res.body.result.content;
+              resJson.key.should.be.eql(noEstimationBody.param.key);
+              resJson.value.should.be.eql(noEstimationBody.param.value);
+              resJson.valueType.should.be.eql(noEstimationBody.param.valueType);
+              resJson.projectId.should.be.eql(projectId);
+              should.exist(resJson.createdAt);
+              should.exist(resJson.updatedAt);
+              should.not.exist(resJson.deletedBy);
+              should.not.exist(resJson.deletedAt);
+              expectAfterUpdate(id, projectId, _.assign(estimation, {
+                id: estimationId,
+                value: noEstimationBody.param.value,
+                valueType: noEstimationBody.param.valueType,
+                key: noEstimationBody.param.key,
+              }), 0, 0, err, done);
+            });
+      });
+    });
+
+    it('should return 200, for admin, update with non-estimation type with existing project estimation item record',
+      (done) => {
+        const noEstimationBody = _.cloneDeep(body);
+        noEstimationBody.param.key = 'markup_no_estimation';
+        noEstimationBody.param.value = '1400';
+
+        models.ProjectEstimationItem.create({
+          projectEstimationId: estimationId,
+          price: 1200,
+          type: 'topcoder_service',
+          markupUsedReference: 'projectSetting',
+          markupUsedReferenceId: id,
+          createdBy: 1,
+          updatedBy: 1,
+        }).then(() => {
+          request(server)
+            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({
+              param: {
+                key: noEstimationBody.param.key,
+                value: noEstimationBody.param.value,
+              },
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+              const resJson = res.body.result.content;
+              resJson.key.should.be.eql(noEstimationBody.param.key);
+              resJson.value.should.be.eql(noEstimationBody.param.value);
+              resJson.valueType.should.be.eql(noEstimationBody.param.valueType);
+              resJson.projectId.should.be.eql(projectId);
+              should.exist(resJson.createdAt);
+              should.exist(resJson.updatedAt);
+              should.not.exist(resJson.deletedBy);
+              should.not.exist(resJson.deletedAt);
+              expectAfterUpdate(id, projectId, _.assign(estimation, {
+                id: estimationId,
+                value: noEstimationBody.param.value,
+                valueType: noEstimationBody.param.valueType,
+                key: noEstimationBody.param.key,
+              }), 0, 1, err, done);
+              // resolve(resJson);
+            });
+        });
+      });
+
+    it('should return 200, for member with permission (team member), value updated but no project estimation present',
+      (done) => {
+        const notPresent = _.cloneDeep(body);
+        notPresent.param.value = '4500';
+
+        models.ProjectEstimation.destroy({
+          where: {
+            id: estimationId,
+          },
+        }).then(() => {
+          models.ProjectEstimationItem.destroy({
+            where: {
+              markupUsedReference: 'projectSetting',
+              markupUsedReferenceId: id,
+            },
+          }).then(() => {
+            request(server)
+                .patch(`/v4/projects/${projectId}/settings/${id}`)
+                .set({
+                  Authorization: `Bearer ${testUtil.jwts.member}`,
+                })
+                .send({
+                  param: {
+                    value: notPresent.param.value,
+                  },
+                })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                  const resJson = res.body.result.content;
+                  resJson.id.should.be.eql(id);
+                  resJson.key.should.be.eql(notPresent.param.key);
+                  resJson.value.should.be.eql(notPresent.param.value);
+                  resJson.valueType.should.be.eql(notPresent.param.valueType);
+                  resJson.projectId.should.be.eql(notPresent.param.projectId);
+                  resJson.createdBy.should.be.eql(notPresent.param.createdBy);
+                  resJson.createdBy.should.be.eql(notPresent.param.createdBy);
+                  resJson.updatedBy.should.be.eql(40051331);
+                  should.exist(resJson.updatedAt);
+                  should.not.exist(resJson.deletedBy);
+                  should.not.exist(resJson.deletedAt);
+                  expectAfterUpdate(id, projectId, _.assign(estimation, {
+                    id: estimationId,
+                    value: notPresent.param.value,
+                    valueType: notPresent.param.valueType,
+                    key: notPresent.param.key,
+                  }), 0, 0, err, done);
+                });
+          });
+        });
+      });
+
+    it('should return 200 for admin when update key with different estimation type', (done) => {
+      body.param.key = 'markup_fee';
+
+      models.ProjectEstimationItem.create({
+        projectEstimationId: estimationId,
+        price: 1200,
+        type: 'topcoder_service',
+        markupUsedReference: 'projectSetting',
+        markupUsedReferenceId: id,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.member}`,
+            })
+            .send({
+              param: {
+                key: body.param.key,
+              },
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+              const resJson = res.body.result.content;
+              resJson.id.should.be.eql(id);
+              resJson.key.should.be.eql(body.param.key);
+              resJson.value.should.be.eql(body.param.value);
+              resJson.valueType.should.be.eql(body.param.valueType);
+              resJson.projectId.should.be.eql(body.param.projectId);
+              resJson.createdBy.should.be.eql(body.param.createdBy);
+              resJson.createdBy.should.be.eql(body.param.createdBy);
+              resJson.updatedBy.should.be.eql(40051331); // admin
+              should.exist(resJson.updatedAt);
+              should.not.exist(resJson.deletedBy);
+              should.not.exist(resJson.deletedAt);
+              expectAfterUpdate(id, projectId, _.assign(estimation, {
+                id: estimationId,
+                value: body.param.value,
+                valueType: body.param.valueType,
+                key: body.param.key,
+              }), 1, 1, err, done);
+            });
+      });
+    });
+
+    it('should return 200 for admin when value updated, calculating project estimation items', (done) => {
+      body.param.value = '4500';
+
+      models.ProjectEstimationItem.create({
+        projectEstimationId: estimationId,
+        price: 1200,
+        type: 'topcoder_service',
+        markupUsedReference: 'projectSetting',
+        markupUsedReferenceId: id,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({
+              param: {
+                value: body.param.value,
+              },
+            })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+              const resJson = res.body.result.content;
+              resJson.id.should.be.eql(id);
+              resJson.key.should.be.eql(body.param.key);
+              resJson.value.should.be.eql(body.param.value);
+              resJson.valueType.should.be.eql(body.param.valueType);
+              resJson.projectId.should.be.eql(body.param.projectId);
+              resJson.createdBy.should.be.eql(body.param.createdBy);
+              resJson.createdBy.should.be.eql(body.param.createdBy);
+              resJson.updatedBy.should.be.eql(40051333); // admin
+              should.exist(resJson.updatedAt);
+              should.not.exist(resJson.deletedBy);
+              should.not.exist(resJson.deletedAt);
+              expectAfterUpdate(id, projectId, _.assign(estimation, {
+                id: estimationId,
+                value: body.param.value,
+                valueType: body.param.valueType,
+                key: body.param.key,
+              }), 1, 1, err, done);
+            });
+      });
+    });
+
+    it('should return 200, for admin, update valueType from double to percentage',
+    (done) => {
+      body.param.value = '10.76';
+      body.param.valueType = VALUE_TYPE.PERCENTAGE;
+      request(server)
+          .patch(`/v4/projects/${projectId}/settings/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({
+            param: {
+              value: body.param.value,
+              valueType: VALUE_TYPE.PERCENTAGE,
+            },
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            const resJson = res.body.result.content;
+            resJson.id.should.be.eql(id);
+            resJson.key.should.be.eql(body.param.key);
+            resJson.value.should.be.eql(body.param.value);
+            resJson.valueType.should.be.eql(VALUE_TYPE.PERCENTAGE);
+            resJson.projectId.should.be.eql(body.param.projectId);
+            resJson.createdBy.should.be.eql(body.param.createdBy);
+            resJson.createdBy.should.be.eql(body.param.createdBy);
+            resJson.updatedBy.should.be.eql(40051333); // admin
+            should.exist(resJson.updatedAt);
+            should.not.exist(resJson.deletedBy);
+            should.not.exist(resJson.deletedAt);
+            expectAfterUpdate(id, projectId, _.assign(estimation, {
+              id: estimationId,
+              value: body.param.value,
+              valueType: body.param.valueType,
+              key: body.param.key,
+            }), 1, 0, err, done);
+          });
+    });
+  });
+});

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "efae2a9b-b869-4965-b889-3278870b29ea",
+		"_postman_id": "63434b2d-3d11-4c2d-8200-8ca342c8c18e",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -6985,6 +6985,838 @@
 								"1",
 								"revisions",
 								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Project Setting",
+			"item": [
+				{
+					"name": "Create project setting - double",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"settingId\", pm.response.json().result.content.id);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - percentage",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "bf3aa19f-517c-4103-9250-82d7847e7477",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_fee\",\r\n    \"value\": \"18.88\",\r\n    \"valueType\": \"percentage\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t    \"topcoderRoles\": [\"Connect Copilot\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - for project = 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"2222\",\r\n    \"valueType\": \"double\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/2/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"2",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - another estimation type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_reference_program\",\r\n    \"value\": \"17800\",\r\n    \"valueType\": \"double\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\", \"copilot\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with non estimation type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_non_estimation\",\r\n    \"value\": \"8765\",\r\n    \"valueType\": \"string\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t  \"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - duplicate key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with invalid valueType",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"int1\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with invalid percentage value",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_community\",\r\n    \"value\": \"200\",\r\n    \"valueType\": \"percentage\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with missing readPermission",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"int\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with empty body",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - not permitted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting(filter)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings?includeAllProjectSettingsForInternalUsage=true",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							],
+							"query": [
+								{
+									"key": "includeAllProjectSettingsForInternalUsage",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting - 403",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting - manager",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change to different estimation type",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_community\",\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"Connect Manager\"]\r\n\t  }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change double to percentage",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"value\": \"35.60\",\r\n    \"valueType\": \"percentage\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change to non-estimation type",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_non_estimated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - non-existent project",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"value\": \"30\",\r\n    \"valueType\": \"percentage\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/9999/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"9999",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - non-existent project setting",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"value\": \"30\",\r\n    \"valueType\": \"percentage\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/9999",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change readPermission",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_community\",\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"Connect Manager\"]\r\n\t  }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting - manager - after update",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete project setting",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
 							]
 						}
 					},

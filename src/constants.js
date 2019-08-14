@@ -191,3 +191,10 @@ export const ESTIMATION_TYPE = {
   TOPCODER_SERVICE: 'topcoder_service',
   REFERENCE_PROGRAM: 'reference_program',
 };
+
+export const VALUE_TYPE = {
+  INT: 'int',
+  DOUBLE: 'double',
+  STRING: 'string',
+  PERCENTAGE: 'percentage',
+};
