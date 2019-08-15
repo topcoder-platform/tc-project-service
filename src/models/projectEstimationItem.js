@@ -34,6 +34,63 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
       updatedAt: 'updatedAt',
       createdAt: 'createdAt',
       indexes: [],
+      classMethods: {
+        /**
+         * Find all project estimation items for project
+         *
+         * TODO: this method can rewritten without using `models`
+         *       and using JOIN instead for retrieving ProjectEstimationTimes by projectId
+         *
+         * @param {Object} models    all models
+         * @param {Number} projectId project id
+         * @param {Object} [where]   additional where request
+         * @param {Object} [options] options
+         *
+         * @returns {Promise}
+         */
+        findAllByProject(models, projectId, options) {
+          return models.ProjectEstimation.findAll({
+            raw: true,
+            where: {
+              projectId,
+            }
+          }).then((estimations) => {
+            const optionsCombined = _.assign({}, options);
+            // update where to always filter by projectEstimationsIds of the project
+            optionsCombined.where = _.assign({}, optionsCombined.where, {
+              projectEstimationId: _.map(estimations, 'id'),
+            })
+
+            return this.findAll(optionsCombined)
+          });
+        },
+
+        /**
+         * Delete all project estimation items for project
+         *
+         * TODO: this method can rewritten without using `models`
+         *       and using JOIN instead for retrieving ProjectEstimationTimes by projectId
+         *
+         * @param {Object} models    all models
+         * @param {Number} projectId project id
+         * @param {Object} reqUser   user who makes the request
+         *
+         * @returns {Promise}
+         */
+        deleteAllForProject(models, projectId, reqUser) {
+          return this.findAllByProject(models, projectId)
+            .then((estimationItems) => {
+              const estimationItemsOptions = {
+                where: {
+                  id: _.map(estimationItems, 'id'),
+                }
+              };
+
+              return this.update({ deletedBy: reqUser.userId, }, estimationItemsOptions)
+                .then(() => this.destroy(estimationItemsOptions));
+            });
+        }
+      }
     },
   );
 

@@ -13,7 +13,7 @@ const should = chai.should();
 
 const expectAfterDelete = (id, projectId, len, deletedLen, err, next) => {
   if (err) throw err;
-  setTimeout(() =>
+
   models.ProjectSetting.findOne({
     includeAllProjectSettingsForInternalUsage: true,
     where: {
@@ -22,40 +22,36 @@ const expectAfterDelete = (id, projectId, len, deletedLen, err, next) => {
     },
     paranoid: false,
   })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        should.exist(res.deletedBy);
-        should.exist(res.deletedAt);
+  .then((res) => {
+    if (!res) {
+      throw new Error('Should found the entity');
+    } else {
+      should.exist(res.deletedBy);
+      should.exist(res.deletedAt);
 
-        models.ProjectEstimationItem.findAll({
-          where: {
-            markupUsedReference: 'projectSetting',
-            deletedAt: { $ne: null },
-          },
-          paranoid: false,
-        }).then((items) => {
-          // deleted project estimation items
-          items.should.have.lengthOf(deletedLen);
-          _.each(items, (item) => {
-            should.exist(item.deletedBy);
-            should.exist(item.deletedAt);
-          });
-
-          return models.ProjectEstimationItem.findAll({
-            where: {
-              markupUsedReference: 'projectSetting',
-            },
-            paranoid: true,
-          });
-        }).then((items) => {
-          // all non-deleted project estimation item count
-          items.should.have.lengthOf(len);
-          next();
+      // find deleted ProjectEstimationItems for project
+      models.ProjectEstimationItem.findAllByProject(models, projectId, {
+        where: {
+          deletedAt: { $ne: null },
+        },
+        paranoid: false,
+      }).then((items) => {
+        // deleted project estimation items
+        items.should.have.lengthOf(deletedLen, 'Number of deleted ProjectEstimationItems doesn\'t match');
+        _.each(items, (item) => {
+          should.exist(item.deletedBy);
+          should.exist(item.deletedAt);
         });
-      }
-    }), 500);
+
+        // find (non-deleted) ProjectEstimationItems for project
+        return models.ProjectEstimationItem.findAllByProject(models, projectId);
+      }).then((items) => {
+        // all non-deleted project estimation item count
+        items.should.have.lengthOf(len, 'Number of created ProjectEstimationItems doesn\'t match');
+        next();
+      }).catch(next);
+    }
+  })
 };
 
 describe('DELETE Project Setting', () => {
@@ -139,17 +135,6 @@ describe('DELETE Project Setting', () => {
             .then((e) => {
               estimationId = e.id;
               done();
-
-              /* models.ProjectEstimationItem.create({
-                projectEstimationId: estimationId,
-                price: 5599.96,
-                type: 'topcoder_service',
-                markupUsedReference: 'projectSetting',
-                markupUsedReferenceId: id,
-                createdBy: 1,
-                updatedBy: 1,
-              })
-              .then(() => done()); */
             });
           });
         });
@@ -210,7 +195,7 @@ describe('DELETE Project Setting', () => {
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
             .expect(404, done);
-        });
+        }).catch(done);
     });
 
     it('should return 204, for admin, if project setting was successfully removed', (done) => {
@@ -223,26 +208,26 @@ describe('DELETE Project Setting', () => {
         createdBy: 1,
         updatedBy: 1,
       })
-        .then(() => {
-          request(server)
-              .delete(`/v4/projects/${projectId}/settings/${id}`)
-              .set({
-                Authorization: `Bearer ${testUtil.jwts.admin}`,
-              })
-              .expect(204)
-              .end(err => expectAfterDelete(id, projectId, 0, 1, err, done));
-        });
+      .then(() => {
+        request(server)
+          .delete(`/v4/projects/${projectId}/settings/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(204)
+          .end(err => expectAfterDelete(id, projectId, 0, 1, err, done));
+      }).catch(done);
     });
 
     it('should return 204, for admin, if project setting with non-estimation type was successfully removed',
     (done) => {
       request(server)
-          .delete(`/v4/projects/${projectId}/settings/${id2}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(204)
-          .end(err => expectAfterDelete(id2, projectId, 0, 0, err, done));
+        .delete(`/v4/projects/${projectId}/settings/${id2}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(204)
+        .end(err => expectAfterDelete(id2, projectId, 0, 0, err, done));
     });
 
     it('should return 204, for admin, another project setting exists if the project setting was successfully removed',
@@ -278,14 +263,14 @@ describe('DELETE Project Setting', () => {
           updatedBy: 1,
         }).then(() => {
           request(server)
-                .delete(`/v4/projects/${projectId}/settings/${id}`)
-                .set({
-                  Authorization: `Bearer ${testUtil.jwts.admin}`,
-                })
-                .expect(204)
-                .end(err => expectAfterDelete(id, projectId, 1, 1, err, done));
+            .delete(`/v4/projects/${projectId}/settings/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(204)
+            .end(err => expectAfterDelete(id, projectId, 1, 1, err, done));
         });
-      });
+      }).catch(done);
     });
   });
 });

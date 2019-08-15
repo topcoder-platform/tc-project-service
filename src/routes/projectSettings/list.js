@@ -27,14 +27,8 @@ module.exports = [
       },
       attributes: { exclude: ['deletedAt', 'deletedBy'] },
       raw: true,
+      reqUser: req.authUser,
     };
-    // when user query with includeAllProjectSettingsForInternalUsage,
-    // return result with all ProjectSettings records to make calculations
-    if (req.query.includeAllProjectSettingsForInternalUsage) {
-      options.includeAllProjectSettingsForInternalUsage = req.query.includeAllProjectSettingsForInternalUsage;
-    } else {
-      options.reqUser = req.authUser;
-    }
 
     models.Project.count({
       where: {
