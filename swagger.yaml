@@ -2948,7 +2948,7 @@ paths:
       tags:
         - Project Estimation Item
       security:
-        - Bearer []
+        - Bearer: []
       description: get project estimation items
       parameters:
         - $ref: '#/parameters/projectIdParam'
@@ -2956,7 +2956,8 @@ paths:
       responses:
         '200':
           description: List of project estimation items
-          $ref: '#/definitions/ProjectEstimationItemListResponse'
+          schema:
+            $ref: '#/definitions/ProjectEstimationItemListResponse'
         '403':
           description: No permission or wrong token
           schema:
