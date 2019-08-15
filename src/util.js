@@ -102,7 +102,7 @@ _.assignIn(util, {
   calculateProjectEstimationItems: (req, projectId) =>
     // delete ALL existent ProjectEstimationItems for the project
      models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
-      includeAllProjectEstimatinoItemsForInternalUsage: true,
+       includeAllProjectEstimatinoItemsForInternalUsage: true,
      })
 
       // retrieve ProjectSettings and ProjectEstimations

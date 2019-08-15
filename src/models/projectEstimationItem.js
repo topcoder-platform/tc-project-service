@@ -1,12 +1,41 @@
+/**
+ * Project Estimation Item model
+ *
+ * WARNING: This model contains sensitive data!
+ *
+ * - To return data from this model to the user always use methods `find`/`findAll`
+ *   and provide to them `options.reqUser` and `options.members` to check what
+ *   types of Project Estimation Items user which makes the request can get.
+ * - For internal usage you can use `options.includeAllProjectEstimatinoItemsForInternalUsage`
+ *   which would force `find`/`findAll` to return all the records without checking permissions.
+ *   Use the data returned in such way ONLY FOR INTERNAL usage. It means such data can be used
+ *   to make some calculations inside Project Service but it should be never returned to the user as it is.
+ */
 import _ from 'lodash';
 import util from '../util';
 import {
   ESTIMATION_TYPE,
   MANAGER_ROLES,
   PROJECT_MEMBER_ROLE,
-  ADMIN_ESTIMATION_ITEM_TYPES,
-  COPILOT_ESTIMATION_ITEM_TYPES,
 } from '../constants';
+
+/*
+  This config defines which Project Estimation Item `types` users can get
+  based on their permissions
+ */
+const permissionsConfigs = [
+  // Topcoder managers can get all types of Project Estimation Items
+  {
+    permission: { topcoderRoles: MANAGER_ROLES },
+    types: _.values(ESTIMATION_TYPE),
+  },
+
+  // Project Copilots can get only 'community' type of Project Estimation Items
+  {
+    permission: { projectRoles: PROJECT_MEMBER_ROLE.COPILOT },
+    types: [ESTIMATION_TYPE.COMMUNITY],
+  },
+];
 
 module.exports = function defineProjectHistory(sequelize, DataTypes) {
   const ProjectEstimationItem = sequelize.define(
@@ -41,29 +70,28 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
       indexes: [],
       hooks: {
         beforeFind: (options, callback) => {
+          // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
           if (options.includeAllProjectEstimatinoItemsForInternalUsage) {
             callback(null);
           }
 
-          /* eslint-disable no-param-reassign */
           if (!options.reqUser || !options.members) {
             callback(new Error(
               'You must provide auth user and project members to get project estimation items'));
-          } else if (util.hasPermission({ topcoderRoles: MANAGER_ROLES }, options.reqUser, options.members)) {
-            // do nothing. admins can see every field.
-            options.where.type = ADMIN_ESTIMATION_ITEM_TYPES;
-            callback(null);
-          } else if (util.hasPermission(
-            { projectRoles: PROJECT_MEMBER_ROLE.COPILOT },
-            options.reqUser,
-            options.members)) {
-            options.where.type = COPILOT_ESTIMATION_ITEM_TYPES;
-            callback(null);
-          } else {
-            options.where.type = { $eq: null };
-            callback(null);
           }
-          /* eslint-enable no-param-reassign */
+
+          // find all project estimation item types which are allowed to be returned to the user
+          let allowedTypes = [];
+          permissionsConfigs.forEach((permissionsConfig) => {
+            if (util.hasPermission(permissionsConfig.permission, options.reqUser, options.members)) {
+              allowedTypes = _.concat(allowedTypes, permissionsConfig.types);
+            }
+          });
+          allowedTypes = _.uniq(allowedTypes);
+
+          // only return Project Estimation Types which are allowed to the user
+          options.where.type = allowedTypes; // eslint-disable-line no-param-reassign
+          callback(null);
         },
       },
       classMethods: {
