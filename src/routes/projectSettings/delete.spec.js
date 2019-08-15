@@ -51,7 +51,7 @@ const expectAfterDelete = (id, projectId, len, deletedLen, err, next) => {
         next();
       }).catch(next);
     }
-  })
+  });
 };
 
 describe('DELETE Project Setting', () => {

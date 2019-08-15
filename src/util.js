@@ -99,9 +99,9 @@ _.assignIn(util, {
    * @param  {Number}     projectId         project id
    * @return {Array}  estimation items
    */
-  calculateProjectEstimationItems: (req, projectId) => {
+  calculateProjectEstimationItems: (req, projectId) =>
     // delete ALL existent ProjectEstimationItems for the project
-    return models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser)
+     models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser)
 
       // retrieve ProjectSettings and ProjectEstimations
       .then(() => Promise.all([
@@ -116,7 +116,7 @@ _.assignIn(util, {
         models.ProjectEstimation.findAll({
           where: { projectId: req.params.projectId },
           raw: true,
-        })
+        }),
       ]))
 
       // create ProjectEstimationItems
@@ -147,8 +147,7 @@ _.assignIn(util, {
         });
 
         return models.ProjectEstimationItem.bulkCreate(estimationItems);
-      })
-  },
+      }),
   /**
    * Helper funtion to verify if user has specified role
    * @param  {object} req  Request object that should contain authUser

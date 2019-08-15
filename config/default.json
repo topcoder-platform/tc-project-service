@@ -60,5 +60,16 @@
   "MAX_REVISION_NUMBER": 100,
   "UNIQUE_GMAIL_VALIDATION": false,
   "SSO_REFCODES": "[]",
-  "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]"
+  "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]",
+  "lookerConfig": {
+    "BASE_URL": "",
+    "CLIENT_ID": "",
+    "CLIENT_SECRET": "",
+    "TOKEN": "TOKEN",
+    "USE_MOCK": "true",
+    "QUERIES": {
+      "REG_STATS": 1234,
+      "BUDGET": 123
+    }
+  }
 }

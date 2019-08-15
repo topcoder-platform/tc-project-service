@@ -63,7 +63,7 @@ const expectAfterUpdate = (id, projectId, estimation, len, deletedLen, err, next
         next();
       });
     }
-  })
+  });
 };
 
 describe('UPDATE Project Setting', () => {
@@ -113,7 +113,7 @@ describe('UPDATE Project Setting', () => {
     key: 'markup_topcoder_service',
     createdBy: 1,
     updatedBy: 1,
-  }
+  };
 
   const estimation = {
     buildingBlockKey: 'BLOCK_KEY',
@@ -270,7 +270,8 @@ describe('UPDATE Project Setting', () => {
         .expect(422, done);
     });
 
-    it('should return 200, for member with permission (team member), value updated but no project estimation present', (done) => {
+    it('should return 200, for member with permission (team member), value updated but no project estimation present',
+    (done) => {
       const notPresent = _.cloneDeep(body);
       notPresent.param.value = '4500';
 

@@ -94,6 +94,14 @@ router.route('/v4/projects/:projectId(\\d+)')
   .patch(require('./projects/update'))
   .delete(require('./projects/delete'));
 
+router.route('/v4/projects/:projectId(\\d+)/scopeChangeRequests')
+  .post(require('./scopeChangeRequests/create'));
+  // .get(require('./scopeChangeRequests/list'));
+router.route('/v4/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)')
+  // .get(require('./scopeChangeRequests/get'))
+  .patch(require('./scopeChangeRequests/update'));
+  // .delete(require('./scopeChangeRequests/delete'));
+
 router.route('/v4/projects/:projectId(\\d+)/members')
   .post(require('./projectMembers/create'));
 
@@ -271,13 +279,47 @@ router.route('/v4/projects/metadata/planConfig/:key/versions/:version(\\d+)')
   .patch(require('./planConfig/version/update'))
   .delete(require('./planConfig/version/delete'));
 
+// work streams
+router.route('/v4/projects/:projectId(\\d+)/workstreams')
+  .get(require('./workStreams/list'))
+  .post(require('./workStreams/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:id(\\d+)')
+  .get(require('./workStreams/get'))
+  .patch(require('./workStreams/update'))
+  .delete(require('./workStreams/delete'));
+
+// works
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works')
+  .get(require('./works/list'))
+  .post(require('./works/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:id(\\d+)')
+  .get(require('./works/get'))
+  .patch(require('./works/update'))
+  .delete(require('./works/delete'));
+
+// work items
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:workId(\\d+)/workitems')
+  .get(require('./workItems/list'))
+  .post(require('./workItems/create'));
+
+router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:workId(\\d+)/workitems/:id(\\d+)')
+  .get(require('./workItems/get'))
+  .patch(require('./workItems/update'))
+  .delete(require('./workItems/delete'));
+
+router.route('/v4/projects/:projectId/reports')
+  .get(require('./projectReports/getReport'));
+
+// Project Settings
 router.route('/v4/projects/:projectId(\\d+)/settings/:id(\\d+)')
-  .patch(require('./projectSettings/update'))
-  .delete(require('./projectSettings/delete'));
+.patch(require('./projectSettings/update'))
+.delete(require('./projectSettings/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/settings')
-  .get(require('./projectSettings/list'))
-  .post(require('./projectSettings/create'));
+.get(require('./projectSettings/list'))
+.post(require('./projectSettings/create'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

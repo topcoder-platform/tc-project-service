@@ -53,15 +53,15 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
             raw: true,
             where: {
               projectId,
-            }
+            },
           }).then((estimations) => {
             const optionsCombined = _.assign({}, options);
             // update where to always filter by projectEstimationsIds of the project
             optionsCombined.where = _.assign({}, optionsCombined.where, {
               projectEstimationId: _.map(estimations, 'id'),
-            })
+            });
 
-            return this.findAll(optionsCombined)
+            return this.findAll(optionsCombined);
           });
         },
 
@@ -83,14 +83,14 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
               const estimationItemsOptions = {
                 where: {
                   id: _.map(estimationItems, 'id'),
-                }
+                },
               };
 
-              return this.update({ deletedBy: reqUser.userId, }, estimationItemsOptions)
+              return this.update({ deletedBy: reqUser.userId }, estimationItemsOptions)
                 .then(() => this.destroy(estimationItemsOptions));
             });
-        }
-      }
+        },
+      },
     },
   );
 

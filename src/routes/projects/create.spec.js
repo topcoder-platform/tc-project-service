@@ -157,6 +157,56 @@ describe('Project create', () => {
           createdBy: 1,
           updatedBy: 2,
         },
+        {
+          id: 4,
+          name: 'template with workstreams',
+          key: 'key 3',
+          category: 'category 3',
+          icon: 'http://example.com/icon3.ico',
+          question: 'question 3',
+          info: 'info 3',
+          aliases: [],
+          scope: {},
+          phases: {
+            workstreamsConfig: {
+              projectFieldName: 'details.appDefinition.deliverables',
+              workstreamTypesToProjectValues: {
+                development: [
+                  'dev-qa',
+                ],
+                design: [
+                  'design',
+                ],
+                deployment: [
+                  'deployment',
+                ],
+                qa: [
+                  'dev-qa',
+                ],
+              },
+              workstreams: [
+                {
+                  name: 'Design Workstream',
+                  type: 'design',
+                },
+                {
+                  name: 'Development Workstream',
+                  type: 'development',
+                },
+                {
+                  name: 'QA Workstream',
+                  type: 'qa',
+                },
+                {
+                  name: 'Deployment Workstream',
+                  typ: 'deployment',
+                },
+              ],
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        },
       ]))
       .then(() => done());
   });
@@ -486,6 +536,83 @@ describe('Project create', () => {
         });
     });
 
+    it('should create project with workstreams if template has them defined', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v4/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(_.merge({
+          param: {
+            templateId: 4,
+            details: {
+              appDefinition: {
+                deliverables: ['dev-qa', 'design'],
+              },
+            },
+          },
+        }, body))
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.directProjectId.should.be.eql(128);
+            resJson.status.should.be.eql('draft');
+            resJson.type.should.be.eql(body.param.type);
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            resJson.phases.should.have.lengthOf(0);
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+
+            // verify that project has been marked to use workstreams
+            resJson.details.settings.workstreams.should.be.true;
+
+            // Check Workstreams records are created correctly
+            models.WorkStream.findAll({
+              where: {
+                projectId: resJson.id,
+              },
+              raw: true,
+            }).then((workStreams) => {
+              workStreams.length.should.be.eql(3);
+              _.filter(workStreams, { type: 'development', name: 'Development Workstream' }).length.should.be.eql(1);
+              _.filter(workStreams, { type: 'design', name: 'Design Workstream' }).length.should.be.eql(1);
+              _.filter(workStreams, { type: 'qa', name: 'QA Workstream' }).length.should.be.eql(1);
+              done();
+            }).catch(done);
+          }
+        });
+    });
+
     it('should return 201 if valid user and data (with estimation)', (done) => {
       const validBody = _.cloneDeep(body);
       validBody.param.estimation = [
@@ -618,7 +745,7 @@ describe('Project create', () => {
               projectEstimations[0].metadata.deliverable.should.be.eql('design');
               projectEstimations[0].buildingBlockKey.should.be.eql('ZEPLIN_APP_ADDON_CA');
               done();
-            });
+            }).catch(done);
           }
         });
     });

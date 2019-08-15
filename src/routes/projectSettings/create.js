@@ -62,7 +62,7 @@ module.exports = [
         })
         .then((projectSetting) => {
           if (projectSetting) {
-            const apiErr = new Error(`Project Setting already exists for project id ${projectId}` +
+            const apiErr = new Error(`Project Setting already exists for project id ${projectId} ` +
               `and key ${req.body.param.key}`);
             apiErr.status = 422;
             return Promise.reject(apiErr);

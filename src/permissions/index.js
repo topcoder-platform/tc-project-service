@@ -10,6 +10,7 @@ const projectAttachmentUpdate = require('./project.updateAttachment');
 const projectAttachmentDownload = require('./project.downloadAttachment');
 const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
+const workManagementPermissions = require('./workManagementForTemplate');
 const projectSettings = require('./projectSetting');
 
 module.exports = () => {
@@ -100,6 +101,25 @@ module.exports = () => {
   Authorizer.setPolicy('planConfig.delete', projectAdmin);
   Authorizer.setPolicy('planConfig.view', true); // anyone can view price config
 
+  // Work stream
+  Authorizer.setPolicy('workStream.create', projectAdmin);
+  Authorizer.setPolicy('workStream.edit', workManagementPermissions('workStream.edit'));
+  Authorizer.setPolicy('workStream.delete', projectAdmin);
+  Authorizer.setPolicy('workStream.view', projectView);
+
+  // Work
+  Authorizer.setPolicy('work.create', workManagementPermissions('work.create'));
+  Authorizer.setPolicy('work.edit', workManagementPermissions('work.edit'));
+  Authorizer.setPolicy('work.delete', workManagementPermissions('work.delete'));
+  Authorizer.setPolicy('work.view', projectView);
+
+  // Work item
+  Authorizer.setPolicy('workItem.create', workManagementPermissions('workItem.create'));
+  Authorizer.setPolicy('workItem.edit', workManagementPermissions('workItem.edit'));
+  Authorizer.setPolicy('workItem.delete', workManagementPermissions('workItem.delete'));
+  Authorizer.setPolicy('workItem.view', projectView);
+
+  // Project Settings
   Authorizer.setPolicy('projectSetting.create', connectManagerOrAdmin);
   Authorizer.setPolicy('projectSetting.edit', projectSettings);
   Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);

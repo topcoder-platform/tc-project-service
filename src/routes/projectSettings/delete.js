@@ -46,7 +46,6 @@ module.exports = [
       })
       .then(entity => entity.destroy())
       .then(() => {
-        console.log
         // Calculate for valid estimation type
         if (util.isProjectSettingForEstimation(deletedEntity.key)) {
           req.log.debug(`Recalculate price breakdown for project id ${projectId}`);
