@@ -34,6 +34,7 @@ const expectAfterDelete = (id, projectId, len, deletedLen, err, next) => {
         where: {
           deletedAt: { $ne: null },
         },
+        includeAllProjectEstimatinoItemsForInternalUsage: true,
         paranoid: false,
       }).then((items) => {
         // deleted project estimation items
@@ -44,7 +45,9 @@ const expectAfterDelete = (id, projectId, len, deletedLen, err, next) => {
         });
 
         // find (non-deleted) ProjectEstimationItems for project
-        return models.ProjectEstimationItem.findAllByProject(models, projectId);
+        return models.ProjectEstimationItem.findAllByProject(models, projectId, {
+          includeAllProjectEstimatinoItemsForInternalUsage: true,
+        });
       }).then((items) => {
         // all non-deleted project estimation item count
         items.should.have.lengthOf(len, 'Number of created ProjectEstimationItems doesn\'t match');

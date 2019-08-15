@@ -124,4 +124,7 @@ module.exports = () => {
   Authorizer.setPolicy('projectSetting.edit', projectSettings);
   Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);
   Authorizer.setPolicy('projectSetting.view', projectView);
+
+  // Poroject Estimation Items
+  Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
 };

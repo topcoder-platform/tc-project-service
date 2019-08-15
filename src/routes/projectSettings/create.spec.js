@@ -31,6 +31,7 @@ const expectAfterCreate = (id, projectId, estimation, len, deletedLen, err, next
           where: {
             deletedAt: { $ne: null },
           },
+          includeAllProjectEstimatinoItemsForInternalUsage: true,
           paranoid: false,
         }).then((items) => {
           // deleted project estimation items
@@ -42,7 +43,9 @@ const expectAfterCreate = (id, projectId, estimation, len, deletedLen, err, next
           });
 
           // find (non-deleted) ProjectEstimationItems for project
-          return models.ProjectEstimationItem.findAllByProject(models, projectId);
+          return models.ProjectEstimationItem.findAllByProject(models, projectId, {
+            includeAllProjectEstimatinoItemsForInternalUsage: true,
+          });
         }).then((entities) => {
           entities.should.have.lengthOf(len, 'Number of created ProjectEstimationItems doesn\'t match');
           if (len) {

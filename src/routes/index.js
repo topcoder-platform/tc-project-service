@@ -314,12 +314,16 @@ router.route('/v4/projects/:projectId/reports')
 
 // Project Settings
 router.route('/v4/projects/:projectId(\\d+)/settings/:id(\\d+)')
-.patch(require('./projectSettings/update'))
-.delete(require('./projectSettings/delete'));
+  .patch(require('./projectSettings/update'))
+  .delete(require('./projectSettings/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/settings')
-.get(require('./projectSettings/list'))
-.post(require('./projectSettings/create'));
+  .get(require('./projectSettings/list'))
+  .post(require('./projectSettings/create'));
+
+// Project Estimation Items
+router.route('/v4/projects/:projectId/estimations/:estimationId/items')
+  .get(require('./projectEstimationItems/list'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
