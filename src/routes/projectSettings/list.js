@@ -27,26 +27,25 @@ module.exports = [
       },
       attributes: { exclude: ['deletedAt', 'deletedBy'] },
       raw: true,
+      // provide current user and project members list so `ProjectSetting.findAll` will return
+      // only records available to view by the current user
       reqUser: req.authUser,
+      members: req.context.currentProjectMembers,
     };
 
-    models.Project.count({
-      where: {
-        id: projectId,
-      },
-    })
-    .then((countProject) => {
-      if (countProject === 0) {
-        const apiErr = new Error(`active project not found for project id ${projectId}`);
-        apiErr.status = 404;
-        throw apiErr;
-      }
+    models.Project.findOne({ where: { id: projectId } })
+      .then((project) => {
+        if (!project) {
+          const apiErr = new Error(`Project not found for id ${projectId}`);
+          apiErr.status = 404;
+          return Promise.reject(apiErr);
+        }
 
-      return models.ProjectSetting.findAll(options);
-    })
-    .then((result) => {
-      res.json(util.wrapResponse(req.id, _.filter(result, r => r)));
-    })
-    .catch(next);
+        return models.ProjectSetting.findAll(options);
+      })
+      .then((result) => {
+        res.json(util.wrapResponse(req.id, _.filter(result, r => r)));
+      })
+      .catch(next);
   },
 ];

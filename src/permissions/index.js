@@ -11,7 +11,7 @@ const projectAttachmentDownload = require('./project.downloadAttachment');
 const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
-const projectSettings = require('./projectSetting');
+const projectSettingEdit = require('./projectSetting.edit');
 
 module.exports = () => {
   Authorizer.setDeniedStatusCode(403);
@@ -121,7 +121,7 @@ module.exports = () => {
 
   // Project Settings
   Authorizer.setPolicy('projectSetting.create', connectManagerOrAdmin);
-  Authorizer.setPolicy('projectSetting.edit', projectSettings);
+  Authorizer.setPolicy('projectSetting.edit', projectSettingEdit);
   Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);
   Authorizer.setPolicy('projectSetting.view', projectView);
 

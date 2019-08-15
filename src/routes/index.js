@@ -322,7 +322,7 @@ router.route('/v4/projects/:projectId(\\d+)/settings')
   .post(require('./projectSettings/create'));
 
 // Project Estimation Items
-router.route('/v4/projects/:projectId/estimations/:estimationId/items')
+router.route('/v4/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
   .get(require('./projectEstimationItems/list'));
 
 // register error handler

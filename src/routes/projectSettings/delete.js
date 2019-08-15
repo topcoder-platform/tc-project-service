@@ -26,7 +26,7 @@ module.exports = [
 
     models.sequelize.transaction(() =>
       models.ProjectSetting.findOne({
-        reqUser: req.authUser,
+        includeAllProjectSettingsForInternalUsage: true,
         where: {
           id,
           projectId,

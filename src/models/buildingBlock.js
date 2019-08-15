@@ -1,7 +1,15 @@
 /* eslint-disable valid-jsdoc */
-
 /**
- * The Building block model
+ * BuildingBlock model
+ *
+ * WARNING: This model contains sensitive data!
+ *
+ * - To return data from this model to the user always use methods `find`/`findAll` which would
+ *   filter out the sensitive data which should be never returned to the user.
+ * - For internal usage you can use `options.includePrivateConfigForInternalUsage`
+ *   which would force `find`/`findAll` to return fields which contain sensitive data.
+ *   Use the data returned in such way ONLY FOR INTERNAL usage. It means such data can be used
+ *   to make some calculations inside Project Service but it should be never returned to the user as it is.
  */
 module.exports = (sequelize, DataTypes) => {
   const BuildingBlock = sequelize.define('BuildingBlock', {
@@ -23,7 +31,16 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     hooks: {
-      beforeFind: (options) => {
+      /**
+       * Inside before hook we are evaluating if user has permission to retrieve `privateConfig` field.
+       * If no, we remove this field from the attributes list, so this field is not requested and thus
+       * not returned.
+       *
+       * @param {Object}   options  find/findAll options
+       * @param {Function} callback callback after hook
+       */
+      beforeFind: (options, callback) => {
+        // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
         if (!options.includePrivateConfigForInternalUsage) {
           // try to remove privateConfig from attributes
           const idx = options.attributes.indexOf('privateConfig');
@@ -31,6 +48,8 @@ module.exports = (sequelize, DataTypes) => {
             options.attributes.splice(idx, 1);
           }
         }
+
+        return callback(null);
       },
     },
   });

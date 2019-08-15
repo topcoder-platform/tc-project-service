@@ -1,5 +1,6 @@
+/* eslint-disable valid-jsdoc */
 /**
- * Project Estimation Item model
+ * ProjectEstimationItem model
  *
  * WARNING: This model contains sensitive data!
  *
@@ -69,14 +70,21 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
       createdAt: 'createdAt',
       indexes: [],
       hooks: {
+        /**
+         * Inside before hook we are evaluating what Project Estimation Item types current user may retrieve.
+         * We update `where` query so only allowed types may be retrieved.
+         *
+         * @param {Object}   options  find/findAll options
+         * @param {Function} callback callback after hook
+         */
         beforeFind: (options, callback) => {
           // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
           if (options.includeAllProjectEstimatinoItemsForInternalUsage) {
-            callback(null);
+            return callback(null);
           }
 
           if (!options.reqUser || !options.members) {
-            callback(new Error(
+            return callback(new Error(
               'You must provide auth user and project members to get project estimation items'));
           }
 
@@ -91,7 +99,7 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
 
           // only return Project Estimation Types which are allowed to the user
           options.where.type = allowedTypes; // eslint-disable-line no-param-reassign
-          callback(null);
+          return callback(null);
         },
       },
       classMethods: {

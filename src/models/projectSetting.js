@@ -1,38 +1,21 @@
 /* eslint-disable valid-jsdoc */
+/**
+ * ProjectSetting model
+ *
+ * WARNING: This model contains sensitive data!
+ *
+ * - To return data from this model to the user always use methods `find`/`findAll`
+ *   and provide to them `options.reqUser` and `options.members` to check which records could be returned
+ *   based on the user roles and `readPermission` property of the records.
+ * - For internal usage you can use `options.includeAllProjectSettingsForInternalUsage`
+ *   which would force `find`/`findAll` to return all the records without checking permissions.
+ *   Use the data returned in such way ONLY FOR INTERNAL usage. It means such data can be used
+ *   to make some calculations inside Project Service but it should be never returned to the user as it is.
+ */
 
 import _ from 'lodash';
 import { VALUE_TYPE } from '../constants';
 import util from '../util';
-
-const populateSetting = (settings, options) => {
-  if (Array.isArray(settings)) {
-    const promises = [];
-    _.each(settings, (setting) => {
-      promises.push(util.hasPermissionForProject(setting.readPermission, options.reqUser, options.projectId)
-        .then((r) => {
-          if (!r) {
-            _.remove(settings, {
-              id: setting.id,
-            });
-          }
-        }));
-    });
-
-    return Promise.all(promises);
-  }
-
-  return util.hasPermissionForProject(settings.readPermission, options.reqUser, options.projectId)
-    .then((r) => {
-      if (!r) {
-        _.map(settings, (s) => {
-          if (Object.prototype.hasOwnProperty.call(settings, s)) {
-            delete settings[s]; // eslint-disable-line no-param-reassign
-          }
-        });
-      }
-    });
-};
-
 
 module.exports = (sequelize, DataTypes) => {
   const ProjectSetting = sequelize.define(
@@ -54,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       deletedAt: { type: DataTypes.DATE, allowNull: true },
       createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
       updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-      deletedBy: DataTypes.BIGINT,
+      deletedBy: DataTypes.INTEGER,
       createdBy: { type: DataTypes.INTEGER, allowNull: false },
       updatedBy: { type: DataTypes.INTEGER, allowNull: false },
     },
@@ -71,31 +54,55 @@ module.exports = (sequelize, DataTypes) => {
         },
       ],
       hooks: {
-        beforeFind: (options) => {
-          _.assign(options, { projectId: options.where.projectId });
+        /**
+         * Inside before hook we are checking that required options are provided
+         * We do it in `beforeFind` instead of `afterFind` to avoid unnecessary data retrievement
+         *
+         * @param {Object}   options  find/findAll options
+         * @param {Function} callback callback after hook
+         */
+        beforeFind: (options, callback) => {
+          // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
           if (options.includeAllProjectSettingsForInternalUsage) {
-            return { where: options.where, attributes: options.attributes };
+            return callback(null);
           }
 
-          if (!options.reqUser) {
-            throw new Error('reqUser not found');
+          if (!options.reqUser || !options.members) {
+            return callback(new Error('You must provide reqUser and project member to get project settings'));
           }
-          // Check permissions
-          return {
-            reqUser: options.reqUser,
-            where: options.where,
-            attributes: options.attributes,
-          };
+
+          return callback(null);
         },
 
-        afterFind: (settings, options) => {
-          if (!settings) return Promise.resolve();
-          if (options.reqUser) {
-            return populateSetting(settings, options);
+        /**
+         * Inside after hook we are filtering records based on `readPermission` and user roles
+         *
+         * @param {Mixed}    results  one result from `find()` or array of results form `findAll()`
+         * @param {Object}   options  find/findAll options
+         * @param {Function} callback callback after hook
+         */
+        afterFind: (results, options, callback) => {
+          // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
+          if (options.includeAllProjectSettingsForInternalUsage) {
+            return callback(null);
           }
-          return settings;
-        },
 
+          // if we have an array of results form `findAll()` we are filtering results
+          if (_.isArray(results)) {
+            // remove results from the "end" using `index` if user doesn't have permissions for to access them
+            for (let index = results.length - 1; index >= 0; index -= 1) {
+              if (!util.hasPermission(results[index].readPermission, options.reqUser, options.members)) {
+                results.splice(index, 1);
+              }
+            }
+
+          // if we have one result from `find()` we check if user has permission for the record
+          } else if (results && !util.hasPermission(results.readPermission, options.reqUser, options.members)) {
+            return callback(new Error('User doesn\'t have permission to access this record.'));
+          }
+
+          return callback(null);
+        },
       },
     },
   );
