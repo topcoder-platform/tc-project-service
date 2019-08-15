@@ -43,7 +43,6 @@ module.exports = function defineProjectHistory(sequelize, DataTypes) {
          *
          * @param {Object} models    all models
          * @param {Number} projectId project id
-         * @param {Object} [where]   additional where request
          * @param {Object} [options] options
          *
          * @returns {Promise}
