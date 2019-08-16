@@ -7,12 +7,38 @@ import config from 'config';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import util from '../../util';
+import { TIMELINE_REFERENCES } from '../../constants';
+
 import messageService from '../../services/messageService';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const eClient = util.getElasticSearchClient();
+
+/**
+ * Get tags based on route parameter.
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} phase     event payload
+ * @param  {String} route   route value can be PHASE/WORK
+ * @returns {undefined}
+ */
+const getTags = function (logger, phase, route) { // eslint-disable-line func-names
+  if (route === TIMELINE_REFERENCES.WORK) {
+    return [{
+      tag: `work#${phase.id}-details`,
+      title: `${phase.name} - Details`,
+    }, {
+      tag: `work#${phase.id}-requirements`,
+      title: `${phase.name} - Requirements`,
+    }];
+  }
+  return [{
+    tag: `phase#${phase.id}`,
+    title: phase.name,
+  }];
+};
 
 /**
  * Indexes the project phase in the elastic search.
@@ -63,20 +89,23 @@ const indexProjectPhase = Promise.coroutine(function* (logger, phase) { // eslin
  *
  * @param  {Object} logger  logger to log along with trace id
  * @param  {Object} msg     event payload
+ * @param  {String} route   route value can be PHASE/WORK
  * @returns {undefined}
  */
-const createPhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint-disable-line func-names
+const createPhaseTopic = Promise.coroutine(function* (logger, phase, route) { // eslint-disable-line func-names
   try {
-    logger.debug('Creating topic for phase with phase', phase);
-    const topic = yield messageService.createTopic({
+    logger.debug('Creating topics for phase with phase', phase);
+    const tags = getTags(logger, phase, route);
+    const topics = yield Promise.all(_.map(tags, tag => messageService.createTopic({
       reference: 'project',
       referenceId: `${phase.projectId}`,
-      tag: `phase#${phase.id}`,
-      title: phase.name,
-      body: 'This is the beginning of your phase discussion. During execution of this phase, all related communication will be conducted here - phase updates, questions and answers, suggestions, etc. If you haven\'t already, do please take a moment to review the form in the Specification tab above and fill in as much detail as possible. This will help get started faster. Thanks!', // eslint-disable-line
-    }, logger);
-    logger.debug('topic for the phase created successfully');
-    logger.debug('created topic', topic);
+      tag: tag.tag,
+      title: tag.title,
+        body: 'This is the beginning of your phase discussion. During execution of this phase, all related communication will be conducted here - phase updates, questions and answers, suggestions, etc. If you haven\'t already, do please take a moment to review the form in the Specification tab above and fill in as much detail as possible. This will help get started faster. Thanks!', // eslint-disable-line
+    }, logger)));
+
+    logger.debug('topics for the phase created successfully');
+    logger.debug('created topics', topics);
   } catch (error) {
     logger.error('Error in creating topic for the project phase', error);
     // don't throw the error back to nack the bus, because we don't want to get multiple topics per phase
@@ -92,12 +121,14 @@ const createPhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint
  * @returns {undefined}
  */
 const projectPhaseAddedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
-  const phase = JSON.parse(msg.content.toString());
+  const data = JSON.parse(msg.content.toString());
+  const phase = _.get(data, 'added', {});
+  const route = _.get(data, 'route', 'PHASE');
   try {
     logger.debug('calling indexProjectPhase', phase);
     yield indexProjectPhase(logger, phase, channel);
     logger.debug('calling createPhaseTopic', phase);
-    yield createPhaseTopic(logger, phase);
+    yield createPhaseTopic(logger, phase, route);
     channel.ack(msg);
   } catch (error) {
     logger.error('Error handling project.phase.added event', error);
@@ -135,29 +166,41 @@ const updateIndexProjectPhase = Promise.coroutine(function* (logger, data) { // 
 });
 
 /**
+ * Indexes the project phase in the elastic search.
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} data     event payload
+ * @returns {undefined}
+ */
+const updateTopicWithTag = Promise.coroutine(function* (logger, phase, tag) { // eslint-disable-line func-names
+  const topic = yield messageService.getPhaseTopic(phase.projectId, tag.tag, logger);
+  logger.trace('Topic', topic);
+  const title = tag.title;
+  const titleChanged = topic && topic.title !== title;
+  logger.trace('titleChanged', titleChanged);
+  const contentPost = topic && topic.posts && topic.posts.length > 0 ? topic.posts[0] : null;
+  logger.trace('contentPost', contentPost);
+  const postId = _.get(contentPost, 'id');
+  const content = _.get(contentPost, 'body');
+  if (postId && content && titleChanged) {
+    const updatedTopic = yield messageService.updateTopic(topic.id, { title, postId, content }, logger);
+    logger.debug('topic for the phase updated successfully');
+    logger.trace('updated topic', updatedTopic);
+  }
+});
+
+/**
  * Creates a new phase topic in message api.
  *
  * @param  {Object} logger  logger to log along with trace id
  * @param  {Object} msg     event payload
  * @returns {undefined}
  */
-const updatePhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint-disable-line func-names
+const updatePhaseTopic = Promise.coroutine(function* (logger, phase, route) { // eslint-disable-line func-names
   try {
     logger.debug('Updating topic for phase with phase', phase);
-    const topic = yield messageService.getPhaseTopic(phase.projectId, phase.id, logger);
-    logger.trace('Topic', topic);
-    const title = phase.name;
-    const titleChanged = topic && topic.title !== title;
-    logger.trace('titleChanged', titleChanged);
-    const contentPost = topic && topic.posts && topic.posts.length > 0 ? topic.posts[0] : null;
-    logger.trace('contentPost', contentPost);
-    const postId = _.get(contentPost, 'id');
-    const content = _.get(contentPost, 'body');
-    if (postId && content && titleChanged) {
-      const updatedTopic = yield messageService.updateTopic(topic.id, { title, postId, content }, logger);
-      logger.debug('topic for the phase updated successfully');
-      logger.trace('updated topic', updatedTopic);
-    }
+    const tags = getTags(logger, phase, route);
+    yield Promise.all(_.map(tags, tag => updateTopicWithTag(logger, phase, tag)));
   } catch (error) {
     logger.error('Error in updating topic for the project phase', error);
     // don't throw the error back to nack the bus, because we don't want to get multiple topics per phase
@@ -175,10 +218,11 @@ const updatePhaseTopic = Promise.coroutine(function* (logger, phase) { // eslint
 const projectPhaseUpdatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   try {
     const data = JSON.parse(msg.content.toString());
+    const route = _.get(data, 'route', 'PHASE');
     logger.debug('calling updateIndexProjectPhase', data);
     yield updateIndexProjectPhase(logger, data, channel);
     logger.debug('calling updatePhaseTopic', data.updated);
-    yield updatePhaseTopic(logger, data.updated);
+    yield updatePhaseTopic(logger, data.updated, route);
     channel.ack(msg);
   } catch (error) {
     logger.error('Error handling project.phase.updated event', error);
@@ -197,13 +241,14 @@ const projectPhaseUpdatedHandler = Promise.coroutine(function* (logger, msg, cha
 const removePhaseFromIndex = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
   try {
     const data = JSON.parse(msg.content.toString());
-    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
-    const phases = _.filter(doc._source.phases, single => single.id !== data.id); // eslint-disable-line no-underscore-dangle
+    const phase = _.get(data, 'deleted', {});
+    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: phase.projectId });
+    const phases = _.filter(doc._source.phases, single => single.id !== phase.id); // eslint-disable-line no-underscore-dangle
     const merged = _.assign(doc._source, { phases });       // eslint-disable-line no-underscore-dangle
     yield eClient.update({
       index: ES_PROJECT_INDEX,
       type: ES_PROJECT_TYPE,
-      id: data.projectId,
+      id: phase.projectId,
       body: {
         doc: merged,
       },
@@ -223,10 +268,9 @@ const removePhaseFromIndex = Promise.coroutine(function* (logger, msg) { // esli
  * @param  {Object} msg     event payload
  * @returns {undefined}
  */
-const removePhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+const removePhaseTopic = Promise.coroutine(function* (logger, phase, tag) { // eslint-disable-line func-names
   try {
-    const phase = JSON.parse(msg.content.toString());
-    const phaseTopic = yield messageService.getPhaseTopic(phase.projectId, phase.id, logger);
+    const phaseTopic = yield messageService.getPhaseTopic(phase.projectId, tag, logger);
     yield messageService.deletePosts(phaseTopic.id, phaseTopic.postIds, logger);
     yield messageService.deleteTopic(phaseTopic.id, logger);
     logger.debug('topic for the phase removed successfully');
@@ -247,7 +291,11 @@ const removePhaseTopic = Promise.coroutine(function* (logger, msg) { // eslint-d
 const projectPhaseRemovedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   try {
     yield removePhaseFromIndex(logger, msg, channel);
-    yield removePhaseTopic(logger, msg);
+    const data = JSON.parse(msg.content.toString());
+    const phase = _.get(data, 'deleted', {});
+    const route = _.get(data, 'route');
+    const tags = getTags(logger, phase, route);
+    yield Promise.all(_.map(tags, tag => removePhaseTopic(logger, phase, tag.tag)));
     channel.ack(msg);
   } catch (error) {
     logger.error('Error fetching project document from elasticsearch', error);
