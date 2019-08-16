@@ -144,17 +144,15 @@ function deletePosts(topicId, postIds, logger) {
  * @param {Object} logger object
  * @return {Promise} topic promise
  */
-function getPhaseTopic(projectId, tag, logger) {
-  const regex = new RegExp(/(\d+)/);
-  const phaseId = regex.exec(tag)[0];
-  logger.debug(`getPhaseTopic for projectId: ${projectId} phaseId: ${phaseId}`);
+function getTopicByTag(projectId, tag, logger) {
+  logger.debug(`getTopicByTag for projectId: ${projectId} tag: ${tag}`);
   return getClient(logger).then((msgClient) => {
     logger.debug(`calling message service for fetching ${tag}`);
     const encodedFilter = encodeURIComponent(`reference=project&referenceId=${projectId}&tag=${tag}`);
     return msgClient.get(`/topics/list/db?filter=${encodedFilter}`)
     .then((resp) => {
-      logger.debug('Fetched phase topic', resp);
       const topics = _.get(resp.data, 'result.content', []);
+      logger.debug(`Fetched ${topics.length} topics`);
       if (topics && topics.length > 0) {
         return topics[0];
       }
@@ -182,7 +180,7 @@ module.exports = {
   createTopic,
   updateTopic,
   deletePosts,
-  getPhaseTopic,
+  getTopicByTag,
   deleteTopic,
   getClient,
 };
