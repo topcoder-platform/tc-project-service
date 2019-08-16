@@ -115,10 +115,9 @@ module.exports = [
         eClient.bulk({
           body,
         })
-        .then((result, err) => {
+        .then((result) => {
           logger.debug(`project indexed successfully (projectId: ${projectIdStart}-${projectIdEnd})`, result);
           logger.debug(result);
-          logger.debug(err);
         })
         .catch((error) => {
           logger.error(`Error in indexing project (projectId: ${projectIdStart}-${projectIdEnd})`, error);
