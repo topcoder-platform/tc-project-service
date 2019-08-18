@@ -13,6 +13,7 @@ import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 import messageService from '../../services/messageService';
 import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import { BUS_API_EVENT } from '../../constants';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -354,13 +355,14 @@ describe('DELETE work', () => {
           publishSpy = sandbox.spy(server.services.pubsub, 'publish');
           deleteTopicSpy = sandbox.spy(messageService, 'deleteTopic');
           deletePostsSpy = sandbox.spy(messageService, 'deletePosts');
-          sandbox.stub(messageService, 'getPhaseTopic', () => Promise.resolve(topic));
+          sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
           done();
         });
       });
 
       afterEach(() => {
         sandbox.restore();
+        mockRabbitMQ(server);
       });
 
       it('should send message topic when work deleted', (done) => {

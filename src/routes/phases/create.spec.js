@@ -10,6 +10,7 @@ import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 import messageService from '../../services/messageService';
 import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT,
 } from '../../constants';
@@ -504,6 +505,7 @@ describe('Project Phases', () => {
 
       afterEach(() => {
         sandbox.restore();
+        mockRabbitMQ(server);
       });
 
       it('should send message topic when phase added', (done) => {

@@ -14,6 +14,7 @@ import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 import messageService from '../../services/messageService';
 import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import { BUS_API_EVENT } from '../../constants';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -374,6 +375,7 @@ describe('CREATE work', () => {
 
       afterEach(() => {
         sandbox.restore();
+        mockRabbitMQ(server);
       });
 
       it('should send message topic when work added', (done) => {

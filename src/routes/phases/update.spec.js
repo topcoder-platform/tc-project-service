@@ -10,6 +10,7 @@ import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 import messageService from '../../services/messageService';
 import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT,
 } from '../../constants';
@@ -685,13 +686,14 @@ describe('Project Phases', () => {
         testUtil.wait(() => {
           publishSpy = sandbox.spy(server.services.pubsub, 'publish');
           updateMessageSpy = sandbox.spy(messageService, 'updateTopic');
-          sandbox.stub(messageService, 'getPhaseTopic', () => Promise.resolve(topic));
+          sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
           done();
         });
       });
 
       afterEach(() => {
         sandbox.restore();
+        mockRabbitMQ(server);
       });
 
       it('should send message topic when phase Updated', (done) => {
