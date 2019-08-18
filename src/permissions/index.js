@@ -117,4 +117,12 @@ module.exports = () => {
   Authorizer.setPolicy('workItem.edit', workManagementPermissions('workItem.edit'));
   Authorizer.setPolicy('workItem.delete', workManagementPermissions('workItem.delete'));
   Authorizer.setPolicy('workItem.view', projectView);
+
+  // Work management permission
+  Authorizer.setPolicy('workManagementPermission.create', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.edit', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.delete', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.view', projectAdmin);
+
+  Authorizer.setPolicy('permissions.view', projectView);
 };
