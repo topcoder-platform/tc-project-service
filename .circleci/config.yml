@@ -48,6 +48,7 @@ jobs:
         - POSTGRES_USER: circle_test
         - POSTGRES_DB: circle_test
       - image: elasticsearch:2.3
+      - image: rabbitmq:3-management
     environment:
       DB_MASTER_URL: postgres://circle_test:@127.0.0.1:5432/circle_test
       AUTH_SECRET: secret
