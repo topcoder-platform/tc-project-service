@@ -470,8 +470,8 @@ describe('Project Phases', () => {
       let publishSpy;
       let sandbox;
 
-      before((done) => {
-            // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+      before(async (done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
         testUtil.wait(done);
       });
 
@@ -505,6 +505,9 @@ describe('Project Phases', () => {
 
       afterEach(() => {
         sandbox.restore();
+      });
+
+      after(() => {
         mockRabbitMQ(server);
       });
 

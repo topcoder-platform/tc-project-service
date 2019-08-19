@@ -652,7 +652,7 @@ describe('UPDATE work', () => {
       let publishSpy;
       let sandbox;
 
-      before((done) => {
+      before(async (done) => {
         // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
         testUtil.wait(done);
       });
@@ -688,6 +688,9 @@ describe('UPDATE work', () => {
 
       afterEach(() => {
         sandbox.restore();
+      });
+
+      after(() => {
         mockRabbitMQ(server);
       });
 
