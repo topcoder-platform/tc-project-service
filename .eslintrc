@@ -8,7 +8,7 @@
     "mocha": true
   },
   "rules": {
-    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.js", "**/*.spec.js", "**/serviceMocks.js"]}],
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.js", "**/*.spec.js", "src/tests/*.js"]}],
     "max-len": ["error", { "ignoreComments": true, "code": 120 }],
     "valid-jsdoc": ["error", {
       "requireReturn": true,

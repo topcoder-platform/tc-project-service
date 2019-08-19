@@ -8,7 +8,7 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, ROUTES } from '../../constants';
+import { EVENT, ROUTES, TIMELINE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -175,7 +175,7 @@ module.exports = [
         // emit original and updated project phase information
         req.app.services.pubsub.publish(
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { original: previousValue, updated, allPhases },
+          { original: previousValue, updated, allPhases, route: TIMELINE_REFERENCES.WORK },
           { correlationId: req.id },
         );
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {

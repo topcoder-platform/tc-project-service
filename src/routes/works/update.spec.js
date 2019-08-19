@@ -6,12 +6,18 @@ import _ from 'lodash';
 import chai from 'chai';
 import request from 'supertest';
 import sinon from 'sinon';
-
+import config from 'config';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
+import messageService from '../../services/messageService';
+import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import { BUS_API_EVENT } from '../../constants';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const should = chai.should();
 
@@ -78,7 +84,27 @@ describe('UPDATE work', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-
+  const project = {
+    type: 'generic',
+    billingAccountId: 1,
+    name: 'test1',
+    description: 'test project1',
+    status: 'draft',
+    details: {},
+    createdBy: 1,
+    updatedBy: 1,
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
+  };
+  const topic = {
+    id: 1,
+    title: 'test project phase',
+    posts:
+    [{ id: 1,
+      type: 'post',
+      body: 'body',
+    }],
+  };
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {
@@ -114,22 +140,10 @@ describe('UPDATE work', () => {
           })
           .then(() => {
             // Create projects
-            models.Project.create({
-              type: 'generic',
-              billingAccountId: 1,
-              name: 'test1',
-              description: 'test project1',
-              status: 'draft',
-              templateId: template.id,
-              details: {},
-              createdBy: 1,
-              updatedBy: 1,
-              lastActivityAt: 1,
-              lastActivityUserId: '1',
-            })
-            .then((project) => {
-              projectId = project.id;
-              projectName = project.name;
+            models.Project.create(_.assign(project, { templateId: template.id }))
+            .then((_project) => {
+              projectId = _project.id;
+              projectName = _project.name;
               models.WorkStream.create({
                 name: 'Work Stream',
                 type: 'generic',
@@ -630,6 +644,92 @@ describe('UPDATE work', () => {
             });
           }
         });
+      });
+    });
+
+    describe('RabbitMQ Message topic', () => {
+      let updateMessageSpy;
+      let publishSpy;
+      let sandbox;
+
+      before(async (done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(async (done) => {
+        sandbox = sinon.sandbox.create();
+        server.services.pubsub = new RabbitMQService(server.logger);
+
+        // initialize RabbitMQ
+        server.services.pubsub.init(
+          config.get('rabbitmqURL'),
+          config.get('pubsubExchangeName'),
+          config.get('pubsubQueueName'),
+        );
+
+        // add project to ES index
+        await server.services.es.index({
+          index: ES_PROJECT_INDEX,
+          type: ES_PROJECT_TYPE,
+          id: projectId,
+          body: {
+            doc: _.assign(project, { phases: [_.assign(body, { id: workId, projectId })] }),
+          },
+        });
+
+        testUtil.wait(() => {
+          publishSpy = sandbox.spy(server.services.pubsub, 'publish');
+          updateMessageSpy = sandbox.spy(messageService, 'updateTopic');
+          sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
+          done();
+        });
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      after(() => {
+        mockRabbitMQ(server);
+      });
+
+      it('should send message topic when work updated', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          post: () => Promise.resolve({
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: {},
+              },
+            },
+          }),
+        });
+        sandbox.stub(messageService, 'getClient', () => mockHttpClient);
+        request(server)
+            .patch(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({ param: _.assign(updateBody, { budget: 123 }) })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err) => {
+              if (err) {
+                done(err);
+              } else {
+                testUtil.wait(() => {
+                  publishSpy.calledOnce.should.be.true;
+                  publishSpy.calledWith('project.phase.updated').should.be.true;
+                  updateMessageSpy.calledTwice.should.be.true;
+                  done();
+                });
+              }
+            });
       });
     });
   });

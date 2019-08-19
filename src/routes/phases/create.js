@@ -5,7 +5,7 @@ import Sequelize from 'sequelize';
 
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, TIMELINE_REFERENCES } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -127,7 +127,7 @@ module.exports = [
         // Send events to buses
         req.log.debug('Sending event to RabbitMQ bus for project phase %d', newProjectPhase.id);
         req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-          newProjectPhase,
+          { added: newProjectPhase, route: TIMELINE_REFERENCES.PHASE },
           { correlationId: req.id },
         );
         req.log.debug('Sending event to Kafka bus for project phase %d', newProjectPhase.id);

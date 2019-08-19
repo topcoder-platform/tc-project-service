@@ -2,15 +2,21 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import chai from 'chai';
+import config from 'config';
 import request from 'supertest';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-
+import messageService from '../../services/messageService';
+import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT,
 } from '../../constants';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const should = chai.should();
 
@@ -75,22 +81,32 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
+  const project = {
+    type: 'generic',
+    billingAccountId: 1,
+    name: 'test1',
+    description: 'test project1',
+    status: 'draft',
+    details: {},
+    createdBy: 1,
+    updatedBy: 1,
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
+  };
+  const topic = {
+    id: 1,
+    title: 'test project phase',
+    posts:
+    [{ id: 1,
+      type: 'post',
+      body: 'body',
+    }],
+  };
   beforeEach((done) => {
     // mocks
     testUtil.clearDb()
       .then(() => {
-        models.Project.create({
-          type: 'generic',
-          billingAccountId: 1,
-          name: 'test1',
-          description: 'test project1',
-          status: 'draft',
-          details: {},
-          createdBy: 1,
-          updatedBy: 1,
-          lastActivityAt: 1,
-          lastActivityUserId: '1',
-        }).then((p) => {
+        models.Project.create(project).then((p) => {
           projectId = p.id;
           projectName = p.name;
           // create members
@@ -633,6 +649,96 @@ describe('Project Phases', () => {
             });
           }
         });
+      });
+    });
+
+    describe('RabbitMQ Message topic', () => {
+      let updateMessageSpy;
+      let publishSpy;
+      let sandbox;
+
+      before(async (done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(async (done) => {
+        sandbox = sinon.sandbox.create();
+        server.services.pubsub = new RabbitMQService(server.logger);
+
+        // initialize RabbitMQ
+        server.services.pubsub.init(
+          config.get('rabbitmqURL'),
+          config.get('pubsubExchangeName'),
+          config.get('pubsubQueueName'),
+        );
+
+        // add project to ES index
+        await server.services.es.index({
+          index: ES_PROJECT_INDEX,
+          type: ES_PROJECT_TYPE,
+          id: projectId,
+          body: {
+            doc: _.assign(project, { phases: [_.assign(body, { id: phaseId, projectId })] }),
+          },
+        });
+
+        testUtil.wait(() => {
+          publishSpy = sandbox.spy(server.services.pubsub, 'publish');
+          updateMessageSpy = sandbox.spy(messageService, 'updateTopic');
+          sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
+          done();
+        });
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      after(() => {
+        mockRabbitMQ(server);
+      });
+
+      it('should send message topic when phase Updated', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          post: () => Promise.resolve({
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: {},
+              },
+            },
+          }),
+        });
+        sandbox.stub(messageService, 'getClient', () => mockHttpClient);
+        request(server)
+            .patch(`/v4/projects/${projectId}/phases/${phaseId}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .send({ param: _.assign(updateBody, { budget: 123 }) })
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err) => {
+              if (err) {
+                done(err);
+              } else {
+                testUtil.wait(() => {
+                  publishSpy.calledOnce.should.be.true;
+                  publishSpy.calledWith('project.phase.updated').should.be.true;
+                  updateMessageSpy.calledOnce.should.be.true;
+                  updateMessageSpy.calledWith(topic.id, sinon.match({
+                    title: updateBody.name,
+                    postId: topic.posts[0].id,
+                    content: topic.posts[0].body })).should.be.true;
+                  done();
+                });
+              }
+            });
       });
     });
   });

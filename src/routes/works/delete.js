@@ -5,7 +5,7 @@ import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import { EVENT } from '../../constants';
+import { EVENT, TIMELINE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -62,7 +62,7 @@ module.exports = [
       // Send events to buses
       req.app.services.pubsub.publish(
         EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED,
-        deleted,
+        { deleted, route: TIMELINE_REFERENCES.WORK },
         { correlationId: req.id },
       );
       req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, { req, deleted });
