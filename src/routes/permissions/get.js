@@ -1,7 +1,6 @@
 /**
  * API to get project permissions
  */
-import _ from 'lodash';
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -21,7 +20,6 @@ module.exports = [
   permissions('permissions.view'),
   (req, res, next) => {
     const projectId = req.params.projectId;
-    let workManagementPermissions;
     return models.Project.findOne({
       where: {
         id: projectId,
@@ -35,7 +33,7 @@ module.exports = [
         }
 
         if (!project.templateId) {
-          return Promise.resolve(true);
+          return Promise.resolve([]);
         }
 
         return models.WorkManagementPermission.findAll({
@@ -44,20 +42,23 @@ module.exports = [
           },
         });
       })
-      .then((allPermissions) => {
-        workManagementPermissions = allPermissions;
-        return Promise.all(_.map(workManagementPermissions, workManagementPermission =>
-          util.hasPermissionForProject(workManagementPermission.permission, req.authUser, projectId)),
-        );
-      })
-      .then((accesses) => {
-        const allAccess = {};
-        _.each(workManagementPermissions, (p, ind) => {
-          if (accesses[ind]) {
-            allAccess[`${p.policy}`] = accesses[ind];
+      .then((workManagementPermissions) => {
+        const allowPermissions = {};
+
+        // find all allowed permissions
+        workManagementPermissions.forEach((workManagementPermission) => {
+          const isAllowed = util.hasPermission(
+            workManagementPermission.permission,
+            req.authUser,
+            req.context.currentProjectMembers,
+          );
+
+          if (isAllowed) {
+            allowPermissions[workManagementPermission.policy] = true;
           }
         });
-        res.json(util.wrapResponse(req.id, allAccess));
+
+        res.json(util.wrapResponse(req.id, allowPermissions));
       })
       .catch(next);
   },
