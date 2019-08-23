@@ -65,6 +65,10 @@ router.route('/v4/projects/metadata/productCategories')
 router.route('/v4/projects/metadata/productCategories/:key')
   .get(require('./productCategories/get'));
 
+router.route('/v4/projects/metadata/workManagementPermission')
+  .get(require('./workManagementPermissions/list'));
+router.route('/v4/projects/metadata/workManagementPermission/:id')
+  .get(require('./workManagementPermissions/get'));
 
 router.use('/v4/projects/metadata', compression());
 router.route('/v4/projects/metadata')
@@ -108,6 +112,10 @@ router.route('/v4/projects/:projectId(\\d+)/members')
 router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
   .delete(require('./projectMembers/delete'))
   .patch(require('./projectMembers/update'));
+
+// Permissions
+router.route('/v4/projects/:projectId(\\d+)/permissions')
+  .get(require('./permissions/get'));
 
 router.route('/v4/projects/:projectId(\\d+)/attachments')
   .post(require('./attachments/create'));
@@ -164,6 +172,13 @@ router.route('/v4/projects/metadata/productCategories')
 router.route('/v4/projects/metadata/productCategories/:key')
   .patch(require('./productCategories/update'))
   .delete(require('./productCategories/delete'));
+
+router.route('/v4/projects/metadata/workManagementPermission')
+  .post(require('./workManagementPermissions/create'));
+
+router.route('/v4/projects/metadata/workManagementPermission/:id')
+  .patch(require('./workManagementPermissions/update'))
+  .delete(require('./workManagementPermissions/delete'));
 
 router.route('/v4/projects/metadata/projectTypes')
   .post(require('./projectTypes/create'));

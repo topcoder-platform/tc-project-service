@@ -119,12 +119,21 @@ module.exports = () => {
   Authorizer.setPolicy('workItem.delete', workManagementPermissions('workItem.delete'));
   Authorizer.setPolicy('workItem.view', projectView);
 
+  // Work management permission
+  Authorizer.setPolicy('workManagementPermission.create', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.edit', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.delete', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.view', projectAdmin);
+
+  // Project Permissions
+  Authorizer.setPolicy('permissions.view', projectView);
+    
   // Project Settings
   Authorizer.setPolicy('projectSetting.create', connectManagerOrAdmin);
   Authorizer.setPolicy('projectSetting.edit', projectSettingEdit);
   Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);
   Authorizer.setPolicy('projectSetting.view', projectView);
-
+    
   // Project Estimation Items
   Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
 };
