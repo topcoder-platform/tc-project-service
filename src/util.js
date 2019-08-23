@@ -18,7 +18,7 @@ import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE } from './constants';
+import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
 
 const exec = require('child_process').exec;
 const models = require('./models').default;
@@ -80,6 +80,76 @@ _.assignIn(util, {
     });
     return valid;
   },
+  /**
+   * Calculate project estimation item price
+   * @param  {object}   valueType       value type can be int, string, double, percentage
+   * @param  {String}   value           value
+   * @param  {Double}   price           price
+   * @return {Double|String}            calculated price value
+   */
+  calculateEstimationItemPrice: (valueType, value, price) => {
+    if (valueType === VALUE_TYPE.PERCENTAGE) {
+      return (value * price) / 100;
+    }
+    return value;
+  },
+  /**
+   * Calculate project estimation item price
+   * @param   {Object}    req               the request
+   * @param  {Number}     projectId         project id
+   * @return {Array}  estimation items
+   */
+  calculateProjectEstimationItems: (req, projectId) =>
+    // delete ALL existent ProjectEstimationItems for the project
+     models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
+       includeAllProjectEstimatinoItemsForInternalUsage: true,
+     })
+
+      // retrieve ProjectSettings and ProjectEstimations
+      .then(() => Promise.all([
+        models.ProjectSetting.findAll({
+          includeAllProjectSettingsForInternalUsage: true,
+          where: {
+            projectId,
+            key: _.map(_.values(ESTIMATION_TYPE), type => `markup_${type}`),
+          },
+          raw: true,
+        }),
+        models.ProjectEstimation.findAll({
+          where: { projectId: req.params.projectId },
+          raw: true,
+        }),
+      ]))
+
+      // create ProjectEstimationItems
+      .then(([settings, estimations]) => {
+        if (!settings || settings.length === 0) {
+          req.log.debug('No project settings for prices found, therefore no estimation items are created');
+          return [];
+        }
+
+        if (!estimations || estimations.length === 0) {
+          req.log.debug('No price estimations found, therefore no estimation items are created');
+          return [];
+        }
+
+        const estimationItems = [];
+        _.each(estimations, (estimation) => {
+          _.each(settings, (setting) => {
+            estimationItems.push({
+              projectEstimationId: estimation.id,
+              price: util.calculateEstimationItemPrice(setting.valueType, setting.value, estimation.price),
+              type: setting.key.replace(/^markup_/, ''),
+              markupUsedReference: 'projectSetting',
+              markupUsedReferenceId: setting.id,
+              createdBy: req.authUser.userId,
+              updatedBy: req.authUser.userId,
+            });
+          });
+        });
+
+        return models.ProjectEstimationItem.bulkCreate(estimationItems);
+      }),
   /**
    * Helper funtion to verify if user has specified role
    * @param  {object} req  Request object that should contain authUser
@@ -746,6 +816,20 @@ _.assignIn(util, {
       util.hasPermission(permission, user, projectMembers),
     )
   ),
+
+  /**
+   * Checks if the Project Setting represents price estimation setting
+   *
+   * @param {String} key project setting key
+   *
+   * @returns {Boolean} true it's project setting for price estimation
+   */
+  isProjectSettingForEstimation: (key) => {
+    const markupMatch = key.match(/^markup_(.+)$/);
+    const markupKey = markupMatch && markupMatch[1] ? markupMatch[1] : null;
+
+    return markupKey ? _.includes(_.values(ESTIMATION_TYPE), markupKey) : false;
+  },
 });
 
 export default util;

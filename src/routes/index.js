@@ -327,6 +327,19 @@ router.route('/v4/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/work
 router.route('/v4/projects/:projectId/reports')
   .get(require('./projectReports/getReport'));
 
+// Project Settings
+router.route('/v4/projects/:projectId(\\d+)/settings/:id(\\d+)')
+  .patch(require('./projectSettings/update'))
+  .delete(require('./projectSettings/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/settings')
+  .get(require('./projectSettings/list'))
+  .post(require('./projectSettings/create'));
+
+// Project Estimation Items
+router.route('/v4/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
+  .get(require('./projectEstimationItems/list'));
+
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint

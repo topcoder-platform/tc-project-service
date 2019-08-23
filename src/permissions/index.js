@@ -8,9 +8,10 @@ const projectMemberDelete = require('./projectMember.delete');
 const projectAdmin = require('./admin.ops');
 const projectAttachmentUpdate = require('./project.updateAttachment');
 const projectAttachmentDownload = require('./project.downloadAttachment');
-// const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
+const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
+const projectSettingEdit = require('./projectSetting.edit');
 
 module.exports = () => {
   Authorizer.setDeniedStatusCode(403);
@@ -124,5 +125,15 @@ module.exports = () => {
   Authorizer.setPolicy('workManagementPermission.delete', projectAdmin);
   Authorizer.setPolicy('workManagementPermission.view', projectAdmin);
 
+  // Project Permissions
   Authorizer.setPolicy('permissions.view', projectView);
+
+  // Project Settings
+  Authorizer.setPolicy('projectSetting.create', connectManagerOrAdmin);
+  Authorizer.setPolicy('projectSetting.edit', projectSettingEdit);
+  Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);
+  Authorizer.setPolicy('projectSetting.view', projectView);
+
+  // Project Estimation Items
+  Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
 };

@@ -224,3 +224,16 @@ export const ROUTES = {
     UPDATE: 'work_items.update',
   },
 };
+
+export const ESTIMATION_TYPE = {
+  FEE: 'fee',
+  COMMUNITY: 'community',
+  TOPCODER_SERVICE: 'topcoder_service',
+};
+
+export const VALUE_TYPE = {
+  INT: 'int',
+  DOUBLE: 'double',
+  STRING: 'string',
+  PERCENTAGE: 'percentage',
+};
