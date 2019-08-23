@@ -229,7 +229,6 @@ export const ESTIMATION_TYPE = {
   FEE: 'fee',
   COMMUNITY: 'community',
   TOPCODER_SERVICE: 'topcoder_service',
-  REFERENCE_PROGRAM: 'reference_program',
 };
 
 export const VALUE_TYPE = {
