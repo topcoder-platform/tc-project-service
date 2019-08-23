@@ -38,7 +38,7 @@ const permissionsConfigs = [
   },
 ];
 
-module.exports = function defineProjectHistory(sequelize, DataTypes) {
+module.exports = function defineProjectEstimationItem(sequelize, DataTypes) {
   const ProjectEstimationItem = sequelize.define(
     'ProjectEstimationItem',
     {
