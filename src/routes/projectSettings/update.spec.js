@@ -120,7 +120,7 @@ describe('UPDATE Project Setting', () => {
 
   const estimation = {
     buildingBlockKey: 'BLOCK_KEY',
-    conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE || CA_NEEDED)',
+    conditions: '( HAS_DEV_DELIVERABLE && ONLY_ONE_OS_MOBILE && CA_NEEDED )',
     price: 6500.50,
     quantity: 10,
     minTime: 35,
