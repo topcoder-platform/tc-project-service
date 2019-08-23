@@ -204,7 +204,7 @@ describe('GET project estimation items', () => {
         });
     });
 
-    it('should return 0 project estimation items for non-admin but project manager', (done) => {
+    it('should return 0 project estimation items for a project manager who is not a topcoder manager', (done) => {
       request(server)
         .get(url)
         .set({
