@@ -127,13 +127,13 @@ module.exports = () => {
 
   // Project Permissions
   Authorizer.setPolicy('permissions.view', projectView);
-    
+
   // Project Settings
   Authorizer.setPolicy('projectSetting.create', connectManagerOrAdmin);
   Authorizer.setPolicy('projectSetting.edit', projectSettingEdit);
   Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);
   Authorizer.setPolicy('projectSetting.view', projectView);
-    
+
   // Project Estimation Items
   Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
 };
