@@ -1971,6 +1971,191 @@ paths:
           description: If organization config is not found
           schema:
             $ref: '#/definitions/ErrorModel'
+
+  /projects/metadata/workManagementPermission:
+    get:
+      tags:
+        - workManagementPermission
+      operationId: findWorkManagementPermissions
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all work management permissions. Only admin or connect admin can access
+        this endpoint.
+      parameters:
+        - name: filter
+          required: true
+          type: string
+          in: query
+          description: |
+            Url encoded list of Supported filters
+             - projectTemplateId (required)
+      responses:
+        '200':
+          description: A list of work management permissions
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - workManagementPermission
+      operationId: addWorkManagementPermission
+      security:
+        - Bearer: []
+      description: >-
+        Create a work management permission. Only admin or connect admin can access
+        this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionCreateBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created work management permission
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/workManagementPermission/{id}':
+    get:
+      tags:
+        - workManagementPermission
+      description: Retrieve work management permission by id. Only admin or connect admin can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project type
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+      operationId: getWorkManagementPermission
+    patch:
+      tags:
+        - workManagementPermission
+      operationId: updateWorkManagementPermission
+      security:
+        - Bearer: []
+      description: >-
+        Update a work management permission. Only admin or connect admin can access
+        this endpoint.
+      responses:
+        '200':
+          description: Successfully updated work management permission.
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionCreateBodyParam'
+    delete:
+      tags:
+        - workManagementPermission
+      description: >-
+        Remove an existing work management permission. Only admin or connect admin can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+      responses:
+        '204':
+          description: Work management permission successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If work management permission is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  '/projects/{projectId}/permissions':
+    get:
+      tags:
+        - permissions
+      description: Retrieve permissions.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: permissions
+          schema:
+            title: Single work management permission response object
+            type: object
+            properties:
+              id:
+                type: string
+                description: unique id identifying the request
+              version:
+                type: string
+              result:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  status:
+                    type: integer
+                    format: int32
+                    description: http status code
+                  metadata:
+                    $ref: '#/definitions/ResponseMetadata'
+                  content:
+                    type: object
+                    example:
+                      'work.create': true
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+      operationId: getPermissions
+
   /timelines:
     get:
       tags:
@@ -3460,6 +3645,13 @@ parameters:
     name: id
     in: path
     description: organization config id
+    required: true
+    type: integer
+    format: int64
+  permissionIdParam:
+    name: id
+    in: path
+    description: work management permission id
     required: true
     type: integer
     format: int64
@@ -5132,6 +5324,130 @@ definitions:
             type: array
             items:
               $ref: '#/definitions/OrgConfig'
+
+
+
+  WorkManagementPermissionCreateRequest:
+    title: Work Management Permission request object
+    type: object
+    required:
+      - policy
+      - permission
+      - projectTemplateId
+    properties:
+      policy:
+        type: string
+        description: the policy
+      permission:
+        type: object
+        description: the permission
+      projectTemplateId:
+        type: number
+        format: int64
+        description: the template id
+  WorkManagementPermissionCreateBodyParam:
+    title: Work Management Permission creation body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: '#/definitions/WorkManagementPermissionCreateRequest'
+  WorkManagementPermission:
+    title: Work Management Permission object
+    allOf:
+      - type: object
+        required:
+          - id
+          - policy
+          - permission
+          - projectTemplateId
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          policy:
+            type: string
+            description: the policy
+          permission:
+            type: object
+            description: the permission
+          projectTemplateId:
+            type: number
+            format: int64
+            description: the template id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/WorkManagementPermissionCreateRequest'
+  WorkManagementPermissionResponse:
+    title: Single work management permission response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            $ref: '#/definitions/WorkManagementPermission'
+
+  WorkManagementPermissionListResponse:
+    title: Work management permissions response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/WorkManagementPermission'
   ProjectTypeResponse:
     title: Single project type response object
     type: object
