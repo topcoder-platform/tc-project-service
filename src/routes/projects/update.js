@@ -124,7 +124,8 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     case PROJECT_STATUS.ACTIVE:
     case PROJECT_STATUS.PAUSED: {
       if (isScopeUpdated(existingProject, updatedProps)) {
-        errors.push(`Scope changes are not allowed for '${existingProject.status}' project`);
+        // TODO commented to disable the scope change flow for immediate release
+        // errors.push(`Scope changes are not allowed for '${existingProject.status}' project`);
       }
       break;
     }
