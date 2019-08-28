@@ -441,23 +441,6 @@ describe('CREATE milestone', () => {
         .expect(422, done);
     });
 
-    it('should return 422 if endDate is after the timeline endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          endDate: '2018-06-13T00:00:00.000Z',
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
     it('should return 422 if invalid timelineId param', (done) => {
       request(server)
         .post('/v4/timelines/0/milestones')
