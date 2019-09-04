@@ -86,9 +86,6 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
     // if timeline is modified
     if (data.cascadedUpdates && data.cascadedUpdates.timeline) {
       cTimeline = data.cascadedUpdates.timeline;
-      // if endDate of the timeline is modified, update the end date in the index
-      if (cTimeline.original.endDate !== cTimeline.updated.endDate) {
-      }
     }
 
     const merged = _.assign(doc._source, cTimeline, { milestones }); // eslint-disable-line no-underscore-dangle
