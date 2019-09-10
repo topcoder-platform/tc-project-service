@@ -82,13 +82,14 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
       });
     }
 
-    let cTimeline = null;
-    // if timeline is modified
-    if (data.cascadedUpdates && data.cascadedUpdates.timeline) {
-      cTimeline = data.cascadedUpdates.timeline;
+    let updatedTimeline = doc._source; // eslint-disable-line no-underscore-dangle
+    // if timeline has been modified during milestones updates
+    if (data.cascadedUpdates && data.cascadedUpdates.timeline && data.cascadedUpdates.timeline.updated) {
+      // merge updated timeline with the object in ES index, the same way as we do when updating timeline in ES using timeline endpoints
+      updatedTimeline = _.merge(doc._source, data.cascadedUpdates.timeline.updated);  // eslint-disable-line no-underscore-dangle
     }
 
-    const merged = _.assign(doc._source, cTimeline, { milestones }); // eslint-disable-line no-underscore-dangle
+    const merged = _.assign(updatedTimeline, { milestones });
     yield eClient.update({
       index: ES_TIMELINE_INDEX,
       type: ES_TIMELINE_TYPE,
