@@ -10,7 +10,7 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
-import { EVENT, MILESTONE_STATUS } from '../../constants';
+import { EVENT, MILESTONE_STATUS, ADMIN_ROLES } from '../../constants';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -181,6 +181,14 @@ module.exports = [
             } else {
               const apiErr = new Error('No previous status is found');
               apiErr.status = 500;
+              return Promise.reject(apiErr);
+            }
+          }
+
+          if (entityToUpdate.completionDate || entityToUpdate.actualStartDate) {
+            if (!util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser)) {
+              const apiErr = new Error('You are not authorised to perform this action');
+              apiErr.status = 403;
               return Promise.reject(apiErr);
             }
           }

@@ -302,6 +302,28 @@ describe('UPDATE Milestone', () => {
         .expect(403, done);
     });
 
+    it('should return 403 for non-admin member updating the completionDate', (done) => {
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .send(body)
+        .expect(403, done);
+    });
+
+    it('should return 403 for non-admin member updating the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.actualStartDate = '2018-05-16T00:00:00.000Z';
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .send(newBody)
+        .expect(403, done);
+    });
+
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
         .patch('/v4/timelines/1234/milestones/1')
@@ -1059,6 +1081,28 @@ describe('UPDATE Milestone', () => {
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    it('should return 200 for admin updating the completionDate', (done) => {
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(body)
+        .expect(200, done);
+    });
+
+    it('should return 200 for admin updating the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.actualStartDate = '2018-05-16T00:00:00.000Z';
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200, done);
     });
 
     it('should return 200 for connect manager', (done) => {
