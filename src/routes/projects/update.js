@@ -58,6 +58,10 @@ const updateProjectValdiations = {
       bookmarks: Joi.array().items(Joi.object().keys({
         title: Joi.string(),
         address: Joi.string().regex(REGEX.URL),
+        createdAt: Joi.date(),
+        createdBy: Joi.number().integer().positive(),
+        updatedAt: Joi.date(),
+        updatedBy: Joi.number().integer().positive(),
       })).optional().allow(null),
       type: Joi.string().max(45),
       details: Joi.any(),
