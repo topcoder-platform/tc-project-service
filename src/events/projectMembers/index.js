@@ -44,7 +44,13 @@ const projectMemberAddedHandler = Promise.coroutine(function* a(logger, msg, cha
     const newMember = JSON.parse(msg.content.toString());
     const projectId = newMember.projectId;
     const directUpdatePromise = Promise.coroutine(function* () { // eslint-disable-line func-names
-      if (_.indexOf([PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.MANAGER], newMember.role) > -1) {
+      if (_.indexOf([
+        PROJECT_MEMBER_ROLE.COPILOT,
+        PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+        PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+        PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+      ], newMember.role) > -1) {
         // add copilot/update manager permissions operation promise
         const directProjectId = yield models.Project.getDirectProjectId(projectId);
         if (directProjectId) {
@@ -116,7 +122,13 @@ const projectMemberRemovedHandler = Promise.coroutine(function* (logger, msg, ch
     const projectId = member.projectId;
     // remove copilot/manager operation promise
     const updateDirectProjectPromise = Promise.coroutine(function* () { // eslint-disable-line func-names
-      if (_.indexOf([PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.MANAGER], member.role) > -1) {
+      if (_.indexOf([
+        PROJECT_MEMBER_ROLE.COPILOT,
+        PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+        PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+        PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+      ], member.role) > -1) {
         const directProjectId = yield models.Project.getDirectProjectId(projectId);
         if (directProjectId) {
           const token = yield util.getM2MToken();
