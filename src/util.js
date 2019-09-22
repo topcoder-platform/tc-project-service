@@ -474,8 +474,6 @@ _.assignIn(util, {
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
-    console.dir('models')
-    console.dir(models)
     return models.ProjectMember.create(member)
     .then((_newMember) => {
       newMember = _newMember.get({ plain: true });
