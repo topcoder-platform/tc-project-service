@@ -16,12 +16,12 @@ import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
+import models from './models';
 // import AWS from 'aws-sdk';
 
 import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
 
 const exec = require('child_process').exec;
-const models = require('./models').default;
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
 const m2m = tcCoreLibAuth.m2m(config);
@@ -474,7 +474,6 @@ _.assignIn(util, {
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
-
     return models.ProjectMember.create(member)
     .then((_newMember) => {
       newMember = _newMember.get({ plain: true });

@@ -289,7 +289,7 @@ module.exports = [
     }
     return Promise.all(promises).then((rolesList) => {
       if (!!invite.userIds && _.includes(PROJECT_MEMBER_MANAGER_ROLES, invite.role)) {
-        req.log.debug('Chekcing if userId is allowed as manager');
+        req.log.debug('Checking if userId is allowed as manager');
         const forbidUserList = [];
         _.zip(invite.userIds, rolesList).forEach((data) => {
           const [userId, roles] = data;
