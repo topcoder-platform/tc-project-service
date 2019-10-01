@@ -221,7 +221,9 @@ module.exports = [
         const members = req.context.currentProjectMembers;
         const validRoles = [
           PROJECT_MEMBER_ROLE.MANAGER,
-          PROJECT_MEMBER_ROLE.MANAGER,
+          PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+          PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+          PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
         ].map(x => x.toLowerCase());
         const matchRole = role => _.indexOf(validRoles, role.toLowerCase()) >= 0;
         if (updatedProps.status === PROJECT_STATUS.ACTIVE &&
