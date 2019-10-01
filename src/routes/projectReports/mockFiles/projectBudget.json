@@ -1,0 +1,57 @@
+[
+  {
+    "project_stream.tc_connect_project_id": "1",
+    "connect_project.directprojectid": "54321",
+    "connect_project.id": "12345",
+    "project_stream.id": "abcd",
+    "project_stream.total_approved_budget": "63680",
+    "project_stream.total_invoiced_amount": "43680",
+    "project_stream.remaining_invoiced_budget": "20000",
+    "project_stream.total_actual_challenge_fee": "29648.09",
+    "project_stream.total_actual_member_payment": "16351.91"
+  },
+  {
+    "project_stream.tc_connect_project_id": "2",
+    "connect_project.directprojectid": "54321",
+    "connect_project.id": "12345",
+    "project_stream.id": "defg",
+    "project_stream.total_approved_budget": "10000",
+    "project_stream.total_invoiced_amount": "10000",
+    "project_stream.remaining_invoiced_budget": "0",
+    "project_stream.total_actual_challenge_fee": "0",
+    "project_stream.total_actual_member_payment": "0"
+  },
+  {
+    "project_stream.tc_connect_project_id": "3",
+    "connect_project.directprojectid": "54321",
+    "connect_project.id": "12345",
+    "project_stream.id": "hijk",
+    "project_stream.total_approved_budget": "4,300",
+    "project_stream.total_invoiced_amount": "0",
+    "project_stream.remaining_invoiced_budget": "0",
+    "project_stream.total_actual_challenge_fee": "0",
+    "project_stream.total_actual_member_payment": "0"
+  },
+  {
+    "project_stream.tc_connect_project_id": "4",
+    "connect_project.directprojectid": "54321",
+    "connect_project.id": "12345",
+    "project_stream.id": "klmn",
+    "project_stream.total_approved_budget": "1250",
+    "project_stream.total_invoiced_amount": "0",
+    "project_stream.remaining_invoiced_budget": "0",
+    "project_stream.total_actual_challenge_fee": "0",
+    "project_stream.total_actual_member_payment": "0"
+  },
+  {
+    "project_stream.tc_connect_project_id": "5",
+    "connect_project.directprojectid": "54321",
+    "connect_project.id": "12345",
+    "project_stream.id": "opqu",
+    "project_stream.total_approved_budget": "0",
+    "project_stream.total_invoiced_amount": "0",
+    "project_stream.remaining_invoiced_budget": "0",
+    "project_stream.total_actual_challenge_fee": "0",
+    "project_stream.total_actual_member_payment": "0"
+  }
+]

@@ -9,6 +9,14 @@ export const PROJECT_STATUS = {
   CANCELLED: 'cancelled',
 };
 
+export const WORKSTREAM_STATUS = {
+  DRAFT: 'draft',
+  REVIEWED: 'reviewed',
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  PAUSED: 'paused',
+};
+
 export const PROJECT_PHASE_STATUS = PROJECT_STATUS;
 
 export const MILESTONE_STATUS = PROJECT_STATUS;
@@ -19,12 +27,20 @@ export const PROJECT_MEMBER_ROLE = {
   CUSTOMER: 'customer',
   COPILOT: 'copilot',
   ACCOUNT_MANAGER: 'account_manager',
+  PROGRAM_MANAGER: 'program_manager',
+  ACCOUNT_EXECUTIVE: 'account_executive',
+  SOLUTION_ARCHITECT: 'solution_architect',
+  PROJECT_MANAGER: 'project_manager',
 };
 
 export const PROJECT_MEMBER_MANAGER_ROLES = [
   PROJECT_MEMBER_ROLE.MANAGER,
   PROJECT_MEMBER_ROLE.OBSERVER,
   PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
+  PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
+  PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+  PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+  PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
 ];
 
 export const USER_ROLE = {
@@ -34,6 +50,12 @@ export const USER_ROLE = {
   COPILOT: 'Connect Copilot',
   CONNECT_ADMIN: 'Connect Admin',
   COPILOT_MANAGER: 'Connect Copilot Manager',
+  BUSINESS_DEVELOPMENT_REPRESENTATIVE: 'Business Development Representative',
+  PRESALES: 'Presales',
+  ACCOUNT_EXECUTIVE: 'Account Executive',
+  PROGRAM_MANAGER: 'Program Manager',
+  SOLUTION_ARCHITECT: 'Solution Architect',
+  PROJECT_MANAGER: 'Project Manager',
 };
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
@@ -43,6 +65,13 @@ export const MANAGER_ROLES = [
   USER_ROLE.MANAGER,
   USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
   USER_ROLE.COPILOT_MANAGER,
+  USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
+  USER_ROLE.PRESALES,
+  USER_ROLE.ACCOUNT_EXECUTIVE,
+
+  USER_ROLE.PROGRAM_MANAGER,
+  USER_ROLE.SOLUTION_ARCHITECT,
+  USER_ROLE.PROJECT_MANAGER,
 ];
 
 export const EVENT = {
@@ -96,6 +125,12 @@ export const BUS_API_EVENT = {
   PROJECT_PHASE_UPDATE_PROGRESS: 'connect.notification.project.phase.update.progress',
   PROJECT_PHASE_UPDATE_SCOPE: 'connect.notification.project.phase.update.scope',
 
+  PROJECT_WORK_TRANSITION_ACTIVE: 'connect.notification.project.work.transition.active',
+  PROJECT_WORK_TRANSITION_COMPLETED: 'connect.notification.project.work.transition.completed',
+  PROJECT_WORK_UPDATE_PAYMENT: 'connect.notification.project.work.update.payment',
+  PROJECT_WORK_UPDATE_PROGRESS: 'connect.notification.project.work.update.progress',
+  PROJECT_WORK_UPDATE_SCOPE: 'connect.notification.project.work.update.scope',
+
   MEMBER_JOINED: 'connect.notification.project.member.joined',
   MEMBER_LEFT: 'connect.notification.project.member.left',
   MEMBER_REMOVED: 'connect.notification.project.member.removed',
@@ -123,6 +158,9 @@ export const BUS_API_EVENT = {
 
   // When specification of a product is modified
   PROJECT_PRODUCT_SPECIFICATION_MODIFIED: 'connect.notification.project.product.update.spec',
+
+  // When specification of a work item is modified
+  PROJECT_WORKITEM_SPECIFICATION_MODIFIED: 'connect.notification.project.workitem.update.spec',
 
   MILESTONE_ADDED: 'connect.notification.project.timeline.milestone.added',
   MILESTONE_REMOVED: 'connect.notification.project.timeline.milestone.removed',
@@ -163,6 +201,7 @@ export const TIMELINE_REFERENCES = {
   PROJECT: 'project',
   PHASE: 'phase',
   PRODUCT: 'product',
+  WORK: 'work',
 };
 
 export const STATUS_HISTORY_REFERENCES = {
@@ -183,4 +222,39 @@ export const INVITE_STATUS = {
   CANCELED: 'canceled',
 };
 
+export const SCOPE_CHANGE_REQ_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  ACTIVATED: 'activated',
+  CANCELED: 'canceled',
+};
 export const MAX_PARALLEL_REQUEST_QTY = 10;
+
+export const ROUTES = {
+  PHASE_PRODUCTS: {
+    UPDATE: 'phase_products.update',
+  },
+  PHASES: {
+    UPDATE: 'phases.update',
+  },
+  WORKS: {
+    UPDATE: 'works.update',
+  },
+  WORK_ITEMS: {
+    UPDATE: 'work_items.update',
+  },
+};
+
+export const ESTIMATION_TYPE = {
+  FEE: 'fee',
+  COMMUNITY: 'community',
+  TOPCODER_SERVICE: 'topcoder_service',
+};
+
+export const VALUE_TYPE = {
+  INT: 'int',
+  DOUBLE: 'double',
+  STRING: 'string',
+  PERCENTAGE: 'percentage',
+};

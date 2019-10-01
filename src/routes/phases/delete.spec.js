@@ -3,14 +3,20 @@ import _ from 'lodash';
 import request from 'supertest';
 import sinon from 'sinon';
 import chai from 'chai';
+import config from 'config';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-
+import messageService from '../../services/messageService';
+import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT,
 } from '../../constants';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const expectAfterDelete = (projectId, id, err, next) => {
   if (err) throw err;
@@ -70,22 +76,32 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
+  const project = {
+    type: 'generic',
+    billingAccountId: 1,
+    name: 'test1',
+    description: 'test project1',
+    status: 'draft',
+    details: {},
+    createdBy: 1,
+    updatedBy: 1,
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
+  };
+  const topic = {
+    id: 1,
+    title: 'test project phase',
+    posts:
+    [{ id: 1,
+      type: 'post',
+      body: 'body',
+    }],
+  };
   beforeEach((done) => {
     // mocks
     testUtil.clearDb()
         .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
+          models.Project.create(project).then((p) => {
             projectId = p.id;
             projectName = p.name;
             // create members
@@ -266,6 +282,83 @@ describe('Project Phases', () => {
             });
           }
         });
+      });
+    });
+
+    describe('RabbitMQ Message topic', () => {
+      let deleteTopicSpy;
+      let deletePostsSpy;
+      let publishSpy;
+      let sandbox;
+
+      before(async (done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(async (done) => {
+        sandbox = sinon.sandbox.create();
+        server.services.pubsub = new RabbitMQService(server.logger);
+
+        // initialize RabbitMQ
+        server.services.pubsub.init(
+          config.get('rabbitmqURL'),
+          config.get('pubsubExchangeName'),
+          config.get('pubsubQueueName'),
+        );
+
+        // add project to ES index
+        await server.services.es.index({
+          index: ES_PROJECT_INDEX,
+          type: ES_PROJECT_TYPE,
+          id: projectId,
+          body: {
+            doc: _.assign(project, { phases: [_.assign(body, { id: phaseId, projectId })] }),
+          },
+        });
+
+        testUtil.wait(() => {
+          publishSpy = sandbox.spy(server.services.pubsub, 'publish');
+          deleteTopicSpy = sandbox.spy(messageService, 'deleteTopic');
+          deletePostsSpy = sandbox.spy(messageService, 'deletePosts');
+          sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
+          done();
+        });
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      after(() => {
+        mockRabbitMQ(server);
+      });
+
+      it('should send message topic when phase deleted', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          delete: () => Promise.resolve(true),
+        });
+        sandbox.stub(messageService, 'getClient', () => mockHttpClient);
+        request(server)
+            .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(204)
+            .end((err) => {
+              if (err) {
+                done(err);
+              } else {
+                testUtil.wait(() => {
+                  publishSpy.calledOnce.should.be.true;
+                  publishSpy.firstCall.calledWith('project.phase.removed').should.be.true;
+                  deleteTopicSpy.calledOnce.should.be.true;
+                  deleteTopicSpy.calledWith(topic.id).should.be.true;
+                  deletePostsSpy.calledWith(topic.id).should.be.true;
+                  done();
+                });
+              }
+            });
       });
     });
   });

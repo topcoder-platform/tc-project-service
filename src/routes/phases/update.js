@@ -6,7 +6,7 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, ROUTES, TIMELINE_REFERENCES } from '../../constants';
 
 
 const permissions = tcMiddleware.permissions;
@@ -15,6 +15,8 @@ const updateProjectPhaseValidation = {
   body: {
     param: Joi.object().keys({
       name: Joi.string().optional(),
+      description: Joi.string().optional(),
+      requirements: Joi.string().optional(),
       status: Joi.string().optional(),
       startDate: Joi.date().optional(),
       endDate: Joi.date().optional(),
@@ -154,11 +156,15 @@ module.exports = [
         // emit original and updated project phase information
         req.app.services.pubsub.publish(
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { original: previousValue, updated, allPhases },
+          { original: previousValue, updated, allPhases, route: TIMELINE_REFERENCES.PHASE },
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { req, original: previousValue, updated: _.clone(updated.get({ plain: true })) });
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
+          req,
+          original: previousValue,
+          updated: _.clone(updated.get({ plain: true })),
+          route: ROUTES.PHASES.UPDATE,
+        });
 
         res.json(util.wrapResponse(req.id, updated));
       })

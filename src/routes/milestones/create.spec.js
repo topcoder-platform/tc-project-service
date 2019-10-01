@@ -320,74 +320,6 @@ describe('CREATE milestone', () => {
         .expect(422, done);
     });
 
-    it('should return 422 if missing plannedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          plannedText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if missing activeText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          activeText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if missing completedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          completedText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if missing blockedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          blockedText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
     it('should return 422 if startDate is after endDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
@@ -428,23 +360,6 @@ describe('CREATE milestone', () => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: '2018-05-01T00:00:00.000Z',
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if endDate is after the timeline endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          endDate: '2018-06-13T00:00:00.000Z',
         }),
       };
 

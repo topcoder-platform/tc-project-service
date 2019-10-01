@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import config from 'config';
 import { EVENT, BUS_API_EVENT, PROJECT_STATUS, PROJECT_PHASE_STATUS, PROJECT_MEMBER_ROLE, MILESTONE_STATUS,
-  INVITE_STATUS }
+  INVITE_STATUS, ROUTES }
   from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
@@ -122,16 +122,17 @@ module.exports = (app, logger) => {
     logger.debug('receive PROJECT_MEMBER_ADDED event');
 
     let eventType;
-    switch (member.role) {
-      case PROJECT_MEMBER_ROLE.MANAGER:
-        eventType = BUS_API_EVENT.MEMBER_JOINED_MANAGER;
-        break;
-      case PROJECT_MEMBER_ROLE.COPILOT:
-        eventType = BUS_API_EVENT.MEMBER_JOINED_COPILOT;
-        break;
-      default:
-        eventType = BUS_API_EVENT.MEMBER_JOINED;
-        break;
+    if ([
+      PROJECT_MEMBER_ROLE.MANAGER,
+      PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+      PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+      PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+    ].includes(member.role)) {
+      eventType = BUS_API_EVENT.MEMBER_JOINED_MANAGER;
+    } else if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
+      eventType = BUS_API_EVENT.MEMBER_JOINED_COPILOT;
+    } else {
+      eventType = BUS_API_EVENT.MEMBER_JOINED;
     }
     const projectId = _.parseInt(req.params.projectId);
 
@@ -401,7 +402,7 @@ module.exports = (app, logger) => {
   /**
   * PROJECT_PHASE_UPDATED
   */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, ({ req, original, updated }) => { // eslint-disable-line no-unused-vars
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, ({ req, original, updated, route }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_PHASE_UPDATED event');
 
     const projectId = _.parseInt(req.params.projectId);
@@ -416,11 +417,29 @@ module.exports = (app, logger) => {
         [
           ['duration', BUS_API_EVENT.PROJECT_PLAN_UPDATED],
           ['startDate', BUS_API_EVENT.PROJECT_PLAN_UPDATED],
-          ['spentBudget', BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT],
-          ['progress', [BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS, BUS_API_EVENT.PROJECT_PROGRESS_MODIFIED]],
-          ['details', BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE],
-          ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE, PROJECT_PHASE_STATUS.ACTIVE],
-          ['status', BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED, PROJECT_PHASE_STATUS.COMPLETED],
+          ['spentBudget', route === ROUTES.PHASES.UPDATE
+              ? BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT
+              : BUS_API_EVENT.PROJECT_WORK_UPDATE_PAYMENT,
+          ],
+          ['progress', [route === ROUTES.PHASES.UPDATE
+              ? BUS_API_EVENT.PROJECT_PHASE_UPDATE_PROGRESS
+              : BUS_API_EVENT.PROJECT_WORK_UPDATE_PROGRESS,
+            BUS_API_EVENT.PROJECT_PROGRESS_MODIFIED,
+          ]],
+          ['details', route === ROUTES.PHASES.UPDATE
+              ? BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE
+              : BUS_API_EVENT.PROJECT_WORK_UPDATE_SCOPE,
+          ],
+          ['status', route === ROUTES.PHASES.UPDATE
+              ? BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE
+              : BUS_API_EVENT.PROJECT_WORK_TRANSITION_ACTIVE,
+            PROJECT_PHASE_STATUS.ACTIVE,
+          ],
+          ['status', route === ROUTES.PHASES.UPDATE
+              ? BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED
+              : BUS_API_EVENT.PROJECT_WORK_TRANSITION_COMPLETED,
+            PROJECT_PHASE_STATUS.COMPLETED,
+          ],
           // ideally we should validate the old value being 'DRAFT' but there is no other status from which
           // we can move phase to REVIEWED status
           ['status', BUS_API_EVENT.PROJECT_PLAN_UPDATED, PROJECT_PHASE_STATUS.REVIEWED],
@@ -459,7 +478,7 @@ module.exports = (app, logger) => {
   /**
   * PROJECT_PHASE_PRODUCT_UPDATED
   */
-  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED, ({ req, original, updated }) => { // eslint-disable-line no-unused-vars
+  app.on(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED, ({ req, original, updated, route }) => { // eslint-disable-line no-unused-vars
     logger.debug('receive PROJECT_PHASE_PRODUCT_UPDATED event');
 
     const projectId = _.parseInt(req.params.projectId);
@@ -472,7 +491,11 @@ module.exports = (app, logger) => {
         if (!_.isEqual(original.details, updated.details)) {
           logger.debug(`Spec changed for product id ${updated.id}`);
 
-          createEvent(BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED, {
+          const busApiEvent = route === 'updatePhaseProducts'
+              ? BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED
+              : BUS_API_EVENT.PROJECT_WORKITEM_SPECIFICATION_MODIFIED;
+
+          createEvent(busApiEvent, {
             projectId,
             projectName: project.name,
             refCode: _.get(project, 'details.utm.code'),

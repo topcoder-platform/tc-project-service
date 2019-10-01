@@ -1,11 +1,7 @@
 import _ from 'lodash';
 import util from '../util';
-import {
-  PROJECT_MEMBER_ROLE,
-  ADMIN_ROLES,
-} from '../constants';
 import models from '../models';
-
+import { PERMISSION } from './constants';
 
 /**
  * Permission to allow copilot and above roles to perform certain operations
@@ -16,27 +12,17 @@ import models from '../models';
  */
 module.exports = req => new Promise((resolve, reject) => {
   const projectId = _.parseInt(req.params.projectId);
-  const isAdmin = util.hasRoles(req, ADMIN_ROLES);
-
-  if (isAdmin) {
-    return resolve(true);
-  }
 
   return models.ProjectMember.getActiveProjectMembers(projectId)
     .then((members) => {
+      const hasPermission = util.hasPermission(PERMISSION.ROLES_COPILOT_AND_ABOVE, req.authUser, members);
+
+      // TODO should we really do this?
+      // if no, we can replace `getActiveProjectMembers + util.hasPermission` with one `util.hasPermissionForProject`
       req.context = req.context || {};
       req.context.currentProjectMembers = members;
-      const validMemberProjectRoles = [
-        PROJECT_MEMBER_ROLE.MANAGER,
-        PROJECT_MEMBER_ROLE.COPILOT,
-      ];
-      // check if the copilot or manager has access to this project
-      const isMember = _.some(
-        members,
-m => m.userId === req.authUser.userId && validMemberProjectRoles.includes(m.role),
-      );
 
-      if (!isMember) {
+      if (!hasPermission) {
         // the copilot or manager is not a registered project member
         return reject(new Error('You do not have permissions to perform this action'));
       }

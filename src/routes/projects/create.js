@@ -8,7 +8,7 @@ import moment from 'moment';
 
 import models from '../../models';
 import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, PROJECT_STATUS, PROJECT_PHASE_STATUS,
-  EVENT, REGEX } from '../../constants';
+  EVENT, REGEX, WORKSTREAM_STATUS } from '../../constants';
 import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
 import directProject from '../../services/directProject';
@@ -25,7 +25,7 @@ const traverse = require('traverse');
  */
 const permissions = require('tc-core-library-js').middleware.permissions;
 
-const createProjectValdiations = {
+const createProjectValidations = {
   body: {
     param: Joi.object().keys({
       name: Joi.string().required(),
@@ -39,6 +39,10 @@ const createProjectValdiations = {
       bookmarks: Joi.array().items(Joi.object().keys({
         title: Joi.string(),
         address: Joi.string().regex(REGEX.URL),
+        createdAt: Joi.date(),
+        createdBy: Joi.number().integer().positive(),
+        updatedAt: Joi.date(),
+        updatedBy: Joi.number().integer().positive(),
       })).optional().allow(null),
       estimatedPrice: Joi.number().precision(2).positive().optional()
         .allow(null),
@@ -79,14 +83,105 @@ const createProjectValdiations = {
 };
 
 /**
+ * Create ProjectEstimationItem with BuildingBlock.
+ * @param {Array} estimations the project estimations
+ * @param {Number} userId the request user id
+ * @returns {Promise} the promise that resolves to the created ProjectEstimationItem
+ */
+function createEstimationItemsWithBuildingBlock(estimations, userId) {
+  const buildingBlockKeys = _.map(estimations, estimation => estimation.buildingBlockKey);
+  // get all building blocks
+  return models.BuildingBlock.findAll({
+    where: { deletedAt: { $eq: null }, key: buildingBlockKeys },
+    raw: true,
+    includePrivateConfigForInternalUsage: true,
+  }).then((buildingBlocks) => {
+    const blocks = {};
+    _.forEach(buildingBlocks, (block) => {
+      if (block) {
+        blocks[block.key] = block;
+      }
+    });
+    const estimationItems = [];
+    _.forEach(estimations, (estimation) => {
+      const block = blocks[estimation.buildingBlockKey];
+      if (block && _.get(block, 'privateConfig.priceItems')) {
+        _.forOwn(block.privateConfig.priceItems, (item, key) => {
+          let itemPrice;
+          if (_.isString(item) && item.endsWith('%')) {
+            const percent = _.toNumber(item.replace('%', '')) / 100;
+            itemPrice = _.toNumber(estimation.price) * percent;
+          } else {
+            itemPrice = item;
+          }
+          estimationItems.push({
+            projectEstimationId: estimation.id,
+            price: itemPrice,
+            type: key,
+            markupUsedReference: 'buildingBlock',
+            markupUsedReferenceId: block.id,
+            createdBy: userId,
+            updatedBy: userId,
+          });
+        });
+      }
+    });
+
+    return models.ProjectEstimationItem.bulkCreate(estimationItems, { returning: true });
+  });
+}
+
+/**
+ * Create workstreams for newly created project based on provided workstreams config
+ * and project details
+ *
+ * @param {Object} req               express request object
+ * @param {Object} newProject        new created project
+ * @param {Object} workstreamsConfig config of workstreams to create
+ *
+ * @returns {Promise} the list of created WorkStreams
+ */
+function createWorkstreams(req, newProject, workstreamsConfig) {
+  if (!workstreamsConfig) {
+    req.log.debug('no workstream config found');
+    return Promise.resolve([]);
+  }
+
+  req.log.debug('creating project workstreams');
+
+  // get value of the field in the project data which would determine which workstream types to create
+  const projectFieldValue = _.get(newProject, workstreamsConfig.projectFieldName);
+
+  // the list of workstream types to create, based on the project field values
+  // mapping provided in `workstreamTypesToProjectValues`
+  const workstreamTypesToCreate = _.keys(_.pickBy(workstreamsConfig.workstreamTypesToProjectValues, fieldValues => (
+    _.intersection(fieldValues, projectFieldValue).length > 0
+  )));
+
+  // the list workstreams to create
+  const workstreamsToCreate = _.filter(workstreamsConfig.workstreams, workstream => (
+    _.includes(workstreamTypesToCreate, workstream.type)
+  )).map(workstreamToCreate => _.assign({}, workstreamToCreate, {
+    projectId: newProject.id,
+    status: WORKSTREAM_STATUS.DRAFT,
+    createdBy: req.authUser.userId,
+    updatedBy: req.authUser.userId,
+  }));
+
+  return models.WorkStream.bulkCreate(workstreamsToCreate);
+  // return Promise.resolve(workstreamsToCreate);
+}
+
+/**
  * Create the project, project phases and products. This needs to be done before creating direct project.
  * @param {Object} req the request
  * @param {Object} project the project
  * @param {Object} projectTemplate the project template
- * @param {Array} productTemplates array of the templates of the products used in the projec template
+ * @param {Array}  productTemplates array of the templates of the products used in the project template
+ * @param {Array}  phasesList list phases definitions to create
  * @returns {Promise} the promise that resolves to the created project and phases
  */
-function createProjectAndPhases(req, project, projectTemplate, productTemplates) {
+function createProjectAndPhases(req, project, projectTemplate, productTemplates, phasesList) {
   const result = {
     newProject: null,
     newPhases: [],
@@ -114,6 +209,17 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
     }
     return Promise.resolve(newProject);
   }).then((newProject) => {
+    req.log.debug('creating project estimation items with building blocks');
+    if (result.estimations && result.estimations.length > 0) {
+      return createEstimationItemsWithBuildingBlock(result.estimations, req.authUser.userId)
+      .then((estimationItems) => {
+        req.log.debug(`creating ${estimationItems.length} project estimation items`);
+        // ignore project estimation items for now
+        return Promise.resolve(newProject);
+      });
+    }
+    return Promise.resolve(newProject);
+  }).then((newProject) => {
     if (project.attachments && (project.attachments.length > 0)) {
       req.log.debug('creating project attachments');
       const attachments = project.attachments.map(attachment => Object.assign({
@@ -128,56 +234,60 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
       });
     }
     return Promise.resolve(newProject);
-  }).then((newProject) => {
+  })
+  .then((newProject) => {
     result.newProject = newProject;
 
     // backward compatibility for releasing the service before releasing the front end
     if (!projectTemplate) {
       return Promise.resolve(result);
     }
-    const phases = _.filter(_.values(projectTemplate.phases), p => !!p);
     const productTemplateMap = {};
     productTemplates.forEach((pt) => {
       productTemplateMap[pt.id] = pt;
     });
-    return Promise.all(_.map(phases, (phase, phaseIdx) => {
-      const duration = _.get(phase, 'duration', 1);
-      const startDate = moment.utc().hours(0).minutes(0).seconds(0)
-        .milliseconds(0);
-      // Create phase
-      return models.ProjectPhase.create({
-        projectId: newProject.id,
-        name: _.get(phase, 'name', `Stage ${phaseIdx}`),
-        duration,
-        startDate: startDate.format(),
-        endDate: moment.utc(startDate).add(duration - 1, 'days').format(),
-        status: _.get(phase, 'status', PROJECT_PHASE_STATUS.DRAFT),
-        budget: _.get(phase, 'budget', 0),
-        updatedBy: req.authUser.userId,
-        createdBy: req.authUser.userId,
-      }).then((newPhase) => {
-        req.log.debug(`Creating products in the newly created phase ${newPhase.id}`);
-        // Create products
-        return models.PhaseProduct.bulkCreate(_.map(phase.products, (product, productIndex) => ({
-          phaseId: newPhase.id,
+
+    if (phasesList) {
+      return Promise.all(_.map(phasesList, (phase, phaseIdx) => {
+        const duration = _.get(phase, 'duration', 1);
+        const startDate = moment.utc().hours(0).minutes(0).seconds(0)
+          .milliseconds(0);
+        // Create phase
+        return models.ProjectPhase.create({
           projectId: newProject.id,
-          estimatedPrice: _.get(product, 'estimatedPrice', 0),
-          name: _.get(product, 'name', _.get(productTemplateMap, `${product.id}.name`, `Product ${productIndex}`)),
-          // assumes that phase template always contains id of each product
-          templateId: parseInt(product.id, 10),
+          name: _.get(phase, 'name', `Stage ${phaseIdx}`),
+          duration,
+          startDate: startDate.format(),
+          endDate: moment.utc(startDate).add(duration - 1, 'days').format(),
+          status: _.get(phase, 'status', PROJECT_PHASE_STATUS.DRAFT),
+          budget: _.get(phase, 'budget', 0),
           updatedBy: req.authUser.userId,
           createdBy: req.authUser.userId,
-        })), { returning: true })
-        .then((products) => {
-          // Add phases and products to the project JSON, so they can be stored to ES later
-          const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
-          newPhaseJson.products = _.map(products, product =>
-            _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
-          result.newPhases.push(newPhaseJson);
-          return Promise.resolve();
+        }).then((newPhase) => {
+          req.log.debug(`Creating products in the newly created phase ${newPhase.id}`);
+          // Create products
+          return models.PhaseProduct.bulkCreate(_.map(phase.products, (product, productIndex) => ({
+            phaseId: newPhase.id,
+            projectId: newProject.id,
+            estimatedPrice: _.get(product, 'estimatedPrice', 0),
+            name: _.get(product, 'name', _.get(productTemplateMap, `${product.id}.name`, `Product ${productIndex}`)),
+            // assumes that phase template always contains id of each product
+            templateId: parseInt(product.id, 10),
+            updatedBy: req.authUser.userId,
+            createdBy: req.authUser.userId,
+          })), { returning: true })
+          .then((products) => {
+            // Add phases and products to the project JSON, so they can be stored to ES later
+            const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
+            newPhaseJson.products = _.map(products, product =>
+              _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
+            result.newPhases.push(newPhaseJson);
+            return Promise.resolve();
+          });
         });
-      });
-    }));
+      }));
+    }
+    return Promise.resolve();
   })
   .then(() => Promise.resolve(result));
 }
@@ -186,7 +296,7 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates)
  * Validates the project and product templates for the give project template id.
  *
  * @param {Integer} templateId id of the project template which should be validated
- * @returns {Promise} the promise that resolves to an object containing validated project and product templates
+ * @returns {Promise} the promise that resolves to an object containing validated project, product templates and phases list
  */
 function validateAndFetchTemplates(templateId) {
   // backward compatibility for releasing the service before releasing the front end
@@ -203,40 +313,72 @@ function validateAndFetchTemplates(templateId) {
     return Promise.resolve(existingProjectTemplate);
   })
   .then((projectTemplate) => {
-    const phases = _.values(projectTemplate.phases);
-    const productPromises = [];
-    phases.forEach((phase) => {
-      // Make sure number of products of per phase <= max value
-      const productCount = _.isArray(phase.products) ? phase.products.length : 0;
-      if (productCount > config.maxPhaseProductCount) {
-        const apiErr = new Error(`Number of products per phase cannot exceed ${config.maxPhaseProductCount}`);
-        apiErr.status = 422;
-        throw apiErr;
-      }
-      _.map(phase.products, (product) => {
-        productPromises.push(models.ProductTemplate.findById(product.id)
-        .then((productTemplate) => {
-          if (!productTemplate) {
-            // Not found
-            const apiErr = new Error(`Product template not found for id ${product.id}`);
-            apiErr.status = 422;
-            return Promise.reject(apiErr);
-          }
-          return Promise.resolve(productTemplate);
-        }));
+    // for old projectTemplate with `phases` just get phases config directly from projectTemplate
+    if (projectTemplate.phases) {
+      // for now support both ways: creating phases and creating workstreams
+      const phasesList = _(projectTemplate.phases).omit('workstreamsConfig').values().value();
+      const workstreamsConfig = _.get(projectTemplate.phases, 'workstreamsConfig');
+
+      return { projectTemplate, phasesList, workstreamsConfig };
+    }
+
+    // for new projectTemplates try to get phases from the `planConfig`, if it's defined
+    if (projectTemplate.planConfig) {
+      return models.PlanConfig.findOneWithLatestRevision(projectTemplate.planConfig).then((planConfig) => {
+        if (!planConfig) {
+          const apiErr = new Error(`Cannot find planConfig ${JSON.stringify(projectTemplate.planConfig)}`);
+          apiErr.status = 422;
+          throw apiErr;
+        }
+
+        // for now support both ways: creating phases and creating workstreams
+        const phasesList = _(planConfig.config).omit('workstreamsConfig').values().value();
+        const workstreamsConfig = _.get(planConfig.config, 'workstreamsConfig');
+
+        return { projectTemplate, phasesList, workstreamsConfig };
       });
-    });
+    }
+
+    return { projectTemplate };
+  })
+  .then(({ projectTemplate, phasesList, workstreamsConfig }) => {
+    const productPromises = [];
+    if (phasesList) {
+      phasesList.forEach((phase) => {
+        // Make sure number of products of per phase <= max value
+        const productCount = _.isArray(phase.products) ? phase.products.length : 0;
+        if (productCount > config.maxPhaseProductCount) {
+          const apiErr = new Error(`Number of products per phase cannot exceed ${config.maxPhaseProductCount}`);
+          apiErr.status = 422;
+          throw apiErr;
+        }
+        _.map(phase.products, (product) => {
+          productPromises.push(models.ProductTemplate.findById(product.id)
+          .then((productTemplate) => {
+            if (!productTemplate) {
+              // Not found
+              const apiErr = new Error(`Product template not found for id ${product.id}`);
+              apiErr.status = 422;
+              return Promise.reject(apiErr);
+            }
+            return Promise.resolve(productTemplate);
+          }));
+        });
+      });
+    }
     if (productPromises.length > 0) {
-      return Promise.all(productPromises).then(productTemplates => ({ projectTemplate, productTemplates }));
+      return Promise.all(productPromises).then(productTemplates => (
+        { projectTemplate, productTemplates, phasesList, workstreamsConfig }
+      ));
     }
     // if there is no phase or product in a phase is specified, return empty product templates
-    return Promise.resolve({ projectTemplate, productTemplates: [] });
+    return Promise.resolve({ projectTemplate, productTemplates: [], phasesList, workstreamsConfig });
   });
 }
 
 module.exports = [
   // handles request validations
-  validate(createProjectValdiations),
+  validate(createProjectValidations),
   permissions('project.create'),
   fieldLookupValidation(models.ProjectType, 'key', 'body.param.type', 'Project type'),
   /**
@@ -293,9 +435,18 @@ module.exports = [
       // Validate the templates
       return validateAndFetchTemplates(project.templateId)
       // Create project and phases
-      .then(({ projectTemplate, productTemplates }) => {
+      .then(({ projectTemplate, productTemplates, phasesList, workstreamsConfig }) => {
         req.log.debug('Creating project, phase and products');
-        return createProjectAndPhases(req, project, projectTemplate, productTemplates);
+        // only if workstream config is provided, treat such project as using workstreams
+        // otherwise project would still use phases
+        if (workstreamsConfig) {
+          _.set(project, 'details.settings.workstreams', true);
+        }
+        return createProjectAndPhases(req, project, projectTemplate, productTemplates, phasesList)
+          .then(createdProjectAndPhases =>
+            createWorkstreams(req, createdProjectAndPhases.newProject, workstreamsConfig)
+              .then(() => createdProjectAndPhases),
+          );
       })
       .then((createdProjectAndPhases) => {
         newProject = createdProjectAndPhases.newProject;
@@ -331,8 +482,7 @@ module.exports = [
           .then(() => newProject.reload(newProject.id))
           .catch((err) => {
             // log the error and continue
-            req.log.error('Error creating direct project');
-            req.log.error(err);
+            req.log.error('Error creating direct project: %s', _.get(err, 'data.result.content', err));
             return Promise.resolve();
           });
         // return Promise.resolve();

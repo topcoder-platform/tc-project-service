@@ -22,6 +22,18 @@ const body = {
   updatedBy: 1,
 };
 
+const productBody = {
+  name: 'test phase product',
+  type: 'product1',
+  estimatedPrice: 20.0,
+  actualPrice: 1.23456,
+  details: {
+    message: 'This can be any json',
+  },
+  createdBy: 1,
+  updatedBy: 1,
+};
+
 describe('Project Phases', () => {
   let projectId;
   let project;
@@ -80,8 +92,15 @@ describe('Project Phases', () => {
             return models.ProjectPhase.create(body);
           }).then((phase) => {
             project.lastActivityAt = 1;
-            project.phases = [phase];
-            done();
+            project.phases = [phase.toJSON()];
+            const phaseId = phase.id;
+            _.assign(productBody, { phaseId, projectId });
+
+            models.PhaseProduct.create(productBody).then((product) => {
+              project.phases[0].products = [product.toJSON()];
+              project.lastActivityAt = 1;
+              done();
+            });
           });
         });
       });
@@ -151,6 +170,33 @@ describe('Project Phases', () => {
             const resJson = res.body.result.content;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
+            done();
+          }
+        });
+    });
+
+    it('should return phase populated with 1 product when fields=products is used', (done) => {
+      request(server)
+        .get(`/v4/projects/${projectId}/phases/db?fields=products`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ param: body })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.result.content;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].should.have.property('products');
+            resJson[0].products.should.be.a('array');
+            resJson[0].products.should.have.lengthOf(1);
+            resJson[0].products[0].should.have.property('projectId');
+            resJson[0].products[0].projectId.should.equal(projectId);
+            resJson[0].products[0].name.should.equal(productBody.name);
             done();
           }
         });

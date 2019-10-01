@@ -16,12 +16,12 @@ import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import Promise from 'bluebird';
+import models from './models';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE } from './constants';
+import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
 
 const exec = require('child_process').exec;
-const models = require('./models').default;
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
 const m2m = tcCoreLibAuth.m2m(config);
@@ -80,6 +80,76 @@ _.assignIn(util, {
     });
     return valid;
   },
+  /**
+   * Calculate project estimation item price
+   * @param  {object}   valueType       value type can be int, string, double, percentage
+   * @param  {String}   value           value
+   * @param  {Double}   price           price
+   * @return {Double|String}            calculated price value
+   */
+  calculateEstimationItemPrice: (valueType, value, price) => {
+    if (valueType === VALUE_TYPE.PERCENTAGE) {
+      return (value * price) / 100;
+    }
+    return value;
+  },
+  /**
+   * Calculate project estimation item price
+   * @param   {Object}    req               the request
+   * @param  {Number}     projectId         project id
+   * @return {Array}  estimation items
+   */
+  calculateProjectEstimationItems: (req, projectId) =>
+    // delete ALL existent ProjectEstimationItems for the project
+     models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
+       includeAllProjectEstimatinoItemsForInternalUsage: true,
+     })
+
+      // retrieve ProjectSettings and ProjectEstimations
+      .then(() => Promise.all([
+        models.ProjectSetting.findAll({
+          includeAllProjectSettingsForInternalUsage: true,
+          where: {
+            projectId,
+            key: _.map(_.values(ESTIMATION_TYPE), type => `markup_${type}`),
+          },
+          raw: true,
+        }),
+        models.ProjectEstimation.findAll({
+          where: { projectId: req.params.projectId },
+          raw: true,
+        }),
+      ]))
+
+      // create ProjectEstimationItems
+      .then(([settings, estimations]) => {
+        if (!settings || settings.length === 0) {
+          req.log.debug('No project settings for prices found, therefore no estimation items are created');
+          return [];
+        }
+
+        if (!estimations || estimations.length === 0) {
+          req.log.debug('No price estimations found, therefore no estimation items are created');
+          return [];
+        }
+
+        const estimationItems = [];
+        _.each(estimations, (estimation) => {
+          _.each(settings, (setting) => {
+            estimationItems.push({
+              projectEstimationId: estimation.id,
+              price: util.calculateEstimationItemPrice(setting.valueType, setting.value, estimation.price),
+              type: setting.key.replace(/^markup_/, ''),
+              markupUsedReference: 'projectSetting',
+              markupUsedReferenceId: setting.id,
+              createdBy: req.authUser.userId,
+              updatedBy: req.authUser.userId,
+            });
+          });
+        });
+
+        return models.ProjectEstimationItem.bulkCreate(estimationItems);
+      }),
   /**
    * Helper funtion to verify if user has specified role
    * @param  {object} req  Request object that should contain authUser
@@ -404,7 +474,6 @@ _.assignIn(util, {
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
-
     return models.ProjectMember.create(member)
     .then((_newMember) => {
       newMember = _newMember.get({ plain: true });
@@ -591,6 +660,174 @@ _.assignIn(util, {
     }
 
     return Promise.resolve(null);
+  },
+
+  /**
+   * Check if user match the permission rule.
+   *
+   * This method uses permission rule defined in `permissionRule`
+   * and checks that the `user` matches it.
+   *
+   * If we define a rule with `projectRoles` list, we also should provide `projectMembers`
+   * - the list of project members.
+   *
+   * @param {Object}        permissionRule               permission rule
+   * @param {Array<String>} permissionRule.projectRoles  the list of project roles of the user
+   * @param {Array<String>} permissionRule.topcoderRoles the list of Topcoder roles of the user
+   * @param {Object}        user                         user for whom we check permissions
+   * @param {Object}        user.roles                   list of user roles
+   * @param {Object}        user.isMachine               `true` - if it's machine, `false` - real user
+   * @param {Object}        user.scopes                  scopes of user token
+   * @param {Array}         projectMembers               (optional) list of project members - required to check `topcoderRoles`
+   *
+   * @returns {Boolean}     true, if has permission
+   */
+  matchPermissionRule: (permissionRule, user, projectMembers) => {
+    const member = _.find(projectMembers, { userId: user.userId });
+    let hasProjectRole = false;
+    let hasTopcoderRole = false;
+
+    if (permissionRule) {
+      if (permissionRule.projectRoles
+        && permissionRule.projectRoles.length > 0
+        && !!member
+      ) {
+        hasProjectRole = _.includes(permissionRule.projectRoles, member.role);
+      }
+
+      if (permissionRule.topcoderRoles && permissionRule.topcoderRoles.length > 0) {
+        hasTopcoderRole = util.hasRoles({ authUser: user }, permissionRule.topcoderRoles);
+      }
+    }
+
+    return hasProjectRole || hasTopcoderRole;
+  },
+
+  /**
+   * Check if user has permission.
+   *
+   * This method uses permission defined in `permission` and checks that the `user` matches it.
+   *
+   * `permission` may be defined in two ways:
+   *  - **Full** way with defined `allowRule` and optional `denyRule`, example:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       },
+   *       denyRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *    If user matches `denyRule` then the access would be dined even if matches `allowRule`.
+   *  - **Simplified** way may be used if we only want to define `allowRule`.
+   *    We can skip the `allowRule` property and define `allowRule` directly inside `permission` object, example:
+   *    ```js
+   *    {
+   *       projectRoles: [],
+   *       topcoderRoles: []
+   *    }
+   *    ```
+   *    This **simplified** permission is equal to a **full** permission:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *         projectRoles: [],
+   *         topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *
+   * If we define any rule with `projectRoles` list, we also should provide `projectMembers`
+   * - the list of project members.
+   *
+   * @param {Object} permission     permission or permissionRule
+   * @param {Object} user           user for whom we check permissions
+   * @param {Object} user.roles     list of user roles
+   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
+   * @param {Object} user.scopes    scopes of user token
+   * @param {Array}  projectMembers (optional) list of project members - required to check `topcoderRoles`
+   *
+   * @returns {Boolean}     true, if has permission
+   */
+  hasPermission: (permission, user, projectMembers) => {
+    const allowRule = permission.allowRule ? permission.allowRule : permission;
+    const denyRule = permission.denyRule ? permission.denyRule : null;
+
+    const allow = util.matchPermissionRule(allowRule, user, projectMembers);
+    const deny = util.matchPermissionRule(denyRule, user, projectMembers);
+
+    return allow && !deny;
+  },
+
+  /**
+   * Check if user has permission for the project by `projectId`.
+   *
+   * This method uses permission defined in `permission` and checks that the `user` matches it.
+   *
+   * `permission` may be defined in two ways:
+   *  - **Full** way with defined `allowRule` and optional `denyRule`, example:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       },
+   *       denyRule: {
+   *          projectRoles: [],
+   *          topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *    If user matches `denyRule` then the access would be dined even if matches `allowRule`.
+   *  - **Simplified** way may be used if we only want to define `allowRule`.
+   *    We can skip the `allowRule` property and define `allowRule` directly inside `permission` object, example:
+   *    ```js
+   *    {
+   *       projectRoles: [],
+   *       topcoderRoles: []
+   *    }
+   *    ```
+   *    This **simplified** permission is equal to a **full** permission:
+   *    ```js
+   *    {
+   *       allowRule: {
+   *         projectRoles: [],
+   *         topcoderRoles: []
+   *       }
+   *    }
+   *    ```
+   *
+   * @param {Object} permission     permission or permissionRule
+   * @param {Object} user           user for whom we check permissions
+   * @param {Object} user.roles     list of user roles
+   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
+   * @param {Object} user.scopes    scopes of user token
+   * @param {Number} projectId      project id to check permissions for
+   *
+   * @returns {Promise<Boolean>}     true, if has permission
+   */
+  hasPermissionForProject: (permission, user, projectId) => (
+    models.ProjectMember.getActiveProjectMembers(projectId).then(projectMembers =>
+      util.hasPermission(permission, user, projectMembers),
+    )
+  ),
+
+  /**
+   * Checks if the Project Setting represents price estimation setting
+   *
+   * @param {String} key project setting key
+   *
+   * @returns {Boolean} true it's project setting for price estimation
+   */
+  isProjectSettingForEstimation: (key) => {
+    const markupMatch = key.match(/^markup_(.+)$/);
+    const markupKey = markupMatch && markupMatch[1] ? markupMatch[1] : null;
+
+    return markupKey ? _.includes(_.values(ESTIMATION_TYPE), markupKey) : false;
   },
 });
 

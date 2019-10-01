@@ -604,6 +604,576 @@ paths:
           description: If project is not found
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - workstream
+      operationId: findWorkStreams
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project workstreams.
+      responses:
+        '200':
+          description: A list of project work streams
+          schema:
+            $ref: '#/definitions/WorkStreamListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - workstream
+      operationId: addWorkStream
+      security:
+        - Bearer: []
+      description: >-
+        Create a work stream.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/WorkStreamBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created project work stream
+          schema:
+            $ref: '#/definitions/WorkStreamResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - workstream
+      description: >-
+        Retrieve work stream by id.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project work stream
+          schema:
+            $ref: '#/definitions/WorkStreamResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/workStreamIdParam'
+      operationId: getWorkStream
+    patch:
+      tags:
+        - workstream
+      operationId: updateWorkStream
+      security:
+        - Bearer: []
+      description: >-
+        Update a project work stream.
+      responses:
+        '200':
+          description: Successfully updated project work stream.
+          schema:
+            $ref: '#/definitions/WorkStreamResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkStreamBodyParam'
+    delete:
+      tags:
+        - workstream
+      description: >-
+        Remove an existing project work stream.
+      security:
+        - Bearer: []
+      responses:
+        '204':
+          description: Project work stream successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work
+      operationId: findWorks
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all works for given project and workstream.
+      parameters:
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: |
+            Comma separated list of project phase fields to return.
+        - name: sort
+          required: false
+          description: >
+            sort project phases by startDate, endDate, status, order. Default is
+            startDate asc
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of project works
+          schema:
+            $ref: '#/definitions/ProjectPhaseListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - work
+      operationId: addWork
+      security:
+        - Bearer: []
+      description: >-
+        Create a work
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectPhaseBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created project work
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work
+      description: >-
+        Retrieve work by id.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project work
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getWork
+    patch:
+      tags:
+        - work
+      operationId: updateWork
+      security:
+        - Bearer: []
+      description: >-
+        Update work for given project and workstream.
+      responses:
+        '200':
+          description: Successfully updated project work.
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectPhaseBodyParam'
+    delete:
+      tags:
+        - work
+      description: >-
+        Remove an existing work by id for given project and workstream.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Work successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}/workitems':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work item
+      operationId: findWorkItems
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all work items for given project, workstream and phase.
+      responses:
+        '200':
+          description: A list of work items
+          schema:
+            $ref: '#/definitions/PhaseProductListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - work item
+      operationId: addWorkItem
+      security:
+        - Bearer: []
+      description: Create a work item for given project, workstream and phase.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created work item
+          schema:
+            $ref: '#/definitions/PhaseProductResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}/workitems/{productId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+      - $ref: '#/parameters/productIdParam'
+    get:
+      tags:
+        - work item
+      description: >-
+        Retrieve work item by id for given project, workstream and phase.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a work item
+          schema:
+            $ref: '#/definitions/PhaseProductResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getWorkItem
+    patch:
+      tags:
+        - work item
+      operationId: updateWorkItem
+      security:
+        - Bearer: []
+      description: >-
+        Update a work item for given project, workstream and phase.
+      responses:
+        '200':
+          description: Successfully updated work item.
+          schema:
+            $ref: '#/definitions/PhaseProductResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductBodyParam'
+    delete:
+      tags:
+        - work item
+      description: >-
+        Remove an existing work item by id for given project, workstream and phase.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Work item successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/settings':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - project settings
+      operationId: findProjectSettings
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project settings. Only users with readPermission can get the setting
+      responses:
+        '200':
+          description: A list of project phases
+          schema:
+            $ref: '#/definitions/ProjectSettingListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - project settings
+      operationId: addProjectSetting
+      security:
+        - Bearer: []
+      description: >-
+        Create a project setting and create project estimation items based on estimation type.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectSettingBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created project phase
+          schema:
+            $ref: '#/definitions/ProjectPhaseResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/settings/{settingId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/settingIdParam'
+    patch:
+      tags:
+        - project settings
+      operationId: updateProjectSetting
+      security:
+        - Bearer: []
+      description: >-
+        Update a project setting. All user with write permission can edit the setting.
+      responses:
+        '200':
+          description: Successfully updated project setting.
+          schema:
+            $ref: '#/definitions/ProjectSettingResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectSettingBodyParam'
+    delete:
+      tags:
+        - project settings
+      description: >-
+        Remove an existing project setting. All users who are connect managers and admins
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/settingIdParam'
+      responses:
+        '204':
+          description: Project setting successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/estimations/{estimationId}/items':
+    get:
+      tags:
+        - Project Estimation Items
+      security:
+        - Bearer: []
+      description: get project estimation items
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/projectEstimationIdParam'
+      responses:
+        '200':
+          description: List of project estimation items
+          schema:
+            $ref: '#/definitions/ProjectEstimationItemListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases/{phaseId}/products/db':
     parameters:
       - $ref: '#/parameters/projectIdParam'
@@ -1537,6 +2107,191 @@ paths:
           description: If organization config is not found
           schema:
             $ref: '#/definitions/ErrorModel'
+
+  /projects/metadata/workManagementPermission:
+    get:
+      tags:
+        - workManagementPermission
+      operationId: findWorkManagementPermissions
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all work management permissions. Only admin or connect admin can access
+        this endpoint.
+      parameters:
+        - name: filter
+          required: true
+          type: string
+          in: query
+          description: |
+            Url encoded list of Supported filters
+             - projectTemplateId (required)
+      responses:
+        '200':
+          description: A list of work management permissions
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionListResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - workManagementPermission
+      operationId: addWorkManagementPermission
+      security:
+        - Bearer: []
+      description: >-
+        Create a work management permission. Only admin or connect admin can access
+        this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionCreateBodyParam'
+      responses:
+        '201':
+          description: Returns the newly created work management permission
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/workManagementPermission/{id}':
+    get:
+      tags:
+        - workManagementPermission
+      description: Retrieve work management permission by id. Only admin or connect admin can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project type
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+      operationId: getWorkManagementPermission
+    patch:
+      tags:
+        - workManagementPermission
+      operationId: updateWorkManagementPermission
+      security:
+        - Bearer: []
+      description: >-
+        Update a work management permission. Only admin or connect admin can access
+        this endpoint.
+      responses:
+        '200':
+          description: Successfully updated work management permission.
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionResponse'
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: error payload
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionCreateBodyParam'
+    delete:
+      tags:
+        - workManagementPermission
+      description: >-
+        Remove an existing work management permission. Only admin or connect admin can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+      responses:
+        '204':
+          description: Work management permission successfully removed
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If work management permission is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  '/projects/{projectId}/permissions':
+    get:
+      tags:
+        - permissions
+      description: Retrieve permissions.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: permissions
+          schema:
+            title: Single work management permission response object
+            type: object
+            properties:
+              id:
+                type: string
+                description: unique id identifying the request
+              version:
+                type: string
+              result:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  status:
+                    type: integer
+                    format: int32
+                    description: http status code
+                  metadata:
+                    $ref: '#/definitions/ResponseMetadata'
+                  content:
+                    type: object
+                    example:
+                      'work.create': true
+        '403':
+          description: No permission or wrong token
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+      operationId: getPermissions
+
   /timelines:
     get:
       tags:
@@ -2960,6 +3715,22 @@ parameters:
     type: integer
     format: int64
     minimum: 1
+  workStreamIdParam:
+    name: workStreamId
+    in: path
+    description: work stream identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  settingIdParam:
+    name: settingId
+    in: path
+    description: project setting identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
   productIdParam:
     name: productId
     in: path
@@ -3021,6 +3792,13 @@ parameters:
     required: true
     type: integer
     format: int64
+  permissionIdParam:
+    name: id
+    in: path
+    description: work management permission id
+    required: true
+    type: integer
+    format: int64
   offsetParam:
     name: offset
     description: number of items to skip. Defaults to 0
@@ -3066,6 +3844,13 @@ parameters:
     name: revisionId
     in: path
     description: revision identifier
+    required: true
+    type: integer
+    format: int64
+  projectEstimationIdParam:
+    name: estimationId
+    in: path
+    description: project estimation identifier
     required: true
     type: integer
     format: int64
@@ -3514,7 +4299,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/ProjectAttachment'
@@ -3620,7 +4406,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/ProjectMember'
@@ -3639,7 +4426,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/ProjectMember'
@@ -3658,7 +4446,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/Project'
@@ -3677,7 +4466,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: object
@@ -3702,7 +4492,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3828,7 +4619,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3850,7 +4642,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3961,7 +4754,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -3980,7 +4774,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4002,7 +4797,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4022,6 +4818,12 @@ definitions:
       name:
         type: string
         description: the project phase name
+      description:
+        type: string
+        description: the project phase short description
+      requirements:
+        type: string
+        description: the project phase requirements
       status:
         type: string
         description: the project phase status
@@ -4046,6 +4848,43 @@ definitions:
         type: number
         format: integer
         description: the project phase order
+  ProjectSettingRequest:
+    title: Project setting request object
+    type: object
+    required:
+      - key
+      - value
+      - valueType
+      - readPermission
+      - writePermission
+      - metadata
+    properties:
+      key:
+        type: string
+        description: the project setting key
+      value:
+        type: string
+        description: the project setting value
+      valueType:
+        type: string
+        description: the project setting value type
+      readPermission:
+        type: object
+        description: the project setting read Permission
+      writePermission:
+        type: object
+        description: the project setting write Permission
+      metadata:
+        type: object
+        description: the project setting metadata
+  ProjectSettingBodyParam:
+    title: Project setting body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: '#/definitions/ProjectSettingRequest'
   ProjectPhaseBodyParam:
     title: Project phase body param
     type: object
@@ -4088,8 +4927,106 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/ProjectPhaseRequest'
-  ProjectPhaseResponse:
-    title: Single project phase response object
+  WorkStream:
+    title: Work stream object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          projectId:
+            type: number
+            format: int64
+            description: the project id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/WorkStreamRequest'
+
+  WorkStreamRequest:
+    title: Work stream request object
+    type: object
+    required:
+      - name
+      - status
+      - type
+    properties:
+      name:
+        type: string
+        description: the work stream name
+      status:
+        type: string
+        description: the work stream status
+      type:
+        type: string
+        description: the type
+  WorkStreamBodyParam:
+    title: Work stream body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: '#/definitions/WorkStreamRequest'
+  ProjectSetting:
+    title: Project setting object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/ProjectSettingRequest'
+  ProjectSettingResponse:
+    title: Single project setting response object
     type: object
     properties:
       id:
@@ -4108,9 +5045,9 @@ definitions:
           metadata:
             $ref: '#/definitions/ResponseMetadata'
           content:
-            $ref: '#/definitions/ProjectPhase'
-  ProjectPhaseListResponse:
-    title: Project phase list response object
+            $ref: '#/definitions/ProjectSetting'
+  ProjectSettingListResponse:
+    title: Project setting list response object
     type: object
     properties:
       id:
@@ -4132,7 +5069,103 @@ definitions:
           content:
             type: array
             items:
+              $ref: '#/definitions/ProjectSetting'
+  ProjectPhaseResponse:
+    title: Single project phase response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            $ref: '#/definitions/ProjectPhase'
+  ProjectPhaseListResponse:
+    title: Project phase list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            type: array
+            items:
               $ref: '#/definitions/ProjectPhase'
+
+  WorkStreamResponse:
+    title: Single project work stream response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            $ref: '#/definitions/WorkStream'
+
+  WorkStreamListResponse:
+    title: Project phase list response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/WorkStream'
   PhaseProductRequest:
     title: Phase product request object
     type: object
@@ -4218,7 +5251,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4240,7 +5274,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4332,7 +5367,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4354,7 +5390,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4522,7 +5559,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4544,7 +5582,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4552,6 +5591,130 @@ definitions:
             type: array
             items:
               $ref: '#/definitions/OrgConfig'
+
+
+
+  WorkManagementPermissionCreateRequest:
+    title: Work Management Permission request object
+    type: object
+    required:
+      - policy
+      - permission
+      - projectTemplateId
+    properties:
+      policy:
+        type: string
+        description: the policy
+      permission:
+        type: object
+        description: the permission
+      projectTemplateId:
+        type: number
+        format: int64
+        description: the template id
+  WorkManagementPermissionCreateBodyParam:
+    title: Work Management Permission creation body param
+    type: object
+    required:
+      - param
+    properties:
+      param:
+        $ref: '#/definitions/WorkManagementPermissionCreateRequest'
+  WorkManagementPermission:
+    title: Work Management Permission object
+    allOf:
+      - type: object
+        required:
+          - id
+          - policy
+          - permission
+          - projectTemplateId
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          policy:
+            type: string
+            description: the policy
+          permission:
+            type: object
+            description: the permission
+          projectTemplateId:
+            type: number
+            format: int64
+            description: the template id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/WorkManagementPermissionCreateRequest'
+  WorkManagementPermissionResponse:
+    title: Single work management permission response object
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            $ref: '#/definitions/WorkManagementPermission'
+
+  WorkManagementPermissionListResponse:
+    title: Work management permissions response object
+    type: object
+    properties:
+      id:
+        type: string
+        readOnly: true
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: integer
+            format: int32
+            description: http status code
+          metadata:
+            $ref: '#/definitions/ResponseMetadata'
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/WorkManagementPermission'
   ProjectTypeResponse:
     title: Single project type response object
     type: object
@@ -4567,7 +5730,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4589,7 +5753,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4689,7 +5854,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4711,7 +5877,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4905,7 +6072,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -4927,7 +6095,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5063,7 +6232,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5085,7 +6255,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5109,7 +6280,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5136,6 +6308,10 @@ definitions:
                 type: array
                 items:
                   $ref: '#/definitions/ProductCategory'
+              buildingBlocks:
+                type: array
+                items:
+                  $ref: '#/definitions/BuildingBlock'
   ProjectMemberInvite:
     type: object
     properties:
@@ -5258,7 +6434,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           metadata:
             $ref: '#/definitions/ResponseMetadata'
@@ -5318,7 +6495,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/Form'
@@ -5337,7 +6515,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: array
@@ -5405,7 +6584,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/PriceConfig'
@@ -5424,7 +6604,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: array
@@ -5493,7 +6674,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             $ref: '#/definitions/PlanConfig'
@@ -5512,7 +6694,8 @@ definitions:
           success:
             type: boolean
           status:
-            type: string
+            type: integer
+            format: int32
             description: http status code
           content:
             type: array
@@ -5570,3 +6753,115 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this object
         readOnly: true
+  BuildingBlock:
+    title: BuildingBlock object
+    type: object
+    required:
+      - id
+      - key
+      - config
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: the id
+      key:
+        type: string
+        description: building block key. Unique field.
+      config:
+        type: object
+        description: building block config
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true
+  ProjectEstimationItem:
+    title: ProjectEstimationItem object
+    type: object
+    required:
+      - id
+      - projectEstimationId
+      - price
+      - type
+      - markupUsedReference
+      - markupUsedReferenceId
+      - metadata
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: the id
+      projectEstimationId:
+        type: integer
+        format: int64
+        description: the ProjectEstimation id
+      price:
+        type: number
+        format: float
+        description: the price of this estimation item
+      type:
+        type: string
+        description: the type of this estimation
+      markupUsedReference:
+        type: string
+        description: the reference type of this estimation. Can be "buildingBlock" for example
+      markupUsedReferenceId:
+        type: integer
+        format: int64
+        description: the reference object id
+      metadata:
+        type: object
+        description: the metadata of this item
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true
+  ProjectEstimationItemListResponse:
+    title: ProjectEstimationItem list response
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id identifying the request
+      version:
+        type: string
+      result:
+        type: object
+        properties:
+          success:
+            type: boolean
+          status:
+            type: string
+            description: http status code
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectEstimationItem'

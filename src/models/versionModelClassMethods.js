@@ -9,6 +9,17 @@
  */
 function versionModelClassMethods(model, jsonField) {
   return {
+    findOneWithLatestRevision(query) {
+      return model.findOne({
+        where: {
+          key: query.key,
+          version: query.version,
+        },
+        order: [['revision', 'DESC']],
+        limit: 1,
+        attributes: { exclude: ['deletedAt', 'deletedBy'] },
+      });
+    },
     deleteOldestRevision(userId, key, version) {
       return model.findOne({
         where: {
