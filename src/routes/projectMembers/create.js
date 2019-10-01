@@ -81,10 +81,14 @@ module.exports = [
           USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
           USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
           USER_ROLE.PRESALES,
+          USER_ROLE.ACCOUNT_EXECUTIVE,
+          USER_ROLE.PROGRAM_MANAGER,
+          USER_ROLE.SOLUTION_ARCHITECT,
+          USER_ROLE.PROJECT_MANAGER,
         ])) {
         const err = new Error(
-            `Only manager, account manager, business development representative,
-            or presales are able to join as ${targetRole}`,
+            // eslint-disable-next-line max-len
+            `Only manager, account manager, business development representative, account executive, program manager, project manager, solution architect, or presales are able to join as ${targetRole}`,
         );
         err.status = 401;
         return next(err);
