@@ -122,16 +122,17 @@ module.exports = (app, logger) => {
     logger.debug('receive PROJECT_MEMBER_ADDED event');
 
     let eventType;
-    switch (member.role) {
-      case PROJECT_MEMBER_ROLE.MANAGER:
-        eventType = BUS_API_EVENT.MEMBER_JOINED_MANAGER;
-        break;
-      case PROJECT_MEMBER_ROLE.COPILOT:
-        eventType = BUS_API_EVENT.MEMBER_JOINED_COPILOT;
-        break;
-      default:
-        eventType = BUS_API_EVENT.MEMBER_JOINED;
-        break;
+    if ([
+      PROJECT_MEMBER_ROLE.MANAGER,
+      PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+      PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+      PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+    ].includes(member.role)) {
+      eventType = BUS_API_EVENT.MEMBER_JOINED_MANAGER;
+    } else if (member.role === PROJECT_MEMBER_ROLE.COPILOT) {
+      eventType = BUS_API_EVENT.MEMBER_JOINED_COPILOT;
+    } else {
+      eventType = BUS_API_EVENT.MEMBER_JOINED;
     }
     const projectId = _.parseInt(req.params.projectId);
 
