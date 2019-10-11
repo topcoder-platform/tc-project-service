@@ -338,7 +338,6 @@ describe('Project create', () => {
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('draft');
             resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v3');
@@ -394,7 +393,6 @@ describe('Project create', () => {
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('draft');
             resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v2');
@@ -448,7 +446,6 @@ describe('Project create', () => {
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('draft');
             resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);
@@ -581,7 +578,6 @@ describe('Project create', () => {
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('draft');
             resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v3');
@@ -670,7 +666,6 @@ describe('Project create', () => {
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('draft');
             resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);

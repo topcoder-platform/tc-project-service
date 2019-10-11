@@ -90,34 +90,6 @@ module.exports = [
             return Promise.all(operations);
           });
         })
-        // .then(() => {
-        //   // TODO move this to an event
-        //   // if copilot role is added or removed should invoke related direct project service
-        //   if(previousValue.role !== newValue.role && (previousValue.role === PROJECT_MEMBER_ROLE.COPILOT
-        //       || newValue.role === PROJECT_MEMBER_ROLE.COPILOT)) {
-        //     return models.Project.getDirectProjectId(projectId)
-        //         .then(directProjectId => {
-        //           if(directProjectId) {
-        //             if(previousValue.role === PROJECT_MEMBER_ROLE.COPILOT) {
-        //               // new role not copilot so remove direct project copilot
-        //               return directProject.deleteCopilot(req, directProjectId, {
-        //                 copilotUserId: projectMember.userId
-        //               })
-        //             } else {
-        //               // new role is copilot so add direct project copilot
-        //               return directProject.addCopilot(req, directProjectId, {
-        //                 copilotUserId: projectMember.userId
-        //               })
-        //             }
-        //           } else {
-        //             return Promise.resolve()
-        //           }
-        //         })
-        //
-        //   } else  {
-        //     return Promise.resolve()
-        //   }
-        // })
         .then(() => projectMember.reload(projectMember.id))
         .then(() => {
           projectMember = projectMember.get({ plain: true });

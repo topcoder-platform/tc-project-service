@@ -14,7 +14,6 @@ import {
   REGEX,
 } from '../../constants';
 import util from '../../util';
-import directProject from '../../services/directProject';
 
 const traverse = require('traverse');
 
@@ -197,20 +196,6 @@ module.exports = [
         const newValues = _.mergeWith({}, previousValue, updatedProps, mergeCustomizer);
         project.set(newValues);
         return project.save();
-      })
-      .then(() => {
-        if (updatedProps.billingAccountId &&
-          (previousValue.billingAccountId !== updatedProps.billingAccountId)) {
-          if (!previousValue.directProjectId) {
-            return Promise.resolve();
-          }
-          // if billing account is updated and exist direct projectId we
-          // should invoke direct project service
-          return directProject.addBillingAccount(req, previousValue.directProjectId, {
-            billingAccountId: updatedProps.billingAccountId,
-          });
-        }
-        return Promise.resolve();
       })
       .then(() => project.reload(project.id))
       // update project history

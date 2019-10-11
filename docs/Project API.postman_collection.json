@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a47f8b92-7ae6-4e66-b8db-f5bcbe073ed9",
+		"_postman_id": "90ff8f9b-5661-4642-8b8b-84aa4b581706",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -393,6 +393,42 @@
 								"{{projectId}}",
 								"attachments",
 								"{{attachmentId}}"
+							]
+						},
+						"description": "Delete a project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "List attachments",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"attachments"
 							]
 						},
 						"description": "Delete a project attachment"
@@ -829,7 +865,100 @@
 					"response": []
 				},
 				{
-					"name": "Delete project member",
+					"name": "List project members",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List project members with roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members?role=customer",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members"
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "customer"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "Get project member",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"{{memberId}}"
+							]
+						},
+						"description": "Delete a project's member"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete project member Copy",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1289,211 +1418,6 @@
 							]
 						},
 						"description": "Get a project by id. project members and attachments should also be returned. Only those fields which are specified should be returned."
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							]
-						},
-						"description": "List all the project with no filter. Default sort and limits are applied."
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with page and perPage",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?perPage=1&page=1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "perPage",
-									"value": "1"
-								},
-								{
-									"key": "page",
-									"value": "1"
-								}
-							]
-						},
-						"description": "List all the project with no filter. Limit of 1 and offset of 1 is applied"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with type filter",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?type=generic",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "type",
-									"value": "generic"
-								}
-							]
-						},
-						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with id filter",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?id=1&id=2",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								},
-								{
-									"key": "id",
-									"value": "2"
-								}
-							]
-						},
-						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with sort applied",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?sort=type desc",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "type desc"
-								}
-							]
-						},
-						"description": "List all the project with custom sort and no filter. Default sort and limits are applied. The sort string has to be url encoded. Sort is of type `key asc|desc`"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB and return specific fields",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?fields=id,name,description",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "fields",
-									"value": "id,name,description"
-								}
-							]
-						},
-						"description": "List all the project with no filter. Default sort and limits are applied. The fields to return is specified as comma separated list. Only those fields should be returned."
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with copilot token",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							]
-						}
 					},
 					"response": []
 				},
@@ -2629,140 +2553,6 @@
 					"response": []
 				},
 				{
-					"name": "List Phase DB",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB with fields",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?fields=status,name,budget",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							],
-							"query": [
-								{
-									"key": "fields",
-									"value": "status,name,budget"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB with sort",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=status desc",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "status desc"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB with sort by order",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=order desc",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "order desc"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "List Phase",
 					"request": {
 						"method": "GET",
@@ -3069,33 +2859,6 @@
 								"phases",
 								"{{phaseId}}",
 								"products"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB Products",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"{{phaseId}}",
-								"products",
-								"db"
 							]
 						}
 					},

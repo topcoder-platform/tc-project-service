@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-expressions */
-import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
@@ -7,7 +6,6 @@ import request from 'supertest';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import util from '../../util';
 
 import busApi from '../../services/busApi';
 
@@ -552,51 +550,7 @@ describe('Project', () => {
         });
     });
 
-    it('should return 500 if error to sync billing account id', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        post: () => Promise.reject(new Error('error message')),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      request(server)
-        .patch(`/v5/projects/${project1.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          billingAccountId: 123,
-
-        })
-        .expect('Content-Type', /json/)
-        .expect(500)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            res.body.message.should.equal('error message');
-            done();
-          }
-        });
-    });
-
     it('should return 200 and sync new billing account id', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        post: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                billingAccountName: '2',
-              },
-            },
-          },
-        }),
-      });
-      const postSpy = sinon.spy(mockHttpClient, 'post');
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -617,7 +571,6 @@ describe('Project', () => {
             resJson.billingAccountId.should.equal(123);
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051332);
-            postSpy.should.have.been.calledOnce;
             server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }

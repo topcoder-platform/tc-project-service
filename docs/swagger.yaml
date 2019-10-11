@@ -25,74 +25,6 @@ securityDefinitions:
     name: Authorization
     in: header
 paths:
-  '/projects/db':
-    get:
-      tags:
-        - project
-      operationId: findProjectsDB
-      security:
-        - Bearer: []
-      description: Retrieve projects that match the filter directly from database
-      responses:
-        '200':
-          description: A list of projects
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Project'
-          headers:
-            X-Next-Page:
-              type: integer
-              description: The index of the next page
-            X-Page:
-              type: integer
-              description: The index of the current page (starting at 1)
-            X-Per-Page:
-              type: integer
-              description: The number of items to list per page
-            X-Prev-Page:
-              type: integer
-              description: The index of the previous page
-            X-Total:
-              type: integer
-              description: The total number of items
-            X-Total-Pages:
-              type: integer
-              description: The total number of pages
-            Link:
-              type: string
-              description: Pagination link header.
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '400':
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-      parameters:
-        - $ref: '#/parameters/pageParam'
-        - $ref: '#/parameters/perPageParam'
-        - $ref: '#/parameters/idQueryParam'
-        - $ref: '#/parameters/statusQueryParam'
-        - $ref: '#/parameters/typeQueryParam'
-        - $ref: '#/parameters/memberOnlyQueryParam'
-        - $ref: '#/parameters/keywordQueryParam'
-        - $ref: '#/parameters/nameQueryParam'
-        - $ref: '#/parameters/codeQueryParam'
-        - $ref: '#/parameters/customerQueryParam'
-        - $ref: '#/parameters/managerQueryParam'
-        - name: sort
-          required: false
-          description: >
-            sort projects by status, name, type, createdAt, updatedAt. Default
-            is createdAt asc
-          in: query
-          type: string
   '/projects':
     get:
       tags:
@@ -312,6 +244,30 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/attachments':
+    get:
+      tags:
+        - project attachments
+      description: Retrieve project attachments
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: list of project attachments
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectAttachment'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+      operationId: listProjectAttachment
     post:
       tags:
         - project attachments
@@ -347,6 +303,37 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/attachments/{id}':
+    get:
+      tags:
+        - project attachments
+      description: Download project attachment
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project attachment
+          schema:
+            $ref: '#/definitions/ProjectAttachment'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          description: The id of attachment to download
+          type: integer
+      operationId: downloadProjectAttachment
     patch:
       tags:
         - project attachments
@@ -428,6 +415,40 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/members':
+    get:
+      tags:
+        - project members
+      description: Retrieve project members
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: list of project members
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectMember'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - name: role
+          required: false
+          description: >
+            member role
+          in: query
+          type: string
+      operationId: listProjectMember
     post:
       tags:
         - project members
@@ -463,6 +484,36 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/members/{id}':
+    get:
+      tags:
+        - project members
+      description: Get project member
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project member
+          schema:
+            $ref: '#/definitions/ProjectMember'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          type: integer
+      operationId: getProjectMember
     delete:
       tags:
         - project members
@@ -542,55 +593,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/UpdateProjectMember'
-  '/projects/{projectId}/phases/db':
-    parameters:
-      - $ref: '#/parameters/projectIdParam'
-    get:
-      tags:
-        - phase
-      operationId: findProjectPhasesDB
-      security:
-        - Bearer: []
-      description: >-
-        Retrieve all project phases directly from database. All users who can edit project can access
-        this endpoint.
-      parameters:
-        - name: fields
-          required: false
-          type: string
-          in: query
-          description: |
-            Comma separated list of project phase fields to return.
-        - name: sort
-          required: false
-          description: >
-            sort project phases by startDate, endDate, status, order. Default is
-            startDate asc
-          in: query
-          type: string
-      responses:
-        '200':
-          description: A list of project phases
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ProjectPhase'
-        '400':
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '403':
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorModel'
   '/projects/{projectId}/phases':
     parameters:
       - $ref: '#/parameters/projectIdParam'
@@ -796,42 +798,6 @@ paths:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  '/projects/{projectId}/phases/{phaseId}/products/db':
-    parameters:
-      - $ref: '#/parameters/projectIdParam'
-      - $ref: '#/parameters/phaseIdParam'
-    get:
-      tags:
-        - phase product
-      operationId: findPhaseProductsDB
-      security:
-        - Bearer: []
-      description: >-
-        Retrieve all phase products directly from database. All users who can edit project can access
-        this endpoint.
-      responses:
-        '200':
-          description: A list of phase products
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/PhaseProduct'
-        '400':
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '403':
-          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':

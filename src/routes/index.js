@@ -76,10 +76,6 @@ router.route('/v5/projects')
   .post(require('./projects/create'))
   .get(require('./projects/list'));
 
-router.use('/v5/projects/db', compression());
-router.route('/v5/projects/db')
-  .get(require('./projects/list-db'));
-
 router.route('/v5/projects/admin/es/project/createIndex')
   .post(require('./admin/project-create-index'));
 router.route('/v5/projects/admin/es/project/deleteIndex')
@@ -95,14 +91,17 @@ router.route('/v5/projects/:projectId(\\d+)')
   .delete(require('./projects/delete'));
 
 router.route('/v5/projects/:projectId(\\d+)/members')
+  .get(require('./projectMembers/list'))
   .post(require('./projectMembers/create'));
 
 router.route('/v5/projects/:projectId(\\d+)/members/:id(\\d+)')
+  .get(require('./projectMembers/get'))
   .delete(require('./projectMembers/delete'))
   .patch(require('./projectMembers/update'));
 
 router.route('/v5/projects/:projectId(\\d+)/attachments')
-  .post(require('./attachments/create'));
+  .post(require('./attachments/create'))
+  .get(require('./attachments/list'));
 
 router.route('/v5/projects/:projectId(\\d+)/attachments/:id(\\d+)')
   .get(require('./attachments/download'))
@@ -130,9 +129,6 @@ router.route('/v5/projects/:projectId(\\d+)/phases')
   .get(require('./phases/list'))
   .post(require('./phases/create'));
 
-router.route('/v5/projects/:projectId(\\d+)/phases/db')
-  .get(require('./phases/list-db'));
-
 router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
   .get(require('./phases/get'))
   .patch(require('./phases/update'))
@@ -141,9 +137,6 @@ router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
 router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products')
   .get(require('./phaseProducts/list'))
   .post(require('./phaseProducts/create'));
-
-router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/db')
-  .get(require('./phaseProducts/list-db'));
 
 router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/:productId(\\d+)')
   .get(require('./phaseProducts/get'))

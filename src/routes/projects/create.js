@@ -11,7 +11,6 @@ import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, PROJECT_STATUS, PROJECT_PHASE_STATU
   EVENT, RESOURCES, REGEX } from '../../constants';
 import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
-import directProject from '../../services/directProject';
 
 const traverse = require('traverse');
 
@@ -287,27 +286,13 @@ module.exports = [
         }
         req.log.debug('creating project history for project %d', newProject.id);
         // add to project history asynchronously, don't wait for it to complete
-        models.ProjectHistory.create({
+        return models.ProjectHistory.create({
           projectId: newProject.id,
           status: PROJECT_STATUS.DRAFT,
           cancelReason: null,
           updatedBy: req.authUser.userId,
         }).then(() => req.log.debug('project history created for project %d', newProject.id))
           .catch(() => req.log.error('project history failed for project %d', newProject.id));
-        req.log.debug('creating direct project for project %d', newProject.id);
-        return directProject.createDirectProject(req, body)
-          .then((resp) => {
-            newProject.directProjectId = resp.data.result.content.projectId;
-            return newProject.save();
-          })
-          .then(() => newProject.reload(newProject.id))
-          .catch((err) => {
-            // log the error and continue
-            req.log.error('Error creating direct project');
-            req.log.error(err);
-            return Promise.resolve();
-          });
-        // return Promise.resolve();
       });
     })
     .then(() => {

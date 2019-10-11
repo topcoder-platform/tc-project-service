@@ -19,13 +19,13 @@
   "projectAttachmentPathSuffix": "attachments",
   "elasticsearchConfig": {
     "host": "",
-    "apiVersion": "7.0",
+    "apiVersion": "6.8",
     "indexName": "projects",
-    "docType": "projectV5",
+    "docType": "doc",
     "timelineIndexName": "timelines",
-    "timelineDocType": "timelineV5",
+    "timelineDocType": "doc",
     "metadataIndexName": "metadata",
-    "metadataDocType": "metadataV5"
+    "metadataDocType": "doc"
   },
   "connectProjectUrl":"",
   "dbConfig": {

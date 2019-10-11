@@ -134,7 +134,7 @@ busApi(app, logger);
 // require('app/permissions')()
 permissions();
 
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(`/${config.apiVersion}/projects/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // ========================
 // Routes

@@ -6,11 +6,13 @@
     "logentriesToken": "",
     "elasticsearchConfig": {
       "host": "http://localhost:9200",
-      "apiVersion": "7.0",
+      "apiVersion": "6.8",
       "indexName": "projects_test",
-      "docType": "projectV5",
+      "docType": "doc",
       "timelineIndexName": "timelines_test",
-      "timelineDocType": "timelineV5"
+      "timelineDocType": "doc",
+      "metadataIndexName": "metadata_test",
+      "metadataDocType": "doc"
     },
     "rabbitmqUrl": "amqp://localhost:5672",
     "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
