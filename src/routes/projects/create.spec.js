@@ -277,31 +277,6 @@ describe('Project create', () => {
         .expect(400, done);
     });
 
-    it('should return 201 if error to create direct project', (done) => {
-      const validBody = _.cloneDeep(body);
-      validBody.templateId = 3;
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        post: () => Promise.reject(new Error('error message')),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      request(server)
-        .post('/v5/projects')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send(validBody)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
-            done();
-          }
-        });
-    });
-
     it('should return 201 if valid user and data', (done) => {
       const validBody = _.cloneDeep(body);
       validBody.templateId = 3;

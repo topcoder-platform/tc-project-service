@@ -5,7 +5,7 @@ import Sequelize from 'sequelize';
 
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES } from '../../constants';
+import { EVENT, RESOURCES, TIMELINE_REFERENCES } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -13,6 +13,8 @@ const permissions = require('tc-core-library-js').middleware.permissions;
 const addProjectPhaseValidations = {
   body: Joi.object().keys({
     name: Joi.string().required(),
+    description: Joi.string().optional(),
+    requirements: Joi.string().optional(),
     status: Joi.string().required(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),
@@ -139,7 +141,7 @@ module.exports = [
         // Send events to buses
         req.log.debug('Sending event to RabbitMQ bus for project phase %d', newProjectPhase.id);
         req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-          newProjectPhase,
+          { added: newProjectPhase, route: TIMELINE_REFERENCES.PHASE },
           { correlationId: req.id },
         );
 

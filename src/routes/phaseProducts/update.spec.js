@@ -144,7 +144,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(updateBody)
         .expect('Content-Type', /json/)
@@ -155,7 +155,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(updateBody)
         .expect('Content-Type', /json/)
@@ -166,7 +166,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(updateBody)
         .expect('Content-Type', /json/)
@@ -177,7 +177,7 @@ describe('Phase Products', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
           estimatedPrice: -15,

@@ -151,7 +151,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v5/projects/999/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(updateBody)
         .expect('Content-Type', /json/)
@@ -162,7 +162,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(updateBody)
         .expect('Content-Type', /json/)
@@ -186,7 +186,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
           endDate: '2018-05-13T00:00:00Z',

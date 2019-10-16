@@ -56,5 +56,7 @@
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
   "MAX_REVISION_NUMBER": 100,
   "UNIQUE_GMAIL_VALIDATION": false,
-  "pageSize": 20
+  "pageSize": 20,
+  "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]",
+  "SSO_REFCODES": "[]"
 }

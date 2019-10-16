@@ -109,7 +109,7 @@ module.exports = [
     }).then((_newAttachment) => {
       newAttachment = _newAttachment.get({ plain: true });
       req.log.debug('New Attachment record: ', newAttachment);
-      if (process.env.NODE_ENV !== 'development') {
+      if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
         // retrieve download url for the response
         req.log.debug('retrieving download url');
         return httpClient.post(`${fileServiceUrl}downloadurl`, {
@@ -118,7 +118,7 @@ module.exports = [
       }
       return Promise.resolve();
     }).then((resp) => {
-      if (process.env.NODE_ENV !== 'development') {
+      if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
         req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data));
         return new Promise((accept, reject) => {
           if (resp.status !== 200 || resp.data.result.status !== 200) {

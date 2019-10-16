@@ -44,15 +44,7 @@ module.exports = [
   .then((data) => {
     if (data.length === 0) {
       req.log.debug('No planConfig found in ES');
-      models.PlanConfig.findOne({
-        where: {
-          key: req.params.key,
-          version: req.params.version,
-        },
-        order: [['revision', 'DESC']],
-        limit: 1,
-        attributes: { exclude: ['deletedAt', 'deletedBy'] },
-      })
+      models.PlanConfig.findOneWithLatestRevision(req.params)
         .then((planConfig) => {
           // Not found
           if (!planConfig) {

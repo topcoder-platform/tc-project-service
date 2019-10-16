@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
-import sleep from 'sleep';
+// import sleep from 'sleep';
 import chai from 'chai';
 import config from 'config';
 import server from '../../app';
@@ -111,7 +111,7 @@ describe('Phase Products', () => {
                   body: project,
                 }).then(() => {
                   // sleep for some time, let elasticsearch indices be settled
-                  sleep.sleep(5);
+                  // sleep.sleep(5);
                   done();
                 });
               });

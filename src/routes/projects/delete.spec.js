@@ -19,8 +19,6 @@ const expectAfterDelete = (id, err, next) => {
       if (!res) {
         throw new Error('Should found the entity');
       } else {
-        server.services.pubsub.publish.calledWith('project.deleted').should.be.true;
-
         chai.assert.isNotNull(res.deletedAt);
         chai.assert.isNotNull(res.deletedBy);
 
@@ -29,7 +27,8 @@ const expectAfterDelete = (id, err, next) => {
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .expect(404, next);
+          .expect(404)
+          .end(next);
       }
     }), 500);
 };
@@ -110,7 +109,8 @@ describe('Project delete test', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 204 if project was successfully removed', (done) => {

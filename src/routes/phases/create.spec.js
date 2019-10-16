@@ -222,7 +222,7 @@ describe('Project Phases', () => {
       request(server)
         .post('/v5/projects/99999/phases/')
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
         .expect('Content-Type', /json/)

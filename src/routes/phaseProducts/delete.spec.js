@@ -152,7 +152,7 @@ describe('Phase Products', () => {
       request(server)
         .delete(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -162,7 +162,7 @@ describe('Phase Products', () => {
       request(server)
         .delete(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -172,7 +172,7 @@ describe('Phase Products', () => {
       request(server)
         .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);

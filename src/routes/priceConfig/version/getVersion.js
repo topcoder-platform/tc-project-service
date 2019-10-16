@@ -44,15 +44,7 @@ module.exports = [
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No priceConfig found in ES');
-        models.PriceConfig.findOne({
-          where: {
-            key: req.params.key,
-            version: req.params.version,
-          },
-          order: [['revision', 'DESC']],
-          limit: 1,
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-        })
+        models.PriceConfig.findOneWithLatestRevision(req.params)
           .then((priceConfig) => {
             // Not found
             if (!priceConfig) {

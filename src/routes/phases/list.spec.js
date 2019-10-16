@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import request from 'supertest';
 import config from 'config';
-import sleep from 'sleep';
+// import sleep from 'sleep';
 import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
@@ -95,7 +95,7 @@ describe('Project Phases', () => {
               body: project,
             }).then(() => {
               // sleep for some time, let elasticsearch indices be settled
-              sleep.sleep(5);
+              // sleep.sleep(5);
               done();
             });
           });

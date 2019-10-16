@@ -5,6 +5,7 @@ import _ from 'lodash';
 import {
   middleware as tcMiddleware,
 } from 'tc-core-library-js';
+import config from 'config';
 import models from '../../models';
 import util from '../../util';
 import fileService from '../../services/fileService';
@@ -42,7 +43,7 @@ module.exports = [
             .then(() => _attachment.destroy());
         }))
         .then((_attachment) => {
-          if (process.env.NODE_ENV !== 'development') {
+          if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
             return fileService.deleteFile(req, _attachment.filePath);
           }
           return Promise.resolve();

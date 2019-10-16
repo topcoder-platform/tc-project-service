@@ -56,6 +56,10 @@ const updateProjectValdiations = {
     bookmarks: Joi.array().items(Joi.object().keys({
       title: Joi.string(),
       address: Joi.string().regex(REGEX.URL),
+      createdAt: Joi.date(),
+      createdBy: Joi.number().integer().positive(),
+      updatedAt: Joi.date(),
+      updatedBy: Joi.number().integer().positive(),
     })).optional().allow(null),
     type: Joi.string().max(45),
     details: Joi.any(),
@@ -79,13 +83,53 @@ const updateProjectValdiations = {
   }),
 };
 
+/**
+ * Gets scopechange fields either from
+ * "template.scope" (for old templates) or from "form.scope" (for new templates).
+ *
+ * @param {Object} project The project object
+ *
+ * @returns {Array} - the scopeChangeFields
+ */
+const getScopeChangeFields = (project) => {
+  const scopeChangeFields = _.get(project, 'template.scope.scopeChangeFields');
+  const getFromForm = _project => _.get(_project, 'template.form.config.scopeChangeFields');
+
+  return scopeChangeFields || getFromForm(project);
+};
+
+const isScopeUpdated = (existingProject, updatedProps) => {
+  const scopeFields = getScopeChangeFields(existingProject);
+
+  if (scopeFields) {
+    for (let idx = 0; idx < scopeFields.length; idx += 1) {
+      const field = scopeFields[idx];
+      const oldFieldValue = _.get(existingProject, field);
+      const updateFieldValue = _.get(updatedProps, field);
+      if (oldFieldValue !== updateFieldValue) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 // NOTE- decided to disable all additional checks for now.
 const validateUpdates = (existingProject, updatedProps, req) => {
   const errors = [];
   switch (existingProject.status) {
     case PROJECT_STATUS.COMPLETED:
-      errors.push(`cannot update a project that is in ${existingProject.status}' state`);
+      errors.push(`cannot update a project that is in '${existingProject.status}' state`);
       break;
+    case PROJECT_STATUS.REVIEWED:
+    case PROJECT_STATUS.ACTIVE:
+    case PROJECT_STATUS.PAUSED: {
+      if (isScopeUpdated(existingProject, updatedProps)) {
+        // TODO commented to disable the scope change flow for immediate release
+        // errors.push(`Scope changes are not allowed for '${existingProject.status}' project`);
+      }
+      break;
+    }
     default:
       break;
     // disabling this check for now.
@@ -150,14 +194,20 @@ module.exports = [
       lock: { of: models.Project },
     })
       .then((_prj) => {
-        project = _prj;
-        if (!project) {
+        if (!_prj) {
           // handle 404
           const err = new Error(`project not found for id ${projectId}`);
           err.status = 404;
           return Promise.reject(err);
         }
+        if (!_prj.templateId) return Promise.resolve({ _prj });
+        return models.ProjectTemplate.getTemplate(_prj.templateId)
+        .then(template => Promise.resolve({ _prj, template }));
+      })
+      .then(({ _prj, template }) => {
+        project = _prj;
         previousValue = _.clone(project.get({ plain: true }));
+        previousValue.template = template;
         // run additional validations
         const validationErrors = validateUpdates(previousValue, updatedProps, req);
         if (validationErrors.length > 0) {
@@ -173,7 +223,9 @@ module.exports = [
         const members = req.context.currentProjectMembers;
         const validRoles = [
           PROJECT_MEMBER_ROLE.MANAGER,
-          PROJECT_MEMBER_ROLE.MANAGER,
+          PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+          PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+          PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
         ].map(x => x.toLowerCase());
         const matchRole = role => _.indexOf(validRoles, role.toLowerCase()) >= 0;
         if (updatedProps.status === PROJECT_STATUS.ACTIVE &&
@@ -228,6 +280,7 @@ module.exports = [
         );
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
           req,
+          original: previousValue,
           updated: _.assign({ resource: RESOURCES.PROJECT }, project),
         });
 

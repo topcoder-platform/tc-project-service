@@ -146,7 +146,7 @@ describe('CREATE milestone', () => {
                     name: 'milestone 1',
                     duration: 2,
                     startDate: '2018-05-03T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type1',
                     details: {
                       detail1: {
@@ -168,7 +168,7 @@ describe('CREATE milestone', () => {
                     name: 'milestone 2',
                     duration: 3,
                     startDate: '2018-05-04T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type2',
                     order: 2,
                     plannedText: 'plannedText 2',
@@ -183,7 +183,7 @@ describe('CREATE milestone', () => {
                     name: 'milestone 3',
                     duration: 4,
                     startDate: '2018-05-04T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type3',
                     order: 3,
                     plannedText: 'plannedText 3',
@@ -212,7 +212,7 @@ describe('CREATE milestone', () => {
       startDate: '2018-05-05T00:00:00.000Z',
       endDate: '2018-05-07T00:00:00.000Z',
       completionDate: '2018-05-08T00:00:00.000Z',
-      status: 'open',
+      status: 'draft',
       type: 'type4',
       details: {
         detail1: {
@@ -309,66 +309,6 @@ describe('CREATE milestone', () => {
         .expect(400, done);
     });
 
-    it('should return 400 if missing plannedText', (done) => {
-      const invalidBody = _.assign({}, body, {
-        plannedText: undefined,
-      });
-
-      request(server)
-        .post('/v5/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(400, done);
-    });
-
-    it('should return 400 if missing activeText', (done) => {
-      const invalidBody = _.assign({}, body, {
-        activeText: undefined,
-      });
-
-      request(server)
-        .post('/v5/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(400, done);
-    });
-
-    it('should return 400 if missing completedText', (done) => {
-      const invalidBody = _.assign({}, body, {
-        completedText: undefined,
-      });
-
-      request(server)
-        .post('/v5/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(400, done);
-    });
-
-    it('should return 400 if missing blockedText', (done) => {
-      const invalidBody = _.assign({}, body, {
-        blockedText: undefined,
-      });
-
-      request(server)
-        .post('/v5/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(400, done);
-    });
-
     it('should return 400 if startDate is after endDate', (done) => {
       const invalidBody = _.assign({}, body, {
         startDate: '2018-05-29T00:00:00.000Z',
@@ -404,21 +344,6 @@ describe('CREATE milestone', () => {
     it('should return 400 if startDate is before the timeline startDate', (done) => {
       const invalidBody = _.assign({}, body, {
         startDate: '2018-05-01T00:00:00.000Z',
-      });
-
-      request(server)
-        .post('/v5/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(400, done);
-    });
-
-    it('should return 400 if endDate is after the timeline endDate', (done) => {
-      const invalidBody = _.assign({}, body, {
-        endDate: '2018-06-13T00:00:00.000Z',
       });
 
       request(server)

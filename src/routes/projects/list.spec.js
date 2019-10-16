@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import chai from 'chai';
 import request from 'supertest';
-import sleep from 'sleep';
+// import sleep from 'sleep';
 import config from 'config';
 import models from '../../models';
 import server from '../../app';
@@ -246,7 +246,7 @@ describe('LIST Project', () => {
           return Promise.all([esp1, esp2, esp3]);
         }).then(() => {
           // sleep for some time, let elasticsearch indices be settled
-          sleep.sleep(5);
+          // sleep.sleep(5);
           done();
         });
       });

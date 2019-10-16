@@ -140,7 +140,7 @@ describe('Project Phases', () => {
       request(server)
         .delete(`/v5/projects/999/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -150,7 +150,7 @@ describe('Project Phases', () => {
       request(server)
         .delete(`/v5/projects/${projectId}/phases/999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);

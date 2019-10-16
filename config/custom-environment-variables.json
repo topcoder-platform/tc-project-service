@@ -52,5 +52,6 @@
   "accountsAppUrl": "ACCOUNTS_APP_URL",
   "inviteEmailSubject": "INVITE_EMAIL_SUBJECT",
   "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE",
-  "pageSize": "PAGE_SIZE"
+  "pageSize": "PAGE_SIZE",
+  "SSO_REFCODES": "SSO_REFCODES"
 }

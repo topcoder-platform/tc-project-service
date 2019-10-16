@@ -76,7 +76,8 @@ describe('GET Project', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
           .get(`/v5/projects/${project2.id}`)
-          .expect(403, done);
+          .expect(403)
+          .end(done);
     });
 
     it('should return 404 if requested project doesn\'t exist', (done) => {
@@ -85,16 +86,18 @@ describe('GET Project', () => {
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .expect(404, done);
+          .expect(404)
+          .end(done);
     });
 
-    it('should return 404 if user does not have access to the project', (done) => {
+    it('should return 403 if user does not have access to the project', (done) => {
       request(server)
           .get(`/v5/projects/${project2.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
-          .expect(403, done);
+          .expect(403)
+          .end(done);
     });
 
     it('should return the project when registerd member attempts to access the project', (done) => {

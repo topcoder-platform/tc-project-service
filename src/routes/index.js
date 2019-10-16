@@ -65,6 +65,11 @@ router.route('/v5/projects/metadata/productCategories')
 router.route('/v5/projects/metadata/productCategories/:key')
   .get(require('./productCategories/get'));
 
+router.route('/v5/projects/metadata/workManagementPermission')
+  .get(require('./workManagementPermissions/list'));
+router.route('/v5/projects/metadata/workManagementPermission/:id')
+  .get(require('./workManagementPermissions/get'));
+
 
 router.use('/v5/projects/metadata', compression());
 router.route('/v5/projects/metadata')
@@ -90,6 +95,14 @@ router.route('/v5/projects/:projectId(\\d+)')
   .patch(require('./projects/update'))
   .delete(require('./projects/delete'));
 
+router.route('/v5/projects/:projectId(\\d+)/scopeChangeRequests')
+  .post(require('./scopeChangeRequests/create'));
+  // .get(require('./scopeChangeRequests/list'));
+router.route('/v5/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)')
+  // .get(require('./scopeChangeRequests/get'))
+  .patch(require('./scopeChangeRequests/update'));
+  // .delete(require('./scopeChangeRequests/delete'));
+
 router.route('/v5/projects/:projectId(\\d+)/members')
   .get(require('./projectMembers/list'))
   .post(require('./projectMembers/create'));
@@ -98,6 +111,10 @@ router.route('/v5/projects/:projectId(\\d+)/members/:id(\\d+)')
   .get(require('./projectMembers/get'))
   .delete(require('./projectMembers/delete'))
   .patch(require('./projectMembers/update'));
+
+// Permissions
+router.route('/v5/projects/:projectId(\\d+)/permissions')
+  .get(require('./permissions/get'));
 
 router.route('/v5/projects/:projectId(\\d+)/attachments')
   .post(require('./attachments/create'))
@@ -149,6 +166,13 @@ router.route('/v5/projects/metadata/productCategories')
 router.route('/v5/projects/metadata/productCategories/:key')
   .patch(require('./productCategories/update'))
   .delete(require('./productCategories/delete'));
+
+router.route('/v5/projects/metadata/workManagementPermission')
+  .post(require('./workManagementPermissions/create'));
+
+router.route('/v5/projects/metadata/workManagementPermission/:id')
+  .patch(require('./workManagementPermissions/update'))
+  .delete(require('./workManagementPermissions/delete'));
 
 router.route('/v5/projects/metadata/projectTypes')
   .post(require('./projectTypes/create'));
@@ -263,6 +287,52 @@ router.route('/v5/projects/metadata/planConfig/:key/versions/:version(\\d+)')
   .get(require('./planConfig/version/getVersion'))
   .patch(require('./planConfig/version/update'))
   .delete(require('./planConfig/version/delete'));
+
+// work streams
+router.route('/v5/projects/:projectId(\\d+)/workstreams')
+  .get(require('./workStreams/list'))
+  .post(require('./workStreams/create'));
+
+router.route('/v5/projects/:projectId(\\d+)/workstreams/:id(\\d+)')
+  .get(require('./workStreams/get'))
+  .patch(require('./workStreams/update'))
+  .delete(require('./workStreams/delete'));
+
+// works
+router.route('/v5/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works')
+  .get(require('./works/list'))
+  .post(require('./works/create'));
+
+router.route('/v5/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:id(\\d+)')
+  .get(require('./works/get'))
+  .patch(require('./works/update'))
+  .delete(require('./works/delete'));
+
+// work items
+router.route('/v5/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:workId(\\d+)/workitems')
+  .get(require('./workItems/list'))
+  .post(require('./workItems/create'));
+
+router.route('/v5/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/works/:workId(\\d+)/workitems/:id(\\d+)')
+  .get(require('./workItems/get'))
+  .patch(require('./workItems/update'))
+  .delete(require('./workItems/delete'));
+
+router.route('/v5/projects/:projectId/reports')
+  .get(require('./projectReports/getReport'));
+
+// Project Settings
+router.route('/v5/projects/:projectId(\\d+)/settings/:id(\\d+)')
+  .patch(require('./projectSettings/update'))
+  .delete(require('./projectSettings/delete'));
+
+router.route('/v5/projects/:projectId(\\d+)/settings')
+  .get(require('./projectSettings/list'))
+  .post(require('./projectSettings/create'));
+
+// Project Estimation Items
+router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
+  .get(require('./projectEstimationItems/list'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

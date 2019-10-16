@@ -177,7 +177,7 @@ describe('Phase Products', () => {
       request(server)
         .post(`/v5/projects/99999/phases/${phaseId}/products`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
@@ -188,7 +188,7 @@ describe('Phase Products', () => {
       request(server)
         .post(`/v5/projects/${projectId}/phases/99999/products`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
