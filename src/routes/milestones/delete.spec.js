@@ -16,7 +16,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 const expectAfterDelete = (timelineId, id, err, next) => {
   if (err) throw err;
-  setTimeout(() =>
   models.Milestone.findOne({
     where: {
       timelineId,
@@ -30,9 +29,15 @@ const expectAfterDelete = (timelineId, id, err, next) => {
       } else {
         chai.assert.isNotNull(res.deletedAt);
         chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v5/timelines/${timelineId}/milestones/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
       }
-      next();
-    }), 500);
+    });
 };
 
 describe('DELETE milestone', () => {

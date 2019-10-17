@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
   Form.latestVersion = classMethods.latestVersion;
   Form.latestRevisionOfLatestVersion = classMethods.latestRevisionOfLatestVersion;
   Form.latestVersionIncludeUsed = classMethods.latestVersionIncludeUsed;
+  Form.findOneWithLatestRevision = classMethods.findOneWithLatestRevision;
 
   return Form;
 };

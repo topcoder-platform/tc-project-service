@@ -6,10 +6,9 @@ import _ from 'lodash';
 import Joi from 'joi';
 import moment from 'moment';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
-import { EVENT, RESOURCES, TIMELINE_REFERENCES, MILESTONE_STATUS, MILESTONE_TEMPLATE_REFERENCES }
+import { EVENT, TIMELINE_REFERENCES, MILESTONE_STATUS, MILESTONE_TEMPLATE_REFERENCES }
   from '../../constants';
 
 const permissions = tcMiddleware.permissions;
@@ -49,7 +48,7 @@ module.exports = [
 
     let result;
     // Save to DB
-    models.sequelize.transaction(() => {
+    return models.sequelize.transaction(() => {
       req.log.debug('Started transaction');
       return models.Timeline.create(entity)
         .then((createdEntity) => {
@@ -107,8 +106,7 @@ module.exports = [
             });
           }
           return Promise.resolve();
-        })
-        .catch(next);
+        });
     })
     .then(() => {
       // Send event to bus
@@ -117,19 +115,6 @@ module.exports = [
         _.assign({ projectId: req.params.projectId }, result),
         { correlationId: req.id },
       );
-
-      // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.TIMELINE_ADDED,
-        RESOURCES.TIMELINE,
-        result);
-
-      // emit the event for milestones
-      _.map(result.milestones, milestone => util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        RESOURCES.MILESTONE,
-        milestone));
 
       // Write to the response
       res.status(201).json(result);

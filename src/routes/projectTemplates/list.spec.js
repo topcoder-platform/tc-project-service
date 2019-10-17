@@ -20,7 +20,7 @@ describe('LIST project templates', () => {
       question: 'question 1',
       info: 'info 1',
       aliases: ['key-1', 'key_1'],
-      disabled: true,
+      disabled: false,
       hidden: true,
       scope: {
         scope1: {

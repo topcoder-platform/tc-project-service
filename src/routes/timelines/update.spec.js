@@ -470,6 +470,19 @@ describe('UPDATE timeline', () => {
           should.not.exist(resJson.deletedAt);
           should.not.exist(resJson.deletedBy);
 
+          // Milestones
+          resJson.milestones.should.have.length(2);
+          resJson.milestones.forEach((milestone) => {
+            // validate statusHistory
+            should.exist(milestone.statusHistory);
+            milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.length.should.be.eql(1);
+            milestone.statusHistory.forEach((statusHistory) => {
+              statusHistory.reference.should.be.eql('milestone');
+              statusHistory.referenceId.should.be.eql(milestone.id);
+            });
+          });
+
           // eslint-disable-next-line no-unused-expressions
           server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.TIMELINE_UPDATED).should.be.true;
 
@@ -637,6 +650,8 @@ describe('UPDATE timeline', () => {
                 createEventSpy.calledOnce.should.be.true;
                 createEventSpy.calledWith(BUS_API_EVENT.TIMELINE_UPDATED,
                   sinon.match({ resource: RESOURCES.TIMELINE })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.TIMELINE_UPDATED,
+                  sinon.match({ name: body.name })).should.be.true;
                 done();
               });
             }

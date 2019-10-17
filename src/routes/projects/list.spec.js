@@ -247,7 +247,8 @@ describe('LIST Project', () => {
         }).then(() => {
           // sleep for some time, let elasticsearch indices be settled
           // sleep.sleep(5);
-          done();
+          testUtil.wait(done);
+          // done();
         });
       });
   });

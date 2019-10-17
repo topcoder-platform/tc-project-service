@@ -46,7 +46,8 @@ module.exports = [
           // Update the deletedBy, and soft delete
           return milestone.update({ deletedBy: req.authUser.userId })
             .then(() => milestone.destroy());
-        })
+        }),
+    )
     .then((deleted) => {
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', deleted.id);
@@ -66,6 +67,6 @@ module.exports = [
       res.status(204).end();
       return Promise.resolve();
     })
-    .catch(next));
+    .catch(next);
   },
 ];

@@ -46,15 +46,7 @@ module.exports = [
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No form found in ES');
-        models.Form.findOne({
-          where: {
-            key: req.params.key,
-            version: req.params.version,
-          },
-          order: [['revision', 'DESC']],
-          limit: 1,
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-        })
+        models.Form.findOneWithLatestRevision(req.params)
           .then((form) => {
             // Not found
             if (!form) {

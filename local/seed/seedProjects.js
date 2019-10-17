@@ -60,6 +60,21 @@ module.exports = (targetUrl, token) => {
           });
         }
 
+        await models.ProjectEstimation.create({
+          projectId,
+          buildingBlockKey: 'BLOCK_KEY',
+          conditions: '( HAS_DEV_DELIVERABLE && ONLY_ONE_OS_MOBILE && CA_NEEDED )',
+          price: 6500.50,
+          quantity: 10,
+          minTime: 35,
+          maxTime: 35,
+          metadata: {
+            deliverable: 'dev-qa',
+          },
+          createdBy: 1,
+          updatedBy: 1,
+        });
+
         // creating invitations
         if (Array.isArray(invites)) {
           let promises = []
