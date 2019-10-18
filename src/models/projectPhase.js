@@ -4,6 +4,8 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
   const ProjectPhase = sequelize.define('ProjectPhase', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: true },
+    description: { type: DataTypes.STRING, allowNull: true },
+    requirements: { type: DataTypes.STRING, allowNull: true },
     status: { type: DataTypes.STRING, allowNull: true },
     startDate: { type: DataTypes.DATE, allowNull: true },
     endDate: { type: DataTypes.DATE, allowNull: true },

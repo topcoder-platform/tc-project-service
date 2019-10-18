@@ -265,7 +265,6 @@ describe('UPDATE Milestone', () => {
     const body = {
       name: 'Milestone 1-updated',
       duration: 3,
-      completionDate: '2018-05-16T00:00:00.000Z',
       description: 'description-updated',
       status: 'draft',
       type: 'type1-updated',
@@ -512,12 +511,14 @@ describe('UPDATE Milestone', () => {
     });
 
     it('should return 200 for admin', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.completionDate = '2018-05-15T00:00:00.000Z';
       request(server)
         .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(body)
+        .send(newBody)
         .expect(200)
         .end((err, res) => {
           const resJson = res.body;
@@ -525,7 +526,7 @@ describe('UPDATE Milestone', () => {
           resJson.name.should.be.eql(body.name);
           resJson.description.should.be.eql(body.description);
           resJson.duration.should.be.eql(body.duration);
-          resJson.completionDate.should.be.eql(body.completionDate);
+          resJson.completionDate.should.be.eql(newBody.completionDate);
           resJson.status.should.be.eql(body.status);
           resJson.type.should.be.eql(body.type);
           resJson.details.should.be.eql({
@@ -545,6 +546,15 @@ describe('UPDATE Milestone', () => {
           should.exist(resJson.updatedAt);
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
+
+          // validate statusHistory
+          should.exist(resJson.statusHistory);
+          resJson.statusHistory.should.be.an('array');
+          resJson.statusHistory.length.should.be.eql(2);
+          resJson.statusHistory.forEach((statusHistory) => {
+            statusHistory.reference.should.be.eql('milestone');
+            statusHistory.referenceId.should.be.eql(resJson.id);
+          });
 
           // eslint-disable-next-line no-unused-expressions
           server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_UPDATED).should.be.true;
@@ -1098,36 +1108,36 @@ describe('UPDATE Milestone', () => {
         .expect(200, done);
     });
 
-    it('should return 403 for connect manager when entity to update has completionDate', (done) => {
+    it('should return 200 for connect manager', (done) => {
       request(server)
         .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send(body)
-        .expect(403)
+        .expect(200)
         .end(done);
     });
 
-    it('should return 403 for copilot when entity to update has completionDate', (done) => {
+    it('should return 200 for copilot', (done) => {
       request(server)
         .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(body)
-        .expect(403)
+        .expect(200)
         .end(done);
     });
 
-    it('should return 403 for member when entity to update has completionDate', (done) => {
+    it('should return 200 for member', (done) => {
       request(server)
         .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(body)
-        .expect(403)
+        .expect(200)
         .end(done);
     });
 

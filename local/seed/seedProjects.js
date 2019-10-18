@@ -1,4 +1,5 @@
 import util from '../../src/tests/util';
+import models from '../../src/models';
 
 const axios = require('axios');
 const Promise = require('bluebird');

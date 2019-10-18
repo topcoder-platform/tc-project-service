@@ -112,7 +112,7 @@ const forms = [
   {
     key: 'productKey 1',
     config: {
-      questions: [{
+      sections: [{
         id: 'appDefinition',
         title: 'Sample Project',
         required: true,

@@ -12,7 +12,7 @@ import testUtil from '../../tests/util';
 const should = chai.should(); // eslint-disable-line no-unused-vars
 
 const validateProductTemplates = (count, resJson, expectedTemplates) => {
-  resJson.length.should.be.eql(count);
+  resJson.should.have.length(count);
 
   resJson.forEach((pt, idx) => {
     pt.should.include.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
@@ -192,7 +192,7 @@ describe('LIST product templates', () => {
         .expect(200)
         .end((err, res) => {
           const resJson = res.body;
-          validateProductTemplates(1, [resJson[1]], [templates[1]]);
+          validateProductTemplates(1, resJson, [templates[1]]);
           done();
         });
     });

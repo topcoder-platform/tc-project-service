@@ -58,7 +58,7 @@ module.exports = [
     });
     let result;
 
-    // Validate startDate and endDate to be within the timeline startDate and endDate
+    // Validate startDate is not earlier than timeline startDate
     let error;
     if (req.body.startDate < req.timeline.startDate) {
       error = 'Milestone startDate must not be before the timeline startDate';

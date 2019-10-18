@@ -46,7 +46,7 @@ module.exports = [
     .then((data) => {
       if (data.length === 0) {
         req.log.debug('No form found in ES');
-        models.Form.findOneWithLatestRevision(req.params)
+        return models.Form.findOneWithLatestRevision(req.params)
           .then((form) => {
             // Not found
             if (!form) {
@@ -58,10 +58,10 @@ module.exports = [
             return Promise.resolve();
           })
           .catch(next);
-      } else {
-        req.log.debug('forms found in ES');
-        res.json(data[0].inner_hits.forms.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
       }
+      req.log.debug('forms found in ES');
+      res.json(data[0].inner_hits.forms.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+      return Promise.resolve();
     })
     .catch(next);
   },

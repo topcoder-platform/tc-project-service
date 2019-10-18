@@ -2,19 +2,28 @@
 import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
+import config from 'config';
 import request from 'supertest';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
+import messageService from '../../services/messageService';
+import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT, RESOURCES,
 } from '../../constants';
 
 const should = chai.should();
 
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+
 const body = {
   name: 'test project phase',
+  description: 'test project phase description',
+  requirements: 'test project phase requirements',
   status: 'active',
   startDate: '2018-05-15T00:00:00Z',
   endDate: '2018-05-15T12:00:00Z',
@@ -30,6 +39,8 @@ const body = {
 const validatePhase = (resJson, expectedPhase) => {
   should.exist(resJson);
   resJson.name.should.be.eql(expectedPhase.name);
+  resJson.description.should.be.eql(expectedPhase.description);
+  resJson.requirements.should.be.eql(expectedPhase.requirements);
   resJson.status.should.be.eql(expectedPhase.status);
   resJson.budget.should.be.eql(expectedPhase.budget);
   resJson.progress.should.be.eql(expectedPhase.progress);
@@ -52,44 +63,43 @@ describe('Project Phases', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
+  const project = {
+    type: 'generic',
+    billingAccountId: 1,
+    name: 'test1',
+    description: 'test project1',
+    status: 'draft',
+    details: {},
+    createdBy: 1,
+    updatedBy: 1,
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
+  };
   let productTemplateId;
-  before((done) => {
+  beforeEach((done) => {
     // mocks
     testUtil.clearDb()
-      .then(() => {
-        models.Project.create({
-          type: 'generic',
-          billingAccountId: 1,
-          name: 'test1',
-          description: 'test project1',
-          status: 'draft',
-          details: {},
+      .then(() => models.Project.create(project).then((p) => {
+        projectId = p.id;
+        // create members
+        return models.ProjectMember.bulkCreate([{
+          id: 1,
+          userId: copilotUser.userId,
+          projectId,
+          role: 'copilot',
+          isPrimary: false,
           createdBy: 1,
           updatedBy: 1,
-          lastActivityAt: 1,
-          lastActivityUserId: '1',
-        }).then((p) => {
-          projectId = p.id;
-          // create members
-          models.ProjectMember.bulkCreate([{
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 2,
-            userId: memberUser.userId,
-            projectId,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1,
-          }]);
-        });
-      })
+        }, {
+          id: 2,
+          userId: memberUser.userId,
+          projectId,
+          role: 'customer',
+          isPrimary: true,
+          createdBy: 1,
+          updatedBy: 1,
+        }]);
+      }))
       .then(() =>
         models.ProductTemplate.create({
           name: 'name 1',
@@ -126,7 +136,7 @@ describe('Project Phases', () => {
       .then(() => done());
   });
 
-  after((done) => {
+  afterEach((done) => {
     testUtil.clearDb(done);
   });
 
@@ -345,6 +355,68 @@ describe('Project Phases', () => {
         });
     });
 
+    it('should return 201 if requested by admin', (done) => {
+      request(server)
+        .post(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(body)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end(done);
+    });
+
+    it('should return 201 if requested by manager which is a member', (done) => {
+      models.ProjectMember.create({
+        id: 3,
+        userId: testUtil.userIds.manager,
+        projectId,
+        role: 'manager',
+        isPrimary: false,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .post(`/v5/projects/${projectId}/phases/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end(done);
+      });
+    });
+
+    it('should return 403 if requested by manager which is not a member', (done) => {
+      request(server)
+        .post(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(body)
+        .expect('Content-Type', /json/)
+        .expect(403)
+        .end(done);
+    });
+
+    it('should return 403 if requested by non-member copilot', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, projectId },
+      }).then(() => {
+        request(server)
+          .post(`/v5/projects/${projectId}/phases/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+      });
+    });
+
     describe('Bus api', () => {
       let createEventSpy;
       const sandbox = sinon.sandbox.create();
@@ -393,6 +465,86 @@ describe('Project Phases', () => {
             });
           }
         });
+      });
+    });
+
+    describe('RabbitMQ Message topic', () => {
+      let createMessageSpy;
+      let publishSpy;
+      let sandbox;
+
+      // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+      before(async () => new Promise(resolve => setTimeout(() => resolve(), 500)));
+
+      beforeEach(async () => {
+        sandbox = sinon.sandbox.create();
+        server.services.pubsub = new RabbitMQService(server.logger);
+
+        // initialize RabbitMQ
+        server.services.pubsub.init(
+          config.get('rabbitmqURL'),
+          config.get('pubsubExchangeName'),
+          config.get('pubsubQueueName'),
+        );
+
+        // add project to ES index
+        await server.services.es.index({
+          index: ES_PROJECT_INDEX,
+          type: ES_PROJECT_TYPE,
+          id: projectId,
+          body: {
+            doc: project,
+          },
+        });
+
+        return new Promise(resolve => setTimeout(() => {
+          publishSpy = sandbox.spy(server.services.pubsub, 'publish');
+          createMessageSpy = sandbox.spy(messageService, 'createTopic');
+          resolve();
+        }, 500));
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      after(() => {
+        mockRabbitMQ(server);
+      });
+
+      it('should send message topic when phase added', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          post: () => Promise.resolve({
+            status: 200,
+            data: {},
+          }),
+        });
+        sandbox.stub(messageService, 'getClient', () => mockHttpClient);
+        request(server)
+            .post(`/v5/projects/${projectId}/phases/`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.copilot}`,
+            })
+            .send(body)
+            .expect('Content-Type', /json/)
+            .expect(201)
+            .end((err) => {
+              if (err) {
+                done(err);
+              } else {
+                testUtil.wait(() => {
+                  publishSpy.calledOnce.should.be.true;
+                  publishSpy.calledWith('project.phase.added').should.be.true;
+                  createMessageSpy.calledOnce.should.be.true;
+                  createMessageSpy.calledWith(sinon.match({ reference: 'project',
+                    referenceId: '1',
+                    tag: 'phase#1',
+                    title: 'test project phase',
+                  })).should.be.true;
+                  done();
+                });
+              }
+            });
       });
     });
   });

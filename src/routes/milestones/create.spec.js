@@ -142,6 +142,7 @@ describe('CREATE milestone', () => {
                 // Create milestones
                 models.Milestone.bulkCreate([
                   {
+                    id: 11,
                     timelineId: 1,
                     name: 'milestone 1',
                     duration: 2,
@@ -164,6 +165,7 @@ describe('CREATE milestone', () => {
                     updatedBy: 2,
                   },
                   {
+                    id: 12,
                     timelineId: 1,
                     name: 'milestone 2',
                     duration: 3,
@@ -179,6 +181,7 @@ describe('CREATE milestone', () => {
                     updatedBy: 3,
                   },
                   {
+                    id: 13,
                     timelineId: 1,
                     name: 'milestone 3',
                     duration: 4,
@@ -424,6 +427,15 @@ describe('CREATE milestone', () => {
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
 
+          // validate statusHistory
+          should.exist(resJson.statusHistory);
+          resJson.statusHistory.should.be.an('array');
+          resJson.statusHistory.length.should.be.eql(1);
+          resJson.statusHistory.forEach((statusHistory) => {
+            statusHistory.reference.should.be.eql('milestone');
+            statusHistory.referenceId.should.be.eql(resJson.id);
+          });
+
           // eslint-disable-next-line no-unused-expressions
           server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_ADDED).should.be.true;
 
@@ -431,11 +443,11 @@ describe('CREATE milestone', () => {
           models.Milestone.findAll({ where: { timelineId: 1 } })
             .then((milestones) => {
               _.each(milestones, (milestone) => {
-                if (milestone.id === 1) {
+                if (milestone.id === 11) {
                   milestone.order.should.be.eql(1);
-                } else if (milestone.id === 2) {
+                } else if (milestone.id === 12) {
                   milestone.order.should.be.eql(2 + 1);
-                } else if (milestone.id === 3) {
+                } else if (milestone.id === 13) {
                   milestone.order.should.be.eql(3 + 1);
                 }
               });
