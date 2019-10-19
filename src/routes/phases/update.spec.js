@@ -11,7 +11,10 @@ import busApi from '../../services/busApi';
 import messageService from '../../services/messageService';
 import RabbitMQService from '../../services/rabbitmq';
 import mockRabbitMQ from '../../tests/mockRabbitMQ';
-import { BUS_API_EVENT } from '../../constants';
+import {
+  BUS_API_EVENT,
+  RESOURCES,
+} from '../../constants';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -63,7 +66,6 @@ describe('Project Phases', () => {
   let projectId;
   let phaseId;
   let phaseId2;
-  let phaseId3;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -133,7 +135,6 @@ describe('Project Phases', () => {
               .then((createdPhases) => {
                 phaseId = createdPhases[0].id;
                 phaseId2 = createdPhases[1].id;
-                phaseId3 = createdPhases[2].id;
 
                 done();
               });
@@ -184,7 +185,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(updateBody)
         .expect('Content-Type', /json/)
@@ -195,7 +196,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
           progress: -15,
@@ -208,7 +209,7 @@ describe('Project Phases', () => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
           endDate: '2018-05-13T00:00:00Z',
@@ -355,168 +356,24 @@ describe('Project Phases', () => {
       let createEventSpy;
       const sandbox = sinon.sandbox.create();
 
+
       before((done) => {
         // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
         testUtil.wait(done);
       });
 
+
       beforeEach(() => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
+
 
       afterEach(() => {
         sandbox.restore();
       });
 
-      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when spentBudget updated', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          spentBudget: 123,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
 
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_PAYMENT);
-              done();
-            });
-          }
-        });
-      });
-
-
-      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when progress updated', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          progress: 50,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(1);
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED);
-              done();
-            });
-          }
-        });
-      });
-
-      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          details: {
-            text: 'something',
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATE_SCOPE);
-              done();
-            });
-          }
-        });
-      });
-
-      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (completed)', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          status: 'completed',
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_COMPLETED);
-              done();
-            });
-          }
-        });
-      });
-
-      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when status updated (active)', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId3}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          status: 'active',
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_TRANSITION_ACTIVE);
-              done();
-            });
-          }
-        });
-      });
-
-      it('should NOT send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when budget updated', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          budget: 123,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED);
-              done();
-            });
-          }
-        });
-      });
-
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when startDate updated', (done) => {
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_UPDATED when startDate updated', (done) => {
         request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -532,16 +389,21 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
+              // createEventSpy.calledOnce.should.be.true;
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED,
-                sinon.match.has('startDate')).should.be.true;
+                sinon.match({ resource: RESOURCES.PHASE })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED,
+                sinon.match({ id: phaseId })).should.be.true;
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED,
+                sinon.match({ updatedBy: testUtil.userIds.copilot })).should.be.true;
               done();
             });
           }
         });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when duration updated', (done) => {
+
+      it('should send message BUS_API_EVENT.PROJECT_PHASE_UPDATED when duration updated', (done) => {
         request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -560,54 +422,6 @@ describe('Project Phases', () => {
               createEventSpy.calledOnce.should.be.true;
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED,
                 sinon.match({ duration: 100 })).should.be.true;
-              done();
-            });
-          }
-        });
-      });
-
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when order updated', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          order: 100,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED);
-              done();
-            });
-          }
-        });
-      });
-
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when endDate updated', (done) => {
-        request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          endDate: new Date(),
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_UPDATED);
               done();
             });
           }

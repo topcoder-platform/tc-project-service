@@ -40,7 +40,7 @@ module.exports = [
     });
 
     // Check if duplicated key
-    return models.ProductCategory.findByPk(req.body.key)
+    return models.ProductCategory.findByPk(req.body.key, { paranoid: false })
       .then((existing) => {
         if (existing) {
           const apiErr = new Error(`Product category already exists for key ${req.params.key}`);

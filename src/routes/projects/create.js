@@ -24,7 +24,7 @@ const traverse = require('traverse');
  */
 const permissions = require('tc-core-library-js').middleware.permissions;
 
-const createProjectValdiations = {
+const createProjectValidations = {
   body: Joi.object().keys({
     name: Joi.string().required(),
     description: Joi.string().allow(null).allow('').optional(),
@@ -375,7 +375,7 @@ function validateAndFetchTemplates(templateId) {
 
 module.exports = [
   // handles request validations
-  validate(createProjectValdiations),
+  validate(createProjectValidations),
   permissions('project.create'),
   fieldLookupValidation(models.ProjectType, 'key', 'body.type', 'Project type'),
   /**

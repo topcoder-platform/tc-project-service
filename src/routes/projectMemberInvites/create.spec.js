@@ -456,17 +456,9 @@ describe('Project Member Invite create', () => {
         get: () => Promise.resolve({
           status: 200,
           data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                success: [{
-                  roleName: USER_ROLE.COPILOT,
-                }],
-              },
-            },
+            success: [{
+              roleName: USER_ROLE.COPILOT,
+            }],
           },
         }),
       });
@@ -502,17 +494,9 @@ describe('Project Member Invite create', () => {
         get: () => Promise.resolve({
           status: 200,
           data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                success: [{
-                  roleName: USER_ROLE.COPILOT,
-                }],
-              },
-            },
+            success: [{
+              roleName: USER_ROLE.COPILOT,
+            }],
           },
         }),
       });
@@ -789,6 +773,8 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.failed;
             should.exist(resJson);
+            resJson[0].email.should.equal('duplicate_lowercase@test.com');
+            resJson[0].message.should.equal('User with such email is already invited to this project.');
             resJson.length.should.equal(1);
             done();
           }
@@ -813,6 +799,8 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.failed;
             should.exist(resJson);
+            resJson[0].email.should.equal('DUPLICATE_UPPERCASE@test.com');
+            resJson[0].message.should.equal('User with such email is already invited to this project.');
             resJson.length.should.equal(1);
             done();
           }
@@ -838,6 +826,7 @@ describe('Project Member Invite create', () => {
             } else {
               const resJson = res.body.failed;
               should.exist(resJson);
+              resJson[0].email.should.equal('WITHdot@gmail.com');
               resJson.length.should.equal(1);
               done();
             }
@@ -864,6 +853,7 @@ describe('Project Member Invite create', () => {
               const resJson = res.body.failed;
               should.exist(resJson);
               resJson.length.should.equal(1);
+              resJson[0].email.should.equal('WITHOUT.dot@gmail.com');
               done();
             }
           });
@@ -885,17 +875,9 @@ describe('Project Member Invite create', () => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: [{
-                  roleName: USER_ROLE.MANAGER,
-                }],
-              },
-            },
+            data: [{
+              roleName: USER_ROLE.MANAGER,
+            }],
           }),
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
@@ -934,17 +916,9 @@ describe('Project Member Invite create', () => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: [{
-                  roleName: USER_ROLE.MANAGER,
-                }],
-              },
-            },
+            data: [{
+              roleName: USER_ROLE.MANAGER,
+            }],
           }),
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
@@ -963,7 +937,7 @@ describe('Project Member Invite create', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledTwice.should.be.true;
+              createEventSpy.calledOnce.should.be.true;
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED).should.be.true;
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
                 sinon.match({ resource: RESOURCES.PROJECT_MEMBER_INVITE })).should.be.true;
