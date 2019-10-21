@@ -43,7 +43,7 @@ module.exports = [
     return models.ProductCategory.findByPk(req.body.key, { paranoid: false })
       .then((existing) => {
         if (existing) {
-          const apiErr = new Error(`Product category already exists for key ${req.params.key}`);
+          const apiErr = new Error(`Product category already exists (may be deleted) for key ${req.body.key}`);
           apiErr.status = 400;
           return Promise.reject(apiErr);
         }

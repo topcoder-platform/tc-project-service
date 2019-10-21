@@ -15,17 +15,15 @@ const schema = {
   params: {
     projectId: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      key: Joi.string().max(255).required(),
-      value: Joi.string().max(255).required(),
-      valueType: Joi.string().valid(_.values(VALUE_TYPE)).required(),
-      projectId: Joi.any().strip(),
-      metadata: Joi.object().optional(),
-      readPermission: Joi.object().required(),
-      writePermission: Joi.object().required(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    key: Joi.string().max(255).required(),
+    value: Joi.string().max(255).required(),
+    valueType: Joi.string().valid(_.values(VALUE_TYPE)).required(),
+    projectId: Joi.any().strip(),
+    metadata: Joi.object().optional(),
+    readPermission: Joi.object().required(),
+    writePermission: Joi.object().required(),
+  }).required(),
 };
 
 module.exports = [
@@ -34,7 +32,7 @@ module.exports = [
   (req, res, next) => {
     let setting = null;
     const projectId = req.params.projectId;
-    const entity = _.assign(req.body.param, {
+    const entity = _.assign(req.body, {
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       projectId,
@@ -55,7 +53,7 @@ module.exports = [
             includeAllProjectSettingsForInternalUsage: true,
             where: {
               projectId,
-              key: req.body.param.key,
+              key: req.body.key,
             },
             paranoid: false,
           });
@@ -63,7 +61,7 @@ module.exports = [
         .then((projectSetting) => {
           if (projectSetting) {
             const apiErr = new Error(`Project Setting already exists for project id ${projectId} ` +
-              `and key ${req.body.param.key}`);
+              `and key ${req.body.key}`);
             apiErr.status = 400;
             return Promise.reject(apiErr);
           }
@@ -86,8 +84,7 @@ module.exports = [
         req.log.debug('new project setting created (id# %d, key: %s)',
           setting.id, setting.key);
         // Omit deletedAt, deletedBy
-        res.status(201).json(util.wrapResponse(
-          req.id, _.omit(setting.toJSON(), 'deletedAt', 'deletedBy'), 1, 201));
+        res.status(201).json(_.omit(setting.toJSON(), 'deletedAt', 'deletedBy'));
       })
       .catch(next);
   },

@@ -74,18 +74,16 @@ describe('CREATE Project Setting', () => {
   let estimationId;
 
   const body = {
-    param: {
-      key: 'markup_topcoder_service',
-      value: '3500',
-      valueType: 'double',
-      readPermission: {
-        projectRoles: ['customer'],
-        topcoderRoles: ['administrator'],
-      },
-      writePermission: {
-        allowRule: { topcoderRoles: ['administrator'] },
-        denyRule: { projectRoles: ['copilot'] },
-      },
+    key: 'markup_topcoder_service',
+    value: '3500',
+    valueType: 'double',
+    readPermission: {
+      projectRoles: ['customer'],
+      topcoderRoles: ['administrator'],
+    },
+    writePermission: {
+      allowRule: { topcoderRoles: ['administrator'] },
+      denyRule: { projectRoles: ['copilot'] },
     },
   };
 
@@ -175,7 +173,7 @@ describe('CREATE Project Setting', () => {
 
     it('should return 400 for missing key', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.key;
+      delete invalidBody.key;
 
       request(server)
         .post(`/v5/projects/${projectId}/settings`)
@@ -189,7 +187,7 @@ describe('CREATE Project Setting', () => {
 
     it('should return 400 for missing value', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.value;
+      delete invalidBody.value;
 
       request(server)
         .post(`/v5/projects/${projectId}/settings`)
@@ -203,7 +201,7 @@ describe('CREATE Project Setting', () => {
 
     it('should return 400 for missing valueType', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.valueType;
+      delete invalidBody.valueType;
 
       request(server)
         .post(`/v5/projects/${projectId}/settings`)
@@ -217,8 +215,8 @@ describe('CREATE Project Setting', () => {
 
     xit('should return 400 for negative value when valueType = percentage', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.value = '-10';
-      invalidBody.param.valueType = VALUE_TYPE.PERCENTAGE;
+      invalidBody.value = '-10';
+      invalidBody.valueType = VALUE_TYPE.PERCENTAGE;
 
       request(server)
         .post(`/v5/projects/${projectId}/settings`)
@@ -232,8 +230,8 @@ describe('CREATE Project Setting', () => {
 
     xit('should return 400 for value greater than 100 when valueType = percentage', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.value = '150';
-      invalidBody.param.valueType = VALUE_TYPE.PERCENTAGE;
+      invalidBody.value = '150';
+      invalidBody.valueType = VALUE_TYPE.PERCENTAGE;
 
       request(server)
         .post(`/v5/projects/${projectId}/settings`)
@@ -247,11 +245,11 @@ describe('CREATE Project Setting', () => {
 
     it('should return 400, for admin, when create key with existing key', (done) => {
       const existing = _.cloneDeep(body);
-      existing.param.projectId = projectId;
-      existing.param.createdBy = 1;
-      existing.param.updatedBy = 1;
+      existing.projectId = projectId;
+      existing.createdBy = 1;
+      existing.updatedBy = 1;
 
-      models.ProjectSetting.create(existing.param).then(() => {
+      models.ProjectSetting.create(existing).then(() => {
         request(server)
           .post(`/v5/projects/${projectId}/settings`)
           .set({
@@ -265,7 +263,7 @@ describe('CREATE Project Setting', () => {
     it('should return 201 for manager with non-estimation type, not calculating project estimation items',
       (done) => {
         const createBody = _.cloneDeep(body);
-        createBody.param.key = 'markup_no_estimation';
+        createBody.key = 'markup_no_estimation';
 
         request(server)
           .post(`/v5/projects/${projectId}/settings`)
@@ -278,10 +276,10 @@ describe('CREATE Project Setting', () => {
           .end((err, res) => {
             if (err) done(err);
 
-            const resJson = res.body.result.content;
-            resJson.key.should.be.eql(createBody.param.key);
-            resJson.value.should.be.eql(createBody.param.value);
-            resJson.valueType.should.be.eql(createBody.param.valueType);
+            const resJson = res.body;
+            resJson.key.should.be.eql(createBody.key);
+            resJson.value.should.be.eql(createBody.value);
+            resJson.valueType.should.be.eql(createBody.valueType);
             resJson.projectId.should.be.eql(projectId);
             resJson.createdBy.should.be.eql(40051334);
             should.exist(resJson.createdAt);
@@ -305,10 +303,10 @@ describe('CREATE Project Setting', () => {
           .end((err, res) => {
             if (err) done(err);
 
-            const resJson = res.body.result.content;
-            resJson.key.should.be.eql(body.param.key);
-            resJson.value.should.be.eql(body.param.value);
-            resJson.valueType.should.be.eql(body.param.valueType);
+            const resJson = res.body;
+            resJson.key.should.be.eql(body.key);
+            resJson.value.should.be.eql(body.value);
+            resJson.valueType.should.be.eql(body.valueType);
             resJson.projectId.should.be.eql(projectId);
             resJson.createdBy.should.be.eql(40051334);
             should.exist(resJson.createdAt);
@@ -318,9 +316,9 @@ describe('CREATE Project Setting', () => {
             should.not.exist(resJson.deletedAt);
             expectAfterCreate(resJson.id, projectId, _.assign(estimation, {
               id: estimationId,
-              value: body.param.value,
-              valueType: body.param.valueType,
-              key: body.param.key,
+              value: body.value,
+              valueType: body.valueType,
+              key: body.key,
             }), 1, 0, err, done);
           });
     });
@@ -337,10 +335,10 @@ describe('CREATE Project Setting', () => {
         .end((err, res) => {
           if (err) done(err);
 
-          const resJson = res.body.result.content;
-          resJson.key.should.be.eql(body.param.key);
-          resJson.value.should.be.eql(body.param.value);
-          resJson.valueType.should.be.eql(body.param.valueType);
+          const resJson = res.body;
+          resJson.key.should.be.eql(body.key);
+          resJson.value.should.be.eql(body.value);
+          resJson.valueType.should.be.eql(body.valueType);
           resJson.projectId.should.be.eql(projectId);
           resJson.createdBy.should.be.eql(40051333);
           should.exist(resJson.createdAt);
@@ -364,10 +362,10 @@ describe('CREATE Project Setting', () => {
         .end((err, res) => {
           if (err) done(err);
 
-          const resJson = res.body.result.content;
-          resJson.key.should.be.eql(body.param.key);
-          resJson.value.should.be.eql(body.param.value);
-          resJson.valueType.should.be.eql(body.param.valueType);
+          const resJson = res.body;
+          resJson.key.should.be.eql(body.key);
+          resJson.value.should.be.eql(body.value);
+          resJson.valueType.should.be.eql(body.valueType);
           resJson.projectId.should.be.eql(projectId);
           resJson.createdBy.should.be.eql(40051336);
           resJson.updatedBy.should.be.eql(40051336);

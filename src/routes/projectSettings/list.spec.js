@@ -159,7 +159,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(0);
             done();
@@ -179,7 +179,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(0);
             done();
@@ -198,7 +198,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             const setting = settings[0];
@@ -225,7 +225,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(2);
             const setting = settings[0];
