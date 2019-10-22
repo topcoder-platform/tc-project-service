@@ -505,6 +505,15 @@ describe('CREATE timeline', () => {
             should.exist(milestone.updatedAt);
             should.not.exist(milestone.deletedBy);
             should.not.exist(milestone.deletedAt);
+
+            // validate statusHistory
+            should.exist(milestone.statusHistory);
+            milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.length.should.be.eql(1);
+            milestone.statusHistory.forEach((statusHistory) => {
+              statusHistory.reference.should.be.eql('milestone');
+              statusHistory.referenceId.should.be.eql(milestone.id);
+            });
           });
 
           // eslint-disable-next-line no-unused-expressions

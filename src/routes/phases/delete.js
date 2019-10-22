@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES } from '../../constants';
+import { EVENT, RESOURCES, TIMELINE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -41,7 +41,7 @@ module.exports = [
         // Send events to buses
         req.app.services.pubsub.publish(
           EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED,
-          deleted,
+          { deleted, route: TIMELINE_REFERENCES.PHASE },
           { correlationId: req.id },
         );
 

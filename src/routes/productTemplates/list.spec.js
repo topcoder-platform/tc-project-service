@@ -9,11 +9,11 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
-const should = chai.should();
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 const validateProductTemplates = (count, resJson, expectedTemplates) => {
-  should.exist(resJson);
-  resJson.length.should.be.eql(count);
+  resJson.should.have.length(count);
+
   resJson.forEach((pt, idx) => {
     pt.should.include.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
     'aliases', 'template', 'disabled', 'form', 'hidden', 'isAddOn', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
@@ -52,7 +52,7 @@ describe('LIST product templates', () => {
         },
         alias2: [1, 2, 3],
       },
-      disabled: true,
+      disabled: false,
       hidden: true,
       isAddOn: true,
       template: {

@@ -157,6 +157,96 @@ describe('Project create', () => {
           createdBy: 1,
           updatedBy: 2,
         },
+        {
+          id: 4,
+          name: 'template with workstreams',
+          key: 'key 3',
+          category: 'category 3',
+          icon: 'http://example.com/icon3.ico',
+          question: 'question 3',
+          info: 'info 3',
+          aliases: [],
+          scope: {},
+          phases: {
+            workstreamsConfig: {
+              projectFieldName: 'details.appDefinition.deliverables',
+              workstreamTypesToProjectValues: {
+                development: [
+                  'dev-qa',
+                ],
+                design: [
+                  'design',
+                ],
+                deployment: [
+                  'deployment',
+                ],
+                qa: [
+                  'dev-qa',
+                ],
+              },
+              workstreams: [
+                {
+                  name: 'Design Workstream',
+                  type: 'design',
+                },
+                {
+                  name: 'Development Workstream',
+                  type: 'development',
+                },
+                {
+                  name: 'QA Workstream',
+                  type: 'qa',
+                },
+                {
+                  name: 'Deployment Workstream',
+                  typ: 'deployment',
+                },
+              ],
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        },
+      ]))
+      .then(() => models.BuildingBlock.bulkCreate([
+        {
+          id: 1,
+          key: 'BLOCK_KEY',
+          config: {},
+          privateConfig: {
+            priceItems: {
+              community: 3456,
+              topcoder_service: '19%',
+              fee: 1234,
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        },
+        {
+          id: 2,
+          key: 'BLOCK_KEY2',
+          config: {},
+          privateConfig: {
+            message: 'invalid config',
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        },
+        {
+          id: 3,
+          key: 'BLOCK_KEY3',
+          config: {},
+          privateConfig: {
+            priceItems: {
+              community: '34%',
+              topcoder_service: 6789,
+              fee: '56%',
+            },
+          },
+          createdBy: 1,
+          updatedBy: 2,
+        },
       ]))
       .then(() => done());
   });
@@ -275,31 +365,6 @@ describe('Project create', () => {
         .send(invalidBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
-    });
-
-    it('should return 201 if error to create direct project', (done) => {
-      const validBody = _.cloneDeep(body);
-      validBody.templateId = 3;
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        post: () => Promise.reject(new Error('error message')),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      request(server)
-        .post('/v5/projects')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send(validBody)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
-            done();
-          }
-        });
     });
 
     it('should return 201 if valid user and data', (done) => {
@@ -478,6 +543,80 @@ describe('Project create', () => {
         });
     });
 
+    it('should create project with workstreams if template has them defined', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(_.merge({
+          templateId: 4,
+          details: {
+            appDefinition: {
+              deliverables: ['dev-qa', 'design'],
+            },
+          },
+        }, body))
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.status.should.be.eql('draft');
+            resJson.type.should.be.eql(body.type);
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            resJson.phases.should.have.lengthOf(0);
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+
+            // verify that project has been marked to use workstreams
+            resJson.details.settings.workstreams.should.be.true;
+
+            // Check Workstreams records are created correctly
+            models.WorkStream.findAll({
+              where: {
+                projectId: resJson.id,
+              },
+              raw: true,
+            }).then((workStreams) => {
+              workStreams.length.should.be.eql(3);
+              _.filter(workStreams, { type: 'development', name: 'Development Workstream' }).length.should.be.eql(1);
+              _.filter(workStreams, { type: 'design', name: 'Design Workstream' }).length.should.be.eql(1);
+              _.filter(workStreams, { type: 'qa', name: 'QA Workstream' }).length.should.be.eql(1);
+              done();
+            }).catch(done);
+          }
+        });
+    });
+
     it('should return 201 if valid user and data (with estimation)', (done) => {
       const validBody = _.cloneDeep(body);
       validBody.estimation = [
@@ -609,7 +748,7 @@ describe('Project create', () => {
               projectEstimations[0].metadata.deliverable.should.be.eql('design');
               projectEstimations[0].buildingBlockKey.should.be.eql('ZEPLIN_APP_ADDON_CA');
               done();
-            });
+            }).catch(done);
           }
         });
     });
@@ -694,6 +833,113 @@ describe('Project create', () => {
             phases[0].products[0].templateId.should.be.eql(21);
             server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
+          }
+        });
+    });
+
+    it('should create correct estimation items with estimation', (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.estimation = [
+        {
+          conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE) )',
+          price: 1000,
+          minTime: 2,
+          maxTime: 2,
+          metadata: {},
+          buildingBlockKey: 'BLOCK_KEY',
+        },
+        {
+          conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE) )',
+          price: 1000,
+          minTime: 2,
+          maxTime: 2,
+          metadata: {},
+          buildingBlockKey: 'BLOCK_KEY2',
+        },
+        {
+          conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE) )',
+          price: 1000,
+          minTime: 2,
+          maxTime: 2,
+          metadata: {},
+          buildingBlockKey: 'BLOCK_KEY3',
+        },
+      ];
+      validBody.templateId = 3;
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            projectId: 128,
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.exist(resJson.name);
+            should.exist(resJson.estimations);
+            resJson.estimations.length.should.be.eql(3);
+
+            const totalPromises = [];
+            // check estimation items one by one
+            _.forEach(resJson.estimations, estimation => models.ProjectEstimationItem.findAll({
+              where: {
+                projectEstimationId: estimation.id,
+              },
+              raw: true,
+            }).then((items) => {
+              totalPromises.concat(_.map(items, (item) => {
+                should.exist(item.type);
+                should.exist(item.price);
+                should.exist(item.markupUsedReference);
+                should.exist(item.markupUsedReferenceId);
+
+                item.markupUsedReference.should.be.eql('buildingBlock');
+                if (estimation.buildingBlockKey === 'BLOCK_KEY') {
+                  if (item.type === 'community') {
+                    item.price.should.be.eql(3456);
+                  } else if (item.type === 'topcoder_service') {
+                    item.price.should.be.eql(190);
+                  } else if (item.type === 'fee') {
+                    item.price.should.be.eql(1234);
+                  } else {
+                    return Promise.reject('estimation item type is not correct');
+                  }
+                } else if (estimation.buildingBlockKey === 'BLOCK_KEY2') {
+                  return Promise.reject('should not create estimation item for invalid building block');
+                } else if (estimation.buildingBlockKey === 'BLOCK_KEY3') {
+                  if (item.type === 'community') {
+                    item.price.should.be.eql(340);
+                  } else if (item.type === 'topcoder_service') {
+                    item.price.should.be.eql(6789);
+                  } else if (item.type === 'fee') {
+                    item.price.should.be.eql(560);
+                  } else {
+                    return Promise.reject('estimation item type is not correct');
+                  }
+                } else {
+                  return Promise.reject('estimation building block key is not correct');
+                }
+                return Promise.resolve();
+              }));
+            }));
+
+            Promise.all(totalPromises).then(() => {
+              done();
+            }).catch(e => done(e));
           }
         });
     });

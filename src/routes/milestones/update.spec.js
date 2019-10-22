@@ -141,7 +141,7 @@ describe('UPDATE Milestone', () => {
                     startDate: '2018-05-13T00:00:00.000Z',
                     endDate: '2018-05-14T00:00:00.000Z',
                     completionDate: '2018-05-15T00:00:00.000Z',
-                    status: 'open',
+                    status: 'active',
                     type: 'type1',
                     details: {
                       detail1: {
@@ -166,7 +166,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 2',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
-                    status: 'open',
+                    status: 'reviewed',
                     type: 'type2',
                     order: 2,
                     plannedText: 'plannedText 2',
@@ -184,7 +184,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 3',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
-                    status: 'open',
+                    status: 'active',
                     type: 'type3',
                     order: 3,
                     plannedText: 'plannedText 3',
@@ -202,7 +202,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 4',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
-                    status: 'open',
+                    status: 'active',
                     type: 'type4',
                     order: 4,
                     plannedText: 'plannedText 4',
@@ -220,7 +220,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 5',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
-                    status: 'open',
+                    status: 'active',
                     type: 'type5',
                     order: 5,
                     plannedText: 'plannedText 5',
@@ -239,7 +239,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 6',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
-                    status: 'open',
+                    status: 'active',
                     type: 'type5',
                     order: 1,
                     plannedText: 'plannedText 6',
@@ -265,9 +265,8 @@ describe('UPDATE Milestone', () => {
     const body = {
       name: 'Milestone 1-updated',
       duration: 3,
-      completionDate: '2018-05-16T00:00:00.000Z',
       description: 'description-updated',
-      status: 'closed',
+      status: 'draft',
       type: 'type1-updated',
       details: {
         detail1: {
@@ -299,6 +298,30 @@ describe('UPDATE Milestone', () => {
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
         .send(body)
+        .expect(403, done);
+    });
+
+    it('should return 403 for non-admin member updating the completionDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.completionDate = '2019-01-16T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
+        .expect(403, done);
+    });
+
+    it('should return 403 for non-admin member updating the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
         .expect(403, done);
     });
 
@@ -488,12 +511,14 @@ describe('UPDATE Milestone', () => {
     });
 
     it('should return 200 for admin', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.completionDate = '2018-05-15T00:00:00.000Z';
       request(server)
         .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(body)
+        .send(newBody)
         .expect(200)
         .end((err, res) => {
           const resJson = res.body;
@@ -501,7 +526,7 @@ describe('UPDATE Milestone', () => {
           resJson.name.should.be.eql(body.name);
           resJson.description.should.be.eql(body.description);
           resJson.duration.should.be.eql(body.duration);
-          resJson.completionDate.should.be.eql(body.completionDate);
+          resJson.completionDate.should.be.eql(newBody.completionDate);
           resJson.status.should.be.eql(body.status);
           resJson.type.should.be.eql(body.type);
           resJson.details.should.be.eql({
@@ -521,6 +546,15 @@ describe('UPDATE Milestone', () => {
           should.exist(resJson.updatedAt);
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
+
+          // validate statusHistory
+          should.exist(resJson.statusHistory);
+          resJson.statusHistory.should.be.an('array');
+          resJson.statusHistory.length.should.be.eql(2);
+          resJson.statusHistory.forEach((statusHistory) => {
+            statusHistory.reference.should.be.eql('milestone');
+            statusHistory.referenceId.should.be.eql(resJson.id);
+          });
 
           // eslint-disable-next-line no-unused-expressions
           server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_UPDATED).should.be.true;
@@ -711,7 +745,7 @@ describe('UPDATE Milestone', () => {
           name: 'Milestone 7',
           duration: 3,
           startDate: '2018-05-14T00:00:00.000Z',
-          status: 'open',
+          status: 'active',
           type: 'type7',
           order: 3,
           plannedText: 'plannedText 7',
@@ -729,7 +763,7 @@ describe('UPDATE Milestone', () => {
           name: 'Milestone 8',
           duration: 3,
           startDate: '2018-05-14T00:00:00.000Z',
-          status: 'open',
+          status: 'active',
           type: 'type7',
           order: 4,
           plannedText: 'plannedText 8',
@@ -784,7 +818,7 @@ describe('UPDATE Milestone', () => {
           name: 'Milestone 7',
           duration: 3,
           startDate: '2018-05-14T00:00:00.000Z',
-          status: 'open',
+          status: 'active',
           type: 'type7',
           order: 2,
           plannedText: 'plannedText 7',
@@ -802,7 +836,7 @@ describe('UPDATE Milestone', () => {
           name: 'Milestone 8',
           duration: 3,
           startDate: '2018-05-14T00:00:00.000Z',
-          status: 'open',
+          status: 'active',
           type: 'type7',
           order: 4,
           plannedText: 'plannedText 8',
@@ -1050,6 +1084,30 @@ describe('UPDATE Milestone', () => {
         .end(done);
     });
 
+    it('should return 200 for admin updating the completionDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.completionDate = '2018-05-16T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for admin updating the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200, done);
+    });
+
     it('should return 200 for connect manager', (done) => {
       request(server)
         .patch('/v5/timelines/1/milestones/1')
@@ -1081,6 +1139,146 @@ describe('UPDATE Milestone', () => {
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    it('should return 400 if try to pause and statusComment is missed', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.status = 'paused';
+      request(server)
+      .patch('/v5/timelines/1/milestones/1')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(400, done);
+    });
+
+    it('should return 400 if try to pause not active milestone', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.status = 'paused';
+      newBody.statusComment = 'milestone paused';
+      request(server)
+      .patch('/v5/timelines/1/milestones/2')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(400, done);
+    });
+
+    it('should return 200 if try to pause and should have one status history created', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.status = 'paused';
+      newBody.statusComment = 'milestone paused';
+      request(server)
+      .patch('/v5/timelines/1/milestones/1')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(200)
+      .end((err) => {
+        if (err) {
+          done(err);
+        } else {
+          models.Milestone.findByPk(1).then((milestone) => {
+            milestone.status.should.be.eql('paused');
+            return models.StatusHistory.findAll({
+              where: {
+                reference: 'milestone',
+                referenceId: milestone.id,
+                status: milestone.status,
+                comment: 'milestone paused',
+              },
+              paranoid: false,
+            }).then((statusHistories) => {
+              statusHistories.length.should.be.eql(1);
+              done();
+            });
+          });
+        }
+      });
+    });
+
+    it('should return 400 if try to resume not paused milestone', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.status = 'resume';
+      request(server)
+      .patch('/v5/timelines/1/milestones/2')
+      .set({
+        Authorization: `Bearer ${testUtil.jwts.admin}`,
+      })
+      .send(newBody)
+      .expect(400, done);
+    });
+
+    it('should return 200 if try to resume then status should update to last status and ' +
+        'should have one status history created', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.status = 'resume';
+      newBody.statusComment = 'new comment';
+      models.Milestone.bulkCreate([
+        {
+          id: 7,
+          timelineId: 1,
+          name: 'Milestone 1 [paused]',
+          duration: 2,
+          startDate: '2018-05-13T00:00:00.000Z',
+          endDate: '2018-05-14T00:00:00.000Z',
+          completionDate: '2018-05-16T00:00:00.000Z',
+          status: 'active',
+          type: 'type1',
+          details: {
+            detail1: {
+              subDetail1A: 1,
+              subDetail1B: 2,
+            },
+            detail2: [1, 2, 3],
+          },
+          order: 1,
+          plannedText: 'plannedText 1',
+          activeText: 'activeText 1',
+          completedText: 'completedText 1',
+          blockedText: 'blockedText 1',
+          createdBy: 1,
+          updatedBy: 2,
+          createdAt: '2018-05-11T00:00:00.000Z',
+          updatedAt: '2018-05-11T00:00:00.000Z',
+        },
+      ]).then(() => models.Milestone.findByPk(7)
+        // pause milestone before resume
+        .then(milestone => milestone.update(_.assign({}, milestone.toJSON(), { status: 'paused' }))),
+      ).then(() => {
+        request(server)
+        .patch('/v5/timelines/1/milestones/7')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            models.Milestone.findByPk(7).then((milestone) => {
+              milestone.status.should.be.eql('active');
+
+              return models.StatusHistory.findAll({
+                where: {
+                  reference: 'milestone',
+                  referenceId: milestone.id,
+                  status: 'active',
+                  comment: 'new comment',
+                },
+                paranoid: false,
+              }).then((statusHistories) => {
+                statusHistories.length.should.be.eql(1);
+                done();
+              }).catch(done);
+            }).catch(done);
+          }
+        });
+      });
     });
 
     describe('Bus api', () => {

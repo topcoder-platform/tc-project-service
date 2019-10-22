@@ -8,8 +8,10 @@ const projectMemberDelete = require('./projectMember.delete');
 const projectAdmin = require('./admin.ops');
 const projectAttachmentUpdate = require('./project.updateAttachment');
 const projectAttachmentDownload = require('./project.downloadAttachment');
-// const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
+const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
+const workManagementPermissions = require('./workManagementForTemplate');
+const projectSettingEdit = require('./projectSetting.edit');
 
 module.exports = () => {
   Authorizer.setDeniedStatusCode(403);
@@ -100,4 +102,40 @@ module.exports = () => {
   Authorizer.setPolicy('planConfig.edit', projectAdmin);
   Authorizer.setPolicy('planConfig.delete', projectAdmin);
   Authorizer.setPolicy('planConfig.view', true); // anyone can view price config
+
+  // Work stream
+  Authorizer.setPolicy('workStream.create', projectAdmin);
+  Authorizer.setPolicy('workStream.edit', workManagementPermissions('workStream.edit'));
+  Authorizer.setPolicy('workStream.delete', projectAdmin);
+  Authorizer.setPolicy('workStream.view', projectView);
+
+  // Work
+  Authorizer.setPolicy('work.create', workManagementPermissions('work.create'));
+  Authorizer.setPolicy('work.edit', workManagementPermissions('work.edit'));
+  Authorizer.setPolicy('work.delete', workManagementPermissions('work.delete'));
+  Authorizer.setPolicy('work.view', projectView);
+
+  // Work item
+  Authorizer.setPolicy('workItem.create', workManagementPermissions('workItem.create'));
+  Authorizer.setPolicy('workItem.edit', workManagementPermissions('workItem.edit'));
+  Authorizer.setPolicy('workItem.delete', workManagementPermissions('workItem.delete'));
+  Authorizer.setPolicy('workItem.view', projectView);
+
+  // Work management permission
+  Authorizer.setPolicy('workManagementPermission.create', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.edit', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.delete', projectAdmin);
+  Authorizer.setPolicy('workManagementPermission.view', projectAdmin);
+
+  // Project Permissions
+  Authorizer.setPolicy('permissions.view', projectView);
+
+  // Project Settings
+  Authorizer.setPolicy('projectSetting.create', connectManagerOrAdmin);
+  Authorizer.setPolicy('projectSetting.edit', projectSettingEdit);
+  Authorizer.setPolicy('projectSetting.delete', connectManagerOrAdmin);
+  Authorizer.setPolicy('projectSetting.view', projectView);
+
+  // Project Estimation Items
+  Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
 };

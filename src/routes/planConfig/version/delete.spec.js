@@ -70,7 +70,8 @@ describe('DELETE planConfig version', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
         .delete('/v5/projects/metadata/planConfig/dev/versions/1')
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 403 for member', (done) => {
@@ -79,7 +80,8 @@ describe('DELETE planConfig version', () => {
       .set({
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 403 for copilot', (done) => {
@@ -88,7 +90,8 @@ describe('DELETE planConfig version', () => {
       .set({
         Authorization: `Bearer ${testUtil.jwts.copilot}`,
       })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 403 for manager', (done) => {
@@ -97,7 +100,8 @@ describe('DELETE planConfig version', () => {
       .set({
         Authorization: `Bearer ${testUtil.jwts.manager}`,
       })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 404 for non-existed key', (done) => {
@@ -106,7 +110,8 @@ describe('DELETE planConfig version', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(404, done);
+        .expect(404)
+        .end(done);
     });
 
     it('should return 404 for non-existed version', (done) => {
@@ -115,7 +120,8 @@ describe('DELETE planConfig version', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(404, done);
+        .expect(404)
+        .end(done);
     });
 
     it('should return 204, for admin', (done) => {

@@ -16,7 +16,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 const expectAfterDelete = (timelineId, id, err, next) => {
   if (err) throw err;
-  setTimeout(() =>
   models.Milestone.findOne({
     where: {
       timelineId,
@@ -30,9 +29,15 @@ const expectAfterDelete = (timelineId, id, err, next) => {
       } else {
         chai.assert.isNotNull(res.deletedAt);
         chai.assert.isNotNull(res.deletedBy);
+
+        request(server)
+          .get(`/v5/timelines/${timelineId}/milestones/${id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(404, next);
       }
-      next();
-    }), 500);
+    });
 };
 
 describe('DELETE milestone', () => {
@@ -157,6 +162,7 @@ describe('DELETE milestone', () => {
                 // Create milestones
                 models.Milestone.bulkCreate([
                   {
+                    id: 1,
                     timelineId: 1,
                     name: 'milestone 1',
                     duration: 2,
@@ -179,6 +185,7 @@ describe('DELETE milestone', () => {
                     updatedBy: 2,
                   },
                   {
+                    id: 2,
                     timelineId: 1,
                     name: 'milestone 2',
                     duration: 3,
@@ -194,6 +201,7 @@ describe('DELETE milestone', () => {
                     updatedBy: 3,
                   },
                   {
+                    id: 3,
                     timelineId: 1,
                     name: 'milestone 3',
                     duration: 4,

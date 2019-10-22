@@ -152,7 +152,7 @@ describe('Phase Products', () => {
       request(server)
         .delete(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -162,7 +162,7 @@ describe('Phase Products', () => {
       request(server)
         .delete(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -172,7 +172,7 @@ describe('Phase Products', () => {
       request(server)
         .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -186,6 +186,60 @@ describe('Phase Products', () => {
         })
         .expect(204)
         .end(err => expectAfterDelete(projectId, phaseId, productId, err, done));
+    });
+
+    it('should return 204 if requested by admin', (done) => {
+      request(server)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+        })
+        .expect(204)
+        .end(done);
+    });
+
+    it('should return 204 if requested by manager which is a member', (done) => {
+      models.ProjectMember.create({
+        id: 3,
+        userId: testUtil.userIds.manager,
+        projectId,
+        role: 'manager',
+        isPrimary: false,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .expect(204)
+          .end(done);
+      });
+    });
+
+    it('should return 403 if requested by manager which is not a member', (done) => {
+      request(server)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .expect(403)
+        .end(done);
+    });
+
+    it('should return 403 if requested by non-member copilot', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, projectId },
+      }).then(() => {
+        request(server)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(403)
+        .end(done);
+      });
     });
 
     describe('Bus api', () => {

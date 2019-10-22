@@ -56,5 +56,18 @@
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
   "MAX_REVISION_NUMBER": 100,
   "UNIQUE_GMAIL_VALIDATION": false,
-  "pageSize": 20
+  "pageSize": 20,
+  "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]",
+  "SSO_REFCODES": "[]",
+  "lookerConfig": {
+    "BASE_URL": "",
+    "CLIENT_ID": "",
+    "CLIENT_SECRET": "",
+    "TOKEN": "TOKEN",
+    "USE_MOCK": "true",
+    "QUERIES": {
+      "REG_STATS": 1234,
+      "BUDGET": 123
+    }
+  }
 }

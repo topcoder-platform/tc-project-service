@@ -37,7 +37,45 @@ module.exports = (targetUrl, token) => {
       'Authorization': 'Bearer ' + token
     }
 
-    let promises = _(data.result.content.projectTypes).map(pt=>{
+    let promises
+
+    promises = _(data.result.content.forms).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
+      const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
+      return axios
+        .post(destUrl + `metadata/form/${pt.key}/versions`, param, {headers:headers})
+        .catch((err) => {
+          const errMessage = _.get(err, 'response.data.message', '');
+          console.log(`Failed to create form with key=${pt.key} version=${pt.version}.`, errMessage)
+        })
+    });
+
+    await Promise.all(promises);
+
+    promises = _(data.result.content.planConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
+      const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
+      return axios
+        .post(destUrl + `metadata/planConfig/${pt.key}/versions`, param, {headers:headers})
+        .catch((err) => {
+          const errMessage = _.get(err, 'response.data.message', '');
+          console.log(`Failed to create planConfig with key=${pt.key} version=${pt.version}.`, errMessage)
+        })
+    });
+
+    await Promise.all(promises);
+
+    promises = _(data.result.content.priceConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
+      const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
+      return axios
+        .post(destUrl + `metadata/priceConfig/${pt.key}/versions`, param, {headers:headers})
+        .catch((err) => {
+          const errMessage = _.get(err, 'response.data.message', '');
+          console.log(`Failed to create priceConfig with key=${pt.key} version=${pt.version}.`, errMessage)
+        })
+    });
+
+    await Promise.all(promises);
+
+    promises = _(data.result.content.projectTypes).map(pt=>{
       return axios
         .post(destUrl+'metadata/projectTypes', pt, {headers:headers})
         .catch((err) => {

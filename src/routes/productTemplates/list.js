@@ -16,7 +16,7 @@ module.exports = [
       if (!util.isValidFilter(filters, ['productKey'])) {
         util.handleError('Invalid filters', null, req, next);
       }
-      const where = { deletedAt: { $eq: null } };
+      const where = { deletedAt: { $eq: null }, disabled: false };
       if (filters.productKey) {
         where.productKey = { $eq: filters.productKey };
       }

@@ -30,11 +30,10 @@ module.exports = [
       id: req.params.milestoneId,
     };
 
-    return models.sequelize.transaction(tx =>
+    return models.sequelize.transaction(() =>
       // Find the milestone
       models.Milestone.findOne({
         where,
-        transaction: tx,
       })
         .then((milestone) => {
           // Not found
@@ -45,9 +44,10 @@ module.exports = [
           }
 
           // Update the deletedBy, and soft delete
-          return milestone.update({ deletedBy: req.authUser.userId }, { transaction: tx })
-            .then(() => milestone.destroy({ transaction: tx }));
-        })
+          return milestone.update({ deletedBy: req.authUser.userId })
+            .then(() => milestone.destroy());
+        }),
+    )
     .then((deleted) => {
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', deleted.id);
@@ -67,6 +67,6 @@ module.exports = [
       res.status(204).end();
       return Promise.resolve();
     })
-    .catch(next));
+    .catch(next);
   },
 ];

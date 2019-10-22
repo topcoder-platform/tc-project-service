@@ -1,6 +1,5 @@
 import config from 'config';
 import _ from 'lodash';
-// import util from '../util';
 
 const Promise = require('bluebird');
 const axios = require('axios');
@@ -141,19 +140,19 @@ function deletePosts(topicId, postIds, logger) {
  * Fetches the topic of given phase of the project.
  *
  * @param {Integer} projectId id of the project
- * @param {Integer} phaseId id of the phase of the project
+ * @param {String} tag tag
  * @param {Object} logger object
  * @return {Promise} topic promise
  */
-function getPhaseTopic(projectId, phaseId, logger) {
-  logger.debug(`getPhaseTopic for projectId: ${projectId} phaseId: ${phaseId}`);
+function getTopicByTag(projectId, tag, logger) {
+  logger.debug(`getTopicByTag for projectId: ${projectId} tag: ${tag}`);
   return getClient(logger).then((msgClient) => {
-    logger.debug(`calling message service for fetching phaseId#${phaseId}`);
-    const encodedFilter = encodeURIComponent(`reference=project&referenceId=${projectId}&tag=phase#${phaseId}`);
+    logger.debug(`calling message service for fetching ${tag}`);
+    const encodedFilter = encodeURIComponent(`reference=project&referenceId=${projectId}&tag=${tag}`);
     return msgClient.get(`/topics/list/db?filter=${encodedFilter}`)
     .then((resp) => {
-      logger.debug('Fetched phase topic', resp);
       const topics = _.get(resp.data, 'result.content', []);
+      logger.debug(`Fetched ${topics.length} topics`);
       if (topics && topics.length > 0) {
         return topics[0];
       }
@@ -181,6 +180,7 @@ module.exports = {
   createTopic,
   updateTopic,
   deletePosts,
-  getPhaseTopic,
+  getTopicByTag,
   deleteTopic,
+  getClient,
 };

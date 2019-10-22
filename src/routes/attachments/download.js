@@ -61,6 +61,9 @@ module.exports = [
             err.status = 404;
             return Promise.reject(err);
           }
+          if (process.env.NODE_ENV === 'development' && config.get('enableFileUpload') === 'false') {
+            return ['dummy://url'];
+          }
 
           return getFileDownloadUrl(req, attachment.filePath);
         })
@@ -76,6 +79,7 @@ module.exports = [
       return getFileDownloadUrl(req, attachment.filePath);
     })
     .then((result) => {
+      req.log.debug('getFileDownloadUrl result: ', JSON.stringify(result));
       const url = result[1];
       return res.json({ url });
     })

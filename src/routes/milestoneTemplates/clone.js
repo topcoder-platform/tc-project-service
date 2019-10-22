@@ -28,7 +28,7 @@ module.exports = [
   (req, res, next) => {
     let result;
 
-    return models.sequelize.transaction(tx => // eslint-disable-line no-unused-vars
+    return models.sequelize.transaction(() =>
       // Find the product template
       models.MilestoneTemplate.findAll({
         where: {

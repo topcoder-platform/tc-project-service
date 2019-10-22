@@ -41,10 +41,10 @@ module.exports = [
     });
 
     // Check if duplicated key
-    return models.ProjectType.findByPk(req.body.key)
+    return models.ProjectType.findByPk(req.body.key, { paranoid: false })
       .then((existing) => {
         if (existing) {
-          const apiErr = new Error(`Project type already exists for key ${req.params.key}`);
+          const apiErr = new Error(`Project type already exists (may be deleted) for key ${req.body.key}`);
           apiErr.status = 400;
           return Promise.reject(apiErr);
         }

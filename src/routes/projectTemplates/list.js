@@ -10,13 +10,24 @@ const permissions = tcMiddleware.permissions;
 module.exports = [
   permissions('projectTemplate.view'),
   (req, res, next) => {
-    util.fetchFromES('projectTemplates')
+    util.fetchFromES('projectTemplates', {
+      query: {
+        nested: {
+          path: 'projectTemplates',
+          query: {
+            match: { 'projectTemplates.disabled': false },
+          },
+          inner_hits: {},
+        },
+      },
+    }, 'metadata')
     .then((data) => {
       if (data.projectTemplates.length === 0) {
         req.log.debug('No projectTemplate found in ES');
         models.ProjectTemplate.findAll({
           where: {
             deletedAt: { $eq: null },
+            disabled: false,
           },
           attributes: { exclude: ['deletedAt', 'deletedBy'] },
           raw: true,

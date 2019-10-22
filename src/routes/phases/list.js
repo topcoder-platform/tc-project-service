@@ -64,7 +64,7 @@ module.exports = [
               if (!project) {
                 const apiErr = new Error(`active project not found for project id ${projectId}`);
                 apiErr.status = 404;
-                next(apiErr);
+                return next(apiErr);
               }
 
               // Get the phases

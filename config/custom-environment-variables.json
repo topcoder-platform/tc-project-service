@@ -52,5 +52,17 @@
   "accountsAppUrl": "ACCOUNTS_APP_URL",
   "inviteEmailSubject": "INVITE_EMAIL_SUBJECT",
   "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE",
-  "pageSize": "PAGE_SIZE"
+  "pageSize": "PAGE_SIZE",
+  "SSO_REFCODES": "SSO_REFCODES",
+  "lookerConfig": {
+    "BASE_URL": "LOOKER_API_BASE_URL",
+    "CLIENT_ID": "LOOKER_API_CLIENT_ID",
+    "CLIENT_SECRET": "LOOKER_API_CLIENT_SECRET",
+    "TOKEN": "TOKEN",
+    "USE_MOCK": "LOOKER_API_ENABLE_MOCK",
+    "QUERIES": {
+      "REG_STATS": "LOOKER_API_REG_STATS_QUERY_ID",
+      "BUDGET": "LOOKER_API_BUDGET_QUERY_ID"
+    }
+  }
 }

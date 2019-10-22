@@ -26,6 +26,10 @@ function getUsedModel() {
     priceConfig: { },
   };
   const query = {
+    where: {
+      deletedAt: { $eq: null },
+      disabled: false,
+    },
     attributes: { exclude: ['deletedAt', 'deletedBy'] },
     raw: true,
   };
@@ -73,6 +77,14 @@ module.exports = [
       attributes: { exclude: ['deletedAt', 'deletedBy'] },
       raw: true,
     };
+    const projectProductTemplateQuery = {
+      where: {
+        deletedAt: { $eq: null },
+        disabled: false,
+      },
+      attributes: { exclude: ['deletedAt', 'deletedBy'] },
+      raw: true,
+    };
 
     // when user query with includeAllReferred, return result with all used version of
     // Form, PriceConfig, PlanConfig
@@ -92,8 +104,8 @@ module.exports = [
         }).then((latestVersionModels) => {
           latestVersion = latestVersionModels;
           return Promise.all([
-            models.ProjectTemplate.findAll(query),
-            models.ProductTemplate.findAll(query),
+            models.ProjectTemplate.findAll(projectProductTemplateQuery),
+            models.ProductTemplate.findAll(projectProductTemplateQuery),
             models.MilestoneTemplate.findAll(query),
             models.ProjectType.findAll(query),
             models.ProductCategory.findAll(query),
@@ -116,14 +128,15 @@ module.exports = [
         .catch(next);
     }
     return Promise.all([
-      models.ProjectTemplate.findAll(query),
-      models.ProductTemplate.findAll(query),
+      models.ProjectTemplate.findAll(projectProductTemplateQuery),
+      models.ProductTemplate.findAll(projectProductTemplateQuery),
       models.MilestoneTemplate.findAll(query),
       models.ProjectType.findAll(query),
       models.ProductCategory.findAll(query),
       models.Form.latestVersion(),
       models.PriceConfig.latestVersion(),
       models.PlanConfig.latestVersion(),
+      models.BuildingBlock.findAll(query),
     ])
       .then((results) => {
         res.json({
@@ -135,6 +148,7 @@ module.exports = [
           forms: results[5],
           priceConfigs: results[6],
           planConfigs: results[7],
+          buildingBlocks: results[8],
         });
       })
       .catch(next);

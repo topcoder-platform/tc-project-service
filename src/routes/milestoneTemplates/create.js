@@ -48,9 +48,9 @@ module.exports = [
       updatedBy: req.authUser.userId,
     });
     let result;
-    return models.sequelize.transaction(tx =>
+    return models.sequelize.transaction(() =>
       // Create the milestone template
-      models.MilestoneTemplate.create(entity, { transaction: tx })
+      models.MilestoneTemplate.create(entity)
         .then((createdEntity) => {
           // Omit deletedAt and deletedBy
           result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
@@ -64,7 +64,6 @@ module.exports = [
               id: { $ne: result.id },
               order: { $gte: result.order },
             },
-            transaction: tx,
           });
         })
         .then((updatedCount) => {
@@ -77,7 +76,6 @@ module.exports = [
               },
               order: [['updatedAt', 'DESC']],
               limit: updatedCount[0],
-              transaction: tx,
             });
           }
           return Promise.resolve();

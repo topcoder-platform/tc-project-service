@@ -44,15 +44,7 @@ module.exports = [
   .then((data) => {
     if (data.length === 0) {
       req.log.debug('No planConfig found in ES');
-      models.PlanConfig.findOne({
-        where: {
-          key: req.params.key,
-          version: req.params.version,
-        },
-        order: [['revision', 'DESC']],
-        limit: 1,
-        attributes: { exclude: ['deletedAt', 'deletedBy'] },
-      })
+      return models.PlanConfig.findOneWithLatestRevision(req.params)
         .then((planConfig) => {
           // Not found
           if (!planConfig) {
@@ -64,10 +56,10 @@ module.exports = [
           return Promise.resolve();
         })
         .catch(next);
-    } else {
-      req.log.debug('planConfigs found in ES');
-      res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
     }
+    req.log.debug('planConfigs found in ES');
+    res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+    return Promise.resolve();
   })
   .catch(next),
 ];

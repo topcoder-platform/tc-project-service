@@ -92,7 +92,8 @@ describe('GET a latest version of specific key of PlanConfig', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
       .get('/v5/projects/metadata/planConfig/dev')
-      .expect(403, done);
+      .expect(403)
+      .end(done);
     });
 
     it('should return 200 for connect admin', (done) => {
@@ -121,7 +122,8 @@ describe('GET a latest version of specific key of PlanConfig', () => {
       .set({
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
-        .expect(200, done);
+        .expect(200)
+        .end(done);
     });
 
     it('should return 200 for copilot', (done) => {
@@ -130,7 +132,8 @@ describe('GET a latest version of specific key of PlanConfig', () => {
       .set({
         Authorization: `Bearer ${testUtil.jwts.copilot}`,
       })
-        .expect(200, done);
+        .expect(200)
+        .end(done);
     });
   });
 });

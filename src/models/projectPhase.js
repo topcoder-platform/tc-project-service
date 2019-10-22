@@ -4,6 +4,8 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
   const ProjectPhase = sequelize.define('ProjectPhase', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: true },
+    description: { type: DataTypes.STRING, allowNull: true },
+    requirements: { type: DataTypes.STRING, allowNull: true },
     status: { type: DataTypes.STRING, allowNull: true },
     startDate: { type: DataTypes.DATE, allowNull: true },
     endDate: { type: DataTypes.DATE, allowNull: true },
@@ -40,6 +42,7 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
 
   ProjectPhase.associate = (models) => {
     ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
+    ProjectPhase.belongsToMany(models.WorkStream, { through: models.PhaseWorkStream, foreignKey: 'phaseId' });
   };
 
   /**
@@ -53,22 +56,28 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
    * @return {Object} the result rows and count
    */
   ProjectPhase.search = async (parameters = {}, log) => {
-    let fieldsStr = _.map(parameters.fields, field => `project_phases."${field}"`);
-    fieldsStr = `${fieldsStr.join(',')}`;
-    const replacements = {
-      projectId: parameters.projectId,
-    };
-    let dbQuery = `SELECT ${fieldsStr} FROM project_phases WHERE project_phases."projectId" = :projectId`;
+    // ordering
+    const orderBy = [];
     if (_.has(parameters, 'sortField') && _.has(parameters, 'sortType')) {
-      dbQuery = `${dbQuery} ORDER BY project_phases."${parameters.sortField}" ${parameters.sortType}`;
+      orderBy.push([parameters.sortField, parameters.sortType]);
     }
-    return sequelize.query(dbQuery,
-      { type: sequelize.QueryTypes.SELECT,
-        logging: (str) => { log.debug(str); },
-        replacements,
-        raw: true,
-      })
-      .then(phases => ({ rows: phases, count: phases.length }));
+    // find options
+    const options = {
+      where: {
+        projectId: parameters.projectId,
+      },
+      order: orderBy,
+      logging: (str) => { log.debug(str); },
+    };
+    // select fields
+    if (_.has(parameters, 'fields')) {
+      _.set(options, 'attributes', parameters.fields.filter(e => e !== 'products'));
+      if (parameters.fields.includes('products')) {
+        _.set(options, 'include', [{ model: this.sequelize.models.PhaseProduct, as: 'products' }]);
+      }
+    }
+
+    return ProjectPhase.findAll(options).then(phases => ({ rows: phases, count: phases.length }));
   };
 
   return ProjectPhase;

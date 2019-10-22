@@ -55,7 +55,8 @@ describe('UPDATE PlanConfig version', () => {
       request(server)
         .patch('/v5/projects/metadata/planConfig/dev/versions/1')
         .send(body)
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 400 if missing config', (done) => {
@@ -69,7 +70,8 @@ describe('UPDATE PlanConfig version', () => {
       })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(400, done);
+        .expect(400)
+        .end(done);
     });
 
     it('should return 201 for admin', (done) => {
@@ -105,7 +107,8 @@ describe('UPDATE PlanConfig version', () => {
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
         .send(body)
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
   });
 });

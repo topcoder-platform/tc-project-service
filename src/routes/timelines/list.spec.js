@@ -3,7 +3,7 @@
  */
 import chai from 'chai';
 import request from 'supertest';
-import sleep from 'sleep';
+// import sleep from 'sleep';
 import config from 'config';
 import _ from 'lodash';
 
@@ -182,25 +182,34 @@ describe('LIST timelines', () => {
                ]))
               .then(() =>
                 // Create timelines
-                 models.Timeline.bulkCreate(timelines, { returning: true }))
-              .then(createdTimelines =>
+                models.Timeline.bulkCreate(timelines, { returning: true })
+                  .then(createdTimelines => (
+                    // create milestones after timelines
+                    models.Milestone.bulkCreate(milestones))
+                      .then(createdMilestones => [createdTimelines, createdMilestones]),
+                  ),
+              ).then(([createdTimelines, createdMilestones]) =>
                 // Index to ES
-                 Promise.all(_.map(createdTimelines, (createdTimeline) => {
-                   const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
-                   timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
-                   if (timelineJson.id === 1) {
-                     timelineJson.milestones = milestones;
-                   }
-                   return server.services.es.index({
-                     index: ES_TIMELINE_INDEX,
-                     type: ES_TIMELINE_TYPE,
-                     id: timelineJson.id,
-                     body: timelineJson,
-                   });
-                 }))
+                Promise.all(_.map(createdTimelines, (createdTimeline) => {
+                  const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
+                  timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
+                  if (timelineJson.id === 1) {
+                    timelineJson.milestones = _.map(
+                      createdMilestones,
+                      cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'),
+                    );
+                  }
+
+                  return server.services.es.index({
+                    index: ES_TIMELINE_INDEX,
+                    type: ES_TIMELINE_TYPE,
+                    id: timelineJson.id,
+                    body: timelineJson,
+                  });
+                }))
                   .then(() => {
                     // sleep for some time, let elasticsearch indices be settled
-                    sleep.sleep(5);
+                    // sleep.sleep(5);
                     done();
                   }));
           });
@@ -278,6 +287,16 @@ describe('LIST timelines', () => {
 
           // Milestones
           resJson[0].milestones.should.have.length(2);
+          resJson[0].milestones.forEach((milestone) => {
+            // validate statusHistory
+            should.exist(milestone.statusHistory);
+            milestone.statusHistory.should.be.an('array');
+            milestone.statusHistory.length.should.be.eql(1);
+            milestone.statusHistory.forEach((statusHistory) => {
+              statusHistory.reference.should.be.eql('milestone');
+              statusHistory.referenceId.should.be.eql(milestone.id);
+            });
+          });
 
           done();
         });

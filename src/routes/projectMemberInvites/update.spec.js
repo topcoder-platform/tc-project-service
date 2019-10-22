@@ -306,16 +306,7 @@ describe('Project member invite update', () => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: [{
-                }],
-              },
-            },
+            data: {},
           }),
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);

@@ -177,7 +177,7 @@ describe('Phase Products', () => {
       request(server)
         .post(`/v5/projects/99999/phases/${phaseId}/products`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
@@ -188,7 +188,7 @@ describe('Phase Products', () => {
       request(server)
         .post(`/v5/projects/${projectId}/phases/99999/products`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
@@ -218,6 +218,68 @@ describe('Phase Products', () => {
             done();
           }
         });
+    });
+
+    it('should return 201 if requested by admin', (done) => {
+      request(server)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+        })
+        .send(body)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end(done);
+    });
+
+    it('should return 201 if requested by manager which is a member', (done) => {
+      models.ProjectMember.create({
+        id: 3,
+        userId: testUtil.userIds.manager,
+        projectId,
+        role: 'manager',
+        isPrimary: false,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end(done);
+      });
+    });
+
+    it('should return 403 if requested by manager which is not a member', (done) => {
+      request(server)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(body)
+        .expect('Content-Type', /json/)
+        .expect(403)
+        .end(done);
+    });
+
+    it('should return 403 if requested by non-member copilot', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, projectId },
+      }).then(() => {
+        request(server)
+          .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(403)
+          .end(done);
+      });
     });
 
     describe('Bus api', () => {

@@ -1,4 +1,5 @@
 import util from '../../src/tests/util';
+import models from '../../src/models';
 
 const axios = require('axios');
 const Promise = require('bluebird');
@@ -59,6 +60,21 @@ module.exports = (targetUrl, token) => {
             console.error(`Project #${projectId}: Failed to update project status: ${ex.message}`);
           });
         }
+
+        await models.ProjectEstimation.create({
+          projectId,
+          buildingBlockKey: 'BLOCK_KEY',
+          conditions: '( HAS_DEV_DELIVERABLE && ONLY_ONE_OS_MOBILE && CA_NEEDED )',
+          price: 6500.50,
+          quantity: 10,
+          minTime: 35,
+          maxTime: 35,
+          metadata: {
+            deliverable: 'dev-qa',
+          },
+          createdBy: 1,
+          updatedBy: 1,
+        });
 
         // creating invitations
         if (Array.isArray(invites)) {

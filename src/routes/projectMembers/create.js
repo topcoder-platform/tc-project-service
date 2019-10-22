@@ -16,7 +16,15 @@ const permissions = tcMiddleware.permissions;
 const createProjectMemberValidations = {
   body: Joi.object().keys({
     role: Joi.any()
-          .valid(PROJECT_MEMBER_ROLE.MANAGER, PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER, PROJECT_MEMBER_ROLE.COPILOT),
+      .valid(
+        PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
+        PROJECT_MEMBER_ROLE.COPILOT,
+        PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+        PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+        PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+        PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
+    ),
   }),
 };
 
@@ -36,9 +44,49 @@ module.exports = [
         return next(err);
       }
 
+      if (PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT === targetRole &&
+          !util.hasRoles(req, [USER_ROLE.SOLUTION_ARCHITECT])) {
+        const err = new Error(`Only solution architect is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+
+      if (PROJECT_MEMBER_ROLE.PROJECT_MANAGER === targetRole &&
+          !util.hasRoles(req, [USER_ROLE.PROJECT_MANAGER])) {
+        const err = new Error(`Only project manager is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+
+      if (PROJECT_MEMBER_ROLE.PROGRAM_MANAGER === targetRole &&
+          !util.hasRoles(req, [USER_ROLE.PROGRAM_MANAGER])) {
+        const err = new Error(`Only program manager is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+
+      if (PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE === targetRole &&
+          !util.hasRoles(req, [USER_ROLE.ACCOUNT_EXECUTIVE])) {
+        const err = new Error(`Only account executive is able to join as ${targetRole}`);
+        err.status = 401;
+        return next(err);
+      }
+
       if (PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER === targetRole &&
-        !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ACCOUNT_MANAGER])) {
-        const err = new Error(`Only manager  or account manager is able to join as ${targetRole}`);
+        !util.hasRoles(req, [
+          USER_ROLE.MANAGER,
+          USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
+          USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
+          USER_ROLE.PRESALES,
+          USER_ROLE.ACCOUNT_EXECUTIVE,
+          USER_ROLE.PROGRAM_MANAGER,
+          USER_ROLE.SOLUTION_ARCHITECT,
+          USER_ROLE.PROJECT_MANAGER,
+        ])) {
+        const err = new Error(
+            // eslint-disable-next-line max-len
+            `Only manager, account manager, business development representative, account executive, program manager, project manager, solution architect, or presales are able to join as ${targetRole}`,
+        );
         err.status = 401;
         return next(err);
       }
@@ -50,10 +98,22 @@ module.exports = [
       }
     } else if (util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.MANAGER;
-    } else if (util.hasRoles(req, [USER_ROLE.TOPCODER_ACCOUNT_MANAGER])) {
+    } else if (util.hasRoles(req, [
+      USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
+      USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
+      USER_ROLE.PRESALES,
+    ])) {
       targetRole = PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER;
     } else if (util.hasRoles(req, [USER_ROLE.COPILOT, USER_ROLE.CONNECT_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.COPILOT;
+    } else if (util.hasRoles(req, [USER_ROLE.ACCOUNT_EXECUTIVE])) {
+      targetRole = PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE;
+    } else if (util.hasRoles(req, [USER_ROLE.PROGRAM_MANAGER])) {
+      targetRole = PROJECT_MEMBER_ROLE.PROGRAM_MANAGER;
+    } else if (util.hasRoles(req, [USER_ROLE.SOLUTION_ARCHITECT])) {
+      targetRole = PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT;
+    } else if (util.hasRoles(req, [USER_ROLE.PROJECT_MANAGER])) {
+      targetRole = PROJECT_MEMBER_ROLE.PROJECT_MANAGER;
     } else {
       const err = new Error('Only copilot or manager is able to call this endpoint');
       err.status = 401;

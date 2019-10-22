@@ -26,6 +26,7 @@ const projectTemplates = [
     priceConfig: { key: 'key1', version: 1 },
     createdBy: 1,
     updatedBy: 1,
+    disabled: false,
   },
 ];
 const productTemplates = [
@@ -111,7 +112,7 @@ const forms = [
   {
     key: 'productKey 1',
     config: {
-      questions: [{
+      sections: [{
         id: 'appDefinition',
         title: 'Sample Project',
         required: true,
@@ -178,6 +179,31 @@ const planConfigs = [
   },
 ];
 
+const buildingBlocks = [
+  {
+    key: 'key1',
+    config: {
+      hello: 'world',
+    },
+    privateConfig: {
+      message: 'you should not see this',
+    },
+    createdBy: 1,
+    updatedBy: 1,
+  },
+  {
+    key: 'key2',
+    config: {
+      hello: 'topcoder',
+    },
+    privateConfig: {
+      message: 'you should not see this',
+    },
+    createdBy: 1,
+    updatedBy: 1,
+  },
+];
+
 describe('GET all metadata', () => {
   before((done) => {
     testUtil.clearDb()
@@ -188,7 +214,8 @@ describe('GET all metadata', () => {
     .then(() => models.ProductCategory.bulkCreate(productCategories))
     .then(() => models.Form.bulkCreate(forms))
     .then(() => models.PriceConfig.bulkCreate(priceConfigs))
-    .then(() => models.PlanConfig.bulkCreate(planConfigs).then(() => done()));
+    .then(() => models.PlanConfig.bulkCreate(planConfigs))
+    .then(() => models.BuildingBlock.bulkCreate(buildingBlocks).then(() => done()));
   });
 
   after((done) => {
@@ -287,6 +314,30 @@ describe('GET all metadata', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect(200, done);
+    });
+
+    it('should return correct building blocks for admin', (done) => {
+      request(server)
+        .get('/v5/projects/metadata')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.exist(resJson.buildingBlocks);
+            resJson.buildingBlocks.length.should.be.eql(2);
+            resJson.buildingBlocks[0].key.should.be.eql('key1');
+            should.not.exist(resJson.buildingBlocks[0].privateConfig);
+            resJson.buildingBlocks[1].key.should.be.eql('key2');
+            should.not.exist(resJson.buildingBlocks[1].privateConfig);
+            done();
+          }
+        });
     });
   });
 });
