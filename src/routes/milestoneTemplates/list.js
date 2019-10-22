@@ -14,7 +14,7 @@ module.exports = [
   permissions('milestoneTemplate.view'),
   (req, res, next) => {
     // Parse the sort query
-    let sort = req.query.sort ? req.query.sort : 'order';
+    let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'order';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }

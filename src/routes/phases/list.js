@@ -20,8 +20,8 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
 
     // Parse the fields string to determine what fields are to be returned
-    let fields = req.query.fields ? req.query.fields.split(',') : PHASE_ATTRIBUTES;
-    let sort = req.query.sort ? req.query.sort : 'startDate';
+    let fields = req.query.fields ? decodeURIComponent(req.query.fields).split(',') : PHASE_ATTRIBUTES;
+    let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'startDate';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }

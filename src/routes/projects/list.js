@@ -531,7 +531,7 @@ module.exports = [
     // handle filters
     let filters = _.omit(req.query, 'sort', 'perPage', 'page', 'fields');
 
-    let sort = req.query.sort ? req.query.sort : 'createdAt';
+    let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
