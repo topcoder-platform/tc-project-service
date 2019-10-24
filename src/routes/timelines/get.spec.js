@@ -3,6 +3,8 @@
  */
 import chai from 'chai';
 import request from 'supertest';
+import config from 'config';
+import _ from 'lodash';
 
 import models from '../../models';
 import server from '../../app';
@@ -10,6 +12,42 @@ import testUtil from '../../tests/util';
 
 const should = chai.should();
 
+const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
+const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
+
+const timelines = [
+  {
+    name: 'name 1',
+    description: 'description 1',
+    startDate: '2018-05-11T00:00:00.000Z',
+    endDate: '2018-05-12T00:00:00.000Z',
+    reference: 'project',
+    referenceId: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+  {
+    name: 'name 2',
+    description: 'description 2',
+    startDate: '2018-05-12T00:00:00.000Z',
+    endDate: '2018-05-13T00:00:00.000Z',
+    reference: 'phase',
+    referenceId: 1,
+    createdBy: 1,
+    updatedBy: 1,
+  },
+  {
+    name: 'name 3',
+    description: 'description 3',
+    startDate: '2018-05-13T00:00:00.000Z',
+    endDate: '2018-05-14T00:00:00.000Z',
+    reference: 'phase',
+    referenceId: 1,
+    createdBy: 1,
+    updatedBy: 1,
+    deletedAt: '2018-05-14T00:00:00.000Z',
+  },
+];
 const milestones = [
   {
     id: 1,
@@ -143,41 +181,37 @@ describe('GET timeline', () => {
               ]))
               .then(() =>
                 // Create timelines
-                models.Timeline.bulkCreate([
-                  {
-                    name: 'name 1',
-                    description: 'description 1',
-                    startDate: '2018-05-11T00:00:00.000Z',
-                    endDate: '2018-05-12T00:00:00.000Z',
-                    reference: 'project',
-                    referenceId: 1,
-                    createdBy: 1,
-                    updatedBy: 1,
-                  },
-                  {
-                    name: 'name 2',
-                    description: 'description 2',
-                    startDate: '2018-05-12T00:00:00.000Z',
-                    endDate: '2018-05-13T00:00:00.000Z',
-                    reference: 'phase',
-                    referenceId: 1,
-                    createdBy: 1,
-                    updatedBy: 1,
-                  },
-                  {
-                    name: 'name 3',
-                    description: 'description 3',
-                    startDate: '2018-05-13T00:00:00.000Z',
-                    endDate: '2018-05-14T00:00:00.000Z',
-                    reference: 'phase',
-                    referenceId: 1,
-                    createdBy: 1,
-                    updatedBy: 1,
-                    deletedAt: '2018-05-14T00:00:00.000Z',
-                  },
-                ]))
-              .then(() => models.Milestone.bulkCreate(milestones))
-              .then(() => done());
+                // Create timelines
+                models.Timeline.bulkCreate(timelines, { returning: true })
+                  .then(createdTimelines => (
+                    // create milestones after timelines
+                    models.Milestone.bulkCreate(milestones))
+                      .then(createdMilestones => [createdTimelines, createdMilestones]),
+                  ),
+              ).then(([createdTimelines, createdMilestones]) =>
+                // Index to ES
+                Promise.all(_.map(createdTimelines, async (createdTimeline) => {
+                  const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
+                  timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
+                  if (timelineJson.id === 1) {
+                    timelineJson.milestones = _.map(
+                      createdMilestones,
+                      cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'),
+                    );
+                  } else if (timelineJson.id === 2) {
+                    timelineJson.description = 'from ES';
+                  }
+
+                  await server.services.es.index({
+                    index: ES_TIMELINE_INDEX,
+                    type: ES_TIMELINE_TYPE,
+                    id: timelineJson.id,
+                    body: timelineJson,
+                  });
+                }))
+                  .then(() => {
+                    done();
+                  }));
           });
       });
   });
@@ -315,6 +349,54 @@ describe('GET timeline', () => {
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect(200, done);
+    });
+
+    it('should return data from ES when db param is not set', (done) => {
+      request(server)
+        .get('/v5/timelines/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body;
+          resJson.id.should.be.eql(2);
+          resJson.name.should.be.eql('name 2');
+          resJson.description.should.be.eql('from ES');
+
+          resJson.startDate.should.be.eql('2018-05-12T00:00:00.000Z');
+          resJson.endDate.should.be.eql('2018-05-13T00:00:00.000Z');
+          resJson.reference.should.be.eql('phase');
+          resJson.referenceId.should.be.eql(1);
+
+          resJson.createdBy.should.be.eql(1);
+          should.exist(resJson.createdAt);
+          resJson.updatedBy.should.be.eql(1);
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          should.not.exist(resJson.milestones);
+
+          done();
+        });
+    });
+
+    it('should return data from DB without calling ES when db param is set', (done) => {
+      request(server)
+        .get('/v5/timelines/2?db=true')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body;
+          resJson.id.should.be.eql(2);
+          resJson.name.should.be.eql('name 2');
+          resJson.description.should.be.eql('description 2');
+
+          done();
+        });
     });
   });
 });
