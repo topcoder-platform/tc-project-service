@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bd828203-8def-4648-bb54-e509c177ec71",
+		"_postman_id": "dd9afefd-0b47-4483-a4e5-33ca395791a3",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1427,177 +1427,6 @@
 					"response": []
 				},
 				{
-					"name": "List projects DB",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							]
-						},
-						"description": "List all the project with no filter. Default sort and limits are applied."
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with limit and offset",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?limit=1&offset=1",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "1"
-								},
-								{
-									"key": "offset",
-									"value": "1"
-								}
-							]
-						},
-						"description": "List all the project with no filter. Limit of 1 and offset of 1 is applied"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with filters applied",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?filter=type%3Dgeneric",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "filter",
-									"value": "type%3Dgeneric"
-								}
-							]
-						},
-						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with sort applied",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?sort=type%20desc",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "type%20desc"
-								}
-							]
-						},
-						"description": "List all the project with custom sort and no filter. Default sort and limits are applied. The sort string has to be url encoded. Sort is of type `key asc|desc`"
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB and return specific fields",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db?fields=id,name,description",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							],
-							"query": [
-								{
-									"key": "fields",
-									"value": "id,name,description"
-								}
-							]
-						},
-						"description": "List all the project with no filter. Default sort and limits are applied. The fields to return is specified as comma separated list. Only those fields should be returned."
-					},
-					"response": []
-				},
-				{
-					"name": "List projects DB with copilot token",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token-copilot-40051332}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"db"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "List projects",
 					"request": {
 						"method": "GET",
@@ -2373,39 +2202,6 @@
 					"response": []
 				},
 				{
-					"name": "Create workstream without valid name",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"workstreams"
-							]
-						},
-						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
-					},
-					"response": []
-				},
-				{
 					"name": "Create workstream with valid values",
 					"event": [
 						{
@@ -2640,41 +2436,6 @@
 							]
 						},
 						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
-					},
-					"response": []
-				},
-				{
-					"name": "Create work without valid name",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"workstreams",
-								"{{workStreamId}}",
-								"works"
-							]
-						},
-						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
 					},
 					"response": []
 				},
@@ -3065,43 +2826,6 @@
 					"response": []
 				},
 				{
-					"name": "Create work item without valid name",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"workstreams",
-								"{{workStreamId}}",
-								"works",
-								"{{workId}}",
-								"workitems"
-							]
-						},
-						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
-					},
-					"response": []
-				},
-				{
 					"name": "Create work item with valid values",
 					"event": [
 						{
@@ -3361,40 +3085,7 @@
 					"response": []
 				},
 				{
-					"name": "Create work management permission without valid name",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n}"
-						},
-						"url": {
-							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"metadata",
-								"workManagementPermission"
-							]
-						},
-						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
-					},
-					"response": []
-				},
-				{
-					"name": "Create work management permission with valid values",
+					"name": "Create work management permission with valid values 1",
 					"event": [
 						{
 							"listen": "test",
@@ -3442,7 +3133,7 @@
 					"response": []
 				},
 				{
-					"name": "Create work management permission with valid values",
+					"name": "Create work management permission with valid values 2",
 					"event": [
 						{
 							"listen": "test",
@@ -4639,140 +4330,6 @@
 					"response": []
 				},
 				{
-					"name": "List Phase DB",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB with fields",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?fields=status,name,budget",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							],
-							"query": [
-								{
-									"key": "fields",
-									"value": "status,name,budget"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB with sort",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=status desc",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "status desc"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB with sort by order",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=order desc",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"db"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "order desc"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "List Phase",
 					"request": {
 						"method": "GET",
@@ -5080,33 +4637,6 @@
 								"phases",
 								"{{phaseId}}",
 								"products"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Phase DB Products",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
-							}
-						],
-						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/db",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases",
-								"{{phaseId}}",
-								"products",
-								"db"
 							]
 						}
 					},
@@ -6817,6 +6347,33 @@
 				},
 				{
 					"name": "Get timeline",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/timelines/{{timelineId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"timelines",
+								"{{timelineId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get timeline from DB",
 					"request": {
 						"method": "GET",
 						"header": [
