@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "90ff8f9b-5661-4642-8b8b-84aa4b581706",
+		"_postman_id": "bd828203-8def-4648-bb54-e509c177ec71",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -244,6 +244,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -435,7 +436,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Project With TemplateId issue",
@@ -515,7 +517,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Project Members",
@@ -1024,7 +1027,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Project Members Invites",
@@ -1223,7 +1227,8 @@
 						]
 					}
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Projects",
@@ -1418,6 +1423,177 @@
 							]
 						},
 						"description": "Get a project by id. project members and attachments should also be returned. Only those fields which are specified should be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List projects DB",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/db",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"db"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List projects DB with limit and offset",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/db?limit=1&offset=1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"db"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								},
+								{
+									"key": "offset",
+									"value": "1"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Limit of 1 and offset of 1 is applied"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects DB with filters applied",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/db?filter=type%3Dgeneric",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"db"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "type%3Dgeneric"
+								}
+							]
+						},
+						"description": "List all the project with filters applied. The filter string should be url encoded. Default limit and offset is applicable"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects DB with sort applied",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/db?sort=type%20desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"db"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "type%20desc"
+								}
+							]
+						},
+						"description": "List all the project with custom sort and no filter. Default sort and limits are applied. The sort string has to be url encoded. Sort is of type `key asc|desc`"
+					},
+					"response": []
+				},
+				{
+					"name": "List projects DB and return specific fields",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/db?fields=id,name,description",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"db"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,name,description"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied. The fields to return is specified as comma separated list. Only those fields should be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List projects DB with copilot token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/db",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"db"
+							]
+						}
 					},
 					"response": []
 				},
@@ -2157,7 +2333,1916 @@
 					"response": []
 				}
 			],
-			"description": "Requests for all things projects."
+			"description": "Requests for all things projects.",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Workstream",
+			"item": [
+				{
+					"name": "Create workstream without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "15506f7a-77d3-46cb-9b37-41015ffbfdbc",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workStreamId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get workstream by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List workstreams",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE workstream by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				},
+				{
+					"name": "Update workstream",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects.",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Work",
+			"item": [
+				{
+					"name": "Create work without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "34d06fac-76f6-47b8-9b70-6e9c558e2bf1",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-16T00:00:00\",\n\t\t\"endDate\": \"2018-05-17T00:00:00\",\n\t\t\"order\": 1,\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work - 403",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"order\": 2,\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get work by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List works",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List works - sort",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works?sort=startDate desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "startDate desc"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List works - fields",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works?fields=status,name,budget",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "status,name,budget"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE work by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				},
+				{
+					"name": "Update work",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project phase 11\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 24,\n\t\t\"order\": 2\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work 403",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project - updated\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}"
+							]
+						},
+						"description": "Update the project name. If user don't have permission to the project than it should return 403."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects.",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Work Item",
+			"item": [
+				{
+					"name": "Create work item without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work item without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work item with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"itemId\", pm.response.json().id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"work item - phase product\",\n\t\t\"type\": \"type 1\",\n\t\t\"estimatedPrice\": 12\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work item by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get work item by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems/{{itemId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems",
+								"{{itemId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List work items",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE work item by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems/{{itemId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems",
+								"{{itemId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				},
+				{
+					"name": "Update work item",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"work item - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems/{{itemId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId}}",
+								"works",
+								"{{workId}}",
+								"workitems",
+								"{{itemId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects.",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Work Management Permission",
+			"item": [
+				{
+					"name": "Create work management permission without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "305f3d68-6e9f-4c4d-b031-7487986a93e2",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workManagementPermissionId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"policy\": \"work.new.create\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "305f3d68-6e9f-4c4d-b031-7487986a93e2",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workManagementPermissionId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"policy\": \"work.new.create\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"policy\": \"work.create\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get work management permission by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission",
+								"{{workManagementPermissionId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions - filter required",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions - missing filter",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=template",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "template"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions - invalid filter",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=invalid%3D2%26projectTemplateId%3D1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "invalid%3D2%26projectTemplateId%3D1"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "projectTemplateId%3D1"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work management permission",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"policy\": \"work.new.delete\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission",
+								"{{workManagementPermissionId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete work management permission by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"workManagementPermission",
+								"{{workManagementPermissionId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects.",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Permissions",
+			"item": [
+				{
+					"name": "Get permissions - 404",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/9999/permissions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"9999",
+								"permissions"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project invite for customer with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"userIds\": [40051331],\n\t\t\"role\": \"customer\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project invite to accept invite",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"userId\": 40051331,\n\t\t\"status\": \"accepted\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Get permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/permissions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"permissions"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "Get permissions - manager",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/permissions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"permissions"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "5197d1ec-429c-4a6f-9e9c-3ec3cd6f292a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "cc0cbbf1-54d1-481f-b8fa-a6dc4c80e993",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "WorkManagementForTemplate",
+			"item": [
+				{
+					"name": "Create workstream with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workStreamId1\", pm.response.json().id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project invite for customer with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"userIds\": [40051331],\n\t\t\"role\": \"customer\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project invite to accept invite",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"userId\": 40051331,\n\t\t\"status\": \"accepted\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work stream - no match allowRule",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"work item - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId1}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId1}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work stream - allow access",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-connectAdmin-40051336}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"work item - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId1}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId1}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work stream - allow access with ProjectRoles",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"work item - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId1}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"workstreams",
+								"{{workStreamId1}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream with valid values - Project 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workStreamId2\", pm.response.json().id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/2/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"2",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work item - allow access",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"test project - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/2/workstreams/{{workStreamId2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"2",
+								"workstreams",
+								"{{workStreamId2}}"
+							]
+						},
+						"description": "Update the project name. If user don't have permission to the project than it should return 403."
+					},
+					"response": []
+				},
+				{
+					"name": "Update workstream - deny access",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\t\"name\": \"work item - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/2/workstreams/{{workStreamId2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"2",
+								"workstreams",
+								"{{workStreamId2}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects.",
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "EventHandling and Integration with Direct Project API",
@@ -2406,7 +4491,8 @@
 						]
 					}
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Project Phase",
@@ -2547,6 +4633,140 @@
 								"projects",
 								"{{projectId}}",
 								"phases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase DB",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"db"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase DB with fields",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?fields=status,name,budget",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"db"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "status,name,budget"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase DB with sort",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=status desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"db"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "status desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase DB with sort by order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/db?sort=order desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"db"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "order desc"
+								}
 							]
 						}
 					},
@@ -2810,7 +5030,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Phase Products",
@@ -2859,6 +5080,33 @@
 								"phases",
 								"{{phaseId}}",
 								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase DB Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/db",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"products",
+								"db"
 							]
 						}
 					},
@@ -2983,7 +5231,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Project Templates",
@@ -3484,7 +5733,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Product Templates",
@@ -3878,7 +6128,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Project Type",
@@ -4053,7 +6304,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Product Category",
@@ -4260,7 +6512,8 @@
 						]
 					}
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Project upgrade",
@@ -4394,7 +6647,8 @@
 					"response": []
 				}
 			],
-			"description": "Request to migrate projects."
+			"description": "Request to migrate projects.",
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Timeline",
@@ -4712,7 +6966,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Milestone",
@@ -4905,6 +7160,72 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-09-28T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"timelines",
+								"{{timelineId}}",
+								"milestones",
+								"{{milestoneId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone - paused",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"status\": \"paused\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"statusComment\": \"milestone paused\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"timelines",
+								"{{timelineId}}",
+								"milestones",
+								"{{milestoneId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone - resume",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"status\": \"resume\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"statusComment\": \"milestone resume\"\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
@@ -5152,7 +7473,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Milestone Template",
@@ -5735,7 +8057,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Metadata",
@@ -5808,7 +8131,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Form Version",
@@ -6050,7 +8374,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Form Revision",
@@ -6270,7 +8595,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Price Config Version",
@@ -6534,7 +8860,8 @@
 						]
 					}
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Price Config Revision",
@@ -6754,7 +9081,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Plan Config Version",
@@ -6996,7 +9324,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Plan Config Revision",
@@ -7216,7 +9545,899 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Project Reports",
+			"item": [
+				{
+					"name": "summary",
+					"item": [
+						{
+							"name": "get report by admin",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-admin-40051333}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get report by member",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-member2-40051335}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get report with invalid project id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/projects/123456/reports?reportName=summary",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"123456",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get report with invalid report name",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary123",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary123"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "projectBudget",
+					"item": [
+						{
+							"name": "get report by admin",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=projectBudget",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "projectBudget"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Project Setting",
+			"item": [
+				{
+					"name": "Create project setting - double",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"settingId\", pm.response.json().id);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - percentage",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "bf3aa19f-517c-4103-9250-82d7847e7477",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_fee\",\r\n    \"value\": \"18.88\",\r\n    \"valueType\": \"percentage\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t    \"topcoderRoles\": [\"Connect Copilot\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - for project = 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"2222\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/2/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"2",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - another estimation type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_reference_program\",\r\n    \"value\": \"17800\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\", \"copilot\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with non estimation type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_non_estimation\",\r\n    \"value\": \"8765\",\r\n    \"valueType\": \"string\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t  \"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - duplicate key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with invalid valueType",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"int1\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with invalid percentage value",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_community\",\r\n    \"value\": \"200\",\r\n    \"valueType\": \"percentage\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with missing readPermission",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"int\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with empty body",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - not permitted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting - 403",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting - manager",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - (failed) change key",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"key\": \"markup_community\",\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"Connect Manager\"]\r\n\t  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change double to percentage",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"value\": \"35.60\",\r\n    \"valueType\": \"percentage\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - non-existent project",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"value\": \"30\",\r\n    \"valueType\": \"percentage\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/9999/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"9999",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - non-existent project setting",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"value\": \"30\",\r\n    \"valueType\": \"percentage\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings/9999",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change readPermission",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"readPermission\": {\r\n\t\t\"projectRoles\": [\"manager\"],\r\n\t\t\"topcoderRoles\": [\"Connect Manager\"]\r\n\t}\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete project setting",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
