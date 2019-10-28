@@ -1,11 +1,16 @@
 /* eslint-disable max-len */
 
 import models from '../models';
+import elasticsearchSync from '../../migrations/elasticsearch_sync';
 
 const jwt = require('jsonwebtoken');
 
 export default {
   clearDb: done => models.sequelize.sync({ force: true })
+      .then(() => {
+        if (done) done();
+      }),
+  clearES: done => elasticsearchSync.sync()
       .then(() => {
         if (done) done();
       }),
