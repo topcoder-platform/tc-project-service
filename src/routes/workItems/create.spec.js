@@ -12,7 +12,7 @@ import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should();
 
@@ -314,7 +314,7 @@ describe('CREATE Work Item', () => {
         sandbox.restore();
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when work item created', (done) => {
+      it('should send correct BUS API messages when work item created', (done) => {
         request(server)
         .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems`)
         .set({
@@ -328,8 +328,12 @@ describe('CREATE Work Item', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED,
-                sinon.match({ name: body.name })).should.be.false;
+              createEventSpy.callCount.should.be.eql(1);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                resource: RESOURCES.PHASE_PRODUCT,
+              })).should.be.true;
+
               done();
             });
           }

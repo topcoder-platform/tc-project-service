@@ -44,6 +44,7 @@ async function getClient() {
  * @return {Promise} new event promise
  */
 function createEvent(topic, payload, logger) {
+  console.log(`createEvent "${topic}"`, require('util').inspect(payload)); // eslint-disable-line global-require
   logger.debug(`Sending message to topic ${topic}: ${JSON.stringify(payload)}`);
   return getClient().then((busClient) => {
     logger.debug('calling bus-api');

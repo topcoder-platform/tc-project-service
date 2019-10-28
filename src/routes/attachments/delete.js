@@ -56,7 +56,6 @@ module.exports = [
             pattachment,
             { correlationId: req.id },
           );
-          // req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED, { req, pattachment });
           // emit the event
           util.sendResourceToKafkaBus(
             req,

@@ -7,6 +7,7 @@ import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
+import { RESOURCES, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -299,7 +300,7 @@ describe('Phase Products', () => {
         sandbox.restore();
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_ADDED when product phase created', (done) => {
+      it('should send correct BUS API messages when product phase created', (done) => {
         request(server)
         .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
@@ -313,7 +314,12 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.callCount.should.be.eql(1);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                })).should.be.true;
+
                 done();
               });
             }

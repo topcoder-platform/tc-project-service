@@ -12,6 +12,7 @@ import busApi from '../../services/busApi';
 import {
   PROJECT_STATUS,
   BUS_API_EVENT,
+  CONNECT_NOTIFICATION_EVENT,
 } from '../../constants';
 
 const should = chai.should();
@@ -745,7 +746,7 @@ describe('Project', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project status update', (done) => {
+      it('should send correct BUS API messages when project status updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -753,7 +754,6 @@ describe('Project', () => {
         })
         .send({
           status: PROJECT_STATUS.COMPLETED,
-
         })
         .expect(200)
         .end((err) => {
@@ -761,14 +761,32 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
+              createEventSpy.callCount.should.equal(3);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                status: PROJECT_STATUS.COMPLETED,
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_COMPLETED).should.be.true;
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project details update', (done) => {
+      it('should send correct BUS API messages when project details updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -785,22 +803,32 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ resource: 'project' })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ id: project1.id })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ details: { info: 'something' } })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
+              createEventSpy.callCount.should.equal(3);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                details: { info: 'something' },
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_SPECIFICATION_MODIFIED).should.be.true;
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project name update', (done) => {
+      it('should send correct BUS API messages when project name updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -808,7 +836,6 @@ describe('Project', () => {
         })
         .send({
           name: 'New project name',
-
         })
         .expect(200)
         .end((err) => {
@@ -816,22 +843,32 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ resource: 'project' })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ id: project1.id })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ name: 'New project name' })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
+              createEventSpy.callCount.should.equal(3);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                name: 'New project name',
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_SPECIFICATION_MODIFIED).should.be.true;
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: 'New project name',
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project description update', (done) => {
+      it('should send correct BUS API messages when project description updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -839,7 +876,6 @@ describe('Project', () => {
         })
         .send({
           description: 'Updated description',
-
         })
         .expect(200)
         .end((err) => {
@@ -847,22 +883,32 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ resource: 'project' })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ id: project1.id })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                 sinon.match({ description: 'Updated description' })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                 sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
+              createEventSpy.callCount.should.equal(3);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                description: 'Updated description',
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_SPECIFICATION_MODIFIED).should.be.true;
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_UPDATED message on project bookmarks update', (done) => {
+      it('should send correct BUS API messages when project bookmarks updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -880,22 +926,32 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ resource: 'project' })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ id: project1.id })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ bookmarks: [{ title: 'title1', address: 'http://someurl.com' }] })).should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_UPDATED,
-                sinon.match({ updatedBy: testUtil.userIds.admin })).should.be.true;
+              createEventSpy.callCount.should.equal(3);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                bookmarks: [{ title: 'title1', address: 'http://someurl.com' }],
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_LINK_CREATED).should.be.true;
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051333,
+                initiatorUserId: 40051333,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('should send BUS_API_EVENT.PROJECT_UPDATED message when project estimatedPrice is updated', (done) => {
+      it('should send correct BUS API messages when project estimatedPrice updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -903,7 +959,6 @@ describe('Project', () => {
         })
         .send({
           estimatedPrice: 123,
-
         })
         .expect(200)
         .end((err) => {
@@ -911,14 +966,23 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.called.should.be.true;
+              createEventSpy.callCount.should.equal(1);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                // FIXME https://github.com/sequelize/sequelize/issues/8019
+                // estimatedPrice: 123,
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('should send BUS_API_EVENT.PROJECT_UPDATED message when project actualPrice is updated', (done) => {
+      it('should send correct BUS API messages when project actualPrice updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -926,7 +990,6 @@ describe('Project', () => {
         })
         .send({
           actualPrice: 123,
-
         })
         .expect(200)
         .end((err) => {
@@ -934,14 +997,23 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.called.should.be.true;
+              createEventSpy.callCount.should.equal(1);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                // FIXME https://github.com/sequelize/sequelize/issues/8019
+                // actualPrice: 123,
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('should send BUS_API_EVENT.PROJECT_UPDATED message when project terms are updated', (done) => {
+      it('should send correct BUS API messages when project terms are updated', (done) => {
         request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
@@ -949,7 +1021,6 @@ describe('Project', () => {
         })
         .send({
           terms: [1, 2, 3],
-
         })
         .expect(200)
         .end((err) => {
@@ -957,7 +1028,15 @@ describe('Project', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.called.should.be.true;
+              createEventSpy.callCount.should.equal(1);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
+                resource: 'project',
+                id: project1.id,
+                terms: [1, 2, 3],
+                updatedBy: testUtil.userIds.admin,
+              })).should.be.true;
+
               done();
             });
           }

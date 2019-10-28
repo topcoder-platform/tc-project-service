@@ -11,7 +11,7 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should();
 
@@ -26,6 +26,7 @@ const validatePhase = (resJson, expectedPhase) => {
 
 describe('CREATE work', () => {
   let projectId;
+  let projectName;
   let workStreamId;
 
   const memberUser = {
@@ -93,6 +94,7 @@ describe('CREATE work', () => {
             models.Project.create(_.assign(project, { templateId: template.id }))
             .then((_project) => {
               projectId = _project.id;
+              projectName = _project.name;
               models.WorkStream.create({
                 name: 'Work Stream',
                 type: 'generic',
@@ -328,7 +330,7 @@ describe('CREATE work', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_CREATED when work added', (done) => {
+      it('should send correct BUS API messages when work added', (done) => {
         request(server)
         .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
@@ -342,9 +344,26 @@ describe('CREATE work', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
-                sinon.match({ name: body.name })).should.be.true;
+              createEventSpy.callCount.should.be.eql(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                resource: RESOURCES.PHASE,
+                name: body.name,
+                status: body.status,
+                budget: body.budget,
+                progress: body.progress,
+                projectId,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                userId: 40051331,
+                initiatorUserId: 40051331,
+              })).should.be.true;
+
               done();
             });
           }

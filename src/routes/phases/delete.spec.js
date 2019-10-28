@@ -14,6 +14,7 @@ import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT,
   RESOURCES,
+  CONNECT_NOTIFICATION_EVENT,
 } from '../../constants';
 
 const should = chai.should(); // eslint-disable-line no-unused-vars
@@ -58,6 +59,7 @@ const body = {
 describe('Project Phases', () => {
   let projectId;
   let phaseId;
+  let projectName;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -99,6 +101,7 @@ describe('Project Phases', () => {
         .then(() => {
           models.Project.create(project).then((p) => {
             projectId = p.id;
+            projectName = p.name;
             // create members
             models.ProjectMember.bulkCreate([{
               id: 1,
@@ -253,7 +256,7 @@ describe('Project Phases', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_DELETED when phase removed', (done) => {
+      it('should send correct BUS API messages when phase removed', (done) => {
         request(server)
         .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
@@ -265,11 +268,22 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED,
-                sinon.match({ resource: RESOURCES.PHASE })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED,
-                sinon.match({ id: phaseId })).should.be.true;
+              createEventSpy.callCount.should.be.eql(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                resource: RESOURCES.PHASE,
+                id: phaseId,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+
               done();
             });
           }

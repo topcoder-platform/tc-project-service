@@ -3,7 +3,7 @@ import Joi from 'joi';
 import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
-import { INVITE_STATUS, MANAGER_ROLES, PROJECT_MEMBER_ROLE, USER_ROLE, EVENT, RESOURCES } from '../../constants';
+import { INVITE_STATUS, MANAGER_ROLES, PROJECT_MEMBER_ROLE, USER_ROLE } from '../../constants';
 import models from '../../models';
 
 /**
@@ -145,37 +145,19 @@ module.exports = [
         return next(err);
       }
 
-      return util.addUserToProject(req, member)
-        .then((newMember) => {
-          let invite;
-          return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, null, newMember.userId)
-            .then((_invite) => {
-              invite = _invite;
+      return util.addUserToProject(req, member) // Kafka event is emitted inside `addUserToProject`
+        .then(newMember =>
+          models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, null, newMember.userId)
+            .then((invite) => {
               if (!invite) {
-                // emit the event
-                util.sendResourceToKafkaBus(
-                  req,
-                  EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-                  RESOURCES.PROJECT_MEMBER,
-                  newMember);
-
-                return res.status(201)
-                  .json(newMember);
+                return res.status(201).json(newMember);
               }
               return invite.update({
                 status: INVITE_STATUS.ACCEPTED,
               })
-                .then(() => {
-                  // emit the event
-                  util.sendResourceToKafkaBus(
-                    req,
-                    EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-                    RESOURCES.PROJECT_MEMBER,
-                    newMember);
-                  return res.status(201).json(newMember);
-                });
-            });
-        });
+                .then(() => res.status(201).json(newMember));
+            }),
+        );
     })
       .catch(err => next(err));
   },

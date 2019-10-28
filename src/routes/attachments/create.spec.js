@@ -7,7 +7,7 @@ import models from '../../models';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, RESOURCES } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -150,7 +150,7 @@ describe('Project Attachments', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED message when attachment added', (done) => {
+      it('sends send correct BUS API messages when attachment added', (done) => {
         request(server)
           .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
@@ -164,17 +164,27 @@ describe('Project Attachments', () => {
             } else {
               // Wait for app message handler to complete
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED,
-                  sinon.match({ resource: RESOURCES.ATTACHMENT })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED,
-                  sinon.match({ title: body.title })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED,
-                  sinon.match({ description: body.description })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED,
-                  sinon.match({ category: body.category })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED,
-                  sinon.match({ contentType: body.contentType })).should.be.true;
+                createEventSpy.calledThrice.should.be.true;
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED, sinon.match({
+                  resource: RESOURCES.ATTACHMENT,
+                  title: body.title,
+                  description: body.description,
+                  category: body.category,
+                  contentType: body.contentType,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_FILE_UPLOADED)
+                  .should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+
                 done();
               });
             }

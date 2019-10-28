@@ -12,7 +12,7 @@ import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
 
 chai.should();
 
@@ -263,7 +263,7 @@ describe('DELETE Work Item', () => {
         sandbox.restore();
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when work item removed', (done) => {
+      it('should send correct BUS API messages when work item removed', (done) => {
         request(server)
         .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
@@ -275,8 +275,12 @@ describe('DELETE Work Item', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED,
-                sinon.match({ name: body.name })).should.be.false;
+              createEventSpy.callCount.should.be.eql(1);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                resource: RESOURCES.PHASE_PRODUCT,
+              })).should.be.true;
+
               done();
             });
           }

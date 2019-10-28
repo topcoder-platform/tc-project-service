@@ -8,7 +8,9 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, RESOURCES, USER_ROLE, MAX_PARALLEL_REQUEST_QTY } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, RESOURCES, USER_ROLE,
+  MAX_PARALLEL_REQUEST_QTY, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import { createEvent } from '../../services/busApi';
 
 /**
  * API to create member invite to project.
@@ -171,8 +173,9 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed, members) 
   return invitePromises;
 };
 
-const sendInviteEmail = (req, projectId) => {
+const sendInviteEmail = (req, projectId, invite) => {
   req.log.debug(req.authUser);
+  const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
     models.Project.findOne({
       where: { id: projectId },
@@ -182,6 +185,40 @@ const sendInviteEmail = (req, projectId) => {
   ];
   return Promise.all(promises).then((responses) => {
     req.log.debug(responses);
+    const project = responses[0];
+    const initiator = responses[1] && responses[1].length ? responses[1][0] : {
+      userId: req.authUser.userId,
+      firstName: 'Connect',
+      lastName: 'User',
+    };
+    createEvent(emailEventType, {
+      data: {
+        connectURL: config.get('connectUrl'),
+        accountsAppURL: config.get('accountsAppUrl'),
+        subject: config.get('inviteEmailSubject'),
+        projects: [{
+          name: project.name,
+          projectId,
+          sections: [
+            {
+              EMAIL_INVITES: true,
+              title: config.get('inviteEmailSectionTitle'),
+              projectName: project.name,
+              projectId,
+              initiator,
+              isSSO: util.isSSO(project),
+            },
+          ],
+        }],
+      },
+      recipients: [invite.email],
+      version: 'v3',
+      from: {
+        name: config.get('EMAIL_INVITE_FROM_NAME'),
+        email: config.get('EMAIL_INVITE_FROM_EMAIL'),
+      },
+      categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
+    }, req.log);
   }).catch((error) => {
     req.log.error(error);
   });
@@ -296,7 +333,7 @@ module.exports = [
                     );
                 // send email invite (async)
                 if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
-                  sendInviteEmail(req, projectId);
+                  sendInviteEmail(req, projectId, v);
                 }
               });
               return values;

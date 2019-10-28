@@ -15,6 +15,7 @@ import {
   INVITE_STATUS,
   BUS_API_EVENT,
   RESOURCES,
+  CONNECT_NOTIFICATION_EVENT,
 } from '../../constants';
 
 const should = chai.should();
@@ -871,7 +872,7 @@ describe('Project Member Invite create', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED message when userId invite added', (done) => {
+      it('should send correct BUS API messages when invite added by userId', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
@@ -896,23 +897,30 @@ describe('Project Member Invite create', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                sinon.match({ resource: RESOURCES.PROJECT_MEMBER_INVITE })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                sinon.match({ projectId: project1.id })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                sinon.match({ userId: 3 })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                  sinon.match({ email: null })).should.be.true;
+              createEventSpy.callCount.should.be.eql(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                projectId: project1.id,
+                userId: 3,
+                email: null,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                projectId: project1.id,
+                userId: 3,
+                email: null,
+                isSSO: false,
+              })).should.be.true;
+
               done();
             });
           }
         });
       });
 
-      it('sends BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED message when email invite added', (done) => {
+      it('should send correct BUS API messages when invite added by email', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
@@ -937,16 +945,26 @@ describe('Project Member Invite create', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                sinon.match({ resource: RESOURCES.PROJECT_MEMBER_INVITE })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                sinon.match({ projectId: project1.id })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                sinon.match({ userId: null })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED,
-                  sinon.match({ email: 'hello@world.com' })).should.be.true;
+              createEventSpy.callCount.should.be.eql(3);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                projectId: project1.id,
+                userId: null,
+                email: 'hello@world.com',
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                projectId: project1.id,
+                userId: null,
+                email: 'hello@world.com',
+                isSSO: false,
+              })).should.be.true;
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED, sinon.match({
+                recipients: ['hello@world.com'],
+              })).should.be.true;
+
               done();
             });
           }

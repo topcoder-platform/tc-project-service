@@ -83,7 +83,7 @@ module.exports = [
           req,
           EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
           RESOURCES.PROJECT_MEMBER,
-          { id: pmember.id });
+          pmember);
         res.status(204).json({});
       }).catch(err => next(err));
   },

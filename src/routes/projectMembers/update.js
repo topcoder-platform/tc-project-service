@@ -113,7 +113,8 @@ module.exports = [
               req,
               EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
               RESOURCES.PROJECT_MEMBER,
-              projectMember);
+              projectMember,
+              previousValue);
           req.log.debug('updated project member', projectMember);
           res.json(projectMember);
         })

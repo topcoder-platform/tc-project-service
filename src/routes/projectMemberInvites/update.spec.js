@@ -8,7 +8,14 @@ import server from '../../app';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, RESOURCES, USER_ROLE, PROJECT_MEMBER_ROLE, INVITE_STATUS } from '../../constants';
+import {
+  BUS_API_EVENT,
+  RESOURCES,
+  USER_ROLE,
+  PROJECT_MEMBER_ROLE,
+  INVITE_STATUS,
+  CONNECT_NOTIFICATION_EVENT,
+} from '../../constants';
 
 const should = chai.should();
 
@@ -301,8 +308,7 @@ describe('Project member invite update', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('Accept invite sends BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED ' +
-          'and BUS_API_EVENT.PROJECT_MEMBER_ADDED messages', (done) => {
+      it('should send correct BUS API messages when invite is accepted', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
@@ -326,18 +332,51 @@ describe('Project member invite update', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
-                sinon.match({ resource: RESOURCES.PROJECT_MEMBER_INVITE })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
-                sinon.match({ projectId: project1.id })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
-                sinon.match({ userId: invite1.userId })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
-                  sinon.match({ status: INVITE_STATUS.ACCEPTED })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED,
-                  sinon.match({ email: null })).should.be.true;
+              createEventSpy.callCount.should.be.eql(5);
+
+              /*
+                Events for accepted invite
+              */
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+                resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                projectId: project1.id,
+                userId: invite1.userId,
+                status: INVITE_STATUS.ACCEPTED,
+                email: null,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+                projectId: project1.id,
+                userId: invite1.userId,
+                status: INVITE_STATUS.ACCEPTED,
+                email: null,
+                isSSO: false,
+              })).should.be.true;
+
+              /*
+                Events for created member (after invite acceptance)
+              */
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
+                resource: RESOURCES.PROJECT_MEMBER,
+                projectId: project1.id,
+                userId: invite1.userId,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                userId: invite1.userId,
+                initiatorUserId: 40051331,
+              })).should.be.true;
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                userId: invite1.userId,
+                initiatorUserId: 40051331,
+              })).should.be.true;
+
               done();
             });
           }

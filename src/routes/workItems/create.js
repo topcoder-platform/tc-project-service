@@ -6,7 +6,8 @@ import _ from 'lodash';
 import Joi from 'joi';
 
 import models from '../../models';
-import { EVENT } from '../../constants';
+import util from '../../util';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -124,7 +125,12 @@ module.exports = [
         { correlationId: req.id },
       );
       req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, { req, created: newPhaseProduct });
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
+        RESOURCES.PHASE_PRODUCT,
+        newPhaseProduct);
 
       res.status(201).json(newPhaseProduct);
     })

@@ -158,7 +158,12 @@ module.exports = [
             req,
             EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
             RESOURCES.PHASE,
+            _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
+            // Pass the same object as original phase even though, the order has changed.
+            // So far we don't use the order so it's ok. But in general, we should pass
+            // the original phases. <- TODO
             _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+            true, // don't send event to Notification Service as the main event here is updating one phase
         );
 
         res.status(201).json(newProjectPhase);

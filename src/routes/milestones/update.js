@@ -334,12 +334,13 @@ module.exports = [
       );
 
       // emit the event
-      util.sendResourceToKafkaBus(
+      // we cannot use `util.sendResourceToKafkaBus` as we have to pass a custom param `cascadedUpdates`
+      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_UPDATED, {
         req,
-        EVENT.ROUTING_KEY.MILESTONE_UPDATED,
-        RESOURCES.MILESTONE,
-        _.assign(entityToUpdate, _.pick(updated, 'id', 'updatedAt')),
-      );
+        resource: _.assign({ resource: RESOURCES.MILESTONE }, updated),
+        originalResource: _.assign({ resource: RESOURCES.MILESTONE }, original),
+        cascadedUpdates,
+      });
 
       // Write to response
       res.json(updated);

@@ -10,7 +10,7 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT, RESOURCES } from '../../constants';
 
 chai.should();
 
@@ -42,6 +42,7 @@ const expectAfterDelete = (workId, projectId, workStreamId, err, next) => {
 
 describe('DELETE work', () => {
   let projectId;
+  let projectName;
   let workStreamId;
   let workId;
 
@@ -110,6 +111,7 @@ describe('DELETE work', () => {
             models.Project.create(_.assign(project, { templateId: template.id }))
             .then((_project) => {
               projectId = _project.id;
+              projectName = _project.name;
               models.WorkStream.create({
                 name: 'Work Stream',
                 type: 'generic',
@@ -264,7 +266,7 @@ describe('DELETE work', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_DELETED when work removed', (done) => {
+      it('should send correct BUS API messages when work removed', (done) => {
         request(server)
         .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
@@ -276,8 +278,22 @@ describe('DELETE work', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED).should.be.true;
+              createEventSpy.callCount.should.be.eql(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                resource: RESOURCES.PHASE,
+                id: workId,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                userId: 40051336,
+                initiatorUserId: 40051336,
+              })).should.be.true;
+
               done();
             });
           }

@@ -1,5 +1,5 @@
 
-import { EVENT, BUS_API_EVENT } from '../constants';
+import { EVENT, CONNECT_NOTIFICATION_EVENT } from '../constants';
 import { projectCreatedHandler, projectUpdatedHandler, projectDeletedHandler,
   projectUpdatedKafkaHandler } from './projects';
 import { projectMemberAddedHandler, projectMemberRemovedHandler,
@@ -57,18 +57,18 @@ export const rabbitHandlers = {
 
 export const kafkaHandlers = {
   // Events defined by project-api
-  [BUS_API_EVENT.PROJECT_UPDATED]: projectUpdatedKafkaHandler,
-  [BUS_API_EVENT.PROJECT_FILES_UPDATED]: projectUpdatedKafkaHandler,
-  [BUS_API_EVENT.PROJECT_TEAM_UPDATED]: projectUpdatedKafkaHandler,
-  [BUS_API_EVENT.PROJECT_PLAN_UPDATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.PROJECT_UPDATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED]: projectUpdatedKafkaHandler,
 
   // Events from message-service
-  [BUS_API_EVENT.TOPIC_CREATED]: projectUpdatedKafkaHandler,
-  [BUS_API_EVENT.TOPIC_UPDATED]: projectUpdatedKafkaHandler,
-  [BUS_API_EVENT.POST_CREATED]: projectUpdatedKafkaHandler,
-  [BUS_API_EVENT.POST_UPDATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.TOPIC_CREATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.TOPIC_UPDATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.POST_CREATED]: projectUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.POST_UPDATED]: projectUpdatedKafkaHandler,
 
   // Events coming from timeline/milestones (considering it as a separate module/service in future)
-  [BUS_API_EVENT.MILESTONE_TRANSITION_COMPLETED]: milestoneUpdatedKafkaHandler,
-  [BUS_API_EVENT.TIMELINE_ADJUSTED]: timelineAdjustedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.MILESTONE_TRANSITION_COMPLETED]: milestoneUpdatedKafkaHandler,
+  [CONNECT_NOTIFICATION_EVENT.TIMELINE_ADJUSTED]: timelineAdjustedKafkaHandler,
 };

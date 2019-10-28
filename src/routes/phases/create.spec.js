@@ -12,7 +12,7 @@ import messageService from '../../services/messageService';
 import RabbitMQService from '../../services/rabbitmq';
 import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
-  BUS_API_EVENT, RESOURCES,
+  BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT,
 } from '../../constants';
 
 const should = chai.should();
@@ -49,6 +49,7 @@ const validatePhase = (resJson, expectedPhase) => {
 
 describe('Project Phases', () => {
   let projectId;
+  let projectName;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -81,6 +82,7 @@ describe('Project Phases', () => {
     testUtil.clearDb()
       .then(() => models.Project.create(project).then((p) => {
         projectId = p.id;
+        projectName = p.name;
         // create members
         return models.ProjectMember.bulkCreate([{
           id: 1,
@@ -434,7 +436,7 @@ describe('Project Phases', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_ADDED when phase added', (done) => {
+      it('should send correct BUS API messages when phase added', (done) => {
         request(server)
         .post(`/v5/projects/${projectId}/phases/`)
         .set({
@@ -448,19 +450,26 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
-                sinon.match({ resource: RESOURCES.PHASE })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
-                sinon.match({ name: body.name })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
-                sinon.match({ status: body.status })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
-                sinon.match({ budget: body.budget })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
-                sinon.match({ progress: body.progress })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED,
-                sinon.match({ projectId })).should.be.true;
+              createEventSpy.callCount.should.be.eql(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                resource: RESOURCES.PHASE,
+                name: body.name,
+                status: body.status,
+                budget: body.budget,
+                progress: body.progress,
+                projectId,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                projectId,
+                projectName,
+                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+
               done();
             });
           }

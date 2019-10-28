@@ -7,7 +7,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES } from '../../constants';
+import { EVENT, RESOURCES, ROUTES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -108,7 +108,9 @@ module.exports = [
         req,
         EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
         RESOURCES.PHASE_PRODUCT,
-        _.assign(updatedProps, _.pick(updated, 'id', 'updatedAt')),
+        updatedValue,
+        previousValue,
+        ROUTES.WORK_ITEMS.UPDATE,
       );
 
       res.json(updated);

@@ -11,7 +11,7 @@ import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -279,129 +279,187 @@ describe('UPDATE Work Item', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when name updated', (done) => {
+      it('should send correct BUS API messages when name updated', (done) => {
         request(server)
-        .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          name: 'new name',
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
-                sinon.match({ name: 'new name' })).should.be.true;
-              done();
-            });
-          }
-        });
+          .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send({
+            name: 'new name',
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  name: 'new name',
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051331,
+                  initiatorUserId: 40051331,
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when estimatedPrice updated', (done) => {
+      it('should send correct BUS API messages when estimatedPrice updated', (done) => {
         request(server)
-        .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          estimatedPrice: 123,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
-                sinon.match({ estimatedPrice: 123 })).should.be.true;
-              done();
-            });
-          }
-        });
+          .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send({
+            estimatedPrice: 123,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  estimatedPrice: 123,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051331,
+                  initiatorUserId: 40051331,
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when actualPrice updated', (done) => {
+      it('should send correct BUS API messages when actualPrice updated', (done) => {
         request(server)
-        .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          actualPrice: 123,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
-                sinon.match({ actualPrice: 123 })).should.be.true;
-              done();
-            });
-          }
-        });
+          .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send({
+            actualPrice: 123,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  actualPrice: 123,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051331,
+                  initiatorUserId: 40051331,
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when details updated', (done) => {
+      it('should send correct BUS API messages when details updated', (done) => {
         request(server)
-        .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          details: 'something',
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
-                sinon.match({ details: 'something' })).should.be.true;
-              done();
-            });
-          }
-        });
+          .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send({
+            details: 'something',
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  details: 'something',
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_WORKITEM_SPECIFICATION_MODIFIED)
+                  .should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051331,
+                  initiatorUserId: 40051331,
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED when type updated', (done) => {
+      it('should send correct BUS API messages when type updated', (done) => {
         request(server)
-        .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          type: 'another type',
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED,
-                sinon.match({ type: 'another type' })).should.be.true;
-              done();
-            });
-          }
-        });
+          .patch(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send({
+            type: 'another type',
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(1);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  type: 'another type',
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
       });
     });
   });

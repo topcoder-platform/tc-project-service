@@ -8,7 +8,7 @@ import server from '../../app';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, RESOURCES } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -477,7 +477,7 @@ describe('Project members update', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_MEMBER_UPDATED message when user role updated', (done) => {
+      it('should send correct BUS API messages when user role updated', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
@@ -508,16 +508,24 @@ describe('Project members update', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED,
-                sinon.match({ resource: RESOURCES.PROJECT_MEMBER })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED,
-                sinon.match({ id: member2.id })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED,
-                sinon.match({ role: 'customer' })).should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED,
-                  sinon.match({ userId: 40051332 })).should.be.true;
+              createEventSpy.callCount.should.equal(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED, sinon.match({
+                resource: RESOURCES.PROJECT_MEMBER,
+                id: member2.id,
+                role: 'customer',
+                userId: 40051332,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                projectId: project1.id,
+                projectName: project1.name,
+                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                userId: 40051332,
+                initiatorUserId: 40051332,
+              })).should.be.true;
+
               done();
             });
           }

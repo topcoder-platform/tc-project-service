@@ -107,7 +107,8 @@ module.exports = [
           req,
           EVENT.ROUTING_KEY.TIMELINE_UPDATED,
           RESOURCES.TIMELINE,
-          _.assign(entityToUpdate, _.pick(updated, 'id', 'updatedAt')));
+          updated,
+          original);
 
         // Write to response
         res.json(updated);

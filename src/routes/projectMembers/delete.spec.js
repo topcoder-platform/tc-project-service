@@ -9,7 +9,7 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, RESOURCES } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -328,7 +328,7 @@ describe('Project members delete', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends BUS_API_EVENT.PROJECT_MEMBER_REMOVED message when manager removed', (done) => {
+      it('should send correct BUS API messages when manager left', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           post: () => Promise.resolve({
             status: 200,
@@ -355,19 +355,30 @@ describe('Project members delete', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
-                  sinon.match({ resource: RESOURCES.PROJECT_MEMBER })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
-                  sinon.match({ id: member2.id })).should.be.true;
+                createEventSpy.callCount.should.equal(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  id: member2.id,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_LEFT).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051334,
+                  initiatorUserId: 40051334,
+                })).should.be.true;
+
                 done();
               });
             }
           });
       });
 
-      it('sends BUS_API_EVENT.PROJECT_MEMBER_REMOVED message when copilot removed', (done) => {
+      it('should send correct BUS API messages when copilot removed', (done) => {
         request(server)
           .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
           .set({
@@ -379,12 +390,23 @@ describe('Project members delete', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
-                  sinon.match({ resource: RESOURCES.PROJECT_MEMBER })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED,
-                  sinon.match({ id: member1.id })).should.be.true;
+                createEventSpy.callCount.should.equal(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  id: member1.id,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_REMOVED).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051334,
+                  initiatorUserId: 40051334,
+                })).should.be.true;
+
                 done();
               });
             }

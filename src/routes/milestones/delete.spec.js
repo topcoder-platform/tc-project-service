@@ -9,7 +9,7 @@ import chai from 'chai';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { EVENT, RESOURCES, BUS_API_EVENT } from '../../constants';
+import { EVENT, RESOURCES, BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 import busApi from '../../services/busApi';
 
 const should = chai.should(); // eslint-disable-line no-unused-vars
@@ -379,7 +379,7 @@ describe('DELETE milestone', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.MILESTONE_REMOVED when milestone removed', (done) => {
+      it('sends send correct BUS API messages when milestone removed', (done) => {
         request(server)
           .delete('/v5/timelines/1/milestones/1')
           .set({
@@ -391,11 +391,22 @@ describe('DELETE milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED,
-                  sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED,
-                  sinon.match({ id: 1 })).should.be.true;
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
+                  resource: RESOURCES.MILESTONE,
+                  id: 1,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_REMOVED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+
                 done();
               });
             }

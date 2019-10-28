@@ -11,7 +11,7 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { EVENT, RESOURCES, MILESTONE_STATUS, BUS_API_EVENT } from '../../constants';
+import { EVENT, RESOURCES, MILESTONE_STATUS, BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -1298,14 +1298,13 @@ describe('UPDATE Milestone', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone duration updated', (done) => {
+      it('sends send correct BUS API messages when milestone details updated and waiting for customer', (done) => {
         request(server)
           .patch('/v5/timelines/1/milestones/1')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            // duration: 1,
             details: {
               metadata: { waitingForCustomer: true },
             },
@@ -1316,18 +1315,26 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                // 5 milestones in total, so it would trigger 5 events
-                // 4 MILESTONE_UPDATED events are for 4 non deleted milestones
-                // 1 TIMELINE_ADJUSTED event, because timeline's end date updated
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
-                  sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
-                  sinon.match({
-                    details: {
-                      metadata: { waitingForCustomer: true },
-                    },
-                  })).should.be.true;
+                createEventSpy.callCount.should.be.eql(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  resource: RESOURCES.MILESTONE,
+                  details: {
+                    metadata: { waitingForCustomer: true },
+                  },
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_WAITING_CUSTOMER)
+                  .should.be.true;
+
                 done();
               });
             }
@@ -1389,7 +1396,7 @@ describe('UPDATE Milestone', () => {
           });
       });
 
-      it('should ONLY send message BUS_API_EVENT.MILESTONE_UPDATED when milestone order updated', (done) => {
+      it('should send correct BUS API messages when milestone order updated', (done) => {
         request(server)
           .patch('/v5/timelines/1/milestones/1')
           .set({
@@ -1404,18 +1411,29 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
-                  sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
-                  sinon.match({ order: 2 })).should.be.true;
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  resource: RESOURCES.MILESTONE,
+                  order: 2,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+
                 done();
               });
             }
           });
       });
 
-      it('should ONLY send message BUS_API_EVENT.MILESTONE_UPDATED when milestone plannedText updated', (done) => {
+      it('should send correct BUS API messages when milestone plannedText updated', (done) => {
         request(server)
           .patch('/v5/timelines/1/milestones/1')
           .set({
@@ -1430,11 +1448,22 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
-                  sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
-                  sinon.match({ plannedText: 'new text' })).should.be.true;
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  resource: RESOURCES.MILESTONE,
+                  plannedText: 'new text',
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+
                 done();
               });
             }

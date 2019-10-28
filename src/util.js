@@ -19,7 +19,15 @@ import Promise from 'bluebird';
 import models from './models';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
+import {
+  ADMIN_ROLES,
+  TOKEN_SCOPES,
+  EVENT,
+  PROJECT_MEMBER_ROLE,
+  VALUE_TYPE,
+  ESTIMATION_TYPE,
+  RESOURCES,
+} from './constants';
 
 const exec = require('child_process').exec;
 const tcCoreLibAuth = require('tc-core-library-js').auth;
@@ -525,11 +533,21 @@ _.assignIn(util, {
      * @param  {String} key  the event key
      * @param  {String} name  the resource name
      * @param  {object} resource  the resource
+     * @param  {object} [originalResource] original resource in case resource was updated
+     * @param  {String} [route] route which called the event (for phases and works)
+     * @param  {Boolean}[skipNotification] if true, than event is not send to Notification Service
     */
-    sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource) {    // eslint-disable-line
+    sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource, originalResource, route, skipNotification) {    // eslint-disable-line
       req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
+
       // emit event
-      req.app.emit(key, { req, resource: _.assign({ resource: name }, resource) });
+      req.app.emit(key, {
+        req,
+        resource: _.assign({ resource: name }, resource),
+        originalResource: originalResource ? _.assign({ resource: name }, originalResource) : undefined,
+        route,
+        skipNotification,
+      });
     }),
 
   /**
@@ -561,6 +579,12 @@ _.assignIn(util, {
         newMember,
         { correlationId: req.id },
       );
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+        RESOURCES.PROJECT_MEMBER,
+        newMember);
 
       return newMember;
     })

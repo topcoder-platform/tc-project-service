@@ -127,7 +127,14 @@ module.exports = [
           req,
           EVENT.ROUTING_KEY.MILESTONE_UPDATED,
           RESOURCES.MILESTONE,
-          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
+          // Pass the same object as original milestone even though, their time has changed.
+          // So far we don't use time properties in the handler so it's ok. But in general, we should pass
+          // the original milestones. <- TODO
+          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
+          null, // no route
+          true, // don't send event to Notification Service as the main event here is updating one milestone
+        ),
       );
 
       // Write to the response

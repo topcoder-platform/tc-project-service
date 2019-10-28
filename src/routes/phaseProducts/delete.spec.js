@@ -7,6 +7,7 @@ import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should(); // eslint-disable-line no-unused-vars
 
@@ -259,7 +260,7 @@ describe('Phase Products', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PHASE_PRODUCT_REMOVED when product phase removed', (done) => {
+      it('should send correct BUS API messages when product phase removed', (done) => {
         request(server)
           .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
@@ -271,7 +272,12 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.callCount.should.be.eql(1);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                })).should.be.true;
+
                 done();
               });
             }
