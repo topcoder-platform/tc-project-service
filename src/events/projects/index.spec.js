@@ -94,6 +94,7 @@ describe('projectUpdatedKafkaHandler', () => {
 
     beforeEach(async () => {
       await testUtil.clearDb();
+      await testUtil.clearES();
       project = await models.Project.create({
         type: 'generic',
         billingAccountId: 1,

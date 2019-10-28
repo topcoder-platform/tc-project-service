@@ -389,6 +389,16 @@ _.assignIn(util, {
     } else {
       esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
     }
+    // during unit tests, we need to refresh the indices
+    // before making get/search requests to make sure all ES data can be visible.
+    if (process.env.NODE_ENV.toLowerCase() === 'test') {
+      esClient.originalSearch = esClient.search;
+      esClient.search = (params, cb) => esClient.indices.refresh({ index: '' })
+        .then(() => esClient.originalSearch(params, cb)); // refresh index before reply
+      esClient.originalGet = esClient.get;
+      esClient.get = (params, cb) => esClient.indices.refresh({ index: '' })
+        .then(() => esClient.originalGet(params, cb)); // refresh index before reply
+    }
     return esClient;
   },
 
