@@ -208,6 +208,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
 
   req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
     req,
+    original: previousValue,
     updated: _.assign({ resource: RESOURCES.PROJECT }, project.toJSON()),
   });
 }
