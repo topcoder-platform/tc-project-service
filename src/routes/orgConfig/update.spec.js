@@ -87,6 +87,9 @@ describe('UPDATE organization config', () => {
 
     it('should return 404 for deleted config', (done) => {
       models.OrgConfig.destroy({ where: { id } })
+        // we should clear ES, otherwise deleted config would be returned by ES
+        // TODO we should create an alternative way to test it, as all the data is "cached" in ES now
+        .then(() => testUtil.clearES())
         .then(() => {
           request(server)
             .patch(`/v5/projects/metadata/orgConfig/${id}`)
