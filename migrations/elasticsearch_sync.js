@@ -673,6 +673,7 @@ function getRequestBody(indexName) {
         updateAllTypes: true,
         body: {
           mappings: { },
+          refresh: 'wait_for',
         },
       };
       result.body.mappings[ES_PROJECT_TYPE] = projectMapping;
@@ -683,6 +684,7 @@ function getRequestBody(indexName) {
         updateAllTypes: true,
         body: {
           mappings: { },
+          refresh: 'wait_for',
         },
       };
       result.body.mappings[ES_METADATA_TYPE] = metadataMapping;
@@ -693,6 +695,7 @@ function getRequestBody(indexName) {
         updateAllTypes: true,
         body: {
           mappings: { },
+          refresh: 'wait_for',
         },
       };
       result.body.mappings[ES_TIMELINE_TYPE] = timelineMapping;
