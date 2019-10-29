@@ -126,6 +126,7 @@ describe('LIST Project', () => {
   before(function inner(done) {
     this.timeout(10000);
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => {
         const p1 = models.Project.create({
           type: 'generic',

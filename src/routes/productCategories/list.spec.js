@@ -37,7 +37,9 @@ describe('LIST product categories', () => {
       updatedBy: 1,
     },
   ];
-
+  before((done) => {
+    testUtil.clearES(done);
+  });
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => models.ProductCategory.create(productCategories[0]))
