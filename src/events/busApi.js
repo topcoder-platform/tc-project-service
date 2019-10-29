@@ -916,7 +916,7 @@ module.exports = (app, logger) => {
         if (!_.isEqual(original.details, updated.details)) {
           logger.debug(`Spec changed for product id ${updated.id}`);
 
-          const busApiEvent = route === 'updatePhaseProducts'
+          const busApiEvent = route === ROUTES.PHASE_PRODUCTS.UPDATE
               ? CONNECT_NOTIFICATION_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED
               : CONNECT_NOTIFICATION_EVENT.PROJECT_WORKITEM_SPECIFICATION_MODIFIED;
 
