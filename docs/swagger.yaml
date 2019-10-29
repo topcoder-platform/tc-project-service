@@ -2886,27 +2886,10 @@ paths:
           schema:
             title: Single work management permission response object
             type: object
-            properties:
-              id:
-                type: string
-                description: unique id identifying the request
-              version:
-                type: string
-              result:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  status:
-                    type: integer
-                    format: int32
-                    description: http status code
-                  metadata:
-                    $ref: '#/definitions/ResponseMetadata'
-                  content:
-                    type: object
-                    example:
-                      'work.create': true
+            example:
+              'work.create': true
+              'workItem.edit': true
+                    
         '401':
           description: Unauthorized
           schema:
@@ -4804,14 +4787,6 @@ parameters:
     type: integer
     format: int64
 definitions:
-  ResponseMetadata:
-    title: Metadata object for a response
-    type: object
-    properties:
-      totalCount:
-        type: integer
-        format: int64
-        description: Total count of the objects
   ErrorModel:
     type: object
     properties:
