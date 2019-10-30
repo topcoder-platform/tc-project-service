@@ -7,11 +7,18 @@ import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
+import config from 'config';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
+import messageService from '../../services/messageService';
+import RabbitMQService from '../../services/rabbitmq';
+import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import { BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT, RESOURCES } from '../../constants';
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const should = chai.should();
 
@@ -368,6 +375,90 @@ describe('CREATE work', () => {
             });
           }
         });
+      });
+    });
+
+    describe('RabbitMQ Message topic', () => {
+      let createMessageSpy;
+      let publishSpy;
+      let sandbox;
+
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
+
+      beforeEach(async () => {
+        sandbox = sinon.sandbox.create();
+        server.services.pubsub = new RabbitMQService(server.logger);
+
+        // initialize RabbitMQ
+        server.services.pubsub.init(
+          config.get('rabbitmqURL'),
+          config.get('pubsubExchangeName'),
+          config.get('pubsubQueueName'),
+        );
+
+        // add project to ES index
+        await server.services.es.index({
+          index: ES_PROJECT_INDEX,
+          type: ES_PROJECT_TYPE,
+          id: projectId,
+          body: {
+            doc: project,
+          },
+        });
+
+        return new Promise(resolve => setTimeout(() => {
+          publishSpy = sandbox.spy(server.services.pubsub, 'publish');
+          createMessageSpy = sandbox.spy(messageService, 'createTopic');
+          resolve();
+        }, 500));
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      after(() => {
+        mockRabbitMQ(server);
+      });
+
+      it('should send message topic when work added', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          post: () => Promise.resolve({
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: {},
+              },
+            },
+          }),
+        });
+        sandbox.stub(messageService, 'getClient', () => mockHttpClient);
+        request(server)
+          .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .send(body)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                publishSpy.calledOnce.should.be.true;
+                publishSpy.calledWith('project.phase.added').should.be.true;
+                createMessageSpy.calledTwice.should.be.true;
+                done();
+              });
+            }
+          });
       });
     });
   });
