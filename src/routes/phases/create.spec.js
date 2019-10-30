@@ -482,8 +482,10 @@ describe('Project Phases', () => {
       let publishSpy;
       let sandbox;
 
-      // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
-      before(async () => new Promise(resolve => setTimeout(() => resolve(), 500)));
+      before((done) => {
+        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
+        testUtil.wait(done);
+      });
 
       beforeEach(async () => {
         sandbox = sinon.sandbox.create();
