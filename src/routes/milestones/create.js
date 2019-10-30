@@ -102,10 +102,6 @@ module.exports = [
         }),
     )
     .then((otherUpdated) => {
-      // Do not send events for the updated milestones here,
-      // because it will make 'version conflict' error in ES.
-      // The order of the other milestones need to be updated in the MILESTONE_ADDED event handler
-
       // Send event to bus
       req.log.debug('Sending event to RabbitMQ bus for milestone %d', result.id);
       req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_ADDED,
@@ -113,15 +109,20 @@ module.exports = [
         { correlationId: req.id },
       );
 
-      // emit the event
+      // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
+      //      Even though we send this event to the Kafka, the "project-processor-es" shouldn't process it.
       util.sendResourceToKafkaBus(
         req,
         EVENT.ROUTING_KEY.MILESTONE_ADDED,
         RESOURCES.MILESTONE,
         result);
 
-
-      // emit the event for other milestone order updated
+      // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
+      //      Even though we send these events to the Kafka, the "project-processor-es" shouldn't process them.
+      //
+      //      We don't process these event in "project-processor-es"
+      //      because it will make 'version conflict' error in ES.
+      //      The order of the other milestones need to be updated in the PROJECT_PHASE_UPDATED event handler
       _.map(otherUpdated, milestone =>
         util.sendResourceToKafkaBus(
           req,

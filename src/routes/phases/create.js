@@ -145,14 +145,20 @@ module.exports = [
           { correlationId: req.id },
         );
 
-        // emit the event
+        // NOTE So far this logic is implemented in RabbitMQ handler of PROJECT_PHASE_UPDATED
+        //      Even though we send this event to the Kafka, the "project-processor-es" shouldn't process it.
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
           RESOURCES.PHASE,
           newProjectPhase);
 
-        // emit the event for other phase order updated
+        // NOTE So far this logic is implemented in RabbitMQ handler of PROJECT_PHASE_UPDATED
+        //      Even though we send these events to the Kafka, the "project-processor-es" shouldn't process them.
+        //
+        //      We don't process these event in "project-processor-es"
+        //      because it will make 'version conflict' error in ES.
+        //      The order of the other milestones need to be updated in the PROJECT_PHASE_UPDATED event handler
         _.map(otherUpdated, phase =>
           util.sendResourceToKafkaBus(
             req,

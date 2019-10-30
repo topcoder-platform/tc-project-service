@@ -1,58 +1,47 @@
 
 import { EVENT, CONNECT_NOTIFICATION_EVENT } from '../constants';
-import { projectCreatedHandler, projectUpdatedHandler, projectDeletedHandler,
+import { projectCreatedHandler,
   projectUpdatedKafkaHandler } from './projects';
-import { projectMemberAddedHandler, projectMemberRemovedHandler,
-  projectMemberUpdatedHandler } from './projectMembers';
-import { projectMemberInviteCreatedHandler,
-  projectMemberInviteUpdatedHandler } from './projectMemberInvites';
-import { projectAttachmentRemovedHandler,
-  projectAttachmentUpdatedHandler, projectAttachmentAddedHandler } from './projectAttachments';
 import { projectPhaseAddedHandler, projectPhaseRemovedHandler,
   projectPhaseUpdatedHandler } from './projectPhases';
-import { phaseProductAddedHandler, phaseProductRemovedHandler,
-  phaseProductUpdatedHandler } from './phaseProducts';
 import {
   timelineAddedHandler,
-  timelineUpdatedHandler,
-  timelineRemovedHandler,
   timelineAdjustedKafkaHandler,
 } from './timelines';
 import {
   milestoneAddedHandler,
   milestoneUpdatedHandler,
-  milestoneRemovedHandler,
   milestoneUpdatedKafkaHandler,
 } from './milestones';
 
+// NOTE: We use "project-processor-es" for ES indexing now.
+//       So I disable indexing using RabbitMQ for a transition period for most of the objects
+//       which don't have any special logic.
+//       As soon as we are sure, that "project-processor-es" works well for ES indexing,
+//       we should completely remove the handlers for this events.
 export const rabbitHandlers = {
-  'project.initial': projectCreatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED]: projectCreatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_UPDATED]: projectUpdatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_DELETED]: projectDeletedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED]: projectMemberAddedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED]: projectMemberRemovedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED]: projectMemberUpdatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED]: projectMemberInviteCreatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED]: projectMemberInviteUpdatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED]: projectAttachmentAddedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED]: projectAttachmentRemovedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED]: projectAttachmentUpdatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED]: projectPhaseAddedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED]: projectPhaseRemovedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED]: projectPhaseUpdatedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED]: phaseProductAddedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED]: phaseProductRemovedHandler,
-  [EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED]: phaseProductUpdatedHandler,
+  'project.initial': projectCreatedHandler, // is only used `seedElasticsearchIndex.js` and can be removed
+  // [EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED]: projectCreatedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_UPDATED]: projectUpdatedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_DELETED]: projectDeletedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED]: projectMemberAddedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED]: projectMemberRemovedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED]: projectMemberUpdatedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED]: projectMemberInviteCreatedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED]: projectMemberInviteUpdatedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED]: projectAttachmentAddedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED]: projectAttachmentRemovedHandler,
+  // [EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED]: projectAttachmentUpdatedHandler,
+
+  // project phase handles additionally implement logic for creating associated topics in Message Service
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED]: projectPhaseAddedHandler, // index in ES because of cascade updates
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED]: projectPhaseRemovedHandler, // doesn't index in ES
+  [EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED]: projectPhaseUpdatedHandler, // index in ES because of cascade updates
 
   // Timeline and milestone
-  'timeline.initial': timelineAddedHandler,
-  [EVENT.ROUTING_KEY.TIMELINE_ADDED]: timelineAddedHandler,
-  [EVENT.ROUTING_KEY.TIMELINE_REMOVED]: timelineRemovedHandler,
-  [EVENT.ROUTING_KEY.TIMELINE_UPDATED]: timelineUpdatedHandler,
-  [EVENT.ROUTING_KEY.MILESTONE_ADDED]: milestoneAddedHandler,
-  [EVENT.ROUTING_KEY.MILESTONE_REMOVED]: milestoneRemovedHandler,
-  [EVENT.ROUTING_KEY.MILESTONE_UPDATED]: milestoneUpdatedHandler,
+  'timeline.initial': timelineAddedHandler, // is only used `seedElasticsearchIndex.js` and can be removed
+  [EVENT.ROUTING_KEY.MILESTONE_ADDED]: milestoneAddedHandler, // index in ES because of cascade updates
+  [EVENT.ROUTING_KEY.MILESTONE_UPDATED]: milestoneUpdatedHandler, // index in ES because of cascade updates
 };
 
 export const kafkaHandlers = {
