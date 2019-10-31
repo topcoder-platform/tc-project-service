@@ -569,9 +569,11 @@ module.exports = [
       return retrieveProjects(req, criteria, sort, req.query.fields)
       .then((result) => {
         if (result.rows.length === 0) {
+          req.log.debug('No projects found in ES');
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
             .then(r => util.setPaginationHeaders(req, res, r));
         }
+        req.log.debug('Projects found in ES');
         // set header
         return util.setPaginationHeaders(req, res, result);
       })
@@ -584,9 +586,11 @@ module.exports = [
     return retrieveProjects(req, criteria, sort, req.query.fields)
       .then((result) => {
         if (result.rows.length === 0) {
+          req.log.debug('No projects found in ES');
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
             .then(r => util.setPaginationHeaders(req, res, r));
         }
+        req.log.debug('Projects found in ES');
         return util.setPaginationHeaders(req, res, result);
       })
       .catch(err => next(err));
