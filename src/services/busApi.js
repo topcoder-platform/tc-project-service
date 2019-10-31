@@ -46,7 +46,7 @@ async function getClient() {
 function createEvent(topic, payload, logger) {
   logger.debug(`Sending message to topic ${topic}: ${JSON.stringify(payload)}`);
   return getClient().then((busClient) => {
-    logger.debug('calling bus-api');
+    logger.debug(`calling bus-api for topic ${topic}`);
     return busClient.post('/bus/events', {
       topic,
       originator: 'project-api',
@@ -54,11 +54,11 @@ function createEvent(topic, payload, logger) {
       'mime-type': 'application/json',
       payload,
     }).then((resp) => {
-      logger.debug('Sent event to bus-api');
-      logger.debug(`Sent event to bus-api [data]: ${_.get(resp, 'data')}`);
-      logger.debug(`Sent event to bus-api [status]: ${_.get(resp, 'status')}`);
+      logger.debug(`Sent event to bus-api for topic ${topic}`);
+      logger.debug(`Sent event to bus-api for topic ${topic} [data]: ${_.get(resp, 'data')}`);
+      logger.debug(`Sent event to bus-api for topic ${topic} [status]: ${_.get(resp, 'status')}`);
     }).catch((error) => {
-      logger.debug('Error sending event to bus-api');
+      logger.debug(`Error sending event to bus-api for topic ${topic}`);
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
