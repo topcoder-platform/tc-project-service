@@ -54,7 +54,7 @@ module.exports = [
        })
         .catch(next);
       } else {
-        req.log.debug('projectTemplates found in ES');
+        req.log.debug('projectTemplate found in ES');
         res.json(data[0].inner_hits.projectTemplates.hits.hits[0]._source);  // eslint-disable-line no-underscore-dangle
       }
     })

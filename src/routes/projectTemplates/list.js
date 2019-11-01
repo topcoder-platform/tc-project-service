@@ -23,7 +23,7 @@ module.exports = [
     }, 'metadata')
     .then((data) => {
       if (data.projectTemplates.length === 0) {
-        req.log.debug('No projectTemplate found in ES');
+        req.log.debug('No projectTemplates found in ES');
         models.ProjectTemplate.findAll({
           where: {
             deletedAt: { $eq: null },
