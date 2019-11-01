@@ -23,11 +23,7 @@ if (process.env.NODE_ENV === 'test') {
       idleTimeout: 1000,
     },
     elasticsearchConfig: {
-      host: 'dockerhost:9200',
-      // target elasticsearch 2.3 version
-      apiVersion: '7.0',
-      indexName: 'projects',
-      docType: 'projectV5'
+      host: 'dockerhost:9200'
     },
     whitelistedOriginsForUserIdAuth: "[\"\"]",
   };
