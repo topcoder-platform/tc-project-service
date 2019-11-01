@@ -399,7 +399,7 @@ _.assignIn(util, {
     }
     // during unit tests, we need to refresh the indices
     // before making get/search requests to make sure all ES data can be visible.
-    if (process.env.NODE_ENV.toLowerCase() === 'test') {
+    if (process.env.NODE_ENV === 'test') {
       esClient.originalSearch = esClient.search;
       esClient.search = (params, cb) => esClient.indices.refresh({ index: '' })
         .then(() => esClient.originalSearch(params, cb)); // refresh index before reply
