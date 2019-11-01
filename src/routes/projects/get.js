@@ -68,10 +68,6 @@ module.exports = [
       })
       .then((invites) => {
         project.invites = invites;
-        return models.ScopeChangeRequest.getProjectScopeChangeRequests(projectId);
-      })
-      .then((scopeChangeRequests) => {
-        project.scopeChangeRequests = scopeChangeRequests;
         res.status(200).json(project);
       })
       .catch(err => next(err));
