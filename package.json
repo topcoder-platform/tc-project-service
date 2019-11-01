@@ -54,7 +54,7 @@
     "http-aws-es": "^4.0.0",
     "joi": "^8.0.5",
     "jsonwebtoken": "^8.3.0",
-    "lodash": "^4.16.4",
+    "lodash": "^4.17.13",
     "memwatch-next": "^0.3.0",
     "method-override": "^2.3.9",
     "moment": "^2.22.2",
