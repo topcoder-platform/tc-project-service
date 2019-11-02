@@ -1,16 +1,78 @@
 /* eslint-disable no-unused-expressions */
+/* eslint-disable max-len */
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
 
+import config from 'config';
 import models from '../../models';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
+
+const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
+const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+
 const should = chai.should();
 
+const data = [
+  {
+    id: 5,
+    type: 'generic',
+    billingAccountId: 1,
+    name: 'test1',
+    description: 'es_project',
+    status: 'active',
+    details: {
+      utm: {
+        code: 'code1',
+      },
+    },
+    createdBy: 1,
+    updatedBy: 1,
+    lastActivityAt: 1,
+    lastActivityUserId: '1',
+    members: [
+      {
+        id: 1,
+        userId: 40051331,
+        projectId: 1,
+        role: 'customer',
+        firstName: 'es_member_1_firstName',
+        lastName: 'Lastname',
+        handle: 'test_tourist_handle',
+        isPrimary: true,
+        createdBy: 1,
+        updatedBy: 1,
+      },
+      {
+        id: 2,
+        userId: 40051332,
+        projectId: 1,
+        role: 'copilot',
+        isPrimary: true,
+        createdBy: 1,
+        updatedBy: 1,
+      },
+    ],
+    attachments: [
+      {
+        id: 1,
+        title: 'Spec',
+        projectId: 1,
+        description: 'specification',
+        filePath: 'projects/1/spec.pdf',
+        contentType: 'application/pdf',
+        createdBy: 1,
+        updatedBy: 1,
+      },
+    ],
+  },
+];
+
 describe('GET Project', () => {
+  // only add project1 to es
   let project1;
   let project2;
   before((done) => {
@@ -53,7 +115,8 @@ describe('GET Project', () => {
             type: 'visual_design',
             billingAccountId: 1,
             name: 'test2',
-            description: 'test project2',
+            description: 'db_project',
+            id: 2,
             status: 'draft',
             details: {},
             createdBy: 1,
@@ -62,9 +125,28 @@ describe('GET Project', () => {
             lastActivityUserId: '1',
           }).then((p) => {
             project2 = p;
+            return models.ProjectMember.create({
+              userId: 40051335,
+              projectId: project2.id,
+              role: 'manager',
+              handle: 'manager_handle',
+              isPrimary: true,
+              createdBy: 1,
+              updatedBy: 1,
+            });
           });
           return Promise.all([p1, p2])
-              .then(() => done());
+              .then(() => server.services.es.index({
+                index: ES_PROJECT_INDEX,
+                type: ES_PROJECT_TYPE,
+                id: data[0].id,
+                body: data[0],
+              })).then(() => {
+                // sleep for some time, let elasticsearch indices be settled
+                // sleep.sleep(5);
+                testUtil.wait(done);
+                // done();
+              });
         });
   });
 
@@ -119,6 +201,50 @@ describe('GET Project', () => {
               should.exist(resJson.name);
               resJson.status.should.be.eql('draft');
               resJson.members.should.have.lengthOf(2);
+              done();
+            }
+          });
+    });
+
+    it('should return project with "members", "invites", and "attachments" by default when data comes from ES', (done) => {
+      request(server)
+          .get(`/v5/projects/${data[0].id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.description.should.be.eql('es_project');
+              resJson.members.should.have.lengthOf(2);
+              resJson.members[0].firstName.should.equal('es_member_1_firstName');
+              done();
+            }
+          });
+    });
+
+    it('should return project with "members", "invites", and "attachments" by default when data comes from DB', (done) => {
+      request(server)
+          .get(`/v5/projects/${project2.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.description.should.be.eql('db_project');
+              resJson.members.should.have.lengthOf(1);
+              resJson.members[0].role.should.equal('manager');
               done();
             }
           });
