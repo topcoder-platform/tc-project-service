@@ -2,15 +2,24 @@
  * API to list all metadata
  */
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import _ from 'lodash';
 import Joi from 'joi';
 import validate from 'express-validation';
 
 import models from '../../models';
 import util from '../../util';
 
-const metadataProperties = ['productTemplates', 'forms', 'projectTemplates', 'planConfigs', 'priceConfigs',
-  'projectTypes', 'productCategories', 'milestoneTemplates', 'buildingBlocks'];
-const metadataToReturnFromES = 99999;
+const metadataProperties = [
+  'productTemplates',
+  'forms',
+  'projectTemplates',
+  'planConfigs',
+  'priceConfigs',
+  'projectTypes',
+  'productCategories',
+  'milestoneTemplates',
+  'buildingBlocks',
+];
 const permissions = tcMiddleware.permissions;
 
 const schema = {
@@ -159,160 +168,58 @@ module.exports = [
   validate(schema),
   permissions('metadata.list'),
   (req, res, next) => {
-    req.log.debug('try getting metadata from ES.');
-    return util.fetchFromES(metadataProperties, {
-      query: {
-        bool: {
-          should: [
-            {
-              nested: {
-                path: 'projectTemplates',
-                query: {
-                  bool: {
-                    must: {
-                      match: {
-                        'projectTemplates.disabled': false,
-                      },
-                    },
-                    must_not: {
-                      match: {
-                        'projectTemplates.deleted': true,
-                      },
-                    },
-                  },
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'productTemplates',
-                query: {
-                  bool: {
-                    must: {
-                      match: {
-                        'productTemplates.disabled': false,
-                      },
-                    },
-                    must_not: {
-                      match: {
-                        'productTemplates.deleted': true,
-                      },
-                    },
-                  },
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'milestoneTemplates',
-                query: {
-                  match_all: {},
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'buildingBlocks',
-                query: {
-                  match_all: {},
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                  _source: {
-                    excludes: [
-                      'privateConfig',
-                    ],
-                  },
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'projectTypes',
-                query: {
-                  match_all: {},
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'productCategories',
-                query: {
-                  match_all: {},
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'forms',
-                query: {
-                  match_all: {},
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'priceConfigs',
-                query: {
-                  match_all: {},
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'planConfigs',
-                query: {
-                  match_all: {},
-                },
-                inner_hits: {
-                  size: metadataToReturnFromES,
-                },
-              },
-            },
-          ],
-        },
-      },
-    }, 'metadata')
+    // As we are generally return all the data from metadata ES index we just get all the index data
+    // instead of creating a detailed request to get each type of object
+    // There are few reasons for this:
+    // + getting all the index works much faster than making detailed request:
+    //   ~2.5 seconds using detailed query vs 0.15 seconds without query (including JS filtering)
+    // + making request we have to get data from `inner_hits` and specify `size` which is by default is `3`
+    //   otherwise we wouldn't get all the data, but we want to get all the data
+    // Disadvantage:
+    // - we have to filter disabled Project Templates and Product Templates by JS
+    util.fetchFromES(null, null, 'metadata')
     .then((data) => {
-      let esReturnedData = false;
-      const resJson = data;
-      const numMetadataProperties = metadataProperties.length;
-      for (let i = 0; i < numMetadataProperties; i += 1) {
-        const property = metadataProperties[i];
-        if (resJson[property] != null && !Array.isArray(resJson[property])) {
-          resJson[property] = resJson[property].hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
-          if (resJson[property].length > 0) {
-            esReturnedData = true;
-          }
+      const esDataToReturn = _.pick(data, metadataProperties);
+      // if some metadata properties are not returned from ES, then initialize such properties with empty array
+      // for consistency
+      metadataProperties.forEach((prop) => {
+        if (!esDataToReturn[prop]) {
+          esDataToReturn[prop] = [];
         }
+      });
+
+      // return only non-disabled Project Templates
+      if (esDataToReturn.projectTemplates && esDataToReturn.projectTemplates.length > 0) {
+        esDataToReturn.projectTemplates = _.filter(esDataToReturn.projectTemplates, { disabled: false });
       }
-      if (esReturnedData) {
-        req.log.debug('Returning results from ES');
-        return res.json(resJson);
+
+      // return only non-disabled Product Templates
+      if (esDataToReturn.productTemplates && esDataToReturn.productTemplates.length > 0) {
+        esDataToReturn.productTemplates = _.filter(esDataToReturn.productTemplates, { disabled: false });
       }
-      req.log.debug('ES returned no results');
-      return loadMetadataFromDb(req.query.includeAllReferred).then(results => res.json(results));
+
+      // WARNING: `BuildingBlock` model contains sensitive data!
+      //
+      // We should NEVER return `privateConfig` property for `buildingBlocks`.
+      // For the DB we use hooks to always clear it out, see `src/models/buildingBlock.js`.
+      // For the ES so far we should always remember about it and filter it out.
+      if (esDataToReturn.buildingBlocks && esDataToReturn.buildingBlocks.length > 0) {
+        esDataToReturn.buildingBlocks = _.map(
+          esDataToReturn.buildingBlocks,
+          buildingBlock => _.omit(buildingBlock, 'privateConfig'),
+        );
+      }
+
+      // check if any data is returned from ES
+      const hasDataInES = _.some(esDataToReturn, propData => propData && propData.length > 0);
+
+      if (hasDataInES) {
+        req.log.debug('Metadata is found in ES');
+        return res.json(esDataToReturn);
+      }
+
+      req.log.debug('Metadata is not found in ES');
+      return loadMetadataFromDb(req.query.includeAllReferred).then(dbDataToReturn => res.json(dbDataToReturn));
     })
     .catch(next);
   },
