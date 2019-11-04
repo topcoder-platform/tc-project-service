@@ -91,7 +91,7 @@ describe('Project Phases', () => {
   describe('GET /projects/{projectId}/phases/{phaseId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -101,7 +101,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/999/phases/${phaseId}`)
+        .get(`/v5/projects/999/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -111,7 +111,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/999`)
+        .get(`/v5/projects/${projectId}/phases/999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -121,7 +121,7 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -131,7 +131,7 @@ describe('Project Phases', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql('test project phase');
             resJson.status.should.be.eql('active');
@@ -145,7 +145,7 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -155,7 +155,7 @@ describe('Project Phases', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql('test project phase');
             resJson.status.should.be.eql('active');

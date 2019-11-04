@@ -12,48 +12,50 @@ import models from '../../models';
 const should = chai.should();
 
 describe('CREATE project type', () => {
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProjectType.create({
-      key: 'key1',
-      displayName: 'displayName 1',
-      icon: 'http://example.com/icon1.ico',
-      question: 'question 1',
-      info: 'info 1',
-      aliases: ['key-1', 'key_1'],
-      disabled: false,
-      hidden: false,
-      metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
-      createdBy: 1,
-      updatedBy: 1,
-    })).then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProjectType.create({
+        key: 'key1',
+        displayName: 'displayName 1',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 1',
+        info: 'info 1',
+        aliases: ['key-1', 'key_1'],
+        disabled: false,
+        hidden: false,
+        metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /projects/metadata/projectTypes', () => {
     const body = {
-      param: {
-        key: 'app_dev',
-        displayName: 'Application Development',
-        icon: 'prod-cat-app-icon',
-        info: 'Application Development Info',
-        question: 'What kind of devlopment you need?',
-        aliases: ['key-1', 'key_1'],
-        disabled: true,
-        hidden: true,
-        metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
-      },
+      key: 'app_dev',
+      displayName: 'Application Development',
+      icon: 'prod-cat-app-icon',
+      info: 'Application Development Info',
+      question: 'What kind of devlopment you need?',
+      aliases: ['key-1', 'key_1'],
+      disabled: true,
+      hidden: true,
+      metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
+
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -63,7 +65,7 @@ describe('CREATE project type', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -73,7 +75,7 @@ describe('CREATE project type', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -81,107 +83,107 @@ describe('CREATE project type', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for missing key', (done) => {
+    it('should return 400 for missing key', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.key;
+      delete invalidBody.key;
 
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing displayName', (done) => {
+    it('should return 400 for missing displayName', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.displayName;
+      delete invalidBody.displayName;
 
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing icon', (done) => {
+    it('should return 400 for missing icon', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.icon;
+      delete invalidBody.icon;
 
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing question', (done) => {
+    it('should return 400 for missing question', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.question;
+      delete invalidBody.question;
 
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing info', (done) => {
+    it('should return 400 for missing info', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.info;
+      delete invalidBody.info;
 
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing metadata', (done) => {
+    it('should return 400 for missing metadata', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.metadata;
+      delete invalidBody.metadata;
 
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for duplicated key', (done) => {
+    it('should return 400 for duplicated key', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.key = 'key1';
+      invalidBody.key = 'key1';
 
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -189,16 +191,16 @@ describe('CREATE project type', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.key.should.be.eql(body.param.key);
-          resJson.displayName.should.be.eql(body.param.displayName);
-          resJson.icon.should.be.eql(body.param.icon);
-          resJson.info.should.be.eql(body.param.info);
-          resJson.question.should.be.eql(body.param.question);
-          resJson.aliases.should.be.eql(body.param.aliases);
-          resJson.disabled.should.be.eql(body.param.disabled);
-          resJson.hidden.should.be.eql(body.param.hidden);
-          resJson.metadata.should.be.eql(body.param.metadata);
+          const resJson = res.body;
+          resJson.key.should.be.eql(body.key);
+          resJson.displayName.should.be.eql(body.displayName);
+          resJson.icon.should.be.eql(body.icon);
+          resJson.info.should.be.eql(body.info);
+          resJson.question.should.be.eql(body.question);
+          resJson.aliases.should.be.eql(body.aliases);
+          resJson.disabled.should.be.eql(body.disabled);
+          resJson.hidden.should.be.eql(body.hidden);
+          resJson.metadata.should.be.eql(body.metadata);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -213,7 +215,7 @@ describe('CREATE project type', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/projects/metadata/projectTypes')
+        .post('/v5/projects/metadata/projectTypes')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -221,16 +223,16 @@ describe('CREATE project type', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.key.should.be.eql(body.param.key);
-          resJson.displayName.should.be.eql(body.param.displayName);
-          resJson.icon.should.be.eql(body.param.icon);
-          resJson.info.should.be.eql(body.param.info);
-          resJson.question.should.be.eql(body.param.question);
-          resJson.aliases.should.be.eql(body.param.aliases);
-          resJson.disabled.should.be.eql(body.param.disabled);
-          resJson.hidden.should.be.eql(body.param.hidden);
-          resJson.metadata.should.be.eql(body.param.metadata);
+          const resJson = res.body;
+          resJson.key.should.be.eql(body.key);
+          resJson.displayName.should.be.eql(body.displayName);
+          resJson.icon.should.be.eql(body.icon);
+          resJson.info.should.be.eql(body.info);
+          resJson.question.should.be.eql(body.question);
+          resJson.aliases.should.be.eql(body.aliases);
+          resJson.disabled.should.be.eql(body.disabled);
+          resJson.hidden.should.be.eql(body.hidden);
+          resJson.metadata.should.be.eql(body.metadata);
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();

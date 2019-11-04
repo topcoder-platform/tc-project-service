@@ -80,12 +80,13 @@ module.exports = function defineProjectEstimationItem(sequelize, DataTypes) {
         beforeFind: (options, callback) => {
           // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
           if (options.includeAllProjectEstimatinoItemsForInternalUsage) {
-            return callback(null);
+            return callback ? callback(null) : null;
           }
 
           if (!options.reqUser || !options.members) {
-            return callback(new Error(
-              'You must provide auth user and project members to get project estimation items'));
+            const err = new Error('You must provide auth user and project members to get project estimation items');
+            if (!callback) throw err;
+            return callback(err);
           }
 
           // find all project estimation item types which are allowed to be returned to the user
@@ -99,68 +100,65 @@ module.exports = function defineProjectEstimationItem(sequelize, DataTypes) {
 
           // only return Project Estimation Types which are allowed to the user
           options.where.type = allowedTypes; // eslint-disable-line no-param-reassign
-          return callback(null);
-        },
-      },
-      classMethods: {
-        /**
-         * Find all project estimation items for project
-         *
-         * TODO: this method can rewritten without using `models`
-         *       and using JOIN instead for retrieving ProjectEstimationTimes by projectId
-         *
-         * @param {Object} models    all models
-         * @param {Number} projectId project id
-         * @param {Object} [options] options
-         *
-         * @returns {Promise} list of project estimation items
-         */
-        findAllByProject(models, projectId, options) {
-          return models.ProjectEstimation.findAll({
-            raw: true,
-            where: {
-              projectId,
-            },
-          }).then((estimations) => {
-            const optionsCombined = _.assign({}, options);
-            // update where to always filter by projectEstimationsIds of the project
-            optionsCombined.where = _.assign({}, optionsCombined.where, {
-              projectEstimationId: _.map(estimations, 'id'),
-            });
-
-            return this.findAll(optionsCombined);
-          });
-        },
-
-        /**
-         * Delete all project estimation items for project
-         *
-         * TODO: this method can rewritten without using `models`
-         *       and using JOIN instead for retrieving ProjectEstimationTimes by projectId
-         *
-         * @param {Object} models    all models
-         * @param {Number} projectId project id
-         * @param {Object} reqUser   user who makes the request
-         * @param {Object} [options] options
-         *
-         * @returns {Promise} result of destroy query
-         */
-        deleteAllForProject(models, projectId, reqUser, options) {
-          return this.findAllByProject(models, projectId, options)
-            .then((estimationItems) => {
-              const estimationItemsOptions = {
-                where: {
-                  id: _.map(estimationItems, 'id'),
-                },
-              };
-
-              return this.update({ deletedBy: reqUser.userId }, estimationItemsOptions)
-                .then(() => this.destroy(estimationItemsOptions));
-            });
+          return callback ? callback(null) : null;
         },
       },
     },
   );
+
+  /**
+   * Find all project estimation items for project
+   *
+   * TODO: this method can rewritten without using `models`
+   *       and using JOIN instead for retrieving ProjectEstimationTimes by projectId
+   *
+   * @param {Object} models    all models
+   * @param {Number} projectId project id
+   * @param {Object} [options] options
+   *
+   * @returns {Promise} list of project estimation items
+   */
+  ProjectEstimationItem.findAllByProject = (models, projectId, options) =>
+    models.ProjectEstimation.findAll({
+      raw: true,
+      where: {
+        projectId,
+      },
+    }).then((estimations) => {
+      const optionsCombined = _.assign({}, options);
+      // update where to always filter by projectEstimationsIds of the project
+      optionsCombined.where = _.assign({}, optionsCombined.where, {
+        projectEstimationId: _.map(estimations, 'id'),
+      });
+
+      return ProjectEstimationItem.findAll(optionsCombined);
+    });
+
+  /**
+   * Delete all project estimation items for project
+   *
+   * TODO: this method can rewritten without using `models`
+   *       and using JOIN instead for retrieving ProjectEstimationTimes by projectId
+   *
+   * @param {Object} models    all models
+   * @param {Number} projectId project id
+   * @param {Object} reqUser   user who makes the request
+   * @param {Object} [options] options
+   *
+   * @returns {Promise} result of destroy query
+   */
+  ProjectEstimationItem.deleteAllForProject = (models, projectId, reqUser, options) =>
+    ProjectEstimationItem.findAllByProject(models, projectId, options)
+      .then((estimationItems) => {
+        const estimationItemsOptions = {
+          where: {
+            id: _.map(estimationItems, 'id'),
+          },
+        };
+
+        return ProjectEstimationItem.update({ deletedBy: reqUser.userId }, estimationItemsOptions)
+          .then(() => ProjectEstimationItem.destroy(estimationItemsOptions));
+      });
 
   return ProjectEstimationItem;
 };

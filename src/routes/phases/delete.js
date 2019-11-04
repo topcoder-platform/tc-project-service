@@ -3,7 +3,8 @@
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import { EVENT, TIMELINE_REFERENCES } from '../../constants';
+import util from '../../util';
+import { EVENT, RESOURCES, TIMELINE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -43,7 +44,13 @@ module.exports = [
           { deleted, route: TIMELINE_REFERENCES.PHASE },
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, { req, deleted });
+
+        //  emit event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED,
+          RESOURCES.PHASE,
+          _.pick(deleted.toJSON(), 'id'));
 
         res.status(204).json({});
       }).catch(err => next(err));

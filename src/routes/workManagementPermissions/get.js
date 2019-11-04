@@ -4,7 +4,6 @@
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -32,7 +31,7 @@ module.exports = [
         return Promise.reject(apiErr);
       }
 
-      res.json(util.wrapResponse(req.id, existing));
+      res.json(existing);
       return Promise.resolve();
     })
     .catch(next),

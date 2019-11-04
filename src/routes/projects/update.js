@@ -9,14 +9,13 @@ import {
   PROJECT_STATUS,
   PROJECT_MEMBER_ROLE,
   EVENT,
+  RESOURCES,
   USER_ROLE,
   REGEX,
 } from '../../constants';
 import util from '../../util';
-import directProject from '../../services/directProject';
 
 const traverse = require('traverse');
-
 
 /**
  * API to handle updating a project.
@@ -39,51 +38,49 @@ const mergeCustomizer = (objValue, srcValue) => {
 };
 
 const updateProjectValdiations = {
-  body: {
-    param: Joi.object().keys({
-      id: Joi.number().valid(Joi.ref('$params.id')),
-      name: Joi.string(),
-      description: Joi.string().allow(null).allow('').optional(),
-      billingAccountId: Joi.number().positive(),
-      directProjectId: Joi.number().positive().allow(null),
-      status: Joi.any().valid(_.values(PROJECT_STATUS)),
-      estimatedPrice: Joi.number().precision(2).positive().allow(null),
-      actualPrice: Joi.number().precision(2).positive(),
-      terms: Joi.array().items(Joi.number().positive()),
-      external: Joi.object().keys({
-        id: Joi.string(),
-        type: Joi.any().valid('github', 'jira', 'asana', 'other'),
-        data: Joi.string().max(300), // TODO - restrict length
-      }).allow(null),
-      bookmarks: Joi.array().items(Joi.object().keys({
-        title: Joi.string(),
-        address: Joi.string().regex(REGEX.URL),
-        createdAt: Joi.date(),
-        createdBy: Joi.number().integer().positive(),
-        updatedAt: Joi.date(),
-        updatedBy: Joi.number().integer().positive(),
-      })).optional().allow(null),
-      type: Joi.string().max(45),
-      details: Joi.any(),
-      memers: Joi.any(),
-      templateId: Joi.any().strip(), // ignore the template id
-      createdBy: Joi.any(),
-      createdAt: Joi.any(),
-      updatedBy: Joi.any(),
-      updatedAt: Joi.any(),
-      challengeEligibility: Joi.array().items(Joi.object().keys({
-        role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
-        users: Joi.array().items(Joi.number().positive()),
-        groups: Joi.array().items(Joi.number().positive()),
-      })).allow(null),
+  body: Joi.object().keys({
+    id: Joi.number().valid(Joi.ref('$params.id')),
+    name: Joi.string(),
+    description: Joi.string().allow(null).allow('').optional(),
+    billingAccountId: Joi.number().positive(),
+    directProjectId: Joi.number().positive().allow(null),
+    status: Joi.any().valid(_.values(PROJECT_STATUS)),
+    estimatedPrice: Joi.number().precision(2).positive().allow(null),
+    actualPrice: Joi.number().precision(2).positive(),
+    terms: Joi.array().items(Joi.number().positive()),
+    external: Joi.object().keys({
+      id: Joi.string(),
+      type: Joi.any().valid('github', 'jira', 'asana', 'other'),
+      data: Joi.string().max(300), // TODO - restrict length
+    }).allow(null),
+    bookmarks: Joi.array().items(Joi.object().keys({
+      title: Joi.string(),
+      address: Joi.string().regex(REGEX.URL),
+      createdAt: Joi.date(),
+      createdBy: Joi.number().integer().positive(),
+      updatedAt: Joi.date(),
+      updatedBy: Joi.number().integer().positive(),
+    })).optional().allow(null),
+    type: Joi.string().max(45),
+    details: Joi.any(),
+    memers: Joi.any(),
+    templateId: Joi.any().strip(), // ignore the template id
+    createdBy: Joi.any(),
+    createdAt: Joi.any(),
+    updatedBy: Joi.any(),
+    updatedAt: Joi.any(),
+    challengeEligibility: Joi.array().items(Joi.object().keys({
+      role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
+      users: Joi.array().items(Joi.number().positive()),
+      groups: Joi.array().items(Joi.number().positive()),
+    })).allow(null),
       // cancel reason is mandatory when project status is cancelled
-      cancelReason: Joi.when('status', {
-        is: PROJECT_STATUS.CANCELLED,
-        then: Joi.string().required(),
-        otherwise: Joi.string().optional(),
-      }),
+    cancelReason: Joi.when('status', {
+      is: PROJECT_STATUS.CANCELLED,
+      then: Joi.string().required(),
+      otherwise: Joi.string().optional(),
     }),
-  },
+  }),
 };
 
 /**
@@ -149,6 +146,7 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
     errors.push('Don\'t have permission to update \'directProjectId\' property');
   }
+
   return errors;
 };
 
@@ -160,14 +158,14 @@ module.exports = [
    * Validate project type to be existed.
    */
   (req, res, next) => {
-    if (req.body.param.type) {
-      models.ProjectType.findOne({ where: { key: req.body.param.type } })
+    if (req.body.type) {
+      models.ProjectType.findOne({ where: { key: req.body.type } })
         .then((projectType) => {
           if (projectType) {
             next();
           } else {
-            const err = new Error(`Project type not found for key ${req.body.param.type}`);
-            err.status = 422;
+            const err = new Error(`Project type not found for key ${req.body.type}`);
+            err.status = 400;
             next(err);
           }
         });
@@ -181,7 +179,7 @@ module.exports = [
    */
   (req, res, next) => {
     let project;
-    let updatedProps = req.body.param;
+    let updatedProps = req.body;
     const projectId = _.parseInt(req.params.projectId);
     // prune any fields that cannot be updated directly
     updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
@@ -251,20 +249,6 @@ module.exports = [
         project.set(newValues);
         return project.save();
       })
-      .then(() => {
-        if (updatedProps.billingAccountId &&
-          (previousValue.billingAccountId !== updatedProps.billingAccountId)) {
-          if (!previousValue.directProjectId) {
-            return Promise.resolve();
-          }
-          // if billing account is updated and exist direct projectId we
-          // should invoke direct project service
-          return directProject.addBillingAccount(req, previousValue.directProjectId, {
-            billingAccountId: updatedProps.billingAccountId,
-          });
-        }
-        return Promise.resolve();
-      })
       .then(() => project.reload(project.id))
       // update project history
       .then(() => new Promise((accept, reject) => {
@@ -297,8 +281,9 @@ module.exports = [
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
           req,
           original: previousValue,
-          updated: project,
+          updated: _.assign({ resource: RESOURCES.PROJECT }, project),
         });
+
         // check context for project members
         project.members = req.context.currentProjectMembers;
         // get attachments

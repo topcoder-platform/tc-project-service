@@ -24,43 +24,36 @@ module.exports = function defineProjectAttachment(sequelize, DataTypes) {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     indexes: [],
-    classMethods: {
-      getActiveProjectAttachments(projectId) {
-        return this.findAll({
-          where: {
-            deletedAt: { $eq: null },
-            projectId,
-          },
-          raw: true,
-        });
-      },
+  });
 
-      getAttachmentById(projectId, attachmentId) {
-        return this.findOne({
-          where: {
-            projectId,
-            id: attachmentId,
-          },
-        });
-      },
+  ProjectAttachment.getActiveProjectAttachments = projectId => ProjectAttachment.findAll({
+    where: {
+      deletedAt: { $eq: null },
+      projectId,
+    },
+    raw: true,
+  });
 
-      getAttachmentsForUser(projectId, userId) {
-        return this.findAll({
-          where: {
-            projectId,
-            $or: [{
-              createdBy: { $eq: userId },
-            }, {
-              allowedUsers: {
-                $or: [
-                  { $contains: [userId] },
-                  { $eq: null },
-                ],
-              },
-            }],
-          },
-        });
-      },
+  ProjectAttachment.getAttachmentById = (projectId, attachmentId) => ProjectAttachment.findOne({
+    where: {
+      projectId,
+      id: attachmentId,
+    },
+  });
+
+  ProjectAttachment.getAttachmentsForUser = (projectId, userId) => ProjectAttachment.findAll({
+    where: {
+      projectId,
+      $or: [{
+        createdBy: { $eq: userId },
+      }, {
+        allowedUsers: {
+          $or: [
+              { $contains: [userId] },
+              { $eq: null },
+          ],
+        },
+      }],
     },
   });
 

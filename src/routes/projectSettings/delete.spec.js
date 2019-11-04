@@ -144,18 +144,20 @@ describe('DELETE Project Setting', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /projects/{projectId}/settings/{id}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/settings/${id}`)
+        .delete(`/v5/projects/${projectId}/settings/${id}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/settings/${id}`)
+        .delete(`/v5/projects/${projectId}/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -164,7 +166,7 @@ describe('DELETE Project Setting', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/settings/${id}`)
+        .delete(`/v5/projects/${projectId}/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -173,7 +175,7 @@ describe('DELETE Project Setting', () => {
 
     it('should return 404 for non-existed project', (done) => {
       request(server)
-        .delete(`/v4/projects/9999/settings/${id}`)
+        .delete(`/v5/projects/9999/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -182,7 +184,7 @@ describe('DELETE Project Setting', () => {
 
     it('should return 404 for non-existed project setting', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/settings/1234`)
+        .delete(`/v5/projects/${projectId}/settings/1234`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -193,7 +195,7 @@ describe('DELETE Project Setting', () => {
       models.ProjectSetting.destroy({ where: { id } })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/${projectId}/settings/${id}`)
+            .delete(`/v5/projects/${projectId}/settings/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -213,7 +215,7 @@ describe('DELETE Project Setting', () => {
       })
       .then(() => {
         request(server)
-          .delete(`/v4/projects/${projectId}/settings/${id}`)
+          .delete(`/v5/projects/${projectId}/settings/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -225,7 +227,7 @@ describe('DELETE Project Setting', () => {
     it('should return 204, for admin, if project setting with non-estimation type was successfully removed',
     (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/settings/${id2}`)
+        .delete(`/v5/projects/${projectId}/settings/${id2}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -266,7 +268,7 @@ describe('DELETE Project Setting', () => {
           updatedBy: 1,
         }).then(() => {
           request(server)
-            .delete(`/v4/projects/${projectId}/settings/${id}`)
+            .delete(`/v5/projects/${projectId}/settings/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })

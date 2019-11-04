@@ -19,7 +19,15 @@ import Promise from 'bluebird';
 import models from './models';
 // import AWS from 'aws-sdk';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
+import {
+  ADMIN_ROLES,
+  TOKEN_SCOPES,
+  EVENT,
+  PROJECT_MEMBER_ROLE,
+  VALUE_TYPE,
+  ESTIMATION_TYPE,
+  RESOURCES,
+} from './constants';
 
 const exec = require('child_process').exec;
 const tcCoreLibAuth = require('tc-core-library-js').auth;
@@ -389,8 +397,82 @@ _.assignIn(util, {
     } else {
       esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
     }
+    // during unit tests, we need to refresh the indices
+    // before making get/search requests to make sure all ES data can be visible.
+    if (process.env.NODE_ENV === 'test') {
+      esClient.originalSearch = esClient.search;
+      esClient.search = (params, cb) => esClient.indices.refresh({ index: '' })
+        .then(() => esClient.originalSearch(params, cb)); // refresh index before reply
+      esClient.originalGet = esClient.get;
+      esClient.get = (params, cb) => esClient.indices.refresh({ index: '' })
+        .then(() => esClient.originalGet(params, cb)); // refresh index before reply
+    }
     return esClient;
   },
+
+  /**
+   * Return the searched resource from elastic search
+   * @param resource resource name
+   * @param query    search query
+   * @param index    index to search from
+   * @return {Object}           the searched resource
+   */
+  fetchFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+    let INDEX = config.get('elasticsearchConfig.metadataIndexName');
+    let TYPE = config.get('elasticsearchConfig.metadataDocType');
+    if (index === 'timeline') {
+      INDEX = config.get('elasticsearchConfig.timelineIndexName');
+      TYPE = config.get('elasticsearchConfig.timelineDocType');
+    } else if (index === 'project') {
+      INDEX = config.get('elasticsearchConfig.indexName');
+      TYPE = config.get('elasticsearchConfig.docType');
+    }
+
+    const data = query ? (yield esClient.search({ index: INDEX, type: TYPE, body: query })) :
+    (yield esClient.search({ index: INDEX, type: TYPE }));
+    if (data.hits.hits.length > 0 && data.hits.hits[0].inner_hits) {
+      return data.hits.hits[0].inner_hits;
+    }
+
+    return data.hits.hits.length > 0 ? data.hits.hits[0]._source : {  // eslint-disable-line no-underscore-dangle
+      productTemplates: [],
+      forms: [],
+      projectTemplates: [],
+      planConfigs: [],
+      priceConfigs: [],
+      projectTypes: [],
+      productCategories: [],
+      orgConfigs: [],
+      milestoneTemplates: [],
+    };
+  }),
+
+  /**
+   * Return the searched resource from elastic search PROJECT index
+   * @param resource resource name
+   * @param query    search query
+   * @param index    index to search from
+   * @return {Array}           the searched resource
+   */
+  fetchByIdFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+    let INDEX = config.get('elasticsearchConfig.indexName');
+    let TYPE = config.get('elasticsearchConfig.docType');
+    if (index === 'timeline') {
+      INDEX = config.get('elasticsearchConfig.timelineIndexName');
+      TYPE = config.get('elasticsearchConfig.timelineDocType');
+    } else if (index === 'metadata') {
+      INDEX = config.get('elasticsearchConfig.metadataIndexName');
+      TYPE = config.get('elasticsearchConfig.metadataDocType');
+    }
+
+    return (yield esClient.search({
+      index: INDEX,
+      type: TYPE,
+      _source: false,
+      body: query,
+    })).hits.hits;
+  }),
+
 
   /**
    * Retrieve member details from userIds
@@ -455,6 +537,29 @@ _.assignIn(util, {
       }
     }),
 
+    /**
+     * Send resource to kafka bus
+     * @param  {object} req  Request object
+     * @param  {String} key  the event key
+     * @param  {String} name  the resource name
+     * @param  {object} resource  the resource
+     * @param  {object} [originalResource] original resource in case resource was updated
+     * @param  {String} [route] route which called the event (for phases and works)
+     * @param  {Boolean}[skipNotification] if true, than event is not send to Notification Service
+    */
+    sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource, originalResource, route, skipNotification) {    // eslint-disable-line
+      req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
+
+      // emit event
+      req.app.emit(key, {
+        req,
+        resource: _.assign({ resource: name }, resource),
+        originalResource: originalResource ? _.assign({ resource: name }, originalResource) : undefined,
+        route,
+        skipNotification,
+      });
+    }),
+
   /**
    * Add userId to project
    * @param  {object} req  Request object that should contain project info and user info
@@ -474,6 +579,7 @@ _.assignIn(util, {
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
+
     return models.ProjectMember.create(member)
     .then((_newMember) => {
       newMember = _newMember.get({ plain: true });
@@ -483,7 +589,13 @@ _.assignIn(util, {
         newMember,
         { correlationId: req.id },
       );
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, { req, member: newMember });
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+        RESOURCES.PROJECT_MEMBER,
+        newMember);
+
       return newMember;
     })
     .catch((err) => {
@@ -613,6 +725,67 @@ _.assignIn(util, {
   isSSO: project => ssoRefCodes.indexOf(_.get(project, 'details.utm.code')) > -1,
 
   /**
+  * Set paginated header and respond with data
+  * @param {Object} req HTTP request
+  * @param {Object} res HTTP response
+  * @param {Object} data Data for which pagination need to be applied
+  * @return {Array} data rows to be returned
+  */
+  setPaginationHeaders: (req, res, data) => {
+    const totalPages = Math.ceil(data.count / data.pageSize);
+    let fullUrl = `${req.protocol}://${req.get('host')}${req.url.replace(`&page=${data.page}`, '')}`;
+  // URL formatting to add pagination parameters accordingly
+    if (fullUrl.indexOf('?') === -1) {
+      fullUrl += '?';
+    } else {
+      fullUrl += '&';
+    }
+
+  // Pagination follows github style
+    if (data.count > 0) { // Set Pagination headers only if there is data to paginate
+      let link = ''; // Content for Link header
+
+    // Set first and last page in Link header
+      link += `<${fullUrl}page=1>; rel="first"`;
+      link += `, <${fullUrl}page=${totalPages}>; rel="last"`;
+
+    // Set Prev-Page only if it's not first page and within page limits
+      if (data.page > 1 && data.page <= totalPages) {
+        const prevPage = (data.page - 1);
+        res.set({
+          'X-Prev-Page': prevPage,
+        });
+        link += `, <${fullUrl}page=${prevPage}>; rel="prev"`;
+      }
+
+    // Set Next-Page only if it's not Last page and within page limits
+      if (data.page < totalPages) {
+        const nextPage = (_.parseInt(data.page) + 1);
+        res.set({
+          'X-Next-Page': (_.parseInt(data.page) + 1),
+        });
+        link += `, <${fullUrl}page=${nextPage}>; rel="next"`;
+      }
+
+    // Allow browsers access pagination data in headers
+      let accessControlExposeHeaders = res.get('Access-Control-Expose-Headers') || '';
+      accessControlExposeHeaders += accessControlExposeHeaders ? ', ' : '';
+      accessControlExposeHeaders += 'X-Page, X-Per-Page, X-Total, X-Total-Pages';
+
+      res.set({
+        'Access-Control-Expose-Headers': accessControlExposeHeaders,
+        'X-Page': data.page,
+        'X-Per-Page': data.pageSize,
+        'X-Total': data.count,
+        'X-Total-Pages': totalPages,
+        Link: link,
+      });
+    }
+  // Return the data after setting pagination headers
+    res.json(data.rows);
+  },
+
+  /**
    * Check if the following model exist
    * @param {Object} keyInfo key information, it includes version and key
    * @param {String} modelName name of model
@@ -639,7 +812,7 @@ _.assignIn(util, {
       })).then((record) => {
         if (_.isNil(record)) {
           const apiErr = new Error(errorMessage);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
       });
@@ -653,7 +826,7 @@ _.assignIn(util, {
       })).then((record) => {
         if (_.isNil(record)) {
           const apiErr = new Error(errorMessage);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
       });

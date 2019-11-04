@@ -8,10 +8,9 @@ import moment from 'moment';
 
 import models from '../../models';
 import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, PROJECT_STATUS, PROJECT_PHASE_STATUS,
-  EVENT, REGEX, WORKSTREAM_STATUS } from '../../constants';
+  EVENT, RESOURCES, REGEX, WORKSTREAM_STATUS } from '../../constants';
 import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
-import directProject from '../../services/directProject';
 
 const traverse = require('traverse');
 
@@ -26,60 +25,58 @@ const traverse = require('traverse');
 const permissions = require('tc-core-library-js').middleware.permissions;
 
 const createProjectValidations = {
-  body: {
-    param: Joi.object().keys({
-      name: Joi.string().required(),
-      description: Joi.string().allow(null).allow('').optional(),
-      billingAccountId: Joi.number().positive(),
-      utm: Joi.object().keys({
-        source: Joi.string().allow(null),
-        medium: Joi.string().allow(null),
-        campaign: Joi.string().allow(null),
-      }).allow(null),
-      bookmarks: Joi.array().items(Joi.object().keys({
-        title: Joi.string(),
-        address: Joi.string().regex(REGEX.URL),
-        createdAt: Joi.date(),
-        createdBy: Joi.number().integer().positive(),
-        updatedAt: Joi.date(),
-        updatedBy: Joi.number().integer().positive(),
-      })).optional().allow(null),
-      estimatedPrice: Joi.number().precision(2).positive().optional()
+  body: Joi.object().keys({
+    name: Joi.string().required(),
+    description: Joi.string().allow(null).allow('').optional(),
+    billingAccountId: Joi.number().positive(),
+    utm: Joi.object().keys({
+      source: Joi.string().allow(null),
+      medium: Joi.string().allow(null),
+      campaign: Joi.string().allow(null),
+    }).allow(null),
+    bookmarks: Joi.array().items(Joi.object().keys({
+      title: Joi.string(),
+      address: Joi.string().regex(REGEX.URL),
+      createdAt: Joi.date(),
+      createdBy: Joi.number().integer().positive(),
+      updatedAt: Joi.date(),
+      updatedBy: Joi.number().integer().positive(),
+    })).optional().allow(null),
+    estimatedPrice: Joi.number().precision(2).positive().optional()
         .allow(null),
-      terms: Joi.array().items(Joi.number().positive()).optional(),
-      external: Joi.object().keys({
-        id: Joi.string(),
-        type: Joi.any().valid('github', 'jira', 'asana', 'other'),
-        data: Joi.string().max(300), // TODO - restrict length
-      }).allow(null),
-      type: Joi.string().max(45).required(),
-      details: Joi.any(),
-      challengeEligibility: Joi.array().items(Joi.object().keys({
-        role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
-        users: Joi.array().items(Joi.number().positive()),
-        groups: Joi.array().items(Joi.number().positive()),
-      })).allow(null),
-      templateId: Joi.number().integer().positive(),
-      version: Joi.string(),
-      estimation: Joi.array().items(Joi.object().keys({
-        conditions: Joi.string().required(),
-        price: Joi.number().required(),
-        quantity: Joi.number().optional(),
-        minTime: Joi.number().integer().required(),
-        maxTime: Joi.number().integer().required(),
-        buildingBlockKey: Joi.string().required(),
-        metadata: Joi.object().optional(),
-      })).optional(),
-      attachments: Joi.array().items(Joi.object().keys({
-        category: Joi.string().required(),
-        contentType: Joi.string().required(),
-        description: Joi.string().allow(null).allow('').optional(),
-        filePath: Joi.string().required(),
-        size: Joi.number().required(),
-        title: Joi.string().required(),
-      })).optional(),
-    }).required(),
-  },
+    terms: Joi.array().items(Joi.number().positive()).optional(),
+    external: Joi.object().keys({
+      id: Joi.string(),
+      type: Joi.any().valid('github', 'jira', 'asana', 'other'),
+      data: Joi.string().max(300), // TODO - restrict length
+    }).allow(null),
+    type: Joi.string().max(45).required(),
+    details: Joi.any(),
+    challengeEligibility: Joi.array().items(Joi.object().keys({
+      role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
+      users: Joi.array().items(Joi.number().positive()),
+      groups: Joi.array().items(Joi.number().positive()),
+    })).allow(null),
+    templateId: Joi.number().integer().positive(),
+    version: Joi.string(),
+    estimation: Joi.array().items(Joi.object().keys({
+      conditions: Joi.string().required(),
+      price: Joi.number().required(),
+      quantity: Joi.number().optional(),
+      minTime: Joi.number().integer().required(),
+      maxTime: Joi.number().integer().required(),
+      buildingBlockKey: Joi.string().required(),
+      metadata: Joi.object().optional(),
+    })).optional(),
+    attachments: Joi.array().items(Joi.object().keys({
+      category: Joi.string().required(),
+      contentType: Joi.string().required(),
+      description: Joi.string().allow(null).allow('').optional(),
+      filePath: Joi.string().required(),
+      size: Joi.number().required(),
+      title: Joi.string().required(),
+    })).optional(),
+  }).required(),
 };
 
 /**
@@ -302,12 +299,12 @@ function validateAndFetchTemplates(templateId) {
   // backward compatibility for releasing the service before releasing the front end
   // we ignore missing template id field and create a project without phase/products
   if (!templateId) return Promise.resolve({});
-  return models.ProjectTemplate.findById(templateId, { raw: true })
+  return models.ProjectTemplate.findByPk(templateId, { raw: true })
   .then((existingProjectTemplate) => {
     if (!existingProjectTemplate) {
       // Not found
       const apiErr = new Error(`Project template not found for id ${templateId}`);
-      apiErr.status = 422;
+      apiErr.status = 400;
       return Promise.reject(apiErr);
     }
     return Promise.resolve(existingProjectTemplate);
@@ -327,7 +324,7 @@ function validateAndFetchTemplates(templateId) {
       return models.PlanConfig.findOneWithLatestRevision(projectTemplate.planConfig).then((planConfig) => {
         if (!planConfig) {
           const apiErr = new Error(`Cannot find planConfig ${JSON.stringify(projectTemplate.planConfig)}`);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
 
@@ -349,16 +346,16 @@ function validateAndFetchTemplates(templateId) {
         const productCount = _.isArray(phase.products) ? phase.products.length : 0;
         if (productCount > config.maxPhaseProductCount) {
           const apiErr = new Error(`Number of products per phase cannot exceed ${config.maxPhaseProductCount}`);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
         _.map(phase.products, (product) => {
-          productPromises.push(models.ProductTemplate.findById(product.id)
+          productPromises.push(models.ProductTemplate.findByPk(product.id)
           .then((productTemplate) => {
             if (!productTemplate) {
               // Not found
               const apiErr = new Error(`Product template not found for id ${product.id}`);
-              apiErr.status = 422;
+              apiErr.status = 400;
               return Promise.reject(apiErr);
             }
             return Promise.resolve(productTemplate);
@@ -380,13 +377,13 @@ module.exports = [
   // handles request validations
   validate(createProjectValidations),
   permissions('project.create'),
-  fieldLookupValidation(models.ProjectType, 'key', 'body.param.type', 'Project type'),
+  fieldLookupValidation(models.ProjectType, 'key', 'body.type', 'Project type'),
   /**
    * POST projects/
    * Create a project if the user has access
    */
   (req, res, next) => {
-    const project = req.body.param;
+    const project = req.body;
     // by default connect admin and managers joins projects as manager
     const userRole = util.hasRoles(req, MANAGER_ROLES)
       ? PROJECT_MEMBER_ROLE.MANAGER
@@ -473,26 +470,14 @@ module.exports = [
           updatedBy: req.authUser.userId,
         }).then(() => req.log.debug('project history created for project %d', newProject.id))
           .catch(() => req.log.error('project history failed for project %d', newProject.id));
-        req.log.debug('creating direct project for project %d', newProject.id);
-        return directProject.createDirectProject(req, body)
-          .then((resp) => {
-            newProject.directProjectId = resp.data.result.content.projectId;
-            return newProject.save();
-          })
-          .then(() => newProject.reload(newProject.id))
-          .catch((err) => {
-            // log the error and continue
-            req.log.error('Error creating direct project: %s', _.get(err, 'data.result.content', err));
-            return Promise.resolve();
-          });
-        // return Promise.resolve();
+        return Promise.resolve();
       });
     })
     .then(() => {
       newProject = newProject.get({ plain: true });
       // remove utm details & deletedAt field
       newProject = _.omit(newProject, ['deletedAt', 'utm']);
-      // adds the project attachments, if any
+      // add the project attachments, if any
       newProject.attachments = projectAttachments;
       // set phases array
       newProject.phases = newPhases;
@@ -508,8 +493,10 @@ module.exports = [
       );
       req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
       // emit event
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
-      res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
+      req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
+        { req, project: _.assign({ resource: RESOURCES.PROJECT }, newProject),
+        });
+      res.status(201).json(newProject);
     })
     .catch((err) => {
       req.log.error(err.message);

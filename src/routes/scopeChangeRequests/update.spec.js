@@ -89,7 +89,7 @@ function createScopeChangeRequest(project) {
  * @returns {Promise} A promise to update details json in the project
  */
 function updateProjectDetails(projectId, detailsChange) {
-  return models.Project.findById(projectId).then((project) => {
+  return models.Project.findByPk(projectId).then((project) => {
     const updatedDetails = _.merge({}, project.details, detailsChange);
     return project.update({ details: updatedDetails });
   });
@@ -99,7 +99,7 @@ describe('Update Scope Change Rquest', () => {
   let project;
   let scopeChangeRequest;
 
-  before(done =>
+  before((done) => {
     testUtil
       .clearDb()
       .then(() => createProject(PROJECT_STATUS.REVIEWED))
@@ -110,9 +110,10 @@ describe('Update Scope Change Rquest', () => {
       .then(_project => createScopeChangeRequest(_project))
       .then((_scopeChangeRequest) => {
         scopeChangeRequest = _scopeChangeRequest;
+        return scopeChangeRequest;
       })
-      .then(() => done()),
-  );
+      .then(() => done());
+  });
 
   after((done) => {
     testUtil.clearDb(done);
@@ -121,14 +122,12 @@ describe('Update Scope Change Rquest', () => {
   describe('PATCH projects/{projectId}/scopeChangeRequests/{requestId}', () => {
     it('Should approve change request with customer login', (done) => {
       request(server)
-        .patch(`/v4/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
+        .patch(`/v5/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send({
-          param: {
-            status: SCOPE_CHANGE_REQ_STATUS.APPROVED,
-          },
+          status: SCOPE_CHANGE_REQ_STATUS.APPROVED,
         })
         .expect(200)
         .end((err) => {
@@ -147,14 +146,12 @@ describe('Update Scope Change Rquest', () => {
       // Updating project details before activation. This is used in a later test case
       updateProjectDetails(project.id, { apiDefinition: { notes: 'Please include swagger docs' } }).then(() => {
         request(server)
-          .patch(`/v4/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
+          .patch(`/v5/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
           .send({
-            param: {
-              status: SCOPE_CHANGE_REQ_STATUS.ACTIVATED,
-            },
+            status: SCOPE_CHANGE_REQ_STATUS.ACTIVATED,
           })
           .expect(200)
           .end((err) => {
@@ -189,31 +186,27 @@ describe('Update Scope Change Rquest', () => {
 
     it('Should not allow updating oldScope', (done) => {
       request(server)
-        .patch(`/v4/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
+        .patch(`/v5/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            oldScope: {},
-          },
+          oldScope: {},
         })
-        .expect(422)
+        .expect(400)
         .end(err => done(err));
     });
 
     it('Should not allow updating newScope', (done) => {
       request(server)
-        .patch(`/v4/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
+        .patch(`/v5/projects/${project.id}/scopeChangeRequests/${scopeChangeRequest.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            newScope: {},
-          },
+          newScope: {},
         })
-        .expect(422)
+        .expect(400)
         .end(err => done(err));
     });
   });

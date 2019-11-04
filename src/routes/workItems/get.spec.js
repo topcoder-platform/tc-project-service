@@ -145,7 +145,7 @@ describe('GET Work Item', () => {
   describe('GET /projects/{projectId}/workstreams/{workStreamId}/works/{workId}/workitems/{productId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -155,7 +155,7 @@ describe('GET Work Item', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/9999/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/9999/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -165,7 +165,7 @@ describe('GET Work Item', () => {
 
     it('should return 404 when no work stream with specific workStreamId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/999/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/999/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -175,7 +175,7 @@ describe('GET Work Item', () => {
 
     it('should return 404 when no work with specific workId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/999/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/999/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -185,7 +185,7 @@ describe('GET Work Item', () => {
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -195,7 +195,7 @@ describe('GET Work Item', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);
@@ -209,7 +209,7 @@ describe('GET Work Item', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -219,7 +219,7 @@ describe('GET Work Item', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);

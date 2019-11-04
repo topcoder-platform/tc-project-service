@@ -8,9 +8,9 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, BUS_API_EVENT, USER_ROLE, MAX_PARALLEL_REQUEST_QTY } from '../../constants';
+  MANAGER_ROLES, INVITE_STATUS, EVENT, RESOURCES, USER_ROLE,
+  MAX_PARALLEL_REQUEST_QTY, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 import { createEvent } from '../../services/busApi';
-
 
 /**
  * API to create member invite to project.
@@ -19,13 +19,11 @@ import { createEvent } from '../../services/busApi';
 const permissions = tcMiddleware.permissions;
 
 const addMemberValidations = {
-  body: {
-    param: Joi.object().keys({
-      userIds: Joi.array().items(Joi.number()).optional().min(1),
-      emails: Joi.array().items(Joi.string().email()).optional().min(1),
-      role: Joi.any().valid(_.values(PROJECT_MEMBER_ROLE)).required(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    userIds: Joi.array().items(Joi.number()).optional().min(1),
+    emails: Joi.array().items(Joi.string().email()).optional().min(1),
+    role: Joi.any().valid(_.values(PROJECT_MEMBER_ROLE)).required(),
+  }).required(),
 };
 
 /**
@@ -143,7 +141,6 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed, members) 
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
-
         // remove invites for users that are invited already
         _.remove(nonExistentUserEmails, email =>
           _.some(invites, (i) => {
@@ -173,15 +170,14 @@ const buildCreateInvitePromises = (req, invite, invites, data, failed, members) 
         return invitePromises;
       });
   }
-
   return invitePromises;
 };
 
 const sendInviteEmail = (req, projectId, invite) => {
   req.log.debug(req.authUser);
-  const emailEventType = BUS_API_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
+  const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
-    models.Project.find({
+    models.Project.findOne({
       where: { id: projectId },
       raw: true,
     }),
@@ -234,7 +230,7 @@ module.exports = [
   permissions('projectMemberInvite.create'),
   (req, res, next) => {
     let failed = [];
-    const invite = req.body.param;
+    const invite = req.body;
 
     if (!invite.userIds && !invite.emails) {
       const err = new Error('Either userIds or emails are required');
@@ -320,16 +316,16 @@ module.exports = [
           };
 
           req.log.debug('Creating invites');
-          return models.sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed, members))
+          return models.Sequelize.Promise.all(buildCreateInvitePromises(req, invite, invites, data, failed, members))
             .then((values) => {
               values.forEach((v) => {
-                req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED, {
+                // emit the event
+                util.sendResourceToKafkaBus(
                   req,
-                  userId: v.userId,
-                  email: v.email,
-                  status: v.status,
-                  role: v.role,
-                });
+                  EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
+                  RESOURCES.PROJECT_MEMBER_INVITE,
+                  v.toJSON());
+
                 req.app.services.pubsub.publish(
                         EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
                         v,
@@ -347,9 +343,9 @@ module.exports = [
     .then((values) => {
       const success = _.assign({}, { success: values });
       if (failed.length) {
-        res.status(403).json(util.wrapResponse(req.id, _.assign({}, success, { failed }), null, 403));
+        res.status(403).json(_.assign({}, success, { failed }));
       } else {
-        res.status(201).json(util.wrapResponse(req.id, success, null, 201));
+        res.status(201).json(success);
       }
     })
     .catch(err => next(err));

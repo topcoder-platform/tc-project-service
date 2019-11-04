@@ -9,30 +9,28 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
-import { EVENT, TIMELINE_REFERENCES, MILESTONE_STATUS, MILESTONE_TEMPLATE_REFERENCES }
+import { EVENT, RESOURCES, TIMELINE_REFERENCES, MILESTONE_STATUS, MILESTONE_TEMPLATE_REFERENCES }
   from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
 const schema = {
-  body: {
-    param: Joi.object().keys({
-      id: Joi.any().strip(),
-      name: Joi.string().max(255).required(),
-      description: Joi.string().max(255),
-      startDate: Joi.date().required(),
-      endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      reference: Joi.string().valid(_.values(TIMELINE_REFERENCES)).required(),
-      referenceId: Joi.number().integer().positive().required(),
-      templateId: Joi.number().integer().min(1).optional(),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    id: Joi.any().strip(),
+    name: Joi.string().max(255).required(),
+    description: Joi.string().max(255),
+    startDate: Joi.date().required(),
+    endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
+    reference: Joi.string().valid(_.values(TIMELINE_REFERENCES)).required(),
+    referenceId: Joi.number().integer().positive().required(),
+    templateId: Joi.number().integer().min(1).optional(),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
 };
 
 module.exports = [
@@ -42,8 +40,8 @@ module.exports = [
   validateTimeline.validateTimelineRequestBody,
   permissions('timeline.create'),
   (req, res, next) => {
-    const templateId = req.body.param.templateId;
-    const entity = _.assign({}, req.body.param, {
+    const templateId = req.body.templateId;
+    const entity = _.assign({}, req.body, {
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
     });
@@ -51,7 +49,7 @@ module.exports = [
 
     let result;
     // Save to DB
-    return models.sequelize.transaction(() => {
+    models.sequelize.transaction(() => {
       req.log.debug('Started transaction');
       return models.Timeline.create(entity)
         .then((createdEntity) => {
@@ -109,7 +107,8 @@ module.exports = [
             });
           }
           return Promise.resolve();
-        });
+        })
+        .catch(next);
     })
     .then(() => {
       // Send event to bus
@@ -118,8 +117,22 @@ module.exports = [
         _.assign({ projectId: req.params.projectId }, result),
         { correlationId: req.id },
       );
+
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.TIMELINE_ADDED,
+        RESOURCES.TIMELINE,
+        result);
+
+      // emit the event for milestones
+      _.map(result.milestones, milestone => util.sendResourceToKafkaBus(req,
+        EVENT.ROUTING_KEY.MILESTONE_ADDED,
+        RESOURCES.MILESTONE,
+        milestone));
+
       // Write to the response
-      res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
+      res.status(201).json(result);
       return Promise.resolve();
     })
     .catch(next);

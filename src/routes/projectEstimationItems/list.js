@@ -4,7 +4,6 @@
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -19,7 +18,7 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('projectEstimation.item.list'),
-  (req, res, next) => models.ProjectEstimation.find({
+  (req, res, next) => models.ProjectEstimation.findOne({
     where: {
       id: req.params.estimationId,
       projectId: req.params.projectId,
@@ -43,7 +42,7 @@ module.exports = [
       reqUser: req.authUser,
       members: req.context.currentProjectMembers,
     }).then((items) => {
-      res.json(util.wrapResponse(req.id, items));
+      res.json(items);
       return Promise.resolve();
     });
   }).catch(next),

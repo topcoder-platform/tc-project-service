@@ -28,41 +28,41 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updatedAt',
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
-    classMethods: {
-      findScopeChangeRequest(projectId, { requestId, status }) {
-        const where = {
-          projectId,
-        };
-        if (status) {
-          where.status = status;
-        }
-        if (requestId) {
-          where.id = requestId;
-        }
-        return this.findOne({
-          where,
-        });
-      },
-      findPendingScopeChangeRequest(projectId) {
-        return this.findScopeChangeRequest(
-          projectId,
-          { status: { $in: [SCOPE_CHANGE_REQ_STATUS.PENDING, SCOPE_CHANGE_REQ_STATUS.APPROVED] } },
-        );
-      },
-      getProjectScopeChangeRequests(projectId, status) {
-        const where = {
-          projectId,
-        };
-        if (status) {
-          where.status = status;
-        }
-        return this.findAll({
-          where,
-          raw: true,
-        });
-      },
-    },
   });
+
+  ScopeChangeRequest.findScopeChangeRequest = (projectId, { requestId, status }) => {
+    const where = {
+      projectId,
+    };
+    if (status) {
+      where.status = status;
+    }
+    if (requestId) {
+      where.id = requestId;
+    }
+    return ScopeChangeRequest.findOne({
+      where,
+    });
+  };
+
+  ScopeChangeRequest.findPendingScopeChangeRequest = projectId =>
+    ScopeChangeRequest.findScopeChangeRequest(
+      projectId,
+      { status: { $in: [SCOPE_CHANGE_REQ_STATUS.PENDING, SCOPE_CHANGE_REQ_STATUS.APPROVED] } },
+    );
+
+  ScopeChangeRequest.getProjectScopeChangeRequests = (projectId, status) => {
+    const where = {
+      projectId,
+    };
+    if (status) {
+      where.status = status;
+    }
+    return ScopeChangeRequest.findAll({
+      where,
+      raw: true,
+    });
+  };
 
   return ScopeChangeRequest;
 };

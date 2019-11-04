@@ -9,7 +9,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
 import validateMilestoneTemplate from '../../middlewares/validateMilestoneTemplate';
-import { MILESTONE_TEMPLATE_REFERENCES } from '../../constants';
+import { EVENT, RESOURCES, MILESTONE_TEMPLATE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -17,31 +17,29 @@ const schema = {
   params: {
     milestoneTemplateId: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      id: Joi.any().strip(),
-      name: Joi.string().max(255).optional(),
-      description: Joi.string().max(255),
-      duration: Joi.number().integer().optional(),
-      type: Joi.string().max(45).optional(),
-      order: Joi.number().integer().optional(),
-      plannedText: Joi.string().max(512).optional(),
-      activeText: Joi.string().max(512).optional(),
-      completedText: Joi.string().max(512).optional(),
-      blockedText: Joi.string().max(512).optional(),
-      productTemplateId: Joi.any().strip(),
-      hidden: Joi.boolean().optional(),
-      reference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
-      referenceId: Joi.number().integer().positive().required(),
-      metadata: Joi.object().optional(),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    id: Joi.any().strip(),
+    name: Joi.string().max(255).optional(),
+    description: Joi.string().max(255),
+    duration: Joi.number().integer().optional(),
+    type: Joi.string().max(45).optional(),
+    order: Joi.number().integer().optional(),
+    plannedText: Joi.string().max(512).optional(),
+    activeText: Joi.string().max(512).optional(),
+    completedText: Joi.string().max(512).optional(),
+    blockedText: Joi.string().max(512).optional(),
+    productTemplateId: Joi.any().strip(),
+    hidden: Joi.boolean().optional(),
+    reference: Joi.string().valid(_.values(MILESTONE_TEMPLATE_REFERENCES)).required(),
+    referenceId: Joi.number().integer().positive().required(),
+    metadata: Joi.object().optional(),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
 };
 
 module.exports = [
@@ -50,7 +48,7 @@ module.exports = [
   validateMilestoneTemplate.validateRequestBody,
   permissions('milestoneTemplate.edit'),
   (req, res, next) => {
-    const entityToUpdate = _.assign(req.body.param, {
+    const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
 
@@ -108,10 +106,40 @@ module.exports = [
                 },
               });
             });
+        })
+        .then((updatedCount) => {
+          if (updatedCount) {
+            return models.MilestoneTemplate.findAll({
+              where: {
+                reference: updated.reference,
+                referenceId: updated.referenceId,
+                id: { $ne: updated.id },
+              },
+              order: [['updatedAt', 'DESC']],
+              limit: updatedCount[0],
+            });
+          }
+          return Promise.resolve();
         }),
     )
-      .then(() => {
-        res.json(util.wrapResponse(req.id, updated));
+      .then((otherUpdated) => {
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_UPDATED,
+          RESOURCES.MILESTONE_TEMPLATE,
+          _.assign(entityToUpdate, _.pick(updated, 'id', 'updatedAt')));
+
+        // emit the event for other milestone templates order updated
+        _.map(otherUpdated, milestoneTemplate =>
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_UPDATED,
+            RESOURCES.MILESTONE_TEMPLATE,
+            _.assign(_.pick(milestoneTemplate.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+        );
+
+        res.json(updated);
         return Promise.resolve();
       })
       .catch(next);

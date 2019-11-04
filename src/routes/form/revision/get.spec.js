@@ -34,24 +34,26 @@ describe('GET a particular revision of specific version Form', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.Form.create(forms[0]))
-    .then(() => models.Form.create(forms[1]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.Form.create(forms[0]))
+      .then(() => models.Form.create(forms[1]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/form/dev/versions/{version}/revisions/{revision}', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata/form/dev/versions/1/revisions/2')
+        .get('/v5/projects/metadata/form/dev/versions/1/revisions/2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
           const form = forms[1];
-          const resJson = res.body.result.content;
+          const resJson = res.body;
 
           resJson.key.should.be.eql(form.key);
           resJson.config.should.be.eql(form.config);
@@ -68,13 +70,13 @@ describe('GET a particular revision of specific version Form', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions/1/revisions/2')
+      .get('/v5/projects/metadata/form/dev/versions/1/revisions/2')
       .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions/1/revisions/2')
+      .get('/v5/projects/metadata/form/dev/versions/1/revisions/2')
       .set({
         Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
       })
@@ -84,7 +86,7 @@ describe('GET a particular revision of specific version Form', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions/1/revisions/2')
+      .get('/v5/projects/metadata/form/dev/versions/1/revisions/2')
       .set({
         Authorization: `Bearer ${testUtil.jwts.manager}`,
       })
@@ -94,7 +96,7 @@ describe('GET a particular revision of specific version Form', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions/1/revisions/2')
+      .get('/v5/projects/metadata/form/dev/versions/1/revisions/2')
       .set({
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
@@ -103,7 +105,7 @@ describe('GET a particular revision of specific version Form', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions/1/revisions/2')
+      .get('/v5/projects/metadata/form/dev/versions/1/revisions/2')
       .set({
         Authorization: `Bearer ${testUtil.jwts.copilot}`,
       })

@@ -14,7 +14,7 @@ import busApi from '../../services/busApi';
 import messageService from '../../services/messageService';
 import RabbitMQService from '../../services/rabbitmq';
 import mockRabbitMQ from '../../tests/mockRabbitMQ';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT, RESOURCES } from '../../constants';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -38,7 +38,7 @@ const expectAfterDelete = (workId, projectId, workStreamId, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+          .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -182,18 +182,20 @@ describe('DELETE work', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /projects/{projectId}/workstreams/{workStreamId}/works/{workId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .expect(403, done);
     });
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -202,7 +204,7 @@ describe('DELETE work', () => {
 
     it('should return 404 when no work stream with specific workStreamId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/999/works/${workId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/999/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -212,7 +214,7 @@ describe('DELETE work', () => {
 
     it('should return 404 when no work with specific workId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/999`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -224,7 +226,7 @@ describe('DELETE work', () => {
       models.ProjectPhase.destroy({ where: { id: workId } })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+            .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -234,7 +236,7 @@ describe('DELETE work', () => {
 
     it('should return 204 for member', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -244,7 +246,7 @@ describe('DELETE work', () => {
 
     it('should return 204, for admin, if type was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -254,7 +256,7 @@ describe('DELETE work', () => {
 
     it('should return 204, for connect admin, if type was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -279,9 +281,9 @@ describe('DELETE work', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when work removed', (done) => {
+      it('should send correct BUS API messages when work removed', (done) => {
         request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -291,14 +293,22 @@ describe('DELETE work', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+              createEventSpy.callCount.should.be.eql(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                resource: RESOURCES.PHASE,
+                id: workId,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
                 projectId,
                 projectName,
                 projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
                 userId: 40051336,
                 initiatorUserId: 40051336,
               })).should.be.true;
+
               done();
             });
           }
@@ -312,12 +322,12 @@ describe('DELETE work', () => {
       let publishSpy;
       let sandbox;
 
-      before(async (done) => {
+      before((done) => {
         // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
         testUtil.wait(done);
       });
 
-      beforeEach(async (done) => {
+      beforeEach(async () => {
         sandbox = sinon.sandbox.create();
         server.services.pubsub = new RabbitMQService(server.logger);
 
@@ -351,13 +361,13 @@ describe('DELETE work', () => {
           },
         });
 
-        testUtil.wait(() => {
+        return new Promise(resolve => setTimeout(() => {
           publishSpy = sandbox.spy(server.services.pubsub, 'publish');
           deleteTopicSpy = sandbox.spy(messageService, 'deleteTopic');
           deletePostsSpy = sandbox.spy(messageService, 'deletePosts');
           sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
-          done();
-        });
+          resolve();
+        }, 500));
       });
 
       afterEach(() => {
@@ -374,24 +384,24 @@ describe('DELETE work', () => {
         });
         sandbox.stub(messageService, 'getClient', () => mockHttpClient);
         request(server)
-            .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.admin}`,
-            })
-            .expect(204)
-            .end((err) => {
-              if (err) {
-                done(err);
-              } else {
-                testUtil.wait(() => {
-                  publishSpy.calledOnce.should.be.true;
-                  publishSpy.calledWith('project.phase.removed').should.be.true;
-                  deleteTopicSpy.calledTwice.should.be.true;
-                  deletePostsSpy.calledTwice.should.be.true;
-                  done();
-                });
-              }
-            });
+          .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(204)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                publishSpy.calledOnce.should.be.true;
+                publishSpy.calledWith('project.phase.removed').should.be.true;
+                deleteTopicSpy.calledTwice.should.be.true;
+                deletePostsSpy.calledTwice.should.be.true;
+                done();
+              });
+            }
+          });
       });
     });
   });

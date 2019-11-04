@@ -2,7 +2,6 @@ import _ from 'lodash';
 import Joi from 'joi';
 import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import util from '../../util';
 import { SCOPE_CHANGE_REQ_STATUS, PROJECT_MEMBER_ROLE, PROJECT_STATUS } from '../../constants';
 import models from '../../models';
 
@@ -13,11 +12,8 @@ const permissions = tcMiddleware.permissions;
 
 const createScopeChangeRequestValidations = {
   body: {
-    param: Joi.object()
-      .keys({
-        oldScope: Joi.object(),
-        newScope: Joi.object(),
-      }),
+    oldScope: Joi.object(),
+    newScope: Joi.object(),
   },
 };
 
@@ -27,8 +23,8 @@ module.exports = [
   permissions('project.edit'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
-    const oldScope = _.get(req, 'body.param.oldScope');
-    const newScope = _.get(req, 'body.param.newScope');
+    const oldScope = _.get(req, 'body.oldScope');
+    const newScope = _.get(req, 'body.newScope');
     const members = req.context.currentProjectMembers;
     const isCustomer = !_.isUndefined(_.find(members,
         m => m.userId === req.authUser.userId && m.role === PROJECT_MEMBER_ROLE.CUSTOMER));
@@ -80,7 +76,7 @@ module.exports = [
 
     .then((_newScopeChange) => {
       req.log.debug('Created scope change request');
-      res.json(util.wrapResponse(req.id, _newScopeChange));
+      res.json(_newScopeChange);
       return Promise.resolve();
     })
 

@@ -58,7 +58,7 @@ module.exports = [
           }
         });
 
-        res.json(util.wrapResponse(req.id, allowPermissions));
+        res.json(allowPermissions);
       })
       .catch(next);
   },

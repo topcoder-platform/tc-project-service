@@ -93,27 +93,27 @@ describe('CREATE work stream', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /projects/{projectId}/workstreams', () => {
     const body = {
-      param: {
-        name: 'Work Stream',
-        type: 'generic',
-        status: 'active',
-      },
+      name: 'Work Stream',
+      type: 'generic',
+      status: 'active',
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -123,7 +123,7 @@ describe('CREATE work stream', () => {
 
     it('should return 404 for non-existed project id', (done) => {
       request(server)
-        .delete('/v4/projects/999/workstreams')
+        .delete('/v5/projects/999/workstreams')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -134,7 +134,7 @@ describe('CREATE work stream', () => {
       models.Project.destroy({ where: { id: projectId } })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/${projectId}/workstreams`)
+            .delete(`/v5/projects/${projectId}/workstreams`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -144,7 +144,7 @@ describe('CREATE work stream', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -154,7 +154,7 @@ describe('CREATE work stream', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -162,51 +162,51 @@ describe('CREATE work stream', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for missing type', (done) => {
+    it('should return 400 for missing type', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.type;
+      delete invalidBody.type;
 
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing name', (done) => {
+    it('should return 400 for missing name', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.name;
+      delete invalidBody.name;
 
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for status', (done) => {
+    it('should return 400 for status', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.status;
+      delete invalidBody.status;
 
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -214,10 +214,10 @@ describe('CREATE work stream', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.name.should.be.eql(body.param.name);
-          resJson.type.should.be.eql(body.param.type);
-          resJson.status.should.be.eql(body.param.status);
+          const resJson = res.body;
+          resJson.name.should.be.eql(body.name);
+          resJson.type.should.be.eql(body.type);
+          resJson.status.should.be.eql(body.status);
           resJson.projectId.should.be.eql(projectId);
 
           resJson.createdBy.should.be.eql(40051333);
@@ -233,7 +233,7 @@ describe('CREATE work stream', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams`)
+        .post(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -241,10 +241,10 @@ describe('CREATE work stream', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.name.should.be.eql(body.param.name);
-          resJson.type.should.be.eql(body.param.type);
-          resJson.status.should.be.eql(body.param.status);
+          const resJson = res.body;
+          resJson.name.should.be.eql(body.name);
+          resJson.type.should.be.eql(body.type);
+          resJson.status.should.be.eql(body.status);
           resJson.projectId.should.be.eql(projectId);
           resJson.createdBy.should.be.eql(40051336);
           resJson.updatedBy.should.be.eql(40051336);

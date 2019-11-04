@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES } from '../../constants';
+import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES } from '../../constants';
 
 /**
  * API to update a project member.
@@ -13,22 +13,20 @@ import { EVENT, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES
 const permissions = tcMiddleware.permissions;
 
 const updateProjectMemberValdiations = {
-  body: {
-    param: Joi.object().keys({
-      isPrimary: Joi.boolean(),
-      role: Joi.any().valid(
-        PROJECT_MEMBER_ROLE.CUSTOMER,
-        PROJECT_MEMBER_ROLE.MANAGER,
-        PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
-        PROJECT_MEMBER_ROLE.COPILOT,
-        PROJECT_MEMBER_ROLE.OBSERVER,
-        PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
-        PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
-        PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
-        PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
-      ).required(),
-    }),
-  },
+  body: Joi.object().keys({
+    isPrimary: Joi.boolean(),
+    role: Joi.any().valid(
+      PROJECT_MEMBER_ROLE.CUSTOMER,
+      PROJECT_MEMBER_ROLE.MANAGER,
+      PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
+      PROJECT_MEMBER_ROLE.COPILOT,
+      PROJECT_MEMBER_ROLE.OBSERVER,
+      PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+      PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
+      PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+      PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+    ).required(),
+  }),
 };
 
 module.exports = [
@@ -40,7 +38,7 @@ module.exports = [
    */
   (req, res, next) => {
     let projectMember;
-    let updatedProps = req.body.param;
+    let updatedProps = req.body;
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
     updatedProps = _.pick(updatedProps, ['isPrimary', 'role']);
@@ -101,34 +99,6 @@ module.exports = [
             return Promise.all(operations);
           });
         })
-        // .then(() => {
-        //   // TODO move this to an event
-        //   // if copilot role is added or removed should invoke related direct project service
-        //   if(previousValue.role !== newValue.role && (previousValue.role === PROJECT_MEMBER_ROLE.COPILOT
-        //       || newValue.role === PROJECT_MEMBER_ROLE.COPILOT)) {
-        //     return models.Project.getDirectProjectId(projectId)
-        //         .then(directProjectId => {
-        //           if(directProjectId) {
-        //             if(previousValue.role === PROJECT_MEMBER_ROLE.COPILOT) {
-        //               // new role not copilot so remove direct project copilot
-        //               return directProject.deleteCopilot(req, directProjectId, {
-        //                 copilotUserId: projectMember.userId
-        //               })
-        //             } else {
-        //               // new role is copilot so add direct project copilot
-        //               return directProject.addCopilot(req, directProjectId, {
-        //                 copilotUserId: projectMember.userId
-        //               })
-        //             }
-        //           } else {
-        //             return Promise.resolve()
-        //           }
-        //         })
-        //
-        //   } else  {
-        //     return Promise.resolve()
-        //   }
-        // })
         .then(() => projectMember.reload(projectMember.id))
         .then(() => {
           projectMember = projectMember.get({ plain: true });
@@ -139,10 +109,14 @@ module.exports = [
             { original: previousValue, updated: projectMember },
             { correlationId: req.id },
           );
-          req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
-            { req, original: previousValue, updated: projectMember });
+          util.sendResourceToKafkaBus(
+              req,
+              EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
+              RESOURCES.PROJECT_MEMBER,
+              projectMember,
+              previousValue);
           req.log.debug('updated project member', projectMember);
-          res.json(util.wrapResponse(req.id, projectMember));
+          res.json(projectMember);
         })
         .catch(err => next(err)));
   },

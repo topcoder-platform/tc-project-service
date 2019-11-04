@@ -16,7 +16,6 @@ export const WORKSTREAM_STATUS = {
   COMPLETED: 'completed',
   PAUSED: 'paused',
 };
-
 export const PROJECT_PHASE_STATUS = PROJECT_STATUS;
 
 export const MILESTONE_STATUS = PROJECT_STATUS;
@@ -104,12 +103,76 @@ export const EVENT = {
     MILESTONE_UPDATED: 'milestone.updated',
     MILESTONE_REMOVED: 'milestone.removed',
 
+    MILESTONE_TEMPLATE_ADDED: 'milestone.template.added',
+    MILESTONE_TEMPLATE_UPDATED: 'milestone.template.updated',
+    MILESTONE_TEMPLATE_REMOVED: 'milestone.template.removed',
+
     PROJECT_MEMBER_INVITE_CREATED: 'project.member.invite.created',
     PROJECT_MEMBER_INVITE_UPDATED: 'project.member.invite.updated',
+    PROJECT_MEMBER_INVITE_REMOVED: 'project.member.invite.deleted',
+
+    // project metadata
+    PROJECT_METADATA_CREATE: 'project.metadata.create',
+    PROJECT_METADATA_UPDATE: 'project.metadata.update',
+    PROJECT_METADATA_DELETE: 'project.metadata.delete',
+
+    // project template
+    PROJECT_TEMPLATE_CREATED: 'project.template.created',
+    PROJECT_TEMPLATE_UPDATED: 'project.template.updated',
+    PROJECT_TEMPLATE_DELETED: 'project.template.deleted',
   },
 };
 
 export const BUS_API_EVENT = {
+  PROJECT_CREATED: 'project.notification.create',
+  PROJECT_UPDATED: 'project.notification.update',
+  PROJECT_DELETED: 'project.notification.delete',
+
+  PROJECT_MEMBER_ADDED: 'project.notification.create',
+  PROJECT_MEMBER_REMOVED: 'project.notification.delete',
+  PROJECT_MEMBER_UPDATED: 'project.notification.update',
+
+  PROJECT_ATTACHMENT_ADDED: 'project.notification.create',
+  PROJECT_ATTACHMENT_REMOVED: 'project.notification.delete',
+  PROJECT_ATTACHMENT_UPDATED: 'project.notification.update',
+
+  // When phase is added/updated/deleted from the project,
+  // When product is added/deleted from a phase
+  // When product is updated on any field other than specification
+  PROJECT_PHASE_CREATED: 'project.notification.create',
+  PROJECT_PHASE_UPDATED: 'project.notification.update',
+  PROJECT_PHASE_DELETED: 'project.notification.delete',
+
+  // phase product
+  PROJECT_PHASE_PRODUCT_ADDED: 'project.notification.create',
+  PROJECT_PHASE_PRODUCT_UPDATED: 'project.notification.update',
+  PROJECT_PHASE_PRODUCT_REMOVED: 'project.notification.delete',
+
+  // timeline
+  TIMELINE_CREATED: 'project.notification.create',
+  TIMELINE_UPDATED: 'project.notification.update',
+  TIMELINE_DELETED: 'project.notification.delete',
+
+  MILESTONE_ADDED: 'project.notification.create',
+  MILESTONE_REMOVED: 'project.notification.delete',
+  MILESTONE_UPDATED: 'project.notification.update',
+
+  MILESTONE_TEMPLATE_ADDED: 'project.notification.create',
+  MILESTONE_TEMPLATE_REMOVED: 'project.notification.delete',
+  MILESTONE_TEMPLATE_UPDATED: 'project.notification.update',
+
+  // Project Member Invites
+  PROJECT_MEMBER_INVITE_CREATED: 'project.notification.create',
+  PROJECT_MEMBER_INVITE_UPDATED: 'project.notification.update',
+  PROJECT_MEMBER_INVITE_REMOVED: 'project.notification.delete',
+
+  // metadata
+  PROJECT_METADATA_CREATE: 'project.notification.create',
+  PROJECT_METADATA_UPDATE: 'project.notification.update',
+  PROJECT_METADATA_DELETE: 'project.notification.delete',
+};
+
+export const CONNECT_NOTIFICATION_EVENT = {
   PROJECT_CREATED: 'connect.notification.project.created',
   PROJECT_UPDATED: 'connect.notification.project.updated',
   PROJECT_SUBMITTED_FOR_REVIEW: 'connect.notification.project.submittedForReview',
@@ -174,12 +237,6 @@ export const BUS_API_EVENT = {
   // When milestone is waiting for customers's input
   MILESTONE_WAITING_CUSTOMER: 'connect.notification.project.timeline.milestone.waiting.customer',
 
-  // TC Message Service events
-  TOPIC_CREATED: 'connect.notification.project.topic.created',
-  TOPIC_UPDATED: 'connect.notification.project.topic.updated',
-  POST_CREATED: 'connect.notification.project.post.created',
-  POST_UPDATED: 'connect.notification.project.post.edited',
-
   // Project Member Invites
   PROJECT_MEMBER_INVITE_CREATED: 'connect.notification.project.member.invite.created',
   PROJECT_MEMBER_INVITE_REQUESTED: 'connect.notification.project.member.invite.requested',
@@ -187,6 +244,12 @@ export const BUS_API_EVENT = {
   PROJECT_MEMBER_INVITE_APPROVED: 'connect.notification.project.member.invite.approved',
   PROJECT_MEMBER_INVITE_REJECTED: 'connect.notification.project.member.invite.rejected',
   PROJECT_MEMBER_EMAIL_INVITE_CREATED: 'connect.notification.email.project.member.invite.created',
+
+  // TC Message Service events
+  TOPIC_CREATED: 'connect.notification.project.topic.created',
+  TOPIC_UPDATED: 'connect.notification.project.topic.updated',
+  POST_CREATED: 'connect.notification.project.post.created',
+  POST_UPDATED: 'connect.notification.project.post.edited',
 };
 
 export const REGEX = {
@@ -257,4 +320,28 @@ export const VALUE_TYPE = {
   DOUBLE: 'double',
   STRING: 'string',
   PERCENTAGE: 'percentage',
+};
+
+
+export const RESOURCES = {
+  PROJECT: 'project',
+  PROJECT_TEMPLATE: 'project.template',
+  PROJECT_TYPE: 'project.type',
+  PROJECT_MEMBER: 'project.member',
+  PROJECT_MEMBER_INVITE: 'project.member.invite',
+  ORG_CONFIG: 'project.orgConfig',
+  FORM_VERSION: 'project.form.version',
+  FORM_REVISION: 'project.form.revision',
+  PRICE_CONFIG_VERSION: 'project.priceConfig.version',
+  PRICE_CONFIG_REVISION: 'project.priceConfig.revision',
+  PLAN_CONFIG_VERSION: 'project.planConfig.version',
+  PLAN_CONFIG_REVISION: 'project.planConfig.revision',
+  PRODUCT_TEMPLATE: 'product.template',
+  PRODUCT_CATEGORY: 'product.category',
+  PHASE: 'project.phase',
+  PHASE_PRODUCT: 'project.phase.product',
+  TIMELINE: 'timeline',
+  MILESTONE: 'milestone',
+  MILESTONE_TEMPLATE: 'milestone.template',
+  ATTACHMENT: 'project.attachment',
 };

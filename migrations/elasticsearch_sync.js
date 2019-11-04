@@ -17,6 +17,9 @@ import util from '../src/util';
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
+const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
+const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
+const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
 
 // create new elasticsearch client
 // the client modifies the config object, so always passed the cloned object
@@ -291,6 +294,9 @@ function getRequestBody(indexName) {
           userId: {
             type: 'long',
           },
+          projectId: {
+            type: 'long',
+          },
         },
       },
       name: {
@@ -340,6 +346,353 @@ function getRequestBody(indexName) {
       },
     },
   };
+
+  const metadataMapping = {
+    _all: { enabled: false },
+    properties: {
+      projectTemplates: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          category: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          name: {
+            type: 'string',
+          },
+          id: {
+            type: 'long',
+          },
+          scope: {
+            type: 'object',
+          },
+          form: {
+            type: 'object',
+          },
+          priceConfig: {
+            type: 'object',
+          },
+          planConfig: {
+            type: 'object',
+          },
+          phases: {
+            type: 'object',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+      forms: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          version: {
+            type: 'integer',
+          },
+          revision: {
+            type: 'integer',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      planConfigs: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          version: {
+            type: 'integer',
+          },
+          revision: {
+            type: 'integer',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      priceConfigs: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          version: {
+            type: 'integer',
+          },
+          revision: {
+            type: 'integer',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      orgConfigs: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          orgId: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          configName: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          configValue: {
+            type: 'string',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      productTemplates: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          name: {
+            type: 'string',
+          },
+          productKey: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          category: {
+            type: 'string',
+          },
+          subCategory: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      projectTypes: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          displayName: {
+            type: 'string',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      productCategories: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          displayName: {
+            type: 'string',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      buildingBlocks: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
+      milestoneTemplates: {
+        type: 'nested',
+        properties: {
+          referenceId: {
+            type: 'long',
+          },
+          reference: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          order: {
+            type: 'long',
+          },
+        },
+      },
+    },
+  };
+
+  const timelineMapping = {
+    _all: { enabled: false },
+    properties: {
+      milestones: {
+        type: 'nested',
+        properties: {
+          id: {
+            type: 'long',
+          },
+          timelineId: {
+            type: 'long',
+          },
+        },
+      },
+    },
+  };
+
   switch (indexName) {
     case ES_PROJECT_INDEX:
       result = {
@@ -347,9 +700,32 @@ function getRequestBody(indexName) {
         updateAllTypes: true,
         body: {
           mappings: { },
+          refresh: 'wait_for',
         },
       };
       result.body.mappings[ES_PROJECT_TYPE] = projectMapping;
+      break;
+    case ES_METADATA_INDEX:
+      result = {
+        index: indexName,
+        updateAllTypes: true,
+        body: {
+          mappings: { },
+          refresh: 'wait_for',
+        },
+      };
+      result.body.mappings[ES_METADATA_TYPE] = metadataMapping;
+      break;
+    case ES_TIMELINE_INDEX:
+      result = {
+        index: indexName,
+        updateAllTypes: true,
+        body: {
+          mappings: { },
+          refresh: 'wait_for',
+        },
+      };
+      result.body.mappings[ES_TIMELINE_TYPE] = timelineMapping;
       break;
     default:
       throw new Error(`Invalid index name '${indexName}'`);
@@ -357,21 +733,39 @@ function getRequestBody(indexName) {
   return result;
 }
 
-    // first delete the index if already present
-esClient.indices.delete({
-  index: ES_PROJECT_INDEX,
-  // we would want to ignore no such index error
-  ignore: [404],
-})
-.then(() => esClient.indices.create(getRequestBody(ES_PROJECT_INDEX)))
-// Re-create timeline index
-.then(() => esClient.indices.delete({ index: ES_TIMELINE_INDEX, ignore: [404] }))
-.then(() => esClient.indices.create({ index: ES_TIMELINE_INDEX }))
-.then(() => {
-  console.log('elasticsearch indices synced successfully');
-  process.exit();
-})
-.catch((err) => {
-  console.error('elasticsearch indices sync failed', err);
-  process.exit();
-});
+/**
+ * Sync elasticsearch indices.
+ *
+ * @returns {undefined}
+ */
+function sync() {
+      // first delete the index if already present
+  return esClient.indices.delete({
+    index: ES_PROJECT_INDEX,
+    // we would want to ignore no such index error
+    ignore: [404],
+  })
+  .then(() => esClient.indices.create(getRequestBody(ES_PROJECT_INDEX)))
+  // Re-create timeline index
+  .then(() => esClient.indices.delete({ index: ES_TIMELINE_INDEX, ignore: [404] }))
+  .then(() => esClient.indices.create(getRequestBody(ES_TIMELINE_INDEX)))
+  // Re-create metadata index
+  .then(() => esClient.indices.delete({ index: ES_METADATA_INDEX, ignore: [404] }))
+  .then(() => esClient.indices.create(getRequestBody(ES_METADATA_INDEX)));
+}
+
+if (!module.parent) {
+  sync()
+    .then(() => {
+      console.log('elasticsearch indices synced successfully');
+      process.exit();
+    })
+    .catch((err) => {
+      console.error('elasticsearch indices sync failed', err);
+      process.exit();
+    });
+}
+
+module.exports = {
+  sync,
+};

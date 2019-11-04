@@ -48,75 +48,75 @@ describe('CREATE product template', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProductCategory.bulkCreate(productCategories))
-    .then(() => models.Form.create(forms[0]))
-    .then(() => models.Form.create(forms[1]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProductCategory.bulkCreate(productCategories))
+      .then(() => models.Form.create(forms[0]))
+      .then(() => models.Form.create(forms[1]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /projects/metadata/productTemplates', () => {
     const body = {
-      param: {
-        name: 'name 1',
-        productKey: 'productKey 1',
-        category: 'generic',
-        subCategory: 'generic',
-        icon: 'http://example.com/icon1.ico',
-        brief: 'brief 1',
-        details: 'details 1',
-        aliases: ['product key 1', 'product_key_1'],
-        disabled: true,
-        hidden: true,
-        isAddOn: true,
-        template: {
-          template1: {
-            name: 'template 1',
-            details: {
-              anyDetails: 'any details 1',
-            },
-            others: ['others 11', 'others 12'],
+      name: 'name 1',
+      productKey: 'productKey 1',
+      category: 'generic',
+      subCategory: 'generic',
+      icon: 'http://example.com/icon1.ico',
+      brief: 'brief 1',
+      details: 'details 1',
+      aliases: ['product key 1', 'product_key_1'],
+      disabled: true,
+      hidden: true,
+      isAddOn: true,
+      template: {
+        template1: {
+          name: 'template 1',
+          details: {
+            anyDetails: 'any details 1',
           },
-          template2: {
-            name: 'template 2',
-            details: {
-              anyDetails: 'any details 2',
-            },
-            others: ['others 21', 'others 22'],
+          others: ['others 11', 'others 12'],
+        },
+        template2: {
+          name: 'template 2',
+          details: {
+            anyDetails: 'any details 2',
           },
+          others: ['others 21', 'others 22'],
         },
       },
     };
 
     const bodyDefinedFormTemplate = _.cloneDeep(body);
-    bodyDefinedFormTemplate.param.form = {
+    bodyDefinedFormTemplate.form = {
       version: 1,
       key: 'dev',
     };
 
     const bodyWithForm = _.cloneDeep(bodyDefinedFormTemplate);
-    delete bodyWithForm.param.template;
+    delete bodyWithForm.template;
 
     const bodyMissingFormTemplate = _.cloneDeep(bodyWithForm);
-    delete bodyMissingFormTemplate.param.form;
+    delete bodyMissingFormTemplate.form;
 
     const bodyInvalidForm = _.cloneDeep(body);
-    bodyInvalidForm.param.form = {
+    bodyInvalidForm.form = {
       version: 1,
       key: 'wrongKey',
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -126,7 +126,7 @@ describe('CREATE product template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -136,7 +136,7 @@ describe('CREATE product template', () => {
 
     it('should return 403 for connect manager', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -144,53 +144,51 @@ describe('CREATE product template', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if validations dont pass', (done) => {
+    it('should return 400 if validations dont pass', (done) => {
       const invalidBody = {
-        param: {
-          aliases: 'a',
-          template: 1,
-        },
+        aliases: 'a',
+        template: 1,
       };
 
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if product category is missing', (done) => {
+    it('should return 400 if product category is missing', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.category = null;
+      invalidBody.category = null;
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if product category does not exist', (done) => {
+    it('should return 400 if product category does not exist', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.category = 'not_exist';
+      invalidBody.category = 'not_exist';
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -198,16 +196,16 @@ describe('CREATE product template', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.productKey.should.be.eql(body.param.productKey);
-          resJson.category.should.be.eql(body.param.category);
-          resJson.icon.should.be.eql(body.param.icon);
-          resJson.brief.should.be.eql(body.param.brief);
-          resJson.details.should.be.eql(body.param.details);
-          resJson.aliases.should.be.eql(body.param.aliases);
-          resJson.template.should.be.eql(body.param.template);
+          resJson.name.should.be.eql(body.name);
+          resJson.productKey.should.be.eql(body.productKey);
+          resJson.category.should.be.eql(body.category);
+          resJson.icon.should.be.eql(body.icon);
+          resJson.brief.should.be.eql(body.brief);
+          resJson.details.should.be.eql(body.details);
+          resJson.aliases.should.be.eql(body.aliases);
+          resJson.template.should.be.eql(body.template);
           resJson.disabled.should.be.eql(true);
           resJson.hidden.should.be.eql(true);
 
@@ -224,7 +222,7 @@ describe('CREATE product template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -232,7 +230,7 @@ describe('CREATE product template', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();
@@ -241,7 +239,7 @@ describe('CREATE product template', () => {
 
     it('should return 201 with form data', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -249,16 +247,16 @@ describe('CREATE product template', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(bodyWithForm.param.name);
-          resJson.productKey.should.be.eql(bodyWithForm.param.productKey);
-          resJson.category.should.be.eql(bodyWithForm.param.category);
-          resJson.icon.should.be.eql(bodyWithForm.param.icon);
-          resJson.brief.should.be.eql(bodyWithForm.param.brief);
-          resJson.details.should.be.eql(bodyWithForm.param.details);
-          resJson.aliases.should.be.eql(bodyWithForm.param.aliases);
-          resJson.form.should.be.eql(bodyWithForm.param.form);
+          resJson.name.should.be.eql(bodyWithForm.name);
+          resJson.productKey.should.be.eql(bodyWithForm.productKey);
+          resJson.category.should.be.eql(bodyWithForm.category);
+          resJson.icon.should.be.eql(bodyWithForm.icon);
+          resJson.brief.should.be.eql(bodyWithForm.brief);
+          resJson.details.should.be.eql(bodyWithForm.details);
+          resJson.aliases.should.be.eql(bodyWithForm.aliases);
+          resJson.form.should.be.eql(bodyWithForm.form);
           resJson.disabled.should.be.eql(true);
           resJson.hidden.should.be.eql(true);
 
@@ -273,36 +271,36 @@ describe('CREATE product template', () => {
         });
     });
 
-    it('should return 422 when form is invalid', (done) => {
+    it('should return 400 when form is invalid', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(bodyInvalidForm)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if both form or template field are defined', (done) => {
+    it('should return 400 if both form or template field are defined', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(bodyDefinedFormTemplate)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if both form or template field are missing', (done) => {
+    it('should return 400 if both form or template field are missing', (done) => {
       request(server)
-        .post('/v4/projects/metadata/productTemplates')
+        .post('/v5/projects/metadata/productTemplates')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(bodyMissingFormTemplate)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
   });
 });

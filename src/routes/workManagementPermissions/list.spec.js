@@ -106,18 +106,20 @@ describe('LIST work management permissions', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/workManagementPermission', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
+        .get('/v5/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
+        .get('/v5/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -126,7 +128,7 @@ describe('LIST work management permissions', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
+        .get('/v5/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -135,7 +137,7 @@ describe('LIST work management permissions', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
+        .get('/v5/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -144,36 +146,36 @@ describe('LIST work management permissions', () => {
 
     it('should return 403 for non-member', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
+        .get('/v5/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
         .expect(403, done);
     });
 
-    it('should return 422 for missing filter', (done) => {
+    it('should return 400 for missing filter', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission')
+        .get('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing projectTemplateId', (done) => {
+    it('should return 400 for missing projectTemplateId', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission?filter=template')
+        .get('/v5/projects/metadata/workManagementPermission?filter=template')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for invalid filter', (done) => {
+    it('should return 400 for invalid filter', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission?filter=invalid%3D2%26projectTemplateId%3D${templateIds[0]}`)
+        .get(`/v5/projects/metadata/workManagementPermission?filter=invalid%3D2%26projectTemplateId%3D${templateIds[0]}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -184,13 +186,13 @@ describe('LIST work management permissions', () => {
 
     it('should return 200 for admin for projectTemplateId=1', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D${templateIds[0]}`)
+        .get(`/v5/projects/metadata/workManagementPermission?filter=projectTemplateId%3D${templateIds[0]}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].policy.should.be.eql(permissions[0].policy);
           resJson[0].permission.should.be.eql(permissions[0].permission);
@@ -215,13 +217,13 @@ describe('LIST work management permissions', () => {
 
     it('should return 200 for admin for projectTemplateId=2', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D${templateIds[1]}`)
+        .get(`/v5/projects/metadata/workManagementPermission?filter=projectTemplateId%3D${templateIds[1]}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(1);
           resJson[0].policy.should.be.eql(permissions[0].policy);
           resJson[0].permission.should.be.eql(permissions[0].permission);

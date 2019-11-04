@@ -7,7 +7,7 @@ import Joi from 'joi';
 
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -18,16 +18,14 @@ const schema = {
     workId: Joi.number().integer().positive().required(),
   },
   body: {
-    param: Joi.object().keys({
-      name: Joi.string().required(),
-      type: Joi.string().required(),
-      templateId: Joi.number().positive().optional(),
-      directProjectId: Joi.number().positive().optional(),
-      billingAccountId: Joi.number().positive().optional(),
-      estimatedPrice: Joi.number().positive().optional(),
-      actualPrice: Joi.number().positive().optional(),
-      details: Joi.any().optional(),
-    }).required(),
+    name: Joi.string().required(),
+    type: Joi.string().required(),
+    templateId: Joi.number().positive().optional(),
+    directProjectId: Joi.number().positive().optional(),
+    billingAccountId: Joi.number().positive().optional(),
+    estimatedPrice: Joi.number().positive().optional(),
+    actualPrice: Joi.number().positive().optional(),
+    details: Joi.any().optional(),
   },
 };
 
@@ -42,7 +40,7 @@ module.exports = [
     const workStreamId = _.parseInt(req.params.workStreamId);
     const phaseId = _.parseInt(req.params.workId);
 
-    const data = req.body.param;
+    const data = req.body;
     // default values
     _.assign(data, {
       projectId,
@@ -127,9 +125,14 @@ module.exports = [
         { correlationId: req.id },
       );
       req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED, { req, created: newPhaseProduct });
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
+        RESOURCES.PHASE_PRODUCT,
+        newPhaseProduct);
 
-      res.status(201).json(util.wrapResponse(req.id, newPhaseProduct, 1, 201));
+      res.status(201).json(newPhaseProduct);
     })
     .catch((err) => { next(err); });
   },
