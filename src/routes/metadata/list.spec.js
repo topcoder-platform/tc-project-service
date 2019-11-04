@@ -3,12 +3,18 @@
  */
 import chai from 'chai';
 import request from 'supertest';
+import config from 'config';
+import _ from 'lodash';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 
 const should = chai.should();
+const expect = chai.expect;
+
+const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
+const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
 
 const projectTemplates = [
   {
@@ -204,9 +210,36 @@ const buildingBlocks = [
   },
 ];
 
-describe('GET all metadata', () => {
+const getObjToIndex = (items) => {
+  const toIndex = _(items).map((item) => {
+    const json = _.omit(item.toJSON(), 'deletedAt', 'deletedBy');
+
+    // setup ES markers. check these for equality with "from ES" to confirm that these records well pulled from ES
+    if (json.description !== undefined) {
+      json.description = 'from ES';
+    } else if (json.info != null) {
+      json.info = 'from ES';
+    } else if (json.details != null) {
+      json.details = 'from ES';
+    } else if (json.config != null) {
+      if (json.config.sections != null) {
+        json.config.sections[0].description = 'from ES';
+      } else if (json.hello != null) {
+        json.hello = 'from ES';
+      }
+    }
+    // end of ES markers
+
+    return json;
+  }).value();
+
+  return toIndex;
+};
+
+describe('GET all metadata from DB', () => {
   before((done) => {
-    testUtil.clearDb()
+    testUtil.clearES()
+    .then(() => testUtil.clearDb())
     .then(() => models.ProjectTemplate.bulkCreate(projectTemplates))
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
     .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates))
@@ -215,7 +248,8 @@ describe('GET all metadata', () => {
     .then(() => models.Form.bulkCreate(forms))
     .then(() => models.PriceConfig.bulkCreate(priceConfigs))
     .then(() => models.PlanConfig.bulkCreate(planConfigs))
-    .then(() => models.BuildingBlock.bulkCreate(buildingBlocks).then(() => done()));
+    .then(() => models.BuildingBlock.bulkCreate(buildingBlocks))
+    .then(() => done());
   });
 
   after((done) => {
@@ -335,6 +369,125 @@ describe('GET all metadata', () => {
             should.not.exist(resJson.buildingBlocks[0].privateConfig);
             resJson.buildingBlocks[1].key.should.be.eql('key2');
             should.not.exist(resJson.buildingBlocks[1].privateConfig);
+            done();
+          }
+        });
+    });
+  });
+});
+
+describe('GET all metadata from ES', () => {
+  before((done) => {
+    const esData = {};
+
+    testUtil.clearES()
+    .then(() => testUtil.clearDb())
+    .then(() => models.ProjectTemplate.bulkCreate(projectTemplates, { returning: true }))
+    .then((created) => { esData.projectTemplates = getObjToIndex(created); })
+    .then(() => models.ProductTemplate.bulkCreate(productTemplates, { returning: true }))
+    .then((created) => { esData.productTemplates = getObjToIndex(created); })
+    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates, { returning: true }))
+    .then((created) => { esData.milestoneTemplates = getObjToIndex(created); })
+    .then(() => models.ProjectType.bulkCreate(projectTypes, { returning: true }))
+    .then((created) => { esData.projectTypes = getObjToIndex(created); })
+    .then(() => models.ProductCategory.bulkCreate(productCategories, { returning: true }))
+    .then((created) => { esData.productCategories = getObjToIndex(created); })
+    .then(() => models.Form.bulkCreate(forms, { returning: true }))
+    .then((created) => {
+      // only index form with key `productKey 1`
+      const v2Form = _(created).filter(c => c.key === 'productKey 1');
+      esData.forms = getObjToIndex(v2Form);
+    })
+    .then(() => models.PriceConfig.bulkCreate(priceConfigs, { returning: true }))
+    .then((created) => {
+      // only index latest versions
+      const v2PriceConfigs = _(created).filter(c => c.version === 2);
+      esData.priceConfigs = getObjToIndex(v2PriceConfigs);
+    })
+    .then(() => models.PlanConfig.bulkCreate(planConfigs, { returning: true }))
+    .then((created) => {
+      // only index latest versions
+      const v2PlanConfigs = _(created).filter(c => c.version === 2);
+      esData.planConfigs = getObjToIndex(v2PlanConfigs);
+    })
+    .then(() => models.BuildingBlock.bulkCreate(buildingBlocks, { returning: true }))
+    .then((created) => { esData.buildingBlocks = getObjToIndex(created); })
+    .then(() => server.services.es.index({
+      index: ES_METADATA_INDEX,
+      type: ES_METADATA_TYPE,
+      body: esData,
+    }))
+    .then(() => done());
+  });
+
+  after((done) => {
+    testUtil.clearES().then(() => testUtil.clearDb(done));
+  });
+
+  describe('GET /projects/metadata', () => {
+    it('should return 200 for admin from ES', (done) => {
+      request(server)
+        .get('/v5/projects/metadata')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body;
+          should.exist(resJson);
+          resJson.projectTemplates.should.have.length(1);
+          resJson.projectTemplates[0].info.should.eql('from ES');
+
+          resJson.productTemplates.should.have.length(1);
+          resJson.productTemplates[0].details.should.eql('from ES');
+
+          resJson.milestoneTemplates.should.have.length(1);
+          resJson.milestoneTemplates[0].description.should.eql('from ES');
+
+          resJson.projectTypes.should.have.length(1);
+          resJson.projectTypes[0].info.should.eql('from ES');
+
+          resJson.productCategories.should.have.length(1);
+          resJson.productCategories[0].info.should.eql('from ES');
+
+          resJson.forms.should.have.length(1);
+          resJson.forms[0].key.should.eql('productKey 1');
+          resJson.forms[0].config.sections.should.have.length(1);
+          resJson.forms[0].config.sections[0].description.should.eql('from ES');
+
+          resJson.planConfigs.should.have.length(1);
+          resJson.priceConfigs.should.have.length(1);
+
+          resJson.forms[0].version.should.be.eql(2);
+          resJson.planConfigs[0].version.should.be.eql(2);
+          resJson.priceConfigs[0].version.should.be.eql(2);
+
+          done();
+        });
+    });
+
+    it('should return correct building blocks for admin from ES', (done) => {
+      request(server)
+        .get('/v5/projects/metadata')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.exist(resJson.buildingBlocks);
+            resJson.buildingBlocks.length.should.be.eql(2);
+            should.not.exist(resJson.buildingBlocks[0].privateConfig);
+            should.not.exist(resJson.buildingBlocks[1].privateConfig);
+
+            // ES doesn't guarantee order if sort order isn't specified. Current implementation doesn't specify sort order
+            expect(_.some(resJson.buildingBlocks, { key: 'key1' })).to.be.true; // eslint-disable-line no-unused-expressions
+            expect(_.some(resJson.buildingBlocks, { key: 'key2' })).to.be.true; // eslint-disable-line no-unused-expressions
+
             done();
           }
         });
