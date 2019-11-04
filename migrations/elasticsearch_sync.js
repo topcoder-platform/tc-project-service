@@ -628,6 +628,33 @@ function getRequestBody(indexName) {
         },
       },
 
+      buildingBlocks: {
+        type: 'nested',
+        properties: {
+          createdAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          createdBy: {
+            type: 'integer',
+          },
+          key: {
+            type: 'string',
+            index: 'not_analyzed',
+          },
+          id: {
+            type: 'long',
+          },
+          updatedAt: {
+            type: 'date',
+            format: 'strict_date_optional_time||epoch_millis',
+          },
+          updatedBy: {
+            type: 'integer',
+          },
+        },
+      },
+
       milestoneTemplates: {
         type: 'nested',
         properties: {
