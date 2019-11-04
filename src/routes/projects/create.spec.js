@@ -19,6 +19,7 @@ describe('Project create', () => {
     sinon.stub(RabbitMQService.prototype, 'init', () => {});
     sinon.stub(RabbitMQService.prototype, 'publish', () => {});
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => models.ProjectType.bulkCreate([
         {
           key: 'generic',

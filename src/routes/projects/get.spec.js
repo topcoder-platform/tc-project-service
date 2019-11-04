@@ -77,6 +77,7 @@ describe('GET Project', () => {
   let project2;
   before((done) => {
     testUtil.clearDb()
+        .then(() => testUtil.clearES())
         .then(() => {
           const p1 = models.Project.create({
             type: 'generic',
