@@ -23,6 +23,7 @@ describe('Project', () => {
   let project3;
   beforeEach((done) => {
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => models.ProjectType.bulkCreate([
         {
           key: 'generic',

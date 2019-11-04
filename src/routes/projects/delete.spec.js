@@ -36,6 +36,7 @@ describe('Project delete test', () => {
   let project1;
   beforeEach((done) => {
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',

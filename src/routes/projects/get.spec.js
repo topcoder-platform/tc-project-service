@@ -151,7 +151,9 @@ describe('GET Project', () => {
   });
 
   after((done) => {
-    testUtil.clearDb(done);
+    testUtil.clearDb()
+      .then(() => testUtil.clearES())
+      .then(done);
   });
 
   describe('GET /projects/{id}', () => {

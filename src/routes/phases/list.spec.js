@@ -48,6 +48,7 @@ describe('Project Phases', () => {
     this.timeout(10000);
     // mocks
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',
