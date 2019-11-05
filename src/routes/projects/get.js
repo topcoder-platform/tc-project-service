@@ -159,7 +159,7 @@ module.exports = [
         req.log.debug('No project found in ES');
         return retrieveProjectFromDB(projectId, req);
       }
-      req.log.debug('No project found in ES');
+      req.log.debug('Project found in ES');
       return result;
     }).then((project) => {
       res.status(200).json(project);
