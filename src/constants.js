@@ -343,5 +343,5 @@ export const RESOURCES = {
   TIMELINE: 'timeline',
   MILESTONE: 'milestone',
   MILESTONE_TEMPLATE: 'milestone.template',
-  ATTACHMENT: 'project.attachment',
+  ATTACHMENT: 'attachment',
 };
