@@ -103,7 +103,7 @@ describe('projectUpdatedKafkaHandler', () => {
         details: {},
         createdBy: 1,
         updatedBy: 1,
-        lastActivityAt: '1970-01-01T00:00:00.001Z',
+        lastActivityAt: 1,
         lastActivityUserId: '1',
       });
       // add project to ES index
