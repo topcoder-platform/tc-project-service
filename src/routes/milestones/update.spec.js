@@ -264,7 +264,6 @@ describe('UPDATE Milestone', () => {
       param: {
         name: 'Milestone 1-updated',
         duration: 3,
-        completionDate: '2018-05-16T00:00:00.000Z',
         description: 'description-updated',
         status: 'draft',
         type: 'type1-updated',
@@ -299,6 +298,30 @@ describe('UPDATE Milestone', () => {
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
         .send(body)
+        .expect(403, done);
+    });
+
+    it('should return 403 for non-admin member updating the completionDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.completionDate = '2019-01-16T00:00:00.000Z';
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
+        .expect(403, done);
+    });
+
+    it('should return 403 for non-admin member updating the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.actualStartDate = '2018-05-15T00:00:00.000Z';
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
         .expect(403, done);
     });
 
@@ -490,12 +513,14 @@ describe('UPDATE Milestone', () => {
     });
 
     it('should return 200 for admin', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.completionDate = '2018-05-15T00:00:00.000Z';
       request(server)
         .patch('/v4/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send(body)
+        .send(newBody)
         .expect(200)
         .end((err, res) => {
           const resJson = res.body.result.content;
@@ -503,7 +528,7 @@ describe('UPDATE Milestone', () => {
           resJson.name.should.be.eql(body.param.name);
           resJson.description.should.be.eql(body.param.description);
           resJson.duration.should.be.eql(body.param.duration);
-          resJson.completionDate.should.be.eql(body.param.completionDate);
+          resJson.completionDate.should.be.eql(newBody.param.completionDate);
           resJson.status.should.be.eql(body.param.status);
           resJson.type.should.be.eql(body.param.type);
           resJson.details.should.be.eql({
@@ -1059,6 +1084,30 @@ describe('UPDATE Milestone', () => {
         .send(body)
         .expect(200)
         .end(done);
+    });
+
+    it('should return 200 for admin updating the completionDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.completionDate = '2018-05-16T00:00:00.000Z';
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for admin updating the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.param.actualStartDate = '2018-05-15T00:00:00.000Z';
+      request(server)
+        .patch('/v4/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200, done);
     });
 
     it('should return 200 for connect manager', (done) => {
