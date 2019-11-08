@@ -44,11 +44,17 @@ const projectMemberAddedHandler = Promise.coroutine(function* a(logger, msg, cha
     const newMember = JSON.parse(msg.content.toString());
     const projectId = newMember.projectId;
     const directUpdatePromise = Promise.coroutine(function* () { // eslint-disable-line func-names
-      if (_.indexOf([PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.MANAGER], newMember.role) > -1) {
+      if (_.indexOf([
+        PROJECT_MEMBER_ROLE.COPILOT,
+        PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+        PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+        PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+      ], newMember.role) > -1) {
         // add copilot/update manager permissions operation promise
         const directProjectId = yield models.Project.getDirectProjectId(projectId);
         if (directProjectId) {
-          const token = yield util.getSystemUserToken(logger);
+          const token = yield util.getM2MToken();
           const req = {
             id: origRequestId,
             log: logger,
@@ -116,10 +122,16 @@ const projectMemberRemovedHandler = Promise.coroutine(function* (logger, msg, ch
     const projectId = member.projectId;
     // remove copilot/manager operation promise
     const updateDirectProjectPromise = Promise.coroutine(function* () { // eslint-disable-line func-names
-      if (_.indexOf([PROJECT_MEMBER_ROLE.COPILOT, PROJECT_MEMBER_ROLE.MANAGER], member.role) > -1) {
+      if (_.indexOf([
+        PROJECT_MEMBER_ROLE.COPILOT,
+        PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+        PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+        PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+      ], member.role) > -1) {
         const directProjectId = yield models.Project.getDirectProjectId(projectId);
         if (directProjectId) {
-          const token = yield util.getSystemUserToken(logger);
+          const token = yield util.getM2MToken();
           const req = {
             id: origRequestId,
             log: logger,
@@ -152,7 +164,7 @@ const projectMemberRemovedHandler = Promise.coroutine(function* (logger, msg, ch
 
     const updateDocPromise = (doc) => {
       const members = _.filter(doc._source.members, single => single.id !== member.id);   // eslint-disable-line no-underscore-dangle
-      return Promise.resolve(_.merge(doc._source, { members }));    // eslint-disable-line no-underscore-dangle
+      return Promise.resolve(_.set(doc._source, 'members', members));    // eslint-disable-line no-underscore-dangle
     };
     yield Promise.all([
       updateDirectProjectPromise(),

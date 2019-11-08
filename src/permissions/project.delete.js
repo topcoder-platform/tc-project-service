@@ -23,7 +23,13 @@ module.exports = freq => new Promise((resolve, reject) => {
         const hasAccess = util.hasAdminRole(req) ||
           !_.isUndefined(_.find(members, m => m.userId === req.authUser.userId &&
             ((m.role === PROJECT_MEMBER_ROLE.CUSTOMER && m.isPrimary) ||
-              m.role === PROJECT_MEMBER_ROLE.MANAGER)));
+                [
+                  PROJECT_MEMBER_ROLE.MANAGER,
+                  PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+                  PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+                  PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+                ].includes(m.role)
+            )));
 
         if (!hasAccess) {
           // user is not an admin nor is a registered project member

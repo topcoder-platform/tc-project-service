@@ -19,15 +19,7 @@ const schema = {
 module.exports = [
   validate(schema),
   permissions('priceConfig.view'),
-  (req, res, next) => models.PriceConfig.findOne({
-    where: {
-      key: req.params.key,
-      version: req.params.version,
-    },
-    order: [['revision', 'DESC']],
-    limit: 1,
-    attributes: { exclude: ['deletedAt', 'deletedBy'] },
-  })
+  (req, res, next) => models.PriceConfig.findOneWithLatestRevision(req.params)
     .then((priceConfig) => {
       // Not found
       if (!priceConfig) {

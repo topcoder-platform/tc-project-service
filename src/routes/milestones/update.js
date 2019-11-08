@@ -4,12 +4,13 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import moment from 'moment';
+import config from 'config';
 import Joi from 'joi';
 import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
-import { EVENT, MILESTONE_STATUS } from '../../constants';
+import { EVENT, MILESTONE_STATUS, ADMIN_ROLES } from '../../constants';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -111,6 +112,7 @@ const schema = {
       completedText: Joi.string().max(512).optional(),
       blockedText: Joi.string().max(512).optional(),
       hidden: Joi.boolean().optional(),
+      statusComment: Joi.string().when('status', { is: 'paused', then: Joi.required(), otherwise: Joi.optional() }),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
       deletedAt: Joi.any().strip(),
@@ -146,16 +148,60 @@ module.exports = [
     return models.sequelize.transaction(() =>
       // Find the milestone
       models.Milestone.findOne({ where })
-        .then((milestone) => {
+        .then(async (milestone) => {
           // Not found
           if (!milestone) {
             const apiErr = new Error(`Milestone not found for milestone id ${req.params.milestoneId}`);
             apiErr.status = 404;
             return Promise.reject(apiErr);
           }
+          const validStatuses = JSON.parse(config.get('VALID_STATUSES_BEFORE_PAUSED'));
+          if (entityToUpdate.status === MILESTONE_STATUS.PAUSED && !validStatuses.includes(milestone.status)) {
+            const validStatutesStr = validStatuses.join(', ');
+            const apiErr = new Error(`Milestone can only be paused from the next statuses: ${validStatutesStr}`);
+            apiErr.status = 422;
+            return Promise.reject(apiErr);
+          }
 
-          if (entityToUpdate.completionDate && entityToUpdate.completionDate < milestone.startDate) {
-            const apiErr = new Error('The milestone completionDate should be greater or equal than the startDate.');
+          if (entityToUpdate.status === 'resume') {
+            if (milestone.status !== MILESTONE_STATUS.PAUSED) {
+              const apiErr = new Error('Milestone status isn\'t paused');
+              apiErr.status = 422;
+              return Promise.reject(apiErr);
+            }
+            const statusHistory = await models.StatusHistory.findAll({
+              where: { referenceId: milestone.id },
+              order: [['createdAt', 'desc'], ['id', 'desc']],
+              attributes: ['status', 'id'],
+              limit: 2,
+              raw: true,
+            });
+            if (statusHistory.length === 2) {
+              entityToUpdate.status = statusHistory[1].status;
+            } else {
+              const apiErr = new Error('No previous status is found');
+              apiErr.status = 500;
+              return Promise.reject(apiErr);
+            }
+          }
+
+          if (entityToUpdate.completionDate || entityToUpdate.actualStartDate) {
+            if (!util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser)) {
+              const apiErr = new Error('You are not authorised to perform this action');
+              apiErr.status = 403;
+              return Promise.reject(apiErr);
+            }
+          }
+
+          if (
+            entityToUpdate.completionDate &&
+            (entityToUpdate.actualStartDate || milestone.actualStartDate) &&
+            moment.utc(entityToUpdate.completionDate).isBefore(
+              moment.utc(entityToUpdate.actualStartDate || milestone.actualStartDate),
+              'day',
+            )
+          ) {
+            const apiErr = new Error('The milestone completionDate should be greater or equal to actualStartDate.');
             apiErr.status = 422;
             return Promise.reject(apiErr);
           }
@@ -177,7 +223,8 @@ module.exports = [
             // if status has changed to be completed, set the compeltionDate if not provided
             if (entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
               entityToUpdate.completionDate = entityToUpdate.completionDate ? entityToUpdate.completionDate : today;
-              entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
+              entityToUpdate.duration = moment.utc(entityToUpdate.completionDate)
+                .diff(entityToUpdate.actualStartDate, 'days') + 1;
             }
             // if status has changed to be active, set the startDate to today
             if (entityToUpdate.status === MILESTONE_STATUS.ACTIVE) {
@@ -202,12 +249,13 @@ module.exports = [
 
           // if completionDate has changed
           if (!statusChanged && completionDateChanged) {
-            entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
+            entityToUpdate.duration = moment.utc(entityToUpdate.completionDate)
+              .diff(entityToUpdate.actualStartDate, 'days') + 1;
             entityToUpdate.status = MILESTONE_STATUS.COMPLETED;
           }
 
           // Update
-          return milestone.update(entityToUpdate);
+          return milestone.update(entityToUpdate, { comment: entityToUpdate.statusComment });
         })
         .then((updatedMilestone) => {
           // Omit deletedAt, deletedBy

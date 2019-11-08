@@ -22,8 +22,6 @@
   "fileServiceEndpoint": "FILE_SERVICE_ENDPOINT",
   "identityServiceEndpoint": "IDENTITY_SERVICE_ENDPOINT",
   "memberServiceEndpoint": "MEMBER_SERVICE_ENDPOINT",
-  "systemUserClientId": "SYSTEM_USER_CLIENT_ID",
-  "systemUserClientSecret": "SYSTEM_USER_CLIENT_SECRET",
   "connectProjectsUrl": "CONNECT_PROJECTS_URL",
   "dbConfig": {
     "masterUrl": "DB_MASTER_URL",
@@ -51,5 +49,18 @@
   "connectUrl": "CONNECT_URL",
   "accountsAppUrl": "ACCOUNTS_APP_URL",
   "inviteEmailSubject": "INVITE_EMAIL_SUBJECT",
-  "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE"
+  "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE",
+  "SSO_REFCODES": "SSO_REFCODES",
+  "lookerConfig": {
+    "BASE_URL": "LOOKER_API_BASE_URL",
+    "CLIENT_ID": "LOOKER_API_CLIENT_ID",
+    "CLIENT_SECRET": "LOOKER_API_CLIENT_SECRET",
+    "TOKEN": "TOKEN",
+    "USE_MOCK": "LOOKER_API_ENABLE_MOCK",
+    "QUERIES": {
+      "REG_STATS": "LOOKER_API_REG_STATS_QUERY_ID",
+      "BUDGET": "LOOKER_API_BUDGET_QUERY_ID"
+    }
+  },
+  "DEFAULT_M2M_USERID": "DEFAULT_M2M_USERID"
 }

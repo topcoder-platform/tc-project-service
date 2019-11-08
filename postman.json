@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "57206894-511c-4ffb-94bb-e50d2dd416fb",
+		"_postman_id": "51273dbf-d56a-49f4-b8a6-de33f9fb30e7",
 		"name": "tc-project-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -118,10 +118,6 @@
 										"value": "application/json"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/v4/projects/2",
 									"host": [
@@ -242,10 +238,6 @@
 										"value": "Bearer {{jwt-token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/v4/projects",
 									"host": [
@@ -958,10 +950,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/7",
 							"host": [
@@ -987,10 +975,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1?fields=id,name,description,members.id,members.projectId",
 							"host": [
@@ -1022,10 +1006,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db",
 							"host": [
@@ -1051,10 +1031,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?limit=1&offset=1",
 							"host": [
@@ -1090,10 +1066,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?filter=type%3Dgeneric",
 							"host": [
@@ -1125,10 +1097,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?sort=type%20desc",
 							"host": [
@@ -1160,10 +1128,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db?fields=id,name,description",
 							"host": [
@@ -1195,10 +1159,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/db",
 							"host": [
@@ -1223,10 +1183,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",
 							"host": [
@@ -1251,10 +1207,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?limit=1&offset=1",
 							"host": [
@@ -1289,10 +1241,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?filter=type%3Dgeneric",
 							"host": [
@@ -1323,10 +1271,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?sort=type%20desc",
 							"host": [
@@ -1357,10 +1301,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects?fields=id,name,description",
 							"host": [
@@ -1391,10 +1331,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects",
 							"host": [
@@ -1966,6 +1902,1960 @@
 			"description": "Requests for all things projects."
 		},
 		{
+			"name": "Workstream",
+			"item": [
+				{
+					"name": "Create workstream without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"WorkStreamId\", pm.response.json().result.content.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get workstream by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List workstreams",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE workstream by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				},
+				{
+					"name": "Update workstream",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project - updated\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects."
+		},
+		{
+			"name": "Work",
+			"item": [
+				{
+					"name": "Create work without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"WorkId\", pm.response.json().result.content.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-16T00:00:00\",\n\t\t\"endDate\": \"2018-05-17T00:00:00\",\n\t\t\"order\": 1,\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work - 403",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"order\": 2,\n\t\t\"budget\": 20,\n\t\t\"details\": {\n\t\t\t\"aDetails\": \"a details\"\n\t\t}\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get work by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List works",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List works - sort",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works?sort=startDate desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "startDate desc"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List works - fields",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works?fields=status,name,budget",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "status,name,budget"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE work by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				},
+				{
+					"name": "Update work",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project phase 11\",\n\t\t\"status\": \"active\",\n\t\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\t\"budget\": 24,\n\t\t\"order\": 2\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work 403",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project - updated\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"1"
+							]
+						},
+						"description": "Update the project name. If user don't have permission to the project than it should return 403."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects."
+		},
+		{
+			"name": "Work Item",
+			"item": [
+				{
+					"name": "Create work item without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work item without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work item with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"ItemId\", pm.response.json().result.content.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"work item - phase product\",\n\t\t\"type\": \"type 1\",\n\t\t\"estimatedPrice\": 12\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work item by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"description\": \"Hello I am a test project\",\n\t\t\"type\": \"generic\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get work item by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems/{{ItemId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems",
+								"{{ItemId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List work items",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE work item by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems/{{ItemId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems",
+								"{{ItemId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				},
+				{
+					"name": "Update work item",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"work item - updated\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId}}/works/{{WorkId}}/workitems/{{ItemId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId}}",
+								"works",
+								"{{WorkId}}",
+								"workitems",
+								"{{ItemId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects."
+		},
+		{
+			"name": "Work Management Permission",
+			"item": [
+				{
+					"name": "Create work management permission without payload",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Request body is mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission without valid name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Certain fields are mandatory while creating project. If invalid request body is supplied this should return 422 status code."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "305f3d68-6e9f-4c4d-b031-7487986a93e2",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workManagementPermissionId\", pm.response.json().result.content.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n      \"policy\": \"work.new.create\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 1\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "305f3d68-6e9f-4c4d-b031-7487986a93e2",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"workManagementPermissionId\", pm.response.json().result.content.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n      \"policy\": \"work.new.create\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 2\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create work management permission by inactive user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer userId_{{inactive-userId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n      \"policy\": \"work.create\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 1\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Get work management permission by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission",
+								"{{workManagementPermissionId}}"
+							]
+						},
+						"description": "Get a project by id. project members and attachments should also be returned."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions - filter required",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions - missing filter",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission?filter=template",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "template"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions - invalid filter",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission?filter=invalid%3D2%26projectTemplateId%3D1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "invalid%3D2%26projectTemplateId%3D1"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "List work management permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "projectTemplateId%3D1"
+								}
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work management permission",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n      \"policy\": \"work.new.delete\",\n      \"permission\": {\n        \"allowRule\": {\n          \"projectRoles\": [\"customer\", \"copilot\"],\n          \"topcoderRoles\": [\"Connect Manager\", \"Connect Admin\", \"administrator\"]\n        },\n        \"denyRule\": { \"projectRoles\": [\"copilot\"] }\n      },\n      \"projectTemplateId\": 1\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission",
+								"{{workManagementPermissionId}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete work management permission by id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"metadata",
+								"workManagementPermission",
+								"{{workManagementPermissionId}}"
+							]
+						},
+						"description": "Delete a project by id"
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects."
+		},
+		{
+			"name": "Permissions",
+			"item": [
+				{
+					"name": "Get permissions - 404",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/9999/permissions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"9999",
+								"permissions"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project invite for customer with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331],\n\t\t\"role\": \"customer\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project invite to accept invite",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"userId\": 40051331,\n\t\t\"status\": \"accepted\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Get permissions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/permissions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"permissions"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				},
+				{
+					"name": "Get permissions - manager",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/permissions",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"permissions"
+							]
+						},
+						"description": "List all the project with no filter. Default sort and limits are applied."
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "5197d1ec-429c-4a6f-9e9c-3ec3cd6f292a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "cc0cbbf1-54d1-481f-b8fa-a6dc4c80e993",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "WorkManagementForTemplate",
+			"item": [
+				{
+					"name": "Create workstream with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"WorkStreamId1\", pm.response.json().result.content.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create project invite for customer with valid values",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"userIds\": [40051331],\n\t\t\"role\": \"customer\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Update project invite to accept invite",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"userId\": 40051331,\n\t\t\"status\": \"accepted\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/members/invite",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"members",
+								"invite"
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work stream - no match allowRule",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"work item - updated\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId1}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId1}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work stream - allow access",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-connectAdmin-40051336}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"work item - updated\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId1}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId1}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work stream - allow access with ProjectRoles",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"work item - updated\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/workstreams/{{WorkStreamId1}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"workstreams",
+								"{{WorkStreamId1}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Create workstream with valid values - Project 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"WorkStreamId2\", pm.response.json().result.content.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project\",\n\t\t\"type\": \"generic\",\n\t\t\"status\": \"active\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/2/workstreams",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"2",
+								"workstreams"
+							]
+						},
+						"description": "Valid request body. Project should be created successfully."
+					},
+					"response": []
+				},
+				{
+					"name": "Update work item - allow access",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"test project - updated\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/2/workstreams/{{WorkStreamId2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"2",
+								"workstreams",
+								"{{WorkStreamId2}}"
+							]
+						},
+						"description": "Update the project name. If user don't have permission to the project than it should return 403."
+					},
+					"response": []
+				},
+				{
+					"name": "Update workstream - deny access",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"param\": {\n\t\t\"name\": \"work item - updated\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/2/workstreams/{{WorkStreamId2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"2",
+								"workstreams",
+								"{{WorkStreamId2}}"
+							]
+						},
+						"description": "Update the project name. Name should be updated successfully."
+					},
+					"response": []
+				}
+			],
+			"description": "Requests for all things projects."
+		},
+		{
 			"name": "EventHandling and Integration with Direct Project API",
 			"item": [
 				{
@@ -1982,10 +3872,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.topcoder-dev.com/v3/direct/projects",
 							"protocol": "https",
@@ -2200,28 +4086,6 @@
 					},
 					"response": []
 				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "ef96ac6a-0fc0-4a64-a4fe-5390e17afe67",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"id": "12f9d794-0872-4058-aafa-77b89e72025b",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				}
 			]
 		},
 		{
@@ -2340,10 +4204,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db",
 							"host": [
@@ -2374,10 +4234,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db?fields=status,name,budget",
 							"host": [
@@ -2414,10 +4270,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db?sort=status desc",
 							"host": [
@@ -2454,10 +4306,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/db?sort=order desc",
 							"host": [
@@ -2494,10 +4342,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases",
 							"host": [
@@ -2527,10 +4371,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases?fields=status,name,budget",
 							"host": [
@@ -2566,10 +4406,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases?sort=status desc",
 							"host": [
@@ -2605,10 +4441,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases?sort=order desc",
 							"host": [
@@ -2644,10 +4476,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1",
 							"host": [
@@ -2816,10 +4644,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products/db",
 							"host": [
@@ -2848,10 +4672,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products",
 							"host": [
@@ -2879,10 +4699,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/1/phases/1/products/1",
 							"host": [
@@ -3153,10 +4969,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates",
 							"host": [
@@ -3186,10 +4998,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTemplates/1",
 							"host": [
@@ -3598,10 +5406,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productTemplates",
 							"host": [
@@ -3631,10 +5435,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productTemplates/3",
 							"host": [
@@ -3882,10 +5682,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTypes",
 							"host": [
@@ -3915,10 +5711,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/projectTypes/generic",
 							"host": [
@@ -4055,10 +5847,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productCategories",
 							"host": [
@@ -4088,10 +5876,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/productCategories/generic",
 							"host": [
@@ -4175,38 +5959,6 @@
 						}
 					},
 					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJwc2hhaDEiLCJleHAiOjI0NjI0OTQ2MTgsInVzZXJJZCI6IjQwMTM1OTc4IiwiaWF0IjoxNDYyNDk0MDE4LCJlbWFpbCI6InBzaGFoMUB0ZXN0LmNvbSIsImp0aSI6ImY0ZTFhNTE0LTg5ODAtNDY0MC04ZWM1LWUzNmUzMWE3ZTg0OSJ9.XuNN7tpMOXvBG1QwWRQROj7NfuUbqhkjwn39Vy4tR5I",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "f0092ef5-e624-4c25-87b2-b6a9e4c81ec8",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"id": "9183c429-a5e0-4bf9-96a2-89f4d66e9b0d",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
 				}
 			]
 		},
@@ -4458,10 +6210,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines?filter=reference%3Dphase%26referenceId%3D1",
 							"host": [
@@ -4495,10 +6243,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1",
 							"host": [
@@ -4726,10 +6470,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones",
 							"host": [
@@ -4759,10 +6499,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones?sort=order desc",
 							"host": [
@@ -4798,10 +6534,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
 							"host": [
@@ -4835,6 +6567,74 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"completionDate\": \"2018-09-28T00:00:00.000Z\",\r\n    \"status\": \"closed\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone - paused",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"status\": \"paused\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"statusComment\": \"milestone paused\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"timelines",
+								"1",
+								"milestones",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update milestone - resume",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"status\": \"resume\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"statusComment\": \"milestone resume\"\r\n  }\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/1/milestones/1",
@@ -5310,10 +7110,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates",
 							"host": [
@@ -5343,10 +7139,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1",
 							"host": [
@@ -5382,10 +7174,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates?filter=reference%3DproductTemplate%26referenceId%3D1&sort=order desc",
 							"host": [
@@ -5425,10 +7213,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/timelines/metadata/milestoneTemplates/1",
 							"host": [
@@ -5691,16 +7475,6 @@
 				{
 					"name": "Get all metadata",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [
 							{
@@ -5709,10 +7483,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata",
 							"host": [
@@ -5730,22 +7500,8 @@
 				{
 					"name": "Get all metadata with includeAllVersion",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata?includeAllReferred=true",
 							"host": [
@@ -5774,22 +7530,8 @@
 				{
 					"name": "List forms",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions",
 							"host": [
@@ -5810,22 +7552,8 @@
 				{
 					"name": "Get a particular version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1",
 							"host": [
@@ -5847,22 +7575,8 @@
 				{
 					"name": "Get latest version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev",
 							"host": [
@@ -5882,16 +7596,6 @@
 				{
 					"name": "Create form",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -5925,16 +7629,6 @@
 				{
 					"name": "Update form",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PATCH",
 						"header": [
 							{
@@ -5969,16 +7663,6 @@
 				{
 					"name": "Delete form",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -6018,22 +7702,8 @@
 				{
 					"name": "List all revision for version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions",
 							"host": [
@@ -6056,22 +7726,8 @@
 				{
 					"name": "Get a particular revision",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/form/dev/versions/1/revisions/1",
 							"host": [
@@ -6095,16 +7751,6 @@
 				{
 					"name": "Create form",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -6140,16 +7786,6 @@
 				{
 					"name": "Create for no exist key",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -6185,16 +7821,6 @@
 				{
 					"name": "Delete revision",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -6236,22 +7862,8 @@
 				{
 					"name": "List price configs",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions",
 							"host": [
@@ -6272,22 +7884,8 @@
 				{
 					"name": "Get a particular version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1",
 							"host": [
@@ -6309,22 +7907,8 @@
 				{
 					"name": "Get latest version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev",
 							"host": [
@@ -6344,16 +7928,6 @@
 				{
 					"name": "Create priceConfig",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -6387,16 +7961,6 @@
 				{
 					"name": "Update priceConfig",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PATCH",
 						"header": [
 							{
@@ -6431,16 +7995,6 @@
 				{
 					"name": "Delete priceConfig",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -6472,28 +8026,6 @@
 					},
 					"response": []
 				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "59182724-4332-4d76-90ea-f7520a7b1be9",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"id": "abc13dca-e8a4-4995-970f-00e5889a5f2d",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				}
 			]
 		},
 		{
@@ -6502,22 +8034,8 @@
 				{
 					"name": "List all revision for version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/3/revisions",
 							"host": [
@@ -6540,22 +8058,8 @@
 				{
 					"name": "Get a particular revision",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1",
 							"host": [
@@ -6579,16 +8083,6 @@
 				{
 					"name": "Create price config",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -6624,16 +8118,6 @@
 				{
 					"name": "Create for no exist key",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -6669,16 +8153,6 @@
 				{
 					"name": "Delete revision",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -6720,22 +8194,8 @@
 				{
 					"name": "List plan configs",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions",
 							"host": [
@@ -6756,22 +8216,8 @@
 				{
 					"name": "Get a particular version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/3",
 							"host": [
@@ -6793,22 +8239,8 @@
 				{
 					"name": "Get latest version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev",
 							"host": [
@@ -6828,16 +8260,6 @@
 				{
 					"name": "Create plan config",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -6871,16 +8293,6 @@
 				{
 					"name": "Update plan config",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PATCH",
 						"header": [
 							{
@@ -6915,16 +8327,6 @@
 				{
 					"name": "Delete plan config",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -6964,22 +8366,8 @@
 				{
 					"name": "List all revision for version",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions",
 							"host": [
@@ -7002,22 +8390,8 @@
 				{
 					"name": "Get a particular revision",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/v4/projects/metadata/planConfig/dev/versions/1/revisions/1",
 							"host": [
@@ -7041,16 +8415,6 @@
 				{
 					"name": "Create plan config",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -7086,16 +8450,6 @@
 				{
 					"name": "Create for no exist key",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [
 							{
@@ -7131,16 +8485,6 @@
 				{
 					"name": "Delete revision",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoidGVzdDEiLCJleHAiOjI1NjMwNzY2ODksInVzZXJJZCI6IjQwMDUxMzMzIiwiaWF0IjoxNDYzMDc2MDg5LCJlbWFpbCI6InRlc3RAdG9wY29kZXIuY29tIiwianRpIjoiYjMzYjc3Y2QtYjUyZS00MGZlLTgzN2UtYmViOGUwYWU2YTRhIn0.wKWUe0-SaiFVN-VR_-GwgFlvWaDkSbc8H55ktb9LAVw",
-									"type": "string"
-								}
-							]
-						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -7169,6 +8513,917 @@
 								"1",
 								"revisions",
 								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Project Reports",
+			"item": [
+				{
+					"name": "summary",
+					"item": [
+						{
+							"name": "get report by admin",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-admin-40051333}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/v4/projects/1/reports?reportName=summary",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"1",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get report by member",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-member2-40051335}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/v4/projects/1/reports?reportName=summary",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"1",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get report with invalid project id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/v4/projects/123456/reports?reportName=summary",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"123456",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get report with invalid report name",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/v4/projects/1/reports?reportName=summary123",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"1",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "summary123"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "projectBudget",
+					"item": [
+						{
+							"name": "get report by admin",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/v4/projects/1/reports?reportName=projectBudget",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"v4",
+										"projects",
+										"1",
+										"reports"
+									],
+									"query": [
+										{
+											"key": "reportName",
+											"value": "projectBudget"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		},
+		{
+			"name": "Project Setting",
+			"item": [
+				{
+					"name": "Create project setting - double",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"settingId\", pm.response.json().result.content.id);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - percentage",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "bf3aa19f-517c-4103-9250-82d7847e7477",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_fee\",\r\n    \"value\": \"18.88\",\r\n    \"valueType\": \"percentage\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t    \"topcoderRoles\": [\"Connect Copilot\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - for project = 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"2222\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/2/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"2",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - another estimation type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_reference_program\",\r\n    \"value\": \"17800\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\", \"copilot\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with non estimation type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_non_estimation\",\r\n    \"value\": \"8765\",\r\n    \"valueType\": \"string\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t  \"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - duplicate key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with invalid valueType",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"int1\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with invalid percentage value",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_community\",\r\n    \"value\": \"200\",\r\n    \"valueType\": \"percentage\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with missing readPermission",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"int\",\r\n    \"projectId\": 1,\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting with empty body",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project setting - not permitted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member-40051331}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_topcoder_service\",\r\n    \"value\": \"1000\",\r\n    \"valueType\": \"double\",\r\n\t\"writePermission\": {\r\n\t  \t\"allowRule\": {\r\n\t    \t\"projectRoles\": [\"account_manager\"],\r\n\t    \t\"topcoderRoles\": [\"administrator\", \"Connect Admin\"]\r\n\t    },\r\n\t  \t\"denyRule\": {\r\n\t    \t\"topcoderRoles\": [\"Connect Copilot Manager\"]\r\n\t    }\r\n\t  },\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"administrator\", \"Connect Admin\", \"Connect Account Manager\"]\r\n\t  },\r\n\t\"metadata\": {}\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting - 403",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List project setting - manager",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-manager-40051334}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - (failed) change key",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"key\": \"markup_community\",\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"Connect Manager\"]\r\n\t  }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change double to percentage",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"value\": \"35.60\",\r\n    \"valueType\": \"percentage\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - non-existent project",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"value\": \"30\",\r\n    \"valueType\": \"percentage\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/9999/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"9999",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - non-existent project setting",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n    \"value\": \"30\",\r\n    \"valueType\": \"percentage\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/9999",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project setting - change readPermission",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"param\":{\r\n\t\"readPermission\": {\r\n\t  \t\"projectRoles\": [\"manager\"],\r\n\t    \"topcoderRoles\": [\"Connect Manager\"]\r\n\t  }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete project setting",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/v4/projects/1/settings/{{settingId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"v4",
+								"projects",
+								"1",
+								"settings",
+								"{{settingId}}"
 							]
 						}
 					},

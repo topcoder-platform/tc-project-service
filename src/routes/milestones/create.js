@@ -31,10 +31,10 @@ const schema = {
       type: Joi.string().max(45).required(),
       details: Joi.object(),
       order: Joi.number().integer().required(),
-      plannedText: Joi.string().max(512).required(),
-      activeText: Joi.string().max(512).required(),
-      completedText: Joi.string().max(512).required(),
-      blockedText: Joi.string().max(512).required(),
+      plannedText: Joi.string().max(512),
+      activeText: Joi.string().max(512),
+      completedText: Joi.string().max(512),
+      blockedText: Joi.string().max(512),
       hidden: Joi.boolean().optional(),
       createdAt: Joi.any().strip(),
       updatedAt: Joi.any().strip(),
@@ -60,12 +60,10 @@ module.exports = [
     });
     let result;
 
-    // Validate startDate and endDate to be within the timeline startDate and endDate
+    // Validate startDate is not earlier than timeline startDate
     let error;
     if (req.body.param.startDate < req.timeline.startDate) {
       error = 'Milestone startDate must not be before the timeline startDate';
-    } else if (req.body.param.endDate && req.timeline.endDate && req.body.param.endDate > req.timeline.endDate) {
-      error = 'Milestone endDate must not be after the timeline endDate';
     }
     if (error) {
       const apiErr = new Error(error);
@@ -73,9 +71,9 @@ module.exports = [
       return next(apiErr);
     }
 
-    return models.sequelize.transaction(tx =>
+    return models.sequelize.transaction(() =>
       // Save to DB
-      models.Milestone.create(entity, { transaction: tx })
+      models.Milestone.create(entity)
         .then((createdEntity) => {
           // Omit deletedAt, deletedBy
           result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
@@ -88,7 +86,6 @@ module.exports = [
               id: { $ne: result.id },
               order: { $gte: result.order },
             },
-            transaction: tx,
           });
         }),
     )

@@ -142,11 +142,12 @@ describe('CREATE milestone', () => {
                 // Create milestones
                 models.Milestone.bulkCreate([
                   {
+                    id: 11,
                     timelineId: 1,
                     name: 'milestone 1',
                     duration: 2,
                     startDate: '2018-05-03T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type1',
                     details: {
                       detail1: {
@@ -164,11 +165,12 @@ describe('CREATE milestone', () => {
                     updatedBy: 2,
                   },
                   {
+                    id: 12,
                     timelineId: 1,
                     name: 'milestone 2',
                     duration: 3,
                     startDate: '2018-05-04T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type2',
                     order: 2,
                     plannedText: 'plannedText 2',
@@ -179,11 +181,12 @@ describe('CREATE milestone', () => {
                     updatedBy: 3,
                   },
                   {
+                    id: 13,
                     timelineId: 1,
                     name: 'milestone 3',
                     duration: 4,
                     startDate: '2018-05-04T00:00:00.000Z',
-                    status: 'open',
+                    status: 'draft',
                     type: 'type3',
                     order: 3,
                     plannedText: 'plannedText 3',
@@ -211,7 +214,7 @@ describe('CREATE milestone', () => {
         startDate: '2018-05-05T00:00:00.000Z',
         endDate: '2018-05-07T00:00:00.000Z',
         completionDate: '2018-05-08T00:00:00.000Z',
-        status: 'open',
+        status: 'draft',
         type: 'type4',
         details: {
           detail1: {
@@ -317,74 +320,6 @@ describe('CREATE milestone', () => {
         .expect(422, done);
     });
 
-    it('should return 422 if missing plannedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          plannedText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if missing activeText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          activeText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if missing completedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          completedText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if missing blockedText', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          blockedText: undefined,
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
     it('should return 422 if startDate is after endDate', (done) => {
       const invalidBody = {
         param: _.assign({}, body.param, {
@@ -425,23 +360,6 @@ describe('CREATE milestone', () => {
       const invalidBody = {
         param: _.assign({}, body.param, {
           startDate: '2018-05-01T00:00:00.000Z',
-        }),
-      };
-
-      request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if endDate is after the timeline endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          endDate: '2018-06-13T00:00:00.000Z',
         }),
       };
 
@@ -523,6 +441,15 @@ describe('CREATE milestone', () => {
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
 
+          // validate statusHistory
+          should.exist(resJson.statusHistory);
+          resJson.statusHistory.should.be.an('array');
+          resJson.statusHistory.length.should.be.eql(1);
+          resJson.statusHistory.forEach((statusHistory) => {
+            statusHistory.reference.should.be.eql('milestone');
+            statusHistory.referenceId.should.be.eql(resJson.id);
+          });
+
           // eslint-disable-next-line no-unused-expressions
           server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_ADDED).should.be.true;
 
@@ -530,11 +457,11 @@ describe('CREATE milestone', () => {
           models.Milestone.findAll({ where: { timelineId: 1 } })
             .then((milestones) => {
               _.each(milestones, (milestone) => {
-                if (milestone.id === 1) {
+                if (milestone.id === 11) {
                   milestone.order.should.be.eql(1);
-                } else if (milestone.id === 2) {
+                } else if (milestone.id === 12) {
                   milestone.order.should.be.eql(2 + 1);
-                } else if (milestone.id === 3) {
+                } else if (milestone.id === 13) {
                   milestone.order.should.be.eql(3 + 1);
                 }
               });
