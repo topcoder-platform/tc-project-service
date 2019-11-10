@@ -110,6 +110,11 @@ function updateTemplate(template) {
       if (section.subSections) {
         for (const subSection of section.subSections) {
           updateRequiredProperty(subSection);
+          if (subSection.questions) {
+            for (const question of subSection.questions) {
+              updateRequiredProperty(question);
+            }
+          }
         }
       }
     }
