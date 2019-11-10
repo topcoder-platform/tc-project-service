@@ -792,7 +792,9 @@ if (!module.parent) {
   // if we pass index name in command line arguments, then sync only that index
   const indexName = process.argv[2] === '--index-name' && process.argv[3] ? process.argv[3] : undefined;
 
-  if (process.env.NODE_ENV !== 'development' && !indexName) {
+  // to avoid accidental resetting of all indexes in PROD, enforce explicit defining of index name if not in
+  // development or test environment
+  if (['development', 'test'].indexOf(process.env.NODE_ENV) === -1 && !indexName) {
     console.error('Error. "--index-name" should be provided when run this command in non-development environment.');
     console.error('Example usage: "$ npm run sync:es -- --index-name metadata"');
     process.exit(1);
