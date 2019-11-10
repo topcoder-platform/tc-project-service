@@ -20,8 +20,7 @@
     "test": "NODE_ENV=test npm run lint && NODE_ENV=test npm run sync:es && NODE_ENV=test npm run sync:db && NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --timeout 10000 --require babel-core/register $(find src -path '*spec.js*') --exit",
     "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha -w --require babel-core/register $(find src -path '*spec.js*')",
     "seed": "babel-node src/tests/seed.js --presets es2015",
-    "demo-data": "babel-node local/seed",
-    "update-data:ProjectTemplate": "babel-node migrations/updateDataInProjectTemplate.js"
+    "demo-data": "babel-node local/seed"
   },
   "repository": {
     "type": "git",

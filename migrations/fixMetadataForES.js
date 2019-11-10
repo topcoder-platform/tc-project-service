@@ -7,6 +7,8 @@
  * - inside “scope” field update “buildingBlocks.<KEY>.price” (for any <KEY>) to be a string if it’s not a string.
  * - inside “scope” field replace all the ‘“wizard”: true’ with ‘“wizard”: {“enabled”: true}’,
  *   and ‘“wizard”: false’ replace with ‘“wizard”: {“enabled”: false}’.
+ * Update all records in the ProductTemplate table.
+ * - inside "template" field update all "required" properties which is not of "boolean" type to boolean.
  */
 import _ from 'lodash';
 import models from '../src/models';
@@ -57,11 +59,11 @@ function updateScope(scope) {
 }
 
 /**
- * Update all projectTemplates.
+ * Fix all projectTemplates.
  *
  * @returns {undefined}
  */
-async function updateProjectTemplates() {
+async function fixProjectTemplates() {
   const projectTemplates = await models.ProjectTemplate.findAll();
   for (const projectTemplate of projectTemplates) {
     if (projectTemplate.scope) {
@@ -75,7 +77,77 @@ async function updateProjectTemplates() {
   }
 }
 
-updateProjectTemplates()
+/**
+ * Update the required property of an object.
+ *
+ * @param {Object} data any object
+ * @returns {undefined}
+ */
+function updateRequiredProperty(data) {
+  if (typeof data.required !== 'undefined' && typeof data.required !== 'boolean') {
+    if (data.required === 'false') {
+      data.required = false;
+    } else if (data.required === 'true') {
+      data.required = true;
+    } else {
+      throw new Error(`"required" value ${data.required} cannot be converted to boolean.`);
+    }
+  }
+}
+
+/**
+ * Update the template property of a productTemplate.
+ *
+ * @param {Object} template the template property
+ * @returns {Object} the updated template
+ */
+function updateTemplate(template) {
+  // update wizard properties
+  updateRequiredProperty(template);
+  if (template.sections) {
+    for (const section of template.sections) {
+      updateRequiredProperty(section);
+      if (section.subSections) {
+        for (const subSection of section.subSections) {
+          updateRequiredProperty(subSection);
+        }
+      }
+    }
+  }
+  return template;
+}
+
+/**
+ * Fix all productTemplates.
+ *
+ * @returns {undefined}
+ */
+async function fixProductTemplates() {
+  const productTemplates = await models.ProductTemplate.findAll();
+
+  for (const productTemplate of productTemplates) {
+    if (productTemplate.template) {
+      const updatedTemplate = updateTemplate(JSON.parse(JSON.stringify(productTemplate.template)));
+      if (!_.isEqual(updatedTemplate, productTemplate.template)) {
+        productTemplate.template = updatedTemplate;
+        await productTemplate.save();
+        console.log(`updated record of ProductTemplate with id ${productTemplate.id}`);
+      }
+    }
+  }
+}
+
+/**
+ * Fix all metadata models.
+ *
+ * @returns {undefined}
+ */
+async function fixMetadataForES() {
+  await fixProjectTemplates();
+  await fixProductTemplates();
+}
+
+fixMetadataForES()
   .then(() => {
     console.log('done!');
     process.exit();
