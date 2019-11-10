@@ -21,6 +21,8 @@ const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
 const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
 
+const allowedIndexes = [ES_PROJECT_INDEX, ES_TIMELINE_INDEX, ES_METADATA_INDEX];
+
 // create new elasticsearch client
 // the client modifies the config object, so always passed the cloned object
 const esClient = util.getElasticSearchClient();
@@ -766,33 +768,44 @@ function getRequestBody(indexName) {
 /**
  * Sync elasticsearch indices.
  *
- * @returns {undefined}
+ * @param {String} [indexName] index name to sync, if it's not define, then all indexes are recreated
+ *
+ * @returns {Promise} resolved when sync is complete
  */
-function sync() {
-      // first delete the index if already present
-  return esClient.indices.delete({
-    index: ES_PROJECT_INDEX,
-    // we would want to ignore no such index error
-    ignore: [404],
-  })
-  .then(() => esClient.indices.create(getRequestBody(ES_PROJECT_INDEX)))
-  // Re-create timeline index
-  .then(() => esClient.indices.delete({ index: ES_TIMELINE_INDEX, ignore: [404] }))
-  .then(() => esClient.indices.create(getRequestBody(ES_TIMELINE_INDEX)))
-  // Re-create metadata index
-  .then(() => esClient.indices.delete({ index: ES_METADATA_INDEX, ignore: [404] }))
-  .then(() => esClient.indices.create(getRequestBody(ES_METADATA_INDEX)));
+async function sync(indexName) {
+  if (indexName && allowedIndexes.indexOf(indexName) === -1) {
+    throw new Error(`Index "${indexName}" is not supported.`);
+  }
+  const indexesToSync = indexName ? [indexName] : allowedIndexes;
+
+  for (let i = 0; i < indexesToSync.length; i += 1) {
+    const indexToSync = indexesToSync[i];
+
+    console.log(`Deleting "${indexToSync}" index...`);
+    await esClient.indices.delete({ index: indexToSync, ignore: [404] }); // eslint-disable-line no-await-in-loop
+    console.log(`Creating "${indexToSync}" index...`);
+    await esClient.indices.create(getRequestBody(indexToSync)); // eslint-disable-line no-await-in-loop
+  }
 }
 
 if (!module.parent) {
-  sync()
+  // if we pass index name in command line arguments, then sync only that index
+  const indexName = process.argv[2] === '--index-name' && process.argv[3] ? process.argv[3] : undefined;
+
+  if (process.env.NODE_ENV !== 'development' && !indexName) {
+    console.error('Error. "--index-name" should be provided when run this command in non-development environment.');
+    console.error('Example usage: "$ npm run sync:es -- --index-name metadata"');
+    process.exit(1);
+  }
+
+  sync(indexName)
     .then(() => {
-      console.log('elasticsearch indices synced successfully');
+      console.log('ElasticSearch indices synced successfully.');
       process.exit();
     })
     .catch((err) => {
-      console.error('elasticsearch indices sync failed', err);
-      process.exit();
+      console.error('ElasticSearch indices sync failed: ', err);
+      process.exit(1);
     });
 }
 

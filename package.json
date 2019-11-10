@@ -12,6 +12,7 @@
     "build": "babel src -d dist --presets es2015 --copy-files",
     "sync:db": "./node_modules/.bin/babel-node migrations/sync.js",
     "sync:es": "./node_modules/.bin/babel-node migrations/elasticsearch_sync.js",
+    "sync:es:metadata": "./node_modules/.bin/babel-node migrations/elasticsearch_sync.js --index-name metadata",
     "migrate:es": "./node_modules/.bin/babel-node migrations/seedElasticsearchIndex.js",
     "prestart": "npm run -s build",
     "start": "node dist",
