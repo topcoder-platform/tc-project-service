@@ -347,6 +347,36 @@ function getRequestBody(indexName) {
     },
   };
 
+  // form config can be present inside 3 models, so we reuse it
+  const formConfig = {
+    type: 'object',
+    properties: {
+      sections: {
+        type: 'nested',
+        properties: {
+          subSections: {
+            type: 'nested',
+            properties: {
+              questions: {
+                type: 'nested',
+                properties: {
+                  options: {
+                    type: 'nested',
+                    properties: {
+                      value: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
   const metadataMapping = {
     _all: { enabled: false },
     properties: {
@@ -374,9 +404,7 @@ function getRequestBody(indexName) {
           id: {
             type: 'long',
           },
-          scope: {
-            type: 'object',
-          },
+          scope: formConfig,
           form: {
             type: 'object',
           },
@@ -412,6 +440,7 @@ function getRequestBody(indexName) {
             type: 'string',
             index: 'not_analyzed',
           },
+          config: formConfig,
           version: {
             type: 'integer',
           },
@@ -544,6 +573,7 @@ function getRequestBody(indexName) {
           name: {
             type: 'string',
           },
+          template: formConfig,
           productKey: {
             type: 'string',
             index: 'not_analyzed',
