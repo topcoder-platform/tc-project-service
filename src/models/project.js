@@ -141,7 +141,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
     let joinQuery = '';
     if (_.has(parameters.filters, 'userId') || _.has(parameters.filters, 'email')) {
       query += ` AND (
-        members."userId" = :userId
+        members."userId" = :userId AND members.deletedAt IS NULL
         OR (
           invites.status = :INVITE_STATUS_PENDING AND
           (invites."userId" = :userId OR invites."email" = :email)
