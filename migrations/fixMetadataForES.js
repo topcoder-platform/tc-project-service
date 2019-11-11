@@ -61,9 +61,11 @@ function updateScope(scope) {
 /**
  * Fix all projectTemplates.
  *
- * @returns {undefined}
+ * @param {Object} logger logger
+ *
+ * @returns {Promise} resolved when dene
  */
-async function fixProjectTemplates() {
+async function fixProjectTemplates(logger) {
   const projectTemplates = await models.ProjectTemplate.findAll();
   for (const projectTemplate of projectTemplates) {
     if (projectTemplate.scope) {
@@ -71,7 +73,7 @@ async function fixProjectTemplates() {
       if (!_.isEqual(updatedScope, projectTemplate.scope)) {
         projectTemplate.scope = updatedScope;
         await projectTemplate.save();
-        console.log(`updated record of ProjectTemplate with id ${projectTemplate.id}`);
+        logger.info(`updated record of ProjectTemplate with id ${projectTemplate.id}`);
       }
     }
   }
@@ -81,6 +83,7 @@ async function fixProjectTemplates() {
  * Update the required property of an object.
  *
  * @param {Object} data any object
+ *
  * @returns {undefined}
  */
 function updateRequiredProperty(data) {
@@ -125,9 +128,11 @@ function updateTemplate(template) {
 /**
  * Fix all productTemplates.
  *
- * @returns {undefined}
+ * @param {Object} logger logger
+ *
+ * @returns {Promise} resolved when dene
  */
-async function fixProductTemplates() {
+async function fixProductTemplates(logger) {
   const productTemplates = await models.ProductTemplate.findAll();
 
   for (const productTemplate of productTemplates) {
@@ -136,7 +141,7 @@ async function fixProductTemplates() {
       if (!_.isEqual(updatedTemplate, productTemplate.template)) {
         productTemplate.template = updatedTemplate;
         await productTemplate.save();
-        console.log(`updated record of ProductTemplate with id ${productTemplate.id}`);
+        logger.info(`updated record of ProductTemplate with id ${productTemplate.id}`);
       }
     }
   }
@@ -145,18 +150,26 @@ async function fixProductTemplates() {
 /**
  * Fix all metadata models.
  *
+ * @param {Object} logger logger
+ *
  * @returns {undefined}
  */
-async function fixMetadataForES() {
-  await fixProjectTemplates();
-  await fixProductTemplates();
+async function fixMetadataForES(logger) {
+  await fixProjectTemplates(logger);
+  await fixProductTemplates(logger);
 }
 
-fixMetadataForES()
-  .then(() => {
-    console.log('done!');
-    process.exit();
-  }).catch((err) => {
-    console.error('Error syncing database', err);
-    process.exit(1);
-  });
+if (!module.parent) {
+  fixMetadataForES(console)
+    .then(() => {
+      console.log('done!');
+      process.exit();
+    }).catch((err) => {
+      console.error('Error syncing database', err);
+      process.exit(1);
+    });
+}
+
+module.exports = {
+  fixMetadataForES,
+};
