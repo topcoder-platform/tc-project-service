@@ -5,6 +5,7 @@ import _ from 'lodash';
 import config from 'config';
 import util from '../util';
 import models from '../models';
+import { MAPPINGS } from './es-config';
 
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
 const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
@@ -70,6 +71,34 @@ async function indexMetadata() {
   });
 }
 
+/**
+ * Build the request for creating index
+ *
+ * @param {String} indexName the index name
+ * @param {String} docType   docType for index
+ *
+ * @return {Object} create index request
+ */
+function buildCreateIndexRequest(indexName, docType) {
+  const indexMapping = MAPPINGS[indexName];
+
+  if (!indexMapping) {
+    throw new Error(`Mapping is not found for index name '${indexName}'.`);
+  }
+
+  const indexCreateRequest = {
+    index: indexName,
+    updateAllTypes: true,
+    body: {
+      mappings: {},
+    },
+  };
+  indexCreateRequest.body.mappings[docType] = indexMapping;
+
+  return indexCreateRequest;
+}
+
 module.exports = {
   indexMetadata,
+  buildCreateIndexRequest,
 };
