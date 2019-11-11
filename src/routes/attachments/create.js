@@ -75,7 +75,7 @@ module.exports = [
             filePath,
             contentType: data.contentType,
             isPublic: false,
-          }
+          },
         }).then((resp) => {
           req.log.debug('Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
           if (resp.status !== 200 || resp.data.result.status !== 200) {
