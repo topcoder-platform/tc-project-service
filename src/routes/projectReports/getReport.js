@@ -21,7 +21,7 @@ module.exports = [
       req.log.info('using mock');
       // using mock
       return mock(projectId, reportName, req, res);
-      // res.status(200).json(util.wrapResponse(req.id, project));
+      // res.status(200).json(project);
     }
     const lookApi = new LookApi(req.log);
 

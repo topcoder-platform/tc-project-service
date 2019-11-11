@@ -292,7 +292,7 @@ module.exports = [
       .then((attachments) => {
         // make sure we only send response after transaction is committed
         project.attachments = attachments;
-        res.json(util.wrapResponse(req.id, project));
+        res.json(project);
       })
       .catch(err => next(err));
   },

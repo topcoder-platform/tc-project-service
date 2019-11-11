@@ -40,6 +40,6 @@ module.exports = [
       // we would want to ignore no such index error
       ignore: [404],
     });
-    return res.status(200).json(util.wrapResponse(req.id, { message: 'Delete index request successfully submitted' }));
+    return res.status(200).json({ message: 'Delete index request successfully submitted' });
   },
 ];

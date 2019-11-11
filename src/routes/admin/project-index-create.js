@@ -108,9 +108,9 @@ module.exports = [
           logger.trace('body[length-1]', body[body.length - 1]);
         }
 
-        res.status(200).json(util.wrapResponse(req.id, {
+        res.status(200).json({
           message: `Reindex request successfully submitted for ${body.length / 2} projects`,
-        }));
+        });
         // bulk index
         eClient.bulk({
           body,

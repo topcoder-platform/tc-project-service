@@ -362,6 +362,6 @@ module.exports = [
 
     const esClient = util.getElasticSearchClient();
     esClient.indices.create(getRequestBody(indexName, docType));
-    res.status(200).json(util.wrapResponse(req.id, { message: 'Create index request successfully submitted' }));
+    res.status(200).json({ message: 'Create index request successfully submitted' });
   },
 ];
