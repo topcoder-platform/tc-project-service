@@ -71,9 +71,11 @@ module.exports = [
         // get pre-signed Url
         req.log.debug('requesting presigned Url');
         httpClient.post(`${fileServiceUrl}uploadurl/`, {
-          filePath,
-          contentType: data.contentType,
-          isPublic: false,
+          param: {
+            filePath,
+            contentType: data.contentType,
+            isPublic: false,
+          }
         }).then((resp) => {
           req.log.debug('Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
           if (resp.status !== 200 || resp.data.result.status !== 200) {
