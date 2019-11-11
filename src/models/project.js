@@ -1,7 +1,7 @@
 /* eslint-disable valid-jsdoc */
 
 import _ from 'lodash';
-import { PROJECT_STATUS } from '../constants';
+import { PROJECT_STATUS, INVITE_STATUS } from '../constants';
 
 module.exports = function defineProject(sequelize, DataTypes) {
   const Project = sequelize.define('Project', {
@@ -96,7 +96,9 @@ module.exports = function defineProject(sequelize, DataTypes) {
   Project.searchText = (parameters, log) => {
     // special handling for keyword filter
     let query = '1=1 ';
-    const replacements = {};
+    const replacements = {
+      INVITE_STATUS_PENDING: INVITE_STATUS.PENDING,
+    };
     if (_.has(parameters.filters, 'id')) {
       if (_.isArray(parameters.filters.id)) {
         if (parameters.filters.id.length === 0) {
@@ -138,9 +140,13 @@ module.exports = function defineProject(sequelize, DataTypes) {
 
     let joinQuery = '';
     if (_.has(parameters.filters, 'userId') || _.has(parameters.filters, 'email')) {
-      query += ` AND (members."userId" = :userId
-      OR invites."userId" = :userId
-      OR invites."email" = :email) GROUP BY projects.id`;
+      query += ` AND (
+        members."userId" = :userId
+        OR (
+          invites.status = :INVITE_STATUS_PENDING AND
+          (invites."userId" = :userId OR invites."email" = :email)
+        )
+      ) GROUP BY projects.id`;
 
       joinQuery = `LEFT OUTER JOIN project_members AS members ON projects.id = members."projectId"
       LEFT OUTER JOIN project_member_invites AS invites ON projects.id = invites."projectId"`;
