@@ -191,8 +191,15 @@ module.exports = [
             }
           }
 
-          if (entityToUpdate.completionDate && entityToUpdate.completionDate < milestone.startDate) {
-            const apiErr = new Error('The milestone completionDate should be greater or equal than the startDate.');
+          if (
+            entityToUpdate.completionDate &&
+            (entityToUpdate.actualStartDate || milestone.actualStartDate) &&
+            moment.utc(entityToUpdate.completionDate).isBefore(
+              moment.utc(entityToUpdate.actualStartDate || milestone.actualStartDate),
+              'day',
+            )
+          ) {
+            const apiErr = new Error('The milestone completionDate should be greater or equal to actualStartDate.');
             apiErr.status = 400;
             return Promise.reject(apiErr);
           }
@@ -214,7 +221,8 @@ module.exports = [
             // if status has changed to be completed, set the compeltionDate if not provided
             if (entityToUpdate.status === MILESTONE_STATUS.COMPLETED) {
               entityToUpdate.completionDate = entityToUpdate.completionDate ? entityToUpdate.completionDate : today;
-              entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
+              entityToUpdate.duration = moment.utc(entityToUpdate.completionDate)
+                .diff(entityToUpdate.actualStartDate, 'days') + 1;
             }
             // if status has changed to be active, set the startDate to today
             if (entityToUpdate.status === MILESTONE_STATUS.ACTIVE) {
@@ -239,7 +247,8 @@ module.exports = [
 
           // if completionDate has changed
           if (!statusChanged && completionDateChanged) {
-            entityToUpdate.duration = entityToUpdate.completionDate.diff(entityToUpdate.actualStartDate, 'days') + 1;
+            entityToUpdate.duration = moment.utc(entityToUpdate.completionDate)
+              .diff(entityToUpdate.actualStartDate, 'days') + 1;
             entityToUpdate.status = MILESTONE_STATUS.COMPLETED;
           }
 

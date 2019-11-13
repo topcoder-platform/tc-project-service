@@ -69,5 +69,6 @@
       "REG_STATS": 1234,
       "BUDGET": 123
     }
-  }
+  },
+  "DEFAULT_M2M_USERID": -101
 }

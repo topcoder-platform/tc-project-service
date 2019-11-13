@@ -406,7 +406,7 @@ module.exports = [
     });
     // override values
     _.assign(project, {
-      status: PROJECT_STATUS.DRAFT,
+      status: PROJECT_STATUS.IN_REVIEW,
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       lastActivityAt: new Date(),
@@ -465,7 +465,7 @@ module.exports = [
         // add to project history asynchronously, don't wait for it to complete
         models.ProjectHistory.create({
           projectId: newProject.id,
-          status: PROJECT_STATUS.DRAFT,
+          status: PROJECT_STATUS.IN_REVIEW,
           cancelReason: null,
           updatedBy: req.authUser.userId,
         }).then(() => req.log.debug('project history created for project %d', newProject.id))

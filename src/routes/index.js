@@ -34,6 +34,18 @@ router.all(
   ),
 );
 
+router.all(
+  RegExp(`\\/${apiVersion}\\/.*`), (req, res, next) => {
+    // if it is an M2M call, hard code user id to a deafult value to avoid errors
+    // Ideally, the m2m token should have unique userId, which may not be an actual user, as well
+    const isMachineToken = _.get(req, 'authUser.isMachine', false);
+    if (req.authUser && !req.authUser.userId && isMachineToken) {
+      req.authUser.userId = config.DEFAULT_M2M_USERID;
+    }
+    return next();
+  },
+);
+
 router.route('/v5/projects/metadata/projectTemplates')
   .get(require('./projectTemplates/list'));
 router.route('/v5/projects/metadata/projectTemplates/:templateId(\\d+)')

@@ -112,9 +112,8 @@ describe('projectUpdatedKafkaHandler', () => {
         index: ES_PROJECT_INDEX,
         type: ES_PROJECT_TYPE,
         id: project.id,
-        body: {
-          doc: project.get({ plain: true }),
-        },
+        body: project.get({ plain: true }),
+        refresh: 'wait_for',
       });
     });
 

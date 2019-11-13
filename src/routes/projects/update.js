@@ -146,7 +146,9 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
     errors.push('Don\'t have permission to update \'directProjectId\' property');
   }
-
+  if ((existingProject.status !== PROJECT_STATUS.DRAFT) && (updatedProps.status === PROJECT_STATUS.DRAFT)) {
+    errors.push('cannot update a project status to draft');
+  }
   return errors;
 };
 
