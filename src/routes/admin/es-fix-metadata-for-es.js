@@ -4,7 +4,7 @@
  * Waits until the operation is completed and returns result.
  */
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import { fixMetadataForES } from '../../../migrations/fixMetadataForES';
+import fixMetadataForES from '../../utils/fixMetadataForES';
 
 const permissions = tcMiddleware.permissions;
 
