@@ -20,7 +20,7 @@ module.exports = [
       models.Project.findByPk(req.params.projectId)
         .then((entity) => {
           if (!entity) {
-            const apiErr = new Error(`Project template not found for template id ${projectId}`);
+            const apiErr = new Error(`Project not found for id ${projectId}`);
             apiErr.status = 404;
             return Promise.reject(apiErr);
           }
