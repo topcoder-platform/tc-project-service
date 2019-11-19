@@ -68,6 +68,7 @@ async function indexMetadata() {
     index: ES_METADATA_INDEX,
     type: ES_METADATA_TYPE,
     body,
+    refresh: 'wait_for',
   });
 }
 
