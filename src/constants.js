@@ -124,52 +124,52 @@ export const EVENT = {
 };
 
 export const BUS_API_EVENT = {
-  PROJECT_CREATED: 'project.notification.create',
-  PROJECT_UPDATED: 'project.notification.update',
-  PROJECT_DELETED: 'project.notification.delete',
+  PROJECT_CREATED: 'project.action.create',
+  PROJECT_UPDATED: 'project.action.update',
+  PROJECT_DELETED: 'project.action.delete',
 
-  PROJECT_MEMBER_ADDED: 'project.notification.create',
-  PROJECT_MEMBER_REMOVED: 'project.notification.delete',
-  PROJECT_MEMBER_UPDATED: 'project.notification.update',
+  PROJECT_MEMBER_ADDED: 'project.action.create',
+  PROJECT_MEMBER_REMOVED: 'project.action.delete',
+  PROJECT_MEMBER_UPDATED: 'project.action.update',
 
-  PROJECT_ATTACHMENT_ADDED: 'project.notification.create',
-  PROJECT_ATTACHMENT_REMOVED: 'project.notification.delete',
-  PROJECT_ATTACHMENT_UPDATED: 'project.notification.update',
+  PROJECT_ATTACHMENT_ADDED: 'project.action.create',
+  PROJECT_ATTACHMENT_REMOVED: 'project.action.delete',
+  PROJECT_ATTACHMENT_UPDATED: 'project.action.update',
 
   // When phase is added/updated/deleted from the project,
   // When product is added/deleted from a phase
   // When product is updated on any field other than specification
-  PROJECT_PHASE_CREATED: 'project.notification.create',
-  PROJECT_PHASE_UPDATED: 'project.notification.update',
-  PROJECT_PHASE_DELETED: 'project.notification.delete',
+  PROJECT_PHASE_CREATED: 'project.action.create',
+  PROJECT_PHASE_UPDATED: 'project.action.update',
+  PROJECT_PHASE_DELETED: 'project.action.delete',
 
   // phase product
-  PROJECT_PHASE_PRODUCT_ADDED: 'project.notification.create',
-  PROJECT_PHASE_PRODUCT_UPDATED: 'project.notification.update',
-  PROJECT_PHASE_PRODUCT_REMOVED: 'project.notification.delete',
+  PROJECT_PHASE_PRODUCT_ADDED: 'project.action.create',
+  PROJECT_PHASE_PRODUCT_UPDATED: 'project.action.update',
+  PROJECT_PHASE_PRODUCT_REMOVED: 'project.action.delete',
 
   // timeline
-  TIMELINE_CREATED: 'project.notification.create',
-  TIMELINE_UPDATED: 'project.notification.update',
-  TIMELINE_DELETED: 'project.notification.delete',
+  TIMELINE_CREATED: 'project.action.create',
+  TIMELINE_UPDATED: 'project.action.update',
+  TIMELINE_DELETED: 'project.action.delete',
 
-  MILESTONE_ADDED: 'project.notification.create',
-  MILESTONE_REMOVED: 'project.notification.delete',
-  MILESTONE_UPDATED: 'project.notification.update',
+  MILESTONE_ADDED: 'project.action.create',
+  MILESTONE_REMOVED: 'project.action.delete',
+  MILESTONE_UPDATED: 'project.action.update',
 
-  MILESTONE_TEMPLATE_ADDED: 'project.notification.create',
-  MILESTONE_TEMPLATE_REMOVED: 'project.notification.delete',
-  MILESTONE_TEMPLATE_UPDATED: 'project.notification.update',
+  MILESTONE_TEMPLATE_ADDED: 'project.action.create',
+  MILESTONE_TEMPLATE_REMOVED: 'project.action.delete',
+  MILESTONE_TEMPLATE_UPDATED: 'project.action.update',
 
   // Project Member Invites
-  PROJECT_MEMBER_INVITE_CREATED: 'project.notification.create',
-  PROJECT_MEMBER_INVITE_UPDATED: 'project.notification.update',
-  PROJECT_MEMBER_INVITE_REMOVED: 'project.notification.delete',
+  PROJECT_MEMBER_INVITE_CREATED: 'project.action.create',
+  PROJECT_MEMBER_INVITE_UPDATED: 'project.action.update',
+  PROJECT_MEMBER_INVITE_REMOVED: 'project.action.delete',
 
   // metadata
-  PROJECT_METADATA_CREATE: 'project.notification.create',
-  PROJECT_METADATA_UPDATE: 'project.notification.update',
-  PROJECT_METADATA_DELETE: 'project.notification.delete',
+  PROJECT_METADATA_CREATE: 'project.action.create',
+  PROJECT_METADATA_UPDATE: 'project.action.update',
+  PROJECT_METADATA_DELETE: 'project.action.delete',
 };
 
 export const CONNECT_NOTIFICATION_EVENT = {

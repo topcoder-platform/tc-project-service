@@ -14,7 +14,7 @@
  */
 import _ from 'lodash';
 import models from '../../src/models';
-import { RESOURCES } from '../../src/constants';
+import { RESOURCES, BUS_API_EVENT } from '../../src/constants';
 import { createEvent } from '../../src/services/busApi';
 
 const modelConfigs = {
@@ -79,7 +79,7 @@ async function syncMetadataIndex() {
     await Promise.all( // eslint-disable-line no-await-in-loop
       records.map(record =>
         createEvent(
-          'project.notification.create',
+          BUS_API_EVENT.PROJECT_METADATA_CREATE,
           _.assign({ resource: modelConfig.resource }, record),
           console,
         ),
