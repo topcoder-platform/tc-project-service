@@ -60,8 +60,8 @@ module.exports = (analyticsKey, app) => {
     });
   });
 
-  app.on(EVENT.ROUTING_KEY.PROJECT_DELETED, ({ req, id }) => {
-    track(req, PROJECT_CREATED, { id });
+  app.on(EVENT.ROUTING_KEY.PROJECT_DELETED, ({ req, project }) => {
+    track(req, PROJECT_CREATED, { id: project.id });
   });
 
   app.on(EVENT.ROUTING_KEY.PROJECT_UPDATED, ({ req, original, updated }) => {
@@ -84,11 +84,15 @@ module.exports = (analyticsKey, app) => {
     }
   });
 
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, ({ req, member }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, ({ req, resource }) => {
+    const member = _.omit(resource, 'resource');
+
     track(req, PROJECT_MEMBER_ADDED, { role: member.role });
   });
 
-  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, ({ req, member }) => {
+  app.on(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, ({ req, resource }) => {
+    const member = _.omit(resource, 'resource');
+
     track(req, PROJECT_MEMBER_REMOVED, { role: member.role });
   });
 };
