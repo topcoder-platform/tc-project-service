@@ -115,7 +115,9 @@ module.exports = [
         // retrieve download url for the response
         req.log.debug('retrieving download url');
         return httpClient.post(`${fileServiceUrl}downloadurl`, {
-          filePath,
+          param: {
+            filePath,
+          }
         });
       }
       return Promise.resolve();
