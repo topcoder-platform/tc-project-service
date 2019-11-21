@@ -117,7 +117,7 @@ module.exports = [
         return httpClient.post(`${fileServiceUrl}downloadurl`, {
           param: {
             filePath,
-          }
+          },
         });
       }
       return Promise.resolve();
