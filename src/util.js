@@ -393,6 +393,32 @@ _.assignIn(util, {
   },
 
   /**
+   * Retrieve member traitbyhandle
+   * @param  {string}     handle
+   * @param  {Object}     logger           req.logger
+   * @return {string}     requestId
+   */
+  getMemberTratisByHandle: Promise.coroutine(function* (handle, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      if (logger) {
+        logger.trace(handle);
+      }
+
+      return httpClient.get(`${config.memberServiceEndpoint}/${handle}/traits`, {
+        params: {},
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(res => _.get(res, 'data.result.content', null));
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
+
+  /**
    * Retrieve member details from userIds
    */
   getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
