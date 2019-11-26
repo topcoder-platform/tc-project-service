@@ -63,7 +63,7 @@ module.exports = [
           });
 
 
-          const TraitFields = ['photoURL', 'workingHoursStart', 'workingHoursEnd', 'timeZone'];
+          const TraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
           const traitFields = _.intersection(TraitFields, fields);
           if (traitFields.length) {
             const promises = [];
@@ -76,7 +76,7 @@ module.exports = [
             const traits = await Promise.all(promises);
 
             // remove photoURL, because connect_info also has photoURL
-            const ConnectInfoFields = ['workingHoursStart', 'workingHoursEnd', 'timeZone'];
+            const ConnectInfoFields = ['workingHourStart', 'workingHourEnd', 'timeZone'];
             const connectInfoFields = _.intersection(ConnectInfoFields, fields);
 
             // merge traits
