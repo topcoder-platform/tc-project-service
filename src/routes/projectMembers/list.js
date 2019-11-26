@@ -1,20 +1,14 @@
-/* eslint-disable max-len */
+/**
+ * Endpoint to list project members.
+ */
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 
-/**
- * API to add a project member.
- * add members directly (only managers and copilots)
- * user being added is current user
- */
 const permissions = tcMiddleware.permissions;
 
-
 module.exports = [
-  // handles request validations
-  // validate(createProjectMemberValidations),
-  permissions('project.getMember'),
+  permissions('project.listMembers'),
   async (req, res) => {
     let members = req.context.currentProjectMembers;
 
@@ -22,7 +16,18 @@ module.exports = [
     if (members.length && _.get(req, 'query.fields')) {
       const fields = req.query.fields.split(',');
 
-      const ModelFields = ['id', 'userId', 'role', 'isPrimary', 'deletedAt', 'createdAt', 'updatedAt', 'deletedBy', 'createdBy', 'updatedBy'];
+      const ModelFields = [
+        'id',
+        'userId',
+        'role',
+        'isPrimary',
+        'deletedAt',
+        'createdAt',
+        'updatedAt',
+        'deletedBy',
+        'createdBy',
+        'updatedBy',
+      ];
 
       const modelFields = _.intersection(ModelFields, fields);
       const hasUserIdField = _.indexOf(fields, 'userId') !== -1;
@@ -79,19 +84,22 @@ module.exports = [
               const traitsArr = _.find(traits, t => t[0].userId === m.userId);
               if (traitsArr) {
                 if (traitFields[0] === 'photoURL') {
-                  _.assign(m, { photoURL: _.get(_.find(traitsArr, t => t.traitId === 'basic_info'), 'traits.data[0].photoURL') });
+                  _.assign(m, {
+                    photoURL: _.get(_.find(traitsArr, { traitId: 'basic_info' }), 'traits.data[0].photoURL'),
+                  });
                   if (traitFields.length > 1) {
-                    const traitInfo = _.get(_.find(traitsArr, t => t.traitId === 'connect_info'), 'traits.data[0]', {});
+                    const traitInfo = _.get(_.find(traitsArr, { traitId: 'connect_info' }), 'traits.data[0]', {});
                     _.assign(m, _.pick(traitInfo, connectInfoFields));
                   }
                 } else {
-                  const traitInfo = _.get(_.find(traitsArr, t => t.traitId === 'connect_info'), 'traits.data[0]', {});
+                  const traitInfo = _.get(_.find(traitsArr, { traitId: 'connect_info' }), 'traits.data[0]', {});
                   _.assign(m, _.pick(traitInfo, connectInfoFields));
                 }
               }
             });
           }
         } catch (e) {
+          logger.error('Error getting member details', e);
           if (hasUserIdField === false) {
             members = _.map(members, m => _.omit(m, ['userId']));
           }

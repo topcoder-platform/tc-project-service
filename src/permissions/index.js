@@ -22,7 +22,7 @@ module.exports = () => {
   Authorizer.setPolicy('project.edit', projectEdit);
   Authorizer.setPolicy('project.delete', projectDelete);
   Authorizer.setPolicy('project.addMember', projectView);
-  Authorizer.setPolicy('project.getMember', projectView);
+  Authorizer.setPolicy('project.listMembers', projectView);
   Authorizer.setPolicy('project.removeMember', projectMemberDelete);
   Authorizer.setPolicy('project.addAttachment', projectEdit);
   Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);

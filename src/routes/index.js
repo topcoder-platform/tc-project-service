@@ -119,7 +119,7 @@ router.route('/v4/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)
   // .delete(require('./scopeChangeRequests/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/members')
-  .get(require('./projectMembers/get'))
+  .get(require('./projectMembers/list'))
   .post(require('./projectMembers/create'));
 
 router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
