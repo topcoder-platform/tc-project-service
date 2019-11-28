@@ -1,3 +1,5 @@
+
+
 import _ from 'lodash';
 import Joi from 'joi';
 import validate from 'express-validation';
@@ -6,8 +8,7 @@ import models from '../../models';
 import util from '../../util';
 
 /**
- * API to list all project members.
- *
+ * API to get a project member in a project.
  */
 const permissions = tcMiddleware.permissions;
 
@@ -19,22 +20,24 @@ const schema = {
 
 module.exports = [
   validate(schema),
-  permissions('project.listMembers'),
+  permissions('project.getMember'),
   async (req, res, next) => {
-    let fields = null;
-    if (req.query.fields) {
-      fields = req.query.fields.split(',');
-    }
     try {
+      let fields = null;
+      if (req.query.fields) {
+        fields = req.query.fields.split(',');
+      }
       const memberFields = _.keys(models.ProjectMember.attributes);
-      const members = await util.getObjectsWithMemberDetails(
-        req.context.currentProjectMembers, fields, {
+      const memberId = _.parseInt(req.params.id);
+      const members = [_.find(req.context.currentProjectMembers, user => user.id === memberId)];
+      const [member] = await util.getObjectsWithMemberDetails(
+        members, fields, {
           logger: req.log,
           requestId: req.id,
           memberFields,
         },
       );
-      return res.json(util.wrapResponse(req.id, members));
+      return res.json(util.wrapResponse(req.id, member));
     } catch (err) {
       return next(err);
     }

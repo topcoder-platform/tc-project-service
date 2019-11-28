@@ -123,6 +123,7 @@ router.route('/v4/projects/:projectId(\\d+)/members')
   .post(require('./projectMembers/create'));
 
 router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
+  .get(require('./projectMembers/get'))
   .delete(require('./projectMembers/delete'))
   .patch(require('./projectMembers/update'));
 
@@ -229,6 +230,9 @@ router.route('/v4/timelines/metadata/milestoneTemplates/:milestoneTemplateId(\\d
   .get(require('./milestoneTemplates/get'))
   .patch(require('./milestoneTemplates/update'))
   .delete(require('./milestoneTemplates/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/members/invites')
+  .get(require('./projectMemberInvites/list'));
 
 router.route('/v4/projects/:projectId(\\d+)/members/invite')
   .post(require('./projectMemberInvites/create'))
