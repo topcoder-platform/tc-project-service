@@ -54,6 +54,7 @@ Microservice to manage CRUD operations for all things Projects.
   ```
   Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.<br>
   You may try using command `docker-machine ip` to get your docker IP, but it works not for all systems.
+  Also, be sure to update `busApiUrl` if you are running `tc-bus-api` locally. (See below)
 
   Explanation of configs:
   - `config/mock.local.js` - Use local `mock-services` from docker to mock Identity and Member services instead of using deployed at Topcoder dev environment.
@@ -92,6 +93,47 @@ This command will create sample metadata entries in the DB (duplicate what is cu
 
 To retrieve data from DEV env we need to provide a valid user token. You may login to http://connect.topcoder-dev.com and find the Bearer token in the request headers using browser dev tools.
 
+### Local Deployment with other Topcoder Services.
+
+* There exists an alternate `docker-compose.yml` file that can be used to spawn containers for the following services:
+
+|  Service | Name | Port  |
+|----------|:-----:|:----:|
+| PostGreSQL DB | db | 5432  |
+| ElasticSearch | esearch | 9200,9300 |
+| RabbitMQ | queue | 5672, 15672  |
+| Zookeeper | zookeeper | 2181  |
+| Kafka | kafka | 9092  |
+| [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) | tc-bus-api | 8002  |
+| [project-processor-es](https://github.com/topcoder-platform/project-processor-es) | project-processor-es | 5000  |
+| [tc-notifications-api](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-api | 4000  |
+| [tc-notifications-processor](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-processor | 4001  |
+
+* To have kafka create a list of desired topics on startup, there exists a file with the path `local/full/kafka-client/topics.txt`. Each line from the file will be added as a topic.
+* To run these services simply run the following commands:
+
+  ```bash
+  export AUTH0_CLIENT_ID=<insert required value here>
+  export AUTH0_CLIENT_SECRET=<insert required value here>
+  export AUTH0_URL=<insert required value here>
+  export AUTH0_AUDIENCE=<insert required value here>
+  export AUTH0_PROXY_SERVER_URL=<insert required value here>
+
+  cd local/full
+  docker-compose up -d
+  ```
+
+* The environment variables specified in the commands above will be passed onto the containers that have been configured to read them.
+* The above command will start all containers in the background.
+* To view the logs of any of the services use the following command, replacing "SERVICE_NAME" with the corresponding value under the "Name" column in the above table:
+
+  ```bash
+  cd local/full
+  docker-compose logs -f SERVICE_NAME
+  ```
+
+* The containers have been configured such that all Topcoder services will wait until all the topics listed in `local/full/kafka-client/topics.txt` have been created. To monitor the progress of topic creation, you can view the logs of the `kafka-client` service, which will exit when all topics have been created.
+
 ### Run Connect App with Project Service locally
 
 To be able to run [Connect App](https://github.com/appirio-tech/connect-app) with the local setup of Project Service we have to do two things:
@@ -99,7 +141,9 @@ To be able to run [Connect App](https://github.com/appirio-tech/connect-app) wit
 
    ```js
    PROJECTS_API_URL: 'http://localhost:8001'
+   TC_NOTIFICATION_URL: 'http://localhost:4000/v5/notifications' # if tc-notfication-api has been locally deployed
    ```
+
 2. Bypass token validation in Project Service.
 
    In `tc-project-service/node_modules/tc-core-library-js/lib/auth/verifier.js` add this to line 23:
@@ -142,3 +186,33 @@ You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) o
 
 #### Deploying without docker
 If you don't want to use docker to deploy to localhost. You can simply run `npm run start:dev` from root of project. This should start the server on default port `8001`.
+
+### Kafka Commands
+
+If you've used `docker-compose` with the file `local/full/docker-compose.yml` to spawn kafka & zookeeper, you can use the following commands to manipulate kafka topics and messages:
+(Replace TOPIC_NAME with the name of the desired topic)
+
+**Create Topic**
+
+```bash
+docker exec tc-projects-kafka /usr/bin/kafka-topics --create --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic TOPIC_NAME
+```
+
+**List Topics**
+
+```bash
+docker exec -it tc-projects-kafka /usr/bin/kafka-topics --list --zookeeper zookeeper:2181
+```
+
+**Watch Topic**
+
+```bash
+docker exec -it tc-projects-kafka /usr/bin/kafka-console-consumer --bootstrap-server localhost:9092 --zookeeper zookeeper:2181 --topic TOPIC_NAME
+```
+
+**Post Message to Topic**
+
+```bash
+docker exec -it tc-projects-kafka /usr/bin/kafka-console-producer --topic TOPIC_NAME --broker-list localhost:9092
+```
+The message can be passed using `stdin`

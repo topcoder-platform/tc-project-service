@@ -1,0 +1,129 @@
+version: "2"
+services:
+  jsonserver:
+    extends:
+      file: ../docker-compose.yml
+      service: jsonserver
+  db:
+    extends:
+      file: ../docker-compose.yml
+      service: db
+  notifications_db:
+    image: "postgres:9.5"
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=coder
+      - POSTGRES_DB=tc_notifications
+  db_test:
+    extends:
+      file: ../docker-compose.yml
+      service: db_test
+  esearch:
+    extends:
+      file: ../docker-compose.yml
+      service: esearch
+  queue:
+    extends:
+      file: ../docker-compose.yml
+      service: queue
+  zookeeper:
+    image: confluent/zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      zk_id: "1"
+  kafka:
+    image: confluent/kafka
+    container_name: tc-projects-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+  kafka-client:
+    build: ./kafka-client
+    depends_on:
+      - kafka
+      - zookeeper
+  tc-bus-api:
+    build:
+      context: ./generic-tc-service
+      args:
+        NODE_VERSION: 8.2.1
+        GIT_URL: https://github.com/topcoder-platform/tc-bus-api
+        GIT_BRANCH: dev
+        BYPASS_TOKEN_VALIDATION: 1
+    command: start kafka-client
+    expose:
+      - "3000"
+    ports:
+      - "8002:3000"
+    depends_on:
+      - kafka-client
+    environment:
+      - PORT=3000
+      - KAFKA_URL=kafka:9092
+      - JWT_TOKEN_SECRET=secret
+      - VALID_ISSUERS="[\"https://topcoder-newauth.auth0.com/\",\"https://api.topcoder-dev.com\"]"
+  project-processor-es:
+    build:
+      context: ./generic-tc-service
+      args:
+        NODE_VERSION: 8.11.3
+        GIT_URL: https://github.com/topcoder-platform/project-processor-es
+        GIT_BRANCH: develop
+    command: start kafka-client
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - kafka-client
+    environment:
+      - PORT=5000
+      - KAFKA_URL=kafka:9092
+      - ES_HOST=esearch:9200
+  tc-notifications-reset-db:
+    extends:
+      file: ./docker-compose.base.yml
+      service: tc-notifications-base
+    command: reset:db
+    restart: on-failure
+    expose:
+      - "4002"
+    ports:
+      - "4002:4002"
+    depends_on:
+      - notifications_db
+      - esearch
+    environment:
+      - PORT=4002
+  tc-notifications-processor:
+    extends:
+      file: ./docker-compose.base.yml
+      service: tc-notifications-base
+    command: start kafka-client
+    depends_on:
+      - tc-notifications-reset-db
+      - kafka-client
+    expose:
+      - "4001"
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+  tc-notifications-api:
+    extends:
+      file: ./docker-compose.base.yml
+      service: tc-notifications-base
+    command: startAPI kafka-client
+    depends_on:
+      - tc-notifications-reset-db
+      - kafka-client
+    expose:
+      - "4000"
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
