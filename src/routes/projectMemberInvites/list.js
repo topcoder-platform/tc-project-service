@@ -26,18 +26,12 @@ module.exports = [
       if (req.query.fields) {
         fields = req.query.fields.split(',');
       }
-      const memberFields = _.keys(models.ProjectMemberInvite.attributes);
       const projectId = _.parseInt(req.params.projectId);
       const invites = await models.ProjectMemberInvite.findAll({
         where: { projectId },
         raw: true,
       });
-      const opts = {
-        logger: req.log,
-        requestId: req.id,
-        memberFields,
-      };
-      const invitesWithDetails = await util.getObjectsWithMemberDetails(invites, fields, opts);
+      const invitesWithDetails = await util.getObjectsWithMemberDetails(invites, fields, req);
       return res.json(util.wrapResponse(req.id, invitesWithDetails));
     } catch (err) {
       return next(err);

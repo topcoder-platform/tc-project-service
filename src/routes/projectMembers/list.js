@@ -1,8 +1,6 @@
-import _ from 'lodash';
 import Joi from 'joi';
 import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import models from '../../models';
 import util from '../../util';
 
 /**
@@ -26,14 +24,7 @@ module.exports = [
       fields = req.query.fields.split(',');
     }
     try {
-      const memberFields = _.keys(models.ProjectMember.attributes);
-      const members = await util.getObjectsWithMemberDetails(
-        req.context.currentProjectMembers, fields, {
-          logger: req.log,
-          requestId: req.id,
-          memberFields,
-        },
-      );
+      const members = await util.getObjectsWithMemberDetails(req.context.currentProjectMembers, fields, req);
       return res.json(util.wrapResponse(req.id, members));
     } catch (err) {
       return next(err);

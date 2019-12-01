@@ -23,7 +23,6 @@ module.exports = [
     try {
       const projectId = _.parseInt(req.params.projectId);
       const currentUserId = req.authUser.userId;
-      const memberFields = _.keys(models.ProjectMemberInvite.attributes);
       const invite = await models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(
         projectId, req.authUser.email, currentUserId,
       );
@@ -42,12 +41,7 @@ module.exports = [
       if (req.query.fields) {
         fields = req.query.fields.split(',');
       }
-      const opts = {
-        logger: req.log,
-        requestId: req.id,
-        memberFields,
-      };
-      const inviteWithDetails = await util.getObjectsWithMemberDetails(invite, fields, opts);
+      const inviteWithDetails = await util.getObjectsWithMemberDetails([invite], fields, req);
 
       return res.json(util.wrapResponse(req.id, inviteWithDetails));
     } catch (err) {
