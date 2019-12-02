@@ -445,12 +445,12 @@ _.assignIn(util, {
    *
    * @param {Array}   members   Array of member detail objects
    * @param {Array}   fields    Array of fields to be used to filter member objects
-   * @param {Object}  req      The request object
+   * @param {Object}  req       The request object
    *
    * @return {Array}            Filtered array of member detail objects
    */
   getObjectsWithMemberDetails: async (members, fields, req) => {
-    if (!fields || _.isEmpty(fields)) {
+    if (!fields || _.isEmpty(fields) || _.isEmpty(members)) {
       return members;
     }
     const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];

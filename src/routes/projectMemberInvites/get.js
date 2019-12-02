@@ -41,7 +41,7 @@ module.exports = [
       if (req.query.fields) {
         fields = req.query.fields.split(',');
       }
-      const inviteWithDetails = await util.getObjectsWithMemberDetails([invite], fields, req);
+      const [inviteWithDetails] = await util.getObjectsWithMemberDetails([invite], fields, req);
 
       return res.json(util.wrapResponse(req.id, inviteWithDetails));
     } catch (err) {

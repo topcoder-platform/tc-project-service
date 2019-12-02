@@ -22,13 +22,22 @@ module.exports = [
   permissions('project.getMember'),
   async (req, res, next) => {
     try {
+      const projectId = _.parseInt(req.params.projectId);
       let fields = null;
       if (req.query.fields) {
         fields = req.query.fields.split(',');
       }
       const memberId = _.parseInt(req.params.id);
-      const members = [_.find(req.context.currentProjectMembers, user => user.id === memberId)];
-      const [member] = await util.getObjectsWithMemberDetails(members, fields, req);
+      let member = _.find(req.context.currentProjectMembers, user => user.id === memberId);
+      if (!member) {
+        const err = new Error(
+          `member not found for project id ${projectId}, userId ${memberId}`,
+        );
+        err.status = 404;
+        throw err;
+      }
+      const memberDetails = await util.getObjectsWithMemberDetails([member], fields, req);
+      member = _.first(memberDetails);
       return res.json(util.wrapResponse(req.id, member));
     } catch (err) {
       return next(err);
