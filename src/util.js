@@ -393,12 +393,9 @@ _.assignIn(util, {
   },
 
   /**
-   * Retrieve member traitbyhandle
-   * @param  {string}     handle
-   * @param  {Object}     logger           req.logger
-   * @return {string}     requestId
+   * Retrieve member traits from user handle
    */
-  getMemberTratisByHandle: Promise.coroutine(function* (handle, logger, requestId) { // eslint-disable-line func-names
+  getMemberTraitsByHandle: Promise.coroutine(function* (handle, logger, requestId) { // eslint-disable-line func-names
     try {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
@@ -442,6 +439,72 @@ _.assignIn(util, {
       return Promise.reject(err);
     }
   }),
+
+  /**
+   * Filter member details by input fields
+   *
+   * @param {Array}   members   Array of member detail objects
+   * @param {Array}   fields    Array of fields to be used to filter member objects
+   * @param {Object}  req       The request object
+   *
+   * @return {Array}            Filtered array of member detail objects
+   */
+  getObjectsWithMemberDetails: async (members, fields, req) => {
+    if (!fields || _.isEmpty(fields) || _.isEmpty(members)) {
+      return members;
+    }
+    const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
+    const memberDetailFields = ['handle', 'firstName', 'lastName'];
+
+    let allMemberDetails = [];
+    if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
+      const userIds = _.map(members, 'userId');
+      allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+
+      if (_.intersection(fields, memberTraitFields).length > 0) {
+        const promises = _.map(
+          allMemberDetails,
+          member => util.getMemberTraitsByHandle(member.handle, req.log, req.id),
+        );
+        const traits = await Promise.all(promises);
+        _.each(traits, (memberTraits) => {
+          const basicInfo = _.find(memberTraits, trait => trait.traitId === 'basic_info');
+          const connectInfo = _.find(memberTraits, trait => trait.traitId === 'connect_info');
+          const memberIndex = _.findIndex(
+            allMemberDetails,
+            member => member.userId === _.get(basicInfo, 'traits.data[0].userId'),
+          );
+          const basicDetails = {
+            photoURL: _.get(basicInfo, 'traits.data[0].photoURL', null),
+          };
+          const connectDetails = _.pick(
+            _.get(connectInfo, 'traits.data.0'),
+            'workingHourStart', 'workingHourEnd', 'timeZone',
+          );
+          allMemberDetails.splice(
+            memberIndex, 1,
+            _.assign({}, allMemberDetails[memberIndex], basicDetails, connectDetails),
+          );
+        });
+      }
+    }
+
+    // set default null value for all valid fields
+    const memberDefaults = _.reduce(fields, (acc, field) => {
+      const isValidField = _.includes(_.union(memberDetailFields, memberTraitFields), field);
+      if (isValidField) {
+        acc[field] = null;
+      }
+      return acc;
+    }, {});
+
+    // pick valid fields from fetched member details
+    return _.map(members, (member) => {
+      let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
+      memberDetails = _.assign({}, member, memberDetails);
+      return _(memberDetails).pick(fields).defaults(memberDefaults).value();
+    });
+  },
 
   /**
    * Retrieve member details from userIds
