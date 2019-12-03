@@ -1,5 +1,4 @@
 
-
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
@@ -347,9 +346,11 @@ module.exports = [
     .then((values) => {
       const success = _.assign({}, { success: values });
       if (failed.length) {
-        res.status(403).json(util.wrapResponse(req.id, _.assign({}, success, { failed }), null, 403));
+        res.status(403).json(util.wrapResponse(req.id,
+          util.maskInviteEmails('$..email', _.assign({}, success, { failed }), req), null, 403));
       } else {
-        res.status(201).json(util.wrapResponse(req.id, success, null, 201));
+        res.status(201).json(util.wrapResponse(req.id,
+          util.maskInviteEmails('$.success[?(@.email)]', success, req), null, 201));
       }
     })
     .catch(err => next(err));
