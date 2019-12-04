@@ -1,4 +1,3 @@
-
 /* globals Promise */
 /*
  * Copyright (C) 2016 TopCoder Inc., All Rights Reserved.
@@ -15,8 +14,10 @@ import querystring from 'querystring';
 import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
+import jp from 'jsonpath';
 import Promise from 'bluebird';
 import models from './models';
+
 // import AWS from 'aws-sdk';
 
 import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
@@ -439,6 +440,70 @@ _.assignIn(util, {
       return Promise.reject(err);
     }
   }),
+
+  /**
+   * maksEmail
+   *
+   * @param {String} email emailstring
+   *
+   * @return {String} email has been masked
+   */
+  maskEmail: (email) => {
+    // common function for formating
+    const addMask = (str) => {
+      let newStr;
+      const len = str.length;
+      if (len <= 3) {
+        newStr = _.repeat('*', len);
+      } else {
+        newStr = str.substr(0, 2) + _.repeat('*', len - 3) + str.substr(-1);
+      }
+      return newStr;
+    };
+
+    try {
+      const mailParts = email.split('@');
+      const domainParts = mailParts[1].split('.');
+
+      let userName = mailParts[0];
+      userName = addMask(userName);
+      mailParts[0] = userName;
+
+      let domainName = domainParts[0];
+      domainName = addMask(domainName);
+      domainParts[0] = domainName;
+
+      mailParts[1] = domainParts.join('.');
+      return mailParts.join('@');
+    } catch (e) {
+      return email;
+    }
+  },
+  /**
+   * Filter member details by input fields
+   *
+   * @param {String}  jsonPath   jsonpath string
+   * @param {Object}  data      the data which  need to process
+   * @param {Object}  req       The request object
+   *
+   * @return {Object} data has been processed
+   */
+  maskInviteEmails: (jsonPath, data, req) => {
+    const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
+    if (isAdmin) {
+      return data;
+    }
+
+    jp.apply(data, jsonPath, (value) => {
+      if (_.isObject(value)) {
+        _.assign(value, { email: util.maskEmail(value.email) });
+        return value;
+      }
+      // isString or null
+      return util.maskEmail(value);
+    });
+    return data;
+  },
 
   /**
    * Filter member details by input fields

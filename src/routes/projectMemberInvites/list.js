@@ -29,7 +29,7 @@ module.exports = [
       const projectId = _.parseInt(req.params.projectId);
       const invites = await models.ProjectMemberInvite.getPendingInvitesForProject(projectId);
       const invitesWithDetails = await util.getObjectsWithMemberDetails(invites, fields, req);
-      return res.json(util.wrapResponse(req.id, invitesWithDetails));
+      return res.json(util.wrapResponse(req.id, util.maskInviteEmails('$..email', invitesWithDetails, req)));
     } catch (err) {
       return next(err);
     }
