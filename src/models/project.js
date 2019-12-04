@@ -1,7 +1,7 @@
 /* eslint-disable valid-jsdoc */
 
 import _ from 'lodash';
-import { PROJECT_STATUS } from '../constants';
+import { PROJECT_STATUS, INVITE_STATUS } from '../constants';
 
 module.exports = function defineProject(sequelize, DataTypes) {
   const Project = sequelize.define('Project', {
@@ -76,7 +76,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
         Project.hasMany(models.ProjectMember, { as: 'members', foreignKey: 'projectId' });
         Project.hasMany(models.ProjectAttachment, { as: 'attachments', foreignKey: 'projectId' });
         Project.hasMany(models.ProjectPhase, { as: 'phases', foreignKey: 'projectId' });
-        Project.hasMany(models.ProjectMemberInvite, { as: 'memberInvites', foreignKey: 'projectId' });
+        Project.hasMany(models.ProjectMemberInvite, { as: 'invites', foreignKey: 'projectId' });
         Project.hasMany(models.ScopeChangeRequest, { as: 'scopeChangeRequests', foreignKey: 'projectId' });
         Project.hasMany(models.WorkStream, { as: 'workStreams', foreignKey: 'projectId' });
       },
@@ -188,6 +188,10 @@ module.exports = function defineProject(sequelize, DataTypes) {
               model: models.PhaseProduct,
               as: 'products',
             }],
+          }, {
+            model: models.ProjectMemberInvite,
+            as: 'invites',
+            where: { status: INVITE_STATUS.PENDING },
           }],
         });
       },
