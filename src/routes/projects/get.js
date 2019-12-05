@@ -72,7 +72,7 @@ module.exports = [
       })
       .then((scopeChangeRequests) => {
         project.scopeChangeRequests = scopeChangeRequests;
-        res.status(200).json(util.wrapResponse(req.id, util.maskInviteEmails('$..invites[?(@.email)]', project, req)));
+        res.status(200).json(util.wrapResponse(req.id, util.maskInviteEmails('$.invites[?(@.email)]', project, req)));
       })
       .catch(err => next(err));
   },
