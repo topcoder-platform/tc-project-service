@@ -129,7 +129,7 @@ module.exports = [
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => res.json(util.wrapResponse(req.id,
-          util.maskInviteEmails('$..invites[?(@.email)]', result.rows, req), result.count)))
+          util.maskInviteEmails('$[*].invites[?(@.email)]', result.rows, req), result.count)))
         .catch(err => next(err));
     }
 
@@ -138,7 +138,7 @@ module.exports = [
     criteria.filters.email = req.authUser.email;
     return retrieveProjects(req, criteria, sort, req.query.fields)
         .then(result => res.json(util.wrapResponse(req.id,
-          util.maskInviteEmails('$..invites[?(@.email)]', result.rows, req), result.count)))
+          util.maskInviteEmails('$[*].invites[?(@.email)]', result.rows, req), result.count)))
       .catch(err => next(err));
   },
 ];
