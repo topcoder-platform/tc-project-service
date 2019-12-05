@@ -347,7 +347,7 @@ module.exports = [
       const success = _.assign({}, { success: values });
       if (failed.length) {
         res.status(403).json(util.wrapResponse(req.id,
-          util.maskInviteEmails('$..email', _.assign({}, success, { failed }), req), null, 403));
+          util.maskInviteEmails('$.email', _.assign({}, success, { failed }), req), null, 403));
       } else {
         res.status(201).json(util.wrapResponse(req.id,
           util.maskInviteEmails('$.success[?(@.email)]', success, req), null, 201));

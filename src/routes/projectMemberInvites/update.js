@@ -136,12 +136,12 @@ module.exports = [
                 return util
                   .addUserToProject(req, member)
                   .then(() => res.json(util.wrapResponse(req.id,
-                    util.maskInviteEmails('$..email', updatedInvite, req))))
+                    util.maskInviteEmails('$.email', updatedInvite, req))))
                   .catch(err => next(err));
               });
           }
 
-          return res.json(util.wrapResponse(req.id, util.maskInviteEmails('$..email', updatedInvite, req)));
+          return res.json(util.wrapResponse(req.id, util.maskInviteEmails('$.email', updatedInvite, req)));
         });
     });
   },
