@@ -28,7 +28,7 @@ module.exports = [
         fields = req.query.fields.split(',');
       }
       const memberId = _.parseInt(req.params.id);
-      let member = _.find(req.context.currentProjectMembers, user => user.id === memberId);
+      const member = _.find(req.context.currentProjectMembers, user => user.id === memberId);
       if (!member) {
         const err = new Error(
           `member not found for project id ${projectId}, userId ${memberId}`,
@@ -36,9 +36,17 @@ module.exports = [
         err.status = 404;
         throw err;
       }
-      const memberDetails = await util.getObjectsWithMemberDetails([member], fields, req);
-      member = _.first(memberDetails);
-      return res.json(util.wrapResponse(req.id, member));
+
+      let memberWithDetails;
+      try {
+        [memberWithDetails] = await util.getObjectsWithMemberDetails([member], fields, req);
+      } catch (err) {
+        memberWithDetails = member;
+        req.log.error('Cannot get user details for the member.');
+        req.log.debug('Error during getting user details for member.', err);
+      }
+
+      return res.json(util.wrapResponse(req.id, memberWithDetails));
     } catch (err) {
       return next(err);
     }

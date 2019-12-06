@@ -19,13 +19,22 @@ module.exports = [
   validate(schema),
   permissions('project.listMembers'),
   async (req, res, next) => {
-    let fields = null;
-    if (req.query.fields) {
-      fields = req.query.fields.split(',');
-    }
     try {
-      const members = await util.getObjectsWithMemberDetails(req.context.currentProjectMembers, fields, req);
-      return res.json(util.wrapResponse(req.id, members));
+      let fields = null;
+      if (req.query.fields) {
+        fields = req.query.fields.split(',');
+      }
+
+      let membersWithDetails;
+      try {
+        membersWithDetails = await util.getObjectsWithMemberDetails(req.context.currentProjectMembers, fields, req);
+      } catch (err) {
+        membersWithDetails = req.context.currentProjectMembers;
+        req.log.error('Cannot get user details for the members.');
+        req.log.debug('Error during getting user details for the members', err);
+      }
+
+      return res.json(util.wrapResponse(req.id, membersWithDetails));
     } catch (err) {
       return next(err);
     }

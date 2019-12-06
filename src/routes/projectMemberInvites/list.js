@@ -28,7 +28,14 @@ module.exports = [
       }
       const projectId = _.parseInt(req.params.projectId);
       const invites = await models.ProjectMemberInvite.getPendingInvitesForProject(projectId);
-      const invitesWithDetails = await util.getObjectsWithMemberDetails(invites, fields, req);
+      let invitesWithDetails;
+      try {
+        invitesWithDetails = await util.getObjectsWithMemberDetails(invites, fields, req);
+      } catch (err) {
+        invitesWithDetails = invites;
+        req.log.error('Cannot get user details for invites.');
+        req.log.debug('Error during getting user details for invites', err);
+      }
       return res.json(util.wrapResponse(req.id, util.maskInviteEmails('$[*].email', invitesWithDetails, req)));
     } catch (err) {
       return next(err);

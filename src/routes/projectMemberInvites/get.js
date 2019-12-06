@@ -41,7 +41,14 @@ module.exports = [
       if (req.query.fields) {
         fields = req.query.fields.split(',');
       }
-      const [inviteWithDetails] = await util.getObjectsWithMemberDetails([invite], fields, req);
+      let inviteWithDetails;
+      try {
+        [inviteWithDetails] = await util.getObjectsWithMemberDetails([invite], fields, req);
+      } catch (err) {
+        inviteWithDetails = invite;
+        req.log.error('Cannot get user details for invite.');
+        req.log.debug('Error during getting user details for invite.', err);
+      }
 
       return res.json(util.wrapResponse(req.id, inviteWithDetails));
     } catch (err) {
