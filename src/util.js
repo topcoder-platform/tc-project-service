@@ -523,16 +523,22 @@ _.assignIn(util, {
 
     let allMemberDetails = [];
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
-      const userIds = _.remove(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
+      const userIds = _.reject(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
       allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
 
       if (_.intersection(fields, memberTraitFields).length > 0) {
         const promises = _.map(
           allMemberDetails,
-          member => util.getMemberTraitsByHandle(member.handle, req.log, req.id),
+          member => util.getMemberTraitsByHandle(member.handle, req.log, req.id).catch((err) => {
+            req.log.error(`Cannot get traits for user (userId:${member.userId}, handle: ${member.handle}).`);
+            req.log.debug(`Error getting traits for user (userId:${member.userId}, handle: ${member.handle}).`, err);
+          }),
         );
         const traits = await Promise.all(promises);
         _.each(traits, (memberTraits) => {
+          // if we didn't manage to get traits for the user, skip it
+          if (!memberTraits) return;
+
           const basicInfo = _.find(memberTraits, trait => trait.traitId === 'basic_info');
           const connectInfo = _.find(memberTraits, trait => trait.traitId === 'connect_info');
           const memberIndex = _.findIndex(
@@ -540,7 +546,7 @@ _.assignIn(util, {
             member => member.userId === _.get(basicInfo, 'traits.data[0].userId'),
           );
           const basicDetails = {
-            photoURL: _.get(basicInfo, 'traits.data[0].photoURL', null),
+            photoURL: _.get(basicInfo, 'traits.data[0].photoURL'),
           };
           const connectDetails = _.pick(
             _.get(connectInfo, 'traits.data.0'),
