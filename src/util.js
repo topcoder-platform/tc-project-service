@@ -523,7 +523,7 @@ _.assignIn(util, {
 
     let allMemberDetails = [];
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
-      const userIds = _.map(members, 'userId');
+      const userIds = _.remove(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
       allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
 
       if (_.intersection(fields, memberTraitFields).length > 0) {
