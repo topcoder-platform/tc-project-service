@@ -27,7 +27,7 @@ module.exports = [
         fields = req.query.fields.split(',');
       }
       const projectId = _.parseInt(req.params.projectId);
-      const invites = await models.ProjectMemberInvite.getPendingInvitesForProject(projectId);
+      const invites = await models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
       let invitesWithDetails;
       try {
         invitesWithDetails = await util.getObjectsWithMemberDetails(invites, fields, req);
