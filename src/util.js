@@ -14,7 +14,7 @@ import querystring from 'querystring';
 import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
-import jp from 'jsonpath';
+// import jp from 'jsonpath';
 import Promise from 'bluebird';
 import models from './models';
 
@@ -488,7 +488,16 @@ _.assignIn(util, {
    *
    * @return {Object} data has been processed
    */
-  maskInviteEmails: (jsonPath, data, req) => {
+  maskInviteEmails: (jsonPath, data, req) => { // eslint-disable-line
+    // temporary disable this feature, because it has some side effects
+    // see relative issues:
+    // - https://github.com/topcoder-platform/tc-project-service/issues/420
+    // - https://github.com/appirio-tech/connect-app/issues/3412
+    // - https://github.com/topcoder-platform/tc-project-service/issues/422
+    // - https://github.com/appirio-tech/connect-app/issues/3413
+    // uncomment code below, to enable masking emails again
+
+    /*
     const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
     if (isAdmin) {
       return data;
@@ -502,6 +511,7 @@ _.assignIn(util, {
       // isString or null
       return util.maskEmail(value);
     });
+    */
     return data;
   },
 
