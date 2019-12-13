@@ -30,7 +30,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
-    const fields = req.query.field ? req.query.fields.split(',') : null;
+    const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     util.fetchByIdFromES('members', {
       query: {
@@ -68,7 +68,6 @@ module.exports = [
             // check there is an existing member
             const err = new Error(`member not found for project id ${projectId}, id ${memberRecordId}`);
             err.status = 404;
-            console.log('ERRRRRRRR');
             throw err;
           }
           return member;

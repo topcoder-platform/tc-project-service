@@ -24,7 +24,7 @@ module.exports = [
   permissions('projectMemberInvite.list'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
-    const fields = req.query.field ? req.query.fields.split(',') : null;
+    const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     util.fetchByIdFromES('invites', {
       query: {
@@ -52,7 +52,7 @@ module.exports = [
         return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
       }
       req.log.debug('project member found in ES');
-      return data[0].inner_hits.invites.hits.hits; // eslint-disable-line no-underscore-dangle
+      return data[0].inner_hits.invites.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
     }).then(invites => (
       util.getObjectsWithMemberDetails(invites, fields, req)
         .catch((err) => {

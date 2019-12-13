@@ -26,7 +26,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const currentUserId = req.authUser.userId;
     const email = req.authUser.email;
-    const fields = req.query.field ? req.query.fields.split(',') : null;
+    const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     util.fetchByIdFromES('invites', {
       query: {

@@ -31,7 +31,7 @@ module.exports = [
   permissions('project.viewMember'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
-    const fields = req.query.field ? req.query.fields.split(',') : null;
+    const fields = req.query.fields ? req.query.fields.split(',') : null;
     const must = [
       { term: { 'members.projectId': projectId } },
     ];
@@ -63,7 +63,7 @@ module.exports = [
     })
     .then((data) => {
       if (data.length === 0) {
-        req.log.debug('No project member found in ES');
+        req.log.debug('No project members found in ES');
           // Get all project members
         const where = {
           projectId,
@@ -81,7 +81,7 @@ module.exports = [
           raw: true,
         });
       }
-      req.log.debug('project member found in ES');
+      req.log.debug('project members found in ES');
       return data[0].inner_hits.members.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
     })
     .then(members => (
