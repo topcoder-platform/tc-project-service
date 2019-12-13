@@ -132,11 +132,11 @@ module.exports = [
                 };
                 return util
                   .addUserToProject(req, member)
-                  .then(() => res.json(updatedInvite))
+                  .then(() => res.json(util.maskInviteEmails('$.email', updatedInvite, req)))
                   .catch(err => next(err));
               });
           }
-          return res.json(updatedInvite);
+          return res.json(util.maskInviteEmails('$.email', updatedInvite, req));
         });
     });
   },

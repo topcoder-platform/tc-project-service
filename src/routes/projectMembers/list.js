@@ -19,6 +19,7 @@ const schema = {
             PROJECT_MEMBER_ROLE.COPILOT,
             PROJECT_MEMBER_ROLE.CUSTOMER,
             PROJECT_MEMBER_ROLE.OBSERVER),
+    fields: Joi.string().optional(),
   },
   params: {
     projectId: Joi.number().integer().positive().required(),
@@ -30,6 +31,7 @@ module.exports = [
   permissions('project.viewMember'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
+    const fields = req.query.field ? req.query.fields.split(',') : null;
     const must = [
       { term: { 'members.projectId': projectId } },
     ];
@@ -77,13 +79,19 @@ module.exports = [
           ],
           attributes: { exclude: ['deletedAt', 'deletedBy'] },
           raw: true,
-        })
-          .then(members => res.json(members))
-          .catch(next);
+        });
       }
       req.log.debug('project member found in ES');
-      return res.json(data[0].inner_hits.members.hits.hits.map(hit => hit._source)); // eslint-disable-line no-underscore-dangle
+      return data[0].inner_hits.members.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
     })
+    .then(members => (
+      util.getObjectsWithMemberDetails(members, fields, req)
+        .catch((err) => {
+          req.log.error('Cannot get user details for member.');
+          req.log.debug('Error during getting user details for member.', err);
+        })
+    ))
+    .then(members => res.json(members))
     .catch(next);
   },
 ];

@@ -232,6 +232,9 @@ router.route('/v5/projects/:projectId(\\d+)/members/invite')
   .put(require('./projectMemberInvites/update'))
   .get(require('./projectMemberInvites/get'));
 
+router.route('/v5/projects/:projectId(\\d+)/members/invites')
+  .get(require('./projectMemberInvites/list'));
+
 router.route('/v5/projects/metadata/orgConfig')
   .post(require('./orgConfig/create'));
 

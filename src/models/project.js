@@ -66,7 +66,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
     Project.hasMany(models.ProjectMember, { as: 'members', foreignKey: 'projectId' });
     Project.hasMany(models.ProjectAttachment, { as: 'attachments', foreignKey: 'projectId' });
     Project.hasMany(models.ProjectPhase, { as: 'phases', foreignKey: 'projectId' });
-    Project.hasMany(models.ProjectMemberInvite, { as: 'memberInvites', foreignKey: 'projectId' });
+    Project.hasMany(models.ProjectMemberInvite, { as: 'invites', foreignKey: 'projectId' });
     Project.hasMany(models.ScopeChangeRequest, { as: 'scopeChangeRequests', foreignKey: 'projectId' });
     Project.hasMany(models.WorkStream, { as: 'workStreams', foreignKey: 'projectId' });
   };
@@ -202,6 +202,10 @@ module.exports = function defineProject(sequelize, DataTypes) {
       include: [{
         model: models.PhaseProduct,
         as: 'products',
+      }, {
+        model: models.ProjectMemberInvite,
+        as: 'invites',
+        where: { status: INVITE_STATUS.PENDING },
       }],
     }],
   });

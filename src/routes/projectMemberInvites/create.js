@@ -343,9 +343,9 @@ module.exports = [
     .then((values) => {
       const success = _.assign({}, { success: values });
       if (failed.length) {
-        res.status(403).json(_.assign({}, success, { failed }));
+        res.status(403).json(_.assign({}, util.maskInviteEmails('$.success[?(@.email)]', success, req), { failed }));
       } else {
-        res.status(201).json(success);
+        res.status(201).json(util.maskInviteEmails('$.success[?(@.email)]', success, req));
       }
     })
     .catch(err => next(err));

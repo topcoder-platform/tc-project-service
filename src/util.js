@@ -15,6 +15,7 @@ import querystring from 'querystring';
 import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
+// import jp from 'jsonpath';
 import Promise from 'bluebird';
 import models from './models';
 // import AWS from 'aws-sdk';
@@ -473,6 +474,28 @@ _.assignIn(util, {
     })).hits.hits;
   }),
 
+  /**
+   * Retrieve member traits from user handle
+   */
+  getMemberTraitsByHandle: Promise.coroutine(function* (handle, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      if (logger) {
+        logger.trace(handle);
+      }
+
+      return httpClient.get(`${config.memberServiceEndpoint}/${handle}/traits`, {
+        params: {},
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(res => _.get(res, 'data.result.content', null));
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
 
   /**
    * Retrieve member details from userIds
@@ -498,6 +521,151 @@ _.assignIn(util, {
       return Promise.reject(err);
     }
   }),
+
+  /**
+   * maksEmail
+   *
+   * @param {String} email emailstring
+   *
+   * @return {String} email has been masked
+   */
+  maskEmail: (email) => {
+    // common function for formating
+    const addMask = (str) => {
+      let newStr;
+      const len = str.length;
+      if (len <= 3) {
+        newStr = _.repeat('*', len);
+      } else {
+        newStr = str.substr(0, 2) + _.repeat('*', len - 3) + str.substr(-1);
+      }
+      return newStr;
+    };
+
+    try {
+      const mailParts = email.split('@');
+      const domainParts = mailParts[1].split('.');
+
+      let userName = mailParts[0];
+      userName = addMask(userName);
+      mailParts[0] = userName;
+
+      let domainName = domainParts[0];
+      domainName = addMask(domainName);
+      domainParts[0] = domainName;
+
+      mailParts[1] = domainParts.join('.');
+      return mailParts.join('@');
+    } catch (e) {
+      return email;
+    }
+  },
+  /**
+   * Filter member details by input fields
+   *
+   * @param {String}  jsonPath   jsonpath string
+   * @param {Object}  data      the data which  need to process
+   * @param {Object}  req       The request object
+   *
+   * @return {Object} data has been processed
+   */
+  maskInviteEmails: (jsonPath, data, req) => { // eslint-disable-line
+    // temporary disable this feature, because it has some side effects
+    // see relative issues:
+    // - https://github.com/topcoder-platform/tc-project-service/issues/420
+    // - https://github.com/appirio-tech/connect-app/issues/3412
+    // - https://github.com/topcoder-platform/tc-project-service/issues/422
+    // - https://github.com/appirio-tech/connect-app/issues/3413
+    // uncomment code below, to enable masking emails again
+
+    /*
+    const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
+    if (isAdmin) {
+      return data;
+    }
+    jp.apply(data, jsonPath, (value) => {
+      if (_.isObject(value)) {
+        _.assign(value, { email: util.maskEmail(value.email) });
+        return value;
+      }
+      // isString or null
+      return util.maskEmail(value);
+    });
+    */
+    return data;
+  },
+
+  /**
+   * Filter member details by input fields
+   *
+   * @param {Array}   members   Array of member detail objects
+   * @param {Array}   fields    Array of fields to be used to filter member objects
+   * @param {Object}  req       The request object
+   *
+   * @return {Array}            Filtered array of member detail objects
+   */
+  getObjectsWithMemberDetails: async (members, fields, req) => {
+    if (!fields || _.isEmpty(fields) || _.isEmpty(members)) {
+      return members;
+    }
+    const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
+    const memberDetailFields = ['handle', 'firstName', 'lastName'];
+
+    let allMemberDetails = [];
+    if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
+      const userIds = _.reject(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
+      allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+
+      if (_.intersection(fields, memberTraitFields).length > 0) {
+        const promises = _.map(
+          allMemberDetails,
+          member => util.getMemberTraitsByHandle(member.handle, req.log, req.id).catch((err) => {
+            req.log.error(`Cannot get traits for user (userId:${member.userId}, handle: ${member.handle}).`);
+            req.log.debug(`Error getting traits for user (userId:${member.userId}, handle: ${member.handle}).`, err);
+          }),
+        );
+        const traits = await Promise.all(promises);
+        _.each(traits, (memberTraits) => {
+          // if we didn't manage to get traits for the user, skip it
+          if (!memberTraits) return;
+
+          const basicInfo = _.find(memberTraits, trait => trait.traitId === 'basic_info');
+          const connectInfo = _.find(memberTraits, trait => trait.traitId === 'connect_info');
+          const memberIndex = _.findIndex(
+            allMemberDetails,
+            member => member.userId === _.get(basicInfo, 'traits.data[0].userId'),
+          );
+          const basicDetails = {
+            photoURL: _.get(basicInfo, 'traits.data[0].photoURL'),
+          };
+          const connectDetails = _.pick(
+            _.get(connectInfo, 'traits.data.0'),
+            'workingHourStart', 'workingHourEnd', 'timeZone',
+          );
+          allMemberDetails.splice(
+            memberIndex, 1,
+            _.assign({}, allMemberDetails[memberIndex], basicDetails, connectDetails),
+          );
+        });
+      }
+    }
+
+    // set default null value for all valid fields
+    const memberDefaults = _.reduce(fields, (acc, field) => {
+      const isValidField = _.includes(_.union(memberDetailFields, memberTraitFields), field);
+      if (isValidField) {
+        acc[field] = null;
+      }
+      return acc;
+    }, {});
+
+    // pick valid fields from fetched member details
+    return _.map(members, (member) => {
+      let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
+      memberDetails = _.assign({}, member, memberDetails);
+      return _(memberDetails).pick(fields).defaults(memberDefaults).value();
+    });
+  },
 
   /**
    * Retrieve member details from userIds

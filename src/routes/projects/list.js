@@ -571,11 +571,11 @@ module.exports = [
         if (result.rows.length === 0) {
           req.log.debug('No projects found in ES');
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res, r));
+            .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
         }
         req.log.debug('Projects found in ES');
         // set header
-        return util.setPaginationHeaders(req, res, result);
+        return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
       })
         .catch(err => next(err));
     }
@@ -588,10 +588,10 @@ module.exports = [
         if (result.rows.length === 0) {
           req.log.debug('No projects found in ES');
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res, r));
+            .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
         }
         req.log.debug('Projects found in ES');
-        return util.setPaginationHeaders(req, res, result);
+        return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
       })
       .catch(err => next(err));
   },
