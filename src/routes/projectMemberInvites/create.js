@@ -234,6 +234,8 @@ module.exports = [
   (req, res, next) => {
     let failed = [];
     const invite = req.body.param;
+    // let us request user fields during creating, probably this should be move to GET by ID endpoint instead
+    const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     if (!invite.userIds && !invite.emails) {
       const err = new Error('Either userIds or emails are required');
@@ -343,6 +345,14 @@ module.exports = [
             }); // models.sequelize.Promise.all
         }); // models.ProjectMemberInvite.getPendingInvitesForProject
     })
+    .then(values => (
+      // populate successful invites with user details if required
+      util.getObjectsWithMemberDetails(values, fields, req)
+        .catch((err) => {
+          req.log.error('Cannot get user details for invites.');
+          req.log.debug('Error during getting user details for invites', err);
+        })
+    ))
     .then((values) => {
       const success = _.assign({}, { success: values });
       if (failed.length) {
