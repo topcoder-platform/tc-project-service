@@ -341,7 +341,7 @@ module.exports = [
                   sendInviteEmail(req, projectId, v);
                 }
               });
-              return values;
+              return values.map(value => value.get({ plain: true }));
             }); // models.sequelize.Promise.all
         }); // models.ProjectMemberInvite.getPendingInvitesForProject
     })
