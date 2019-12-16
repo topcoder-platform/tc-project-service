@@ -11,15 +11,20 @@ const permissions = tcMiddleware.permissions;
 /**
  * Create a simple logger to log into an array.
  *
+ * @param {Object} defaultLogger default logger which should be used apart from logging to array
+ *
  * @returns {Object} logger
  */
-const createArrayLogger = () => {
+const createArrayLogger = (defaultLogger) => {
   const loggerMethods = ['trace', 'debug', 'info', 'warn', 'error'];
   const log = [];
   const logger = {};
 
   loggerMethods.forEach((method) => {
     logger[method] = (message) => {
+      // log directly with the default logger first
+      defaultLogger[method](message);
+      // save the same message to the array
       log.push({
         level: method,
         message,
@@ -39,7 +44,9 @@ module.exports = [
       const logger = req.log;
       logger.debug('Entered Admin#fixMetadataForEs');
 
-      const arrayLogger = createArrayLogger();
+      // this logger would use the default `logger` to log into console
+      // while saving the same log messages to an array, so we can return it in response
+      const arrayLogger = createArrayLogger(logger);
 
       fixMetadataForES(arrayLogger)
         .then(() => {
