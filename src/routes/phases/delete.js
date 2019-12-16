@@ -50,7 +50,8 @@ module.exports = [
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED,
           RESOURCES.PHASE,
-          _.pick(deleted.toJSON(), 'id'));
+          deleted.toJSON(),
+        );
 
         res.status(204).json({});
       }).catch(err => next(err));
