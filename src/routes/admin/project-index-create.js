@@ -97,6 +97,10 @@ module.exports = [
         projectResponses.map((p) => {
           if (p) {
             body.push({ index: { _index: indexName, _type: docType, _id: p.id } });
+            // TEMPORARY FIX: should fix ES mapping instead and reindex all the projects instead
+            if (typeof _.get(p, 'details.taasDefinition.team.skills') !== 'string') {
+              _.set(p, 'details.taasDefinition.team.skills', '');
+            }
             body.push(p);
           }
           // dummy return
