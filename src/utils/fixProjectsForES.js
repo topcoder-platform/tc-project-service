@@ -18,10 +18,10 @@ async function fixProjects(logger) {
   const path = 'taasDefinition.team.skills';
   const projects = await models.Project.findAll();
   for (const project of projects) {
-    if (_.has(project, 'details')) {
+    if (project.details) {
       const details = JSON.parse(JSON.stringify(project.details));
       const skills = _.get(details, path);
-      if (skills && !_.isArray(skills)) {
+      if (!_.isUndefined(skills) && !_.isArray(skills)) {
         _.set(details, path, []);
         project.details = details;
         await project.save();
