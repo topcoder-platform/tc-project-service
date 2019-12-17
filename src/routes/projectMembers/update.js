@@ -27,6 +27,9 @@ const updateProjectMemberValdiations = {
       PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
     ).required(),
   }),
+  query: {
+    fields: Joi.string().optional(),
+  },
 };
 
 module.exports = [
@@ -42,6 +45,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
     updatedProps = _.pick(updatedProps, ['isPrimary', 'role']);
+    const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     let previousValue;
     // let newValue;
@@ -103,6 +107,16 @@ module.exports = [
         .then(() => {
           projectMember = projectMember.get({ plain: true });
           projectMember = _.omit(projectMember, ['deletedAt']);
+        })
+        .then(() => (
+          util.getObjectsWithMemberDetails([projectMember], fields, req)
+            .then(([memberWithDetails]) => memberWithDetails)
+            .catch((err) => {
+              req.log.error('Cannot get user details for member.');
+              req.log.debug('Error during getting user details for member.', err);
+            })
+        ))
+        .then((memberWithDetails) => {
           // emit original and updated project information
           req.app.services.pubsub.publish(
             EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
@@ -116,7 +130,7 @@ module.exports = [
               projectMember,
               previousValue);
           req.log.debug('updated project member', projectMember);
-          res.json(projectMember);
+          res.json(memberWithDetails || projectMember);
         })
         .catch(err => next(err)));
   },
