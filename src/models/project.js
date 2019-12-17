@@ -202,11 +202,11 @@ module.exports = function defineProject(sequelize, DataTypes) {
       include: [{
         model: models.PhaseProduct,
         as: 'products',
-      }, {
-        model: models.ProjectMemberInvite,
-        as: 'invites',
-        where: { status: INVITE_STATUS.PENDING },
       }],
+    }, {
+      model: models.ProjectMemberInvite,
+      as: 'invites',
+      where: { status: INVITE_STATUS.PENDING },
     }],
   });
 
