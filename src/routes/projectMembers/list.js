@@ -57,7 +57,14 @@ module.exports = [
               },
             },
           },
-          inner_hits: {},
+          inner_hits: {
+            // TODO: replace this temporary fix with a better solution
+            // we have to get all the members of the project,
+            // should we just get a project object instead of creating such a detailed request?
+            // I guess just retrieving project by id and after returning members from it
+            // should work much faster
+            size: 1000,
+          },
         },
       },
     })
