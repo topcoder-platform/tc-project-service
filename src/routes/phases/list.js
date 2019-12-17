@@ -39,7 +39,7 @@ module.exports = [
     // Get project from ES
     return eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: req.params.projectId })
       .then((doc) => {
-        req.log.debug('phase found in ES');
+        req.log.debug('phases found in ES');
         // Get the phases
         let phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
 
@@ -57,9 +57,19 @@ module.exports = [
       })
       .catch((err) => {
         if (err.status === 404) {
-          req.log.debug('No phase found in ES');
+          req.log.debug('No phases found in ES');
           // Load the phases
-          return models.Project.findByPk(projectId)
+          return models.Project.findByPk(projectId, {
+            include: [{
+              model: models.ProjectPhase,
+              as: 'phases',
+              order: [['startDate', 'asc']],
+              include: [{
+                model: models.PhaseProduct,
+                as: 'products',
+              }],
+            }],
+          })
             .then((project) => {
               if (!project) {
                 const apiErr = new Error(`active project not found for project id ${projectId}`);
