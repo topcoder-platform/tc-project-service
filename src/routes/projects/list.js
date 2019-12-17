@@ -1,4 +1,3 @@
-
 /* globals Promise */
 
 import _ from 'lodash';
@@ -502,7 +501,8 @@ module.exports = [
           || util.hasRoles(req, MANAGER_ROLES))) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
-        .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+        .then(result => res.json(util.wrapResponse(req.id,
+          util.maskInviteEmails('$[*].invites[?(@.email)]', result.rows, req), result.count)))
         .catch(err => next(err));
     }
 
@@ -510,7 +510,8 @@ module.exports = [
     criteria.filters.email = req.authUser.email;
     criteria.filters.userId = req.authUser.userId;
     return retrieveProjects(req, criteria, sort, req.query.fields)
-      .then(result => res.json(util.wrapResponse(req.id, result.rows, result.count)))
+      .then(result => res.json(util.wrapResponse(req.id,
+        util.maskInviteEmails('$[*].invites[?(@.email)]', result.rows, req), result.count)))
       .catch(err => next(err));
   },
 ];

@@ -1,5 +1,4 @@
 
-
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
@@ -235,6 +234,8 @@ module.exports = [
   (req, res, next) => {
     let failed = [];
     const invite = req.body.param;
+    // let us request user fields during creating, probably this should be move to GET by ID endpoint instead
+    const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     if (!invite.userIds && !invite.emails) {
       const err = new Error('Either userIds or emails are required');
@@ -340,16 +341,26 @@ module.exports = [
                   sendInviteEmail(req, projectId, v);
                 }
               });
-              return values;
+              return values.map(value => value.get({ plain: true }));
             }); // models.sequelize.Promise.all
         }); // models.ProjectMemberInvite.getPendingInvitesForProject
     })
+    .then(values => (
+      // populate successful invites with user details if required
+      util.getObjectsWithMemberDetails(values, fields, req)
+        .catch((err) => {
+          req.log.error('Cannot get user details for invites.');
+          req.log.debug('Error during getting user details for invites', err);
+        })
+    ))
     .then((values) => {
       const success = _.assign({}, { success: values });
       if (failed.length) {
-        res.status(403).json(util.wrapResponse(req.id, _.assign({}, success, { failed }), null, 403));
+        res.status(403).json(util.wrapResponse(req.id,
+          util.maskInviteEmails('$.email', _.assign({}, success, { failed }), req), null, 403));
       } else {
-        res.status(201).json(util.wrapResponse(req.id, success, null, 201));
+        res.status(201).json(util.wrapResponse(req.id,
+          util.maskInviteEmails('$.success[?(@.email)]', success, req), null, 201));
       }
     })
     .catch(err => next(err));

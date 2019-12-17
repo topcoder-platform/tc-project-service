@@ -34,6 +34,18 @@ router.all(
   ),
 );
 
+router.all(
+  RegExp(`\\/${apiVersion}\\/.*`), (req, res, next) => {
+    // if it is an M2M call, hard code user id to a deafult value to avoid errors
+    // Ideally, the m2m token should have unique userId, which may not be an actual user, as well
+    const isMachineToken = _.get(req, 'authUser.isMachine', false);
+    if (req.authUser && !req.authUser.userId && isMachineToken) {
+      req.authUser.userId = config.DEFAULT_M2M_USERID;
+    }
+    return next();
+  },
+);
+
 router.route('/v4/projects/metadata/projectTemplates')
   .get(require('./projectTemplates/list'));
 router.route('/v4/projects/metadata/projectTemplates/:templateId(\\d+)')
@@ -107,9 +119,11 @@ router.route('/v4/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)
   // .delete(require('./scopeChangeRequests/delete'));
 
 router.route('/v4/projects/:projectId(\\d+)/members')
+  .get(require('./projectMembers/list'))
   .post(require('./projectMembers/create'));
 
 router.route('/v4/projects/:projectId(\\d+)/members/:id(\\d+)')
+  .get(require('./projectMembers/get'))
   .delete(require('./projectMembers/delete'))
   .patch(require('./projectMembers/update'));
 
@@ -216,6 +230,9 @@ router.route('/v4/timelines/metadata/milestoneTemplates/:milestoneTemplateId(\\d
   .get(require('./milestoneTemplates/get'))
   .patch(require('./milestoneTemplates/update'))
   .delete(require('./milestoneTemplates/delete'));
+
+router.route('/v4/projects/:projectId(\\d+)/members/invites')
+  .get(require('./projectMemberInvites/list'));
 
 router.route('/v4/projects/:projectId(\\d+)/members/invite')
   .post(require('./projectMemberInvites/create'))

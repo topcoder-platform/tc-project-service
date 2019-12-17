@@ -21,7 +21,9 @@ module.exports = () => {
   Authorizer.setPolicy('project.view', projectView);
   Authorizer.setPolicy('project.edit', projectEdit);
   Authorizer.setPolicy('project.delete', projectDelete);
+  Authorizer.setPolicy('project.getMember', projectView);
   Authorizer.setPolicy('project.addMember', projectView);
+  Authorizer.setPolicy('project.listMembers', projectView);
   Authorizer.setPolicy('project.removeMember', projectMemberDelete);
   Authorizer.setPolicy('project.addAttachment', projectEdit);
   Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);
@@ -85,6 +87,7 @@ module.exports = () => {
   Authorizer.setPolicy('projectMemberInvite.create', projectView);
   Authorizer.setPolicy('projectMemberInvite.put', true);
   Authorizer.setPolicy('projectMemberInvite.get', true);
+  Authorizer.setPolicy('projectMemberInvite.list', projectView);
 
   Authorizer.setPolicy('form.create', projectAdmin);
   Authorizer.setPolicy('form.edit', projectAdmin);
