@@ -50,6 +50,6 @@ connect.notification.project.work.update.payment
 connect.notification.project.work.update.progress
 connect.notification.project.work.update.scope
 connect.notification.project.workitem.update.spec
-project.notification.create
-project.notification.delete
-project.notification.update
+project.action.create
+project.action.delete
+project.action.update
