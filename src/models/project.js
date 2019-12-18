@@ -210,7 +210,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
       required: false,
     }, {
       model: models.ProjectAttachment,
-      as: 'attachments'
+      as: 'attachments',
     }],
   });
 
