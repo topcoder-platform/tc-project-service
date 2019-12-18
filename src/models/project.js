@@ -208,6 +208,9 @@ module.exports = function defineProject(sequelize, DataTypes) {
       as: 'invites',
       where: { status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] } },
       required: false,
+    }, {
+      model: models.ProjectAttachment,
+      as: 'attachments'
     }],
   });
 
