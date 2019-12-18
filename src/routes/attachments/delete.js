@@ -61,7 +61,7 @@ module.exports = [
             req,
             EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED,
             RESOURCES.ATTACHMENT,
-            { id: attachmentId });
+            pattachment);
           res.status(204).json({});
         })
         .catch(err => next(err));
