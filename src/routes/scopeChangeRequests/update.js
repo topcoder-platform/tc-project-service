@@ -19,10 +19,7 @@ const permissions = tcMiddleware.permissions;
 
 const updateScopeChangeRequestValidations = {
   body: {
-    param: Joi.object()
-      .keys({
-        status: Joi.string().valid(_.values(SCOPE_CHANGE_REQ_STATUS)),
-      }),
+    status: Joi.string().valid(_.values(SCOPE_CHANGE_REQ_STATUS)),
   },
 };
 
@@ -35,7 +32,7 @@ const updateScopeChangeRequestValidations = {
  * @returns {Promise} The promise to update the project with merged data
  */
 function updateProjectDetails(req, newScope, projectId) {
-  return models.Project.findById(projectId).then((project) => {
+  return models.Project.findByPk(projectId).then((project) => {
     const previousValue = _.clone(project.get({ plain: true }));
 
     if (!project) {
@@ -77,7 +74,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const requestId = _.parseInt(req.params.requestId);
-    const updatedProps = req.body.param;
+    const updatedProps = req.body;
     const members = req.context.currentProjectMembers;
     const member = _.find(members, m => m.userId === req.authUser.userId);
     const isCustomer = member && member.role === PROJECT_MEMBER_ROLE.CUSTOMER;
@@ -121,7 +118,7 @@ module.exports = [
       )
       .then(() => scopeChangeReq.update(updatedProps))
       .then((_updatedReq) => {
-        res.json(util.wrapResponse(req.id, _updatedReq));
+        res.json(_updatedReq);
         return Promise.resolve();
       });
     })

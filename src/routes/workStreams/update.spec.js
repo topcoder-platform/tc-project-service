@@ -81,27 +81,27 @@ describe('UPDATE Work Stream', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('PATCH /projects/{projectId}/workstreams/{id}', () => {
     const body = {
-      param: {
-        name: 'Work Stream',
-        type: 'generic',
-        status: 'active',
-      },
+      name: 'Work Stream',
+      type: 'generic',
+      status: 'active',
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+        .patch(`/v5/projects/${projectId}/workstreams/${id}`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+        .patch(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -111,7 +111,7 @@ describe('UPDATE Work Stream', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+        .patch(`/v5/projects/${projectId}/workstreams/${id}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -121,7 +121,7 @@ describe('UPDATE Work Stream', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+        .patch(`/v5/projects/${projectId}/workstreams/${id}`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
@@ -131,7 +131,7 @@ describe('UPDATE Work Stream', () => {
 
     it('should return 404 for non-existed work stream', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/1234`)
+        .patch(`/v5/projects/${projectId}/workstreams/1234`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -143,7 +143,7 @@ describe('UPDATE Work Stream', () => {
       models.WorkStream.destroy({ where: { id } })
         .then(() => {
           request(server)
-            .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+            .patch(`/v5/projects/${projectId}/workstreams/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -154,17 +154,17 @@ describe('UPDATE Work Stream', () => {
 
     it('should return 200 for admin name updated', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.type;
-      delete partialBody.param.status;
+      delete partialBody.type;
+      delete partialBody.status;
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+        .patch(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(partialBody)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(id);
           resJson.name.should.be.eql(workStream.name);
           resJson.type.should.be.eql(workStream.type);
@@ -183,14 +183,14 @@ describe('UPDATE Work Stream', () => {
 
     it('should return 200 for admin all fields updated', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+        .patch(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(id);
           resJson.name.should.be.eql(workStream.name);
           resJson.type.should.be.eql(workStream.type);
@@ -208,14 +208,14 @@ describe('UPDATE Work Stream', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/workstreams/${id}`)
+        .patch(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .send(body)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(id);
           resJson.name.should.be.eql(workStream.name);
           resJson.type.should.be.eql(workStream.type);

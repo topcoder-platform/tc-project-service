@@ -8,12 +8,16 @@ import cors from 'cors';
 import coreLib from 'tc-core-library-js';
 import expressRequestId from 'express-request-id';
 import memWatch from 'memwatch-next';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 import performanceRequestLogger from './middlewares/performanceRequestLogger';
 import router from './routes';
 import permissions from './permissions';
 import models from './models';
 import analytics from './events/analytics';
 import busApi from './events/busApi';
+
+const swaggerDocument = YAML.load('./docs/swagger.yaml');
 
 const app = express();
 
@@ -130,12 +134,15 @@ busApi(app, logger);
 // require('app/permissions')()
 permissions();
 
+app.use(`/${config.apiVersion}/projects/docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // ========================
 // Routes
 // ========================
 
 app.use(router);
 app.routerRef = router;
+
 
 // =======================
 // Initialize services

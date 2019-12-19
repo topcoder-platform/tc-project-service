@@ -25,11 +25,12 @@ const expectAfterDelete = (permissionId, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+          .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .expect(404, next);
+          .expect(404)
+          .end(next);
       }
     }), 500);
 };
@@ -127,19 +128,21 @@ describe('DELETE work management permission', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
 
   describe('DELETE /projects/metadata/workManagementPermission/{permissionId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .delete(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .delete(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -148,7 +151,7 @@ describe('DELETE work management permission', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .delete(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -157,7 +160,7 @@ describe('DELETE work management permission', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .delete(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -166,7 +169,7 @@ describe('DELETE work management permission', () => {
 
     it('should return 404 for non-existed permission', (done) => {
       request(server)
-        .delete('/v4/projects/metadata/workManagementPermission/123')
+        .delete('/v5/projects/metadata/workManagementPermission/123')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -177,7 +180,7 @@ describe('DELETE work management permission', () => {
       models.WorkManagementPermission.destroy({ where: { id: permissionId } })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+            .delete(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -187,7 +190,7 @@ describe('DELETE work management permission', () => {
 
     it('should return 204, for admin, if permission was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .delete(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -197,7 +200,7 @@ describe('DELETE work management permission', () => {
 
     it('should return 204, for connect admin, if permission was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .delete(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

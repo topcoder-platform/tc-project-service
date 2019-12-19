@@ -11,23 +11,21 @@ import path from 'path';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
 const addAttachmentValidations = {
-  body: {
-    param: Joi.object().keys({
-      title: Joi.string().required(),
-      description: Joi.string().optional().allow(null).allow(''),
-      category: Joi.string().optional().allow(null).allow(''),
-      size: Joi.number().optional(),
-      filePath: Joi.string().required(),
-      s3Bucket: Joi.string().required(),
-      contentType: Joi.string().required(),
-      allowedUsers: Joi.array(Joi.number().integer().positive()).allow(null).default(null),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    title: Joi.string().required(),
+    description: Joi.string().optional().allow(null).allow(''),
+    category: Joi.string().optional().allow(null).allow(''),
+    size: Joi.number().optional(),
+    filePath: Joi.string().required(),
+    s3Bucket: Joi.string().required(),
+    contentType: Joi.string().required(),
+    allowedUsers: Joi.array().items(Joi.number().integer().positive()).allow(null).default(null),
+  }).required(),
 };
 
 module.exports = [
@@ -39,7 +37,7 @@ module.exports = [
    * In development mode we have to mock the ec2 file transfer and file service calls
    */
   (req, res, next) => {
-    const data = req.body.param;
+    const data = req.body;
     // default values
     const projectId = req.params.projectId;
     const allowedUsers = data.allowedUsers;
@@ -140,8 +138,14 @@ module.exports = [
               newAttachment,
               { correlationId: req.id },
             );
-            req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED, { req, attachment: newAttachment });
-            res.status(201).json(util.wrapResponse(req.id, response, 1, 201));
+
+            // emit the event
+            util.sendResourceToKafkaBus(
+              req,
+              EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
+              RESOURCES.ATTACHMENT,
+              newAttachment);
+            res.status(201).json(response);
             accept();
           }
         });
@@ -156,8 +160,14 @@ module.exports = [
         newAttachment,
         { correlationId: req.id },
       );
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED, { req, attachment: newAttachment });
-      res.status(201).json(util.wrapResponse(req.id, response, 1, 201));
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
+        RESOURCES.ATTACHMENT,
+        newAttachment);
+
+      res.status(201).json(response);
       return Promise.resolve();
     })
     .catch((error) => {

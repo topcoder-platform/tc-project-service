@@ -14,21 +14,18 @@ import models from '../../models';
 const permissions = tcMiddleware.permissions;
 
 const createProjectMemberValidations = {
-  body: {
-    param: Joi.object()
-      .keys({
-        role: Joi.any()
-          .valid(
-            PROJECT_MEMBER_ROLE.MANAGER,
-            PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
-            PROJECT_MEMBER_ROLE.COPILOT,
-            PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
-            PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
-            PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
-            PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
-        ),
-      }),
-  },
+  body: Joi.object().keys({
+    role: Joi.any()
+      .valid(
+        PROJECT_MEMBER_ROLE.MANAGER,
+        PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
+        PROJECT_MEMBER_ROLE.COPILOT,
+        PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+        PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+        PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+        PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
+    ),
+  }),
 };
 
 module.exports = [
@@ -37,8 +34,8 @@ module.exports = [
   permissions('project.addMember'),
   (req, res, next) => {
     let targetRole;
-    if (_.get(req, 'body.param.role')) {
-      targetRole = _.get(req, 'body.param.role');
+    if (_.get(req, 'body.role')) {
+      targetRole = _.get(req, 'body.role');
 
       if (PROJECT_MEMBER_ROLE.MANAGER === targetRole &&
         !util.hasRoles(req, [USER_ROLE.MANAGER])) {
@@ -148,23 +145,19 @@ module.exports = [
         return next(err);
       }
 
-      return util.addUserToProject(req, member)
-        .then((newMember) => {
-          let invite;
-          return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, null, newMember.userId)
-            .then((_invite) => {
-              invite = _invite;
+      return util.addUserToProject(req, member) // Kafka event is emitted inside `addUserToProject`
+        .then(newMember =>
+          models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, null, newMember.userId)
+            .then((invite) => {
               if (!invite) {
-                return res.status(201)
-                  .json(util.wrapResponse(req.id, newMember, 1, 201));
+                return res.status(201).json(newMember);
               }
               return invite.update({
                 status: INVITE_STATUS.ACCEPTED,
               })
-                .then(() => res.status(201)
-                  .json(util.wrapResponse(req.id, newMember, 1, 201)));
-            });
-        });
+                .then(() => res.status(201).json(newMember));
+            }),
+        );
     })
       .catch(err => next(err));
   },

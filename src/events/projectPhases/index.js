@@ -243,7 +243,7 @@ const projectPhaseUpdatedHandler = Promise.coroutine(function* (logger, msg, cha
  * @param  {Object} msg     event payload
  * @returns {undefined}
  */
-const removePhaseFromIndex = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+const removePhaseFromIndex = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names, no-unused-vars
   try {
     const data = JSON.parse(msg.content.toString());
     const phase = _.get(data, 'deleted', {});
@@ -316,7 +316,8 @@ const removeTopics = Promise.coroutine(function* (logger, phase, route) { // esl
  */
 const projectPhaseRemovedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   try {
-    yield removePhaseFromIndex(logger, msg, channel);
+    // NOTE We use "project-processor-es" for ES indexing now.
+    // yield removePhaseFromIndex(logger, msg, channel);
     const data = JSON.parse(msg.content.toString());
     const phase = _.get(data, 'deleted', {});
     const route = _.get(data, 'route');

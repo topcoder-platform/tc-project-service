@@ -90,7 +90,7 @@ module.exports = [
         return phaseObj;
       });
     })
-    .then(phases => res.json(util.wrapResponse(req.id, phases, phases.length)))
+    .then(phases => res.json(phases))
     .catch(next);
   },
 ];

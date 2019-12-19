@@ -7,7 +7,7 @@ import models from '../../models';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -103,29 +103,29 @@ describe('Project Attachments', () => {
   describe('POST /projects/{id}/attachments/', () => {
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .post(`/v4/projects/${project1.id}/attachments/`)
+          .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
-          .send({ param: body })
+          .send(body)
           .expect('Content-Type', /json/)
           .expect(403, done);
     });
 
     it('should return 201 return attachment record', (done) => {
       request(server)
-          .post(`/v4/projects/${project1.id}/attachments/`)
+          .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
-          .send({ param: body })
+          .send(body)
           .expect('Content-Type', /json/)
           .expect(201)
           .end((err, res) => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               postSpy.should.have.been.calledOnce;
               getSpy.should.have.been.calledOnce;
@@ -150,13 +150,13 @@ describe('Project Attachments', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment added', (done) => {
+      it('sends send correct BUS API messages when attachment added', (done) => {
         request(server)
-          .post(`/v4/projects/${project1.id}/attachments/`)
+          .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .send({ param: body })
+          .send(body)
           .expect(201)
           .end((err) => {
             if (err) {
@@ -164,15 +164,27 @@ describe('Project Attachments', () => {
             } else {
               // Wait for app message handler to complete
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_FILE_UPLOADED);
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                createEventSpy.calledThrice.should.be.true;
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED, sinon.match({
+                  resource: RESOURCES.ATTACHMENT,
+                  title: body.title,
+                  description: body.description,
+                  category: body.category,
+                  contentType: body.contentType,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_FILE_UPLOADED)
+                  .should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED, sinon.match({
                   projectId: project1.id,
                   projectName: project1.name,
                   projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
                   userId: 40051333,
                   initiatorUserId: 40051333,
                 })).should.be.true;
+
                 done();
               });
             }

@@ -118,18 +118,20 @@ describe('GET permissions', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/{projectId}/permissions', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/permissions`)
+        .get(`/v5/projects/${projectId}/permissions`)
         .expect(403, done);
     });
 
     it('should return 403 for non-member', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/permissions`)
+        .get(`/v5/projects/${projectId}/permissions`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -138,7 +140,7 @@ describe('GET permissions', () => {
 
     it('should return 404 for non-existed project', (done) => {
       request(server)
-        .get('/v4/projects/9999/permissions')
+        .get('/v5/projects/9999/permissions')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -157,13 +159,13 @@ describe('GET permissions', () => {
       })
         .then((p) => {
           request(server)
-            .get(`/v4/projects/${p.id}/permissions`)
+            .get(`/v5/projects/${p.id}/permissions`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
             .expect(200)
             .end((err, res) => {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               resJson.should.be.empty;
               done();
             });
@@ -172,13 +174,13 @@ describe('GET permissions', () => {
 
     it('should return 200 for connect admin - no permission', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/permissions`)
+        .get(`/v5/projects/${projectId}/permissions`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.not.have.all.keys(permissions[0].policy, permissions[1].policy);
           done();
         });
@@ -186,13 +188,13 @@ describe('GET permissions', () => {
 
     it('should return 200 for copilot - has both no-permission and permission', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/permissions`)
+        .get(`/v5/projects/${projectId}/permissions`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.all.keys(permissions[1].policy);
           resJson.should.not.have.all.keys(permissions[0].policy);
           done();
@@ -201,13 +203,13 @@ describe('GET permissions', () => {
 
     it('should return 200 for admin - has both permission and no-permission', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/permissions`)
+        .get(`/v5/projects/${projectId}/permissions`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.all.keys(permissions[0].policy);
           resJson.should.not.have.all.keys(permissions[1].policy);
           done();
@@ -216,13 +218,13 @@ describe('GET permissions', () => {
 
     it('should return 200 for manager - has permissions', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/permissions`)
+        .get(`/v5/projects/${projectId}/permissions`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.all.keys(permissions[0].policy, permissions[1].policy);
           done();
         });

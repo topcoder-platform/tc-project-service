@@ -56,69 +56,77 @@ describe('DELETE planConfig version', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.PlanConfig.create(planConfigs[0]))
-    .then(() => models.PlanConfig.create(planConfigs[1]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.PlanConfig.create(planConfigs[0]))
+      .then(() => models.PlanConfig.create(planConfigs[1]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
 
   describe('DELETE /projects/metadata/planConfig/{key}/versions/{version}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete('/v4/projects/metadata/planConfig/dev/versions/1')
-        .expect(403, done);
+        .delete('/v5/projects/metadata/planConfig/dev/versions/1')
+        .expect(403)
+        .end(done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/planConfig/dev/versions/1')
+      .delete('/v5/projects/metadata/planConfig/dev/versions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 403 for copilot', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/planConfig/dev/versions/1')
+      .delete('/v5/projects/metadata/planConfig/dev/versions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.copilot}`,
       })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 403 for manager', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/planConfig/dev/versions/1')
+      .delete('/v5/projects/metadata/planConfig/dev/versions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.manager}`,
       })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 404 for non-existed key', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/planConfig/dev111/versions/1')
+      .delete('/v5/projects/metadata/planConfig/dev111/versions/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(404, done);
+        .expect(404)
+        .end(done);
     });
 
     it('should return 404 for non-existed version', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/planConfig/dev/versions/111')
+      .delete('/v5/projects/metadata/planConfig/dev/versions/111')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(404, done);
+        .expect(404)
+        .end(done);
     });
 
     it('should return 204, for admin', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/planConfig/dev/versions/1')
+      .delete('/v5/projects/metadata/planConfig/dev/versions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
@@ -128,7 +136,7 @@ describe('DELETE planConfig version', () => {
 
     it('should return 204, for connect admin', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/planConfig/dev/versions/1')
+      .delete('/v5/projects/metadata/planConfig/dev/versions/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

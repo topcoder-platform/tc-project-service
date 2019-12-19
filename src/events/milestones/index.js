@@ -7,7 +7,7 @@ import Joi from 'joi';
 import Promise from 'bluebird';
 import util from '../../util';
 // import { createEvent } from '../../services/busApi';
-import { EVENT, TIMELINE_REFERENCES, MILESTONE_STATUS, REGEX } from '../../constants';
+import { EVENT, TIMELINE_REFERENCES, MILESTONE_STATUS, REGEX, RESOURCES, ROUTES } from '../../constants';
 import models from '../../models';
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
@@ -219,14 +219,18 @@ async function milestoneUpdatedKafkaHandler(app, topic, payload) {
           }, ['progress', 'duration']);
           app.logger.debug(`Updated phase progress ${timeline.progress} and duration ${timeline.duration}`);
           app.logger.debug('Raising node event for PROJECT_PHASE_UPDATED');
-          app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
-            req: {
+          util.sendResourceToKafkaBus(
+            {
               params: { projectId: project.id, phaseId: phase.id },
               authUser: { userId: payload.userId },
             },
-            original: phase,
-            updated: _.omit(updatedPhase.toJSON(), 'deletedAt', 'deletedBy'),
-          });
+            EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+            RESOURCES.PHASE,
+            _.omit(updatedPhase.toJSON(), 'deletedAt', 'deletedBy'),
+            phase,
+            _.get(project, 'details.settings.workstreams') ? ROUTES.WORKS.UPDATE : ROUTES.PHASES.UPDATE,
+            true, // don't send event to Notification Service as the main event here is updating milestones, not phase
+          );
         }
       }
     }

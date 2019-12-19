@@ -50,16 +50,14 @@ function createProject(status) {
  */
 function newScopeChangeRequest() {
   return {
-    param: {
-      newScope: {
-        appDefinition: {
-          numberScreens: '5-8',
-        },
+    newScope: {
+      appDefinition: {
+        numberScreens: '5-8',
       },
-      oldScope: {
-        appDefinition: {
-          numberScreens: '2-4',
-        },
+    },
+    oldScope: {
+      appDefinition: {
+        numberScreens: '2-4',
       },
     },
   };
@@ -73,7 +71,7 @@ function newScopeChangeRequest() {
  * @returns {undefined} - throws error if assertion failed
  */
 function assertStatus(response, expectedStatus) {
-  const status = _.get(response, 'body.result.content.status');
+  const status = _.get(response, 'body.status');
   sinon.assert.match(status, expectedStatus);
 }
 
@@ -102,7 +100,7 @@ describe('Create Scope Change Rquest', () => {
       PROJECT_STATUS.ACTIVE,
     ];
 
-    return Promise.all(projectStatuses.map(status => createProject(status)))
+    Promise.all(projectStatuses.map(status => createProject(status)))
       .then(_projects => _projects.map((project, i) => [projectStatuses[i], project]))
       .then((_projectStatusPairs) => {
         projects = _.fromPairs(_projectStatusPairs);
@@ -119,12 +117,12 @@ describe('Create Scope Change Rquest', () => {
       const project = projects[PROJECT_STATUS.REVIEWED];
 
       request(server)
-        .post(`/v4/projects/${project.id}/scopeChangeRequests`)
-        .send(newScopeChangeRequest())
-        .expect(200)
+        .post(`/v5/projects/${project.id}/scopeChangeRequests`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
+        .send(newScopeChangeRequest())
+        .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -141,12 +139,12 @@ describe('Create Scope Change Rquest', () => {
       const project = projects[PROJECT_STATUS.ACTIVE];
 
       request(server)
-        .post(`/v4/projects/${project.id}/scopeChangeRequests`)
-        .send(newScopeChangeRequest())
-        .expect(200)
+        .post(`/v5/projects/${project.id}/scopeChangeRequests`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
+        .send(newScopeChangeRequest())
+        .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -163,12 +161,12 @@ describe('Create Scope Change Rquest', () => {
       const project = projects[PROJECT_STATUS.DRAFT];
 
       request(server)
-        .post(`/v4/projects/${project.id}/scopeChangeRequests`)
-        .send(newScopeChangeRequest())
-        .expect(403)
+        .post(`/v5/projects/${project.id}/scopeChangeRequests`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
+        .send(newScopeChangeRequest())
+        .expect(403)
         .end(err => done(err));
     });
 
@@ -176,58 +174,58 @@ describe('Create Scope Change Rquest', () => {
       const project = projects[PROJECT_STATUS.IN_REVIEW];
 
       request(server)
-        .post(`/v4/projects/${project.id}/scopeChangeRequests`)
-        .send(newScopeChangeRequest())
-        .expect(403)
+        .post(`/v5/projects/${project.id}/scopeChangeRequests`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
+        .send(newScopeChangeRequest())
+        .expect(403)
         .end(err => done(err));
     });
 
     it('Should return error with status 404 if project not present', (done) => {
       const nonExistentProjectId = 341212;
       request(server)
-        .post(`/v4/projects/${nonExistentProjectId}/scopeChangeRequests`)
-        .send(newScopeChangeRequest())
-        .expect(404)
+        .post(`/v5/projects/${nonExistentProjectId}/scopeChangeRequests`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
+        .send(newScopeChangeRequest())
+        .expect(404)
         .end(err => done(err));
     });
 
     it('Should return error with status 403 if there is a request in pending status', (done) => {
       request(server)
-        .post(`/v4/projects/${projectWithPendingChange.id}/scopeChangeRequests`)
-        .send(newScopeChangeRequest())
-        .expect(403)
+        .post(`/v5/projects/${projectWithPendingChange.id}/scopeChangeRequests`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
+        .send(newScopeChangeRequest())
+        .expect(403)
         .end(err => done(err));
     });
 
     it('Should return error with status 403 if there is a request in approved status', (done) => {
       request(server)
-        .post(`/v4/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
-        .send(newScopeChangeRequest())
-        .expect(403)
+        .post(`/v5/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
+        .send(newScopeChangeRequest())
+        .expect(403)
         .end(err => done(err));
     });
 
     it('Should create scope change request if there is a request in canceled status', (done) => {
       updateScopeChangeStatuses(projectWithApprovedChange, SCOPE_CHANGE_REQ_STATUS.CANCELED).then(() => {
         request(server)
-          .post(`/v4/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
-          .send(newScopeChangeRequest())
-          .expect(200)
+          .post(`/v5/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
+          .send(newScopeChangeRequest())
+          .expect(200)
           .end((err, res) => {
             if (err) {
               done(err);
@@ -242,12 +240,12 @@ describe('Create Scope Change Rquest', () => {
     it('Should create scope change request if there is a request in rejected status', (done) => {
       updateScopeChangeStatuses(projectWithApprovedChange, SCOPE_CHANGE_REQ_STATUS.REJECTED).then(() => {
         request(server)
-          .post(`/v4/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
-          .send(newScopeChangeRequest())
-          .expect(200)
+          .post(`/v5/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
+          .send(newScopeChangeRequest())
+          .expect(200)
           .end((err, res) => {
             if (err) {
               done(err);
@@ -262,12 +260,12 @@ describe('Create Scope Change Rquest', () => {
     it('Should create scope change request if there is a request in activated status', (done) => {
       updateScopeChangeStatuses(projectWithApprovedChange, SCOPE_CHANGE_REQ_STATUS.ACTIVATED).then(() => {
         request(server)
-          .post(`/v4/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
-          .send(newScopeChangeRequest())
-          .expect(200)
+          .post(`/v5/projects/${projectWithApprovedChange.id}/scopeChangeRequests`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
+          .send(newScopeChangeRequest())
+          .expect(200)
           .end((err, res) => {
             if (err) {
               done(err);

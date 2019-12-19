@@ -78,7 +78,7 @@ module.exports = [
         .catch((error) => {
           logger.error(`Error in deleting indexes for project (projectId: ${projectIdStart}-${projectIdEnd})`, error);
         });
-        res.status(200).json(util.wrapResponse(req.id, { message: 'Delete index request successfully submitted' }));
+        res.status(200).json({ message: 'Delete index request successfully submitted' });
       });
     })
     .catch(err => next(err));

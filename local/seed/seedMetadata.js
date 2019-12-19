@@ -42,9 +42,9 @@ module.exports = (targetUrl, token) => {
     promises = _(data.result.content.forms).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
       const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
       return axios
-        .post(destUrl + `metadata/form/${pt.key}/versions`,{param}, {headers:headers})
+        .post(destUrl + `metadata/form/${pt.key}/versions`, param, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create form with key=${pt.key} version=${pt.version}.`, errMessage)
         })
     });
@@ -54,9 +54,9 @@ module.exports = (targetUrl, token) => {
     promises = _(data.result.content.planConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
       const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
       return axios
-        .post(destUrl + `metadata/planConfig/${pt.key}/versions`,{param}, {headers:headers})
+        .post(destUrl + `metadata/planConfig/${pt.key}/versions`, param, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create planConfig with key=${pt.key} version=${pt.version}.`, errMessage)
         })
     });
@@ -66,9 +66,9 @@ module.exports = (targetUrl, token) => {
     promises = _(data.result.content.priceConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
       const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
       return axios
-        .post(destUrl + `metadata/priceConfig/${pt.key}/versions`,{param}, {headers:headers})
+        .post(destUrl + `metadata/priceConfig/${pt.key}/versions`, param, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create priceConfig with key=${pt.key} version=${pt.version}.`, errMessage)
         })
     });
@@ -77,9 +77,9 @@ module.exports = (targetUrl, token) => {
 
     promises = _(data.result.content.projectTypes).map(pt=>{
       return axios
-        .post(destUrl+'metadata/projectTypes',{param:pt}, {headers:headers})
+        .post(destUrl+'metadata/projectTypes', pt, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create projectType with key=${pt.key}.`, errMessage)
         })
     });
@@ -88,9 +88,9 @@ module.exports = (targetUrl, token) => {
 
     promises = _(data.result.content.productCategories).map(pt=>{
       return axios
-        .post(destUrl+'metadata/productCategories',{param:pt}, {headers:headers})
+        .post(destUrl+'metadata/productCategories', pt, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create productCategory with key=${pt.key}.`, errMessage)
         })
     });
@@ -99,9 +99,9 @@ module.exports = (targetUrl, token) => {
 
     promises = _(data.result.content.projectTemplates).map(pt=>{
       return axios
-        .post(destUrl+'metadata/projectTemplates',{param:pt}, {headers:headers})
+        .post(destUrl+'metadata/projectTemplates', pt, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create projectTemplate with id=${pt.id}.`, errMessage)
         })
     });
@@ -110,9 +110,9 @@ module.exports = (targetUrl, token) => {
 
     promises = _(data.result.content.productTemplates).map(pt=>{
       return axios
-        .post(destUrl+'metadata/productTemplates',{param:pt}, {headers:headers})
+        .post(destUrl+'metadata/productTemplates', pt, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create productTemplate with id=${pt.id}.`, errMessage)
         })
     });
@@ -121,9 +121,9 @@ module.exports = (targetUrl, token) => {
 
     await Promise.each(data.result.content.milestoneTemplates,pt=> (
       axios
-        .post(destTimelines+'timelines/metadata/milestoneTemplates',{param:pt}, {headers:headers})
+        .post(destTimelines+'timelines/metadata/milestoneTemplates', pt, {headers:headers})
         .catch((err) => {
-          const errMessage = _.get(err, 'response.data.result.content.message', '');
+          const errMessage = _.get(err, 'response.data.message', '');
           console.log(`Failed to create milestoneTemplate with id=${pt.id}.`, errMessage)
         })
     ));

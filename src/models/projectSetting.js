@@ -64,14 +64,16 @@ module.exports = (sequelize, DataTypes) => {
         beforeFind: (options, callback) => {
           // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
           if (options.includeAllProjectSettingsForInternalUsage) {
-            return callback(null);
+            return callback ? callback(null) : null;
           }
 
           if (!options.reqUser || !options.members) {
-            return callback(new Error('You must provide reqUser and project member to get project settings'));
+            const err = new Error('You must provide reqUser and project member to get project settings');
+            if (!callback) throw err;
+            return callback(err);
           }
 
-          return callback(null);
+          return callback ? callback(null) : null;
         },
 
         /**
@@ -84,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
         afterFind: (results, options, callback) => {
           // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
           if (options.includeAllProjectSettingsForInternalUsage) {
-            return callback(null);
+            return callback ? callback(null) : null;
           }
 
           // if we have an array of results form `findAll()` we are filtering results
@@ -98,10 +100,12 @@ module.exports = (sequelize, DataTypes) => {
 
           // if we have one result from `find()` we check if user has permission for the record
           } else if (results && !util.hasPermission(results.readPermission, options.reqUser, options.members)) {
-            return callback(new Error('User doesn\'t have permission to access this record.'));
+            const err = new Error('User doesn\'t have permission to access this record.');
+            if (!callback) throw err;
+            return callback(err);
           }
 
-          return callback(null);
+          return callback ? callback(null) : null;
         },
       },
     },

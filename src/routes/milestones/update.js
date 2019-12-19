@@ -10,7 +10,7 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
-import { EVENT, MILESTONE_STATUS, ADMIN_ROLES } from '../../constants';
+import { EVENT, RESOURCES, MILESTONE_STATUS, ADMIN_ROLES } from '../../constants';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -93,34 +93,32 @@ const schema = {
     timelineId: Joi.number().integer().positive().required(),
     milestoneId: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      id: Joi.any().strip(),
-      name: Joi.string().max(255).optional(),
-      description: Joi.string().max(255),
-      duration: Joi.number().integer().min(1).optional(),
-      startDate: Joi.any().forbidden(),
-      actualStartDate: Joi.date().allow(null),
-      endDate: Joi.any().forbidden(),
-      completionDate: Joi.date().allow(null),
-      status: Joi.string().max(45).optional(),
-      type: Joi.string().max(45).optional(),
-      details: Joi.object(),
-      order: Joi.number().integer().optional(),
-      plannedText: Joi.string().max(512).optional(),
-      activeText: Joi.string().max(512).optional(),
-      completedText: Joi.string().max(512).optional(),
-      blockedText: Joi.string().max(512).optional(),
-      hidden: Joi.boolean().optional(),
-      statusComment: Joi.string().when('status', { is: 'paused', then: Joi.required(), otherwise: Joi.optional() }),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    id: Joi.any().strip(),
+    name: Joi.string().max(255).optional(),
+    description: Joi.string().max(255),
+    duration: Joi.number().integer().min(1).optional(),
+    startDate: Joi.any().forbidden(),
+    actualStartDate: Joi.date().allow(null),
+    endDate: Joi.any().forbidden(),
+    completionDate: Joi.date().allow(null),
+    status: Joi.string().max(45).optional(),
+    type: Joi.string().max(45).optional(),
+    details: Joi.object(),
+    order: Joi.number().integer().optional(),
+    plannedText: Joi.string().max(512).optional(),
+    activeText: Joi.string().max(512).optional(),
+    completedText: Joi.string().max(512).optional(),
+    blockedText: Joi.string().max(512).optional(),
+    hidden: Joi.boolean().optional(),
+    statusComment: Joi.string().when('status', { is: 'paused', then: Joi.required(), otherwise: Joi.optional() }),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
 };
 
 module.exports = [
@@ -134,7 +132,7 @@ module.exports = [
       timelineId: req.params.timelineId,
       id: req.params.milestoneId,
     };
-    const entityToUpdate = _.assign(req.body.param, {
+    const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
       timelineId: req.params.timelineId,
     });
@@ -159,14 +157,14 @@ module.exports = [
           if (entityToUpdate.status === MILESTONE_STATUS.PAUSED && !validStatuses.includes(milestone.status)) {
             const validStatutesStr = validStatuses.join(', ');
             const apiErr = new Error(`Milestone can only be paused from the next statuses: ${validStatutesStr}`);
-            apiErr.status = 422;
+            apiErr.status = 400;
             return Promise.reject(apiErr);
           }
 
           if (entityToUpdate.status === 'resume') {
             if (milestone.status !== MILESTONE_STATUS.PAUSED) {
               const apiErr = new Error('Milestone status isn\'t paused');
-              apiErr.status = 422;
+              apiErr.status = 400;
               return Promise.reject(apiErr);
             }
             const statusHistory = await models.StatusHistory.findAll({
@@ -202,7 +200,7 @@ module.exports = [
             )
           ) {
             const apiErr = new Error('The milestone completionDate should be greater or equal to actualStartDate.');
-            apiErr.status = 422;
+            apiErr.status = 400;
             return Promise.reject(apiErr);
           }
 
@@ -344,15 +342,17 @@ module.exports = [
         { correlationId: req.id },
       );
 
-      // Do not send events for the the other milestones (updated order) here,
-      // because it will make 'version conflict' error in ES.
-      // The order of the other milestones need to be updated in the MILESTONE_UPDATED event above
-
-      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
-        { req, original, updated, cascadedUpdates });
+      // emit the event
+      // we cannot use `util.sendResourceToKafkaBus` as we have to pass a custom param `cascadedUpdates`
+      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_UPDATED, {
+        req,
+        resource: _.assign({ resource: RESOURCES.MILESTONE }, updated),
+        originalResource: _.assign({ resource: RESOURCES.MILESTONE }, original),
+        cascadedUpdates,
+      });
 
       // Write to response
-      res.json(util.wrapResponse(req.id, updated));
+      res.json(updated);
       return Promise.resolve();
     })
     .catch(next);

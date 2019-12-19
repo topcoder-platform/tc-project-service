@@ -122,12 +122,14 @@ describe('LIST works', () => {
         });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/{projectId}/workstreams/{workStreamId}/works', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -135,7 +137,7 @@ describe('LIST works', () => {
         .end((err, res) => {
           const phase = phases[0];
 
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].name.should.be.eql(phase.name);
           resJson[0].status.should.be.eql(phase.status);
@@ -154,13 +156,13 @@ describe('LIST works', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -169,7 +171,7 @@ describe('LIST works', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -178,7 +180,7 @@ describe('LIST works', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -188,7 +190,7 @@ describe('LIST works', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -198,13 +200,13 @@ describe('LIST works', () => {
 
     it('should return with populated workItems if fields=workItems is used', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works?fields=workItems`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works?fields=workItems`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].should.have.property('workItems');
           resJson[0].workItems.should.be.a('array');

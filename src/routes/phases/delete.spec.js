@@ -13,7 +13,11 @@ import RabbitMQService from '../../services/rabbitmq';
 import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT,
+  RESOURCES,
+  CONNECT_NOTIFICATION_EVENT,
 } from '../../constants';
+
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -34,14 +38,8 @@ const expectAfterDelete = (projectId, id, err, next) => {
       } else {
         chai.assert.isNotNull(res.deletedAt);
         chai.assert.isNotNull(res.deletedBy);
-
-        request(server)
-          .get(`/v4/projects/${projectId}/phases/${id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, next);
       }
+      next();
     }), 500);
 };
 const body = {
@@ -60,8 +58,8 @@ const body = {
 
 describe('Project Phases', () => {
   let projectId;
-  let projectName;
   let phaseId;
+  let projectName;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -139,7 +137,7 @@ describe('Project Phases', () => {
   describe('DELETE /projects/{projectId}/phases/{phaseId}', () => {
     it('should return 403 if user does not have permissions (non team member)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -149,7 +147,7 @@ describe('Project Phases', () => {
 
     it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -159,7 +157,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .delete(`/v4/projects/999/phases/${phaseId}`)
+        .delete(`/v5/projects/999/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -169,7 +167,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/999`)
+        .delete(`/v5/projects/${projectId}/phases/999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -179,7 +177,7 @@ describe('Project Phases', () => {
 
     it('should return 204 when user have project permission', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -189,7 +187,7 @@ describe('Project Phases', () => {
 
     it('should return 204 if requested by admin', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -208,7 +206,7 @@ describe('Project Phases', () => {
         updatedBy: 1,
       }).then(() => {
         request(server)
-          .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+          .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
@@ -219,7 +217,7 @@ describe('Project Phases', () => {
 
     it('should return 403 if requested by manager which is not a member', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -232,7 +230,7 @@ describe('Project Phases', () => {
         where: { userId: testUtil.userIds.copilot, projectId },
       }).then(() => {
         request(server)
-          .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+          .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -258,9 +256,9 @@ describe('Project Phases', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when phase removed', (done) => {
+      it('should send correct BUS API messages when phase removed', (done) => {
         request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -270,14 +268,22 @@ describe('Project Phases', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+              createEventSpy.callCount.should.be.eql(2);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                resource: RESOURCES.PHASE,
+                id: phaseId,
+              })).should.be.true;
+
+              // Check Notification Service events
+              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
                 projectId,
                 projectName,
                 projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
                 userId: 40051332,
                 initiatorUserId: 40051332,
               })).should.be.true;
+
               done();
             });
           }
@@ -291,12 +297,12 @@ describe('Project Phases', () => {
       let publishSpy;
       let sandbox;
 
-      before(async (done) => {
+      before((done) => {
         // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
         testUtil.wait(done);
       });
 
-      beforeEach(async (done) => {
+      beforeEach(async () => {
         sandbox = sinon.sandbox.create();
         server.services.pubsub = new RabbitMQService(server.logger);
 
@@ -317,13 +323,13 @@ describe('Project Phases', () => {
           },
         });
 
-        testUtil.wait(() => {
+        return new Promise(resolve => setTimeout(() => {
           publishSpy = sandbox.spy(server.services.pubsub, 'publish');
           deleteTopicSpy = sandbox.spy(messageService, 'deleteTopic');
           deletePostsSpy = sandbox.spy(messageService, 'deletePosts');
           sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
-          done();
-        });
+          resolve();
+        }, 500));
       });
 
       afterEach(() => {
@@ -340,7 +346,7 @@ describe('Project Phases', () => {
         });
         sandbox.stub(messageService, 'getClient', () => mockHttpClient);
         request(server)
-            .delete(`/v4/projects/${projectId}/phases/${phaseId}`)
+            .delete(`/v5/projects/${projectId}/phases/${phaseId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })

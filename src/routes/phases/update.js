@@ -6,28 +6,26 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, ROUTES, TIMELINE_REFERENCES } from '../../constants';
+import { EVENT, RESOURCES, TIMELINE_REFERENCES, ROUTES } from '../../constants';
 
 
 const permissions = tcMiddleware.permissions;
 
 const updateProjectPhaseValidation = {
-  body: {
-    param: Joi.object().keys({
-      name: Joi.string().optional(),
-      description: Joi.string().optional(),
-      requirements: Joi.string().optional(),
-      status: Joi.string().optional(),
-      startDate: Joi.date().optional(),
-      endDate: Joi.date().optional(),
-      duration: Joi.number().min(0).optional(),
-      budget: Joi.number().min(0).optional(),
-      spentBudget: Joi.number().min(0).optional(),
-      progress: Joi.number().min(0).optional(),
-      details: Joi.any().optional(),
-      order: Joi.number().integer().optional(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    name: Joi.string().optional(),
+    description: Joi.string().optional(),
+    requirements: Joi.string().optional(),
+    status: Joi.string().optional(),
+    startDate: Joi.date().optional(),
+    endDate: Joi.date().optional(),
+    duration: Joi.number().min(0).optional(),
+    budget: Joi.number().min(0).optional(),
+    spentBudget: Joi.number().min(0).optional(),
+    progress: Joi.number().min(0).optional(),
+    details: Joi.any().optional(),
+    order: Joi.number().integer().optional(),
+  }).required(),
 };
 
 
@@ -41,7 +39,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
 
-    const updatedProps = req.body.param;
+    const updatedProps = req.body;
     updatedProps.updatedBy = req.authUser.userId;
 
     let previousValue;
@@ -153,20 +151,25 @@ module.exports = [
       .then((allPhases) => {
         req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
 
+        const updatedValue = updated.get({ plain: true });
+
         // emit original and updated project phase information
         req.app.services.pubsub.publish(
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { original: previousValue, updated, allPhases, route: TIMELINE_REFERENCES.PHASE },
+          { original: previousValue, updated: updatedValue, allPhases, route: TIMELINE_REFERENCES.PHASE },
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED, {
-          req,
-          original: previousValue,
-          updated: _.clone(updated.get({ plain: true })),
-          route: ROUTES.PHASES.UPDATE,
-        });
 
-        res.json(util.wrapResponse(req.id, updated));
+        //  emit event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+          RESOURCES.PHASE,
+          updatedValue,
+          previousValue,
+          ROUTES.PHASES.UPDATE);
+
+        res.json(updated);
       })
       .catch(err => next(err));
   },

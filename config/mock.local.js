@@ -5,6 +5,7 @@ if (process.env.NODE_ENV === 'test') {
   config = require('./test.json');
 } else {
   config = {
+    busApiUrl: "http://localhost:8002/v5",
     identityServiceEndpoint: "http://dockerhost:3001/",
     authSecret: 'secret',
     authDomain: 'topcoder-dev.com',
@@ -23,11 +24,7 @@ if (process.env.NODE_ENV === 'test') {
       idleTimeout: 1000,
     },
     elasticsearchConfig: {
-      host: 'dockerhost:9200',
-      // target elasticsearch 2.3 version
-      apiVersion: '2.3',
-      indexName: 'projects',
-      docType: 'projectV4'
+      host: 'dockerhost:9200'
     },
     whitelistedOriginsForUserIdAuth: "[\"\"]",
   };

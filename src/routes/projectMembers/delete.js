@@ -3,7 +3,8 @@
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import { EVENT, PROJECT_MEMBER_ROLE } from '../../constants';
+import util from '../../util';
+import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE } from '../../constants';
 
 /**
  * API to delete a project member.
@@ -76,7 +77,13 @@ module.exports = [
           pmember,
           { correlationId: req.id },
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED, { req, member: pmember });
+
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
+          RESOURCES.PROJECT_MEMBER,
+          pmember);
         res.status(204).json({});
       }).catch(err => next(err));
   },

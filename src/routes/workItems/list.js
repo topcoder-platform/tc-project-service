@@ -4,7 +4,6 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
@@ -58,7 +57,7 @@ module.exports = [
         },
       });
     })
-    .then(products => res.json(util.wrapResponse(req.id, products, products.length)))
+    .then(products => res.json(products))
     .catch(err => next(err));
   },
 ];

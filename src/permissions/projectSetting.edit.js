@@ -20,7 +20,7 @@ module.exports = freq => new Promise((resolve, reject) => {
       projectMembers = members;
       return Promise.resolve();
     })
-    .then(() => models.ProjectSetting.find({
+    .then(() => models.ProjectSetting.findOne({
       where: { projectId, id: settingId },
       raw: true,
       includeAllProjectSettingsForInternalUsage: true,

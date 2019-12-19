@@ -32,12 +32,11 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     indexes: [],
-    classMethods: {
-      associate: (models) => {
-        WorkStream.belongsToMany(models.ProjectPhase, { through: models.PhaseWorkStream, foreignKey: 'workStreamId' });
-      },
-    },
   });
+
+  WorkStream.associate = (models) => {
+    WorkStream.belongsToMany(models.ProjectPhase, { through: models.PhaseWorkStream, foreignKey: 'workStreamId' });
+  };
 
   return WorkStream;
 };

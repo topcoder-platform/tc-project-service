@@ -16,16 +16,14 @@ const schema = {
     projectId: Joi.number().integer().positive().required(),
     id: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      value: Joi.string().max(255),
-      valueType: Joi.string().valid(_.values(VALUE_TYPE)),
-      projectId: Joi.any().strip(),
-      metadata: Joi.object(),
-      readPermission: Joi.object(),
-      writePermission: Joi.object(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    value: Joi.string().max(255),
+    valueType: Joi.string().valid(_.values(VALUE_TYPE)),
+    projectId: Joi.any().strip(),
+    metadata: Joi.object(),
+    readPermission: Joi.object(),
+    writePermission: Joi.object(),
+  }).required(),
 };
 
 module.exports = [
@@ -36,7 +34,7 @@ module.exports = [
     let updatedSetting = null;
     const projectId = req.params.projectId;
     const id = req.params.id;
-    const entityToUpdate = _.assign(req.body.param, {
+    const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
 
@@ -69,7 +67,7 @@ module.exports = [
       }),
     ) // transaction end
     .then(() => {
-      res.json(util.wrapResponse(req.id, updatedSetting));
+      res.json(updatedSetting);
     })
     .catch(next);
   },

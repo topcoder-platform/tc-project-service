@@ -7,32 +7,29 @@ import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
+
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 const expectAfterDelete = (projectId, phaseId, id, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.PhaseProduct.findOne({
-    where: {
-      id,
-      projectId,
-      phaseId,
-    },
-    paranoid: false,
-  })
+    models.PhaseProduct.findOne({
+      where: {
+        id,
+        projectId,
+        phaseId,
+      },
+      paranoid: false,
+    })
     .then((res) => {
       if (!res) {
         throw new Error('Should found the entity');
       } else {
         chai.assert.isNotNull(res.deletedAt);
         chai.assert.isNotNull(res.deletedBy);
-
-        request(server)
-          .get(`/v4/projects/${projectId}/phases/${phaseId}/products/${id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, next);
       }
+      next();
     }), 500);
 };
 const body = {
@@ -134,7 +131,7 @@ describe('Phase Products', () => {
   describe('DELETE /projects/{id}/phases/{phaseId}/products/{productId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -144,7 +141,7 @@ describe('Phase Products', () => {
 
     it('should return 403 when user have no permission (customer)', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -154,7 +151,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .delete(`/v4/projects/999/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -164,7 +161,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/99999/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -174,7 +171,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no product with specific productId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -184,7 +181,7 @@ describe('Phase Products', () => {
 
     it('should return 204 when user have project permission', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -194,7 +191,7 @@ describe('Phase Products', () => {
 
     it('should return 204 if requested by admin', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -213,7 +210,7 @@ describe('Phase Products', () => {
         updatedBy: 1,
       }).then(() => {
         request(server)
-          .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
@@ -224,7 +221,7 @@ describe('Phase Products', () => {
 
     it('should return 403 if requested by manager which is not a member', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -237,7 +234,7 @@ describe('Phase Products', () => {
         where: { userId: testUtil.userIds.copilot, projectId },
       }).then(() => {
         request(server)
-        .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -263,9 +260,9 @@ describe('Phase Products', () => {
         sandbox.restore();
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when product phase removed', (done) => {
+      it('should send correct BUS API messages when product phase removed', (done) => {
         request(server)
-          .delete(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -275,7 +272,12 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.notCalled.should.be.true;
+                createEventSpy.callCount.should.be.eql(1);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                })).should.be.true;
+
                 done();
               });
             }

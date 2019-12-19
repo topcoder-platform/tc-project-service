@@ -196,18 +196,20 @@ describe('GET milestone', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines/{timelineId}/milestones/{milestoneId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1')
+        .get('/v5/timelines/1/milestones/1')
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1')
+        .get('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -216,7 +218,7 @@ describe('GET milestone', () => {
 
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
-        .get('/v4/timelines/1234/milestones/1')
+        .get('/v5/timelines/1234/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -225,7 +227,7 @@ describe('GET milestone', () => {
 
     it('should return 404 for deleted timeline', (done) => {
       request(server)
-        .get('/v4/timelines/3/milestones/1')
+        .get('/v5/timelines/3/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -234,7 +236,7 @@ describe('GET milestone', () => {
 
     it('should return 404 for non-existed milestone', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1234')
+        .get('/v5/timelines/1/milestones/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -243,40 +245,40 @@ describe('GET milestone', () => {
 
     it('should return 404 for deleted milestone', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/3')
+        .get('/v5/timelines/1/milestones/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(404, done);
     });
 
-    it('should return 422 for invalid timelineId param', (done) => {
+    it('should return 400 for invalid timelineId param', (done) => {
       request(server)
-        .get('/v4/timelines/0/milestones/3')
+        .get('/v5/timelines/0/milestones/3')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for invalid milestoneId param', (done) => {
+    it('should return 400 for invalid milestoneId param', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/0')
+        .get('/v5/timelines/1/milestones/0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1')
+        .get('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(1);
           resJson.timelineId.should.be.eql(1);
           resJson.name.should.be.eql('milestone 1');
@@ -319,7 +321,7 @@ describe('GET milestone', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1')
+        .get('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -329,7 +331,7 @@ describe('GET milestone', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1')
+        .get('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -339,7 +341,7 @@ describe('GET milestone', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1')
+        .get('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -348,7 +350,7 @@ describe('GET milestone', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones/1')
+        .get('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

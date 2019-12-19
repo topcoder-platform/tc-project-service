@@ -21,14 +21,14 @@ module.exports = () => {
   Authorizer.setPolicy('project.view', projectView);
   Authorizer.setPolicy('project.edit', projectEdit);
   Authorizer.setPolicy('project.delete', projectDelete);
-  Authorizer.setPolicy('project.getMember', projectView);
   Authorizer.setPolicy('project.addMember', projectView);
-  Authorizer.setPolicy('project.listMembers', projectView);
+  Authorizer.setPolicy('project.viewMember', projectView);
   Authorizer.setPolicy('project.removeMember', projectMemberDelete);
   Authorizer.setPolicy('project.addAttachment', projectEdit);
   Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);
   Authorizer.setPolicy('project.removeAttachment', projectAttachmentUpdate);
   Authorizer.setPolicy('project.downloadAttachment', projectAttachmentDownload);
+  Authorizer.setPolicy('project.listAttachment', projectView);
   Authorizer.setPolicy('project.updateMember', projectEdit);
   Authorizer.setPolicy('project.admin', projectAdmin);
 

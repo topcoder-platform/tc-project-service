@@ -2,8 +2,8 @@ import _ from 'lodash';
 
 /**
  * Constructs a middleware the validates the existence of a record given a path to find in the req. For example, in
- * order to check for a ProductCategory being received in "req.body.param.category" you would construct this middleware
- * by calling this function with (models.ProductCategory, 'key', 'body.param.category', 'Category').
+ * order to check for a ProductCategory being received in "req.body.category" you would construct this middleware
+ * by calling this function with (models.ProductCategory, 'key', 'body.category', 'Category').
  * Note that this also works for updates where the value might not be present in the request, in which the case
  * the built middleware will continue without errors.
  *
@@ -23,7 +23,7 @@ export default function (model, modelKey, path, errorEntityName) {
             next();
           } else {
             const err = new Error(`${errorEntityName} not found for key "${value}"`);
-            err.status = 422;
+            err.status = 400;
             next(err);
           }
         });

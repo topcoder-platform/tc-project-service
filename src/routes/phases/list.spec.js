@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import request from 'supertest';
 import config from 'config';
-import sleep from 'sleep';
+// import sleep from 'sleep';
 import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
@@ -48,6 +48,7 @@ describe('Project Phases', () => {
     this.timeout(10000);
     // mocks
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',
@@ -95,7 +96,7 @@ describe('Project Phases', () => {
               body: project,
             }).then(() => {
               // sleep for some time, let elasticsearch indices be settled
-              sleep.sleep(5);
+              // sleep.sleep(5);
               done();
             });
           });
@@ -110,40 +111,40 @@ describe('Project Phases', () => {
   describe('GET /projects/{id}/phases/', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get('/v4/projects/999/phases/')
+        .get('/v5/projects/999/phases/')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             done();
@@ -153,18 +154,18 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             done();

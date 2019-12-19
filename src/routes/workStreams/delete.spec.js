@@ -24,7 +24,7 @@ const expectAfterDelete = (id, projectId, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/${projectId}/workstreams/${id}`)
+          .get(`/v5/projects/${projectId}/workstreams/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -86,18 +86,20 @@ describe('DELETE work stream', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /projects/{projectId}/workstreams/{id}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${id}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${id}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${id}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -106,7 +108,7 @@ describe('DELETE work stream', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${id}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -115,7 +117,7 @@ describe('DELETE work stream', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${id}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -124,7 +126,7 @@ describe('DELETE work stream', () => {
 
     it('should return 404 for non-existed type', (done) => {
       request(server)
-        .delete('/v4/projects/metadata/projectTypes/not_existed')
+        .delete('/v5/projects/metadata/projectTypes/not_existed')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -135,7 +137,7 @@ describe('DELETE work stream', () => {
       models.WorkStream.destroy({ where: { id } })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/${projectId}/workstreams/${id}`)
+            .delete(`/v5/projects/${projectId}/workstreams/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -145,7 +147,7 @@ describe('DELETE work stream', () => {
 
     it('should return 204, for admin, if type was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${id}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -155,7 +157,7 @@ describe('DELETE work stream', () => {
 
     it('should return 204, for connect admin, if type was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${id}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

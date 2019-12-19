@@ -90,29 +90,27 @@ describe('UPDATE Project Setting', () => {
   };
 
   const body = {
-    param: {
-      value: '5599.96',
-      valueType: 'double',
-      readPermission: {
-        projectRoles: ['customer'],
-        topcoderRoles: ['administrator'],
+    value: '5599.96',
+    valueType: 'double',
+    readPermission: {
+      projectRoles: ['customer'],
+      topcoderRoles: ['administrator'],
+    },
+    writePermission: {
+      allowRule: {
+        projectRoles: ['customer', 'copilot'],
+        topcoderRoles: ['administrator', 'Connect Admin'],
       },
-      writePermission: {
-        allowRule: {
-          projectRoles: ['customer', 'copilot'],
-          topcoderRoles: ['administrator', 'Connect Admin'],
-        },
-        denyRule: {
-          projectRoles: ['copilot'],
-          topcoderRoles: ['Connect Admin'],
-        },
+      denyRule: {
+        projectRoles: ['copilot'],
+        topcoderRoles: ['Connect Admin'],
       },
     },
   };
 
   // we don't include these params into the body, we cannot update them
   // but we use them for creating model directly and for checking returned values
-  const bodyParamNonMutable = {
+  const bodyNonMutable = {
     key: 'markup_topcoder_service',
     createdBy: 1,
     updatedBy: 1,
@@ -169,7 +167,7 @@ describe('UPDATE Project Setting', () => {
             updatedBy: 1,
           }])
           .then(() => {
-            models.ProjectSetting.create(_.assign({}, body.param, bodyParamNonMutable, {
+            models.ProjectSetting.create(_.assign({}, body, bodyNonMutable, {
               projectId,
             }))
             .then((s) => {
@@ -186,19 +184,21 @@ describe('UPDATE Project Setting', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('PATCH /projects/{projectId}/settings/{id}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .patch(`/v5/projects/${projectId}/settings/${id}`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .patch(`/v5/projects/${projectId}/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -208,7 +208,7 @@ describe('UPDATE Project Setting', () => {
 
     it('should return 403 when copilot is in both denyRule and allowRule', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .patch(`/v5/projects/${projectId}/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -218,7 +218,7 @@ describe('UPDATE Project Setting', () => {
 
     it('should return 403 when connect admin is in both denyRule and allowRule', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .patch(`/v5/projects/${projectId}/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -228,7 +228,7 @@ describe('UPDATE Project Setting', () => {
 
     it('should return 404 for non-existed project', (done) => {
       request(server)
-        .patch(`/v4/projects/9999/settings/${id}`)
+        .patch(`/v5/projects/9999/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -238,7 +238,7 @@ describe('UPDATE Project Setting', () => {
 
     it('should return 404 for non-existed project setting', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/settings/1234`)
+        .patch(`/v5/projects/${projectId}/settings/1234`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -250,7 +250,7 @@ describe('UPDATE Project Setting', () => {
       models.ProjectSetting.destroy({ where: { id } })
         .then(() => {
           request(server)
-            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .patch(`/v5/projects/${projectId}/settings/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -259,24 +259,22 @@ describe('UPDATE Project Setting', () => {
         });
     });
 
-    it('should return 422, when try to update key', (done) => {
+    it('should return 400, when try to update key', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .patch(`/v5/projects/${projectId}/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            key: 'updated_key',
-          },
+          key: 'updated_key',
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200, for member with permission (team member), value updated but no project estimation present',
     (done) => {
       const notPresent = _.cloneDeep(body);
-      notPresent.param.value = '4500';
+      notPresent.value = '4500';
 
       models.ProjectEstimation.destroy({
         where: {
@@ -290,36 +288,34 @@ describe('UPDATE Project Setting', () => {
           },
         }).then(() => {
           request(server)
-            .patch(`/v4/projects/${projectId}/settings/${id}`)
+            .patch(`/v5/projects/${projectId}/settings/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.member}`,
             })
             .send({
-              param: {
-                value: notPresent.param.value,
-              },
+              value: notPresent.value,
             })
             .expect('Content-Type', /json/)
             .expect(200)
             .end((err, res) => {
               if (err) done(err);
 
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               resJson.id.should.be.eql(id);
-              resJson.key.should.be.eql(bodyParamNonMutable.key);
-              resJson.value.should.be.eql(notPresent.param.value);
-              resJson.valueType.should.be.eql(notPresent.param.valueType);
+              resJson.key.should.be.eql(bodyNonMutable.key);
+              resJson.value.should.be.eql(notPresent.value);
+              resJson.valueType.should.be.eql(notPresent.valueType);
               resJson.projectId.should.be.eql(projectId);
-              resJson.createdBy.should.be.eql(bodyParamNonMutable.createdBy);
+              resJson.createdBy.should.be.eql(bodyNonMutable.createdBy);
               resJson.updatedBy.should.be.eql(40051331);
               should.exist(resJson.updatedAt);
               should.not.exist(resJson.deletedBy);
               should.not.exist(resJson.deletedAt);
               expectAfterUpdate(id, projectId, _.assign(estimation, {
                 id: estimationId,
-                value: notPresent.param.value,
-                valueType: notPresent.param.valueType,
-                key: bodyParamNonMutable.key,
+                value: notPresent.value,
+                valueType: notPresent.valueType,
+                key: bodyNonMutable.key,
               }), 0, 0, err, done);
             });
         });
@@ -327,7 +323,7 @@ describe('UPDATE Project Setting', () => {
     });
 
     it('should return 200 for admin when value updated, calculating project estimation items', (done) => {
-      body.param.value = '4500';
+      body.value = '4500';
 
       models.ProjectEstimationItem.create({
         projectEstimationId: estimationId,
@@ -339,76 +335,72 @@ describe('UPDATE Project Setting', () => {
         updatedBy: 1,
       }).then(() => {
         request(server)
-          .patch(`/v4/projects/${projectId}/settings/${id}`)
+          .patch(`/v5/projects/${projectId}/settings/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
           .send({
-            param: {
-              value: body.param.value,
-            },
+            value: body.value,
           })
           .expect('Content-Type', /json/)
           .expect(200)
           .end((err, res) => {
             if (err) done(err);
 
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             resJson.id.should.be.eql(id);
-            resJson.key.should.be.eql(bodyParamNonMutable.key);
-            resJson.value.should.be.eql(body.param.value);
-            resJson.valueType.should.be.eql(body.param.valueType);
+            resJson.key.should.be.eql(bodyNonMutable.key);
+            resJson.value.should.be.eql(body.value);
+            resJson.valueType.should.be.eql(body.valueType);
             resJson.projectId.should.be.eql(projectId);
-            resJson.createdBy.should.be.eql(bodyParamNonMutable.createdBy);
+            resJson.createdBy.should.be.eql(bodyNonMutable.createdBy);
             resJson.updatedBy.should.be.eql(40051333); // admin
             should.exist(resJson.updatedAt);
             should.not.exist(resJson.deletedBy);
             should.not.exist(resJson.deletedAt);
             expectAfterUpdate(id, projectId, _.assign(estimation, {
               id: estimationId,
-              value: body.param.value,
-              valueType: body.param.valueType,
-              key: bodyParamNonMutable.key,
+              value: body.value,
+              valueType: body.valueType,
+              key: bodyNonMutable.key,
             }), 1, 1, err, done);
           });
       }).catch(done);
     });
 
     it('should return 200, for admin, update valueType from double to percentage', (done) => {
-      body.param.value = '10.76';
-      body.param.valueType = VALUE_TYPE.PERCENTAGE;
+      body.value = '10.76';
+      body.valueType = VALUE_TYPE.PERCENTAGE;
       request(server)
-        .patch(`/v4/projects/${projectId}/settings/${id}`)
+        .patch(`/v5/projects/${projectId}/settings/${id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            value: body.param.value,
-            valueType: VALUE_TYPE.PERCENTAGE,
-          },
+          value: body.value,
+          valueType: VALUE_TYPE.PERCENTAGE,
         })
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) done(err);
 
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(id);
-          resJson.key.should.be.eql(bodyParamNonMutable.key);
-          resJson.value.should.be.eql(body.param.value);
+          resJson.key.should.be.eql(bodyNonMutable.key);
+          resJson.value.should.be.eql(body.value);
           resJson.valueType.should.be.eql(VALUE_TYPE.PERCENTAGE);
           resJson.projectId.should.be.eql(projectId);
-          resJson.createdBy.should.be.eql(bodyParamNonMutable.createdBy);
+          resJson.createdBy.should.be.eql(bodyNonMutable.createdBy);
           resJson.updatedBy.should.be.eql(40051333); // admin
           should.exist(resJson.updatedAt);
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
           expectAfterUpdate(id, projectId, _.assign(estimation, {
             id: estimationId,
-            value: body.param.value,
-            valueType: body.param.valueType,
-            key: bodyParamNonMutable.key,
+            value: body.value,
+            valueType: body.valueType,
+            key: bodyNonMutable.key,
           }), 1, 0, err, done);
         });
     });
