@@ -14,7 +14,6 @@ const PHASE_ATTRIBUTES = _.keys(models.ProjectPhase.rawAttributes);
 
 const permissions = tcMiddleware.permissions;
 
-
 module.exports = [
   permissions('project.view'),
   (req, res, next) => {
@@ -40,17 +39,12 @@ module.exports = [
     // Get project from ES
     return eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: req.params.projectId })
       .then((doc) => {
-        if (!doc) {
-          const err = new Error(`active project not found for project id ${projectId}`);
-          err.status = 404;
-          throw err;
-        }
-
+        req.log.debug('phases found in ES');
         // Get the phases
         let phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
 
         // Sort
-        phases = _.sortBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
+        phases = _.orderBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
 
         fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products']);
         if (_.indexOf(fields, 'id') < 0) {
@@ -59,8 +53,46 @@ module.exports = [
 
         phases = _.map(phases, phase => _.pick(phase, fields));
 
-        res.json(util.wrapResponse(req.id, phases, phases.length));
+        res.json(phases);
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (err.status === 404) {
+          req.log.debug('No phases found in ES');
+          // Load the phases
+          return models.Project.findByPk(projectId, {
+            include: [{
+              model: models.ProjectPhase,
+              as: 'phases',
+              order: [['startDate', 'asc']],
+              include: [{
+                model: models.PhaseProduct,
+                as: 'products',
+              }],
+            }],
+          })
+            .then((project) => {
+              if (!project) {
+                const apiErr = new Error(`active project not found for project id ${projectId}`);
+                apiErr.status = 404;
+                return next(apiErr);
+              }
+
+              // Get the phases
+              let phases = _.isArray(project.phases) ? project.phases : [];
+
+              // Sort
+              phases = _.orderBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
+
+              fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products']);
+              if (_.indexOf(fields, 'id') < 0) {
+                fields.push('id');
+              }
+
+              // Write to response
+              return res.json(_.map(phases, p => _.omit(p.toJSON(), ['deletedAt', 'deletedBy'])));
+            });
+        }
+        return next(err);
+      });
   },
 ];

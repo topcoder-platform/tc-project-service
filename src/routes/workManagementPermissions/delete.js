@@ -19,7 +19,7 @@ module.exports = [
   permissions('workManagementPermission.delete'),
   (req, res, next) =>
      models.sequelize.transaction(() =>
-      models.WorkManagementPermission.findById(req.params.id)
+      models.WorkManagementPermission.findByPk(req.params.id)
         .then((entity) => {
           if (!entity) {
             const apiErr = new Error(`Work Management Permission not found for id ${req.params.id}`);

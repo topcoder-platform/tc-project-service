@@ -26,7 +26,7 @@ const expectAfterDelete = (err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-        .get('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1')
+        .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -60,24 +60,25 @@ describe('DELETE priceConfig revision', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.PriceConfig.create(priceConfigs[0]))
-    .then(() => models.PriceConfig.create(priceConfigs[1]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
-
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.PriceConfig.create(priceConfigs[0]))
+      .then(() => models.PriceConfig.create(priceConfigs[1]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /projects/metadata/priceConfig/{key}/versions/{version}/revisions/{revision}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1')
+        .delete('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/1')
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1')
+      .delete('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
@@ -86,7 +87,7 @@ describe('DELETE priceConfig revision', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1')
+      .delete('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.copilot}`,
       })
@@ -95,7 +96,7 @@ describe('DELETE priceConfig revision', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1')
+      .delete('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.manager}`,
       })
@@ -104,7 +105,7 @@ describe('DELETE priceConfig revision', () => {
 
     it('should return 404 for non-existed key', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/no-existed-key/versions/1/revisions/1')
+      .delete('/v5/projects/metadata/priceConfig/no-existed-key/versions/1/revisions/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -113,7 +114,7 @@ describe('DELETE priceConfig revision', () => {
 
     it('should return 404 for non-existed version', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/dev/versions/100/revisions/1')
+      .delete('/v5/projects/metadata/priceConfig/dev/versions/100/revisions/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -123,7 +124,7 @@ describe('DELETE priceConfig revision', () => {
 
     it('should return 404 for non-existed revision', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/100')
+      .delete('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/100')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -132,7 +133,7 @@ describe('DELETE priceConfig revision', () => {
 
     it('should return 204, for admin', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1')
+      .delete('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/1')
       .set({
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
@@ -142,7 +143,7 @@ describe('DELETE priceConfig revision', () => {
 
     it('should return 204, for connect admin', (done) => {
       request(server)
-      .delete('/v4/projects/metadata/priceConfig/dev/versions/1/revisions/1')
+      .delete('/v5/projects/metadata/priceConfig/dev/versions/1/revisions/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

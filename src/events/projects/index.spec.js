@@ -94,6 +94,7 @@ describe('projectUpdatedKafkaHandler', () => {
 
     beforeEach(async () => {
       await testUtil.clearDb();
+      await testUtil.clearES();
       project = await models.Project.create({
         type: 'generic',
         billingAccountId: 1,
@@ -130,7 +131,7 @@ describe('projectUpdatedKafkaHandler', () => {
     it('should update lastActivityAt and lastActivityUserId columns in db', async () => {
       await projectUpdatedKafkaHandler(mockedApp, topic, validPayload);
 
-      const updatedProject = await models.Project.findById(project.id);
+      const updatedProject = await models.Project.findByPk(project.id);
       expect(updatedProject.lastActivityUserId).to.be.eql('2');
       expect(updatedProject.lastActivityAt).to.be.greaterThan(project.lastActivityAt);
     });

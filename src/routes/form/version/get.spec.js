@@ -54,25 +54,27 @@ describe('GET a latest version of specific key of Form', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.Form.create(forms[0]))
-    .then(() => models.Form.create(forms[1]))
-    .then(() => models.Form.create(forms[2]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.Form.create(forms[0]))
+      .then(() => models.Form.create(forms[1]))
+      .then(() => models.Form.create(forms[2]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/form/dev/versions/{version}', () => {
     it('should return 200 and correct version for admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata/form/dev')
+        .get('/v5/projects/metadata/form/dev')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
           const form = forms[2];
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.key.should.be.eql(form.key);
           resJson.config.should.be.eql(form.config);
           resJson.version.should.be.eql(form.version);
@@ -88,13 +90,13 @@ describe('GET a latest version of specific key of Form', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev')
+      .get('/v5/projects/metadata/form/dev')
       .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev')
+      .get('/v5/projects/metadata/form/dev')
       .set({
         Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
       })
@@ -104,7 +106,7 @@ describe('GET a latest version of specific key of Form', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev')
+      .get('/v5/projects/metadata/form/dev')
       .set({
         Authorization: `Bearer ${testUtil.jwts.manager}`,
       })
@@ -114,7 +116,7 @@ describe('GET a latest version of specific key of Form', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev')
+      .get('/v5/projects/metadata/form/dev')
       .set({
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
@@ -123,7 +125,7 @@ describe('GET a latest version of specific key of Form', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev')
+      .get('/v5/projects/metadata/form/dev')
       .set({
         Authorization: `Bearer ${testUtil.jwts.copilot}`,
       })

@@ -19,17 +19,16 @@ const expectAfterDelete = (id, err, next) => {
       if (!res) {
         throw new Error('Should found the entity');
       } else {
-        server.services.pubsub.publish.calledWith('project.deleted').should.be.true;
-
         chai.assert.isNotNull(res.deletedAt);
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/${id}`)
+          .get(`/v5/projects/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .expect(404, next);
+          .expect(404)
+          .end(next);
       }
     }), 500);
 };
@@ -37,6 +36,7 @@ describe('Project delete test', () => {
   let project1;
   beforeEach((done) => {
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',
@@ -106,16 +106,17 @@ describe('Project delete test', () => {
   describe('DELETE /projects/{id}/', () => {
     it('should return 403 if copilot tries to delete the project', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 204 if project was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -127,7 +128,7 @@ describe('Project delete test', () => {
 
     it('should return 204, for connect admin, if project was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -139,7 +140,7 @@ describe('Project delete test', () => {
 
     it('should return 204, for connect admin, if project was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}`)
+        .delete(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

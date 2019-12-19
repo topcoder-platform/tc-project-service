@@ -97,18 +97,20 @@ describe('GET work', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/{projectId}/workstreams/{workStreamId}/works/{workId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -117,7 +119,7 @@ describe('GET work', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -126,7 +128,7 @@ describe('GET work', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/9999/workstreams/${workStreamId}/works/${workId}`)
+        .get(`/v5/projects/9999/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -136,7 +138,7 @@ describe('GET work', () => {
 
     it('should return 404 when no work stream with specific workStreamId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/999/works/${workId}`)
+        .get(`/v5/projects/${projectId}/workstreams/999/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -146,7 +148,7 @@ describe('GET work', () => {
 
     it('should return 404 when no work with specific workId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/999`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -158,7 +160,7 @@ describe('GET work', () => {
       models.ProjectPhase.destroy({ where: { id: workId } })
         .then(() => {
           request(server)
-            .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+            .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -168,13 +170,13 @@ describe('GET work', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.name.should.be.eql(body.name);
           resJson.status.should.be.eql(body.status);
           resJson.budget.should.be.eql(body.budget);
@@ -193,7 +195,7 @@ describe('GET work', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -203,7 +205,7 @@ describe('GET work', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })

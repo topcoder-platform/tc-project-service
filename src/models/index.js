@@ -11,8 +11,24 @@ pg.defaults.parseInt8 = true;
 delete pg.native;
 
 Sequelize.cls = cls.createNamespace('tc.micro.service');
+// Sequelize.useCLS(cls.createNamespace('tc.micro.service'));
+
+const Op = Sequelize.Op;
+const operatorsAliases = {
+  $gt: Op.gt,
+  $gte: Op.gte,
+  $lt: Op.lt,
+  $between: Op.between,
+  $eq: Op.eq,
+  $ne: Op.ne,
+  $or: Op.or,
+  $and: Op.and,
+  $in: Op.in,
+  $contains: Op.contains,
+};
 
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
+  operatorsAliases,
   logging: false,
   dialectOptions: {
     ssl: false,

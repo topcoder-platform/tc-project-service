@@ -97,10 +97,6 @@ module.exports = [
         projectResponses.map((p) => {
           if (p) {
             body.push({ index: { _index: indexName, _type: docType, _id: p.id } });
-            // TEMPORARY FIX: should fix ES mapping instead and reindex all the projects instead
-            if (typeof _.get(p, 'details.taasDefinition.team.skills') !== 'string') {
-              _.set(p, 'details.taasDefinition.team.skills', '');
-            }
             body.push(p);
           }
           // dummy return
@@ -112,9 +108,9 @@ module.exports = [
           logger.trace('body[length-1]', body[body.length - 1]);
         }
 
-        res.status(200).json(util.wrapResponse(req.id, {
+        res.status(200).json({
           message: `Reindex request successfully submitted for ${body.length / 2} projects`,
-        }));
+        });
         // bulk index
         eClient.bulk({
           body,

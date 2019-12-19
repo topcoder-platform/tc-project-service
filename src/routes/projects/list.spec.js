@@ -2,7 +2,7 @@
 /* eslint-disable max-len */
 import chai from 'chai';
 import request from 'supertest';
-import sleep from 'sleep';
+// import sleep from 'sleep';
 import config from 'config';
 import models from '../../models';
 import server from '../../app';
@@ -126,6 +126,7 @@ describe('LIST Project', () => {
   before(function inner(done) {
     this.timeout(10000);
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => {
         const p1 = models.Project.create({
           type: 'generic',
@@ -246,8 +247,9 @@ describe('LIST Project', () => {
           return Promise.all([esp1, esp2, esp3]);
         }).then(() => {
           // sleep for some time, let elasticsearch indices be settled
-          sleep.sleep(5);
-          done();
+          // sleep.sleep(5);
+          testUtil.wait(done);
+          // done();
         });
       });
   });
@@ -259,13 +261,14 @@ describe('LIST Project', () => {
   describe('GET All /projects/', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/projects/')
+        .get('/v5/projects/')
         .expect(403, done);
     });
 
     it('should return 200 and no projects if user does not have access', (done) => {
       request(server)
-        .get(`/v4/projects/?filter=id%3Din%28${project2.id}%29`)
+        // .get(`/v5/projects/?id=in%28${project2.id}%29`)
+        .get(`/v5/projects/?id=${project2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -274,7 +277,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            res.body.result.content.should.have.lengthOf(0);
+            res.body.should.have.lengthOf(0);
             done();
           }
         });
@@ -282,7 +285,7 @@ describe('LIST Project', () => {
 
     it('should return the project when registerd member attempts to access the project', (done) => {
       request(server)
-        .get('/v4/projects/?filter=status%3Ddraft')
+        .get('/v5/projects/?status=draft')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -292,8 +295,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
-            res.body.result.metadata.totalCount.should.equal(1);
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             // since project 2 is indexed with id 2
@@ -305,7 +307,7 @@ describe('LIST Project', () => {
 
     it('should return the project when project that is in reviewed state in which the copilot is its member or has been invited', (done) => {
       request(server)
-          .get('/v4/projects')
+          .get('/v5/projects')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -315,8 +317,7 @@ describe('LIST Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
-              res.body.result.metadata.totalCount.should.equal(2);
+              const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(2);
               done();
@@ -326,7 +327,7 @@ describe('LIST Project', () => {
 
     it('should return the project for administrator ', (done) => {
       request(server)
-        .get('/v4/projects/?fields=id%2Cmembers.id')
+        .get('/v5/projects/?fields=id,members.id')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -336,7 +337,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
             done();
@@ -347,7 +348,7 @@ describe('LIST Project', () => {
     it('should return the project for administrator with field description, billingAccountId and attachments',
       (done) => {
         request(server)
-          .get('/v4/projects/?fields=description%2CbillingAccountId%2Cattachments&sort=id%20asc')
+          .get('/v5/projects/?fields=description,billingAccountId,attachments&sort=id asc')
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -357,7 +358,7 @@ describe('LIST Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(3);
               resJson[0].should.have.property('attachments');
@@ -379,7 +380,7 @@ describe('LIST Project', () => {
 
     it('should return the project for administrator with field description and billingAccountId', (done) => {
       request(server)
-        .get('/v4/projects/?fields=description%2CbillingAccountId&sort=id%20asc')
+        .get('/v5/projects/?fields=description,billingAccountId&sort=id asc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -389,10 +390,10 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
-            resJson[0].should.not.have.property('attachments');
+            resJson[0].should.have.property('attachments');
             resJson[0].should.have.property('description');
             resJson[0].should.have.property('billingAccountId');
             done();
@@ -402,7 +403,7 @@ describe('LIST Project', () => {
 
     it('should return the project for administrator with all field', (done) => {
       request(server)
-        .get('/v4/projects/?sort=id%20asc')
+        .get('/v5/projects/?sort=id asc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -412,7 +413,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
             resJson[0].should.have.property('id');
@@ -432,7 +433,7 @@ describe('LIST Project', () => {
 
     it('should return all projects that match when filtering by name', (done) => {
       request(server)
-        .get('/v4/projects/?filter=keyword%3Dtest')
+        .get('/v5/projects/?keyword=test')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -442,7 +443,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
             done();
@@ -452,7 +453,7 @@ describe('LIST Project', () => {
 
     it('should return the project when filtering by keyword, which matches the name', (done) => {
       request(server)
-        .get('/v4/projects/?filter=keyword%3D1')
+        .get('/v5/projects/?keyword=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -462,7 +463,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
@@ -473,7 +474,7 @@ describe('LIST Project', () => {
 
     it('should return the project when filtering by keyword, which matches the description', (done) => {
       request(server)
-        .get('/v4/projects/?filter=keyword%3Dproject')
+        .get('/v5/projects/?keyword=project')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -483,7 +484,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
             done();
@@ -493,7 +494,7 @@ describe('LIST Project', () => {
 
     it('should return the project when filtering by keyword, which matches the member handle', (done) => {
       request(server)
-        .get('/v4/projects/?filter=keyword%3Dtourist')
+        .get('/v5/projects/?keyword=tourist')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -503,7 +504,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
@@ -514,7 +515,7 @@ describe('LIST Project', () => {
 
     it('should return project that match when filtering by id (exact)', (done) => {
       request(server)
-        .get('/v4/projects/?filter=id%3D1')
+        .get('/v5/projects/?id=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -524,7 +525,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].id.should.equal(1);
@@ -536,7 +537,7 @@ describe('LIST Project', () => {
 
     it('should return project that match when filtering by name', (done) => {
       request(server)
-        .get('/v4/projects/?filter=name%3Dtest1')
+        .get('/v5/projects/?name=test1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -546,7 +547,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
@@ -557,7 +558,7 @@ describe('LIST Project', () => {
 
     it('should return project that match when filtering by name\'s substring', (done) => {
       request(server)
-        .get('/v4/projects/?filter=name%3D*st1')
+        .get('/v5/projects/?name=*st1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -567,7 +568,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
@@ -578,7 +579,7 @@ describe('LIST Project', () => {
 
     it('should return all projects that match when filtering by details code', (done) => {
       request(server)
-        .get('/v4/projects/?filter=code%3Dcode1')
+        .get('/v5/projects/?code=code1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -588,7 +589,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
@@ -600,7 +601,7 @@ describe('LIST Project', () => {
 
     it('should return all projects that match when filtering by details code\'s substring', (done) => {
       request(server)
-        .get('/v4/projects/?filter=code%3D*de1')
+        .get('/v5/projects/?code=*de1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -610,7 +611,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
@@ -622,7 +623,7 @@ describe('LIST Project', () => {
 
     it('should return all projects that match when filtering by customer', (done) => {
       request(server)
-        .get('/v4/projects/?filter=customer%3Dfirst*')
+        .get('/v5/projects/?customer=first*')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -632,7 +633,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
@@ -645,7 +646,7 @@ describe('LIST Project', () => {
 
     it('should return all projects that match when filtering by manager', (done) => {
       request(server)
-        .get('/v4/projects/?filter=manager%3D*ast')
+        .get('/v5/projects/?manager=*ast')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -655,7 +656,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test3');
@@ -668,7 +669,7 @@ describe('LIST Project', () => {
 
     it('should return list of projects ordered ascending by lastActivityAt when sort column is "lastActivityAt"', (done) => {
       request(server)
-        .get('/v4/projects/?sort=lastActivityAt')
+        .get('/v5/projects/?sort=lastActivityAt')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -677,7 +678,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
             resJson[0].name.should.equal('test1');
@@ -690,7 +691,7 @@ describe('LIST Project', () => {
 
     it('should return list of projects ordered descending by lastActivityAt when sort column is "lastActivityAt desc"', (done) => {
       request(server)
-        .get('/v4/projects/?sort=lastActivityAt desc')
+        .get('/v5/projects/?sort=lastActivityAt desc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -699,7 +700,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
             resJson[0].name.should.equal('test3');
@@ -712,7 +713,7 @@ describe('LIST Project', () => {
 
     it('should return list of projects ordered ascending by lastActivityAt when sort column is "lastActivityAt asc"', (done) => {
       request(server)
-        .get('/v4/projects/?sort=lastActivityAt asc')
+        .get('/v5/projects/?sort=lastActivityAt asc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -721,7 +722,7 @@ describe('LIST Project', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
             resJson[0].name.should.equal('test1');
@@ -735,7 +736,7 @@ describe('LIST Project', () => {
     describe('GET All /projects/ for Connect Admin, ', () => {
       it('should return the project ', (done) => {
         request(server)
-          .get('/v4/projects/?fields=id%2Cmembers.id')
+          .get('/v5/projects/?fields=id,members.id')
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
@@ -745,7 +746,7 @@ describe('LIST Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(3);
               done();
@@ -755,7 +756,7 @@ describe('LIST Project', () => {
 
       it('should return all projects, that match when filtering by name', (done) => {
         request(server)
-          .get('/v4/projects/?filter=keyword%3Dtest')
+          .get('/v5/projects/?keyword=test')
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
@@ -765,7 +766,7 @@ describe('LIST Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(3);
               done();
@@ -775,7 +776,7 @@ describe('LIST Project', () => {
 
       it('should return the project, when filtering by keyword, which matches the name', (done) => {
         request(server)
-          .get('/v4/projects/?filter=keyword%3D1')
+          .get('/v5/projects/?keyword=1')
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
@@ -785,7 +786,7 @@ describe('LIST Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');
@@ -796,7 +797,7 @@ describe('LIST Project', () => {
 
       it('should return the project, when filtering by keyword, which matches the description', (done) => {
         request(server)
-          .get('/v4/projects/?filter=keyword%3Dproject')
+          .get('/v5/projects/?keyword=project')
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
@@ -806,7 +807,7 @@ describe('LIST Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(3);
               done();
@@ -816,7 +817,7 @@ describe('LIST Project', () => {
 
       it('should return the project, when filtering by keyword, which matches the member handle', (done) => {
         request(server)
-          .get('/v4/projects/?filter=keyword%3Dtourist')
+          .get('/v5/projects/?keyword=tourist')
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
@@ -826,7 +827,7 @@ describe('LIST Project', () => {
             if (err) {
               done(err);
             } else {
-              const resJson = res.body.result.content;
+              const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');

@@ -13,365 +13,66 @@
 
 import config from 'config';
 import util from '../src/util';
+import esUtils from '../src/utils/es';
+import { INDEX_TO_DOC_TYPE } from '../src/utils/es-config';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
+const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
 
-// create new elasticsearch client
-// the client modifies the config object, so always passed the cloned object
-const esClient = util.getElasticSearchClient();
+// all indexes supported by this script
+const supportedIndexes = [ES_PROJECT_INDEX, ES_TIMELINE_INDEX, ES_METADATA_INDEX];
 
 /**
- * Get the request body for the specified index name
- * @private
+ * Sync elasticsearch indices.
  *
- * @param  {String}       indexName         the index name
- * @return {Object}                         the request body for the specified index name
+ * @param {String} [indexName] index name to sync, if it's not define, then all indexes are recreated
+ *
+ * @returns {Promise} resolved when sync is complete
  */
-function getRequestBody(indexName) {
-  let result;
-  const projectMapping = {
-    _all: { enabled: false },
-    properties: {
-      actualPrice: {
-        type: 'double',
-      },
-      attachments: {
-        type: 'nested',
-        properties: {
-          category: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          contentType: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          createdAt: {
-            type: 'date',
-            format: 'strict_date_optional_time||epoch_millis',
-          },
-          createdBy: {
-            type: 'integer',
-          },
-          description: {
-            type: 'string',
-          },
-          filePath: {
-            type: 'string',
-          },
-          id: {
-            type: 'long',
-          },
-          projectId: {
-            type: 'long',
-          },
-          size: {
-            type: 'double',
-          },
-          title: {
-            type: 'string',
-          },
-          updatedAt: {
-            type: 'date',
-            format: 'strict_date_optional_time||epoch_millis',
-          },
-          updatedBy: {
-            type: 'integer',
-          },
-        },
-      },
-      billingAccountId: {
-        type: 'long',
-      },
-      bookmarks: {
-        type: 'nested',
-        properties: {
-          address: {
-            type: 'string',
-          },
-          title: {
-            type: 'string',
-          },
-        },
-      },
-      cancelReason: {
-        type: 'string',
-      },
-      challengeEligibility: {
-        type: 'nested',
-        properties: {
-          groups: {
-            type: 'long',
-          },
-          role: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          users: {
-            type: 'long',
-          },
-        },
-      },
-      createdAt: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis',
-      },
-      createdBy: {
-        type: 'integer',
-      },
-      description: {
-        type: 'string',
-      },
-      details: {
-        type: 'nested',
-        properties: {
-          TBD_features: {
-            type: 'nested',
-            properties: {
-              description: {
-                type: 'string',
-              },
-              id: {
-                type: 'integer',
-              },
-              isCustom: {
-                type: 'boolean',
-              },
-              title: {
-                type: 'string',
-              },
-            },
-          },
-          TBD_usageDescription: {
-            type: 'string',
-          },
-          appDefinition: {
-            properties: {
-              goal: {
-                properties: {
-                  value: {
-                    type: 'string',
-                  },
-                },
-              },
-              primaryTarget: {
-                type: 'string',
-              },
-              users: {
-                properties: {
-                  value: {
-                    type: 'string',
-                  },
-                },
-              },
-            },
-          },
-          hideDiscussions: {
-            type: 'boolean',
-          },
-          products: {
-            type: 'string',
-          },
-          summary: {
-            type: 'string',
-          },
-          utm: {
-            type: 'nested',
-            properties: {
-              code: {
-                type: 'string',
-              },
-            },
-          },
-        },
-      },
-      directProjectId: {
-        type: 'long',
-      },
-      estimatedPrice: {
-        type: 'double',
-      },
-      external: {
-        properties: {
-          data: {
-            type: 'string',
-          },
-          id: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          type: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-        },
-      },
-      id: {
-        type: 'long',
-      },
-      members: {
-        type: 'nested',
-        properties: {
-          createdAt: {
-            type: 'date',
-            format: 'strict_date_optional_time||epoch_millis',
-          },
-          createdBy: {
-            type: 'integer',
-          },
-          email: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          firstName: {
-            type: 'string',
-          },
-          handle: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          id: {
-            type: 'long',
-          },
-          isPrimary: {
-            type: 'boolean',
-          },
-          lastName: {
-            type: 'string',
-          },
-          projectId: {
-            type: 'long',
-          },
-          role: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          updatedAt: {
-            type: 'date',
-            format: 'strict_date_optional_time||epoch_millis',
-          },
-          updatedBy: {
-            type: 'integer',
-          },
-          userId: {
-            type: 'long',
-          },
-        },
-      },
-      invites: {
-        type: 'nested',
-        properties: {
-          createdAt: {
-            type: 'date',
-            format: 'strict_date_optional_time||epoch_millis',
-          },
-          createdBy: {
-            type: 'integer',
-          },
-          email: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          id: {
-            type: 'long',
-          },
-          role: {
-            type: 'string',
-            index: 'not_analyzed',
-          },
-          updatedAt: {
-            type: 'date',
-            format: 'strict_date_optional_time||epoch_millis',
-          },
-          updatedBy: {
-            type: 'integer',
-          },
-          userId: {
-            type: 'long',
-          },
-        },
-      },
-      name: {
-        type: 'string',
-      },
-      status: {
-        type: 'string',
-        index: 'not_analyzed',
-      },
-      terms: {
-        type: 'integer',
-      },
-      type: {
-        type: 'string',
-        index: 'not_analyzed',
-      },
-      updatedAt: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis',
-      },
-      updatedBy: {
-        type: 'integer',
-      },
-      lastActivityAt: {
-        type: 'date',
-        format: 'strict_date_optional_time||epoch_millis',
-      },
-      lastActivityUserId: {
-        type: 'string',
-      },
-      utm: {
-        properties: {
-          campaign: {
-            type: 'string',
-          },
-          medium: {
-            type: 'string',
-          },
-          source: {
-            type: 'string',
-          },
-        },
-      },
-      phases: {
-        type: 'nested',
-        dynamic: true,
-      },
-    },
-  };
-  switch (indexName) {
-    case ES_PROJECT_INDEX:
-      result = {
-        index: indexName,
-        updateAllTypes: true,
-        body: {
-          mappings: { },
-        },
-      };
-      result.body.mappings[ES_PROJECT_TYPE] = projectMapping;
-      break;
-    default:
-      throw new Error(`Invalid index name '${indexName}'`);
+async function sync(indexName) {
+  if (indexName && supportedIndexes.indexOf(indexName) === -1) {
+    throw new Error(`Index "${indexName}" is not supported.`);
   }
-  return result;
+  const indexesToSync = indexName ? [indexName] : supportedIndexes;
+
+  // create new elasticsearch client
+  // the client modifies the config object, so always passed the cloned object
+  const esClient = util.getElasticSearchClient();
+
+  for (let i = 0; i < indexesToSync.length; i += 1) {
+    const indexToSync = indexesToSync[i];
+
+    console.log(`Deleting "${indexToSync}" index...`);
+    await esClient.indices.delete({ index: indexToSync, ignore: [404] }); // eslint-disable-line no-await-in-loop
+    console.log(`Creating "${indexToSync}" index...`);
+    await esClient.indices.create(esUtils.buildCreateIndexRequest(indexToSync, INDEX_TO_DOC_TYPE[indexToSync])); // eslint-disable-line no-await-in-loop
+  }
 }
 
-    // first delete the index if already present
-esClient.indices.delete({
-  index: ES_PROJECT_INDEX,
-  // we would want to ignore no such index error
-  ignore: [404],
-})
-.then(() => esClient.indices.create(getRequestBody(ES_PROJECT_INDEX)))
-// Re-create timeline index
-.then(() => esClient.indices.delete({ index: ES_TIMELINE_INDEX, ignore: [404] }))
-.then(() => esClient.indices.create({ index: ES_TIMELINE_INDEX }))
-.then(() => {
-  console.log('elasticsearch indices synced successfully');
-  process.exit();
-})
-.catch((err) => {
-  console.error('elasticsearch indices sync failed', err);
-  process.exit();
-});
+if (!module.parent) {
+  // if we pass index name in command line arguments, then sync only that index
+  const indexName = process.argv[2] === '--index-name' && process.argv[3] ? process.argv[3] : undefined;
+
+  // to avoid accidental resetting of all indexes in PROD, enforce explicit defining of index name if not in
+  // development or test environment
+  if (['development', 'test'].indexOf(process.env.NODE_ENV) === -1 && !indexName) {
+    console.error('Error. "--index-name" should be provided when run this command in non-development environment.');
+    console.error('Example usage: "$ npm run sync:es -- --index-name metadata"');
+    process.exit(1);
+  }
+
+  sync(indexName)
+    .then(() => {
+      console.log('ElasticSearch indices synced successfully.');
+      process.exit();
+    })
+    .catch((err) => {
+      console.error('ElasticSearch indices sync failed: ', err);
+      process.exit(1);
+    });
+}
+
+module.exports = {
+  sync,
+};

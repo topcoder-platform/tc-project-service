@@ -97,22 +97,26 @@ const milestoneTemplates = [
 ];
 
 describe('GET milestone template', () => {
-  beforeEach(() => testUtil.clearDb()
+  beforeEach((done) => {
+    testUtil.clearDb()
     .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
+    .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
+  },
   );
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines/metadata/milestoneTemplates/{milestoneTemplateId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/1')
+        .get('/v5/timelines/metadata/milestoneTemplates/1')
         .expect(403, done);
     });
 
     it('should return 404 for non-existed milestone template', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/1111')
+        .get('/v5/timelines/metadata/milestoneTemplates/1111')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -121,7 +125,7 @@ describe('GET milestone template', () => {
 
     it('should return 404 for deleted milestone template', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/2')
+        .get('/v5/timelines/metadata/milestoneTemplates/2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -130,13 +134,13 @@ describe('GET milestone template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/1')
+        .get('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(milestoneTemplates[0].id);
           resJson.name.should.be.eql(milestoneTemplates[0].name);
           resJson.duration.should.be.eql(milestoneTemplates[0].duration);
@@ -163,7 +167,7 @@ describe('GET milestone template', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/1')
+        .get('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -173,7 +177,7 @@ describe('GET milestone template', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/1')
+        .get('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -183,7 +187,7 @@ describe('GET milestone template', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/1')
+        .get('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -192,7 +196,7 @@ describe('GET milestone template', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines/metadata/milestoneTemplates/1')
+        .get('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })

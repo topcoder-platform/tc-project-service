@@ -15,19 +15,17 @@ const schema = {
   params: {
     projectId: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      name: Joi.string().max(255).required(),
-      type: Joi.string().max(45).required(),
-      status: Joi.string().valid(_.values(WORKSTREAM_STATUS)).required(),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    name: Joi.string().max(255).required(),
+    type: Joi.string().max(45).required(),
+    status: Joi.string().valid(_.values(WORKSTREAM_STATUS)).required(),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
 };
 
 module.exports = [
@@ -35,7 +33,7 @@ module.exports = [
   permissions('workStream.create'),
   // do the real work
   (req, res, next) => {
-    const data = req.body.param;
+    const data = req.body;
     // default values
     const projectId = _.parseInt(req.params.projectId);
     _.assign(data, {
@@ -63,7 +61,7 @@ module.exports = [
       .then((createdEntity) => {
         req.log.debug('new work stream created (id# %d, name: %s)',
           createdEntity.id, createdEntity.name);
-        res.status(201).json(util.wrapResponse(req.id, _.omit(createdEntity, 'deletedBy', 'deletedAt'), 1, 201));
+        res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedBy', 'deletedAt'));
       })
       .catch((err) => {
         util.handleError('Error creating work stream', err, req, next);

@@ -35,24 +35,26 @@ describe('LIST form versions', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.Form.create(forms[0]))
-    .then(() => models.Form.create(forms[1]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.Form.create(forms[0]))
+      .then(() => models.Form.create(forms[1]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/form/dev/versions/{version}', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/projects/metadata/form/dev/versions')
+        .get('/v5/projects/metadata/form/dev/versions')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
           const form = forms[0];
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           resJson[0].key.should.be.eql(form.key);
@@ -70,13 +72,13 @@ describe('LIST form versions', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions')
+      .get('/v5/projects/metadata/form/dev/versions')
       .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions')
+      .get('/v5/projects/metadata/form/dev/versions')
       .set({
         Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
       })
@@ -86,7 +88,7 @@ describe('LIST form versions', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions')
+      .get('/v5/projects/metadata/form/dev/versions')
       .set({
         Authorization: `Bearer ${testUtil.jwts.manager}`,
       })
@@ -96,7 +98,7 @@ describe('LIST form versions', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions')
+      .get('/v5/projects/metadata/form/dev/versions')
       .set({
         Authorization: `Bearer ${testUtil.jwts.member}`,
       })
@@ -105,7 +107,7 @@ describe('LIST form versions', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-      .get('/v4/projects/metadata/form/dev/versions')
+      .get('/v5/projects/metadata/form/dev/versions')
       .set({
         Authorization: `Bearer ${testUtil.jwts.copilot}`,
       })

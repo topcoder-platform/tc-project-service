@@ -12,6 +12,8 @@ import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 
+import { BUS_API_EVENT, RESOURCES } from '../../constants';
+
 chai.should();
 
 const expectAfterDelete = (projectId, workStreamId, phaseId, id, err, next) => {
@@ -33,7 +35,7 @@ const expectAfterDelete = (projectId, workStreamId, phaseId, id, err, next) => {
         chai.assert.isNotNull(res.deletedBy);
 
         request(server)
-          .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${phaseId}/workitems/${id}`)
+          .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${phaseId}/workitems/${id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -192,13 +194,13 @@ describe('DELETE Work Item', () => {
   describe('DELETE /projects/{projectId}/workstreams/{workStreamId}/works/{workId}/workitems/{productId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .expect(403, done);
     });
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -207,7 +209,7 @@ describe('DELETE Work Item', () => {
 
     it('should return 404 when no work stream with specific workStreamId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/999/works/${workId}/workitems/${productId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/999/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -217,7 +219,7 @@ describe('DELETE Work Item', () => {
 
     it('should return 404 when no work with specific workId', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/999/workitems/${productId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/999/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -227,7 +229,7 @@ describe('DELETE Work Item', () => {
 
     it('should return 204 for member', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -236,7 +238,7 @@ describe('DELETE Work Item', () => {
 
     it('should return 204 when user have project permission', (done) => {
       request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -261,9 +263,9 @@ describe('DELETE Work Item', () => {
         sandbox.restore();
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when work item removed', (done) => {
+      it('should send correct BUS API messages when work item removed', (done) => {
         request(server)
-        .delete(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .delete(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -273,7 +275,12 @@ describe('DELETE Work Item', () => {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.notCalled.should.be.true;
+              createEventSpy.callCount.should.be.eql(1);
+
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_DELETED, sinon.match({
+                resource: RESOURCES.PHASE_PRODUCT,
+              })).should.be.true;
+
               done();
             });
           }

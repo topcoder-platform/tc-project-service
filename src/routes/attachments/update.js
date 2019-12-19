@@ -7,7 +7,7 @@ import {
 } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 /**
  * API to update a project member.
@@ -15,13 +15,11 @@ import { EVENT } from '../../constants';
 const permissions = tcMiddleware.permissions;
 
 const updateProjectAttachmentValidation = {
-  body: {
-    param: Joi.object().keys({
-      title: Joi.string().required(),
-      description: Joi.string().optional().allow(null).allow(''),
-      allowedUsers: Joi.array(Joi.number().integer().positive()).allow(null).default(null),
-    }),
-  },
+  body: Joi.object().keys({
+    title: Joi.string().required(),
+    description: Joi.string().optional().allow(null).allow(''),
+    allowedUsers: Joi.array().items(Joi.number().integer().positive()).allow(null).default(null),
+  }),
 };
 
 module.exports = [
@@ -32,7 +30,7 @@ module.exports = [
    * Update a attachment if the user has access
    */
   (req, res, next) => {
-    const updatedProps = req.body.param;
+    const updatedProps = req.body;
     const projectId = _.parseInt(req.params.projectId);
     const attachmentId = _.parseInt(req.params.id);
     let previousValue;
@@ -56,14 +54,20 @@ module.exports = [
       }
     })).then((updated) => {
       req.log.debug('updated project attachment', JSON.stringify(updated, null, 2));
-      res.json(util.wrapResponse(req.id, updated));
+      res.json(updated);
       // emit original and updated project information
       req.app.services.pubsub.publish(
         EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED,
         { original: previousValue, updated: updated.get({ plain: true }) },
         { correlationId: req.id },
       );
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED, { req, original: previousValue, updated });
+
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED,
+        RESOURCES.ATTACHMENT,
+        updated.toJSON());
     }).catch(err => next(err)));
   },
 ];

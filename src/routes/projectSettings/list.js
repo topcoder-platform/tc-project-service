@@ -6,7 +6,6 @@ import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import util from '../../util';
 
 const permissions = tcMiddleware.permissions;
 
@@ -44,7 +43,7 @@ module.exports = [
         return models.ProjectSetting.findAll(options);
       })
       .then((result) => {
-        res.json(util.wrapResponse(req.id, _.filter(result, r => r)));
+        res.json(_.filter(result, r => r));
       })
       .catch(next);
   },

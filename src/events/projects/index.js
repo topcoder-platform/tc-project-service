@@ -41,10 +41,6 @@ const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disab
       // removes non required fields from phase objects
       data.phases = data.phases.map(phase => _.omit(phase, ['deletedAt', 'deletedBy']));
     }
-    // TEMPORARY FIX: should fix ES mapping instead and reindex all the projects instead
-    if (typeof _.get(data, 'details.taasDefinition.team.skills') !== 'string') {
-      _.set(data, 'details.taasDefinition.team.skills', '');
-    }
     // add the record to the index
     const result = yield eClient.index({
       index: ES_PROJECT_INDEX,
@@ -95,10 +91,6 @@ const projectUpdatedHandler = Promise.coroutine(function* (logger, msg, channel)
     // first get the existing document and than merge the updated changes and save the new document
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.id });
     const merged = _.merge(doc._source, data.updated);        // eslint-disable-line no-underscore-dangle
-    // TEMPORARY FIX: should fix ES mapping instead and reindex all the projects instead
-    if (typeof _.get(merged, 'details.taasDefinition.team.skills') !== 'string') {
-      _.set(merged, 'details.taasDefinition.team.skills', '');
-    }
     // update the merged document
     yield eClient.update({
       index: ES_PROJECT_INDEX,
@@ -167,7 +159,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
 
   // Find project by id and update activity. Single update is used as there is no need to wrap it into transaction
   const projectId = payload.projectId;
-  const project = await models.Project.findById(projectId);
+  const project = await models.Project.findByPk(projectId);
   if (!project) {
     throw new Error(`Project with id ${projectId} not found`);
   }
@@ -181,10 +173,6 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
   try {
     const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
     const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
-    // TEMPORARY FIX: should fix ES mapping instead and reindex all the projects instead
-    if (typeof _.get(merged, 'details.taasDefinition.team.skills') !== 'string') {
-      _.set(merged, 'details.taasDefinition.team.skills', '');
-    }
     // update the merged document
     await eClient.update({
       index: ES_PROJECT_INDEX,

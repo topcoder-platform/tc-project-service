@@ -19,6 +19,7 @@ describe('Project create', () => {
     sinon.stub(RabbitMQService.prototype, 'init', () => {});
     sinon.stub(RabbitMQService.prototype, 'publish', () => {});
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => models.ProjectType.bulkCreate([
         {
           key: 'generic',
@@ -259,17 +260,15 @@ describe('Project create', () => {
 
   describe('POST /projects', () => {
     const body = {
-      param: {
-        type: 'generic',
-        description: 'test project',
-        details: {},
-        billingAccountId: 1,
-        name: 'test project1',
-        bookmarks: [{
-          title: 'title1',
-          address: 'http://www.address.com',
-        }],
-      },
+      type: 'generic',
+      description: 'test project',
+      details: {},
+      billingAccountId: 1,
+      name: 'test project1',
+      bookmarks: [{
+        title: 'title1',
+        address: 'http://www.address.com',
+      }],
     };
 
     let sandbox;
@@ -282,124 +281,96 @@ describe('Project create', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .send(body)
         .expect(403, done);
     });
 
-    it('should return 422 if validations dont pass', (done) => {
+    it('should return 400 if validations dont pass', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.name;
+      delete invalidBody.name;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project type is missing', (done) => {
+    it('should return 400 if project type is missing', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.type = null;
+      invalidBody.type = null;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project type does not exist', (done) => {
+    it('should return 400 if project type does not exist', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.type = 'not_exist';
+      invalidBody.type = 'not_exist';
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if templateId does not exist', (done) => {
+    it('should return 400 if templateId does not exist', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.templateId = 3000;
+      invalidBody.templateId = 3000;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if phaseProduct count exceeds max value', (done) => {
+    it('should return 400 if phaseProduct count exceeds max value', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.templateId = 1;
+      invalidBody.templateId = 1;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 with wrong format estimation field', (done) => {
+    it('should return 400 with wrong format estimation field', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.estimation = [
+      invalidBody.estimation = [
         {
 
         },
       ];
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 201 if error to create direct project', (done) => {
-      const validBody = _.cloneDeep(body);
-      validBody.param.templateId = 3;
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        post: () => Promise.reject(new Error('error message')),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-      request(server)
-        .post('/v4/projects')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send(validBody)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const result = res.body.result;
-            result.success.should.be.truthy;
-            result.status.should.equal(201);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
-            done();
-          }
-        });
+        .expect(400, done);
     });
 
     it('should return 201 if valid user and data', (done) => {
       const validBody = _.cloneDeep(body);
-      validBody.param.templateId = 3;
+      validBody.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
@@ -418,7 +389,7 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -429,13 +400,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v3');
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
@@ -474,7 +444,7 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -485,13 +455,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v2');
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
@@ -528,24 +497,23 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send(_.merge({ param: { templateId: 3 } }, body))
+        .send(_.merge({ templateId: 3 }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
             resJson.members[0].userId.should.be.eql(40051331);
@@ -595,17 +563,15 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(_.merge({
-          param: {
-            templateId: 4,
-            details: {
-              appDefinition: {
-                deliverables: ['dev-qa', 'design'],
-              },
+          templateId: 4,
+          details: {
+            appDefinition: {
+              deliverables: ['dev-qa', 'design'],
             },
           },
         }, body))
@@ -615,13 +581,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
             resJson.members[0].userId.should.be.eql(40051331);
@@ -655,7 +620,7 @@ describe('Project create', () => {
 
     it('should return 201 if valid user and data (with estimation)', (done) => {
       const validBody = _.cloneDeep(body);
-      validBody.param.estimation = [
+      validBody.estimation = [
         {
           conditions: '( HAS_DESIGN_DELIVERABLE && HAS_ZEPLIN_APP_ADDON && CA_NEEDED)',
           price: 6,
@@ -719,7 +684,7 @@ describe('Project create', () => {
           buildingBlockKey: 'HAS_UNIT_TESTING_ADDON_CA',
         },
       ];
-      validBody.param.templateId = 3;
+      validBody.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
@@ -738,7 +703,7 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -749,13 +714,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v3');
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
@@ -826,11 +790,11 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: 'Bearer userId_1800075',
         })
-        .send(_.merge({ param: { templateId: 3 } }, body))
+        .send(_.merge({ templateId: 3 }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
@@ -838,13 +802,12 @@ describe('Project create', () => {
             server.log.error(err);
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
             resJson.members[0].userId.should.be.eql(1800075);
@@ -877,7 +840,7 @@ describe('Project create', () => {
 
     it('should create correct estimation items with estimation', (done) => {
       const validBody = _.cloneDeep(body);
-      validBody.param.estimation = [
+      validBody.estimation = [
         {
           conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE) )',
           price: 1000,
@@ -903,26 +866,18 @@ describe('Project create', () => {
           buildingBlockKey: 'BLOCK_KEY3',
         },
       ];
-      validBody.param.templateId = 3;
+      validBody.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
           data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                projectId: 128,
-              },
-            },
+            projectId: 128,
           },
         }),
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -933,7 +888,7 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.name);
             should.exist(resJson.estimations);

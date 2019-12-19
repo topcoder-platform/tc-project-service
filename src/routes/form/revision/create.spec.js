@@ -35,32 +35,32 @@ describe('CREATE Form Revision', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.Form.create(forms[0]))
-    .then(() => models.Form.create(forms[1]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.Form.create(forms[0]))
+      .then(() => models.Form.create(forms[1]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('Post /projects/metadata/form/{key}/versions/{version}/revision', () => {
     const body = {
-      param: {
-        config: {
-          'test create': 'test create',
-        },
+      config: {
+        'test create': 'test create',
       },
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projects/metadata/form/dev/versions/1/revisions')
+        .post('/v5/projects/metadata/form/dev/versions/1/revisions')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 404 if missing key', (done) => {
       request(server)
-      .post('/v4/projects/metadata/form/no-exist-key/versions/1/revisions')
+      .post('/v5/projects/metadata/form/no-exist-key/versions/1/revisions')
       .set({
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
@@ -71,7 +71,7 @@ describe('CREATE Form Revision', () => {
 
     it('should return 404 if missing version', (done) => {
       request(server)
-      .post('/v4/projects/metadata/form/dev/versions/100/revisions')
+      .post('/v5/projects/metadata/form/dev/versions/100/revisions')
       .set({
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
@@ -80,26 +80,24 @@ describe('CREATE Form Revision', () => {
         .expect(404, done);
     });
 
-    it('should return 422 if missing config', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          config: undefined,
-        }),
-      };
+    it('should return 400 if missing config', (done) => {
+      const invalidBody = _.assign({}, body, {
+        config: undefined,
+      });
 
       request(server)
-        .post('/v4/projects/metadata/form/no-exist-key/versions/1/revisions')
+        .post('/v5/projects/metadata/form/no-exist-key/versions/1/revisions')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-      .post('/v4/projects/metadata/form/dev/versions/1/revisions')
+      .post('/v5/projects/metadata/form/dev/versions/1/revisions')
       .set({
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
@@ -107,9 +105,9 @@ describe('CREATE Form Revision', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.config.should.be.eql(body.param.config);
+          resJson.config.should.be.eql(body.config);
           resJson.key.should.be.eql('dev');
           resJson.revision.should.be.eql(3);
           resJson.version.should.be.eql(1);
@@ -125,7 +123,7 @@ describe('CREATE Form Revision', () => {
 
     it('should return 403 for member', (done) => {
       request(server)
-      .post('/v4/projects/metadata/form/dev/versions/1/revisions')
+      .post('/v5/projects/metadata/form/dev/versions/1/revisions')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })

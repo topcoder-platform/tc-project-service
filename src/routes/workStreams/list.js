@@ -4,7 +4,6 @@
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -40,7 +39,7 @@ module.exports = [
         raw: true,
       });
     })
-    .then(workStreams => res.json(util.wrapResponse(req.id, workStreams, workStreams.length)))
+    .then(workStreams => res.json(workStreams))
     .catch(next);
   },
 ];

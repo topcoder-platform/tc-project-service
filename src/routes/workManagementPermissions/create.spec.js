@@ -15,18 +15,16 @@ describe('CREATE work management permission', () => {
   let templateId;
 
   const body = {
-    param: {
-      policy: 'work.create',
-      permission: {
-        allowRule: {
-          projectRoles: ['customer', 'copilot'],
-          topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
-        },
-        denyRule: { projectRoles: ['copilot'] },
+    policy: 'work.create',
+    permission: {
+      allowRule: {
+        projectRoles: ['customer', 'copilot'],
+        topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
       },
-      createdBy: 1,
-      updatedBy: 1,
+      denyRule: { projectRoles: ['copilot'] },
     },
+    createdBy: 1,
+    updatedBy: 1,
   };
 
   beforeEach((done) => {
@@ -47,24 +45,26 @@ describe('CREATE work management permission', () => {
         })
         .then((t) => {
           templateId = t.id;
-          body.param = _.assign({}, body.param, { projectTemplateId: templateId });
+          body.projectTemplateId = templateId;
         }).then(() => done());
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /projects/metadata/workManagementPermission', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -74,7 +74,7 @@ describe('CREATE work management permission', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -84,7 +84,7 @@ describe('CREATE work management permission', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -94,7 +94,7 @@ describe('CREATE work management permission', () => {
 
     it('should return 403 for non-member', (done) => {
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -102,82 +102,82 @@ describe('CREATE work management permission', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for missing policy', (done) => {
+    it('should return 400 for missing policy', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.policy;
+      delete invalidBody.policy;
 
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing permission', (done) => {
+    it('should return 400 for missing permission', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.permission;
+      delete invalidBody.permission;
 
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for missing projectTemplateId', (done) => {
+    it('should return 400 for missing projectTemplateId', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.projectTemplateId;
+      delete invalidBody.projectTemplateId;
 
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for duplicated policy and projectTemplateId', (done) => {
-      models.WorkManagementPermission.create(body.param)
+    it('should return 400 for duplicated policy and projectTemplateId', (done) => {
+      models.WorkManagementPermission.create(body)
         .then(() => {
           request(server)
-            .post('/v4/projects/metadata/workManagementPermission')
+            .post('/v5/projects/metadata/workManagementPermission')
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
             .send(body)
             .expect('Content-Type', /json/)
-            .expect(422, done);
+            .expect(400, done);
         });
     });
 
-    it('should return 422 for deleted but duplicated policy and projectTemplateId', (done) => {
-      models.WorkManagementPermission.create(body.param)
+    it('should return 400 for deleted but duplicated policy and projectTemplateId', (done) => {
+      models.WorkManagementPermission.create(body)
         .then((permission) => {
           models.WorkManagementPermission.destroy({ where: { id: permission.id } });
         })
         .then(() => {
           request(server)
-            .post('/v4/projects/metadata/workManagementPermission')
+            .post('/v5/projects/metadata/workManagementPermission')
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
             .send(body)
             .expect('Content-Type', /json/)
-            .expect(422, done);
+            .expect(400, done);
         });
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/projects/metadata/workManagementPermission')
+        .post('/v5/projects/metadata/workManagementPermission')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -185,10 +185,10 @@ describe('CREATE work management permission', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          resJson.policy.should.be.eql(body.param.policy);
-          resJson.permission.should.be.eql(body.param.permission);
-          resJson.projectTemplateId.should.be.eql(body.param.projectTemplateId);
+          const resJson = res.body;
+          resJson.policy.should.be.eql(body.policy);
+          resJson.permission.should.be.eql(body.permission);
+          resJson.projectTemplateId.should.be.eql(body.projectTemplateId);
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
           resJson.updatedBy.should.be.eql(40051333); // admin

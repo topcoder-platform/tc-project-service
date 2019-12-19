@@ -3,7 +3,7 @@
  */
 import chai from 'chai';
 import request from 'supertest';
-import sleep from 'sleep';
+// import sleep from 'sleep';
 import config from 'config';
 import _ from 'lodash';
 
@@ -177,29 +177,31 @@ describe('LIST milestones', () => {
                   type: ES_TIMELINE_TYPE,
                   id: timelines[0].id,
                   body: timelines[0],
-                })
-                  .then(() => {
-                    // sleep for some time, let elasticsearch indices be settled
-                    sleep.sleep(5);
-                    done();
-                  });
+                });
+              })
+              .then(() => {
+                // sleep for some time, let elasticsearch indices be settled
+                // sleep.sleep(5);
+                done();
               });
           });
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines/{timelineId}/milestones', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v5/timelines')
         .expect(403, done);
     });
 
     it('should return 403 for member with no accessible project', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -208,40 +210,40 @@ describe('LIST milestones', () => {
 
     it('should return 404 for not-existed timeline', (done) => {
       request(server)
-        .get('/v4/timelines/11/milestones')
+        .get('/v5/timelines/11/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(404, done);
     });
 
-    it('should return 422 for invalid sort column', (done) => {
+    it('should return 400 for invalid sort column', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones?sort=id%20asc')
+        .get('/v5/timelines/1/milestones?sort=id%20asc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for invalid sort order', (done) => {
+    it('should return 400 for invalid sort order', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones?sort=order%20invalid')
+        .get('/v5/timelines/1/milestones?sort=order%20invalid')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           resJson.forEach((milestone, index) => {
@@ -252,7 +254,7 @@ describe('LIST milestones', () => {
               statusHistory.referenceId.should.be.eql(milestone.id);
             });
 
-            const m = _.omit(milestone, ['statusHistory']);
+            const m = _.omitBy(_.omit(milestone, ['statusHistory']), _.isNil);
 
             m.should.be.eql(milestones[index]);
           });
@@ -263,13 +265,13 @@ describe('LIST milestones', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -278,13 +280,13 @@ describe('LIST milestones', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -293,12 +295,12 @@ describe('LIST milestones', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -307,12 +309,12 @@ describe('LIST milestones', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones')
+        .get('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
           done();
@@ -321,17 +323,17 @@ describe('LIST milestones', () => {
 
     it('should return 200 with sort by order desc', (done) => {
       request(server)
-        .get('/v4/timelines/1/milestones?sort=order%20desc')
+        .get('/v5/timelines/1/milestones?sort=order%20desc')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
 
-          const m1 = _.omit(resJson[0], ['statusHistory']);
-          const m2 = _.omit(resJson[1], ['statusHistory']);
+          const m1 = _.omitBy(_.omit(resJson[0], ['statusHistory']), _.isNil);
+          const m2 = _.omitBy(_.omit(resJson[1], ['statusHistory']), _.isNil);
           m1.should.be.eql(milestones[1]);
           m2.should.be.eql(milestones[0]);
 
