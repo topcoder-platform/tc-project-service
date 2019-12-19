@@ -85,7 +85,8 @@ module.exports = [
             util.sendResourceToKafkaBus(req,
               EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
               RESOURCES.PRODUCT_TEMPLATE,
-              entityToUpdate);
+              productTemplate.get({ plain: true }),
+            );
             res.json(productTemplate);
             return Promise.resolve();
           })

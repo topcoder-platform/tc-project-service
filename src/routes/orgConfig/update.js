@@ -57,7 +57,9 @@ module.exports = [
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
           RESOURCES.ORG_CONFIG,
-          entityToUpdate);
+          entityToUpdate,
+          orgConfig.get({ plain: true }),
+        );
         res.json(orgConfig);
         return Promise.resolve();
       })

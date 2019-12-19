@@ -63,7 +63,8 @@ module.exports = [
           req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
           RESOURCES.PROJECT_TYPE,
-          entityToUpdate);
+          projectType.get({ plain: true }),
+        );
 
         res.json(projectType);
         return Promise.resolve();

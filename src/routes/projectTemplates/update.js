@@ -105,7 +105,7 @@ module.exports = [
               req,
               EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
               RESOURCES.PROJECT_TEMPLATE,
-              entityToUpdate,
+              projectTemplate.get({ plain: true }),
             );
 
             res.json(projectTemplate);

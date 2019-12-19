@@ -128,7 +128,8 @@ module.exports = [
           req,
           EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_UPDATED,
           RESOURCES.MILESTONE_TEMPLATE,
-          _.assign(entityToUpdate, _.pick(updated, 'id', 'updatedAt')));
+          updated,
+        );
 
         // emit the event for other milestone templates order updated
         _.map(otherUpdated, milestoneTemplate =>
@@ -136,7 +137,8 @@ module.exports = [
             req,
             EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_UPDATED,
             RESOURCES.MILESTONE_TEMPLATE,
-            _.assign(_.pick(milestoneTemplate.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+            milestoneTemplate.toJSON(),
+          ),
         );
 
         res.json(updated);

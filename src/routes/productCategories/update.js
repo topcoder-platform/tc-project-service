@@ -63,7 +63,8 @@ module.exports = [
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
           RESOURCES.PRODUCT_CATEGORY,
-          entityToUpdate);
+          productCategory.get({ json: true }),
+        );
         res.json(productCategory);
         return Promise.resolve();
       })
