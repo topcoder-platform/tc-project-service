@@ -54,6 +54,14 @@ const data = [
         updatedBy: 1,
       },
     ],
+    invites: [
+      {
+        id: 1,
+        userId: 40051335,
+        email: 'test@topcoder.com',
+        status: 'pending',
+      },
+    ],
     attachments: [
       {
         id: 1,
@@ -88,6 +96,14 @@ const data = [
         isPrimary: true,
         createdBy: 1,
         updatedBy: 1,
+      },
+    ],
+    invites: [
+      {
+        id: 1,
+        userId: 40051335,
+        email: 'test@topcoder.com',
+        status: 'requested',
       },
     ],
   },
@@ -831,6 +847,47 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');
+              done();
+            }
+          });
+      });
+    });
+    describe('GET All /projects/ for non-admins users who are invited', () => {
+      it('should return projects where a non-admin user has an invitation in pending status', (done) => {
+        request(server)
+          .get(`/v5/projects/?id=${project1.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member2}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              resJson[0].name.should.equal('test1');
+              done();
+            }
+          });
+      });
+      it('should not return projects where a non-admin user has an invitation in requested status', (done) => {
+        request(server)
+          .get(`/v5/projects/?id=${project2.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member2}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(0);
               done();
             }
           });
