@@ -5,7 +5,7 @@ import _ from 'lodash';
 import config from 'config';
 
 import models from '../../models';
-import { MANAGER_ROLES } from '../../constants';
+import { MANAGER_ROLES, INVITE_STATUS } from '../../constants';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -127,9 +127,20 @@ const buildEsShouldQuery = (userId, email) => {
       nested: {
         path: 'invites',
         query: {
-          query_string: {
-            query: userId,
-            fields: ['invites.userId'],
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: userId,
+                  fields: ['invites.userId'],
+                },
+              }, {
+                query_string: {
+                  query: INVITE_STATUS.PENDING,
+                  fields: ['invites.status'],
+                },
+              },
+            ],
           },
         },
       },
@@ -141,9 +152,20 @@ const buildEsShouldQuery = (userId, email) => {
       nested: {
         path: 'invites',
         query: {
-          query_string: {
-            query: email,
-            fields: ['invites.email'],
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: email,
+                  fields: ['invites.email'],
+                },
+              }, {
+                query_string: {
+                  query: INVITE_STATUS.PENDING,
+                  fields: ['invites.status'],
+                },
+              },
+            ],
           },
         },
       },
