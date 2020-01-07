@@ -18,6 +18,8 @@ const schema = {
     name: Joi.string().max(255).required(),
     key: Joi.string().max(45).required(),
     category: Joi.string().max(45).required(),
+    subCategory: Joi.string().max(45).empty(null),
+    metadata: Joi.object(),
     icon: Joi.string().max(255).required(),
     question: Joi.string().max(255).required(),
     info: Joi.string().max(255).required(),

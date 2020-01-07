@@ -12,6 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     name: { type: DataTypes.STRING(255), allowNull: false },
     key: { type: DataTypes.STRING(45), allowNull: false },
     category: { type: DataTypes.STRING(45), allowNull: false },
+    subCategory: { type: DataTypes.STRING(45) },
+    metadata: { type: DataTypes.JSON, allowNull: false, defaultValue: {} },
     icon: { type: DataTypes.STRING(255), allowNull: false },
     question: { type: DataTypes.STRING(255), allowNull: false },
     info: { type: DataTypes.STRING(255), allowNull: false },

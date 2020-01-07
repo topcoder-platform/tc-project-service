@@ -21,6 +21,8 @@ const schema = {
     name: Joi.string().max(255),
     key: Joi.string().max(45),
     category: Joi.string().max(45),
+    subCategory: Joi.string().max(45).empty(null),
+    metadata: Joi.object(),
     icon: Joi.string().max(255),
     question: Joi.string().max(255),
     info: Joi.string().max(255),
