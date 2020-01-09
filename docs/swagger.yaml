@@ -5266,6 +5266,12 @@ definitions:
       category:
         type: string
         description: the project template category
+      subCategory:
+        type: string
+        description: the project template subCategory
+      metadata:
+        type: object
+        description: the project template metadata
       scope:
         type: object
         description: the project template scope
