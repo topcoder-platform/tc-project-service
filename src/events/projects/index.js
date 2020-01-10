@@ -65,9 +65,32 @@ const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disab
 const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   const project = JSON.parse(msg.content.toString());
   try {
-    // we don't have to call indexing, as it's now handled by `project-processor-es`
-    // yield indexProject(logger, msg);
-    // we call this handle only for the sake of creating topics for the phases
+    yield indexProject(logger, msg);
+    if (project.phases && project.phases.length > 0) {
+      logger.debug('Phases found for the project, trying to create topics for each phase.');
+      const topicPromises = _.map(project.phases, phase => createPhaseTopic(logger, phase));
+      yield Promise.all(topicPromises);
+    }
+    channel.ack(msg);
+  } catch (error) {
+    logger.error(`Error processing event (projectId: ${project.id})`, error);
+    channel.nack(msg, false, !msg.fields.redelivered);
+  }
+});
+
+/**
+ * Handler for project creation event
+ *
+ * we call this handle only for the sake of creating topics for the phases
+ *
+ * @param  {Object} logger  logger to log along with trace id
+ * @param  {Object} msg     event payload
+ * @param  {Object} channel channel to ack, nack
+ * @returns {undefined}
+ */
+const projectCreatedHandlerForPhases = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
+  const project = JSON.parse(msg.content.toString());
+  try {
     if (project.phases && project.phases.length > 0) {
       logger.debug('Phases found for the project, trying to create topics for each phase.');
       const topicPromises = _.map(project.phases, phase => createPhaseTopic(logger, phase));
@@ -192,6 +215,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
 
 module.exports = {
   projectCreatedHandler,
+  projectCreatedHandlerForPhases,
   projectUpdatedHandler,
   projectDeletedHandler,
   projectUpdatedKafkaHandler,
