@@ -21,7 +21,7 @@ const eClient = util.getElasticSearchClient();
  * @param  {Object} msg     event payload which is essentially a project in JSON format
  * @returns {undefined}
  */
-const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
+const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names, no-unused-vars
   const data = JSON.parse(msg.content.toString());
   const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
   try {
@@ -65,7 +65,9 @@ const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disab
 const projectCreatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
   const project = JSON.parse(msg.content.toString());
   try {
-    yield indexProject(logger, msg);
+    // we don't have to call indexing, as it's now handled by `project-processor-es`
+    // yield indexProject(logger, msg);
+    // we call this handle only for the sake of creating topics for the phases
     if (project.phases && project.phases.length > 0) {
       logger.debug('Phases found for the project, trying to create topics for each phase.');
       const topicPromises = _.map(project.phases, phase => createPhaseTopic(logger, phase));
