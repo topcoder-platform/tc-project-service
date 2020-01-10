@@ -21,7 +21,7 @@ const eClient = util.getElasticSearchClient();
  * @param  {Object} msg     event payload which is essentially a project in JSON format
  * @returns {undefined}
  */
-const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names, no-unused-vars
+const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
   const data = JSON.parse(msg.content.toString());
   const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
   try {
