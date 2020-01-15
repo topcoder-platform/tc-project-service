@@ -8,7 +8,7 @@ The following properties can be set from env variables:
 - PROJECT_LAST_ACTIVITY_AT: if set, only projects with property lastActivityAt that large than or equal to the value are compared.
 
 There could be some fields that always mismatch in ES and DB.
-The variable named `ignoredProperties` at `scripts/es-db-compare/constants.js` maintains a list of fields which will be ignored
+The variable named `ignoredPaths` at `scripts/es-db-compare/constants.js` maintains a list of json paths which will be ignored
 during the comparation. You may need to modify/add/delete items in the list.
 
 ### Note

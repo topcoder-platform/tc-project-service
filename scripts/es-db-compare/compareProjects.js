@@ -12,23 +12,16 @@
 const Diff = require('jsondiffpatch');
 const lodash = require('lodash');
 const scriptUtil = require('./util');
-const scriptConstants = require('./constants');
 
 const associations = {
   phases: 'Phase',
   members: 'Member',
   invites: 'Invite',
-  attachment: 'Attachment',
+  attachments: 'Attachment',
 };
 
 const differ = Diff.create({
   objectHash: obj => obj.id,
-  propertyFilter: (name) => {
-    if (scriptConstants.ignoredProperties.includes(name)) {
-      return false;
-    }
-    return true;
-  },
 });
 
 /**
@@ -67,12 +60,12 @@ function processDelta(delta, esData, dbData, finalData) {
   };
 
   const processProduct = (item) => {
-    const itemNew = Object.assign({}, lodash.omit(item, ['path']), { path: lodash.slice(item.path, 5) });
-    if (itemNew.dataType === 'array') {
+    const subPath = lodash.slice(item.path, 4);
+    if (item.dataType === 'array' && subPath.length === 1) {
       return processMissingObject(item, { modelName: 'Product' });
     }
-    if (['add', 'delete', 'modify'].includes(itemNew.type)) {
-      const path = scriptUtil.generateJSONPath(itemNew.path);
+    if (['add', 'delete', 'modify'].includes(item.type)) {
+      const path = scriptUtil.generateJSONPath(lodash.slice(subPath, 1));
       const id = lodash.get(finalData, lodash.slice(item.path, 0, 5)).id;
       const projectId = lodash.get(finalData, lodash.slice(item.path, 0, 1)).id;
       const phaseId = lodash.get(finalData, lodash.slice(item.path, 0, 3)).id;
@@ -93,6 +86,8 @@ function processDelta(delta, esData, dbData, finalData) {
       console.log(`one mismatch found for Product with id ${id}`);
       return {
         type: 'mismatch',
+        kind: item.type,
+        dataType: item.dataType,
         projectId,
         id,
         modelName: 'Product',
@@ -107,12 +102,12 @@ function processDelta(delta, esData, dbData, finalData) {
     if (item.path[1] === 'phases' && item.path[3] === 'products') {
       return processProduct(item);
     }
-    const itemNew = Object.assign({}, lodash.omit(item, ['path']), { path: lodash.slice(item.path, 2) });
-    if (itemNew.dataType === 'array') {
+    const subPath = lodash.slice(item.path, 2);
+    if (item.dataType === 'array' && subPath.length === 1) {
       return processMissingObject(item, option);
     }
-    if (['add', 'delete', 'modify'].includes(itemNew.type)) {
-      const path = scriptUtil.generateJSONPath(lodash.slice(itemNew.path, 1));
+    if (['add', 'delete', 'modify'].includes(item.type)) {
+      const path = scriptUtil.generateJSONPath(lodash.slice(subPath, 1));
       const id = lodash.get(finalData, lodash.slice(item.path, 0, 3)).id;
       const projectId = lodash.get(finalData, lodash.slice(item.path, 0, 1)).id;
       const dbCopy = lodash.find(
@@ -126,6 +121,8 @@ function processDelta(delta, esData, dbData, finalData) {
       console.log(`one mismatch found for ${option.modelName} with id ${id}`);
       return {
         type: 'mismatch',
+        kind: item.type,
+        dataType: item.dataType,
         projectId,
         modelName: option.modelName,
         id,
@@ -139,7 +136,7 @@ function processDelta(delta, esData, dbData, finalData) {
   if (delta.path.length > 2 && associations[delta.path[1]]) {
     return processAssociation(delta, { modelName: associations[delta.path[1]], refPath: delta.path[1] });
   }
-  if (delta.dataType === 'array') {
+  if (delta.dataType === 'array' && delta.path.length === 1) {
     return processMissingObject(delta, { modelName: 'Project' });
   }
   if (['add', 'delete', 'modify'].includes(delta.type)) {
@@ -150,6 +147,8 @@ function processDelta(delta, esData, dbData, finalData) {
     console.log(`one mismatch found for Project with id ${id}`);
     return {
       type: 'mismatch',
+      kind: delta.type,
+      dataType: delta.dataType,
       projectId: id,
       modelName: 'Project',
       id,
@@ -264,6 +263,9 @@ function compareProjects(esData, dbData) {
   const finalData = differ.patch(Diff.clone(dbData), result);
   const flattenedResult = scriptUtil.flatten(result);
   for (const item of flattenedResult) {
+    if (scriptUtil.isIgnoredPath('project', item.path)) {
+      continue; // eslint-disable-line no-continue
+    }
     const delta = processDelta(item, esData, dbData, finalData);
     if (delta) {
       collectDataCopies(delta);

@@ -8,6 +8,8 @@
 const _ = require('lodash');
 const moment = require('moment');
 
+const constants = require('./constants');
+
 /**
  * Sub-function for the flatten function that process object assets in the delta.
  *
@@ -163,6 +165,26 @@ function generateJSONPath(path) {
 }
 
 /**
+ * Check if the json path of a delta should be ignored.
+ * Low-budget version.
+ *
+ * @param {String} root the model name, one of "project" and "metadata"
+ * @param {Array} path the path to be verified
+ * @returns {Boolean} the result
+ */
+function isIgnoredPath(root, path) {
+  const jsonPath = generateJSONPath(_.slice(path, 1));
+  if (jsonPath === '') {
+    return false;
+  }
+  const expr = jsonPath.replace(/\[\d+\]/g, '[*]').replace(/^/, `${root}.`)
+  if (constants.ignoredPaths.includes(expr)) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Generate a sensible filename for the report.
  *
  * @returns {String} the result filename
@@ -177,4 +199,5 @@ module.exports = {
   flatten,
   generateJSONPath,
   generateFilename,
+  isIgnoredPath,
 };

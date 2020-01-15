@@ -164,6 +164,8 @@ async function getDBData() {
         });
     });
     return Promise.all(projects);
+  }).then(projects => {
+    return JSON.parse(JSON.stringify(projects));
   });
 }
 

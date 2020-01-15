@@ -1,21 +1,37 @@
 <head>
   <title>Topcoder Project Service - ES/DB Comparison Report</title>
 <script>
-function copyFromDB(data) {
-  copyFrom(data, 'db')
+function copyFromDB(data, button) {
+  copyFrom(data, button, 'db')
 }
-function copyFromES(data) {
-  copyFrom(data, 'es')
+function copyFromES(data, button) {
+  copyFrom(data, button, 'es')
 }
-function copyFrom(data, type) {
+function copyFrom(data, button, type) {
   var modelName = Object.keys(data)[0]
   var documentId = Object.values(data)[0]
   var text = document.getElementById(type + '_' + modelName + '_' + documentId)
+  <!-- setTimeout(() => text.innerHTML = originalText, 1000) -->
+  text.style.display = 'block' // show the textarea so that we can copy the text in it
   text.select()
   document.execCommand('copy')
-  alert(`Copied ${modelName}: ${documentId} from ${type.toUpperCase() } data`)
+  text.style.display = 'none' // hide the textarea again
+  // notify the user that the data is copied
+  var buttonOriginalColor = button.style.background
+  var buttonOriginalText = button.innerHTML
+  button.innerHTML = 'Copied!'
+  button.style.background = '#00e0e0'
+  setTimeout(function() {
+    button.innerHTML = buttonOriginalText
+    button.style.background = buttonOriginalColor
+  }, 500)
 }
 </script>
+<style>
+textarea {
+  display: none
+}
+</style>
 </head>
 
 <body>
@@ -26,13 +42,13 @@ There are {{ project.meta.totalObjects }} objects with inconsistencies found in 
 {{#each project.rootMismatch }}
   <h3>Project - id: {{ @key }} ({{ this.meta.counts }})</h3>
   {{#if this.project.length}}
-  <button onclick="copyFromDB({ Project: '{{ @key }}' })">Copy from DB</button>
-  <button onclick="copyFromES({ Project: '{{ @key }}' })">Copy from ES</button>
+  <button onclick="copyFromDB({ Project: '{{ @key }}' }, this)">Copy from DB</button>
+  <button onclick="copyFromES({ Project: '{{ @key }}' }, this)">Copy from ES</button>
   <p>{{ this.project.length }} mismatches:</p>
   {{/if}}
   <ui>
   {{#each this.project }}
-    <li>{{ this.path }}</li>
+    <li>{{ this.path }} (kind: {{ this.kind }})</li>
   {{/each}}
   </ui>
 
@@ -40,24 +56,24 @@ There are {{ project.meta.totalObjects }} objects with inconsistencies found in 
   <h4>{{ @key }} ({{ this.meta.counts }})</h4>
     {{#each this.mismatches }}
       <h5>{{ @../key }} - id: {{ @key }}</h5>
-      <button onclick="copyFromDB({ {{ @../key }}: '{{ @key }}' })">Copy from DB</button>
-      <button onclick="copyFromES({ {{ @../key }}: '{{ @key }}' })">Copy from ES</button>
+      <button onclick="copyFromDB({ {{ @../key }}: '{{ @key }}' }, this)">Copy from DB</button>
+      <button onclick="copyFromES({ {{ @../key }}: '{{ @key }}' }, this)">Copy from ES</button>
       <p>{{ this.length }} mismatches:</p>
       <ui>
       {{#each this }}
-        <li>{{ this.path }}</li>
+        <li>{{ this.path }} (kind: {{ this.kind }})</li>
       {{/each}}
       </ui>
     {{/each}}
     {{#each this.dbOnly }}
       <h5>{{ @../key }} - id: {{ this.id }} (1)</h5>
-      <button onclick="copyFromDB({ {{ this.modelName }}: '{{ this.id }}' })">Copy from DB</button>
+      <button onclick="copyFromDB({ {{ this.modelName }}: '{{ this.id }}' }, this)">Copy from DB</button>
       <p>Found in DB but not in ES.</p>
     {{/each}}
 
     {{#each this.esOnly }}
       <h5>{{ @../key }} - id: {{ this.id }} (1)</h5>
-      <button onclick="copyFromES({ {{ this.modelName }}: '{{ this.id }}' })">Copy from ES</button>
+      <button onclick="copyFromES({ {{ this.modelName }}: '{{ this.id }}' }, this)">Copy from ES</button>
       <p>Found in ES but not in DB.</p>
     {{/each}}
   {{/each}}
@@ -65,25 +81,25 @@ There are {{ project.meta.totalObjects }} objects with inconsistencies found in 
 
 {{#each project.dbOnly }}
 <h3>Project - id: {{ this.id }} (1)</h3>
-<button onclick="copyFromDB({ Project: '{{ this.id }}' })">Copy from DB</button>
+<button onclick="copyFromDB({ Project: '{{ this.id }}' }, this)">Copy from DB</button>
 <p>Found in DB but not in ES.</p>
 {{/each}}
 
 {{#each project.esOnly }}
 <h3>Project - id: {{ this.id }} (1)</h3>
-<button onclick="copyFromES({ Project: '{{ this.id }}' })">Copy from ES</button>
+<button onclick="copyFromES({ Project: '{{ this.id }}' }, this)">Copy from ES</button>
 <p>Found in ES but not in DB.</p>
 {{/each}}
-
-<h1>Data</h1>
-{{#each meta.dbCopies }}
-<textarea readOnly id="db_{{ this.modelName }}_{{ this.id }}" rows="8" cols="40">
-  {{toJSON this.dbCopy }}
-</textarea>
-{{/each}}
-{{#each meta.esCopies }}
-<textarea readOnly id="es_{{ this.modelName }}_{{ this.id }}" rows="8" cols="40">
-  {{toJSON this.esCopy }}
-</textarea>
-{{/each}}
+<div id="data">
+  {{#each meta.dbCopies }}
+  <textarea readOnly id="db_{{ this.modelName }}_{{ this.id }}" rows="8" cols="40">
+    {{toJSON this.dbCopy }}
+  </textarea>
+  {{/each}}
+  {{#each meta.esCopies }}
+  <textarea readOnly id="es_{{ this.modelName }}_{{ this.id }}" rows="8" cols="40">
+    {{toJSON this.esCopy }}
+  </textarea>
+  {{/each}}
 </body>
+</div>
