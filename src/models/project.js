@@ -117,7 +117,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
         query += 'AND projects.status IN (:status) ';
         replacements.status = statusFilter.$in;
       } else if (_.isString(statusFilter)) {
-        query += 'AND projects.status = :status';
+        query += 'AND projects.status = :status ';
         replacements.status = statusFilter;
       }
     }
@@ -126,7 +126,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
       replacements.type = parameters.filters.type;
     }
     if (_.has(parameters.filters, 'keyword')) {
-      query += 'AND projects."projectFullText" ~ lower(:keyword)';
+      query += 'AND projects."projectFullText" ~ lower(:keyword) ';
       replacements.keyword = parameters.filters.keyword;
     }
     if (_.has(parameters.filters, 'name')) {
