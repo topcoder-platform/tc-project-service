@@ -33,10 +33,10 @@ module.exports = [
   (req, res, next) => {
     const logger = req.log;
     logger.debug('Entered Admin#index');
-    const projectIdStart = Number(req.body.param.projectIdStart);
-    const projectIdEnd = Number(req.body.param.projectIdEnd);
-    const indexName = _.get(req, 'body.param.indexName', ES_PROJECT_INDEX);
-    const docType = _.get(req, 'body.param.docType', ES_PROJECT_TYPE);
+    const projectIdStart = Number(req.body.projectIdStart);
+    const projectIdEnd = Number(req.body.projectIdEnd);
+    const indexName = _.get(req, 'body.indexName', ES_PROJECT_INDEX);
+    const docType = _.get(req, 'body.docType', ES_PROJECT_TYPE);
     logger.debug('projectIdStart', projectIdStart);
     logger.debug('projectIdEnd', projectIdEnd);
     logger.debug('indexName', indexName);
