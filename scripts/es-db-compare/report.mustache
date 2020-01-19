@@ -48,7 +48,7 @@ There are {{ project.meta.totalObjects }} objects with inconsistencies found in 
   {{/if}}
   <ui>
   {{#each this.project }}
-    <li>{{ this.path }} (kind: {{ this.kind }})</li>
+    <li>{{ this.path }} ({{describeKind this.kind }})</li>
   {{/each}}
   </ui>
 
@@ -61,7 +61,7 @@ There are {{ project.meta.totalObjects }} objects with inconsistencies found in 
       <p>{{ this.length }} mismatches:</p>
       <ui>
       {{#each this }}
-        <li>{{ this.path }} (kind: {{ this.kind }})</li>
+        <li>{{ this.path }} ({{ this.kind }})</li>
       {{/each}}
       </ui>
     {{/each}}

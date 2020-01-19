@@ -101,6 +101,18 @@ function getESSearchCriteria() {
 function getTemplate() {
   handlebars.registerHelper('getValue', (data, key) => data[key]);
   handlebars.registerHelper('toJSON', obj => JSON.stringify(obj, null, 2));
+  handlebars.registerHelper('describeKind', (kind) => {
+    if (kind === 'modify') {
+      return 'values differ';
+    }
+    if (kind === 'add') {
+      return 'missed in DB';
+    }
+    if (kind === 'delete') {
+      return 'missed in ES';
+    }
+    return 'unknown';
+  });
   const template = handlebars.compile(fs.readFileSync(path.join(__dirname, 'report.mustache')).toString());
   return template;
 }
