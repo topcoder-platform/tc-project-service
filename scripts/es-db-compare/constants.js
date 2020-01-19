@@ -29,5 +29,5 @@ module.exports = {
     'project.invites[*].deletedBy',
     'project.members[*].deletedBy',
     'project.attachments[*].deletedBy',
-  ]
+  ],
 };

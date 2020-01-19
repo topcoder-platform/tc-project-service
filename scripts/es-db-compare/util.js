@@ -177,7 +177,7 @@ function isIgnoredPath(root, path) {
   if (jsonPath === '') {
     return false;
   }
-  const expr = jsonPath.replace(/\[\d+\]/g, '[*]').replace(/^/, `${root}.`)
+  const expr = jsonPath.replace(/\[\d+\]/g, '[*]').replace(/^/, `${root}.`);
   if (constants.ignoredPaths.includes(expr)) {
     return true;
   }

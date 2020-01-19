@@ -25,6 +25,43 @@ const differ = Diff.create({
 });
 
 /**
+ * The json diff patch may contains deltas with same path,
+ * one is "added to array", the other is "deleted from array".
+ * In such case they can be combined and treated as "modified at an index in the array".
+ *
+ * @param {Array} deltas the data to be filtered
+ * @returns {Array} filtered data
+ */
+function processSamePath(deltas) {
+  const result = [];
+  const groups = lodash.groupBy(deltas, 'path');
+  for (const value of Object.values(groups)) {
+    if (value.length === 1) {
+      result.push(value[0]);
+      continue; // eslint-disable-line no-continue
+    }
+    if (value.length === 2) {
+      result.push(Object.assign({ type: 'modify' }, lodash.omit(value[0], 'type')));
+      continue; // eslint-disable-line no-continue
+    }
+    throw new Error('Internal Error');
+  }
+  return result;
+}
+
+/**
+ * Transform or filter deltas before any further proccess.
+ *
+ * @param {Array} deltas the data to be processed
+ * @returns {Array} the result
+ */
+function preProcessDeltas(deltas) {
+  return processSamePath(
+    scriptUtil.flatten(deltas),
+  );
+}
+
+/**
  * Process diff delta to extract project-related data.
  *
  * @param {Object} delta the diff delta. See `util.flatten()`
@@ -261,7 +298,7 @@ function compareProjects(esData, dbData) {
 
   const result = differ.diff(dbData, esData);
   const finalData = differ.patch(Diff.clone(dbData), result);
-  const flattenedResult = scriptUtil.flatten(result);
+  const flattenedResult = preProcessDeltas(result);
   for (const item of flattenedResult) {
     if (scriptUtil.isIgnoredPath('project', item.path)) {
       continue; // eslint-disable-line no-continue
