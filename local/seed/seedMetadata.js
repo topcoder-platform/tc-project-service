@@ -10,7 +10,7 @@ if (!process.env.CONNECT_USER_TOKEN) {
 // we need to know any logged in Connect user token to retrieve data from DEV
 const CONNECT_USER_TOKEN = process.env.CONNECT_USER_TOKEN;
 
-var url = 'https://api.topcoder-dev.com/v4/projects/metadata';
+var url = 'https://api.topcoder-dev.com/v5/projects/metadata';
 
 module.exports = (targetUrl, token) => {
   var destUrl = targetUrl + 'projects/';
