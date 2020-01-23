@@ -219,20 +219,8 @@ describe('Project Members create', () => {
               success: true,
               status: 200,
               content: [{
-                roleName: USER_ROLE.MANAGER,
+                roleName: USER_ROLE.TOPCODER_ADMIN,
               }],
-            },
-          },
-        }),
-        post: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {},
             },
           },
         }),
