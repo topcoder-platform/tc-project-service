@@ -25,7 +25,8 @@
     "timelineIndexName": "timelines",
     "timelineDocType": "doc",
     "metadataIndexName": "metadata",
-    "metadataDocType": "doc"
+    "metadataDocType": "doc",
+    "metadataDocDefaultId": 1
   },
   "connectProjectUrl":"",
   "dbConfig": {
