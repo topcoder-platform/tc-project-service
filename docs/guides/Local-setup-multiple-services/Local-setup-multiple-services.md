@@ -68,7 +68,7 @@ Mostly you have to do the next steps inside `tc-bus-api` folder:
    export VALID_ISSUERS="[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]"
    ```
 
-3. `npm start`
+4. `PORT=8002 npm start`
 
 ### 3. Run Project Service
 
