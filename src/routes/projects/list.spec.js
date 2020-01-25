@@ -683,6 +683,52 @@ describe('LIST Project', () => {
         });
     });
 
+    it('should return all projects that match when filtering by customer handle', (done) => {
+      request(server)
+        .get('/v5/projects/?customer=*tourist*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members[0].userId.should.equal(40051331);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager handle', (done) => {
+      request(server)
+        .get('/v5/projects/?manager=*_handle')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test3');
+            resJson[0].members.should.have.deep.property('[0].role', 'manager');
+            resJson[0].members[0].userId.should.equal(40051334);
+            done();
+          }
+        });
+    });
+
     it('should return list of projects ordered ascending by lastActivityAt when sort column is "lastActivityAt"', (done) => {
       request(server)
         .get('/v5/projects/?sort=lastActivityAt')
