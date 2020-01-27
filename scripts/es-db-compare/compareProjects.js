@@ -9,7 +9,6 @@
  * modules to compare other models.
  */
 
-const Diff = require('jsondiffpatch');
 const lodash = require('lodash');
 const scriptUtil = require('./util');
 
@@ -18,62 +17,22 @@ const associations = {
   members: 'Member',
   invites: 'Invite',
   attachments: 'Attachment',
+  timelines: 'Timeline',
 };
-
-const differ = Diff.create({
-  objectHash: obj => obj.id,
-});
-
-/**
- * The json diff patch may contains deltas with same path,
- * one is "added to array", the other is "deleted from array".
- * In such case they can be combined and treated as "modified at an index in the array".
- *
- * @param {Array} deltas the data to be filtered
- * @returns {Array} filtered data
- */
-function processSamePath(deltas) {
-  const result = [];
-  const groups = lodash.groupBy(deltas, 'path');
-  for (const value of Object.values(groups)) {
-    if (value.length === 1) {
-      result.push(value[0]);
-      continue; // eslint-disable-line no-continue
-    }
-    if (value.length === 2) {
-      result.push(Object.assign({ type: 'modify' }, lodash.omit(value[0], 'type')));
-      continue; // eslint-disable-line no-continue
-    }
-    throw new Error('Internal Error');
-  }
-  return result;
-}
-
-/**
- * Transform or filter deltas before any further proccess.
- *
- * @param {Array} deltas the data to be processed
- * @returns {Array} the result
- */
-function preProcessDeltas(deltas) {
-  return processSamePath(
-    scriptUtil.flatten(deltas),
-  );
-}
 
 /**
  * Process diff delta to extract project-related data.
  *
- * @param {Object} delta the diff delta. See `util.flatten()`
- * @param {Object} esData the data from ES
+ * @param {Object} delta the diff delta.
  * @param {Object} dbData the data from DB
+ * @param {Object} esData the data from ES
  * @param {Object} finalData the data patched
  * @returns {Object} Object project diff delta in a specific data structure
  */
-function processDelta(delta, esData, dbData, finalData) {
+function processDelta(delta, dbData, esData, finalData) {
   const processMissingObject = (item, option) => {
     if (item.type === 'delete') {
-      const projectId = lodash.get(dbData, lodash.slice(item.path, 0, 1)).id;
+      const projectId = lodash.get(finalData, lodash.slice(item.path, 0, 1)).id;
       console.log(`one dbOnly found for ${option.modelName} with id ${item.originalValue.id}`);
       return {
         type: 'dbOnly',
@@ -84,7 +43,7 @@ function processDelta(delta, esData, dbData, finalData) {
       };
     }
     if (item.type === 'add') {
-      const projectId = lodash.get(esData, lodash.slice(item.path, 0, 1)).id;
+      const projectId = lodash.get(finalData, lodash.slice(item.path, 0, 1)).id;
       console.log(`one esOnly found for ${option.modelName} with id ${item.value.id}`);
       return {
         type: 'esOnly',
@@ -92,6 +51,112 @@ function processDelta(delta, esData, dbData, finalData) {
         modelName: option.modelName,
         id: item.value.id,
         esCopy: item.value,
+      };
+    }
+  };
+
+  const processMilestone = (item) => {
+    const subPath = lodash.slice(item.path, 7);
+    if (item.dataType === 'array' && subPath.length === 1) {
+      return processMissingObject(item, { modelName: 'Milestone' });
+    }
+    if (['add', 'delete', 'modify'].includes(item.type)) {
+      const path = scriptUtil.generateJSONPath(lodash.slice(subPath, 1));
+      const id = lodash.get(finalData, lodash.slice(item.path, 0, 8)).id;
+      const projectId = lodash.get(finalData, lodash.slice(item.path, 0, 1)).id;
+      const phaseId = lodash.get(finalData, lodash.slice(item.path, 0, 3)).id;
+      const productId = lodash.get(finalData, lodash.slice(item.path, 0, 5)).id;
+      const dbCopy = lodash.find(
+        lodash.find(
+          lodash.find(
+            lodash.find(dbData, { id: projectId }).phases,
+            { id: phaseId },
+          ).products,
+          { id: productId },
+        ).timeline.milestones,
+        { id },
+      );
+      const esCopy = lodash.find(
+        lodash.find(
+          lodash.find(
+            lodash.find(esData, { id: projectId }).phases,
+            { id: phaseId },
+          ).products,
+          { id: productId },
+        ).timeline.milestones,
+        { id },
+      );
+      console.log(`one mismatch found for Milestone with id ${id}`);
+      return {
+        type: 'mismatch',
+        kind: item.type,
+        dataType: item.dataType,
+        projectId,
+        id,
+        modelName: 'Milestone',
+        path,
+        dbCopy,
+        esCopy,
+      };
+    }
+  };
+
+  const processTimeline = (item) => {
+    if (item.path.length === 6 && item.type === 'modify') {
+      if (lodash.isNil(item.originalValue)) {
+        console.log(`one esOnly found for Timeline with id ${item.currentValue.id}`);
+        return {
+          type: 'esOnly',
+          projectId: lodash.get(finalData, lodash.slice(item.path, 0, 1)).id,
+          modelName: 'Timeline',
+          id: item.currentValue.id,
+          esCopy: item.currentValue,
+        };
+      }
+      if (lodash.isNil(item.currentValue)) {
+        console.log(`one dbOnly found for Timeline with id ${item.originalValue.id}`);
+        return {
+          type: 'dbOnly',
+          projectId: lodash.get(finalData, lodash.slice(item.path, 0, 1)).id,
+          modelName: 'Timeline',
+          id: item.originalValue.id,
+          dbCopy: item.originalValue,
+        };
+      }
+      throw new Error('Internal Error');
+    }
+    const subPath = lodash.slice(item.path, 4);
+    if (['add', 'delete', 'modify'].includes(item.type)) {
+      const path = scriptUtil.generateJSONPath(lodash.slice(subPath, 2));
+      const id = lodash.get(finalData, lodash.slice(item.path, 0, 5)).timeline.id;
+      const projectId = lodash.get(finalData, lodash.slice(item.path, 0, 1)).id;
+      const phaseId = lodash.get(finalData, lodash.slice(item.path, 0, 3)).id;
+      const productId = lodash.get(finalData, lodash.slice(item.path, 0, 5)).id;
+      const dbCopy = lodash.find(
+        lodash.find(
+          lodash.find(dbData, { id: projectId }).phases,
+          { id: phaseId },
+        ).products,
+        { id: productId },
+      ).timeline;
+      const esCopy = lodash.find(
+        lodash.find(
+          lodash.find(esData, { id: projectId }).phases,
+          { id: phaseId },
+        ).products,
+        { id: productId },
+      ).timeline;
+      console.log(`one mismatch found for Timeline with id ${id}`);
+      return {
+        type: 'mismatch',
+        kind: item.type,
+        dataType: item.dataType,
+        projectId,
+        id,
+        modelName: 'Timeline',
+        path,
+        dbCopy,
+        esCopy,
       };
     }
   };
@@ -137,6 +202,12 @@ function processDelta(delta, esData, dbData, finalData) {
 
   const processAssociation = (item, option) => {
     if (item.path[1] === 'phases' && item.path[3] === 'products') {
+      if (item.path[5] === 'timeline') {
+        if (item.path[6] === 'milestones') {
+          return processMilestone(item);
+        }
+        return processTimeline(item);
+      }
       return processProduct(item);
     }
     const subPath = lodash.slice(item.path, 2);
@@ -174,7 +245,24 @@ function processDelta(delta, esData, dbData, finalData) {
     return processAssociation(delta, { modelName: associations[delta.path[1]], refPath: delta.path[1] });
   }
   if (delta.dataType === 'array' && delta.path.length === 1) {
-    return processMissingObject(delta, { modelName: 'Project' });
+    if (delta.type === 'delete') {
+      console.log(`one dbOnly found for Project with id ${delta.originalValue.id}`);
+      return {
+        type: 'dbOnly',
+        modelName: 'Project',
+        id: delta.originalValue.id,
+        dbCopy: delta.originalValue,
+      };
+    }
+    if (delta.type === 'add') {
+      console.log(`one esOnly found for Project with id ${delta.value.id}`);
+      return {
+        type: 'esOnly',
+        modelName: 'Project',
+        id: delta.value.id,
+        esCopy: delta.value,
+      };
+    }
   }
   if (['add', 'delete', 'modify'].includes(delta.type)) {
     const path = scriptUtil.generateJSONPath(lodash.slice(delta.path, 1));
@@ -199,46 +287,36 @@ function processDelta(delta, esData, dbData, finalData) {
 /**
  * Compare Project data from ES and DB.
  *
- * @param {Object} esData the data from ES
  * @param {Object} dbData the data from DB
+ * @param {Object} esData the data from ES
  * @returns {Object} the data to feed handlebars template
  */
-function compareProjects(esData, dbData) {
+function compareProjects(dbData, esData) {
   const data = {
-    project: {
-      rootMismatch: {},
-      esOnly: [],
-      dbOnly: [],
-    },
-    meta: {
-      esCopies: [],
-      dbCopies: [],
-      counts: {
-        Project: 0,
-      },
-      uniqueDeltas: [],
-    },
+    rootMismatch: {},
+    esOnly: [],
+    dbOnly: [],
   };
 
-  const storeDelta = (root, delta) => {
+  const storeDelta = (delta) => {
     if (delta.modelName === 'Project') {
       if (delta.type === 'esOnly') {
-        data[root].esOnly.push(delta);
+        data.esOnly.push(delta);
         return;
       }
       if (delta.type === 'dbOnly') {
-        data[root].dbOnly.push(delta);
+        data.dbOnly.push(delta);
         return;
       }
     }
-    if (!data[root].rootMismatch[delta.projectId]) {
-      data[root].rootMismatch[delta.projectId] = { project: [], associations: {} };
+    if (!data.rootMismatch[delta.projectId]) {
+      data.rootMismatch[delta.projectId] = { project: [], associations: {} };
     }
     if (delta.modelName === 'Project') {
-      data[root].rootMismatch[delta.projectId].project.push(delta);
+      data.rootMismatch[delta.projectId].project.push(delta);
       return;
     }
-    const currentAssociations = data[root].rootMismatch[delta.projectId].associations;
+    const currentAssociations = data.rootMismatch[delta.projectId].associations;
     if (!Object.keys(currentAssociations).includes(delta.modelName)) {
       currentAssociations[delta.modelName] = {
         mismatches: {},
@@ -257,31 +335,18 @@ function compareProjects(esData, dbData) {
     currentAssociations[delta.modelName][delta.type].push(delta);
   };
 
-  const collectDataCopies = (delta) => {
-    if (delta.dbCopy) {
-      if (!lodash.find(data.meta.dbCopies, lodash.pick(delta, ['modelName', 'id']))) {
-        data.meta.dbCopies.push(delta);
-      }
-    }
-    if (delta.esCopy) {
-      if (!lodash.find(data.meta.esCopies, lodash.pick(delta, ['modelName', 'id']))) {
-        data.meta.esCopies.push(delta);
-      }
-    }
-  };
-
   const countInconsistencies = () => {
     lodash.set(
-      data.project,
+      data,
       'meta.totalObjects',
-      data.project.dbOnly.length + data.project.esOnly.length,
+      data.dbOnly.length + data.esOnly.length,
     );
     lodash.set(
-      data.project,
+      data,
       'meta.totalProjects',
-      Object.keys(data.project.rootMismatch).length + data.project.dbOnly.length + data.project.esOnly.length,
+      Object.keys(data.rootMismatch).length + data.dbOnly.length + data.esOnly.length,
     );
-    lodash.map(data.project.rootMismatch, (value) => {
+    lodash.map(data.rootMismatch, (value) => {
       const currentValue = value;
       lodash.set(currentValue, 'meta.counts', currentValue.project.length ? 1 : 0);
       lodash.map(currentValue.associations, (subObject) => {
@@ -292,21 +357,33 @@ function compareProjects(esData, dbData) {
         );
         currentValue.meta.counts += subObject.meta.counts;
       });
-      data.project.meta.totalObjects += currentValue.meta.counts;
+      data.meta.totalObjects += currentValue.meta.counts;
     });
   };
 
-  const result = differ.diff(dbData, esData);
-  const finalData = differ.patch(Diff.clone(dbData), result);
-  const flattenedResult = preProcessDeltas(result);
-  for (const item of flattenedResult) {
+  const { deltas, finalData } = scriptUtil.diffData(
+    dbData,
+    esData,
+    {
+      hashKey: 'id',
+      modelPathExprssions: {
+        Project: '[*]',
+        Phase: '[*].phases[*]',
+        Product: '[*].phases[*].products[*]',
+        Milestone: '[*].phases[*].products[*].timeline.milestones[*]',
+        Invite: '[*].invites[*]',
+        Member: '[*].members[*]',
+        Attachment: '[*].attachments[*]',
+      },
+    },
+  );
+  for (const item of deltas) {
     if (scriptUtil.isIgnoredPath('project', item.path)) {
       continue; // eslint-disable-line no-continue
     }
-    const delta = processDelta(item, esData, dbData, finalData);
+    const delta = processDelta(item, dbData, esData, finalData);
     if (delta) {
-      collectDataCopies(delta);
-      storeDelta('project', delta);
+      storeDelta(delta);
     }
   }
   countInconsistencies();
