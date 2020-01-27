@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "2e0a1b99-3cb9-4c77-a562-7e6fe4956358",
+		"_postman_id": "49981b6e-f611-4016-999e-737ef4103435",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -5833,6 +5833,252 @@
 						}
 					},
 					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Org Config",
+			"item": [
+				{
+					"name": "Create org config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "fbc45946-a3f2-433a-8ec5-0af82b69d2bd",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    console.log(pm.response.json())",
+									"    pm.environment.set(\"orgStrId\", pm.response.json().orgId);",
+									"    pm.environment.set(\"orgConfigName\", pm.response.json().configName);",
+									"    pm.environment.set(\"orgId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{      \n\t\"orgId\": \"testStr Id\",\n    \"configName\": \"project_catefory_url\",\n    \"configValue\": \"http://localhost/url\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/orgConfig",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"orgConfig"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List org configs without orgId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/orgConfig",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"orgConfig"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List org configs with only orgId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/orgConfig?orgId={{orgStrId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"orgConfig"
+							],
+							"query": [
+								{
+									"key": "orgId",
+									"value": "{{orgStrId}}",
+									"description": "orgId can be array with ',', 'id1,id2'"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List org configs with orgId and configName",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/orgConfig?orgId={{orgStrId}}&configName={{orgConfigName}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"orgConfig"
+							],
+							"query": [
+								{
+									"key": "orgId",
+									"value": "{{orgStrId}}",
+									"description": "orgId can be array with ',', 'id1,id2'"
+								},
+								{
+									"key": "configName",
+									"value": "{{orgConfigName}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete org config",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/orgConfig/{{orgId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"orgConfig",
+								"{{orgId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update org config",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{      \n\t\"orgId\": \"another orgId\",\n    \"configName\": \"project_catefory_url\",\n    \"configValue\": \"http://localhost/url\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/metadata/orgConfig/{{orgId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"metadata",
+								"orgConfig",
+								"{{orgId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2e274cc9-22e6-4dd2-9eee-c4f1fd98253d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9d171dbf-2a50-4483-b172-ce240ac09413",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			],
 			"protocolProfileBehavior": {}
