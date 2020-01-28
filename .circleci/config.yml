@@ -109,7 +109,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['develop']
+              only: ['develop', 'feature/looker_reporting']
       - deployProd:
           context : org-global
           requires:
