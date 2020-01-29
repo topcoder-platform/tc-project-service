@@ -141,5 +141,5 @@ module.exports = () => {
   Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
 
   // Project Reporting
-  Authorizer.setPolicy('projectReporting.managers', copilotAndAbove);
+  Authorizer.setPolicy('projectReporting.managers', connectManagerOrAdmin);
 };
