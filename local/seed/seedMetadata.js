@@ -10,7 +10,7 @@ if (!process.env.CONNECT_USER_TOKEN) {
 // we need to know any logged in Connect user token to retrieve data from DEV
 const CONNECT_USER_TOKEN = process.env.CONNECT_USER_TOKEN;
 
-var url = 'https://api.topcoder-dev.com/v4/projects/metadata';
+var url = 'https://api.topcoder-dev.com/v5/projects/metadata';
 
 module.exports = (targetUrl, token) => {
   var destUrl = targetUrl + 'projects/';
@@ -24,7 +24,7 @@ module.exports = (targetUrl, token) => {
     }
   })
   .catch((err) => {
-    const errMessage = _.get(err, 'response.data.result.content.message');
+    const errMessage = _.get(err, 'response.data.message');
     throw errMessage ? new Error('Error during obtaining data from DEV: ' + errMessage) : err
   })
   .then(async function (response) {
@@ -39,7 +39,7 @@ module.exports = (targetUrl, token) => {
 
     let promises
 
-    promises = _(data.result.content.forms).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
+    promises = _(data.forms).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
       const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
       return axios
         .post(destUrl + `metadata/form/${pt.key}/versions`, param, {headers:headers})
@@ -51,7 +51,7 @@ module.exports = (targetUrl, token) => {
 
     await Promise.all(promises);
 
-    promises = _(data.result.content.planConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
+    promises = _(data.planConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
       const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
       return axios
         .post(destUrl + `metadata/planConfig/${pt.key}/versions`, param, {headers:headers})
@@ -63,7 +63,7 @@ module.exports = (targetUrl, token) => {
 
     await Promise.all(promises);
 
-    promises = _(data.result.content.priceConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
+    promises = _(data.priceConfigs).orderBy(['key', 'asc'], ['version', 'asc']).map(pt=>{
       const param = _.omit(pt, ['id', 'version', 'revision', 'key']);
       return axios
         .post(destUrl + `metadata/priceConfig/${pt.key}/versions`, param, {headers:headers})
@@ -75,7 +75,7 @@ module.exports = (targetUrl, token) => {
 
     await Promise.all(promises);
 
-    promises = _(data.result.content.projectTypes).map(pt=>{
+    promises = _(data.projectTypes).map(pt=>{
       return axios
         .post(destUrl+'metadata/projectTypes', pt, {headers:headers})
         .catch((err) => {
@@ -86,7 +86,7 @@ module.exports = (targetUrl, token) => {
 
     await Promise.all(promises);
 
-    promises = _(data.result.content.productCategories).map(pt=>{
+    promises = _(data.productCategories).map(pt=>{
       return axios
         .post(destUrl+'metadata/productCategories', pt, {headers:headers})
         .catch((err) => {
@@ -97,7 +97,7 @@ module.exports = (targetUrl, token) => {
 
     await Promise.all(promises);
 
-    promises = _(data.result.content.projectTemplates).map(pt=>{
+    promises = _(data.projectTemplates).map(pt=>{
       return axios
         .post(destUrl+'metadata/projectTemplates', pt, {headers:headers})
         .catch((err) => {
@@ -108,7 +108,7 @@ module.exports = (targetUrl, token) => {
 
     await Promise.all(promises);
 
-    promises = _(data.result.content.productTemplates).map(pt=>{
+    promises = _(data.productTemplates).map(pt=>{
       return axios
         .post(destUrl+'metadata/productTemplates', pt, {headers:headers})
         .catch((err) => {
@@ -119,7 +119,7 @@ module.exports = (targetUrl, token) => {
 
     await Promise.all(promises);
 
-    await Promise.each(data.result.content.milestoneTemplates,pt=> (
+    await Promise.each(data.milestoneTemplates,pt=> (
       axios
         .post(destTimelines+'timelines/metadata/milestoneTemplates', pt, {headers:headers})
         .catch((err) => {

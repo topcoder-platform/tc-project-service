@@ -14,7 +14,8 @@
     "timelineIndexName": "TIMELINES_ES_INDEX_NAME",
     "timelineDocType": "TIMELINES_ES_DOC_TYPE",
     "metadataIndexName": "METADATA_ES_INDEX_NAME",
-    "metadataDocType": "METADATA_ES_DOC_TYPE"
+    "metadataDocType": "METADATA_ES_DOC_TYPE",
+    "metadataDocDefaultId": "METADATA_ES_DOC_DEFAULT_ID"
   },
   "rabbitmqURL": "RABBITMQ_URL",
   "pubsubQueueName": "PUBSUB_QUEUE_NAME",

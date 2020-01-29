@@ -333,13 +333,13 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   if (_.has(criteria, 'filters.customer')) {
     mustQuery = _.concat(mustQuery, setFilter('customer',
       criteria.filters.customer,
-      ['members.firstName', 'members.lastName']));
+      ['members.firstName', 'members.lastName', 'members.handle']));
   }
 
   if (_.has(criteria, 'filters.manager')) {
     mustQuery = _.concat(mustQuery, setFilter('manager',
       criteria.filters.manager,
-      ['members.firstName', 'members.lastName']));
+      ['members.firstName', 'members.lastName', 'members.handle']));
   }
 
   if (_.has(criteria, 'filters.userId') || _.has(criteria, 'filters.email')) {

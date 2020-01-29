@@ -6,7 +6,7 @@ services:
       args:
         NODE_VERSION: 8.2.1
         GIT_URL: https://github.com/topcoder-platform/tc-notifications
-        GIT_BRANCH: v5-upgrade
+        GIT_BRANCH: dev
         BYPASS_TOKEN_VALIDATION: 1
     environment:
       - VALID_ISSUERS="[\"https://topcoder-newauth.auth0.com/\",\"https://api.topcoder-dev.com\"]"
