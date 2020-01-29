@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions */
+import _ from 'lodash';
 import chai from 'chai';
 import request from 'supertest';
 
@@ -9,7 +10,7 @@ import { INVITE_STATUS } from '../../constants';
 
 const should = chai.should();
 
-describe('GET Project Member Invite', () => {
+describe('GET Project Member Invites', () => {
   let project1;
   let project2;
   before((done) => {
@@ -114,61 +115,36 @@ describe('GET Project Member Invite', () => {
     testUtil.clearDb(done);
   });
 
-  describe('GET /projects/{projectId}/invites/{inviteId}', () => {
+  describe('GET /projects/{projectId}/invites', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-          .get(`/v5/projects/${project2.id}/invites/1`)
+          .get(`/v5/projects/${project2.id}/invites`)
           .expect(403, done);
     });
 
-    it('should return 404 if requested project doesn\'t exist', (done) => {
+    it('should return empty result if requested project doesn\'t exist', (done) => {
       request(server)
-          .get('/v5/projects/14343323/invites/1')
+          .get('/v5/projects/14343323/invites')
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .expect(404, done);
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.be.an('array');
+              resJson.length.should.be.eql(0);
+              done();
+            }
+          });
     });
 
-    it('should return 404 if requested invitation doesn\'t exist', (done) => {
+    it('should return all invitation if user can view the project', (done) => {
       request(server)
-        .get(`/v5/projects/${project1.id}/invites/12345678`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(404, done);
-    });
-
-    it('should return 404 if requested invitation and project doesn\'t match', (done) => {
-      request(server)
-        .get(`/v5/projects/${project1.id}/invites/3`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(404, done);
-    });
-
-    it('should return 404 if user can\'t view project and this invitation is not for this user', (done) => {
-      request(server)
-        .get(`/v5/projects/${project1.id}/invites/1`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .expect(404, done);
-    });
-
-    it('should return 404 if invitation is not in pending or requested status', (done) => {
-      request(server)
-        .get(`/v5/projects/${project2.id}/invites/4`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect(404, done);
-    });
-
-    it('should return the invite if user can view the project', (done) => {
-      request(server)
-          .get(`/v5/projects/${project1.id}/invites/1`)
+          .get(`/v5/projects/${project1.id}/invites`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -180,18 +156,42 @@ describe('GET Project Member Invite', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              should.exist(resJson.projectId);
-              resJson.id.should.be.eql(1);
-              resJson.userId.should.be.eql(testUtil.userIds.member);
-              resJson.status.should.be.eql(INVITE_STATUS.PENDING);
+              resJson.should.be.an('array');
+              resJson.length.should.be.eql(2);
+              // check invitations
+              _.filter(resJson, inv => inv.id === 1).length.should.be.eql(1);
+              _.filter(resJson, inv => inv.id === 2).length.should.be.eql(1);
               done();
             }
           });
     });
 
-    it('should return the invite if this invitation is for logged-in user', (done) => {
+    it('should return only pending/requested invitation if user can view the project', (done) => {
       request(server)
-        .get(`/v5/projects/${project1.id}/invites/2`)
+          .get(`/v5/projects/${project2.id}/invites`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.be.an('array');
+              resJson.length.should.be.eql(1);
+              // check invitations
+              _.filter(resJson, inv => inv.id === 3).length.should.be.eql(1);
+              done();
+            }
+          });
+    });
+
+    it('should return only his/her invitation for logged-in user', (done) => {
+      request(server)
+        .get(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -203,10 +203,31 @@ describe('GET Project Member Invite', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.projectId);
-            resJson.id.should.be.eql(2);
-            resJson.userId.should.be.eql(testUtil.userIds.copilot);
-            resJson.status.should.be.eql(INVITE_STATUS.PENDING);
+            resJson.should.be.an('array');
+            resJson.length.should.be.eql(1);
+            // check invitations
+            _.filter(resJson, inv => inv.id === 2).length.should.be.eql(1);
+            done();
+          }
+        });
+    });
+
+    it('should return empty result for logged-in user has no invitation', (done) => {
+      request(server)
+        .get(`/v5/projects/${project1.id}/invites`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.be.an('array');
+            resJson.length.should.be.eql(0);
             done();
           }
         });
@@ -214,7 +235,7 @@ describe('GET Project Member Invite', () => {
 
     it('should return the invite if user get invitation by email', (done) => {
       request(server)
-        .get(`/v5/projects/${project2.id}/invites/3`)
+        .get(`/v5/projects/${project2.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -226,10 +247,10 @@ describe('GET Project Member Invite', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.projectId);
-            resJson.id.should.be.eql(3);
-            resJson.email.should.be.eql('test@topcoder.com');
-            resJson.status.should.be.eql(INVITE_STATUS.PENDING);
+            resJson.should.be.an('array');
+            resJson.length.should.be.eql(1);
+            // check invitations
+            _.filter(resJson, inv => inv.id === 3).length.should.be.eql(1);
             done();
           }
         });
