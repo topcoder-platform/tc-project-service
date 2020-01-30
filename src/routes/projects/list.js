@@ -47,6 +47,7 @@ const PROJECT_PHASE_PRODUCTS_ATTRIBUTES = _.without(
   'deletedAt',
 );
 
+const SUPPORTED_FILTERS = ['id', 'status', 'memberOnly', 'keyword', 'type', 'name', 'code', 'customer', 'manager'];
 
 const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
 
@@ -567,8 +568,7 @@ module.exports = [
       'name', 'name asc', 'name desc',
       'type', 'type asc', 'type desc',
     ];
-    if (!util.isValidFilter(filters,
-      ['id', 'status', 'memberOnly', 'keyword', 'type', 'name', 'code', 'customer', 'manager']) ||
+    if (!util.isValidFilter(filters, SUPPORTED_FILTERS) ||
       (sort && _.indexOf(sortableProps, sort) < 0)) {
       return util.handleError('Invalid filters or sort', null, req, next);
     }
@@ -584,6 +584,7 @@ module.exports = [
       page: req.query.page || 1,
     };
     req.log.info(criteria);
+    // TODO refactor (DRY) code below so we don't repeat the same logic for admins and non-admin users
     if (!memberOnly
       && (util.hasAdminRole(req)
           || util.hasRoles(req, MANAGER_ROLES))) {
@@ -592,6 +593,15 @@ module.exports = [
       .then((result) => {
         if (result.rows.length === 0) {
           req.log.debug('No projects found in ES');
+
+          // if we have some filters and didn't get any data from ES
+          // we don't fallback to DB, because DB doesn't support all of the filters
+          // so we don't want DB to return unrelated data, ref issue #450
+          if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
+            req.log.debug('Don\'t fallback to DB because some filters are defined.');
+            return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+          }
+
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
             .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
         }
@@ -609,6 +619,15 @@ module.exports = [
       .then((result) => {
         if (result.rows.length === 0) {
           req.log.debug('No projects found in ES');
+
+          // if we have some filters and didn't get any data from ES
+          // we don't fallback to DB, because DB doesn't support all of the filters
+          // so we don't want DB to return unrelated data, ref issue #450
+          if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
+            req.log.debug('Don\'t fallback to DB because some filters are defined.');
+            return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+          }
+
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
             .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
         }
