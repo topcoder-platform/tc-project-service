@@ -22,7 +22,7 @@ const schema = {
     metadata: Joi.object(),
     icon: Joi.string().max(255).required(),
     question: Joi.string().max(255).required(),
-    info: Joi.string().max(255).required(),
+    info: Joi.string().max(1024).required(),
     aliases: Joi.array().required(),
     scope: Joi.object().empty(null),
     phases: Joi.object().empty(null),

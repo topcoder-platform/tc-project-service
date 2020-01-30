@@ -25,7 +25,7 @@ const schema = {
     metadata: Joi.object(),
     icon: Joi.string().max(255),
     question: Joi.string().max(255),
-    info: Joi.string().max(255),
+    info: Joi.string().max(1024),
     aliases: Joi.array(),
     scope: Joi.object().empty(null),
     phases: Joi.object().empty(null),
