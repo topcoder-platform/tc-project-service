@@ -133,6 +133,10 @@ module.exports = function defineProject(sequelize, DataTypes) {
       query += 'AND projects.name = :name ';
       replacements.name = parameters.filters.name;
     }
+    if (_.has(parameters.filters, 'directProjectId')) {
+      query += 'AND projects."directProjectId" = :directProjectId ';
+      replacements.directProjectId = parameters.filters.directProjectId;
+    }
     if (_.has(parameters.filters, 'code')) {
       query += 'AND details -> \'utm\' ->> \'code\' = :code ';
       replacements.code = parameters.filters.code;

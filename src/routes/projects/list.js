@@ -47,8 +47,18 @@ const PROJECT_PHASE_PRODUCTS_ATTRIBUTES = _.without(
   'deletedAt',
 );
 
-const SUPPORTED_FILTERS = ['id', 'status', 'memberOnly', 'keyword', 'type', 'name', 'code', 'customer', 'manager', 
-                           'directProjectId'];
+const SUPPORTED_FILTERS = [
+  'id',
+  'status',
+  'memberOnly',
+  'keyword',
+  'type',
+  'name',
+  'code',
+  'customer',
+  'manager',
+  'directProjectId',
+];
 
 const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
 
@@ -326,6 +336,12 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
 
   if (_.has(criteria, 'filters.name')) {
     mustQuery = _.concat(mustQuery, setFilter('name', criteria.filters.name, ['name']));
+  }
+
+  if (_.has(criteria, 'filters.directProjectId')) {
+    mustQuery = _.concat(mustQuery, setFilter('directProjectId',
+      criteria.filters.directProjectId,
+      ['directProjectId']));
   }
 
   if (_.has(criteria, 'filters.code')) {
