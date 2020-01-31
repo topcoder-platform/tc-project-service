@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     metadata: { type: DataTypes.JSON, allowNull: false, defaultValue: {} },
     icon: { type: DataTypes.STRING(255), allowNull: false },
     question: { type: DataTypes.STRING(255), allowNull: false },
-    info: { type: DataTypes.STRING(255), allowNull: false },
+    info: { type: DataTypes.STRING(1024), allowNull: false },
     aliases: { type: DataTypes.JSON, allowNull: false },
     scope: { type: DataTypes.JSON, allowNull: true },
     phases: { type: DataTypes.JSON, allowNull: true },
