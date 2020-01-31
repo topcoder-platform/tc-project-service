@@ -47,7 +47,8 @@ const PROJECT_PHASE_PRODUCTS_ATTRIBUTES = _.without(
   'deletedAt',
 );
 
-const SUPPORTED_FILTERS = ['id', 'status', 'memberOnly', 'keyword', 'type', 'name', 'code', 'customer', 'manager', 'directProjectId'];
+const SUPPORTED_FILTERS = ['id', 'status', 'memberOnly', 'keyword', 'type', 'name', 'code', 'customer', 'manager', 
+                           'directProjectId'];
 
 const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
 
