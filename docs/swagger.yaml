@@ -86,6 +86,7 @@ paths:
         - $ref: '#/parameters/codeQueryParam'
         - $ref: '#/parameters/customerQueryParam'
         - $ref: '#/parameters/managerQueryParam'
+        - $ref: '#/parameters/directProjectIdQueryParam'
         - name: sort
           required: false
           description: >
@@ -4802,6 +4803,13 @@ parameters:
     description: manager filter
     required: false
     type: string
+  directProjectIdQueryParam:
+    name: directProjectId
+    in: query
+    description: Direct Project Id filter
+    required: false
+    type: integer
+    format: int64
   projectEstimationIdParam:
     name: estimationId
     in: path

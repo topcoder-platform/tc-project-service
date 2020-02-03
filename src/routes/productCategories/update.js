@@ -21,7 +21,7 @@ const schema = {
     displayName: Joi.string().max(255).optional(),
     icon: Joi.string().max(255).optional(),
     question: Joi.string().max(255).optional(),
-    info: Joi.string().max(255).optional(),
+    info: Joi.string().max(1024).optional(),
     aliases: Joi.array().optional(),
     disabled: Joi.boolean().optional(),
     hidden: Joi.boolean().optional(),

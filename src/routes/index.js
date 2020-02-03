@@ -339,6 +339,10 @@ router.route('/v5/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/work
   .patch(require('./workItems/update'))
   .delete(require('./workItems/delete'));
 
+
+router.route('/v5/projects/:projectId/reports/embed')
+.get(require('./projectReports/getEmbedReport'));
+
 router.route('/v5/projects/:projectId/reports')
   .get(require('./projectReports/getReport'));
 

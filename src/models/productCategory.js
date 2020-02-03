@@ -9,7 +9,7 @@ module.exports = function defineProductCategory(sequelize, DataTypes) {
     displayName: { type: DataTypes.STRING(255), allowNull: false },
     icon: { type: DataTypes.STRING(255), allowNull: false },
     question: { type: DataTypes.STRING(255), allowNull: false },
-    info: { type: DataTypes.STRING(255), allowNull: false },
+    info: { type: DataTypes.STRING(1024), allowNull: false },
     aliases: { type: DataTypes.JSON, allowNull: false },
     disabled: { type: DataTypes.BOOLEAN, defaultValue: false },
     hidden: { type: DataTypes.BOOLEAN, defaultValue: false },

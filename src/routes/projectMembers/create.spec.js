@@ -9,7 +9,14 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { USER_ROLE, BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT, INVITE_STATUS } from '../../constants';
+import {
+  USER_ROLE,
+  BUS_API_EVENT,
+  RESOURCES,
+  CONNECT_NOTIFICATION_EVENT,
+  INVITE_STATUS,
+  PROJECT_MEMBER_ROLE,
+} from '../../constants';
 
 const should = chai.should();
 
@@ -199,6 +206,69 @@ describe('Project Members create', () => {
             done();
           }
         });
+    });
+
+    it('should return 201 and register admin as manager', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.TOPCODER_ADMIN,
+              }],
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v5/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.role.should.equal('manager');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(40051333);
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should return 401 if register admin as role other than manager (copilot) ', (done) => {
+      request(server)
+        .post(`/v5/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ role: PROJECT_MEMBER_ROLE.COPILOT })
+        .expect('Content-Type', /json/)
+        .expect(401, done);
+    });
+
+    it('should return 401 if register admin as role other than manager (project manager) ', (done) => {
+      request(server)
+        .post(`/v5/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ role: PROJECT_MEMBER_ROLE.PROJECT_MANAGER })
+        .expect('Content-Type', /json/)
+        .expect(401, done);
     });
 
     describe('Bus api', () => {
