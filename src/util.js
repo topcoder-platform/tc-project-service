@@ -523,6 +523,35 @@ _.assignIn(util, {
   }),
 
   /**
+   * Retrieve member details from user handles
+   */
+  getMemberDetailsByHandles: Promise.coroutine(function* (handles, logger, requestId) { // eslint-disable-line func-names
+    if (_.isNil(handles) || (_.isArray(handles) && handles.length <= 0)) {
+      return Promise.resolve([]);
+    }
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      if (logger) {
+        logger.trace(handles);
+      }
+      const handleArr = _.map(handles, h => `handleLower:${h.toLowerCase()}`);
+      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
+        params: {
+          query: `${handleArr.join(urlencode(' OR ', 'utf8'))}`,
+          fields: 'userId,handle,firstName,lastName,email',
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(res => _.get(res, 'data.result.content', null));
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
+
+  /**
    * maksEmail
    *
    * @param {String} email emailstring

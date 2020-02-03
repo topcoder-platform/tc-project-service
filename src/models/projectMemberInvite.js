@@ -63,6 +63,45 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
     raw: true,
   });
 
+  ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser = (projectId, email, userId) => {
+    const where = {
+      projectId,
+      status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
+    };
+
+    if (email && userId) {
+      _.assign(where, { $or: [{ email: { $eq: email } }, { userId: { $eq: userId } }] });
+    } else if (email) {
+      _.assign(where, { email });
+    } else if (userId) {
+      _.assign(where, { userId });
+    }
+    return ProjectMemberInvite.findAll({
+      where,
+      raw: true,
+    });
+  };
+
+  ProjectMemberInvite.getPendingInviteByIdForUser = (projectId, inviteId, email, userId) => {
+    const where = {
+      projectId,
+      id: inviteId,
+      status: INVITE_STATUS.PENDING,
+    };
+
+    if (email && userId) {
+      _.assign(where, { $or: [{ email: { $eq: email } }, { userId: { $eq: userId } }] });
+    } else if (email) {
+      _.assign(where, { email });
+    } else if (userId) {
+      _.assign(where, { userId });
+    }
+    return ProjectMemberInvite.findOne({
+      where,
+      raw: true,
+    });
+  };
+
   ProjectMemberInvite.getPendingInviteByEmailOrUserId = (projectId, email, userId) => {
     const where = { projectId, status: INVITE_STATUS.PENDING };
 

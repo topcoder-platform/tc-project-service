@@ -15,10 +15,6 @@ const permissions = tcMiddleware.permissions;
 const updateMemberValidations = {
   body: Joi.object()
       .keys({
-        userId: Joi.number().optional(),
-        email: Joi.string()
-          .email()
-          .optional(),
         status: Joi.any()
           .valid(_.values(INVITE_STATUS))
           .required(),
@@ -29,53 +25,45 @@ const updateMemberValidations = {
 module.exports = [
   // handles request validations
   validate(updateMemberValidations),
-  permissions('projectMemberInvite.put'),
+  permissions('projectMemberInvite.edit'),
   (req, res, next) => {
-    const putInvite = req.body;
+    const newStatus = req.body.status;
     const projectId = _.parseInt(req.params.projectId);
+    const inviteId = _.parseInt(req.params.inviteId);
+    const email = req.authUser.email;
+    const currentUserId = req.authUser.userId;
 
-    // userId or email should be provided
-    if (!putInvite.userId && !putInvite.email) {
-      const err = new Error('userId or email should be provided');
-      err.status = 400;
-      return next(err);
-    }
+    // check user has admin role or manager role.
+    const adminAccess = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER]);
+    const managerAccess = util.hasRoles(req, MANAGER_ROLES);
 
-    let invite;
-    let requestedInvite;
-    return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(
-      projectId,
-      putInvite.email,
-      putInvite.userId,
-    ).then((_invite) => {
-      invite = _invite;
-    }).then(() => models.ProjectMemberInvite.getRequestedInvite(projectId, putInvite.userId))
-    .then((_requestedInvite) => {
-      requestedInvite = _requestedInvite;
-      if (!invite && !requestedInvite) {
-        // check there is an existing invite for the user with status PENDING
-        // handle 404
-        const err = new Error(
-          `invite not found for project id ${projectId}, email ${putInvite.email} and userId ${putInvite.userId}`,
+    // get invite by id and project id
+    return models.ProjectMemberInvite.findOne({
+      where: {
+        projectId,
+        id: inviteId,
+        status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
+      },
+    }).then((invite) => {
+      // if invite doesn't exist, return 404
+      if (!invite) {
+        const err = new Error(`invite not found for project id ${projectId}, inviteId ${inviteId},` +
+          ` email ${email} and userId ${currentUserId}`,
         );
         err.status = 404;
         return next(err);
       }
-
-      invite = invite || requestedInvite;
-
+      // check this invitation is for logged-in user or not
+      const ownInvite = (!!invite && (invite.userId === currentUserId || invite.email === email));
+      // check permission
       req.log.debug('Chekcing user permission for updating invite');
       let error = null;
-      if (invite.status === INVITE_STATUS.REQUESTED &&
-          !util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER])) {
+      if (invite.status === INVITE_STATUS.REQUESTED && !adminAccess) {
         error = 'Requested invites can only be updated by Copilot manager';
-      } else if (putInvite.status === INVITE_STATUS.CANCELED) {
-        if (!util.hasRoles(req, MANAGER_ROLES) && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
-          error = `Project members can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
-        }
-      } else if (((!!putInvite.userId && putInvite.userId !== req.authUser.userId) ||
-                 (!!putInvite.email && putInvite.email !== req.authUser.email)) &&
-                 !util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER])) {
+      } else if (newStatus === INVITE_STATUS.CANCELED &&
+        (!managerAccess && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER)) {
+        error = `Project members can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
+      } else if (!adminAccess && !ownInvite) {
         error = 'Project members can only update invites for themselves';
       }
 
@@ -88,7 +76,7 @@ module.exports = [
       req.log.debug('Updating invite status');
       return invite
         .update({
-          status: putInvite.status,
+          status: newStatus,
         })
         .then((updatedInvite) => {
           // emit the event
@@ -105,15 +93,15 @@ module.exports = [
           req.log.debug('Adding user to project');
           // add user to project if accept invite
           if (updatedInvite.status === INVITE_STATUS.ACCEPTED ||
-              updatedInvite.status === INVITE_STATUS.REQUEST_APPROVED) {
+            updatedInvite.status === INVITE_STATUS.REQUEST_APPROVED) {
             return models.ProjectMember.getActiveProjectMembers(projectId)
               .then((members) => {
                 req.context = req.context || {};
                 req.context.currentProjectMembers = members;
                 let userId = updatedInvite.userId;
                 // if the requesting user is updating his/her own invite
-                if (!userId && req.authUser.email === updatedInvite.email) {
-                  userId = req.authUser.userId;
+                if (!userId && email === updatedInvite.email) {
+                  userId = currentUserId;
                 }
                 // if we are not able to identify the user yet, it must be something wrong and we should not create
                 // project member
