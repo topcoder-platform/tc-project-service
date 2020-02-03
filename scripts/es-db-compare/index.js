@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+/* eslint-disable no-param-reassign */
 /*
  * Compare data between DB and ES and generate a report to be uploaded
  * to AWS S3.
@@ -15,7 +16,9 @@ import { INVITE_STATUS } from '../../src/constants';
 const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
+const { compareMetadata } = require('./compareMetadata');
 const { compareProjects } = require('./compareProjects');
+const scriptConstants = require('./constants');
 
 const scriptConfig = {
   PROJECT_START_ID: process.env.PROJECT_START_ID,
@@ -44,13 +47,17 @@ const es = util.getElasticSearchClient();
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
+const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
+const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
+const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 
 /**
  * Get es search criteria.
  *
  * @returns {Object} the search criteria
  */
-function getESSearchCriteria() {
+function getESSearchCriteriaForProject() {
   const filters = [];
   if (!lodash.isNil(scriptConfig.PROJECT_START_ID)) {
     filters.push({
@@ -118,12 +125,22 @@ function getTemplate() {
 }
 
 /**
- * Get ES data.
+ * Get product timelines from ES.
  *
  * @returns {Promise} the ES data
  */
-async function getESData() {
-  const searchCriteria = getESSearchCriteria();
+async function getProductTimelinesFromES() {
+  const searchCriteria = {
+    index: ES_TIMELINE_INDEX,
+    type: ES_TIMELINE_TYPE,
+    body: {
+      query: {
+        match_phrase: {
+          reference: 'product',
+        },
+      },
+    },
+  };
   return es.search(searchCriteria)
     .then((docs) => {
       const rows = lodash.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
@@ -132,17 +149,65 @@ async function getESData() {
 }
 
 /**
- * Get DB data.
+ * Get projects from ES.
+ *
+ * @returns {Promise} the ES data
+ */
+async function getProjectsFromES() {
+  const searchCriteria = getESSearchCriteriaForProject();
+  const projects = await es.search(searchCriteria)
+    .then((docs) => {
+      const rows = lodash.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      return rows;
+    });
+  const timelines = await getProductTimelinesFromES();
+  const timelinesGroup = lodash.groupBy(timelines, 'referenceId');
+  lodash.map(projects, (project) => {
+    lodash.map(project.phases, (phase) => {
+      lodash.map(phase.products, (product) => {
+        product.timeline = lodash.get(timelinesGroup, [product.id, '0']) || null;
+      });
+    });
+  });
+  return projects;
+}
+
+/**
+ * Get metadata from ES.
+ *
+ * @returns {Promise} the ES data
+ */
+async function getMetadataFromES() {
+  const searchCriteria = {
+    index: ES_METADATA_INDEX,
+    type: ES_METADATA_TYPE,
+  };
+  return es.search(searchCriteria)
+    .then((docs) => {
+      const rows = lodash.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      if (!rows.length) {
+        return lodash.reduce(
+          Object.keys(scriptConstants.associations.metadata),
+          (result, modleName) => { result[modleName] = []; },
+          {},
+        );
+      }
+      return rows[0];
+    });
+}
+
+/**
+ * Get projects from DB.
  *
  * @returns {Promise} the DB data
  */
-async function getDBData() {
+async function getProjectsFromDB() {
   const filter = {};
   if (!lodash.isNil(scriptConfig.PROJECT_START_ID)) {
     filter.id = { $between: [scriptConfig.PROJECT_START_ID, scriptConfig.PROJECT_END_ID] };
   }
   if (!lodash.isNil(scriptConfig.PROJECT_LAST_ACTIVITY_AT)) {
-    filter.lastActivityAt = { $gte: scriptConfig.PROJECT_LAST_ACTIVITY_AT };
+    filter.lastActivityAt = { $gte: new Date(scriptConfig.PROJECT_LAST_ACTIVITY_AT).toISOString() };
   }
   return models.Project.findAll({
     where: filter,
@@ -172,11 +237,46 @@ async function getDBData() {
       return models.ProjectMember.getActiveProjectMembers(project.id)
         .then((currentProjectMembers) => {
           project.members = currentProjectMembers;
-          return project;
+        }).then(() => {
+          const promises = [];
+          lodash.map(project.phases, (phase) => {
+            lodash.map(phase.products, (product) => {
+              promises.push(
+                models.Timeline.findOne({
+                  where: {
+                    reference: 'product',
+                    referenceId: product.id,
+                  },
+                  include: [{
+                    model: models.Milestone,
+                    as: 'milestones',
+                  }],
+                }).then((timeline) => {
+                  product.timeline = timeline || null;
+                }),
+              );
+            });
+          });
+          return Promise.all(promises)
+            .then(() => project);
         });
     });
     return Promise.all(projects);
   }).then(projects => JSON.parse(JSON.stringify(projects)));
+}
+
+/**
+ * Get metadata from DB.
+ *
+ * @returns {Promise} the DB data
+ */
+async function getMetadataFromDB() {
+  const metadataAssociations = scriptConstants.associations.metadata;
+  const results = await Promise.all(lodash.map(
+    Object.values(metadataAssociations),
+    modelName => models[modelName].findAll(),
+  ));
+  return lodash.zipObject(Object.keys(metadataAssociations), JSON.parse(JSON.stringify(results)));
 }
 
 /**
@@ -185,11 +285,19 @@ async function getDBData() {
  * @returns {Promise} void
  */
 async function main() {
-  const esData = await getESData();
-  const dbData = await getDBData();
+  console.log('Processing Project...');
+  const projectsFromDB = await getProjectsFromDB();
+  const projectsFromES = await getProjectsFromES();
+  const dataForProject = compareProjects(projectsFromDB, projectsFromES);
+  console.log('Processing Metadata...');
+  const metadataFromDB = await getMetadataFromDB();
+  const metadataFromES = await getMetadataFromES();
+  const dataForMetadata = compareMetadata(metadataFromDB, metadataFromES);
   const template = getTemplate();
-  const data = compareProjects(esData, dbData);
-  const report = template(data);
+  const report = template({
+    metadata: dataForMetadata,
+    project: dataForProject,
+  });
   fs.writeFileSync(reportPathname, report);
   console.log(`report is written to ${reportPathname}`);
 }

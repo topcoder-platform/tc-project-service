@@ -9,6 +9,28 @@ const _ = require('lodash');
 const moment = require('moment');
 
 const constants = require('./constants');
+const Diff = require('jsondiffpatch');
+
+/**
+ * Get jsondiffpatch instance
+ *
+ * @param {Object} config additional config
+ * @returns {Object} the instance
+ */
+function getDiffer(config) {
+  const differ = Diff.create({
+    objectHash: (obj) => {
+      if (!_.isUndefined(obj[config.hashKey])) {
+        return obj[config.hashKey];
+      }
+      if (typeof obj === 'object') { // object or array
+        return obj.toString();
+      }
+      return undefined;
+    },
+  });
+  return differ;
+}
 
 /**
  * Sub-function for the flatten function that process object assets in the delta.
@@ -60,7 +82,7 @@ function flattenObject(delta, path) {
         return;
       }
     }
-    result = _.concat(result, flatten(value, _.clone(currentPath)));
+    result = _.concat(result, flattenDeltas(value, _.clone(currentPath)));
   });
   return result;
 }
@@ -120,7 +142,7 @@ function flattenArray(delta, path) {
     }
     const currentPath = _.concat(path, key);
     if (key >= 0) {
-      result = _.concat(result, flattenObject(value, _.clone(currentPath)));
+      result = _.concat(result, flattenDeltas(value, _.clone(currentPath)));
       return;
     }
     throw new Error(`Unhandled case at ${currentPath}`);
@@ -135,7 +157,7 @@ function flattenArray(delta, path) {
  * @param {Array} path the JSON path
  * @returns {Array} flattened delta
  */
-function flatten(delta, path = []) {
+function flattenDeltas(delta, path = []) {
   if (delta._t === 'a') {
     return flattenArray(delta, path);
   }
@@ -165,26 +187,6 @@ function generateJSONPath(path) {
 }
 
 /**
- * Check if the json path of a delta should be ignored.
- * Low-budget version.
- *
- * @param {String} root the model name, one of "project" and "metadata"
- * @param {Array} path the path to be verified
- * @returns {Boolean} the result
- */
-function isIgnoredPath(root, path) {
-  const jsonPath = generateJSONPath(_.slice(path, 1));
-  if (jsonPath === '') {
-    return false;
-  }
-  const expr = jsonPath.replace(/\[\d+\]/g, '[*]').replace(/^/, `${root}.`);
-  if (constants.ignoredPaths.includes(expr)) {
-    return true;
-  }
-  return false;
-}
-
-/**
  * Generate a sensible filename for the report.
  *
  * @returns {String} the result filename
@@ -195,9 +197,87 @@ function generateFilename() {
   return `es-db-report-${nodeEnv}-${date}.html`;
 }
 
+/**
+ * Check if a json path matches a json path expression.
+ *
+ * @param {Array} path the path to be verified
+ * @param {Array} pathExprs a list of json path expressions
+ * @returns {Boolean} the result
+ */
+function pathMatches(path, pathExprs) {
+  const jsonPath = generateJSONPath(path);
+  const expr = jsonPath.replace(/\[\d+\]/g, '[*]');
+  return pathExprs.includes(expr);
+}
+
+/**
+ * Check if the json path of a diff delta should be ignored.
+ *
+ * @param {String} root the path prefix
+ * @param {Array} path the path to be verified
+ * @returns {Boolean} the result
+ */
+function isIgnoredPath(root, path) {
+  const pathWithPrefix = _.concat([root], _.slice(path, 1));
+  return pathMatches(pathWithPrefix, constants.ignoredPaths);
+}
+
+/**
+ * The json diff patch could contain deltas with same path at an index of an array,
+ * one is "added to the array", the other is "deleted from the array".
+ * In such case, if the path is not related to a model,
+ * they can be combined and treated as "modified at the index in the array".
+ *
+ * @param {Array} deltas the diff deltas to be filtered
+ * @param {Object} config additional config
+ * @returns {Array} the result deltas
+ */
+function processArrayDelta(deltas, config) {
+  const result = [];
+  const groups = _.groupBy(deltas, 'path');
+  _.map(groups, (group) => {
+    if (group.length === 1) {
+      result.push(group[0]);
+      return;
+    }
+    if (group.length === 2) {
+      if (pathMatches(group[0].path, Object.values(config.modelPathExprssions))) {
+        result.push(group[0], group[1]);
+        return;
+      }
+      result.push(Object.assign({ type: 'modify' }, _.omit(group[0], 'type')));
+      return;
+    }
+    throw new Error('Internal Error');
+  });
+  return result;
+}
+
+/**
+ * compare two set of data and generate diff deltas.
+ *
+ * @param {Array} left the origin data
+ * @param {Array} right the comparand data
+ * @param {Object} config additional config
+ * @returns {Object} the deltas
+ */
+function diffData(left, right, config = { hashKey: 'id' }) {
+  const differ = getDiffer(config);
+  const deltas = differ.diff(left, right);
+  if (!deltas) {
+    return { deltas: [] };
+  }
+  const finalData = differ.patch(Diff.clone(left), deltas);
+  const flattenedDeltas = processArrayDelta(flattenDeltas(deltas), config);
+  return {
+    deltas: flattenedDeltas,
+    finalData,
+  };
+}
+
 module.exports = {
-  flatten,
   generateJSONPath,
   generateFilename,
   isIgnoredPath,
+  diffData,
 };
