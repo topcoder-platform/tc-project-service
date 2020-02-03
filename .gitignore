@@ -47,4 +47,6 @@ jspm_packages
 !.elasticbeanstalk/*.global.yml
 .DS_Store
 .idea
+
+# Report which might be generated using `scripts/es-db-compare` script
 report.html
