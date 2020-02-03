@@ -120,7 +120,7 @@ function getTemplate() {
     }
     return 'unknown';
   });
-  const template = handlebars.compile(fs.readFileSync(path.join(__dirname, 'report.mustache')).toString());
+  const template = handlebars.compile(fs.readFileSync(path.join(__dirname, 'report.handlebars')).toString());
   return template;
 }
 

@@ -11,14 +11,7 @@
 
 const lodash = require('lodash');
 const scriptUtil = require('./util');
-
-const associations = {
-  phases: 'Phase',
-  members: 'Member',
-  invites: 'Invite',
-  attachments: 'Attachment',
-  timelines: 'Timeline',
-};
+const scriptConstants = require('./constants');
 
 /**
  * Process diff delta to extract project-related data.
@@ -241,8 +234,10 @@ function processDelta(delta, dbData, esData, finalData) {
     }
   };
 
-  if (delta.path.length > 2 && associations[delta.path[1]]) {
-    return processAssociation(delta, { modelName: associations[delta.path[1]], refPath: delta.path[1] });
+  if (delta.path.length > 2 && scriptConstants.associations.projects[delta.path[1]]) {
+    return processAssociation(delta, {
+      modelName: scriptConstants.associations.projects[delta.path[1]], refPath: delta.path[1],
+    });
   }
   if (delta.dataType === 'array' && delta.path.length === 1) {
     if (delta.type === 'delete') {
