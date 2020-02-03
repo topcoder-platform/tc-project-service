@@ -61,6 +61,9 @@
   "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]",
   "SSO_REFCODES": "[]",
   "lookerConfig": {
+    "EMBED_KEY": "FAKE_KEY",
+    "LOOKER_HOST": "demo.looker.com",
+    "SESSION_LENGTH": 86400,
     "BASE_URL": "",
     "CLIENT_ID": "",
     "CLIENT_SECRET": "",
