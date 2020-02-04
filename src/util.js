@@ -281,7 +281,6 @@ _.assignIn(util, {
       apiVersion: '2006-03-01',
     });
 
-
     try {
       const sourceParam = {
         Bucket: sourceBucket,
@@ -296,18 +295,18 @@ _.assignIn(util, {
 
       await s3.copyObject(copyParam).promise();
       req.log.debug(`s3FileTransfer: copyObject successfully: ${sourceBucket}/${sourceKey}`);
-      // expect delteObject not block the request
-      setTimeout(async () => {
+      // we don't want deleteObject to block the request as it's not critical operation
+      (async () => {
         try {
           await s3.deleteObject(sourceParam).promise();
           req.log.debug(`s3FileTransfer: deleteObject successfully: ${sourceBucket}/${sourceKey}`);
         } catch (e) {
-          req.log.debug(`s3FileTransfer: deleteObject failed: ${sourceBucket}/${sourceKey} : ${e.message}`);
+          req.log.error(`s3FileTransfer: deleteObject failed: ${sourceBucket}/${sourceKey} : ${e.message}`);
         }
-      });
+      })();
       return { success: true };
     } catch (e) {
-      req.log.debug(`s3FileTransfer: error: ${e.message}`);
+      req.log.error(`s3FileTransfer: error: ${e.message}`);
       throw e;
     }
   },
