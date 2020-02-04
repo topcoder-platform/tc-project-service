@@ -109,7 +109,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['develop']
+              only: ['develop', 'feature/file-transfer-s3-improvements']
       - deployProd:
           context : org-global
           requires:
