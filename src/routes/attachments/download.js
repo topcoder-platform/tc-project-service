@@ -12,7 +12,7 @@ import util from '../../util';
 const permissions = tcMiddleware.permissions;
 
 const getFileDownloadUrl = (req, filePath) => {
-  if (process.env.NODE_ENV === 'development' || config.get('enableFileUpload') === false) {
+  if (process.env.NODE_ENV === 'development' && config.get('enableFileUpload') === 'false') {
     return ['', 'dummy://url'];
   }
   return util.getFileDownloadUrl(req, filePath);
