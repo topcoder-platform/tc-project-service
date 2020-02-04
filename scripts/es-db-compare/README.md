@@ -20,6 +20,11 @@ during the comparation. You may need to modify/add/delete items in the list.
 
 - `PROJECT_START_ID` and `PROJECT_END_ID` must exist together.
 - At least one of `PROJECT_START_ID` with `PROJECT_END_ID` or `PROJECT_LAST_ACTIVITY_AT` needs be set before running the script.
+- If you want to upload report to AWS S3 You need to Set `REPORT_S3_BUCKET`, `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY` keys to `config/default.js` file.
+- Report file will uploaded to `REPORT_S3_BUCKET` in `es-db-report-<NODE_ENV>-<DD-MM-YYYY-HH-MM-SS>.html` format.
+    `<NODE_ENV>` - replace with the value for `NODE_ENV` env variable
+    `<DD-MM-YYYY-HH-MM-SS>` - current date and time in such format
+- If `REPORT_S3_BUCKET` variable is not set. Report will be stored in local filesystem.
 
 ## Usage
 
