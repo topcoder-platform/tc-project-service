@@ -15,10 +15,10 @@ import querystring from 'querystring';
 import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
+import AWS from 'aws-sdk';
 // import jp from 'jsonpath';
 import Promise from 'bluebird';
 import models from './models';
-// import AWS from 'aws-sdk';
 
 import {
   ADMIN_ROLES,
@@ -30,7 +30,6 @@ import {
   RESOURCES,
 } from './constants';
 
-const exec = require('child_process').exec;
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
 const m2m = tcCoreLibAuth.m2m(config);
@@ -269,28 +268,49 @@ _.assignIn(util, {
 
   /**
    * Moves file from source to destination
-   * @param  {object} req    request object
-   * @param  {object} source source object
-   * @param  {string} dest   destination url
+   * @param  {object} req          request object
+   * @param  {string} sourceBucket source bucket
+   * @param  {string} sourceKey    source key
+   * @param  {string} destBucket   destination bucket
+   * @param  {string} destKey      destination key
    * @return {promise}       promise
    */
-  s3FileTransfer: (req, source, dest) => new Promise((resolve, reject) => {
-    const cmdStr = _.join([
-      'aws s3 mv',
-      `"${source}"`,
-      `"${dest}"`,
-      '--region us-east-1',
-    ], ' ');
-    exec(cmdStr, (error, stdout, stderr) => {
-      req.log.debug(`s3FileTransfer: stdout: ${stdout}`);
-      req.log.debug(`s3FileTransfer: stderr: ${stderr}`);
-      if (error !== null) {
-        req.log.error(`exec error: ${error}`);
-        return reject(error);
-      }
-      return resolve({ success: true });
+  s3FileTransfer: async (req, sourceBucket, sourceKey, destBucket, destKey) => {
+    const s3 = new AWS.S3({
+      Region: 'us-east-1',
+      apiVersion: '2006-03-01',
     });
-  }),
+
+
+    try {
+      const sourceParam = {
+        Bucket: sourceBucket,
+        Key: sourceKey,
+      };
+
+      const copyParam = {
+        Bucket: destBucket,
+        Key: destKey,
+        CopySource: `${sourceBucket}/${sourceKey}`,
+      };
+
+      await s3.copyObject(copyParam).promise();
+      req.log.debug(`s3FileTransfer: copyObject successfully: ${sourceBucket}/${sourceKey}`);
+      // expect delteObject not block the request
+      setTimeout(async () => {
+        try {
+          await s3.deleteObject(sourceParam).promise();
+          req.log.debug(`s3FileTransfer: deleteObject successfully: ${sourceBucket}/${sourceKey}`);
+        } catch (e) {
+          req.log.debug(`s3FileTransfer: deleteObject failed: ${sourceBucket}/${sourceKey} : ${e.message}`);
+        }
+      });
+      return { success: true };
+    } catch (e) {
+      req.log.debug(`s3FileTransfer: error: ${e.message}`);
+      throw e;
+    }
+  },
 
 
   /**

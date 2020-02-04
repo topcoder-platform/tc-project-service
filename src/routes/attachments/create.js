@@ -76,17 +76,26 @@ module.exports = [
             contentType: data.contentType,
             isPublic: false,
           },
+        // Promise.resolve({
+        //   status: 200,
+        //   data: {
+        //     result: {
+        //       status: 200,
+        //     },
+        //   },
         }).then((resp) => {
           req.log.debug('Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
           if (resp.status !== 200 || resp.data.result.status !== 200) {
             return reject(new Error(resp.data.result.message));
           }
-          // store deistination path & url
-          const destinationUri = `s3://${config.get('attachmentsS3Bucket')}/${filePath}`;
-          const sourceUri = `s3://${data.s3Bucket}/${data.filePath}`;
+          const sourceBucket = data.s3Bucket;
+          const sourceKey = data.filePath;
+          const destBucket = config.get('attachmentsS3Bucket');
+          const destKey = filePath;
+
           req.log.debug('Moving s3 file');
           // transfer file
-          return util.s3FileTransfer(req, sourceUri, destinationUri);
+          return util.s3FileTransfer(req, sourceBucket, sourceKey, destBucket, destKey);
         }).then(() => accept()).catch(reject);
       } else {
         accept();
