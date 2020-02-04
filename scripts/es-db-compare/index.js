@@ -8,6 +8,8 @@
 import Joi from 'joi';
 import lodash from 'lodash';
 import config from 'config';
+import AWS from 'aws-sdk';
+import moment from 'moment';
 
 import models from '../../src/models';
 import util from '../../src/util';
@@ -298,8 +300,35 @@ async function main() {
     metadata: dataForMetadata,
     project: dataForProject,
   });
-  fs.writeFileSync(reportPathname, report);
-  console.log(`report is written to ${reportPathname}`);
+
+  if (config.has('REPORT_S3_BUCKET')) {
+    // Make sure set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY in Environment Variables
+    const s3 = new AWS.S3();
+
+    const fileName =
+      `es-db-report-${process.env.NODE_ENV || 'development'}-${moment().format('DD-MM-YYYY-HH-MM-SS')}.html`;
+
+    const params = {
+      Bucket: config.get('REPORT_S3_BUCKET'),
+      Key: fileName,
+      Body: report,
+      ContentType: 'text/html',
+    };
+
+    await new Promise((resolve, reject) => {
+      s3.putObject(params, (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          console.log(`Report uploaded successfully on S3. FileName is: ${fileName}`);
+          resolve();
+        }
+      });
+    });
+  } else {
+    fs.writeFileSync(reportPathname, report);
+    console.log(`Report is written to local file ${reportPathname}`);
+  }
 }
 
 main().then(() => {
