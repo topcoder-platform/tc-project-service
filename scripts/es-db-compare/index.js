@@ -26,6 +26,7 @@ const scriptConfig = {
   PROJECT_START_ID: process.env.PROJECT_START_ID,
   PROJECT_END_ID: process.env.PROJECT_END_ID,
   PROJECT_LAST_ACTIVITY_AT: process.env.PROJECT_LAST_ACTIVITY_AT,
+  REPORT_S3_BUCKET: process.env.REPORT_S3_BUCKET,
 };
 
 const reportPathname = './report.html';
@@ -34,6 +35,7 @@ const configSchema = Joi.object().keys({
   PROJECT_START_ID: Joi.number().integer().positive().optional(),
   PROJECT_END_ID: Joi.number().integer().positive().optional(),
   PROJECT_LAST_ACTIVITY_AT: Joi.date().optional(),
+  REPORT_S3_BUCKET: Joi.string().optional(),
 })
   .with('PROJECT_START_ID', 'PROJECT_END_ID')
   .or('PROJECT_START_ID', 'PROJECT_LAST_ACTIVITY_AT');
@@ -301,15 +303,16 @@ async function main() {
     project: dataForProject,
   });
 
-  if (config.has('REPORT_S3_BUCKET')) {
+  if (scriptConfig.REPORT_S3_BUCKET) {
+    console.log('Uploading report to S3...');
     // Make sure set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY in Environment Variables
     const s3 = new AWS.S3();
 
     const fileName =
-      `es-db-report-${process.env.NODE_ENV || 'development'}-${moment().format('DD-MM-YYYY-HH-MM-SS')}.html`;
+      `es-db-report-${process.env.NODE_ENV}-${moment().format('YYYY-MM-DD-HH-MM-SS')}.html`;
 
     const params = {
-      Bucket: config.get('REPORT_S3_BUCKET'),
+      Bucket: scriptConfig.REPORT_S3_BUCKET,
       Key: fileName,
       Body: report,
       ContentType: 'text/html',
@@ -326,6 +329,7 @@ async function main() {
       });
     });
   } else {
+    console.log('Saving report to disk...');
     fs.writeFileSync(reportPathname, report);
     console.log(`Report is written to local file ${reportPathname}`);
   }

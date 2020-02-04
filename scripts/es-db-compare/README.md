@@ -11,6 +11,9 @@ The following properties can be set from env variables:
 - `PROJECT_START_ID`: if set, only projects with id that large than or equal to the value are compared.
 - `PROJECT_END_ID`: if set, only projects with id that less than or equal to the value are compared.
 - `PROJECT_LAST_ACTIVITY_AT`: if set, only projects with property lastActivityAt that large than or equal to the value are compared.
+- `REPORT_S3_BUCKET`: If set, report would be uploaded to this S3 bucket, otherwise report will be saved to disk.
+- `AWS_ACCESS_KEY_ID`: AWS credentials, required to upload report to S3 bucket.
+- `AWS_SECRET_ACCESS_KEY`: AWS credentials, required to upload report to S3 bucket.
 
 There could be some fields that always mismatch in ES and DB.
 The variable named `ignoredPaths` at `scripts/es-db-compare/constants.js` maintains a list of json paths which will be ignored
@@ -20,11 +23,7 @@ during the comparation. You may need to modify/add/delete items in the list.
 
 - `PROJECT_START_ID` and `PROJECT_END_ID` must exist together.
 - At least one of `PROJECT_START_ID` with `PROJECT_END_ID` or `PROJECT_LAST_ACTIVITY_AT` needs be set before running the script.
-- If you want to upload report to AWS S3 You need to Set `REPORT_S3_BUCKET`, `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY` keys to `config/default.js` file.
-- Report file will uploaded to `REPORT_S3_BUCKET` in `es-db-report-<NODE_ENV>-<DD-MM-YYYY-HH-MM-SS>.html` format.
-    `<NODE_ENV>` - replace with the value for `NODE_ENV` env variable
-    `<DD-MM-YYYY-HH-MM-SS>` - current date and time in such format
-- If `REPORT_S3_BUCKET` variable is not set. Report will be stored in local filesystem.
+- If you want to upload report to AWS S3 you need to set `REPORT_S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` environment variables.
 
 ## Usage
 
@@ -48,5 +47,11 @@ Example commands:
 - Generate a report comparing projects with ID range:
 
   ```bash
-    PROJECT_START_ID=5000 PROJECT_END_ID=6000 npm run es-db-compare
-    ```
+  PROJECT_START_ID=5000 PROJECT_END_ID=6000 npm run es-db-compare
+  ```
+
+- Any of the command above can be run with additionally set `REPORT_S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` environment variables to upload report to S3 bucket like:
+
+  ```bash
+  REPORT_S3_BUCKET=<S3 bucket name> AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>PROJECT_LAST_ACTIVITY_AT="2019-12-26" npm run es-db-compare
+  ```

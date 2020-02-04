@@ -1,7 +1,6 @@
 # Verification
 
 ## Steps
-- Set `REPORT_S3_BUCKET`, `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY` keys to `config/default.js` file. If you don't set report will be generated in local file
 - Start ES and DB services: `docker-compose -f local/docker-compose.yml up`
 - Insert ES and DB data:
 
@@ -18,4 +17,12 @@
   PROJECT_LAST_ACTIVITY_AT=0 npm run es-db-compare
   ```
 
-- See uploaded file in AWS Console or See `./report.html` under the root project directory.
+  - See `./report.html` under the root project directory.
+
+- To upload report to the S3 bucket, set `REPORT_S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` environment variables and run the same command. For example like this:
+
+  ```bash
+  REPORT_S3_BUCKET=<S3 bucket name> AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID> AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY> PROJECT_LAST_ACTIVITY_AT=0 npm run es-db-compare
+  ```
+
+  - Report would be uploaded to S3 bucket `REPORT_S3_BUCKET` with name in format `es-db-report-<NODE_ENV>-<YYYY-MM-DD-HH-MM-SS>.html`
