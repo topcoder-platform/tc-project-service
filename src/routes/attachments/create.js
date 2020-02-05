@@ -66,32 +66,15 @@ module.exports = [
       fileServiceUrl += '/';
     }
 
-    const fileTransferPromise = new Promise((accept, reject) => {
-      if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
-        // get pre-signed Url
-        req.log.debug('requesting presigned Url');
-        httpClient.post(`${fileServiceUrl}uploadurl/`, {
-          param: {
-            filePath,
-            contentType: data.contentType,
-            isPublic: false,
-          },
-        }).then((resp) => {
-          req.log.debug('Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
-          if (resp.status !== 200 || resp.data.result.status !== 200) {
-            return reject(new Error(resp.data.result.message));
-          }
-          // store deistination path & url
-          const destinationUri = `s3://${config.get('attachmentsS3Bucket')}/${filePath}`;
-          const sourceUri = `s3://${data.s3Bucket}/${data.filePath}`;
-          req.log.debug('Moving s3 file');
-          // transfer file
-          return util.s3FileTransfer(req, sourceUri, destinationUri);
-        }).then(() => accept()).catch(reject);
-      } else {
-        accept();
-      }
-    });
+    const sourceBucket = data.s3Bucket;
+    const sourceKey = data.filePath;
+    const destBucket = config.get('attachmentsS3Bucket');
+    const destKey = filePath;
+
+    // don't actually transfer file in development mode if file uploading is disabled, so we can test this endpoint
+    const fileTransferPromise = (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true')
+      ? util.s3FileTransfer(req, sourceBucket, sourceKey, destBucket, destKey)
+      : Promise.resolve();
 
     fileTransferPromise.then(() => {
       // file copied to final destination, create DB record
