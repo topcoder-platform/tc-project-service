@@ -682,6 +682,17 @@ _.assignIn(util, {
     return _.map(members, (member) => {
       let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
       memberDetails = _.assign({}, member, memberDetails);
+      // this case would be only valid for invites:
+      // don't return `email` for non-admins if invitation has `userId`
+      // if invitation doesn't have `userId` means it is invitation by email
+      // then we are still returning emails to all users
+      if (
+        memberDetails.email &&
+        memberDetails.userId &&
+        !util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser)
+      ) {
+        delete memberDetails.email;
+      }
       return _(memberDetails).pick(fields).defaults(memberDefaults).value();
     });
   },
