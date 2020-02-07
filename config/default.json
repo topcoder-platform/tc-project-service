@@ -36,7 +36,7 @@
     "idleTimeout": 1000
   },
   "kafkaConfig": {
-    "hosts": "localhost:9092"
+    "url": "localhost:9092"
   },
   "analyticsKey": "",
   "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
@@ -63,7 +63,7 @@
   "lookerConfig": {
     "EMBED_KEY": "FAKE_KEY",
     "LOOKER_HOST": "demo.looker.com",
-    "SESSION_LENGTH": 86400,
+    "SESSION_LENGTH": 120,
     "BASE_URL": "",
     "CLIENT_ID": "",
     "CLIENT_SECRET": "",

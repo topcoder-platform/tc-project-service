@@ -102,7 +102,7 @@ function createdSignedEmbedUrl(options) {
  * @returns {String} URL for embedding the looker report, it can be GET only once
  */
 function generateEmbedUrl(authUser, project, member, reportUrl) {
-  const SESSION_LENGTH = config.lookerConfig.SESSION_LENGTH;
+  const SESSION_LENGTH = parseInt(config.lookerConfig.SESSION_LENGTH, 10);
   const urlData = {
     host: config.lookerConfig.LOOKER_HOST,
     secret: config.lookerConfig.EMBED_KEY,
