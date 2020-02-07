@@ -72,7 +72,7 @@ Mostly you have to do the next steps inside `tc-bus-api` folder:
 
 ### 3. Run Project Service
 
-To run **Project Service**, please, follow its README section [Steps to run locally](file:///Users/maks/dev/topcoder/projects/connect/tc-project-service/README.md#steps-to-run-locally).
+To run **Project Service**, please, follow its README section "[Steps to run locally](../../../README.md#steps-to-run-locally)".
 
 *Note, that during "Steps to run locally" you would use `local/docker-compose.yml` with a part of services, not the `local/full/docker-compose.yml` with all the services as we are starting them separately in this guide.*
 
@@ -82,7 +82,7 @@ To run **Project Service**, please, follow its README section [Steps to run loca
 
 ### 4. Run `project-processor-es` (optional)
 
-To run `project-processor-es`, please, follow its README section [Local setup]([file:///Users/maks/dev/topcoder/projects/connect/tc-project-service/README.md#steps-to-run-locally](https://github.com/topcoder-platform/project-processor-es#local-setup)), but **skip** the second step "Run docker compose with dependant services" as we already run the same docker in this guide.
+To run `project-processor-es`, please, follow its README section "[Local setup](https://github.com/topcoder-platform/project-processor-es#local-setup)", but **skip** the second step "Run docker compose with dependant services" as we already run the same docker in this guide.
 
 ### 5. Run `tc-notifications` (optional)
 
@@ -127,4 +127,4 @@ Clone [tc-notifications](https://github.com/topcoder-platform/tc-notifications) 
 
 ### 6. Run Connect App (optional)
 
-You may also run [Connect App](https://github.com/appirio-tech/connect-app) locally together with the current setup. Please, follow section "[Run Connect App with Project Service locally](file:///Users/maks/dev/topcoder/projects/connect/tc-project-service/README.md#run-connect-app-with-project-service-locally)".
+You may also run [Connect App](https://github.com/appirio-tech/connect-app) locally together with the current setup. Please, follow section "[Run Connect App with Project Service locally](../../../README.md#run-connect-app-with-project-service-locally)".
