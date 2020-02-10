@@ -43,7 +43,7 @@ describe('Util method', () => {
     });
   });
 
-  xdescribe('maskInviteEmails', () => {
+  describe('maskInviteEmails', () => {
     it('should mask emails when passing data like for a project list endpoint for non-admin user', () => {
       const list = [
         {
@@ -70,6 +70,7 @@ describe('Util method', () => {
       };
       util.maskInviteEmails('$..invites[?(@.email)]', list, res).should.deep.equal(list2);
     });
+
     it('should mask emails when passing data like for a project details endpoint for non-admin user', () => {
       const detail = {
         id: 1,
