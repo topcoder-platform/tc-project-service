@@ -122,7 +122,7 @@ describe('Project Members create', () => {
           resJson.role.should.equal('copilot');
           resJson.projectId.should.equal(project1.id);
           resJson.userId.should.equal(40051332);
-          should.exist(resJson.id)
+          should.exist(resJson.id);
           server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
           request(server)
           .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
@@ -389,7 +389,7 @@ describe('Project Members create', () => {
                 },
               },
             };
-  
+
             if (url.indexOf('/_search') >= 0) {
               ret.data.result.content.push(testCopilot);
             } else {
@@ -414,8 +414,8 @@ describe('Project Members create', () => {
             done(err);
           } else {
             const inviteResJson = inviteRes.body.success[0];
-            should.exist(inviteResJson)
-            should.exist(inviteResJson.id)
+            should.exist(inviteResJson);
+            should.exist(inviteResJson.id);
             request(server)
             .patch(`/v5/projects/${project1.id}/invites/${inviteResJson.id}`)
             .set({
