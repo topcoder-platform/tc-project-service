@@ -609,7 +609,8 @@ _.assignIn(util, {
     }
   },
   /**
-   * Filter member details by input fields
+   * Mask email in the fields defined by `jsonPath` in the `data`.
+   * Immutable - doesn't modify data, but creates a clone.
    *
    * @param {String}  jsonPath   jsonpath string
    * @param {Object}  data      the data which  need to process
@@ -618,11 +619,17 @@ _.assignIn(util, {
    * @return {Object} data has been processed
    */
   maskInviteEmails: (jsonPath, data, req) => {
+    // clone data to avoid mutations
+    const dataClone = _.cloneDeep(data);
+
     const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
+
     if (isAdmin) {
-      return data;
+      // even though we didn't make any changes to the data, return a clone here for consistency
+      return dataClone;
     }
-    jp.apply(data, jsonPath, (value) => {
+
+    jp.apply(dataClone, jsonPath, (value) => {
       if (_.isObject(value)) {
         _.assign(value, { email: util.maskEmail(value.email) });
         return value;
@@ -630,7 +637,8 @@ _.assignIn(util, {
       // isString or null
       return util.maskEmail(value);
     });
-    return data;
+
+    return dataClone;
   },
 
   /**
