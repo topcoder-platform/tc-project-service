@@ -69,6 +69,7 @@
     "CLIENT_SECRET": "",
     "TOKEN": "TOKEN",
     "USE_MOCK": "true",
+    "MOCK_EMBED_REPORT": "/embed/looks/2",
     "QUERIES": {
       "REG_STATS": 1234,
       "BUDGET": 123

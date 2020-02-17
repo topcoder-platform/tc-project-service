@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-// import config from 'config';
+import config from 'config';
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
@@ -13,7 +13,7 @@ module.exports = [
   permissions('projectReporting.managers'),
   async (req, res, next) => {
     const projectId = Number(req.params.projectId);
-    const reportName = req.query.reportName;
+    const reportName = config.lookerConfig.USE_MOCK ? 'mock' : req.query.reportName;
     const authUser = req.authUser;
 
     try {
@@ -34,13 +34,20 @@ module.exports = [
       }
       // pick the report based on its name
       let result = {};
+      let embedUrl = null;
       const project = { id: projectId };
       switch (reportName) {
         case 'summary':
-          result = await lookerSerivce.generateEmbedUrl(req.authUser, project, member, '/embed/looks/1');
+          embedUrl = '/embed/looks/1';
+          break;
+        case 'mock':
+          embedUrl = config.lookerConfig.MOCK_EMBED_REPORT;
           break;
         default:
           return res.status(404).send('Report not found');
+      }
+      if (embedUrl) {
+        result = await lookerSerivce.generateEmbedUrl(req.authUser, project, member, embedUrl);
       }
 
       req.log.debug(result);
