@@ -5,7 +5,7 @@ import _ from 'lodash';
 import config from 'config';
 
 import models from '../../models';
-import { MANAGER_ROLES, INVITE_STATUS, PROJECT_MEMBER_NON_CUSTOMER_ROLES } from '../../constants';
+import { MANAGER_ROLES, INVITE_STATUS } from '../../constants';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -228,14 +228,13 @@ const buildEsQueryWithFilter = (value, keyword, matchType, fieldName) => {
   }
 
   if (value === 'customer' || value === 'manager') {
-    const roles = value === 'customer' ? [value] : PROJECT_MEMBER_NON_CUSTOMER_ROLES;
     should = _.concat(should, {
       nested: {
         path: 'members',
         query: {
           bool: {
             must: [
-              { terms: { 'members.role': roles } },
+              { match: { 'members.role': value } },
               {
                 query_string: {
                   query: keyword,
