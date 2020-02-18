@@ -13,7 +13,7 @@ module.exports = [
   permissions('projectReporting.managers'),
   async (req, res, next) => {
     const projectId = Number(req.params.projectId);
-    const reportName = config.lookerConfig.USE_MOCK ? 'mock' : req.query.reportName;
+    const reportName = config.lookerConfig.USE_MOCK === 'true' ? 'mock' : req.query.reportName;
     const authUser = req.authUser;
 
     try {
