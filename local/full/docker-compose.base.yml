@@ -13,9 +13,9 @@ services:
       - TC_API_V5_BASE_URL=http://host.docker.internal:8001/v5
       - TC_API_V4_BASE_URL=https://api.topcoder-dev.com/v4
       - TC_API_V3_BASE_URL=https://api.topcoder-dev.com/v3
-      - KAFKA_URL=kafka:9092
+      - KAFKA_URL=kafka:9093
       - AUTH_SECRET=secret
-      - DATABASE_URL=postgresql://coder:mysecretpassword@notifications_db:5432/tc_notifications
+      - DATABASE_URL=postgresql://coder:mysecretpassword@db:5432/tc_notifications
       - JWKS_URI=test
       - LOG_LEVEL=debug
       - ENV=development

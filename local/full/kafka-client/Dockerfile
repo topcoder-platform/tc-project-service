@@ -1,4 +1,4 @@
-From confluent/kafka
+From wurstmeister/kafka
 WORKDIR /app/
 COPY topics.txt .
 COPY create-topics.sh .
