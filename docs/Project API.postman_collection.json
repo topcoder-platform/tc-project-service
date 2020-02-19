@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "47adb133-9da4-4cc6-aa73-c7e7a2eb675e",
+		"_postman_id": "a0a9f1a7-84b1-45ad-a4c0-baa3552118cb",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1110,6 +1110,21 @@
 				},
 				{
 					"name": "Create project customer with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "320b75fe-958d-44ee-b2d2-1716b7b3e207",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"inviteId2\", pm.response.json().success[0].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1396,6 +1411,38 @@
 								"{{inviteId}}"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel project member invite",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"invites",
+								"{{inviteId2}}"
+							]
+						},
+						"description": "Update a project's member."
 					},
 					"response": []
 				}

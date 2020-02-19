@@ -580,29 +580,25 @@ _.assignIn(util, {
   maskEmail: (email) => {
     // common function for formating
     const addMask = (str) => {
-      let newStr;
       const len = str.length;
-      if (len <= 3) {
-        newStr = _.repeat('*', len);
-      } else {
-        newStr = str.substr(0, 2) + _.repeat('*', len - 3) + str.substr(-1);
+      if (len === 1) {
+        return `${str}***${str}`;
       }
-      return newStr;
+      return `${str[0]}***${str[len - 1]}`;
     };
 
     try {
       const mailParts = email.split('@');
-      const domainParts = mailParts[1].split('.');
 
       let userName = mailParts[0];
       userName = addMask(userName);
       mailParts[0] = userName;
 
-      let domainName = domainParts[0];
-      domainName = addMask(domainName);
-      domainParts[0] = domainName;
+      const index = mailParts[1].lastIndexOf('.');
+      if (index !== -1) {
+        mailParts[1] = `${addMask(mailParts[1].slice(0, index))}.${mailParts[1].slice(index + 1)}`;
+      }
 
-      mailParts[1] = domainParts.join('.');
       return mailParts.join('@');
     } catch (e) {
       return email;

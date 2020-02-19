@@ -235,7 +235,8 @@ router.route('/v5/projects/:projectId(\\d+)/invites')
 
 router.route('/v5/projects/:projectId(\\d+)/invites/:inviteId(\\d+)')
   .patch(require('./projectMemberInvites/update'))
-  .get(require('./projectMemberInvites/get'));
+  .get(require('./projectMemberInvites/get'))
+  .delete(require('./projectMemberInvites/delete'));
 
 router.route('/v5/projects/metadata/orgConfig')
   .post(require('./orgConfig/create'));

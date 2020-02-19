@@ -87,6 +87,7 @@ module.exports = () => {
 
   Authorizer.setPolicy('projectMemberInvite.create', projectView);
   Authorizer.setPolicy('projectMemberInvite.edit', true);
+  Authorizer.setPolicy('projectMemberInvite.delete', true);
   Authorizer.setPolicy('projectMemberInvite.get', projectMemberInviteView);
   Authorizer.setPolicy('projectMemberInvite.list', projectMemberInviteView);
 
