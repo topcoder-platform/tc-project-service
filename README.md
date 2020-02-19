@@ -159,9 +159,9 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 
 7. Start Project Service
 
-  1. Set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`
+   1. Set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`
 
-  2. Run
+   2. Run
 
       ```bash
       npm run start:dev
