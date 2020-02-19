@@ -7,6 +7,8 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 
+const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
+
 /**
  * API to update invite member to project.
  *
@@ -28,7 +30,15 @@ module.exports = [
     const email = req.authUser.email;
     const fields = req.query.fields ? req.query.fields.split(',') : null;
 
-    util.fetchByIdFromES('invites', {
+    try {
+      util.validateFields(fields, ALLOWED_FIELDS);
+    } catch (validationError) {
+      const err = new Error(`"fields" is not valid: ${validationError.message}`);
+      err.status = 400;
+      return next(err);
+    }
+
+    return util.fetchByIdFromES('invites', {
       query: {
         nested: {
           path: 'invites',
