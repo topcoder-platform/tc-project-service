@@ -127,7 +127,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 
       </details>
 
-  *NOTE: In production these dependencies / services are hosted & managed outside Project Service.*
+   *NOTE: In production these dependencies / services are hosted & managed outside Project Service.*
 
 4. Local config
 
