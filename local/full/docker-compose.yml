@@ -8,18 +8,8 @@ services:
     extends:
       file: ../docker-compose.yml
       service: db
-  notifications_db:
-    image: "postgres:9.5"
-    expose:
-      - "5432"
     environment:
-      - POSTGRES_PASSWORD=mysecretpassword
-      - POSTGRES_USER=coder
-      - POSTGRES_DB=tc_notifications
-  db_test:
-    extends:
-      file: ../docker-compose.yml
-      service: db_test
+      - POSTGRES_MULTIPLE_DATABASES=projectsdb,projectsdb_test,tc_notifications
   esearch:
     extends:
       file: ../docker-compose.yml
@@ -101,8 +91,7 @@ services:
     ports:
       - "4002:4002"
     depends_on:
-      - notifications_db
-      - esearch
+      - db
     environment:
       - PORT=4002
   tc-notifications-processor:

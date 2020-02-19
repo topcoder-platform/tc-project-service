@@ -54,7 +54,6 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
       |  Service | Name | Port  |
       |----------|:-----:|:----:|
       | PostgreSQL | db | 5432 |
-      | PostgreSQL (for tests) | db_test | 5432 |
       | Elasticsearch | esearch | 9200 |
       | RabbitMQ | queue | 5672, 15672  |
       | Mock Service (not in use) | jsonserver | 3001  |
@@ -105,7 +104,6 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
       |  Service | Name | Port  |
       |----------|:-----:|:----:|
       | PostgreSQL | db | 5432 |
-      | PostgreSQL (for tests) | db_test | 5432 |
       | Elasticsearch | esearch | 9200 |
       | RabbitMQ | queue | 5672, 15672  |
       | Mock Service (not in use) | jsonserver | 3001  |
