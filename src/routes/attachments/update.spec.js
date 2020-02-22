@@ -7,7 +7,7 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT, ATTACHMENT_TYPES } from '../../constants';
 
 const should = chai.should();
 
@@ -46,7 +46,9 @@ describe('Project Attachments update', () => {
               contentType: 'application/unknown',
               size: 12312,
               category: null,
-              filePath: 'https://media.topcoder.com/projects/1/test.txt',
+              path: 'https://media.topcoder.com/projects/1/test.txt',
+              type: ATTACHMENT_TYPES.FILE,
+              tags: ['tag1', 'tag2', 'tag3'],
               createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
               allowedUsers: [],
@@ -97,7 +99,12 @@ describe('Project Attachments update', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ title: 'updated title', description: 'updated description' })
+        .send({
+          title: 'updated title',
+          description: 'updated description',
+          tags: ['updatedTag'],
+          allowedUsers: [123, 521],
+        })
         .expect(200)
         .end((err, res) => {
           if (err) {
@@ -107,6 +114,8 @@ describe('Project Attachments update', () => {
             should.exist(resJson);
             resJson.title.should.equal('updated title');
             resJson.description.should.equal('updated description');
+            resJson.tags.should.eql(['updatedTag']);
+            resJson.allowedUsers.should.eql([123, 521]);
             done();
           }
         });
@@ -168,7 +177,7 @@ describe('Project Attachments update', () => {
                 })).should.be.true;
 
                 // Check Notification Service events
-                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, sinon.match({
                   projectId: project1.id,
                   projectName: project1.name,
                   projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,

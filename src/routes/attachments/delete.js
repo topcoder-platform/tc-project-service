@@ -44,7 +44,7 @@ module.exports = [
         }))
         .then((_attachment) => {
           if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
-            return fileService.deleteFile(req, _attachment.filePath);
+            return fileService.deleteFile(req, _attachment.path);
           }
           return Promise.resolve();
         })

@@ -1,23 +1,35 @@
 /* eslint-disable no-unused-expressions */
 import chai from 'chai';
 import sinon from 'sinon';
+import _ from 'lodash';
 import request from 'supertest';
 import server from '../../app';
 import models from '../../models';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT, ATTACHMENT_TYPES } from '../../constants';
 
 const should = chai.should();
 
-const body = {
+const fileAttachmentBody = {
   title: 'Spec.pdf',
-  description: '',
+  description: 'attachment file description',
   category: 'appDefinition',
-  filePath: 'projects/1/spec.pdf',
+  path: 'projects/1/spec.pdf',
+  type: ATTACHMENT_TYPES.FILE,
+  tags: ['tag1', 'tag2', 'tag3'],
   s3Bucket: 'submissions-staging-dev',
   contentType: 'application/pdf',
+};
+
+const linkAttachmentBody = {
+  title: 'link title',
+  description: 'link description',
+  category: 'appDefinition',
+  path: 'https://connect.topcoder-dev.com/projects/8600/assets',
+  type: ATTACHMENT_TYPES.LINK,
+  tags: ['tag4', 'tag5'],
 };
 
 describe('Project Attachments', () => {
@@ -38,7 +50,7 @@ describe('Project Attachments', () => {
             success: true,
             status: 200,
             content: {
-              filePath: 'tmp/spec.pdf',
+              path: 'tmp/spec.pdf',
               preSignedURL: 'www.topcoder.com/media/spec.pdf',
             },
           },
@@ -51,7 +63,7 @@ describe('Project Attachments', () => {
             success: true,
             status: 200,
             content: {
-              filePath: 'tmp/spec.pdf',
+              path: 'tmp/spec.pdf',
               preSignedURL: 'http://topcoder-media.s3.amazon.com/projects/1/spec.pdf',
             },
           },
@@ -107,18 +119,42 @@ describe('Project Attachments', () => {
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
-          .send(body)
+          .send(fileAttachmentBody)
           .expect('Content-Type', /json/)
           .expect(403, done);
     });
 
-    it('should return 201 return attachment record', (done) => {
+    it('should return 400 if contentType is not provided for file attachment', (done) => {
+      const payload = _.omit(_.cloneDeep(fileAttachmentBody), 'contentType');
       request(server)
           .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
-          .send(body)
+          .send(payload)
+          .expect('Content-Type', /json/)
+          .expect(400, done);
+    });
+
+    it('should return 400 if s3Bucket is not provided for file attachment', (done) => {
+      const payload = _.omit(_.cloneDeep(fileAttachmentBody), 's3Bucket');
+      request(server)
+          .post(`/v5/projects/${project1.id}/attachments/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(payload)
+          .expect('Content-Type', /json/)
+          .expect(400, done);
+    });
+
+    it('should properly create file attachment - 201', (done) => {
+      request(server)
+          .post(`/v5/projects/${project1.id}/attachments/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(fileAttachmentBody)
           .expect('Content-Type', /json/)
           .expect(201)
           .end((err, res) => {
@@ -130,8 +166,38 @@ describe('Project Attachments', () => {
               postSpy.should.have.been.calledOnce;
               getSpy.should.have.been.calledOnce;
               stub.restore();
-              resJson.title.should.equal('Spec.pdf');
+              resJson.title.should.equal(fileAttachmentBody.title);
+              resJson.tags.should.eql(fileAttachmentBody.tags);
               resJson.downloadUrl.should.exist;
+              resJson.projectId.should.equal(project1.id);
+              done();
+            }
+          });
+    });
+
+    it('should properly create link attachment - 201', (done) => {
+      request(server)
+          .post(`/v5/projects/${project1.id}/attachments/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(linkAttachmentBody)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              postSpy.should.have.been.calledOnce;
+              getSpy.should.have.been.calledOnce;
+              stub.restore();
+              resJson.title.should.equal(linkAttachmentBody.title);
+              resJson.path.should.equal(linkAttachmentBody.path);
+              resJson.description.should.equal(linkAttachmentBody.description);
+              resJson.type.should.equal(linkAttachmentBody.type);
+              resJson.tags.should.eql(linkAttachmentBody.tags);
               resJson.projectId.should.equal(project1.id);
               done();
             }
@@ -150,13 +216,13 @@ describe('Project Attachments', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends send correct BUS API messages when attachment added', (done) => {
+      it('should send correct BUS API messages when file attachment added', (done) => {
         request(server)
           .post(`/v5/projects/${project1.id}/attachments/`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
-          .send(body)
+          .send(fileAttachmentBody)
           .expect(201)
           .end((err) => {
             if (err) {
@@ -168,16 +234,61 @@ describe('Project Attachments', () => {
 
                 createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED, sinon.match({
                   resource: RESOURCES.ATTACHMENT,
-                  title: body.title,
-                  description: body.description,
-                  category: body.category,
-                  contentType: body.contentType,
+                  title: fileAttachmentBody.title,
+                  description: fileAttachmentBody.description,
+                  category: fileAttachmentBody.category,
+                  contentType: fileAttachmentBody.contentType,
+                  type: fileAttachmentBody.type,
+                  tags: fileAttachmentBody.tags,
                 })).should.be.true;
 
                 // Check Notification Service events
                 createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_FILE_UPLOADED)
                   .should.be.true;
-                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
+      });
+
+      it('should send correct BUS API messages when link attachment added', (done) => {
+        request(server)
+          .post(`/v5/projects/${project1.id}/attachments/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(linkAttachmentBody)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              // Wait for app message handler to complete
+              testUtil.wait(() => {
+                createEventSpy.calledThrice.should.be.true;
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED, sinon.match({
+                  resource: RESOURCES.ATTACHMENT,
+                  title: linkAttachmentBody.title,
+                  description: linkAttachmentBody.description,
+                  category: linkAttachmentBody.category,
+                  type: linkAttachmentBody.type,
+                  path: linkAttachmentBody.path,
+                  tags: linkAttachmentBody.tags,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_LINK_CREATED)
+                  .should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, sinon.match({
                   projectId: project1.id,
                   projectName: project1.name,
                   projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
