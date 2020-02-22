@@ -11,19 +11,6 @@ import { ATTACHMENT_TYPES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
-// The dummy project attachment to return in development environement when file upload is disabled
-const dummyProjectAttachment = {
-  title: 'Spec',
-  projectId: 123456,
-  type: ATTACHMENT_TYPES.FILE,
-  tags: ['specificaton', 'design preview', 'billing information'],
-  description: 'specification',
-  path: 'projects/1/spec.pdf',
-  contentType: 'application/pdf',
-  createdBy: 1,
-  updatedBy: 1,
-};
-
 /**
  * This private function gets the pre-signed url if the attachment is a file
  *
@@ -39,7 +26,7 @@ const getPreSignedUrl = (req, attachment) => {
   }  // The attachment is a file
     // In development/test mode, if file upload is disabled, we return the dummy attachment object
   if (_.includes(['development', 'test'], process.env.NODE_ENV) && config.get('enableFileUpload') === 'false') {
-    return [dummyProjectAttachment, 'dummy://url'];
+    return [attachment, 'dummy://url'];
   }
       // Not in development mode or file upload is not disabled
   return [attachment, util.getFileDownloadUrl(req, attachment.path)];

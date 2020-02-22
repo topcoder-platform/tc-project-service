@@ -1,10 +1,19 @@
 
+import _ from 'lodash';
+import { ATTACHMENT_TYPES } from '../constants';
+
 module.exports = function defineProjectAttachment(sequelize, DataTypes) {
   const ProjectAttachment = sequelize.define('ProjectAttachment', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     title: { type: DataTypes.STRING, allowNull: true },
-    type: { type: DataTypes.STRING, allowNull: false },
-    tags: DataTypes.ARRAY({ type: DataTypes.STRING, allowNull: false }),
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isIn: [_.values(ATTACHMENT_TYPES)],
+      },
+    },
+    tags: DataTypes.ARRAY({ type: DataTypes.STRING, allowNull: true }),
     size: { type: DataTypes.INTEGER, allowNull: true }, // size in MB
     category: { type: DataTypes.STRING, allowNull: true }, // size in MB
     description: { type: DataTypes.STRING, allowNull: true },

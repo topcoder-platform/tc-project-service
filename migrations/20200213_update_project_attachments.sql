@@ -10,3 +10,6 @@ ALTER TABLE project_attachments ADD COLUMN tags TYPE _varchar NULL;
 
 -- Rename 'file_path' column to 'path'
 ALTER TABLE project_attachments RENAME COLUMN filePath TO "path";
+
+-- Make the contentType column Nullable
+ALTER TABLE project_attachments MODIFY COLUMN "contentType" character varying(45);

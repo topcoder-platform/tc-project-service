@@ -90,6 +90,7 @@ module.exports = [
         tags: data.tags,
       })).then((_link) => {
         const link = _link.get({ plain: true });
+        req.log.debug('New Link Attachment record: ', link);
 
         // publish Rabbit MQ event
         req.app.services.pubsub.publish(
@@ -107,6 +108,12 @@ module.exports = [
 
         res.status(201).json(link);
         return Promise.resolve();
+      })
+      .catch((error) => {
+        req.log.error('Error adding link attachment', error);
+        const rerr = error;
+        rerr.status = rerr.status || 500;
+        next(rerr);
       });
     } else {
     // don't actually transfer file in development mode if file uploading is disabled, so we can test this endpoint
@@ -115,7 +122,7 @@ module.exports = [
       : Promise.resolve();
 
       fileTransferPromise.then(() => {
-      // file copied to final destination, create DB record
+        // file copied to final destination, create DB record
         req.log.debug('creating db file record');
         return models.ProjectAttachment.create({
           projectId,
@@ -135,7 +142,7 @@ module.exports = [
         newAttachment = _newAttachment.get({ plain: true });
         req.log.debug('New Attachment record: ', newAttachment);
         if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
-        // retrieve download url for the response
+          // retrieve download url for the response
           req.log.debug('retrieving download url');
           return httpClient.post(`${fileServiceUrl}downloadurl`, {
             param: {
@@ -155,14 +162,14 @@ module.exports = [
               response = _.omit(response, ['path', 'deletedAt']);
 
               response.downloadUrl = resp.data.result.content.preSignedURL;
-            // publish event
+              // publish event
               req.app.services.pubsub.publish(
               EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
               newAttachment,
               { correlationId: req.id },
             );
 
-            // emit the event
+              // emit the event
               util.sendResourceToKafkaBus(
               req,
               EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
@@ -175,15 +182,15 @@ module.exports = [
         }
         let response = _.cloneDeep(newAttachment);
         response = _.omit(response, ['path', 'deletedAt']);
-      // only in development mode
+        // only in development mode
         response.downloadUrl = path;
-      // publish event
+        // publish event
         req.app.services.pubsub.publish(
         EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
         newAttachment,
         { correlationId: req.id },
       );
-      // emit the event
+        // emit the event
         util.sendResourceToKafkaBus(
         req,
         EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
@@ -193,12 +200,12 @@ module.exports = [
         res.status(201).json(response);
         return Promise.resolve();
       })
-    .catch((error) => {
-      req.log.error('Error adding attachment', error);
-      const rerr = error;
-      rerr.status = rerr.status || 500;
-      next(rerr);
-    });
+      .catch((error) => {
+        req.log.error('Error adding file attachment', error);
+        const rerr = error;
+        rerr.status = rerr.status || 500;
+        next(rerr);
+      });
     }
   },
 ];

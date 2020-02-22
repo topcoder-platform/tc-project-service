@@ -168,6 +168,7 @@ describe('Project Attachments', () => {
               stub.restore();
               resJson.title.should.equal(fileAttachmentBody.title);
               resJson.tags.should.eql(fileAttachmentBody.tags);
+              resJson.type.should.eql(fileAttachmentBody.type);
               resJson.downloadUrl.should.exist;
               resJson.projectId.should.equal(project1.id);
               done();

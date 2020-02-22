@@ -5147,8 +5147,12 @@ definitions:
       type:
         type: string
         description: The attachment type, one of 'link' or 'file'
+        enum: 
+         - link
+         - file
       tags:
         type: array
+        description: The attachment tags
         items:
           type: string
       s3Bucket:
@@ -5182,6 +5186,7 @@ definitions:
     properties:
       tags:
         type: array
+        description: The attachment tags
         items:
           type: string
       title:
@@ -5209,6 +5214,9 @@ definitions:
       type:
         type: string
         description: The attachment type, one of 'file' or 'link'
+        enum:
+         - link
+         - file
       tags:
         type: array
         description: The attachment tags array

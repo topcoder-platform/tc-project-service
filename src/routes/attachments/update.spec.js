@@ -14,6 +14,7 @@ const should = chai.should();
 describe('Project Attachments update', () => {
   let project1;
   let attachment;
+  let link;
   beforeEach((done) => {
     testUtil.clearDb()
         .then(() => {
@@ -54,7 +55,22 @@ describe('Project Attachments update', () => {
               allowedUsers: [],
             }).then((a1) => {
               attachment = a1;
-              done();
+              models.ProjectAttachment.create(
+                {
+                  projectId: project1.id,
+                  title: 'Test Link 1',
+                  description: 'Test link 1 description',
+                  size: 123456,
+                  category: null,
+                  path: 'https://connect.topcoder-dev.com/projects/8600/assets',
+                  type: ATTACHMENT_TYPES.LINK,
+                  tags: ['tag3', 'tag4'],
+                  createdBy: testUtil.userIds.copilot,
+                  updatedBy: 1,
+                }).then((_link) => {
+                  link = _link;
+                  done();
+                });
             }));
           });
         });
@@ -93,7 +109,7 @@ describe('Project Attachments update', () => {
         .expect(404, done);
     });
 
-    it('should return 200 if attachment was successfully updated', (done) => {
+    it('should return 200 if file attachment was successfully updated', (done) => {
       request(server)
         .patch(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
@@ -116,6 +132,34 @@ describe('Project Attachments update', () => {
             resJson.description.should.equal('updated description');
             resJson.tags.should.eql(['updatedTag']);
             resJson.allowedUsers.should.eql([123, 521]);
+            done();
+          }
+        });
+    });
+
+    it('should return 200 if link attachment was successfully updated', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/attachments/${link.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          title: 'updated link title',
+          description: 'updated link description',
+          tags: ['linkTag1', 'linkTag2'],
+          allowedUsers: [1111, 2222],
+        })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.title.should.equal('updated link title');
+            resJson.description.should.equal('updated link description');
+            resJson.tags.should.eql(['linkTag1', 'linkTag2']);
+            resJson.allowedUsers.should.eql([1111, 2222]);
             done();
           }
         });

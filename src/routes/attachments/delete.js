@@ -9,7 +9,7 @@ import config from 'config';
 import models from '../../models';
 import util from '../../util';
 import fileService from '../../services/fileService';
-import { EVENT, RESOURCES } from '../../constants';
+import { EVENT, RESOURCES, ATTACHMENT_TYPES } from '../../constants';
 
 /**
  * API to delete a project member.
@@ -43,7 +43,8 @@ module.exports = [
             .then(() => _attachment.destroy());
         }))
         .then((_attachment) => {
-          if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
+          if (_attachment.type === ATTACHMENT_TYPES.FILE &&
+             (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true')) {
             return fileService.deleteFile(req, _attachment.path);
           }
           return Promise.resolve();

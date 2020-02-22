@@ -14,7 +14,7 @@ console.log('Migrate project.bookmarks to project.attachments for all projects i
  *
  * @returns {Promise} the DB data
  */
-const getAllProjectsFromDB = async () => models.Project.findAll({ raw: false });
+const getAllProjectsFromDB = () => models.Project.findAll({ raw: false });
 
 /**
  * Executes the bookmarks migration to link attachments
