@@ -140,10 +140,9 @@ describe('GET embed report', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .expect('Content-Type', /json/)
-        .expect(404, () => {
+        .expect(404, (err) => {
           cfg.restore();
-          done();
+          done(err);
         });
     });
 
@@ -151,15 +150,16 @@ describe('GET embed report', () => {
       const cfg = sinon.stub(config, 'get');
       const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
+      cfg.withArgs('lookerConfig.EMBED_REPORTS_MAPPING').returns('{"mock-concrete-customer": "/embed/looks/2"}');
       request(server)
         .get(`/v5/projects/${project1.id}/reports/embed?reportName=mock`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(500, () => {
+        .expect(500, (err) => {
           gem.restore();
           cfg.restore();
-          done();
+          done(err);
         });
     });
 
@@ -173,11 +173,10 @@ describe('GET embed report', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .expect('Content-Type', /json/)
-        .expect(404, () => {
+        .expect(404, (err) => {
           gem.restore();
           cfg.restore();
-          done();
+          done(err);
         });
     });
 

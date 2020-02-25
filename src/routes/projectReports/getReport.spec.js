@@ -153,10 +153,9 @@ describe('GET report', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .expect('Content-Type', /json/)
-        .expect(404, () => {
+        .expect(404, (err) => {
           cfg.restore();
-          done();
+          done(err);
         });
     });
 
