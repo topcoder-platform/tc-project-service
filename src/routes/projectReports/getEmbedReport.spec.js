@@ -13,6 +13,9 @@ const should = chai.should();
 describe('GET embed report', () => {
   let project0;
   let project1;
+  let project3;
+  let productTemplate0;
+  let projectTemplate0;
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => models.Project.create({
@@ -51,8 +54,8 @@ describe('GET embed report', () => {
         phases: {},
         createdBy: 1,
         updatedBy: 2,
-      }))
-      .then(temp => models.Project.create({
+      }).then((projectTemplate) => { projectTemplate0 = projectTemplate; }))
+      .then(() => models.Project.create({
         type: 'generic',
         directProjectId: 1,
         billingAccountId: 1,
@@ -63,7 +66,7 @@ describe('GET embed report', () => {
         createdBy: 1,
         updatedBy: 1,
         lastActivityAt: 1,
-        templateId: temp.id,
+        templateId: projectTemplate0.id,
         lastActivityUserId: '1',
       }))
       .then((p) => {
@@ -94,6 +97,33 @@ describe('GET embed report', () => {
         createdBy: 1,
         updatedBy: 1,
       }))
+      .then(() => models.ProductTemplate.create({
+        name: 'product template 1',
+        productKey: 'product-key',
+        category: 'prodCut',
+        subCategory: 'prodSubCut',
+        icon: 'http://example.com/product-icon.ico',
+        brief: 'product brief',
+        details: 'product details',
+        aliases: ['product-key', 'product_key'],
+        createdBy: 1,
+        updatedBy: 2,
+      }).then((productTemplate) => { productTemplate0 = productTemplate; }))
+      .then(() => models.Project.create({
+        type: 'generic',
+        directProjectId: 3,
+        billingAccountId: 3,
+        name: 'product test',
+        description: 'product test description',
+        status: 'reviewed',
+        details: {
+          products: [productTemplate0.productKey],
+        },
+        createdBy: 1,
+        updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
+      }).then((project) => { project3 = project; }))
       .then(() => {
         done();
       });
@@ -163,7 +193,7 @@ describe('GET embed report', () => {
         });
     });
 
-    it('should return 404 when the project template is not found', (done) => {
+    it('should return 404 when the project template or product template is not found', (done) => {
       const cfg = sinon.stub(config, 'get');
       const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
@@ -180,7 +210,7 @@ describe('GET embed report', () => {
         });
     });
 
-    it('should return generate customer url', (done) => {
+    it('should return customer url', (done) => {
       const cfg = sinon.stub(config, 'get');
       const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
@@ -213,7 +243,7 @@ describe('GET embed report', () => {
         });
     });
 
-    it('should return generate admin url', (done) => {
+    it('should return admin url', (done) => {
       const cfg = sinon.stub(config, 'get');
       const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
       const getAdmin = sinon.stub(util, 'getTopcoderUser', () => ({
@@ -253,7 +283,7 @@ describe('GET embed report', () => {
         });
     });
 
-    it('should return generate copilot url', (done) => {
+    it('should return copilot url', (done) => {
       const cfg = sinon.stub(config, 'get');
       const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
@@ -280,6 +310,47 @@ describe('GET embed report', () => {
             member.userId.should.equal(40051332);
             member.role.should.equal('copilot');
             embedUrl.should.equal('/copilot/embed/looks/2');
+            done();
+          }
+        });
+    });
+
+    it('should return admin url for project with product template', (done) => {
+      const cfg = sinon.stub(config, 'get');
+      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
+      const getAdmin = sinon.stub(util, 'getTopcoderUser', () => ({
+        firstName: 'fn',
+        lastName: 'ln',
+        userId: 40051333,
+      }));
+      cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
+      cfg.withArgs('lookerConfig.EMBED_REPORTS_MAPPING')
+        .returns('{"mock-prodCut-topcoder": "/admin/embed/looks/3"}');
+      request(server)
+        .get(`/v5/projects/${project3.id}/reports/embed?reportName=mock`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          getAdmin.restore();
+          gem.restore();
+          cfg.restore();
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.equal('generatedUrl');
+            const [user, project, member, embedUrl] = gem.lastCall.args;
+            user.userId.should.equal(40051333);
+            project.should.deep.equal({ id: project3.id });
+            member.userId.should.equal(40051333);
+            member.firstName.should.equal('fn');
+            member.lastName.should.equal('ln');
+            member.role.should.equal('');
+            embedUrl.should.equal('/admin/embed/looks/3');
             done();
           }
         });

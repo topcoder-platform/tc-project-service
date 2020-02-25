@@ -35,14 +35,39 @@ module.exports = [
       if (!mockReport) {
         const project = await models.Project.findOne({
           where: { id: projectId },
-          attributes: ['id', 'templateId'],
+          attributes: ['id', 'templateId', 'details'],
           raw: true,
         });
+
+        // we would use Project Template or Product Template category to format report name
+        let category = '';
+
+        // try to get project template of the project to generate the report name
         const projectTemplate = project.templateId
           ? await models.ProjectTemplate.findByPk(project.templateId, { attributes: ['category'], raw: true })
           : null;
-        const projectCategory = _.get(projectTemplate, 'category', '');
-        reportName = `${reportName}-${projectCategory}`;
+        if (projectTemplate) {
+          category = _.get(projectTemplate, 'category', '');
+
+        // if no project template found, try to find product template (for old project v2)
+        } else {
+          const productTemplate = _.get(project, 'details.products[0]')
+          ? await models.ProductTemplate.findOne(
+            {
+              where: {
+                productKey: _.get(project, 'details.products[0]'),
+              },
+            },
+            {
+              attributes: ['category'],
+              raw: true,
+            },
+          ) : null;
+
+          category = _.get(productTemplate, 'category', '');
+        }
+
+        reportName = `${reportName}-${category}`;
       }
       // check if auth user has acecss to this project
       const members = req.context.currentProjectMembers;
