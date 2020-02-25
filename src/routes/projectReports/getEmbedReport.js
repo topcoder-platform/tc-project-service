@@ -14,7 +14,7 @@ module.exports = [
   permissions('projectReporting.view'),
   async (req, res, next) => {
     const projectId = Number(req.params.projectId);
-    const mockReport = config.lookerConfig.USE_MOCK === 'true';
+    const mockReport = config.get('lookerConfig.USE_MOCK') === 'true';
     let reportName = mockReport ? 'mock' : req.query.reportName;
     const authUser = req.authUser;
     let REPORTS = null;
@@ -22,7 +22,7 @@ module.exports = [
     try {
       allowedUsers = JSON.parse(_.get(config, 'lookerConfig.ALLOWED_USERS', '[]'));
       req.log.trace(allowedUsers, 'allowedUsers');
-      REPORTS = JSON.parse(config.lookerConfig.EMBED_REPORTS_MAPPING);
+      REPORTS = JSON.parse(config.get('lookerConfig.EMBED_REPORTS_MAPPING'));
     } catch (error) {
       req.log.error(error);
       req.log.debug('Invalid reports mapping. Should be a valid JSON.');
