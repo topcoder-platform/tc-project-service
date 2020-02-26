@@ -2890,7 +2890,7 @@ paths:
             example:
               'work.create': true
               'workItem.edit': true
-                    
+
         '401':
           description: Unauthorized
           schema:
@@ -3631,6 +3631,37 @@ paths:
           description: Returns the newly updated invite
           schema:
             $ref: '#/definitions/ProjectMemberInvite'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - project member invite
+      operationId: deleteProjectMemberInvite
+      security:
+        - Bearer: []
+      description: >-
+        Cancel an invite. All users who can access this endpoint, however more
+        restriction will be applied based on role to be cancelled.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/inviteIdParam'
+      responses:
+        '204':
+          description: Cancel success
         '400':
           description: Bad request
           schema:
@@ -6149,6 +6180,9 @@ definitions:
       email:
         type: string
         description: The user email
+      hashEmail:
+        type: string
+        description: The email hash value
       role:
         description: The user role in the project
         type: string

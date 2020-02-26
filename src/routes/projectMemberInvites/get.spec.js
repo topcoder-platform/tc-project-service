@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-expressions */
 import chai from 'chai';
 import request from 'supertest';
+import md5 from 'md5';
 
 import models from '../../models';
 import server from '../../app';
@@ -84,6 +85,7 @@ describe('GET Project Member Invite', () => {
             id: 3,
             userId: null,
             email: 'test@topcoder.com',
+            hashEmail: md5('test@topcoder.com'),
             projectId: project2.id,
             role: 'customer',
             createdBy: 1,
@@ -229,6 +231,7 @@ describe('GET Project Member Invite', () => {
             should.exist(resJson.projectId);
             resJson.id.should.be.eql(3);
             resJson.email.should.be.eql('test@topcoder.com');
+            resJson.hashEmail.should.be.eql(md5('test@topcoder.com'));
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
             done();
           }

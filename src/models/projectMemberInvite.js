@@ -27,6 +27,10 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
         isIn: [_.values(INVITE_STATUS)],
       },
     },
+    hashEmail: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     deletedAt: { type: DataTypes.DATE, allowNull: true },
@@ -145,6 +149,14 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
       where,
     }).then(res => _.without(_.map(res, 'projectId'), null));
   };
+
+  ProjectMemberInvite.getPendingOrRequestedProjectInviteById = (projectId, inviteId) => ProjectMemberInvite.findOne({
+    where: {
+      projectId,
+      id: inviteId,
+      status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
+    },
+  });
 
   return ProjectMemberInvite;
 };
