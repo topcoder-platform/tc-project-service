@@ -9,7 +9,7 @@ import chai from 'chai';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { EVENT, RESOURCES, BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import { RESOURCES, BUS_API_EVENT } from '../../constants';
 import busApi from '../../services/busApi';
 
 const should = chai.should(); // eslint-disable-line no-unused-vars
@@ -317,12 +317,7 @@ describe('DELETE milestone', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(204)
-        .end(err => expectAfterDelete(1, 1, err, () => {
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_REMOVED).should.be.true;
-          done();
-        }));
+        .expect(204, done);
     });
 
     it('should return 204, for connect admin, if timeline was successfully removed', (done) => {
@@ -399,15 +394,6 @@ describe('DELETE milestone', () => {
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
                   resource: RESOURCES.MILESTONE,
                   id: 1,
-                })).should.be.true;
-
-                // Check Notification Service events
-                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_REMOVED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
                 })).should.be.true;
 
                 done();

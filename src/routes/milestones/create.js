@@ -2,14 +2,13 @@
  * API to add a milestone
  */
 import validate from 'express-validation';
-import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import Sequelize from 'sequelize';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
 import { EVENT, RESOURCES } from '../../constants';
+import { createMilestone } from './commonHelper';
 
 const permissions = tcMiddleware.permissions;
 
@@ -50,98 +49,15 @@ module.exports = [
   // for checking by the permissions middleware
   validateTimeline.validateTimelineIdParam,
   permissions('milestone.create'),
-  (req, res, next) => {
-    const entity = _.assign(req.body, {
-      createdBy: req.authUser.userId,
-      updatedBy: req.authUser.userId,
-      timelineId: req.params.timelineId,
-    });
-    let result;
-
-    // Validate startDate is not earlier than timeline startDate
-    let error;
-    if (req.body.startDate < req.timeline.startDate) {
-      error = 'Milestone startDate must not be before the timeline startDate';
-    }
-    if (error) {
-      const apiErr = new Error(error);
-      apiErr.status = 400;
-      return next(apiErr);
-    }
-
-    return models.sequelize.transaction(() =>
-      // Save to DB
-      models.Milestone.create(entity)
-        .then((createdEntity) => {
-          // Omit deletedAt, deletedBy
-          result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
-
-          // Increase the order of the other milestones in the same timeline,
-          // which have `order` >= this milestone order
-          return models.Milestone.update({ order: Sequelize.literal('"order" + 1') }, {
-            where: {
-              timelineId: result.timelineId,
-              id: { $ne: result.id },
-              order: { $gte: result.order },
-            },
-          });
-        })
-        .then((updatedCount) => {
-          if (updatedCount) {
-            return models.Milestone.findAll({
-              where: {
-                timelineId: result.timelineId,
-                id: { $ne: result.id },
-                order: { $gte: result.order + 1 },
-              },
-              order: [['updatedAt', 'DESC']],
-              limit: updatedCount[0],
-            });
-          }
-          return Promise.resolve();
-        }),
-    )
-    .then((otherUpdated) => {
-      // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for milestone %d', result.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        result,
-        { correlationId: req.id },
-      );
-
-      // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
-      //      Even though we send this event to the Kafka, the "project-processor-es" shouldn't process it.
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        RESOURCES.MILESTONE,
-        result);
-
-      // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
-      //      Even though we send these events to the Kafka, the "project-processor-es" shouldn't process them.
-      //
-      //      We don't process these event in "project-processor-es"
-      //      because it will make 'version conflict' error in ES.
-      //      The order of the other milestones need to be updated in the PROJECT_PHASE_UPDATED event handler
-      _.map(otherUpdated, milestone =>
+  (req, res, next) =>
+    models.sequelize.transaction(t => createMilestone(req.authUser, req.timeline, req.body, t))
+      .then((result) => {
         util.sendResourceToKafkaBus(
           req,
-          EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+          EVENT.ROUTING_KEY.MILESTONE_ADDED,
           RESOURCES.MILESTONE,
-          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
-          // Pass the same object as original milestone even though, their time has changed.
-          // So far we don't use time properties in the handler so it's ok. But in general, we should pass
-          // the original milestones. <- TODO
-          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
-          null, // no route
-          true, // don't send event to Notification Service as the main event here is updating one milestone
-        ),
-      );
-
-      // Write to the response
-      res.status(201).json(result);
-      return Promise.resolve();
-    })
-    .catch(next);
-  },
+          result);
+        res.status(201).json(result);
+      })
+      .catch(next),
 ];

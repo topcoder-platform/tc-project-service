@@ -11,7 +11,7 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { EVENT, RESOURCES, MILESTONE_STATUS, BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import { RESOURCES, MILESTONE_STATUS, BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -550,14 +550,11 @@ describe('UPDATE Milestone', () => {
           // validate statusHistory
           should.exist(resJson.statusHistory);
           resJson.statusHistory.should.be.an('array');
-          resJson.statusHistory.length.should.be.eql(2);
+          resJson.statusHistory.length.should.be.eql(1);
           resJson.statusHistory.forEach((statusHistory) => {
             statusHistory.reference.should.be.eql('milestone');
             statusHistory.referenceId.should.be.eql(resJson.id);
           });
-
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_UPDATED).should.be.true;
 
           done();
         });
@@ -575,26 +572,21 @@ describe('UPDATE Milestone', () => {
         .send(_.assign({}, body, { order: 4 })) // 1 to 4
         .expect(200)
         .end(() => {
-          // Milestone 1: order 4
-          // Milestone 2: order 2 - 1 = 1
-          // Milestone 3: order 3 - 1 = 2
-          // Milestone 4: order 4 - 1 = 3
           models.Milestone.findByPk(1)
             .then((milestone) => {
               milestone.order.should.be.eql(4);
             })
             .then(() => models.Milestone.findByPk(2))
             .then((milestone) => {
-              milestone.order.should.be.eql(1);
+              milestone.order.should.be.eql(2);
             })
             .then(() => models.Milestone.findByPk(3))
             .then((milestone) => {
-              milestone.order.should.be.eql(2);
+              milestone.order.should.be.eql(3);
             })
             .then(() => models.Milestone.findByPk(4))
             .then((milestone) => {
-              milestone.order.should.be.eql(3);
-
+              milestone.order.should.be.eql(4);
               done();
             });
         });
@@ -649,26 +641,21 @@ describe('UPDATE Milestone', () => {
         .send(_.assign({}, body, { order: 2 })) // 4 to 2
         .expect(200)
         .end(() => {
-          // Milestone 1: order 1
-          // Milestone 2: order 3
-          // Milestone 3: order 4
-          // Milestone 4: order 2
           models.Milestone.findByPk(1)
             .then((milestone) => {
               milestone.order.should.be.eql(1);
             })
             .then(() => models.Milestone.findByPk(2))
             .then((milestone) => {
-              milestone.order.should.be.eql(3);
+              milestone.order.should.be.eql(2);
             })
             .then(() => models.Milestone.findByPk(3))
             .then((milestone) => {
-              milestone.order.should.be.eql(4);
+              milestone.order.should.be.eql(3);
             })
             .then(() => models.Milestone.findByPk(4))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
-
               done();
             });
         });
@@ -858,16 +845,13 @@ describe('UPDATE Milestone', () => {
             .send(_.assign({}, body, { order: 2 })) // 4 to 2
             .expect(200)
             .end(() => {
-              // Milestone 6: order 1 => 1
-              // Milestone 7: order 2 => 3
-              // Milestone 8: order 4 => 2
               models.Milestone.findByPk(6)
                 .then((milestone) => {
                   milestone.order.should.be.eql(1);
                 })
                 .then(() => models.Milestone.findByPk(7))
                 .then((milestone) => {
-                  milestone.order.should.be.eql(3);
+                  milestone.order.should.be.eql(2);
                 })
                 .then(() => models.Milestone.findByPk(8))
                 .then((milestone) => {
@@ -880,198 +864,83 @@ describe('UPDATE Milestone', () => {
         });
     });
 
-    it('should return 200 for admin - marking milestone active later will cascade changes to coming ' +
+    it('should return 200 for admin - marking milestone active later will adjust actual start date and end date'
       // eslint-disable-next-line func-names
-      'milestones', function (done) {
-      this.timeout(10000);
-      const today = moment.utc().hours(0).minutes(0).seconds(0)
-        .milliseconds(0);
+      , function (done) {
+        this.timeout(10000);
+        const today = moment.utc().hours(0).minutes(0).seconds(0)
+          .milliseconds(0);
 
-      request(server)
-        .patch('/v5/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ status: MILESTONE_STATUS.ACTIVE })
-        .expect(200)
-        .end(() => {
-          // Milestone 2: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-14T00:00:00.000Z'
-          //        actualStartDate: null                       to today
-          //                endDate: null                       to today + 2 (2 = duration - 1)
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to today + 3
-          //                endDate: null                       to today + 5 (5 = 3 + duration - 1)
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to today + 6
-          //                endDate: null                       to today + 8 (2 = 6 + duration - 1)
-          models.Milestone.findByPk(2)
-            .then((milestone) => {
-              should.exist(milestone.actualStartDate);
-              moment.utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
-              // start date of the updated milestone should not change
-              milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
-              today.add('days', milestone.duration - 1);
-              // end date of the updated milestone should change, as delayed start caused scheduled to be delayed
-              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
-              milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
-              return models.Milestone.findByPk(3);
-            })
-            .then((milestone) => {
-              today.add('days', 1); // should have start date next to previous one's end date
-              moment.utc(milestone.startDate).diff(today, 'days').should.be.eql(0);
-              should.not.exist(milestone.actualStartDate);
-              today.add('days', milestone.duration - 1);
-              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
-              return models.Milestone.findByPk(4);
-            })
-            .then((milestone) => {
-              today.add('days', 1); // should have start date next to previous one's end date
-              moment.utc(milestone.startDate).diff(today, 'days').should.be.eql(0);
-              should.not.exist(milestone.actualStartDate);
-              today.add('days', milestone.duration - 1);
-              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
-              done();
-            })
-            .catch(done);
-        });
-    });
+        request(server)
+          .patch('/v5/timelines/1/milestones/2')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({ status: MILESTONE_STATUS.ACTIVE })
+          .expect(200)
+          .end(() => {
+            models.Milestone.findByPk(2)
+              .then((milestone) => {
+                should.exist(milestone.actualStartDate);
+                moment.utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
+                // start date of the updated milestone should not change
+                milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
+                today.add('days', milestone.duration - 1);
+                // end date of the updated milestone should change, as delayed start caused scheduled to be delayed
+                moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
+                milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
+                done();
+              })
+              .catch(done);
+          });
+      });
 
-    it('should return 200 for admin - changing completionDate will cascade changes to coming ' +
+    it('should return 200 for admin - changing completionDate will set status to completed',
       // eslint-disable-next-line func-names
-      'milestones', function (done) {
-      this.timeout(10000);
-      const today = moment.utc().hours(0).minutes(0).seconds(0)
-        .milliseconds(0);
+      function (done) {
+        this.timeout(10000);
+        const data = Object.assign({}, body, { completionDate: '2018-05-18T00:00:00.000Z',
+          order: undefined,
+          duration: undefined });
+        delete data.status;
+        request(server)
+          .patch('/v5/timelines/1/milestones/2')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(data)
+          .expect(200)
+          .end(() => {
+            models.Milestone.findByPk(2)
+              .then((milestone) => {
+                milestone.status.should.be.eql(MILESTONE_STATUS.COMPLETED);
+                done();
+              })
+              .catch(done);
+          });
+      });
 
-      request(server)
-        .patch('/v5/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(_.assign({}, body, {
-          completionDate: '2018-05-18T00:00:00.000Z', order: undefined, duration: undefined,
-        }))
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Milestone.findByPk(3)
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-              should.exist(milestone.actualStartDate);
-              moment().utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
-              // milestone.actualStartDate.should.be.eql(today);
-              milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
-              milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
-              return models.Milestone.findByPk(4);
-            })
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
-              should.not.exist(milestone.actualStartDate);
-              milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-              done();
-            })
-            .catch(done);
-        });
-    });
-
-    it('should return 200 for admin - changing completionDate will change the timeline\'s ' +
+    it('should return 200 for admin - changing duration will adjust the milestone endDate',
       // eslint-disable-next-line func-names
-      'endDate', function (done) {
-      this.timeout(10000);
-
-      request(server)
-        .patch('/v5/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(_.assign({}, body, {
-          completionDate: '2018-05-18T00:00:00.000Z', order: undefined, duration: undefined,
-        }))
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          // BELOW will be the new timeline's endDate
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Timeline.findByPk(1)
-            .then((timeline) => {
-              // timeline start shouldn't change
-              timeline.startDate.should.be.eql(new Date('2018-05-02T00:00:00.000Z'));
-
-              // timeline end should change
-              timeline.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-
-              done();
-            })
-            .catch(done);
-        });
-    });
-
-    it('should return 200 for admin - changing duration will cascade changes to coming ' +
-      // eslint-disable-next-line func-names
-      'milestones', function (done) {
-      this.timeout(10000);
-
-      request(server)
-        .patch('/v5/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(_.assign({}, body, { duration: 5, order: undefined, completionDate: undefined }))
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Milestone.findByPk(3)
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-              milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
-              return models.Milestone.findByPk(4);
-            })
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
-              milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-              done();
-            })
-            .catch(done);
-        });
-    });
-
-    it('should return 200 for admin - changing duration will change the timeline\'s ' +
-      // eslint-disable-next-line func-names
-      'endDate', function (done) {
-      this.timeout(10000);
-
-      request(server)
-        .patch('/v5/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(_.assign({}, body, { duration: 5, order: undefined, completionDate: undefined }))
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          // BELOW will be the new timeline's endDate
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Timeline.findByPk(1)
-            .then((timeline) => {
-              // timeline start shouldn't change
-              timeline.startDate.should.be.eql(new Date('2018-05-02T00:00:00.000Z'));
-
-              // timeline end should change
-              timeline.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-
-              done();
-            })
-            .catch(done);
-        });
-    });
+      function (done) {
+        this.timeout(10000);
+        request(server)
+          .patch('/v5/timelines/1/milestones/2')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(_.assign({}, body, { duration: 5, order: undefined, completionDate: undefined }))
+          .expect(200)
+          .end(() => {
+            models.Milestone.findByPk(2)
+              .then((milestone) => {
+                milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-18T00:00:00.000Z'));
+                done();
+              })
+              .catch(done);
+          });
+      });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
@@ -1315,7 +1184,7 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.callCount.should.be.eql(3);
+                createEventSpy.callCount.should.be.eql(4);
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   resource: RESOURCES.MILESTONE,
@@ -1341,7 +1210,7 @@ describe('UPDATE Milestone', () => {
           });
       });
 
-      xit('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone duration updated', (done) => {
+      it('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone duration updated', (done) => {
         request(server)
           .patch('/v5/timelines/1/milestones/1')
           .set({
@@ -1356,10 +1225,7 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                // 5 milestones in total, so it would trigger 5 events
-                // 4 MILESTONE_UPDATED events are for 4 non deleted milestones
-                // 1 TIMELINE_ADJUSTED event, because timeline's end date updated
-                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledOnce.should.be.false;
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
                   sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
@@ -1370,7 +1236,7 @@ describe('UPDATE Milestone', () => {
           });
       });
 
-      xit('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone status updated', (done) => {
+      it('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone status updated', (done) => {
         request(server)
           .patch('/v5/timelines/1/milestones/1')
           .set({
@@ -1385,7 +1251,7 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.calledOnce.should.be.false;
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
                   sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
@@ -1411,22 +1277,12 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.callCount.should.be.eql(2);
+                createEventSpy.callCount.should.be.eql(3);
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   resource: RESOURCES.MILESTONE,
                   order: 2,
                 })).should.be.true;
-
-                // Check Notification Service events
-                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
-
                 done();
               });
             }
@@ -1448,20 +1304,11 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.callCount.should.be.eql(2);
+                createEventSpy.callCount.should.be.eql(3);
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   resource: RESOURCES.MILESTONE,
                   plannedText: 'new text',
-                })).should.be.true;
-
-                // Check Notification Service events
-                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
                 })).should.be.true;
 
                 done();
