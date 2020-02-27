@@ -205,6 +205,7 @@ describe('Project Attachments delete', () => {
           },
         }),
       });
+      const deleteSpy = sinon.spy(mockHttpClient, 'delete');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
           .delete(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
@@ -228,6 +229,7 @@ describe('Project Attachments delete', () => {
                     if (!res) {
                       throw new Error('Should found the entity');
                     } else {
+                      deleteSpy.called.should.be.false;
                       chai.assert.isNotNull(res.deletedAt);
                       chai.assert.isNotNull(res.deletedBy);
 
