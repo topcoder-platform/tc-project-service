@@ -361,6 +361,8 @@ module.exports = [
         .catch((err) => {
           req.log.error('Cannot get user details for invites.');
           req.log.debug('Error during getting user details for invites', err);
+          // continues without details anyway
+          return values;
         })
     ))
     .then((values) => {

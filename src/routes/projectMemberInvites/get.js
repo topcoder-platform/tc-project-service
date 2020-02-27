@@ -92,6 +92,8 @@ module.exports = [
         .catch((err) => {
           req.log.error('Cannot get user details for invite.');
           req.log.debug('Error during getting user details for invite.', err);
+          // continues without details anyway
+          return invite;
         })
     ))
     .then(invite => res.json(util.maskInviteEmails('$[*].email', invite, req)))
