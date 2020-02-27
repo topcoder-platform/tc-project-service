@@ -114,6 +114,8 @@ module.exports = [
             .catch((err) => {
               req.log.error('Cannot get user details for member.');
               req.log.debug('Error during getting user details for member.', err);
+              // continues without details anyway
+              return projectMember;
             })
         ))
         .then((memberWithDetails) => {

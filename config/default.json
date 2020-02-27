@@ -36,7 +36,7 @@
     "idleTimeout": 1000
   },
   "kafkaConfig": {
-    "hosts": "localhost:9092"
+    "url": "localhost:9092"
   },
   "analyticsKey": "",
   "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
@@ -61,6 +61,9 @@
   "VALID_STATUSES_BEFORE_PAUSED": "[\"active\"]",
   "SSO_REFCODES": "[]",
   "lookerConfig": {
+    "EMBED_KEY": "FAKE_KEY",
+    "LOOKER_HOST": "demo.looker.com",
+    "SESSION_LENGTH": 120,
     "BASE_URL": "",
     "CLIENT_ID": "",
     "CLIENT_SECRET": "",
@@ -69,7 +72,9 @@
     "QUERIES": {
       "REG_STATS": 1234,
       "BUDGET": 123
-    }
+    },
+    "EMBED_REPORTS_MAPPING": "{\"mock\": \"/embed/looks/2\"}",
+    "ALLOWED_USERS": "[]"
   },
   "DEFAULT_M2M_USERID": -101
 }

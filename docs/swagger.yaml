@@ -86,6 +86,7 @@ paths:
         - $ref: '#/parameters/codeQueryParam'
         - $ref: '#/parameters/customerQueryParam'
         - $ref: '#/parameters/managerQueryParam'
+        - $ref: '#/parameters/directProjectIdQueryParam'
         - name: sort
           required: false
           description: >
@@ -4779,6 +4780,13 @@ parameters:
     description: manager filter
     required: false
     type: string
+  directProjectIdQueryParam:
+    name: directProjectId
+    in: query
+    description: Direct Project Id filter
+    required: false
+    type: integer
+    format: int64
   projectEstimationIdParam:
     name: estimationId
     in: path
@@ -5266,6 +5274,12 @@ definitions:
       category:
         type: string
         description: the project template category
+      subCategory:
+        type: string
+        description: the project template subCategory
+      metadata:
+        type: object
+        description: the project template metadata
       scope:
         type: object
         description: the project template scope

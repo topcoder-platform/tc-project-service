@@ -44,7 +44,7 @@ async function getClient() {
  * @return {Promise} new event promise
  */
 function createEvent(topic, payload, logger) {
-  logger.debug(`Sending message to topic ${topic}: ${JSON.stringify(payload)}`);
+  logger.debug(`Sending message to bus topic ${topic}: ${JSON.stringify(payload)}`);
   return getClient().then((busClient) => {
     logger.debug(`calling bus-api for topic ${topic}`);
     return busClient.post('/bus/events', {
@@ -54,9 +54,9 @@ function createEvent(topic, payload, logger) {
       'mime-type': 'application/json',
       payload,
     }).then((resp) => {
-      logger.debug(`Sent event to bus-api for topic ${topic}`);
-      logger.debug(`Sent event to bus-api for topic ${topic} [data]: ${_.get(resp, 'data')}`);
-      logger.debug(`Sent event to bus-api for topic ${topic} [status]: ${_.get(resp, 'status')}`);
+      logger.debug(`Sent event to bus-api for bus topic ${topic}`);
+      logger.debug(`Sent event to bus-api for bus topic ${topic} [data]: ${_.get(resp, 'data')}`);
+      logger.debug(`Sent event to bus-api for bus topic ${topic} [status]: ${_.get(resp, 'status')}`);
     }).catch((error) => {
       logger.debug(`Error sending event to bus-api for topic ${topic}`);
       if (error.response) {

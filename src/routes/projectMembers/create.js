@@ -38,8 +38,8 @@ module.exports = [
       targetRole = _.get(req, 'body.role');
 
       if (PROJECT_MEMBER_ROLE.MANAGER === targetRole &&
-        !util.hasRoles(req, [USER_ROLE.MANAGER])) {
-        const err = new Error(`Only manager is able to join as ${targetRole}`);
+        !util.hasRoles(req, [USER_ROLE.TOPCODER_ADMIN, USER_ROLE.CONNECT_ADMIN, USER_ROLE.MANAGER])) {
+        const err = new Error(`Only admin or manager is able to join as ${targetRole}`);
         err.status = 401;
         return next(err);
       }
@@ -96,7 +96,7 @@ module.exports = [
         err.status = 401;
         return next(err);
       }
-    } else if (util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.CONNECT_ADMIN])) {
+    } else if (util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN])) {
       targetRole = PROJECT_MEMBER_ROLE.MANAGER;
     } else if (util.hasRoles(req, [
       USER_ROLE.TOPCODER_ACCOUNT_MANAGER,

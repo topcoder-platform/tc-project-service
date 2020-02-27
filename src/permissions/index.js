@@ -139,4 +139,7 @@ module.exports = () => {
 
   // Project Estimation Items
   Authorizer.setPolicy('projectEstimation.item.list', copilotAndAbove);
+
+  // Project Reporting
+  Authorizer.setPolicy('projectReporting.view', projectView);
 };
