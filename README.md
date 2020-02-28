@@ -2,9 +2,26 @@
 
 Microservice to manage CRUD operations for all things Projects.
 
-### Note : Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.
+**Note : Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.**
+
+- [Local Development](#local-development)
+  - [Requirements](#requirements)
+  - [Steps to run locally](#steps-to-run-locally)
+  - [Import sample metadata projects](#import-sample-metadata-projects)
+  - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
+- [Test](#test)
+  - [JWT Authentication](#jwt-authentication)
+- [Deploying with docker (might need updates)](#deploying-with-docker-might-need-updates)
+- [Kafka commands](#kafka-commands)
+  - [Create Topic](#create-topic)
+  - [List Topics](#list-topics)
+  - [Watch Topic](#watch-topic)
+  - [Post Message to Topic (from stdin)](#post-message-to-topic-from-stdin)
+- [References](#references)
 
 ## Local Development
+
+Local setup should work good on **Linux** and **macOS**. But **Windows** is not supported at the moment.
 
 ### Requirements
 
@@ -14,78 +31,156 @@ Microservice to manage CRUD operations for all things Projects.
 
 ### Steps to run locally
 1. Install node dependencies
+
    ```bash
    npm install
    ```
 
-* Run docker with dependant services
-  ```bash
-  cd local/
-  docker-compose up
-  ```
-  This will run several services locally:
-  - `postgres` - two instances: for app and for unit tests
-  - `elasticsearch`
-  - `rabbitmq`
-  - `mock-services` - mocks some Topcoder API
+3. Start **ONE** of the docker-compose files with dependant services which are required for Project Service to work
 
-  *NOTE: In production these dependencies / services are hosted & managed outside tc-projects-service.*
+   1. **Minimal** `./local/docker-compose.yml`:
 
-* Local config
+      *Use this docker-compose if you only want to test and modify code of Project Service and you don't need Elasticsearch (ES) to work.*
 
-  There are two prepared configs:
-  - if you have M2M environment variables provided: `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL` then use `config/m2m.local.js`
-  - otherwise use `config/mock.local.js`.
+      Run, inside folder `./local`:
+      ```bash
+      docker-compose up
+      ```
 
-  To apply any of these config copy it to `config/local.js`:
+      <details><summary>Click to see details</summary>
+      <br>
 
-  ```bash
-  cp config/mock.local.js config/local.js
-  # or
-  cp config/m2m.local.js config/local.js
-  ```
+      This docker-compose file starts the next services:
+      |  Service | Name | Port  |
+      |----------|:-----:|:----:|
+      | PostgreSQL | db | 5432 |
+      | Elasticsearch | esearch | 9200 |
+      | RabbitMQ | queue | 5672, 15672  |
+      | Mock Service (not in use) | jsonserver | 3001  |
 
-  `config/local.js` has a prepared configuration which would replace values no matter what `NODE_ENV` value is.
+      </details>
 
-  **IMPORTANT** These configuration files assume that docker containers are run on domain `dockerhost`. Depend on your system you have to make sure that domain `dockerhost` points to the IP address of docker.
-  For example, you can add a the next line to your `/etc/hosts` file, if docker is run on IP `127.0.0.1`.
-  ```
-  127.0.0.1       dockerhost
-  ```
-  Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.<br>
-  You may try using command `docker-machine ip` to get your docker IP, but it works not for all systems.
-  Also, be sure to update `busApiUrl` if you are running `tc-bus-api` locally. (See below)
+   2. **Full** `./local/full/docker-compose.yml`:
 
-  Explanation of configs:
-  - `config/mock.local.js` - Use local `mock-services` from docker to mock Identity and Member services instead of using deployed at Topcoder dev environment.
-  - `config/m2m.local.js` - Use Identity and Member services deployed at Topcoder dev environment. This can be used only if you have M2M environment variables (`AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`) provided to access Topcoder DEV environment services.
+      *Use this docker-compose if you  want to test and modify code of Project Service together with one of the next relative services: [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api), [project-processor-es](https://github.com/topcoder-platform/project-processor-es), [tc-notifications](https://github.com/topcoder-platform/tc-notifications) or you need Elasticsearch (ES) to work.*
 
-* Create tables in DB
-  ```bash
-  NODE_ENV=development npm run sync:db
-  ```
-  This command will crate tables in `postgres` db.
+      1. Set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`
+      2. Run, inside folder `./local/full`
 
-  *NOTE: this will drop tables if they already exist.*
+          ```bash
+          docker-compose up -d
+          ```
 
-* Sync ES indices
-  ```bash
-  NODE_ENV=development npm run sync:es
-  ```
-  Helper script to sync the indices and mappings with the elasticsearch.
+      3. Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
 
-  *NOTE: This will first clear all the indices and than recreate them. So use with caution.*
+         ```bash
+         docker-compose logs -f project-processor-es
+         ```
 
-* Run
+        <details><summary>Click to see example logs</summary>
+        <br>
 
-  **NOTE** If you use `config/m2m.local.js` config, you should set M2M environment variables before running the next command.
-  ```bash
-  npm run start:dev
-  ```
-  Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
-  The project service will be served on `http://localhost:8001`.
+         - first it would be waiting for `kafka-client` to create all the required topics and exit, you would see:
 
-### Import sample metadata & projects
+           ```
+           project-processor-es_1        | Waiting for kafka-client to exit....
+           ```
+
+        - after that, `project-processor-es` would be started itself. Make sure it successfully connected to Kafka, you should see 3 lines with text `Subscribed to project.action.`:
+
+          ```
+          project-processor-es_1        | 2020-02-19T03:18:46.523Z DEBUG no-kafka-client Subscribed to project.action.update:0 offset 0 leader kafka:9093
+          project-processor-es_1        | 2020-02-19T03:18:46.524Z DEBUG no-kafka-client Subscribed to project.action.delete:0 offset 0 leader kafka:9093
+          project-processor-es_1        | 2020-02-19T03:18:46.528Z DEBUG no-kafka-client Subscribed to project.action.create:0 offset 0 leader kafka:9093
+          ```
+        </details>
+
+      4. If you want to modify the code of any of the services which are run inside this docker-compose file, you can stop such service inside docker-compose by command `docker-compose stop -f <SERVICE_NAME>` and run the service separately, following its README file.
+
+      <details><summary>Click to see details</summary>
+      <br>
+
+      This docker-compose file starts the next services:
+      |  Service | Name | Port  |
+      |----------|:-----:|:----:|
+      | PostgreSQL | db | 5432 |
+      | Elasticsearch | esearch | 9200 |
+      | RabbitMQ | queue | 5672, 15672  |
+      | Mock Service (not in use) | jsonserver | 3001  |
+      | Zookeeper | zookeeper | 2181  |
+      | Kafka | kafka | 9092  |
+      | [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) | tc-bus-api | 8002  |
+      | [project-processor-es](https://github.com/topcoder-platform/project-processor-es) | project-processor-es | 5000  |
+      | [tc-notifications-api](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-api | 4000  |
+      | [tc-notifications-processor](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-processor | 4001  |
+
+      - as many of the Topcoder services which are run in this docker-compose require Auth0 configuration for M2M calls, that's why if we want to start this docker-compose file, we have to set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL` first and they would be passed inside containers.
+
+      - `docker-compose` automatically would create Kafka topics which are used by `tc-project-service` listed in `local/full/kafka-client/topics.txt`.
+
+      - To view the logs from any container inside docker-compose use the following command, replacing `SERVICE_NAME` with the corresponding value under the **Name** column in the above table:
+
+        ```bash
+        cd local/full
+        docker-compose logs -f SERVICE_NAME
+        ```
+
+      </details>
+
+   *NOTE: In production these dependencies / services are hosted & managed outside Project Service.*
+
+4. Local config
+
+    1. Copy config file `config/m2m.local.js` into `config/local.js`:
+        ```bash
+        cp config/m2m.local.js config/local.js
+        ```
+
+    2. Set `dockerhost` to point the IP address of Docker. Docker IP address depends on your system. For example if docker is run on IP `127.0.0.1` add a the next line to your `/etc/hosts` file:
+       ```
+       127.0.0.1       dockerhost
+       ```
+
+       Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.
+
+5. Create tables in DB
+    ```bash
+    NODE_ENV=development npm run sync:db
+    ```
+
+    *NOTE: this will drop tables if they already exist.*
+
+6. Create ES (Elasticsearch) indexes
+    ```bash
+    NODE_ENV=development npm run sync:es
+    ```
+
+    *NOTE: This will first clear all the indices and than recreate them. So use with caution.*
+
+7. Start Project Service
+
+   1. Set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`
+
+   2. Run
+
+      ```bash
+      npm run start:dev
+      ```
+
+      Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
+      The project service will be served on `http://localhost:8001`.
+
+8. *(Optional)* Start Project Service Kafka Consumer
+
+   *Run this only if you want to test or modify logic of `lastActivityAt` or `lastActivityBy`.*
+
+   In another terminal window run:
+
+   ```bash
+   npm run startKafkaConsumers:dev
+   ```
+
+### Import sample metadata projects
 
 ```bash
 CONNECT_USER_TOKEN=<connect user token> npm run demo-data
@@ -96,56 +191,6 @@ This command for importing data uses API to create demo data. Which has a few pe
 - data in DB would be for sure created
 - data in ElasticSearch Index (ES) would be only created if services [project-processor-es](https://github.com/topcoder-platform/project-processor-es) and [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) are also started locally. If you don't start them, then imported data wouldn't be indexed in ES, and would be only added to DB. You may start them locally separately, or better use `local/full/docker-compose.yml` as described [next section](#local-deployment-with-other-topcoder-services) which would start them automatically.
    - **NOTE** During data importing a lot of records has to be indexed in ES, so you have to wait about 5-10 minutes after `npm run demo-data` is finished until imported data is indexed in ES. You may watch logs of `project-processor-es` to see if its done or no.
-
-### Local Deployment with other Topcoder Services.
-
-* There exists an alternate `docker-compose.yml` file that can be used to spawn containers for the following services:
-
-  |  Service | Name | Port  |
-  |----------|:-----:|:----:|
-  | PostGreSQL DB | db | 5432  |
-  | ElasticSearch | esearch | 9200,9300 |
-  | RabbitMQ | queue | 5672, 15672  |
-  | Zookeeper | zookeeper | 2181  |
-  | Kafka | kafka | 9092  |
-  | [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) | tc-bus-api | 8002  |
-  | [project-processor-es](https://github.com/topcoder-platform/project-processor-es) | project-processor-es | 5000  |
-  | [tc-notifications-api](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-api | 4000  |
-  | [tc-notifications-processor](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-processor | 4001  |
-
-* To have kafka create a list of desired topics on startup, there exists a file with the path `local/full/kafka-client/topics.txt`. Each line from the file will be added as a topic.
-* To run these services simply run the following commands:
-
-  ```bash
-  export AUTH0_CLIENT_ID=<insert required value here>
-  export AUTH0_CLIENT_SECRET=<insert required value here>
-  export AUTH0_URL=<insert required value here>
-  export AUTH0_AUDIENCE=<insert required value here>
-  export AUTH0_PROXY_SERVER_URL=<insert required value here>
-
-  cd local/full
-  docker-compose up -d
-  ```
-
-* The environment variables specified in the commands above will be passed onto the containers that have been configured to read them.
-* The above command will start all containers in the background.
-* To view the logs of any of the services use the following command, replacing "SERVICE_NAME" with the corresponding value under the "Name" column in the above table:
-
-  ```bash
-  cd local/full
-  docker-compose logs -f SERVICE_NAME
-  ```
-
-* The containers have been configured such that all Topcoder services will wait until all the topics listed in `local/full/kafka-client/topics.txt` have been created. To monitor the progress of topic creation, you can view the logs of the `kafka-client` service, which will exit when all topics have been created.
-
-* **WARNING**<br>
-  After all the containers are started, make sure that `project-processor-es` service started successfully, as sometimes it doesn't start successfully as Kafka wasn't yet properly started at that moment. So run `docker-compose logs -f project-processor-es` to see its logs, you should see 3 lines with text `Subscribed to project.action.` like:
-  ```
-  project-processor-es_1        | 2019-12-18T11:10:12.849Z DEBUG no-kafka-client Subscribed to project.action.update:0 offset 0 leader 96e65c46c746:9092
-  project-processor-es_1        | 2019-12-18T11:10:12.851Z DEBUG no-kafka-client Subscribed to project.action.delete:0 offset 0 leader 96e65c46c746:9092
-  project-processor-es_1        | 2019-12-18T11:10:12.852Z DEBUG no-kafka-client Subscribed to project.action.create:0 offset 0 leader 96e65c46c746:9092
-  ```
-  If you don't see such lines, restart `project-processor-es` service ONLY by running `docker-compose restart project-processor-es`.
 
 ### Run Connect App with Project Service locally
 
@@ -170,7 +215,7 @@ To be able to run [Connect App](https://github.com/appirio-tech/connect-app) wit
 
 3. Restart both Connect App and Project Service if they were running.
 
-### Test
+## Test
 ```bash
 npm run test
 ```
@@ -178,14 +223,14 @@ Tests are being executed with the `NODE_ENV` environment variable has a value `t
 
 Each of the individual modules/services are unit tested.
 
-#### JWT Authentication
+### JWT Authentication
 Authentication is handled via Authorization (Bearer) token header field. Token is a JWT token. Here is a sample token that is valid for a very long time for a user with administrator role.
 ```
 eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJwc2hhaDEiLCJleHAiOjI0NjI0OTQ2MTgsInVzZXJJZCI6IjQwMTM1OTc4IiwiaWF0IjoxNDYyNDk0MDE4LCJlbWFpbCI6InBzaGFoMUB0ZXN0LmNvbSIsImp0aSI6ImY0ZTFhNTE0LTg5ODAtNDY0MC04ZWM1LWUzNmUzMWE3ZTg0OSJ9.XuNN7tpMOXvBG1QwWRQROj7NfuUbqhkjwn39Vy4tR5I
 ```
 It's been signed with the secret 'secret'. This secret should match your entry in config/local.js. You can generate your own token using https://jwt.io
 
-### Local Deployment
+## Deploying with docker (might need updates)
 
 **NOTE: This part of README may contain inconsistencies and requires update. Don't follow it unless you know how to properly make configuration for these steps. It's not needed for regular development process.**
 
@@ -197,74 +242,38 @@ You may replace 172.17.0.1 with your docker0 IP.
 
 You can paste **swagger.yaml** to  [swagger editor](http://editor.swagger.io/) or import **postman.json** and **postman_environment.json** to verify endpoints.
 
-#### Deploying without docker
-If you don't want to use docker to deploy to localhost. You can simply run `npm run start:dev` from root of project. This should start the server on default port `8001`.
+## Kafka commands
 
-### Kafka Commands
+If you've used **Full** `docker-compose` with the file `local/full/docker-compose.yml` during local setup to spawn kafka & zookeeper, you can use the following commands to manipulate kafka topics and messages:
+(Replace `TOPIC_NAME` with the name of the desired topic)
 
-If you've used `docker-compose` with the file `local/full/docker-compose.yml` to spawn kafka & zookeeper, you can use the following commands to manipulate kafka topics and messages:
-(Replace TOPIC_NAME with the name of the desired topic)
-
-**Create Topic**
+### Create Topic
 
 ```bash
-docker exec tc-projects-kafka /usr/bin/kafka-topics --create --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic TOPIC_NAME
+docker exec tc-projects-kafka /opt/kafka/bin/kafka-topics.sh --create --zookeeper zookeeper:2181 --partitions 1 --replication-factor 1 --topic TOPIC_NAME
 ```
 
-**List Topics**
+### List Topics
 
 ```bash
-docker exec -it tc-projects-kafka /usr/bin/kafka-topics --list --zookeeper zookeeper:2181
+docker exec tc-projects-kafka /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181
 ```
 
-**Watch Topic**
+### Watch Topic
 
 ```bash
-docker exec -it tc-projects-kafka /usr/bin/kafka-console-consumer --bootstrap-server localhost:9092 --zookeeper zookeeper:2181 --topic TOPIC_NAME
+docker exec  tc-projects-kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic TOPIC_NAME
 ```
 
-**Post Message to Topic**
+### Post Message to Topic (from stdin)
 
 ```bash
-docker exec -it tc-projects-kafka /usr/bin/kafka-console-producer --topic TOPIC_NAME --broker-list localhost:9092
-```
-The message can be passed using `stdin`
-
-
-# Bookmarks migration:
-To check the bookmarks migration, follow the instructions below:
-
-```bash
--- sync the database (This will drop and re-create the tables)
-NODE_ENV=development npm run sync:db
-
--- Insert the test data
-NODE_ENV=development npx babel-node migrations/bookmarks/insertTestData.js
+docker exec -it tc-projects-kafka /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic TOPIC_NAME
 ```
 
--- Check the database tables projects and project_attachments using the following SQL statements:
+- Enter or copy/paste the message into the console after starting this command.
 
-```sql
-select id, name, bookmarks from projects order by id;
+## References
 
-select * from project_attachments;
-```
-
--- Migrate the bookmarks to project attachments
-```bash
-NODE_ENV=development npm run migrate:bookmarks
-```
-
--- Re-check the database usig the SQL statements above
-
--- Revert the migration using the following command :
-```bash
-NODE_ENV=development npm run migrate:bookmarks:revert
-```
-
--- Re-check the database using the following SQL statements:
-```sql
-select id, name, bookmarks from projects order by id;
-
-select id, pa.type, pa."deletedAt" from project_attachments pa
-```
+- [Projects Service Architecture](./docs/guides/architercture/architecture.md)
+- [Projects Service Architecture](./docs/guides/architercture/architecture.md)
