@@ -23,7 +23,8 @@
     "test": "NODE_ENV=test npm run lint && NODE_ENV=test npm run sync:es && NODE_ENV=test npm run sync:db && NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --timeout 10000 --require babel-core/register $(find src -path '*spec.js*') --exit",
     "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha -w --require babel-core/register $(find src -path '*spec.js*')",
     "seed": "babel-node src/tests/seed.js --presets es2015",
-    "demo-data": "babel-node local/seed"
+    "demo-data": "babel-node local/seed",
+    "es-db-compare": "babel-node scripts/es-db-compare"
   },
   "repository": {
     "type": "git",
@@ -54,8 +55,10 @@
     "express-request-id": "^1.1.0",
     "express-sanitizer": "^1.0.2",
     "express-validation": "^0.6.0",
+    "handlebars": "^4.5.3",
     "http-aws-es": "^4.0.0",
     "joi": "^8.0.5",
+    "jsondiffpatch": "^0.4.1",
     "jsonpath": "^1.0.2",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.11",

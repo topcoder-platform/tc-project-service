@@ -1223,6 +1223,29 @@ _.assignIn(util, {
 
     return markupKey ? _.includes(_.values(ESTIMATION_TYPE), markupKey) : false;
   },
+
+  /**
+   * Validate if `fields` list has only allowed values from `allowedFields` or throws error.
+   *
+   * @param {Array} fields        fields to validate
+   * @param {Array} allowedFields allowed fields
+   *
+   * @throws {Error}
+   * @returns {void}
+   */
+  validateFields: (fields, allowedFields) => {
+    if (!allowedFields) {
+      throw new Error('List of "allowedFields" has to be provided.');
+    }
+
+    const disallowedFields = _.difference(fields, allowedFields);
+
+    if (disallowedFields.length > 0) {
+      const disallowedFieldsString = disallowedFields.map(field => `"${field}"`).join(', ');
+
+      throw new Error(`values ${disallowedFieldsString} are not allowed`);
+    }
+  },
 });
 
 export default util;

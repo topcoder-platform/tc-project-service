@@ -13,6 +13,8 @@ import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
   MAX_PARALLEL_REQUEST_QTY, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 import { createEvent } from '../../services/busApi';
 
+const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
+
 /**
  * API to create member invite to project.
  *
@@ -25,6 +27,9 @@ const addMemberValidations = {
     emails: Joi.array().items(Joi.string().email()).optional().min(1),
     role: Joi.any().valid(_.values(PROJECT_MEMBER_ROLE)).required(),
   }).required(),
+  query: {
+    fields: Joi.string().optional(),
+  },
 };
 
 /**
@@ -249,6 +254,14 @@ module.exports = [
     // let us request user fields during creating, probably this should be move to GET by ID endpoint instead
     const fields = req.query.fields ? req.query.fields.split(',') : null;
 
+    try {
+      util.validateFields(fields, ALLOWED_FIELDS);
+    } catch (validationError) {
+      const err = new Error(`"fields" is not valid: ${validationError.message}`);
+      err.status = 400;
+      return next(err);
+    }
+
     if (!invite.handles && !invite.emails) {
       const err = new Error('Either handles or emails are required');
       err.status = 400;
@@ -377,6 +390,8 @@ module.exports = [
             .catch((err) => {
               req.log.error('Cannot get user details for invites.');
               req.log.debug('Error during getting user details for invites', err);
+              // continues without details anyway
+              return values;
             })
         ))
         .then((values) => {

@@ -7,6 +7,8 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 
+const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
+
 /**
  * API to update invite member to project.
  *
@@ -51,6 +53,14 @@ module.exports = [
       },
     };
 
+    try {
+      util.validateFields(fields, ALLOWED_FIELDS);
+    } catch (validationError) {
+      const err = new Error(`"fields" is not valid: ${validationError.message}`);
+      err.status = 400;
+      return next(err);
+    }
+
     if (req.context.inviteType === 'list') {
       // user can only his/her own invite with specific id
       esSearchParam.query.nested.query.filtered.filter.bool.must.push({
@@ -63,7 +73,8 @@ module.exports = [
         },
       });
     }
-    util.fetchByIdFromES('invites', esSearchParam).then((data) => {
+
+    return util.fetchByIdFromES('invites', esSearchParam).then((data) => {
       if (data.length === 0) {
         req.log.debug('No project member invite found in ES');
         let getInvitePromise;
@@ -99,6 +110,8 @@ module.exports = [
         .catch((err) => {
           req.log.error('Cannot get user details for invite.');
           req.log.debug('Error during getting user details for invite.', err);
+          // continues without details anyway
+          return invite;
         })
     ))
     .then(invite => res.json(util.maskInviteEmails('$[*].email', invite, req)))

@@ -72,7 +72,9 @@
     "QUERIES": {
       "REG_STATS": 1234,
       "BUDGET": 123
-    }
+    },
+    "EMBED_REPORTS_MAPPING": "{\"mock\": \"/embed/looks/2\"}",
+    "ALLOWED_USERS": "[]"
   },
   "DEFAULT_M2M_USERID": -101
 }
