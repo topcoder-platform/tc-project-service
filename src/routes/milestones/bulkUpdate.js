@@ -87,7 +87,7 @@ module.exports = [
       });
     }
     const created = await Promise.mapSeries(
-      toCreate, data => createMilestone(req.authUser, timelineId, data, transaction));
+      toCreate, data => createMilestone(req.authUser, req.timeline, data, transaction));
     const deleted = await Promise.mapSeries(
       toDelete, item => deleteMilestone(req.authUser, timelineId, item.id, transaction, item));
     const updated = await Promise.mapSeries(
