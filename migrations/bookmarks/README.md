@@ -1,35 +1,19 @@
 # Migration script for Bookmarks
 
-To check the bookmarks migration, follow the instructions below:
+To run any of these commands, make sure that `NODE_ENV` environment variable is set to `production` or `development` depend on which environment you would like to run migration for.
+
+## Migrate the bookmarks to project attachments
 
 ```bash
--- sync the database (This will drop and re-create the tables)
-NODE_ENV=development npm run sync:db
--- Insert the test data
-NODE_ENV=development npx babel-node migrations/bookmarks/insertTestData.js
+npm run migrate:bookmarks
 ```
 
--- Check the database tables projects and project_attachments using the following SQL statements:
+## Revert: migrate project attachments to the bookmarks
 
-```sql
-select id, name, bookmarks from projects order by id;
-select * from project_attachments;
-```
-
--- Migrate the bookmarks to project attachments
 ```bash
-NODE_ENV=development npm run migrate:bookmarks
+npm run migrate:bookmarks:revert
 ```
 
--- Re-check the database usig the SQL statements above
+## References
 
--- Revert the migration using the following command :
-```bash
-NODE_ENV=development npm run migrate:bookmarks:revert
-```
-
--- Re-check the database using the following SQL statements:
-```sql
-select id, name, bookmarks from projects order by id;
-select id, pa.type, pa."deletedAt" from project_attachments pa
-```
+- [Verification guide for "Migration script for Bookmarks"](Verification.md)
