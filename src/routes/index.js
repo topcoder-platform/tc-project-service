@@ -139,7 +139,7 @@ router.route('/v5/projects/:projectId(\\d+)/attachments')
   .get(require('./attachments/list'));
 
 router.route('/v5/projects/:projectId(\\d+)/attachments/:id(\\d+)')
-  .get(require('./attachments/download'))
+  .get(require('./attachments/get'))
   .patch(require('./attachments/update'))
   .delete(require('./attachments/delete'));
 

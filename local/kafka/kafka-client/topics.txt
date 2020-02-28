@@ -5,7 +5,7 @@ connect.notification.project.canceled
 connect.notification.project.completed
 connect.notification.project.created
 connect.notification.project.fileUploaded
-connect.notification.project.files.updated
+connect.notification.project.attachment.updated
 connect.notification.project.linkCreated
 connect.notification.project.member.assignedAsOwner
 connect.notification.project.member.copilotJoined

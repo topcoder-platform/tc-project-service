@@ -6,15 +6,16 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import util from '../../util';
+import { ATTACHMENT_TYPES } from '../../constants';
 
-describe('Project Attachments download', () => {
+describe('Get Project attachments Tests', () => {
   let project1;
   let attachment;
   let getFileDownloadUrlStub;
 
   before(() => {
     getFileDownloadUrlStub = sinon.stub(util, 'getFileDownloadUrl');
-    getFileDownloadUrlStub.returns(['dummy://url']);
+    getFileDownloadUrlStub.returns('dummy://url');
   });
 
   beforeEach((done) => {
@@ -49,7 +50,9 @@ describe('Project Attachments download', () => {
               contentType: 'application/unknown',
               size: 12312,
               category: null,
-              filePath: 'https://media.topcoder.com/projects/1/test.txt',
+              path: 'https://media.topcoder.com/projects/1/test.txt',
+              type: ATTACHMENT_TYPES.FILE,
+              tags: ['tag1', 'tag2'],
               createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
               allowedUsers: [testUtil.userIds.member],

@@ -337,10 +337,7 @@ _.assignIn(util, {
         if (resp.status !== 200 || resp.data.result.status !== 200) {
           return Promise.reject(new Error('Unable to fetch pre-signed url'));
         }
-        return [
-          filePath,
-          resp.data.result.content.preSignedURL,
-        ];
+        return resp.data.result.content.preSignedURL;
       });
   },
   getProjectAttachments: (req, projectId) => {

@@ -353,7 +353,7 @@ paths:
           required: true
           description: Specify only those properties that needs to be updated
           schema:
-            $ref: '#/definitions/NewProjectAttachment'
+            $ref: '#/definitions/UpdateProjectAttachment'
       responses:
         '200':
           description: Returns the newly created project
@@ -5137,20 +5137,30 @@ definitions:
     title: Project attachment request
     type: object
     required:
-      - filePath
-      - s3Bucket
+      - path
+      - type
       - title
-      - contentType
     properties:
-      filePath:
+      path:
         type: string
         description: path where file is stored
+      type:
+        type: string
+        description: The attachment type, one of 'link' or 'file'
+        enum: 
+         - link
+         - file
+      tags:
+        type: array
+        description: The attachment tags
+        items:
+          type: string
       s3Bucket:
         type: string
         description: The s3 bucket of attachment
       contentType:
         type: string
-        description: Uploaded file content type
+        description: Uploaded file content type (optional for 'link')
       title:
         type: string
         description: Name of the attachment
@@ -5170,6 +5180,27 @@ definitions:
           type: integer
           format: int64
           description: Users allowed to access the attachment
+  UpdateProjectAttachment:
+    title: Project attachment request
+    type: object
+    properties:
+      tags:
+        type: array
+        description: The attachment tags
+        items:
+          type: string
+      title:
+        type: string
+        description: Name of the attachment
+      description:
+        type: string
+        description: Optional description for the attached file.
+      allowedUsers:
+        type: array
+        items:
+          type: integer
+          format: int64
+          description: Users allowed to access the attachment
   ProjectAttachment:
     title: Project attachment
     type: object
@@ -5177,6 +5208,28 @@ definitions:
       id:
         type: number
         description: unique id for the attachment
+      projectId:
+        type: number
+        description: the projectId to which this attachment belongs
+      type:
+        type: string
+        description: The attachment type, one of 'file' or 'link'
+        enum:
+         - link
+         - file
+      tags:
+        type: array
+        description: The attachment tags array
+        items:
+         type: string
+      allowedUsers:
+        type: array
+        description: The array of ids of the users allowed to access this attachment
+        items:
+         type: number
+      path:
+        type: string
+        description: The attachment path
       size:
         type: number
         format: float
@@ -5193,9 +5246,9 @@ definitions:
       description:
         type: string
         description: Optional description for the attached file.
-      downloadUrl:
+      url:
         type: string
-        description: download link for the attachment.
+        description: download link for the attachment of type file
       createdAt:
         type: string
         description: Datetime (GMT) when task was created
