@@ -230,22 +230,57 @@ _.assignIn(util, {
     if (queryFields.length) {
       // remove any inavlid fields
       fields.projects = _.intersection(queryFields, allowedFields.projects);
-      fields.project_members = _.filter(queryFields, f => f.indexOf('members.') === 0);
-      // remove members. prefix
-      fields.project_members = _.map(fields.project_members, f => f.substring(8));
-      // remove any errorneous fields
-      fields.project_members = _.intersection(fields.project_members, allowedFields.project_members);
-      if (fields.project_members.length === 0 && _.indexOf(queryFields, 'members') > -1) {
-        fields.project_members = allowedFields.project_members;
+
+      const parseSubFields = (name, strName) => {
+        fields[name] = _.filter(queryFields, f => f.indexOf(`${strName}.`) === 0);
+        fields[name] = _.map(fields[name], f => f.substring(strName.length + 1));
+        fields[name] = _.intersection(fields[name], allowedFields[name]);
+        if (fields[name].length === 0 && _.indexOf(queryFields, strName) > -1) {
+          fields[name] = allowedFields[name];
+        }
+      };
+
+      if (allowedFields.project_members) {
+        parseSubFields('project_members', 'members');
       }
-      // remove attachments if not requested
-      if (fields.attachments && _.indexOf(queryFields, 'attachments') === -1) {
-        fields.attachments = null;
+      if (allowedFields.project_member_invites) {
+        parseSubFields('project_member_invites', 'invites');
+      }
+
+      if (allowedFields.attachments) {
+        parseSubFields('attachments', 'attachments');
+      }
+
+      if (allowedFields.project_phases) {
+        parseSubFields('project_phases', 'phases');
+      }
+
+      if (allowedFields.project_phases_products) {
+        if (fields.project_phases.length > 0) {
+          parseSubFields('project_phases_products', 'phases.products');
+        } else {
+          // if donot have 'phases', so hide 'phases.products'
+          fields.project_phases_products = [];
+        }
       }
     }
     return fields;
   },
-
+  /**
+   * Remove email field for PROJECT_MEMBER_ATTRIBUTES, if user is not admin
+   * @param  {object} req          request object
+   * @param  {object} fields       fields object
+   * @return {object}                       the parsed array
+   */
+  ignoreEmailField: (req, fields) => {
+    if (!fields.project_members) { return fields; }
+    const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
+    if (isAdmin) {
+      return fields;
+    }
+    _.assign(fields, { project_members: _.filter(fields.project_members, f => f !== 'email') });
+    return fields;
+  },
   /**
    * Parse the query filters
    * @param  {String}   fqueryFilter        the query filter string
