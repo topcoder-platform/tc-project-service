@@ -26,10 +26,10 @@ const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes),
    'utm',
    'deletedAt',
 );
-const PROJECT_MEMBER_ATTRIBUTES = _.without(
+const PROJECT_MEMBER_ATTRIBUTES = _.concat(_.without(
   _.keys(models.ProjectMember.rawAttributes),
   'deletedAt',
-);
+), ['firstName', 'lastName', 'handle', 'email']);
 const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(
   _.keys(models.ProjectMemberInvite.rawAttributes),
   'deletedAt',
@@ -314,7 +314,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   }
 
   if (sourceInclude) {
-    searchCriteria._sourceInclude = sourceInclude;        // eslint-disable-line no-underscore-dangle
+    searchCriteria._sourceIncludes = sourceInclude;        // eslint-disable-line no-underscore-dangle
   }
   // prepare the elasticsearch filter criteria
   const boolQuery = [];
@@ -481,6 +481,8 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
     projects: PROJECT_ATTRIBUTES,
     project_members: PROJECT_MEMBER_ATTRIBUTES,
   });
+
+
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
   const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
@@ -548,6 +550,11 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
     attachments: PROJECT_ATTACHMENT_ATTRIBUTES,
   });
+
+
+  // if user is not admin, ignore email field for project_members
+  fields = util.ignoreEmailField(req, fields);
+
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) {
     fields.projects.push('id');
