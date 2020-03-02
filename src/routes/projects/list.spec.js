@@ -282,6 +282,7 @@ describe('LIST Project', () => {
             type: ES_PROJECT_TYPE,
             id: project1.id,
             body: data[0],
+            refresh: 'wait_for',
           });
 
           const esp2 = server.services.es.index({
@@ -289,6 +290,7 @@ describe('LIST Project', () => {
             type: ES_PROJECT_TYPE,
             id: project2.id,
             body: data[1],
+            refresh: 'wait_for',
           });
 
           const esp3 = server.services.es.index({
@@ -296,6 +298,7 @@ describe('LIST Project', () => {
             type: ES_PROJECT_TYPE,
             id: project3.id,
             body: data[2],
+            refresh: 'wait_for',
           });
           return Promise.all([esp1, esp2, esp3]);
         }).then(() => {
