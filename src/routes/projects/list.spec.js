@@ -1244,27 +1244,6 @@ describe('LIST Project', () => {
           }
         });
       });
-
-      it('should not return "phases.products.name" field, when it\'s defined in "fields" query param but "phases" is not defined', (done) => {
-        request(server)
-        .get('/v5/projects/?fields=phases.products.name')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === 1);
-            project.should.not.have.property('phases');
-            done();
-          }
-        });
-      });
     });
   });
 });

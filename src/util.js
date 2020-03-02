@@ -256,12 +256,7 @@ _.assignIn(util, {
       }
 
       if (allowedFields.project_phases_products) {
-        if (fields.project_phases.length > 0) {
-          parseSubFields('project_phases_products', 'phases.products');
-        } else {
-          // if donot have 'phases', so hide 'phases.products'
-          fields.project_phases_products = [];
-        }
+        parseSubFields('project_phases_products', 'phases.products');
       }
     }
     return fields;
