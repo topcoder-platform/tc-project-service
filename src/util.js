@@ -28,6 +28,7 @@ import {
   VALUE_TYPE,
   ESTIMATION_TYPE,
   RESOURCES,
+  USER_ROLE,
 } from './constants';
 
 const tcCoreLibAuth = require('tc-core-library-js').auth;
@@ -230,22 +231,58 @@ _.assignIn(util, {
     if (queryFields.length) {
       // remove any inavlid fields
       fields.projects = _.intersection(queryFields, allowedFields.projects);
-      fields.project_members = _.filter(queryFields, f => f.indexOf('members.') === 0);
-      // remove members. prefix
-      fields.project_members = _.map(fields.project_members, f => f.substring(8));
-      // remove any errorneous fields
-      fields.project_members = _.intersection(fields.project_members, allowedFields.project_members);
-      if (fields.project_members.length === 0 && _.indexOf(queryFields, 'members') > -1) {
-        fields.project_members = allowedFields.project_members;
+
+      const parseSubFields = (name, strName) => {
+        fields[name] = _.filter(queryFields, f => f.indexOf(`${strName}.`) === 0);
+        fields[name] = _.map(fields[name], f => f.substring(strName.length + 1));
+        fields[name] = _.intersection(fields[name], allowedFields[name]);
+        if (fields[name].length === 0 && _.indexOf(queryFields, strName) > -1) {
+          fields[name] = allowedFields[name];
+        }
+      };
+
+      if (allowedFields.project_members) {
+        parseSubFields('project_members', 'members');
       }
-      // remove attachments if not requested
-      if (fields.attachments && _.indexOf(queryFields, 'attachments') === -1) {
-        fields.attachments = null;
+      if (allowedFields.project_member_invites) {
+        parseSubFields('project_member_invites', 'invites');
+      }
+
+      if (allowedFields.attachments) {
+        parseSubFields('attachments', 'attachments');
+      }
+
+      if (allowedFields.project_phases) {
+        parseSubFields('project_phases', 'phases');
+      }
+
+      if (allowedFields.project_phases_products) {
+        parseSubFields('project_phases_products', 'phases.products');
       }
     }
     return fields;
   },
+  /**
+   * Remove email field for PROJECT_MEMBER_ATTRIBUTES, if user is not admin
+   * @param  {object} req          request object
+   * @param  {object} fields       fields object
+   * @return {object}                       the parsed array
+   */
+  ignoreEmailField: (req, fields) => {
+    if (!fields.project_members) {
+      return fields;
+    }
 
+    // Only Topcoder Admins can get all the fields
+    if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
+      return fields;
+    }
+
+    // for non topcoder admins remove emails from the field list
+    _.assign(fields, { project_members: _.filter(fields.project_members, f => f !== 'email') });
+
+    return fields;
+  },
   /**
    * Parse the query filters
    * @param  {String}   fqueryFilter        the query filter string
@@ -598,7 +635,7 @@ _.assignIn(util, {
     // uncomment code below, to enable masking emails again
 
     /*
-    const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
+    const isAdmin = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
     if (isAdmin) {
       return data;
     }
@@ -629,6 +666,11 @@ _.assignIn(util, {
     }
     const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
     const memberDetailFields = ['handle', 'firstName', 'lastName'];
+
+    // Only Topcoder admins can get emails for users
+    if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
+      memberDetailFields.push('email');
+    }
 
     let allMemberDetails = [];
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
@@ -681,16 +723,17 @@ _.assignIn(util, {
     // pick valid fields from fetched member details
     return _.map(members, (member) => {
       let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
-      memberDetails = _.assign({}, member, memberDetails);
-      // this case would be only valid for invites:
-      // don't return `email` for non-admins if invitation has `userId`
-      // if invitation doesn't have `userId` means it is invitation by email
-      // then we are still returning emails to all users
-      if (
-        memberDetails.email &&
-        memberDetails.userId &&
-        !util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser)
-      ) {
+      memberDetails = _.assign({}, member, _.pick(memberDetails, _.union(memberDetailFields, memberTraitFields)));
+
+      // in general, only users with Topcoder administrator privileges can see emails
+      let canSeeEmail = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
+
+      // specially for invite objects, we still have to return email, if invite is for a new user which doesn't have "userId"
+      if (memberDetails.status) { // we identify that the object is "invite" and not a "member" if object has "status" field
+        canSeeEmail = canSeeEmail || !memberDetails.userId;
+      }
+
+      if (!canSeeEmail) {
         delete memberDetails.email;
       }
       return _(memberDetails).pick(fields).defaults(memberDefaults).value();
