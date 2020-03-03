@@ -724,16 +724,16 @@ _.assignIn(util, {
     return _.map(members, (member) => {
       let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
       memberDetails = _.assign({}, member, _.pick(memberDetails, _.union(memberDetailFields, memberTraitFields)));
-      // this case would be only valid for invites:
-      // don't return `email` for non-admins if invitation has `userId`
-      // if invitation doesn't have `userId` means it is invitation by email
-      // then we are still returning emails to all users
-      if (
-        memberDetails.status && // this is how we identify that the object is "invite" and not a "member"
-        memberDetails.email &&
-        memberDetails.userId &&
-        !util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)
-      ) {
+
+      // in general, only users with Topcoder administrator privileges can see emails
+      let canSeeEmail = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
+
+      // specially for invite objects, we still have to return email, if invite is for a new user which doesn't have "userId"
+      if (memberDetails.status) { // we identify that the object is "invite" and not a "member" if object has "status" field
+        canSeeEmail = canSeeEmail || !memberDetails.userId;
+      }
+
+      if (!canSeeEmail) {
         delete memberDetails.email;
       }
       return _(memberDetails).pick(fields).defaults(memberDefaults).value();
