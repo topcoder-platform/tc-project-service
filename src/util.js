@@ -728,9 +728,14 @@ _.assignIn(util, {
       // in general, only users with Topcoder administrator privileges can see emails
       let canSeeEmail = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
 
-      // specially for invite objects, we still have to return email, if invite is for a new user which doesn't have "userId"
+      // for invites we have some special situations, when we still return "email"
       if (memberDetails.status) { // we identify that the object is "invite" and not a "member" if object has "status" field
+        // we still have to return email, if invite is for a new user which doesn't have "userId"
         canSeeEmail = canSeeEmail || !memberDetails.userId;
+
+        // return email, if invite has been created by "email" by the current user
+        // so this user already knows the "email"
+        canSeeEmail = canSeeEmail || (member.createdBy === req.authUser.userId && member.email);
       }
 
       if (!canSeeEmail) {

@@ -366,11 +366,11 @@ module.exports = [
         })
     ))
     .then((values) => {
-      const success = _.assign({}, { success: values });
+      const response = _.assign({}, { success: values });
       if (failed.length) {
-        res.status(403).json(_.assign({}, util.maskInviteEmails('$.success[?(@.email)]', success, req), { failed }));
+        res.status(403).json(_.assign({}, response, { failed }));
       } else {
-        res.status(201).json(util.maskInviteEmails('$.success[?(@.email)]', success, req));
+        res.status(201).json(response);
       }
     })
     .catch(err => next(err));

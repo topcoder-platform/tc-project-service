@@ -347,8 +347,6 @@ describe('Project Member Invite create', () => {
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
-            // temporary disable this feature, because it has some side effects
-            // resJson.email.should.equal('he**o@wo**d.com'); // email is masked
             resJson.email.should.equal('hello@world.com');
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
@@ -401,8 +399,6 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
             resJson.userId.should.equal(12345);
-            // temporary disable this feature, because it has some side effects
-            // resJson.email.should.equal('he**o@wo**d.com'); // email is masked
             resJson.email.should.equal('hello@world.com');
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
