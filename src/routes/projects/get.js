@@ -22,9 +22,18 @@ const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 // var permissions = require('tc-core-library-js').middleware.permissions
 const permissions = tcMiddleware.permissions;
 const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), 'utm', 'deletedAt');
-const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes), 'deletedAt');
+const PROJECT_MEMBER_ATTRIBUTES = _.concat(_.without(_.keys(models.ProjectMember.rawAttributes), 'deletedAt'),
+  ['firstName', 'lastName', 'handle', 'email']);
 const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(_.keys(models.ProjectMemberInvite.rawAttributes), 'deletedAt');
 const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(_.keys(models.ProjectAttachment.rawAttributes), 'deletedAt');
+const PROJECT_PHASE_ATTRIBUTES = _.without(
+  _.keys(models.ProjectPhase.rawAttributes),
+  'deletedAt',
+);
+const PROJECT_PHASE_PRODUCTS_ATTRIBUTES = _.without(
+  _.keys(models.PhaseProduct.rawAttributes),
+  'deletedAt',
+);
 
 /**
  * Parse the ES search criteria and prepare search request body
@@ -52,13 +61,21 @@ const parseElasticSearchCriteria = (projectId, fields) => {
     sourceInclude = sourceInclude.concat(_.map(memberFields, single => `invites.${single}`));
   }
 
+  if (_.get(fields, 'project_phases', null)) {
+    const phaseFields = _.get(fields, 'project_phases');
+    sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `phases.${single}`));
+  }
+  if (_.get(fields, 'project_phases_products', null)) {
+    const phaseFields = _.get(fields, 'project_phases_products');
+    sourceInclude = sourceInclude.concat(_.map(phaseFields, single => `phases.products.${single}`));
+  }
   if (_.get(fields, 'attachments', null)) {
     const attachmentFields = _.get(fields, 'attachments');
     sourceInclude = sourceInclude.concat(_.map(attachmentFields, single => `attachments.${single}`));
   }
 
   if (sourceInclude) {
-    searchCriteria._sourceInclude = sourceInclude;        // eslint-disable-line no-underscore-dangle
+    searchCriteria._sourceIncludes = sourceInclude;        // eslint-disable-line no-underscore-dangle
   }
 
 
@@ -87,8 +104,13 @@ const retrieveProjectFromES = (projectId, req) => {
     projects: PROJECT_ATTRIBUTES,
     project_members: PROJECT_MEMBER_ATTRIBUTES,
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
+    project_phases: PROJECT_PHASE_ATTRIBUTES,
+    project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
     attachments: PROJECT_ATTACHMENT_ATTRIBUTES,
   });
+
+  // if user is not admin, ignore email field for project_members
+  fields = util.ignoreEmailField(req, fields);
 
   const searchCriteria = parseElasticSearchCriteria(projectId, fields) || {};
   return new Promise((accept, reject) => {
@@ -108,6 +130,7 @@ const retrieveProjectFromDB = (projectId, req) => {
     projects: PROJECT_ATTRIBUTES,
     project_members: PROJECT_MEMBER_ATTRIBUTES,
   });
+
   return models.Project
     .findOne({
       where: { id: projectId },
