@@ -3,7 +3,7 @@
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
-
+import _ from 'lodash';
 import config from 'config';
 import models from '../../models';
 import util from '../../util';
@@ -23,7 +23,8 @@ const data = [
     billingAccountId: 1,
     name: 'test1',
     description: 'es_project',
-    status: 'active',
+    cancelReason: 'price/cost',
+    status: 'draft',
     details: {
       utm: {
         code: 'code1',
@@ -42,6 +43,7 @@ const data = [
         firstName: 'es_member_1_firstName',
         lastName: 'Lastname',
         handle: 'test_tourist_handle',
+        email: 'test@test.com',
         isPrimary: true,
         createdBy: 1,
         updatedBy: 1,
@@ -54,6 +56,30 @@ const data = [
         isPrimary: true,
         createdBy: 1,
         updatedBy: 1,
+      },
+    ],
+    invites: [
+      {
+        id: 1,
+        userId: 40051335,
+        email: 'test@topcoder.com',
+        status: 'pending',
+      },
+    ],
+    phases: [
+
+      {
+        id: 45,
+        name: 'test phases',
+        spentBudget: 0,
+        products: [
+          {
+
+            phaseId: 45,
+            id: 3,
+            name: 'tet product',
+          },
+        ],
       },
     ],
     attachments: [
@@ -80,6 +106,7 @@ describe('GET Project', () => {
         .then(() => testUtil.clearES())
         .then(() => {
           const p1 = models.Project.create({
+            id: 5,
             type: 'generic',
             billingAccountId: 1,
             name: 'test1',
@@ -98,6 +125,10 @@ describe('GET Project', () => {
               projectId: project1.id,
               role: 'customer',
               isPrimary: true,
+              firstName: 'Firstname',
+              lastName: 'Lastname',
+              handle: 'test_tourist_handle',
+              email: 'test@test.com',
               createdBy: 1,
               updatedBy: 1,
             });
@@ -341,6 +372,243 @@ describe('GET Project', () => {
                 done();
               }
             });
+      });
+    });
+
+    describe('URL Query fields', () => {
+      it('should not return "email" for project members when "fields" query param is not defined (to non-admin users)', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=members.handle`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.members[0].should.have.property('handle');
+            resJson.members[0].should.not.have.property('email');
+            done();
+          }
+        });
+      });
+
+      it('should not return "email" for project members even if it\'s defined in "fields" query param (to non-admin users)', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=members.email,members.handle`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.members[0].should.have.property('handle');
+            resJson.members[0].should.not.have.property('email');
+            done();
+          }
+        });
+      });
+
+
+      it('should not return "cancelReason" if it is not listed in "fields" query param ', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=description`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.property('description');
+            resJson.description.should.be.eq('es_project');
+            resJson.should.not.have.property('cancelReason');
+            done();
+          }
+        });
+      });
+
+      it('should not return "email" for project members when "fields" query param is not defined (to admin users)', (done) => {
+        request(server)
+          .get(`/v5/projects/${project1.id}?fields=description,members.id`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.members.should.have.lengthOf(2);
+              resJson.members[0].should.not.have.property('email');
+              done();
+            }
+          });
+      });
+
+      it('should return "email" for project members if it\'s defined in "fields" query param (to admin users', (done) => {
+        request(server)
+          .get(`/v5/projects/${project1.id}?fields=description,members.id,members.email`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.members.should.have.lengthOf(2);
+              resJson.members[0].should.have.property('email');
+              resJson.members[0].email.should.be.eq('test@test.com');
+              done();
+            }
+          });
+      });
+
+
+      it('should only return "id" field, when it\'s defined in "fields"  query param', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=id`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.property('id');
+            _.keys(resJson).length.should.be.eq(1);
+            done();
+          }
+        });
+      });
+
+      it('should only return "invites.userId" field, when it\'s defined in "fields"  query param', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=invites.userId`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.invites[0].should.have.property('userId');
+            _.keys(resJson.invites[0]).length.should.be.eq(1);
+            done();
+          }
+        });
+      });
+
+      it('should only return "members.role" field, when it\'s defined in "fields"  query param', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=members.role`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.members[0].should.have.property('role');
+            _.keys(resJson.members[0]).length.should.be.eq(1);
+            done();
+          }
+        });
+      });
+
+      it('should only return "attachments.title" field, when it\'s defined in "fields"  query param', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=attachments.title`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.attachments[0].should.have.property('title');
+            _.keys(resJson.attachments[0]).length.should.be.eq(1);
+            done();
+          }
+        });
+      });
+
+      it('should only return "phases.name" field, when it\'s defined in "fields"  query param', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=phases.name`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.phases[0].should.have.property('name');
+            _.keys(resJson.phases[0]).length.should.be.eq(1);
+            done();
+          }
+        });
+      });
+
+      it('should only return "phases.products.name" field, when it\'s defined in "fields" query param and "phases" is also defined', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}?fields=phases.products.name,phases.name`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.phases[0].products[0].should.have.property('name');
+            _.keys(resJson.phases[0].products[0]).length.should.be.eq(1);
+            done();
+          }
+        });
       });
     });
   });
