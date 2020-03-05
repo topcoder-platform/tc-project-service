@@ -9,6 +9,8 @@ logs
 *.log
 npm-debug.log*
 .DS_Store
+.tern-port
+*#
 
 dist/
 

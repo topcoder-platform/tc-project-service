@@ -9,8 +9,6 @@ import {
   timelineAdjustedKafkaHandler,
 } from './timelines';
 import {
-  milestoneAddedHandler,
-  milestoneUpdatedHandler,
   milestoneUpdatedKafkaHandler,
 } from './milestones';
 
@@ -65,9 +63,9 @@ export const rabbitHandlers = {
   [EVENT.ROUTING_KEY.TIMELINE_ADDED]: voidRabbitHandler, // DISABLED
   [EVENT.ROUTING_KEY.TIMELINE_REMOVED]: voidRabbitHandler, // DISABLED
   [EVENT.ROUTING_KEY.TIMELINE_UPDATED]: voidRabbitHandler, // DISABLED
-  [EVENT.ROUTING_KEY.MILESTONE_ADDED]: milestoneAddedHandler, // index in ES because of cascade updates
+  [EVENT.ROUTING_KEY.MILESTONE_ADDED]: voidRabbitHandler, // DISABLED
   [EVENT.ROUTING_KEY.MILESTONE_REMOVED]: voidRabbitHandler, // DISABLED
-  [EVENT.ROUTING_KEY.MILESTONE_UPDATED]: milestoneUpdatedHandler, // index in ES because of cascade updates
+  [EVENT.ROUTING_KEY.MILESTONE_UPDATED]: voidRabbitHandler, // DISABLED
 };
 
 export const kafkaHandlers = {

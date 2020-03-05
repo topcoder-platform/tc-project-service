@@ -80,6 +80,7 @@ module.exports = () => {
   Authorizer.setPolicy('milestone.create', projectEdit);
   Authorizer.setPolicy('milestone.edit', projectEdit);
   Authorizer.setPolicy('milestone.delete', projectEdit);
+  Authorizer.setPolicy('milestone.bulkUpdate', projectEdit);
   Authorizer.setPolicy('milestone.view', projectView);
 
   Authorizer.setPolicy('metadata.list', true); // anyone can view all metadata

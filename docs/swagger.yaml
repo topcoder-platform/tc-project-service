@@ -2890,7 +2890,7 @@ paths:
             example:
               'work.create': true
               'workItem.edit': true
-                    
+
         '401':
           description: Unauthorized
           schema:
@@ -3178,6 +3178,50 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
+    patch:
+      tags:
+        - milestone
+      operationId: batchUpdateMilestone
+      security:
+        - Bearer: []
+      description: >-
+        Update a batch of milestones. All users who can edit the timeline can access this
+        endpoint. For attributes with JSON object type, it would overwrite the
+        existing fields, or add new if the fields don't exist in the JSON
+        object.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Milestone'
+      responses:
+        '200':
+          description: Aggregation of bulk operations
+          schema:
+            $ref: '#/definitions/BulkMilestoneUpdateResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/timelines/{timelineId}/milestones/{milestoneId}':
     parameters:
       - $ref: '#/parameters/timelineIdParam'
@@ -3257,7 +3301,9 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/MilestonePatchRequest'
+            type: array
+            items:
+              $ref: '#/definitions/MilestonePatchRequest'
     delete:
       tags:
         - milestone
@@ -5968,6 +6014,32 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/MilestonePostRequest'
+  BulkMilestoneUpdateResponse:
+    title: Bulk milestone update response object
+    type: object
+    required:
+      - created
+      - deleted
+      - updated
+    properties:
+      created:
+        description: The created milestones
+        type: array
+        items:
+          $ref: '#/definitions/Milestone'
+      updated:
+        description: The updated milestones
+        type: array
+        items:
+          $ref: '#/definitions/Milestone'
+      deleted:
+        description: The deleted milestones
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
   MilestoneTemplateRequest:
     title: Milestone template request object
     type: object
