@@ -390,8 +390,10 @@ describe('BULK UPDATE Milestones', () => {
     });
 
     it('should return 200 for admin doing creation, update, deletion operation', (done) => {
-      const data = [Object.assign({}, body, { id: 1, actualStartDate: '2018-05-15T00:00:00.000Z' }),
-        Object.assign({}, body)];
+      const data = [
+        Object.assign({}, body, { id: 1, actualStartDate: '2018-05-15T00:00:00.000Z' }),
+        Object.assign({}, body, { name: 'Milestone to create in bulk' }),
+      ];
       request(server)
         .patch('/v5/timelines/1/milestones')
         .send(data)
@@ -400,22 +402,39 @@ describe('BULK UPDATE Milestones', () => {
         })
         .expect(200)
         .end((err, res) => {
-          should.exist(res.body.created);
-          should.exist(res.body.deleted);
-          should.exist(res.body.updated);
-          const { created, deleted, updated } = res.body;
-          created.length.should.be.eql(1);
-          should.exist(created[0].id);
-          created[0].name.should.be.eql(body.name);
-          deleted.length.should.be.eql(4);
-          deleted[0].id.should.be.eql(2);
-          deleted[1].id.should.be.eql(3);
-          deleted[2].id.should.be.eql(4);
-          deleted[3].id.should.be.eql(6);
-          updated.length.should.be.eql(1);
-          updated[0].id.should.be.equal(1);
-          updated[0].actualStartDate.should.be.equal('2018-05-15T00:00:00.000Z');
-          done();
+          if (err) {
+            done(err);
+          } else {
+            const milestones = res.body;
+
+            // check that milestone with id=1 is updated
+            const updatedMilestone = _.find(milestones, { id: 1 });
+            should.exist(updatedMilestone);
+            updatedMilestone.actualStartDate.should.be.eql('2018-05-15T00:00:00.000Z');
+
+            // check that a new milestone is created
+            const createdMilestone = _.find(milestones, { name: 'Milestone to create in bulk' });
+            should.exist(createdMilestone);
+            _.omit(createdMilestone, [
+              'id',
+              'createdAt',
+              'updatedAt',
+              'statusHistory',
+            ]).should.eql(_.assign({}, body, {
+              name: 'Milestone to create in bulk',
+              actualStartDate: null,
+              completionDate: null,
+              endDate: null,
+              createdBy: 40051333,
+              updatedBy: 40051333,
+              timelineId: 1,
+            }));
+
+            // check that all other milestones are deleted
+            milestones.length.should.be.eql(2);
+
+            done();
+          }
         });
     });
 
@@ -437,8 +456,10 @@ describe('BULK UPDATE Milestones', () => {
       });
 
       it('sends send correct BUS API messages when milestone are bulk updated', (done) => {
-        const data = [Object.assign({}, body, { id: 1, actualStartDate: '2018-05-15T00:00:00.000Z' }),
-          Object.assign({}, body)];
+        const data = [
+          Object.assign({}, body, { id: 1, actualStartDate: '2018-05-15T00:00:00.000Z' }),
+          Object.assign({}, body, { name: 'Milestone to create in bulk' }),
+        ];
         request(server)
           .patch('/v5/timelines/1/milestones')
           .set({
@@ -458,25 +479,29 @@ describe('BULK UPDATE Milestones', () => {
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED, sinon.match({
                   resource: RESOURCES.MILESTONE,
-                  name: body.name,
+                  name: 'Milestone to create in bulk',
                 })).should.be.true;
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
                   resource: RESOURCES.MILESTONE,
                   id: 2,
                 })).should.be.true;
+
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
                   resource: RESOURCES.MILESTONE,
                   id: 3,
                 })).should.be.true;
+
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
                   resource: RESOURCES.MILESTONE,
                   id: 4,
                 })).should.be.true;
+
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_REMOVED, sinon.match({
                   resource: RESOURCES.MILESTONE,
                   id: 6,
                 })).should.be.true;
+
                 done();
               });
             }

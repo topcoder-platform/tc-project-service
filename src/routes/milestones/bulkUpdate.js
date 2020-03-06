@@ -2,6 +2,7 @@
  * Bulk create/update/delete milestones
  */
 import Promise from 'bluebird';
+import _ from 'lodash';
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -94,15 +95,20 @@ module.exports = [
       toUpdate, ([item, data]) => updateMilestone(req.authUser, timelineId, data, transaction, item));
     return { created, deleted, updated };
   })
-    .then(({ created, deleted, updated }) => {
+    .then(async ({ created, deleted, updated }) => {
       [
         [created, EVENT.ROUTING_KEY.MILESTONE_ADDED],
         [deleted, EVENT.ROUTING_KEY.MILESTONE_REMOVED],
         [updated, EVENT.ROUTING_KEY.MILESTONE_UPDATED],
       ].forEach(([results, routingKey]) =>
-        results.forEach(result => util.sendResourceToKafkaBus(
-          req, routingKey, RESOURCES.MILESTONE, result)));
-      res.json({ created, deleted, updated });
+        results.forEach(result => util.sendResourceToKafkaBus(req, routingKey, RESOURCES.MILESTONE, result)),
+      );
+
+      // return all the timeline milestones after all updates
+      const milestones = await req.timeline.getMilestones()
+        .map(milestone => _.omit(milestone.toJSON(), ['deletedAt', 'deletedBy']));
+
+      res.json(milestones);
     })
     .catch(next),
 ];

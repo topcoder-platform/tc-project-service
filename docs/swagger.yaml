@@ -6016,30 +6016,10 @@ definitions:
       - $ref: '#/definitions/MilestonePostRequest'
   BulkMilestoneUpdateResponse:
     title: Bulk milestone update response object
-    type: object
-    required:
-      - created
-      - deleted
-      - updated
-    properties:
-      created:
-        description: The created milestones
-        type: array
-        items:
-          $ref: '#/definitions/Milestone'
-      updated:
-        description: The updated milestones
-        type: array
-        items:
-          $ref: '#/definitions/Milestone'
-      deleted:
-        description: The deleted milestones
-        type: array
-        items:
-          type: object
-          properties:
-            id:
-              type: string
+    type: array
+    items:
+      $ref: '#/definitions/Milestone'
+      
   MilestoneTemplateRequest:
     title: Milestone template request object
     type: object
