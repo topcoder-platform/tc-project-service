@@ -165,6 +165,8 @@ describe('BULK UPDATE Milestones', () => {
                     name: 'Milestone 2',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
+                    actualStartDate: '2018-05-14T00:00:00.000Z',
+                    completionDate: '2018-05-15T00:00:00.000Z',
                     status: 'reviewed',
                     type: 'type2',
                     order: 2,
@@ -302,7 +304,7 @@ describe('BULK UPDATE Milestones', () => {
 
     it('should return 403 for non-admin member updating the completionDate', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.id = 1;
+      newBody.id = 2;
       newBody.completionDate = '2019-01-16T00:00:00.000Z';
       request(server)
         .patch('/v5/timelines/1/milestones')
@@ -316,7 +318,7 @@ describe('BULK UPDATE Milestones', () => {
     it('should return 403 for non-admin member updating the actualStartDate', (done) => {
       const newBody = _.cloneDeep(body);
       newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
-      newBody.id = 1;
+      newBody.id = 2;
       request(server)
         .patch('/v5/timelines/1/milestones')
         .set({

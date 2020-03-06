@@ -113,9 +113,17 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
     }
     entityToUpdate.status = statusHistory[1].status;
   }
-  if ((entityToUpdate.completionDate || entityToUpdate.actualStartDate) &&
-      !util.hasPermission({ topcoderRoles: ADMIN_ROLES }, authUser)) {
-    const apiErr = new Error('You are not authorised to perform this action');
+
+  // only admins can update values of 'completionDate' and 'actualStartDate' if they are already set
+  const isUpdatedCompletionDate = milestone.completionDate && entityToUpdate.completionDate
+    && milestone.completionDate !== entityToUpdate.completionDate;
+  const isUpdatedActualStartDate = milestone.actualStartDate && entityToUpdate.actualStartDate
+    && milestone.actualStartDate !== entityToUpdate.actualStartDate;
+  if (
+    (isUpdatedCompletionDate || isUpdatedActualStartDate)
+    && !util.hasPermission({ topcoderRoles: ADMIN_ROLES }, authUser)
+  ) {
+    const apiErr = new Error('You are not allowed to perform this action.');
     apiErr.status = 403;
     throw apiErr;
   }

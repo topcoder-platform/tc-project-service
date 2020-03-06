@@ -166,6 +166,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 2',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
+                    actualStartDate: '2018-05-14T00:00:00.000Z',
                     status: 'reviewed',
                     type: 'type2',
                     order: 2,
@@ -317,12 +318,36 @@ describe('UPDATE Milestone', () => {
       const newBody = _.cloneDeep(body);
       newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
       request(server)
-        .patch('/v5/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send(newBody)
         .expect(403, done);
+    });
+
+    it('should return 200 for non-admin member setting the completionDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.completionDate = '2019-01-16T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for non-admin member setting the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
+        .expect(200, done);
     });
 
     it('should return 404 for non-existed timeline', (done) => {
