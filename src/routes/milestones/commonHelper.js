@@ -16,7 +16,7 @@ const validStatuses = JSON.parse(config.get('VALID_STATUSES_BEFORE_PAUSED'));
  * @param {Object} timeline The timeline of milestone
  * @param {Object} data The updated data
  * @param {Object} transaction The transaction to use
- * @returns {Objec} The updated milestone
+ * @returns {Object} The updated milestone
  * @throws {Error} If something went wrong
  */
 async function createMilestone(authUser, timeline, data, transaction) {
@@ -132,6 +132,11 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
     apiErr.status = 400;
     throw apiErr;
   }
+  // Comment this code for now and disable respective unit tests
+  // Most likely it has to be removed from the server, as otherwise client-side cannot properly
+  // control bulk updates of several milestones, as some milestones could be automatically updated by this logic
+  // which would lead to the unexpected results client-side.
+  /*
   const durationChanged = {}.hasOwnProperty.call(entityToUpdate, 'duration') &&
         entityToUpdate.duration !== milestone.duration;
   const statusChanged = {}.hasOwnProperty.call(entityToUpdate, 'status') &&
@@ -178,6 +183,7 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
       .diff(entityToUpdate.actualStartDate, 'days') + 1;
     entityToUpdate.status = MILESTONE_STATUS.COMPLETED;
   }
+  */
 
   const result = await milestone.update(entityToUpdate, { comment: entityToUpdate.statusComment, transaction });
   return _.omit(result.toJSON(), ['deletedBy', 'deletedAt']);
