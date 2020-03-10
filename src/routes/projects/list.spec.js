@@ -160,7 +160,7 @@ const data = [
       role: 'manager',
       firstName: 'first',
       lastName: 'last',
-      handle: 'manager_handle',
+      handle: 'MANAGER_HANDLE',
       isPrimary: true,
       createdBy: 1,
       updatedBy: 1,
@@ -723,7 +723,7 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return all projects that match when filtering by customer handle', (done) => {
+    it('should return all projects that match when filtering by customer handle (lowercase)', (done) => {
       request(server)
         .get('/v5/projects/?customer=*tourist*')
         .set({
@@ -746,9 +746,101 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return all projects that match when filtering by manager handle', (done) => {
+    it('should return all projects that match when filtering by customer handle (uppercase)', (done) => {
+      request(server)
+        .get('/v5/projects/?customer=*TOUR*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members[0].userId.should.equal(40051331);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by customer handle (mixed case)', (done) => {
+      request(server)
+        .get('/v5/projects/?customer=*tOURiS*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members[0].userId.should.equal(40051331);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager handle (lowercase)', (done) => {
       request(server)
         .get('/v5/projects/?manager=*_handle')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test3');
+            resJson[0].members.should.have.deep.property('[0].role', 'manager');
+            resJson[0].members[0].userId.should.equal(40051334);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager handle (uppercase)', (done) => {
+      request(server)
+        .get('/v5/projects/?manager=MANAG*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test3');
+            resJson[0].members.should.have.deep.property('[0].role', 'manager');
+            resJson[0].members[0].userId.should.equal(40051334);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager handle (mixed case)', (done) => {
+      request(server)
+        .get('/v5/projects/?manager=*_HAndLe')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
