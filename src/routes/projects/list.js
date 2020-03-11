@@ -62,7 +62,18 @@ const SUPPORTED_FILTERS = [
 
 const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
 
+/**
+ * ES need to skip special chars else it is considered as RegEx
+ *
+ * @param  {String}     query          query being searched for
+ * @return {String}                    result after parsing
+ */
+function escapeElasticsearchQuery(query) {
+  return query.replace(/(\+|\-|\=|&&|\|\||\>|\<|\!|\(|\)|\{|\}|\[|\]|\^|"|~|\*|\?|\:|\\|\/)/g, '\\$&');
+}
+
 const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
+  keyword = escapeElasticsearchQuery(keyword);
   let should = [
     {
       query_string: {
