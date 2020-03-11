@@ -69,15 +69,21 @@ const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g
  * @return {String}                    result after parsing
  */
 function escapeElasticsearchQuery(query) {
-  return query.replace(/(\+|\-|\=|&&|\|\||\>|\<|\!|\(|\)|\{|\}|\[|\]|\^|"|~|\*|\?|\:|\\|\/)/g, '\\$&');
+  const chars = ['\\', '+', '-', '&&', '||', '!', '(', ')', '{', '}', '[', ']',
+    '^', '"', '~', '*', '?', ':', '/', '<', '>'];
+  let result = query;
+  _.forEach(chars, (item) => {
+    result = result.replace(item, `\\${item}`);
+  });
+  return result;
 }
 
 const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
-  keyword = escapeElasticsearchQuery(keyword);
+  const escapedKeyword = escapeElasticsearchQuery(keyword);
   let should = [
     {
       query_string: {
-        query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
+        query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? escapedKeyword : `*${escapedKeyword}*`,
         analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
         fields: ['name^5', 'description^3', 'type^2'],
       },
@@ -90,7 +96,7 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
             path: 'details.utm',
             query: {
               query_string: {
-                query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
+                query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? escapedKeyword : `*${escapedKeyword}*`,
                 analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD || matchType === MATCH_TYPE_SINGLE_FIELD),
                 fields: ['details.utm.code^4'],
               },
@@ -104,7 +110,7 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
         path: 'members',
         query: {
           query_string: {
-            query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
+            query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? escapedKeyword : `*${escapedKeyword}*`,
             analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
             fields: ['members.email', 'members.handle', 'members.firstName', 'members.lastName'],
           },
