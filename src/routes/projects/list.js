@@ -62,28 +62,11 @@ const SUPPORTED_FILTERS = [
 
 const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
 
-/**
- * ES need to skip special chars else it is considered as RegEx
- *
- * @param  {String}     query          query being searched for
- * @return {String}                    result after parsing
- */
-function escapeElasticsearchQuery(query) {
-  const chars = ['\\', '+', '-', '&&', '||', '!', '(', ')', '{', '}', '[', ']',
-    '^', '"', '~', '*', '?', ':', '/', '<', '>'];
-  let result = query;
-  _.forEach(chars, (item) => {
-    result = result.replace(item, `\\${item}`);
-  });
-  return result;
-}
-
 const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
-  const escapedKeyword = escapeElasticsearchQuery(keyword);
   let should = [
     {
       query_string: {
-        query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? escapedKeyword : `*${escapedKeyword}*`,
+        query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
         analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
         fields: ['name^5', 'description^3', 'type^2'],
       },
@@ -96,7 +79,7 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
             path: 'details.utm',
             query: {
               query_string: {
-                query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? escapedKeyword : `*${escapedKeyword}*`,
+                query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
                 analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD || matchType === MATCH_TYPE_SINGLE_FIELD),
                 fields: ['details.utm.code^4'],
               },
@@ -110,7 +93,7 @@ const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
         path: 'members',
         query: {
           query_string: {
-            query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? escapedKeyword : `*${escapedKeyword}*`,
+            query: (matchType === MATCH_TYPE_EXACT_PHRASE) ? keyword : `*${keyword}*`,
             analyze_wildcard: (matchType === MATCH_TYPE_WILDCARD),
             fields: ['members.email', 'members.handle', 'members.firstName', 'members.lastName'],
           },
@@ -286,6 +269,22 @@ const setFilter = (value, keyword, fieldName) => {
 };
 
 /**
+  * ES need to skip special chars else it is considered as RegEx
+  *
+  * @param  {String}     query          query being searched for
+  * @return {String}                    result after parsing
+  */
+ function escapeElasticsearchQuery(query) {
+   const chars = ['\\', '+', '-', '&&', '||', '!', '(', ')', '{', '}', '[', ']',
+     '^', '"', '~', '*', '?', ':', '/', '<', '>'];
+   let result = query;
+   _.forEach(chars, (item) => {
+     result = result.replace(item, `\\${item}`);
+   });
+   return result;
+ }
+
+/**
  * Parse the ES search criteria and prepare search request body
  *
  * @param  {Object}     criteria          the filter criteria parsed from client request
@@ -443,7 +442,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
 
     if (!keyword) {
       // Not a specific field search nor an exact phrase search, do a wildcard match
-      keyword = criteria.filters.keyword;
+      keyword = escapeElasticsearchQuery(keywordCriterion);
       matchType = MATCH_TYPE_WILDCARD;
     }
 

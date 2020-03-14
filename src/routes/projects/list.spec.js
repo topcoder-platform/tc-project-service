@@ -21,7 +21,7 @@ const data = [
     type: 'generic',
     billingAccountId: 1,
     name: 'test1',
-    description: 'test project1',
+    description: 'test project1 abc/d',
     status: 'active',
     details: {
       utm: {
@@ -1065,7 +1065,7 @@ describe('LIST Project', () => {
             resJson.should.have.lengthOf(1);
             resJson[0].should.have.property('description');
             resJson[0].should.not.have.property('cancelReason');
-            resJson[0].description.should.be.eq('test project1');
+            resJson[0].description.should.be.eq('test project1 abc/d');
             done();
           }
         });
@@ -1243,6 +1243,46 @@ describe('LIST Project', () => {
             done();
           }
         });
+      });
+
+      it('should find a project by quoted keyword with a special symbol in the name', (done) => {
+        request(server)
+          .get('/v5/projects/?keyword="abc/d"')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              done();
+            }
+          });
+      });
+
+      it('should find a project by keyword with a special symbol in the name', (done) => {
+        request(server)
+          .get('/v5/projects/?keyword=abc/d')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              done();
+            }
+          });
       });
     });
   });
