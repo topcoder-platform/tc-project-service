@@ -4,7 +4,7 @@ services:
     build:
       context: ./generic-tc-service
       args:
-        NODE_VERSION: 8.2.1
+        NODE_VERSION: 8.11.3
         GIT_URL: https://github.com/topcoder-platform/tc-notifications
         GIT_BRANCH: dev
         BYPASS_TOKEN_VALIDATION: 1

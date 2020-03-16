@@ -60,7 +60,14 @@ const SUPPORTED_FILTERS = [
   'directProjectId',
 ];
 
-const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
+/**
+  * ES need to skip special chars else it is considered as RegEx or other ES query string syntax,
+  * see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
+  *
+  * @param  {String}     keyword        keyword being searched for
+  * @return {String}                    result after parsing
+  */
+const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\$&');
 
 const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
   let should = [
@@ -426,7 +433,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
 
     if (!keyword) {
       // Not a specific field search nor an exact phrase search, do a wildcard match
-      keyword = criteria.filters.keyword;
+      keyword = escapeEsKeyword(keywordCriterion);
       matchType = MATCH_TYPE_WILDCARD;
     }
 
