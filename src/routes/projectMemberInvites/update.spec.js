@@ -273,7 +273,10 @@ describe('Project member invite update', () => {
             const resJson = res.body;
             should.exist(resJson);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*Project members can only update invites for themselves/);
+            sinon.assert.match(
+              errorMessage,
+              'You don\'t have permissions to update invites for other users.',
+            );
             done();
           }
         });
@@ -297,7 +300,7 @@ describe('Project member invite update', () => {
             const resJson = res.body;
             should.exist(resJson);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, 'Requested invites can only be updated by Copilot manager');
+            sinon.assert.match(errorMessage, 'You don\'t have permissions to update requested invites.');
             done();
           }
         });

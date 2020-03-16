@@ -13,6 +13,7 @@ const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
 const projectSettingEdit = require('./projectSetting.edit');
 const projectMemberInviteView = require('./projectMemberInvite.view');
+const projectAnyAuthUser = require('./project.anyAuthUser');
 
 module.exports = () => {
   Authorizer.setDeniedStatusCode(403);
@@ -86,8 +87,8 @@ module.exports = () => {
   Authorizer.setPolicy('metadata.list', true); // anyone can view all metadata
 
   Authorizer.setPolicy('projectMemberInvite.create', projectView);
-  Authorizer.setPolicy('projectMemberInvite.edit', true);
-  Authorizer.setPolicy('projectMemberInvite.delete', true);
+  Authorizer.setPolicy('projectMemberInvite.edit', projectAnyAuthUser);
+  Authorizer.setPolicy('projectMemberInvite.delete', projectAnyAuthUser);
   Authorizer.setPolicy('projectMemberInvite.get', projectMemberInviteView);
   Authorizer.setPolicy('projectMemberInvite.list', projectMemberInviteView);
 

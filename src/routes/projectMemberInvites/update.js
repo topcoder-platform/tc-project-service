@@ -4,7 +4,8 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { INVITE_STATUS, EVENT, RESOURCES, USER_ROLE } from '../../constants';
+import { INVITE_STATUS, EVENT, RESOURCES } from '../../constants';
+import { PERMISSION } from '../../permissions/constants';
 
 /**
  * API to update invite member to project.
@@ -38,9 +39,6 @@ module.exports = [
     const email = req.authUser.email;
     const currentUserId = req.authUser.userId;
 
-    // check user has admin role or manager role.
-    const adminAccess = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER]);
-
     // get invite by id and project id
     return models.ProjectMemberInvite.getPendingOrRequestedProjectInviteById(projectId, inviteId)
       .then((invite) => {
@@ -54,13 +52,21 @@ module.exports = [
         }
         // check this invitation is for logged-in user or not
         const ownInvite = (!!invite && (invite.userId === currentUserId || invite.email === email));
+
         // check permission
         req.log.debug('Checking user permission for updating invite');
         let error = null;
-        if (invite.status === INVITE_STATUS.REQUESTED && !adminAccess) {
-          error = 'Requested invites can only be updated by Copilot manager';
-        } else if (!adminAccess && !ownInvite) {
-          error = 'Project members can only update invites for themselves';
+
+        if (
+          invite.status === INVITE_STATUS.REQUESTED
+          && !util.hasPermission(PERMISSION.UPDATE_REQUESTED_INVITE, req.authUser, req.context.currentProjectMembers)
+        ) {
+          error = 'You don\'t have permissions to update requested invites.';
+        } else if (
+          !ownInvite
+          && !util.hasPermission(PERMISSION.UPDATE_NOT_OWN_INVITE, req.authUser, req.context.currentProjectMembers)
+        ) {
+          error = 'You don\'t have permissions to update invites for other users.';
         }
 
         if (error) {
@@ -122,6 +128,7 @@ module.exports = [
             }
             return res.json(util.maskInviteEmails('$.email', updatedInvite, req));
           });
-      });
+      })
+      .catch(next);
   },
 ];

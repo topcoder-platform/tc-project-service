@@ -2,7 +2,8 @@ import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, INVITE_STATUS, EVENT, RESOURCES, USER_ROLE } from '../../constants';
+import { PROJECT_MEMBER_ROLE, INVITE_STATUS, EVENT, RESOURCES } from '../../constants';
+import { PERMISSION } from '../../permissions/constants';
 
 /**
  * API to delete invite member to project.
@@ -18,10 +19,6 @@ module.exports = [
     const email = req.authUser.email;
     const currentUserId = req.authUser.userId;
 
-    // check user has admin role or manager role.
-    const adminAccess = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER]);
-    const managerAccess = util.hasRoles(req, MANAGER_ROLES);
-
     // get invite by id and project id
     return models.ProjectMemberInvite.getPendingOrRequestedProjectInviteById(projectId, inviteId)
       .then((invite) => {
@@ -35,15 +32,28 @@ module.exports = [
         }
         // check this invitation is for logged-in user or not
         const ownInvite = (!!invite && (invite.userId === currentUserId || invite.email === email));
+
         // check permission
-        req.log.debug('Checking user permission for updating invite');
+        req.log.debug('Checking user permission for deleting invite');
         let error = null;
-        if (invite.status === INVITE_STATUS.REQUESTED && !adminAccess) {
-          error = 'Requested invites can only be canceled by Copilot manager';
-        } else if (!managerAccess && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
-          error = `Project members can cancel invites only for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
-        } else if (!adminAccess && !ownInvite) {
-          error = 'Project members can only cancel invites for themselves';
+
+        if (
+          invite.status === INVITE_STATUS.REQUESTED
+          && !util.hasPermission(PERMISSION.DELETE_REQUESTED_INVITE, req.authUser, req.context.currentProjectMembers)
+        ) {
+          error = 'You don\'t have permissions to cancel requested invites.';
+        } else if (
+          invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER
+          && !ownInvite
+          && !util.hasPermission(PERMISSION.DELETE_NON_CUSTOMER_INVITE, req.authUser, req.context.currentProjectMembers)
+        ) {
+          error = 'You don\'t have permissions to cancel invites to Topcoder Team for other users.';
+        } else if (
+          invite.role === PROJECT_MEMBER_ROLE.CUSTOMER
+          && !ownInvite
+          && !util.hasPermission(PERMISSION.DELETE_CUSTOMER_INVITE, req.authUser, req.context.currentProjectMembers)
+        ) {
+          error = 'You don\'t have permissions to cancel invites to Customer Team for other users.';
         }
 
         if (error) {
@@ -52,7 +62,7 @@ module.exports = [
           return next(err);
         }
 
-        req.log.debug('Canceling invite');
+        req.log.debug('Deleting (canceling) invite');
         return invite
           .update({
             status: INVITE_STATUS.CANCELED,
@@ -67,6 +77,7 @@ module.exports = [
 
             res.status(204).end();
           });
-      });
+      })
+      .catch(next);
   },
 ];

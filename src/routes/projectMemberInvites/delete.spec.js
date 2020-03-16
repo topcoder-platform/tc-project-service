@@ -257,17 +257,18 @@ describe('Project member invite delete', () => {
             const resJson = res.body;
             should.exist(resJson);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*Project members can cancel invites only for customer/);
+            sinon.assert.match(errorMessage,
+              'You don\'t have permissions to cancel invites to Topcoder Team for other users.');
             done();
           }
         });
     });
 
-    it('should return 403 if try to update others invite with CUSTOMER', (done) => {
+    it('should return 403 if try to cancel others Topcoder Team invite with CUSTOMER', (done) => {
       request(server)
-        .delete(`/v5/projects/${project1.id}/invites/1`)
+        .delete(`/v5/projects/${project1.id}/invites/3`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -278,7 +279,8 @@ describe('Project member invite delete', () => {
             const resJson = res.body;
             should.exist(resJson);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*Project members can only cancel invites for themselves/);
+            sinon.assert.match(errorMessage,
+              'You don\'t have permissions to cancel invites to Topcoder Team for other users.');
             done();
           }
         });
@@ -299,7 +301,7 @@ describe('Project member invite delete', () => {
             const resJson = res.body;
             should.exist(resJson);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, 'Requested invites can only be canceled by Copilot manager');
+            sinon.assert.match(errorMessage, 'You don\'t have permissions to cancel requested invites.');
             done();
           }
         });
