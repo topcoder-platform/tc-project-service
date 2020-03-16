@@ -269,6 +269,22 @@ const setFilter = (value, keyword, fieldName) => {
 };
 
 /**
+  * ES need to skip special chars else it is considered as RegEx
+  *
+  * @param  {String}     query          query being searched for
+  * @return {String}                    result after parsing
+  */
+ function escapeElasticsearchQuery(query) {
+   const chars = ['\\', '+', '-', '&&', '||', '!', '(', ')', '{', '}', '[', ']',
+     '^', '"', '~', '*', '?', ':', '/', '<', '>'];
+   let result = query;
+   _.forEach(chars, (item) => {
+     result = result.replace(item, `\\${item}`);
+   });
+   return result;
+ }
+
+/**
  * Parse the ES search criteria and prepare search request body
  *
  * @param  {Object}     criteria          the filter criteria parsed from client request
@@ -426,7 +442,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
 
     if (!keyword) {
       // Not a specific field search nor an exact phrase search, do a wildcard match
-      keyword = criteria.filters.keyword;
+      keyword = escapeElasticsearchQuery(keywordCriterion);
       matchType = MATCH_TYPE_WILDCARD;
     }
 
