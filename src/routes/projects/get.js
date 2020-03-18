@@ -22,8 +22,12 @@ const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 // var permissions = require('tc-core-library-js').middleware.permissions
 const permissions = tcMiddleware.permissions;
 const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), 'utm', 'deletedAt');
-const PROJECT_MEMBER_ATTRIBUTES = _.concat(_.without(_.keys(models.ProjectMember.rawAttributes), 'deletedAt'),
-  ['firstName', 'lastName', 'handle', 'email']);
+const PROJECT_MEMBER_ATTRIBUTES = _.concat(_.without(_.keys(models.ProjectMember.rawAttributes), 'deletedAt'));
+// project members has some additional fields stored in ES index, which we don't have in DB
+const PROJECT_MEMBER_ATTRIBUTES_ES = _.concat(
+  PROJECT_MEMBER_ATTRIBUTES,
+  ['firstName', 'lastName', 'handle'], // 'email' can be added when allowed by `addEmailFieldIfAllowed`
+);
 const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(_.keys(models.ProjectMemberInvite.rawAttributes), 'deletedAt');
 const PROJECT_ATTACHMENT_ATTRIBUTES = _.without(_.keys(models.ProjectAttachment.rawAttributes), 'deletedAt');
 const PROJECT_PHASE_ATTRIBUTES = _.without(
@@ -102,15 +106,12 @@ const retrieveProjectFromES = (projectId, req) => {
   fields = fields ? fields.split(',') : [];
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: PROJECT_MEMBER_ATTRIBUTES,
+    project_members: util.addEmailFieldIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
     attachments: PROJECT_ATTACHMENT_ATTRIBUTES,
   });
-
-  // if user is not admin, ignore email field for project_members
-  fields = util.ignoreEmailField(req, fields);
 
   const searchCriteria = parseElasticSearchCriteria(projectId, fields) || {};
   return new Promise((accept, reject) => {

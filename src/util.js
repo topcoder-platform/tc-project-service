@@ -262,27 +262,24 @@ _.assignIn(util, {
     }
     return fields;
   },
+
   /**
-   * Remove email field for PROJECT_MEMBER_ATTRIBUTES, if user is not admin
-   * @param  {object} req          request object
-   * @param  {object} fields       fields object
-   * @return {object}                       the parsed array
+   * Add `email` field to the list of field, if it's allowed to a user who made the request
+   *
+   * @param  {Array}  fields fields list
+   * @param  {Object} req    request object
+   *
+   * @return {Array} fields list with 'email' if allowed
    */
-  ignoreEmailField: (req, fields) => {
-    if (!fields.project_members) {
-      return fields;
-    }
-
-    // Only Topcoder Admins can get all the fields
+  addEmailFieldIfAllowed: (fields, req) => {
+    // Only Topcoder Admins can get email
     if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
-      return fields;
+      return _.concat(fields, ['email']);
     }
-
-    // for non topcoder admins remove emails from the field list
-    _.assign(fields, { project_members: _.filter(fields.project_members, f => f !== 'email') });
 
     return fields;
   },
+
   /**
    * Parse the query filters
    * @param  {String}   fqueryFilter        the query filter string
