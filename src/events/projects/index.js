@@ -172,7 +172,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
   // first get the existing document and than merge the updated changes and save the new document
   try {
     const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
-    console.log(doc, 'Received project from ES');
+    console.log(doc._source, 'Received project from ES');
     const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
     console.log(merged, 'Merged project');
     // update the merged document
