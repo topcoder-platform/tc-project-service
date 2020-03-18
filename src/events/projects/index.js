@@ -172,7 +172,9 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
   // first get the existing document and than merge the updated changes and save the new document
   try {
     const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
+    app.logger.debug(doc, 'Received project from ES');
     const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
+    app.logger.debug(merged, 'Merged project');
     // update the merged document
     await eClient.update({
       index: ES_PROJECT_INDEX,
@@ -182,6 +184,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
         doc: merged,
       },
     });
+    app.logger.debug(`Succesfully updated project document in ES (projectId: ${previousValue.id})`);
   } catch (error) {
     throw Error(`failed to updated project document in elasitcsearch index (projectId: ${previousValue.id})` +
       `. Details: '${error}'.`);
