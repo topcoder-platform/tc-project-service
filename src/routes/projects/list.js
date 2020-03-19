@@ -629,15 +629,18 @@ module.exports = [
           // so we don't want DB to return unrelated data, ref issue #450
           if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
             req.log.debug('Don\'t fallback to DB because some filters are defined.');
-            return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+            return util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
           }
 
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
+            .then(r => util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
         }
         req.log.debug('Projects found in ES');
         // set header
-        return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+        return util.setPaginationHeaders(req, res,
+          util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
       })
         .catch(err => next(err));
     }
@@ -655,14 +658,17 @@ module.exports = [
           // so we don't want DB to return unrelated data, ref issue #450
           if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
             req.log.debug('Don\'t fallback to DB because some filters are defined.');
-            return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+            return util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
           }
 
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
+            .then(r => util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
         }
         req.log.debug('Projects found in ES');
-        return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+        return util.setPaginationHeaders(req, res,
+          util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
       })
       .catch(err => next(err));
   },

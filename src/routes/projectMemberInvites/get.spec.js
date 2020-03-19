@@ -55,7 +55,7 @@ describe('GET Project Member Invite', () => {
           const invite2 = models.ProjectMemberInvite.create({
             id: 2,
             userId: testUtil.userIds.copilot,
-            email: null,
+            email: 'test@topcoder.com',
             projectId: project1.id,
             role: 'copilot',
             createdBy: 1,
@@ -80,6 +80,15 @@ describe('GET Project Member Invite', () => {
         }).then((p) => {
           project2 = p;
 
+          // create members
+          const pm2 = models.ProjectMember.create({
+            userId: testUtil.userIds.romit,
+            projectId: project2.id,
+            role: 'copilot',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          });
           // create invite 3
           const invite3 = models.ProjectMemberInvite.create({
             id: 3,
@@ -104,7 +113,7 @@ describe('GET Project Member Invite', () => {
             status: INVITE_STATUS.ACCEPTED,
           });
 
-          return Promise.all([invite3, invite4]);
+          return Promise.all([pm2, invite3, invite4]);
         });
         return Promise.all([p1, p2])
             .then(() => done());
@@ -206,6 +215,7 @@ describe('GET Project Member Invite', () => {
             const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.projectId);
+            should.not.exist(resJson.email);                                
             resJson.id.should.be.eql(2);
             resJson.userId.should.be.eql(testUtil.userIds.copilot);
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
@@ -232,6 +242,29 @@ describe('GET Project Member Invite', () => {
             resJson.id.should.be.eql(3);
             resJson.email.should.be.eql('test@topcoder.com');
             resJson.hashEmail.should.be.eql(md5('test@topcoder.com'));
+            resJson.status.should.be.eql(INVITE_STATUS.PENDING);
+            done();
+          }
+        });
+    });
+
+    it('should return the invite with masked email if user get not his/her own invitation by email', (done) => {
+      request(server)
+        .get(`/v5/projects/${project2.id}/invites/3`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.romit}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.exist(resJson.projectId);
+            resJson.id.should.be.eql(3);
+            resJson.email.should.be.eql('t***t@t***r.com');
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
             done();
           }

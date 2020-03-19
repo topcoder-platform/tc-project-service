@@ -103,7 +103,7 @@ module.exports = [
             return invites;
           })
       ))
-      .then(invites => res.json(util.maskInviteEmails('$[*].email', invites, req)))
+      .then(invites => res.json(util.postProcessInvites('$[*]', invites, req)))
       .catch(next);
   },
 ];

@@ -639,7 +639,11 @@ _.assignIn(util, {
     }
   },
   /**
-   * Mask email in the fields defined by `jsonPath` in the `data`.
+   * Post-process given invite(s) with following constraints:
+   * - email field will be omitted from invite if the invite has defined userId
+   * - email field (if existed) will be masked UNLESS current user has admin permissions OR current user created this invite
+   *
+   * Email to be masked is found in the fields defined by `jsonPath` in the `data`.
    * Immutable - doesn't modify data, but creates a clone.
    *
    * @param {String}  jsonPath   jsonpath string
@@ -648,24 +652,45 @@ _.assignIn(util, {
    *
    * @return {Object} data has been processed
    */
-  maskInviteEmails: (jsonPath, data, req) => {
+  postProcessInvites: (jsonPath, data, req) => {
     // clone data to avoid mutations
     const dataClone = _.cloneDeep(data);
 
     const isAdmin = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
+    const currentUserEmail = req.authUser.email;
 
     if (isAdmin) {
       // even though we didn't make any changes to the data, return a clone here for consistency
       return dataClone;
     }
 
+    const postProcessInvite = (invite) => {
+      if (!_.has(invite, 'email')) {
+        return invite;
+      }
+      let email;
+      if (!invite.userId) {
+        // mask email if non-admin or not own invite
+        email = isAdmin || invite.email === currentUserEmail ? invite.email : util.maskEmail(invite.email);
+      } else {
+        // userId is defined, no email field returned
+        email = null;
+      }
+      _.assign(invite, { email });
+      if (!invite.email && _.has(invite, 'hashEmail')) {
+        _.assign(invite, { hashEmail: null });
+      }
+      return invite;
+    };
+
     jp.apply(dataClone, jsonPath, (value) => {
       if (_.isObject(value)) {
-        _.assign(value, { email: util.maskEmail(value.email) });
-        return value;
+        // data contains nested invite object
+        return postProcessInvite(value);
       }
-      // isString or null
-      return util.maskEmail(value);
+      // data is single invite object
+      // value is string or null
+      return postProcessInvite(dataClone).email;
     });
 
     return dataClone;

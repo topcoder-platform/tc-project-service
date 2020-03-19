@@ -393,7 +393,7 @@ describe('Project Member Invite create', () => {
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
-            resJson.email.should.equal('hello@world.com');
+            resJson.email.should.equal('h***o@w***d.com');
             resJson.hashEmail.should.equal(md5('hello@world.com'));
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
@@ -446,8 +446,8 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
             resJson.userId.should.equal(12345);
-            resJson.email.should.equal('hello@world.com');
-            resJson.hashEmail.should.equal(md5('hello@world.com'));
+            should.not.exist(resJson.email);
+            should.not.exist(resJson.hashEmail);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
@@ -563,7 +563,7 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.failed;
             should.exist(resJson);
-            resJson[0].email.should.equal('romit.choudhary@rivigo.com');
+            resJson[0].email.should.equal('r***y@r***o.com');
             resJson[0].message.should.equal('User with such email is already a member of the team.');
             resJson.length.should.equal(1);
             server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
@@ -802,7 +802,7 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.failed;
             should.exist(resJson);
-            resJson[0].email.should.equal('duplicate_lowercase@test.com');
+            resJson[0].email.should.equal('d***e@t***t.com');
             resJson[0].message.should.equal('User with such email is already invited to this project.');
             resJson.length.should.equal(1);
             done();
@@ -828,7 +828,7 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.failed;
             should.exist(resJson);
-            resJson[0].email.should.equal('DUPLICATE_UPPERCASE@test.com'); // email is masked
+            resJson[0].email.should.equal('D***E@t***t.com'); // email is masked
             resJson[0].message.should.equal('User with such email is already invited to this project.');
             resJson.length.should.equal(1);
             done();

@@ -81,6 +81,16 @@ describe('GET Project Member Invites', () => {
         }).then((p) => {
           project2 = p;
 
+          // create members
+          const pm2 = models.ProjectMember.create({
+            userId: testUtil.userIds.romit,
+            projectId: project2.id,
+            role: 'copilot',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          });
+
           // create invite 3
           const invite3 = models.ProjectMemberInvite.create({
             id: 3,
@@ -105,7 +115,7 @@ describe('GET Project Member Invites', () => {
             status: INVITE_STATUS.ACCEPTED,
           });
 
-          return Promise.all([invite3, invite4]);
+          return Promise.all([pm2, invite3, invite4]);
         });
         return Promise.all([p1, p2])
             .then(() => done());
@@ -209,6 +219,7 @@ describe('GET Project Member Invites', () => {
             resJson.length.should.be.eql(1);
             // check invitations
             _.filter(resJson, inv => inv.id === 2).length.should.be.eql(1);
+            should.not.exist(resJson[0].email);
             done();
           }
         });
@@ -253,6 +264,31 @@ describe('GET Project Member Invites', () => {
             resJson.length.should.be.eql(1);
             // check invitations
             _.filter(resJson, inv => inv.id === 3).length.should.be.eql(1);
+            resJson[0].email.should.be.eql('test@topcoder.com');
+            done();
+          }
+        });
+    });
+
+    it('should return the invite with masked email if user get not his/her own invitation by email', (done) => {
+      request(server)
+        .get(`/v5/projects/${project2.id}/invites`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.romit}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.be.an('array');
+            resJson.length.should.be.eql(1);
+            // check invitations
+            _.filter(resJson, inv => inv.id === 3).length.should.be.eql(1);
+            resJson[0].email.should.be.eql('t***t@t***r.com');
             done();
           }
         });
