@@ -264,17 +264,17 @@ _.assignIn(util, {
   },
 
   /**
-   * Add `email` field to the list of field, if it's allowed to a user who made the request
+   * Add user details fields to the list of field, if it's allowed to a user who made the request
    *
    * @param  {Array}  fields fields list
    * @param  {Object} req    request object
    *
    * @return {Array} fields list with 'email' if allowed
    */
-  addEmailFieldIfAllowed: (fields, req) => {
+  addUserDetailsFieldsIfAllowed: (fields, req) => {
     // Only Topcoder Admins can get email
     if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
-      return _.concat(fields, ['email']);
+      return _.concat(fields, ['email', 'firstName', 'lastName']);
     }
 
     return fields;
@@ -685,11 +685,11 @@ _.assignIn(util, {
       return members;
     }
     const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
-    const memberDetailFields = ['handle', 'firstName', 'lastName'];
+    let memberDetailFields = ['handle'];
 
-    // Only Topcoder admins can get emails for users
+    // Only Topcoder admins can get emails, first and last name for users
     if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
-      memberDetailFields.push('email');
+      memberDetailFields = memberDetailFields.concat(['email', 'firstName', 'lastName']);
     }
 
     let allMemberDetails = [];

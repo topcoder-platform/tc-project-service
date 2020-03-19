@@ -30,7 +30,7 @@ const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttri
 // project members has some additional fields stored in ES index, which we don't have in DB
 const PROJECT_MEMBER_ATTRIBUTES_ES = _.concat(
   PROJECT_MEMBER_ATTRIBUTES,
-  ['firstName', 'lastName', 'handle'], // 'email' can be added when allowed by `addEmailFieldIfAllowed`
+  ['handle'], // more fields can be added when allowed by `addUserDetailsFieldsIfAllowed`
 );
 const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(
   _.keys(models.ProjectMemberInvite.rawAttributes),
@@ -553,7 +553,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: util.addEmailFieldIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
+    project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
