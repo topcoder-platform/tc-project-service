@@ -280,6 +280,8 @@ _.assignIn(util, {
 
     // for non topcoder admins remove emails from the field list
     _.assign(fields, { project_members: _.filter(fields.project_members, f => f !== 'email') });
+    _.assign(fields, { project_members: _.filter(fields.project_members, f => f !== 'firstName') });
+    _.assign(fields, { project_members: _.filter(fields.project_members, f => f !== 'lastName') });
 
     return fields;
   },
@@ -565,7 +567,7 @@ _.assignIn(util, {
       }
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
-          query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
+          query: `${_.map(userIds, id => `userId:${id}`).join(urlencode(' OR ', 'utf8'))}`,
           fields: 'userId,handle,firstName,lastName,email',
         },
         headers: {
@@ -665,11 +667,11 @@ _.assignIn(util, {
       return members;
     }
     const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
-    const memberDetailFields = ['handle', 'firstName', 'lastName'];
+    let memberDetailFields = ['handle'];
 
     // Only Topcoder admins can get emails for users
     if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
-      memberDetailFields.push('email');
+      memberDetailFields = memberDetailFields.concat(['email', 'firstName', 'lastName']);
     }
 
     let allMemberDetails = [];
@@ -727,6 +729,8 @@ _.assignIn(util, {
 
       // in general, only users with Topcoder administrator privileges can see emails
       let canSeeEmail = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
+      // we also shouldn't return full name to users except of admins
+      const canSeeFullName = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
 
       // specially for invite objects, we still have to return email, if invite is for a new user which doesn't have "userId"
       if (memberDetails.status) { // we identify that the object is "invite" and not a "member" if object has "status" field
@@ -736,6 +740,13 @@ _.assignIn(util, {
       if (!canSeeEmail) {
         delete memberDetails.email;
       }
+
+      // this is a temporary fix as ES also has this data, so we have explicitly remove it
+      if (!canSeeFullName) {
+        delete memberDetails.firstName;
+        delete memberDetails.lastName;
+      }
+
       return _(memberDetails).pick(fields).defaults(memberDefaults).value();
     });
   },
