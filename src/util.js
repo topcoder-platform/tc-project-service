@@ -657,7 +657,7 @@ _.assignIn(util, {
     const dataClone = _.cloneDeep(data);
 
     const isAdmin = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
-    const currentUserEmail = req.authUser.email;
+    const currentUserId = req.authUser.userId;
 
     if (isAdmin) {
       // even though we didn't make any changes to the data, return a clone here for consistency
@@ -671,7 +671,7 @@ _.assignIn(util, {
       let email;
       if (!invite.userId) {
         // mask email if non-admin or not own invite
-        email = isAdmin || invite.email === currentUserEmail ? invite.email : util.maskEmail(invite.email);
+        email = isAdmin || invite.createdBy === currentUserId ? invite.email : util.maskEmail(invite.email);
       } else {
         // userId is defined, no email field returned
         email = null;

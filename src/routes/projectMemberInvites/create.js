@@ -397,7 +397,7 @@ module.exports = [
         .then((values) => {
           const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
           if (failed.length) {
-            res.status(403).json(_.assign({}, response, { failed: util.postProcessInvites('$[*]', failed, req) }));
+            res.status(403).json(_.assign({}, response, { failed }));
           } else {
             res.status(201).json(response);
           }

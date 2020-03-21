@@ -64,6 +64,12 @@ const data = [
         email: 'test@topcoder.com',
         status: 'pending',
       },
+      {
+        id: 2,
+        email: 'hello@world.com',
+        status: 'pending',
+        createdBy: 1,
+      },
     ],
     phases: [
 
@@ -173,8 +179,8 @@ describe('LIST Project', () => {
   let project1;
   let project2;
   let project3;
-  before((done) => {
-    // this.timeout(10000);
+  before(function inner(done) {
+    this.timeout(10000);
     testUtil.clearDb()
       .then(() => testUtil.clearES())
       .then(() => {
@@ -1074,9 +1080,10 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');
-              resJson[0].invites.should.have.lengthOf(1);
+              resJson[0].invites.should.have.lengthOf(2);
               resJson[0].invites[0].should.have.property('userId');
               should.not.exist(resJson[0].invites[0].email);
+              resJson[0].invites[1].email.should.equal('h***o@w***d.com');
               done();
             }
           });

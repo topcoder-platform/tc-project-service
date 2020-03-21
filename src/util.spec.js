@@ -146,6 +146,7 @@ describe('Util method', () => {
           {
             id: 1,
             email: 'abcd@aaaa.com',
+            createdBy: 2,
           },
         ],
       };
@@ -154,6 +155,7 @@ describe('Util method', () => {
           {
             id: 1,
             email: 'abcd@aaaa.com',
+            createdBy: 2,
           },
         ],
       };
@@ -169,6 +171,7 @@ describe('Util method', () => {
         invites: [{
           id: 2,
           email: 'abcd@aaaa.com',
+          createdBy: 2,
         },
         ],
       };
@@ -177,6 +180,7 @@ describe('Util method', () => {
         invites: [{
           id: 2,
           email: 'abcd@aaaa.com',
+          createdBy: 2,
         },
         ],
       };
