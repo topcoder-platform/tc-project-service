@@ -445,9 +445,8 @@ describe('Project Member Invite create', () => {
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
-            resJson.userId.should.equal(12345);
-            should.not.exist(resJson.email);
-            should.not.exist(resJson.hashEmail);
+            should.not.exist(resJson.userId);
+            resJson.email.should.equal('hello@world.com');
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }

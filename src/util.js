@@ -659,6 +659,7 @@ _.assignIn(util, {
     const isAdmin = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
     const currentUserId = req.authUser.userId;
 
+    // admins can get data as it is
     if (isAdmin) {
       // even though we didn't make any changes to the data, return a clone here for consistency
       return dataClone;
@@ -668,18 +669,21 @@ _.assignIn(util, {
       if (!_.has(invite, 'email')) {
         return invite;
       }
-      let email;
-      if (!invite.userId) {
+
+      if (invite.email) {
         // mask email if non-admin or not own invite
-        email = isAdmin || invite.createdBy === currentUserId ? invite.email : util.maskEmail(invite.email);
-      } else {
-        // userId is defined, no email field returned
-        email = null;
+        _.assign(invite, {
+          email: isAdmin || invite.createdBy === currentUserId ? invite.email : util.maskEmail(invite.email),
+        });
+
+        // for non-admin users don't return `userId` for invites created by `email`
+        if (invite.userId && !isAdmin) {
+          _.assign(invite, {
+            userId: null,
+          });
+        }
       }
-      _.assign(invite, { email });
-      if (!invite.email && _.has(invite, 'hashEmail')) {
-        _.assign(invite, { hashEmail: null });
-      }
+
       return invite;
     };
 

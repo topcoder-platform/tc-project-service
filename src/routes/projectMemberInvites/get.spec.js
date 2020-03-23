@@ -206,10 +206,7 @@ describe('GET Project Member Invite', () => {
             const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.projectId);
-            should.not.exist(resJson.email);
-            should.not.exist(resJson.hashEmail);
             resJson.id.should.be.eql(2);
-            resJson.userId.should.be.eql(testUtil.userIds.copilot);
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
             done();
           }
