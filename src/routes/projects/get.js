@@ -186,7 +186,7 @@ module.exports = [
       req.log.debug('Project found in ES');
       return result;
     }).then((project) => {
-      res.status(200).json(util.maskInviteEmails('$.invites[?(@.email)]', project, req));
+      res.status(200).json(util.postProcessInvites('$.invites[?(@.email)]', project, req));
     })
       .catch(err => next(err));
   },

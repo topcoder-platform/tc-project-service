@@ -209,6 +209,7 @@ describe('GET Project Member Invites', () => {
             resJson.length.should.be.eql(1);
             // check invitations
             _.filter(resJson, inv => inv.id === 2).length.should.be.eql(1);
+            should.not.exist(resJson[0].email);
             done();
           }
         });
@@ -253,6 +254,7 @@ describe('GET Project Member Invites', () => {
             resJson.length.should.be.eql(1);
             // check invitations
             _.filter(resJson, inv => inv.id === 3).length.should.be.eql(1);
+            resJson[0].email.should.be.eql('t***t@t***r.com'); // masked
             done();
           }
         });

@@ -43,7 +43,7 @@ describe('Util method', () => {
     });
   });
 
-  describe('maskInviteEmails', () => {
+  describe('postProcessInvites', () => {
     it('should mask emails when passing data like for a project list endpoint for non-admin user', () => {
       const list = [
         {
@@ -68,7 +68,7 @@ describe('Util method', () => {
       const res = {
         authUser: { userId: 2 },
       };
-      util.maskInviteEmails('$..invites[?(@.email)]', list, res).should.deep.equal(list2);
+      util.postProcessInvites('$..invites[?(@.email)]', list, res).should.deep.equal(list2);
     });
 
     it('should mask emails when passing data like for a project details endpoint for non-admin user', () => {
@@ -91,7 +91,7 @@ describe('Util method', () => {
       const res = {
         authUser: { userId: 2 },
       };
-      util.maskInviteEmails('$..invites[?(@.email)]', detail, res).should.deep.equal(detail2);
+      util.postProcessInvites('$..invites[?(@.email)]', detail, res).should.deep.equal(detail2);
     });
 
     it('should mask emails when passing data like for a single invite endpoint for non-admin user', () => {
@@ -114,7 +114,7 @@ describe('Util method', () => {
       const res = {
         authUser: { userId: 2 },
       };
-      util.maskInviteEmails('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
+      util.postProcessInvites('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
     });
 
     it('should NOT mask emails when passing data like for a single invite endpoint for admin user', () => {
@@ -137,7 +137,82 @@ describe('Util method', () => {
       const res = {
         authUser: { userId: 2, roles: ['administrator'] },
       };
-      util.maskInviteEmails('$..email', detail, res).should.deep.equal(detail2);
+      util.postProcessInvites('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
+    });
+
+    it('should NOT mask emails when passing data like for a single invite endpoint for user\'s own invite', () => {
+      const detail = {
+        success: [
+          {
+            id: 1,
+            email: 'abcd@aaaa.com',
+            createdBy: 2,
+          },
+        ],
+      };
+      const detail2 = {
+        success: [
+          {
+            id: 1,
+            email: 'abcd@aaaa.com',
+            createdBy: 2,
+          },
+        ],
+      };
+      const res = {
+        authUser: { userId: 2, email: 'abcd@aaaa.com' },
+      };
+      util.postProcessInvites('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
+    });
+
+    it('should NOT mask emails when passing data like for a project details endpoint for user\'s own invite', () => {
+      const detail = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: 'abcd@aaaa.com',
+          createdBy: 2,
+        },
+        ],
+      };
+      const detail2 = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: 'abcd@aaaa.com',
+          createdBy: 2,
+        },
+        ],
+      };
+      const res = {
+        authUser: { userId: 2, email: 'abcd@aaaa.com' },
+      };
+      util.postProcessInvites('$.invites[?(@.email)]', detail, res).should.deep.equal(detail2);
+    });
+
+    it('should not return emails for invite with defined userId', () => {
+      const detail = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: 'abcd@aaaa.com',
+          userId: 33,
+        },
+        ],
+      };
+      const detail2 = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: null,
+          userId: 33,
+        },
+        ],
+      };
+      const res = {
+        authUser: { userId: 2 },
+      };
+      util.postProcessInvites('$..invites[?(@.email)]', detail, res).should.deep.equal(detail2);
     });
   });
 

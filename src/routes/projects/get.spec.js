@@ -526,6 +526,28 @@ describe('GET Project', () => {
         });
       });
 
+      it('should not return "email" for any invite which has userId field', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.invites.length.should.be.eql(1);
+            resJson.invites[0].should.have.property('userId');
+            should.not.exist(resJson.invites[0].email);
+            done();
+          }
+        });
+      });
+
       it('should only return "members.role" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}?fields=members.role`)

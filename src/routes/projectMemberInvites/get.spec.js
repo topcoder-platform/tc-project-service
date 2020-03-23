@@ -55,7 +55,7 @@ describe('GET Project Member Invite', () => {
           const invite2 = models.ProjectMemberInvite.create({
             id: 2,
             userId: testUtil.userIds.copilot,
-            email: null,
+            email: 'test@topcoder.com',
             projectId: project1.id,
             role: 'copilot',
             createdBy: 1,
@@ -206,6 +206,8 @@ describe('GET Project Member Invite', () => {
             const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.projectId);
+            should.not.exist(resJson.email);
+            should.not.exist(resJson.hashEmail);
             resJson.id.should.be.eql(2);
             resJson.userId.should.be.eql(testUtil.userIds.copilot);
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
@@ -230,7 +232,7 @@ describe('GET Project Member Invite', () => {
             should.exist(resJson);
             should.exist(resJson.projectId);
             resJson.id.should.be.eql(3);
-            resJson.email.should.be.eql('test@topcoder.com');
+            resJson.email.should.be.eql('t***t@t***r.com'); // masked
             resJson.hashEmail.should.be.eql(md5('test@topcoder.com'));
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
             done();
