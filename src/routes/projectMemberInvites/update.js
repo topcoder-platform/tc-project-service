@@ -122,11 +122,11 @@ module.exports = [
                   };
                   return util
                     .addUserToProject(req, member)
-                    .then(() => res.json(util.maskInviteEmails('$.email', updatedInvite, req)))
+                    .then(() => res.json(util.postProcessInvites('$.email', updatedInvite, req)))
                     .catch(err => next(err));
                 });
             }
-            return res.json(util.maskInviteEmails('$.email', updatedInvite, req));
+            return res.json(util.postProcessInvites('$.email', updatedInvite, req));
           });
       })
       .catch(next);
