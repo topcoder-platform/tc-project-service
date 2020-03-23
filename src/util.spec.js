@@ -190,13 +190,14 @@ describe('Util method', () => {
       util.postProcessInvites('$.invites[?(@.email)]', detail, res).should.deep.equal(detail2);
     });
 
-    it('should not return emails for invite with defined userId', () => {
+    it('should not return `userId` for invite by email', () => {
       const detail = {
         id: 1,
         invites: [{
           id: 2,
           email: 'abcd@aaaa.com',
           userId: 33,
+          createdBy: 2,
         },
         ],
       };
@@ -204,8 +205,9 @@ describe('Util method', () => {
         id: 1,
         invites: [{
           id: 2,
-          email: null,
-          userId: 33,
+          email: 'abcd@aaaa.com',
+          userId: null,
+          createdBy: 2,
         },
         ],
       };

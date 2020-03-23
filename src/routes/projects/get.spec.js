@@ -526,7 +526,7 @@ describe('GET Project', () => {
         });
       });
 
-      it('should not return "email" for any invite which has userId field', (done) => {
+      it('should not return "userId" for any invite which has "email" field', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}`)
         .set({
@@ -541,8 +541,8 @@ describe('GET Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.invites.length.should.be.eql(1);
-            resJson.invites[0].should.have.property('userId');
-            should.not.exist(resJson.invites[0].email);
+            resJson.invites[0].should.have.property('email');
+            should.not.exist(resJson.invites[0].userId);
             done();
           }
         });
