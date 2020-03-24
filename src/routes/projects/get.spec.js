@@ -1,12 +1,10 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable max-len */
 import chai from 'chai';
-import sinon from 'sinon';
 import request from 'supertest';
 import _ from 'lodash';
 import config from 'config';
 import models from '../../models';
-import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import { ATTACHMENT_TYPES } from '../../constants';
