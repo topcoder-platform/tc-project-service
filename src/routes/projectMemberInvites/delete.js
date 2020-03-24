@@ -42,13 +42,17 @@ module.exports = [
           && !util.hasPermission(PERMISSION.DELETE_REQUESTED_INVITE, req.authUser, req.context.currentProjectMembers)
         ) {
           error = 'You don\'t have permissions to cancel requested invites.';
-        } else if (
+        }
+
+        if (
           invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER
           && !ownInvite
           && !util.hasPermission(PERMISSION.DELETE_NON_CUSTOMER_INVITE, req.authUser, req.context.currentProjectMembers)
         ) {
           error = 'You don\'t have permissions to cancel invites to Topcoder Team for other users.';
-        } else if (
+        }
+
+        if (
           invite.role === PROJECT_MEMBER_ROLE.CUSTOMER
           && !ownInvite
           && !util.hasPermission(PERMISSION.DELETE_CUSTOMER_INVITE, req.authUser, req.context.currentProjectMembers)
