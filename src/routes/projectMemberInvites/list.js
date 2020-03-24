@@ -26,17 +26,11 @@ module.exports = [
   permissions('projectMemberInvite.list'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
+    const currentUserId = req.authUser.userId;
+    const email = req.authUser.email;
     const fields = req.query.fields ? req.query.fields.split(',') : null;
 
-    try {
-      util.validateFields(fields, ALLOWED_FIELDS);
-    } catch (validationError) {
-      const err = new Error(`"fields" is not valid: ${validationError.message}`);
-      err.status = 400;
-      return next(err);
-    }
-
-    return util.fetchByIdFromES('invites', {
+    const esSearchParam = {
       query: {
         nested: {
           path: 'invites',
@@ -62,24 +56,54 @@ module.exports = [
           },
         },
       },
-    })
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No project member invites found in ES');
-        return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
-      }
-      req.log.debug('project member found in ES');
-      return data[0].inner_hits.invites.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
-    }).then(invites => (
-      util.getObjectsWithMemberDetails(invites, fields, req)
-        .catch((err) => {
-          req.log.error('Cannot get user details for invites.');
-          req.log.debug('Error during getting user details for invites.', err);
-          // continues without details anyway
-          return invites;
-        })
-    ))
-    .then(invites => res.json(util.maskInviteEmails('$[*].email', invites, req)))
-    .catch(next);
+    };
+
+    if (req.context.inviteType === 'list') {
+      // user has no "view" project permission
+      // try to search from es, add search by user id or email
+      esSearchParam.query.nested.query.filtered.filter.bool.must.push({
+        bool: {
+          should: [
+            { term: { 'invites.email': email } },
+            { term: { 'invites.userId': currentUserId } },
+          ],
+          minimum_number_should_match: 1,
+        },
+      });
+    }
+
+    try {
+      util.validateFields(fields, ALLOWED_FIELDS);
+    } catch (validationError) {
+      const err = new Error(`"fields" is not valid: ${validationError.message}`);
+      err.status = 400;
+      return next(err);
+    }
+
+    return util.fetchByIdFromES('invites', esSearchParam)
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No project member invites found in ES');
+          // if user has "view" project permission, get all invites
+          if (req.context.inviteType === 'all') {
+            return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(projectId);
+          }
+          // get invitation only for user
+          return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(
+            projectId, email, currentUserId);
+        }
+        req.log.debug('project member found in ES');
+        return data[0].inner_hits.invites.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
+      }).then(invites => (
+        util.getObjectsWithMemberDetails(invites, fields, req)
+          .catch((err) => {
+            req.log.error('Cannot get user details for invites.');
+            req.log.debug('Error during getting user details for invites.', err);
+            // continues without details anyway
+            return invites;
+          })
+      ))
+      .then(invites => res.json(util.postProcessInvites('$[*]', invites, req)))
+      .catch(next);
   },
 ];

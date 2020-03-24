@@ -69,29 +69,46 @@ describe('Project Members create', () => {
 
     it('should return 201 when invited then accepted and then 404 if user is already as a member', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
+        get: (url) => {
+          const testCopilot = {
+            userId: 40051332,
+            handle: 'test_copilot1',
+            firstName: 'Firstname',
+            lastName: 'Lastname',
+            email: 'test_copilot1@email.com',
+          };
+          const testRoleName = {
+            roleName: USER_ROLE.COPILOT_MANAGER,
+          };
+          const ret = {
+            status: 200,
+            data: {
+              id: 'requesterId',
+              version: 'v3',
+              result: {
+                success: true,
+                status: 200,
+                content: [],
+              },
             },
-          },
-        }),
+          };
+
+          if (url.indexOf('/_search') >= 0) {
+            ret.data.result.content.push(testCopilot);
+          } else {
+            ret.data.result.content.push(testRoleName);
+          }
+          return Promise.resolve(ret);
+        },
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-      .post(`/v5/projects/${project1.id}/members/invite`)
+      .post(`/v5/projects/${project1.id}/invites`)
       .set({
         Authorization: `Bearer ${testUtil.jwts.admin}`,
       })
       .send({
-        userIds: [40051332],
+        handles: ['test_copilot1'],
         role: 'copilot',
       })
       .expect('Content-Type', /json/)
@@ -105,14 +122,14 @@ describe('Project Members create', () => {
           resJson.role.should.equal('copilot');
           resJson.projectId.should.equal(project1.id);
           resJson.userId.should.equal(40051332);
+          should.exist(resJson.id);
           server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
           request(server)
-          .put(`/v5/projects/${project1.id}/members/invite`)
+          .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
           })
           .send({
-            userId: 40051332,
             status: 'accepted',
           })
           .expect('Content-Type', /json/)
@@ -130,12 +147,11 @@ describe('Project Members create', () => {
               server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
 
               request(server)
-                .put(`/v5/projects/${project1.id}/members/invite`)
+                .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
                 .set({
                   Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
                 })
                 .send({
-                  userId: 40051332,
                   status: 'accepted',
                 })
                 .expect('Content-Type', /json/)
@@ -145,7 +161,7 @@ describe('Project Members create', () => {
                     done(err3);
                   } else {
                     const errorMessage = _.get(res3.body, 'message', '');
-                    sinon.assert.match(errorMessage, /.*invite not found for project id 1, email undefined and userId/);
+                    sinon.assert.match(errorMessage, /.*invite not found for project id 1, inviteId/);
                     done();
                   }
                 });
@@ -349,27 +365,63 @@ describe('Project Members create', () => {
       });
 
       it('should send correct BUS API messages when copilot added', (done) => {
+        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+          get: (url) => {
+            const testCopilot = {
+              userId: 40051332,
+              handle: 'test_copilot1',
+              firstName: 'Firstname',
+              lastName: 'Lastname',
+              email: 'test_copilot1@email.com',
+            };
+            const testRoleName = {
+              roleName: USER_ROLE.COPILOT_MANAGER,
+            };
+            const ret = {
+              status: 200,
+              data: {
+                id: 'requesterId',
+                version: 'v3',
+                result: {
+                  success: true,
+                  status: 200,
+                  content: [],
+                },
+              },
+            };
+
+            if (url.indexOf('/_search') >= 0) {
+              ret.data.result.content.push(testCopilot);
+            } else {
+              ret.data.result.content.push(testRoleName);
+            }
+            return Promise.resolve(ret);
+          },
+        });
+        sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          userIds: [40051332],
+          handles: ['test_copilot1'],
           role: 'copilot',
         })
         .expect(201)
-        .end((err) => {
+        .end((err, inviteRes) => {
           if (err) {
             done(err);
           } else {
+            const inviteResJson = inviteRes.body.success[0];
+            should.exist(inviteResJson);
+            should.exist(inviteResJson.id);
             request(server)
-            .put(`/v5/projects/${project1.id}/members/invite`)
+            .patch(`/v5/projects/${project1.id}/invites/${inviteResJson.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
             })
             .send({
-              userId: 40051332,
               status: 'accepted',
             })
             .expect('Content-Type', /json/)

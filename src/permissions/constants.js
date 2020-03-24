@@ -13,9 +13,12 @@
  *    - `ROLES_PROJECT_MEMBERS`
  *    - `ROLES_ADMINS`
  */
+import _ from 'lodash';
 import {
   PROJECT_MEMBER_ROLE,
+  PROJECT_MEMBER_MANAGER_ROLES,
   ADMIN_ROLES,
+  USER_ROLE,
 } from '../constants';
 
 export const PERMISSION = { // eslint-disable-line import/prefer-default-export
@@ -32,8 +35,37 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       PROJECT_MEMBER_ROLE.COPILOT,
     ],
   },
+
   /**
    * Permissions defined by logic: **WHAT** can be done with such a permission.
    */
+
+  /*
+   * Update invite permissions
+   */
+  UPDATE_NOT_OWN_INVITE: {
+    topcoderRoles: [USER_ROLE.TOPCODER_ADMIN, USER_ROLE.CONNECT_ADMIN],
+  },
+
+  UPDATE_REQUESTED_INVITE: {
+    topcoderRoles: [USER_ROLE.TOPCODER_ADMIN, USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER],
+  },
+
+  /*
+   * Delete invite permissions
+   */
+  DELETE_CUSTOMER_INVITE: {
+    topcoderRoles: [USER_ROLE.TOPCODER_ADMIN, USER_ROLE.CONNECT_ADMIN],
+    projectRoles: _.values(PROJECT_MEMBER_ROLE), // any project member
+  },
+
+  DELETE_NON_CUSTOMER_INVITE: {
+    topcoderRoles: [USER_ROLE.TOPCODER_ADMIN, USER_ROLE.CONNECT_ADMIN],
+    projectRoles: PROJECT_MEMBER_MANAGER_ROLES,
+  },
+
+  DELETE_REQUESTED_INVITE: {
+    topcoderRoles: [USER_ROLE.TOPCODER_ADMIN, USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER],
+  },
 };
 

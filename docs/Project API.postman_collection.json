@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "49981b6e-f611-4016-999e-737ef4103435",
+		"_postman_id": "a0a9f1a7-84b1-45ad-a4c0-baa3552118cb",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1034,6 +1034,41 @@
 			"name": "Project Members Invites",
 			"item": [
 				{
+					"name": "List project member invite",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/invites",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"invites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Create project member with no payload",
 					"request": {
 						"method": "POST",
@@ -1044,23 +1079,29 @@
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json"
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n}"
+							"raw": "{\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"raw": "{{api-url}}/projects/{{projectId}}/invites",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
 								"{{projectId}}",
-								"members",
-								"invite"
+								"invites"
 							]
 						},
 						"description": "Request payload is mandatory while creating project. If no request payload is specified this should result in 400 status code."
@@ -1069,6 +1110,21 @@
 				},
 				{
 					"name": "Create project customer with valid values",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "320b75fe-958d-44ee-b2d2-1716b7b3e207",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"inviteId2\", pm.response.json().success[0].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1078,26 +1134,125 @@
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json"
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"role\": \"customer\",\n\t\"emails\": [\"test@topcoder.com\"]\n}"
+							"raw": "{\n\t\"role\": \"customer\",\n\t\"emails\": [\"test@topcoder.com\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"raw": "{{api-url}}/projects/{{projectId}}/invites",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
 								"{{projectId}}",
-								"members",
-								"invite"
+								"invites"
 							]
 						},
 						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
+					"name": "Create member invites with handles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3835313a-bb42-487a-b17e-4d687535d7e5",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"inviteId\", pm.response.json().success[0].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"role\": \"copilot\",\n\t\"handles\": [\"test_copilot1\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/invites",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"invites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create member invites with wrong roles",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"role\": \"manager\",\n\t\"handles\": [\"test_copilot1\", \"test_user1\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/invites",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"invites"
+							]
+						}
 					},
 					"response": []
 				},
@@ -1123,15 +1278,15 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
 								"{{projectId}}",
-								"members",
-								"invite"
+								"invites",
+								"{{inviteId}}"
 							]
 						},
 						"description": "Update a project's member."
@@ -1141,31 +1296,38 @@
 				{
 					"name": "Update project member invite",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json"
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"status\": \"accepted\",\n\t\"email\": \"test@topcoder.com\"\n}"
+							"raw": "{\n\t\"status\": \"accepted\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
 								"{{projectId}}",
-								"members",
-								"invite"
+								"invites",
+								"{{inviteId}}"
 							]
 						},
 						"description": "Update a project's member."
@@ -1173,9 +1335,9 @@
 					"response": []
 				},
 				{
-					"name": "wrong status",
+					"name": "Update project member invite - wrong status",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
@@ -1183,25 +1345,104 @@
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/json"
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": " {\n\t\"status\": \"wrong\"\n } "
+							"raw": " {\n\t\"status\": \"wrong\"\n } ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/members/invite",
+							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId}}",
 							"host": [
 								"{{api-url}}"
 							],
 							"path": [
 								"projects",
 								"{{projectId}}",
-								"members",
-								"invite"
+								"invites",
+								"{{inviteId}}"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update project member invite - wrong user",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-member2-40051335}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"status\": \"accepted\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"invites",
+								"{{inviteId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel project member invite",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-copilot-40051332}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"invites",
+								"{{inviteId2}}"
+							]
+						},
+						"description": "Update a project's member."
 					},
 					"response": []
 				}

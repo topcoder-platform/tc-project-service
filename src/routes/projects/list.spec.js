@@ -64,6 +64,12 @@ const data = [
         email: 'test@topcoder.com',
         status: 'pending',
       },
+      {
+        id: 2,
+        email: 'hello@world.com',
+        status: 'pending',
+        createdBy: 1,
+      },
     ],
     phases: [
 
@@ -1070,6 +1076,10 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');
+              resJson[0].invites.should.have.lengthOf(2);
+              resJson[0].invites[0].should.have.property('email');
+              should.not.exist(resJson[0].invites[0].userId);
+              resJson[0].invites[1].email.should.equal('h***o@w***d.com');
               done();
             }
           });
@@ -1118,7 +1128,7 @@ describe('LIST Project', () => {
       });
 
 
-      it('should not return "email" for project members even if it\'s defined in "fields" query param (to non-admin users)', (done) => {
+      it('should not return "email" for project members even if it\'s listed in "fields" query param (to non-admin users)', (done) => {
         request(server)
         .get('/v5/projects/?fields=members.email,members.id')
         .set({
@@ -1163,7 +1173,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should not return "email" for project members when "fields" query param is not defined (to admin users)', (done) => {
+      it('should not return "email" for project members when it is not listed in "fields" query param (to admin users)', (done) => {
         request(server)
         .get('/v5/projects/?fields=description,members.id')
         .set({
@@ -1186,7 +1196,7 @@ describe('LIST Project', () => {
       });
 
 
-      it('should return "email" for project members if it\'s defined in "fields" query param (to admin users', (done) => {
+      it('should return "email" for project members if it\'s listed in "fields" query param (to admin users)', (done) => {
         request(server)
         .get('/v5/projects/?fields=description,members.id,members.email')
         .set({
@@ -1209,7 +1219,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "id" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "id" field, when it\'s the only fields listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=id')
         .set({
@@ -1230,7 +1240,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "invites.userId" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "invites.userId" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=invites.userId')
         .set({
@@ -1251,7 +1261,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "members.role" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "members.role" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=members.role')
         .set({
@@ -1272,7 +1282,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "attachments.title" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "attachments.title" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=attachments.title')
         .set({
@@ -1293,7 +1303,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "phases.name" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "phases.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=phases.name')
         .set({
@@ -1315,9 +1325,9 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "phases.products.name" field, when it\'s defined in "fields" query param and "phases" is also defined', (done) => {
+      it('should only return "phases.products.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=phases.products.name,phases.name')
+        .get('/v5/projects/?fields=phases.products.name')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

@@ -26,19 +26,12 @@ module.exports = [
   permissions('projectMemberInvite.get'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
+    const inviteId = _.parseInt(req.params.inviteId);
     const currentUserId = req.authUser.userId;
     const email = req.authUser.email;
     const fields = req.query.fields ? req.query.fields.split(',') : null;
 
-    try {
-      util.validateFields(fields, ALLOWED_FIELDS);
-    } catch (validationError) {
-      const err = new Error(`"fields" is not valid: ${validationError.message}`);
-      err.status = 400;
-      return next(err);
-    }
-
-    return util.fetchByIdFromES('invites', {
+    const esSearchParam = {
       query: {
         nested: {
           path: 'invites',
@@ -49,16 +42,7 @@ module.exports = [
                 bool: {
                   must: [
                     { term: { 'invites.projectId': projectId } },
-                    {
-                      bool: {
-                        should: [
-                                { term: { 'invites.email': email } },
-                                { term: { 'invites.userId': currentUserId } },
-                        ],
-                        minimum_number_should_match: 1,
-                      },
-                    },
-
+                    { term: { 'invites.id': inviteId } },
                   ],
                 },
               },
@@ -67,22 +51,56 @@ module.exports = [
           inner_hits: {},
         },
       },
-    })
-    .then((data) => {
+    };
+
+    try {
+      util.validateFields(fields, ALLOWED_FIELDS);
+    } catch (validationError) {
+      const err = new Error(`"fields" is not valid: ${validationError.message}`);
+      err.status = 400;
+      return next(err);
+    }
+
+    if (req.context.inviteType === 'list') {
+      // user can only his/her own invite with specific id
+      esSearchParam.query.nested.query.filtered.filter.bool.must.push({
+        bool: {
+          should: [
+            { term: { 'invites.email': email } },
+            { term: { 'invites.userId': currentUserId } },
+          ],
+          minimum_number_should_match: 1,
+        },
+      });
+    }
+
+    return util.fetchByIdFromES('invites', esSearchParam).then((data) => {
       if (data.length === 0) {
         req.log.debug('No project member invite found in ES');
-        return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, email, currentUserId)
-          .then((invite) => {
-            if (!invite) {
-                  // check there is an existing invite for the user with status PENDING
-                  // handle 404
-              const err = new Error('invite not found for project id ' +
-                          `${projectId}, userId ${currentUserId}, email ${email}`);
-              err.status = 404;
-              throw err;
+        let getInvitePromise;
+        if (req.context.inviteType === 'all') {
+          getInvitePromise = models.ProjectMemberInvite.getPendingInviteByIdForUser(projectId, inviteId);
+        } else {
+          getInvitePromise = models.ProjectMemberInvite.getPendingInviteByIdForUser(
+            projectId, inviteId, email, currentUserId);
+        }
+        return getInvitePromise.then((invite) => {
+          if (!invite) {
+            // check there is an existing invite for the user with status PENDING
+            // handle 404
+            let errMsg;
+            if (req.context.inviteType === 'all') {
+              errMsg = `invite not found for project id ${projectId}, inviteId ${inviteId}`;
+            } else {
+              errMsg = `invite not found for project id ${projectId}, inviteId ${inviteId}, ` +
+                `userId ${currentUserId} and email ${email}`;
             }
-            return invite;
-          });
+            const err = new Error(errMsg);
+            err.status = 404;
+            throw err;
+          }
+          return invite;
+        });
       }
       req.log.debug('project member found in ES');
       return data[0].inner_hits.invites.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
@@ -96,7 +114,7 @@ module.exports = [
           return invite;
         })
     ))
-    .then(invite => res.json(util.maskInviteEmails('$[*].email', invite, req)))
+    .then(invite => res.json(util.postProcessInvites('$.email', invite, req)))
     .catch(next);
   },
 ];

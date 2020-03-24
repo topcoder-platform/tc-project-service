@@ -3,6 +3,7 @@ import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
+import md5 from 'md5';
 
 import models from '../../models';
 import util from '../../util';
@@ -104,6 +105,7 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'duplicate_lowercase@test.com',
+                  hashEmail: md5('duplicate_lowercase@test.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -114,6 +116,7 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'DUPLICATE_UPPERCASE@test.com',
+                  hashEmail: md5('DUPLICATE_UPPERCASE@test.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -124,6 +127,7 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'with.dot@gmail.com',
+                  hashEmail: md5('with.dot@gmail.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -134,6 +138,7 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'withoutdot@gmail.com',
+                  hashEmail: md5('withoutdot@gmail.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -154,7 +159,7 @@ describe('Project Member Invite create', () => {
     testUtil.clearDb(done);
   });
 
-  describe('POST /projects/{id}/members/invite', () => {
+  describe('POST /projects/{id}/invites', () => {
     let sandbox;
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
@@ -171,6 +176,46 @@ describe('Project Member Invite create', () => {
         firstName: 'Admin',
         lastName: 'User',
       }]));
+      // mock getMemberDetailsByHandles function.
+      sandbox.stub(util, 'getMemberDetailsByHandles', (handles) => {
+        if (_.isNil(handles) || _.isEmpty(handles)) {
+          return Promise.resolve([]);
+        }
+        let userHandles = [{
+          userId: 40011578,
+          handle: 'magrathean',
+        }, {
+          userId: 40011579,
+          handle: 'test_user1',
+        }, {
+          userId: 40011578,
+          handle: 'test_user2',
+        }, {
+          userId: 40051331,
+          handle: 'test_customer1',
+        }, {
+          userId: 40051332,
+          handle: 'test_copilot1',
+        }, {
+          userId: 40051333,
+          handle: 'test_manager1',
+        }, {
+          userId: 40051334,
+          handle: 'test_manager2',
+        }, {
+          userId: 40051335,
+          handle: 'test_manager3',
+        }, {
+          userId: 40051336,
+          handle: 'test_manager4',
+        }, {
+          userId: 40135978,
+          handle: 'test_admin1',
+        }];
+        userHandles = _.each(userHandles, u => _.extend(u, { firstName: 'Connect', lastName: 'User' }));
+
+        return Promise.resolve(_.filter(userHandles, u => handles.indexOf(u.handle) >= 0));
+      });
     });
     afterEach(() => {
       sandbox.restore();
@@ -179,12 +224,12 @@ describe('Project Member Invite create', () => {
     it('should return 201 if userIds and emails are presented the same time',
         (done) => {
           request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          userIds: [40051331],
+          handles: ['test_customer1'],
           emails: ['hello@world.com'],
           role: 'customer',
         })
@@ -199,16 +244,17 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project1.id);
             resJson.email.should.equal('hello@world.com');
+            resJson.hashEmail.should.equal(md5('hello@world.com'));
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
         });
 
-    it('should return 400 if neither userIds or email is presented',
+    it('should return 400 if neither handles or email is presented',
         (done) => {
           request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -222,7 +268,7 @@ describe('Project Member Invite create', () => {
             done(err);
           } else {
             const errorMessage = _.get(res.body, 'message', '');
-            sinon.assert.match(errorMessage, /.*Either userIds or emails are required/);
+            sinon.assert.match(errorMessage, /.*Either handles or emails are required/);
             done();
           }
         });
@@ -247,12 +293,12 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v5/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          userIds: [40152855],
+          handles: ['test_user1'],
           role: 'copilot',
         })
         .expect('Content-Type', /json/)
@@ -287,12 +333,12 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v5/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          userIds: [40152855],
+          handles: ['test_user1'],
           role: 'copilot',
         })
         .expect('Content-Type', /json/)
@@ -329,7 +375,7 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v5/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -348,6 +394,7 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
             resJson.email.should.equal('hello@world.com');
+            resJson.hashEmail.should.equal(md5('hello@world.com'));
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
@@ -380,7 +427,7 @@ describe('Project Member Invite create', () => {
         email: 'hello@world.com',
       }]));
       request(server)
-        .post(`/v5/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -398,7 +445,7 @@ describe('Project Member Invite create', () => {
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
-            resJson.userId.should.equal(12345);
+            should.not.exist(resJson.userId);
             resJson.email.should.equal('hello@world.com');
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
@@ -418,6 +465,7 @@ describe('Project Member Invite create', () => {
               status: 200,
               content: {
                 success: [{
+                  userId: 40152855,
                   roleName: USER_ROLE.COPILOT,
                 }],
               },
@@ -427,12 +475,12 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v5/projects/${project2.id}/members/invite`)
+        .post(`/v5/projects/${project2.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          userIds: [40152855],
+          handles: ['test_customer1'],
           role: 'customer',
         })
         .expect('Content-Type', /json/)
@@ -445,32 +493,23 @@ describe('Project Member Invite create', () => {
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
-            resJson.userId.should.equal(40152855);
+            resJson.userId.should.equal(40051331);
+            should.not.exist(resJson.email);
+            should.not.exist(resJson.hashEmail);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
     });
 
-    it('should return 403 and failed list when trying add already team member by userId', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            success: [{
-              roleName: USER_ROLE.COPILOT,
-            }],
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+    it('should return 403 and failed list when trying add already team member by handle', (done) => {
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          userIds: [40158431],
+          handles: ['test_copilot1'],
           role: 'customer',
         })
         .expect('Content-Type', /json/)
@@ -481,7 +520,7 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.failed;
             should.exist(resJson);
-            resJson[0].userId.should.equal(40158431);
+            resJson[0].handle.should.equal('test_copilot1');
             resJson[0].message.should.equal('User with such handle is already a member of the team.');
             resJson.length.should.equal(1);
             server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
@@ -496,6 +535,7 @@ describe('Project Member Invite create', () => {
           status: 200,
           data: {
             success: [{
+              userId: 40158431,
               roleName: USER_ROLE.COPILOT,
             }],
           },
@@ -508,7 +548,7 @@ describe('Project Member Invite create', () => {
         email: 'romit.choudhary@rivigo.com',
       }]));
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -533,33 +573,14 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 403 and failed list when trying add already invited member by userId', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                success: [{
-                  roleName: USER_ROLE.COPILOT,
-                }],
-              },
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+    it('should return 403 and failed list when trying add already invited member by handle', (done) => {
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          userIds: [40051335],
+          handles: ['test_manager3'],
           role: 'customer',
         })
         .expect('Content-Type', /json/)
@@ -571,7 +592,7 @@ describe('Project Member Invite create', () => {
             const resJson = res.body.failed;
             should.exist(resJson);
             resJson.length.should.equal(1);
-            resJson[0].userId.should.equal(40051335);
+            resJson[0].handle.should.equal('test_manager3');
             resJson[0].message.should.equal('User with such handle is already invited to this project.');
             server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
             done();
@@ -610,12 +631,12 @@ describe('Project Member Invite create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          userIds: [40152855],
+          handles: ['test_user'],
           role: 'manager',
         })
         .expect('Content-Type', /json/)
@@ -633,16 +654,43 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 201 if try to create manager with MANAGER_ROLES', (done) => {
+    it('should return 201 if try to create invitation with non-existent handle', (done) => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          userIds: [40152855],
+          handles: ['invalid_handle'],
+          role: 'customer',
+        })
+        .expect('Content-Type', /json/)
+        .expect(403)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.failed[0];
+            should.exist(resJson);
+            resJson.handle.should.equal('invalid_handle');
+            resJson.message.should.equal('User with such handle does not exist');
+            done();
+          }
+        });
+    });
+
+    it('should return 201 if try to create manager with MANAGER_ROLES', (done) => {
+      util.getUserRoles.restore();
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
+      request(server)
+        .post(`/v5/projects/${project1.id}/invites`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send({
+          handles: ['test_manager4'],
           role: 'manager',
         })
         .expect('Content-Type', /json/)
@@ -652,7 +700,7 @@ describe('Project Member Invite create', () => {
           should.exist(resJson);
           resJson.role.should.equal('manager');
           resJson.projectId.should.equal(project1.id);
-          resJson.userId.should.equal(40152855);
+          resJson.userId.should.equal(40051336);
           server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
           done();
         });
@@ -662,12 +710,12 @@ describe('Project Member Invite create', () => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          userIds: [40152855],
+          handles: ['test_manager4'],
           role: 'account_manager',
         })
         .expect('Content-Type', /json/)
@@ -677,7 +725,7 @@ describe('Project Member Invite create', () => {
           should.exist(resJson);
           resJson.role.should.equal('account_manager');
           resJson.projectId.should.equal(project1.id);
-          resJson.userId.should.equal(40152855);
+          resJson.userId.should.equal(40051336);
           server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
           done();
         });
@@ -687,12 +735,12 @@ describe('Project Member Invite create', () => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve(['Topcoder User']));
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          userIds: [40152855],
+          handles: ['test_customer1'],
           role: 'account_manager',
         })
         .expect('Content-Type', /json/)
@@ -711,32 +759,13 @@ describe('Project Member Invite create', () => {
     });
 
     it('should return 201 if try to create customer with COPILOT', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                success: [{
-                  roleName: USER_ROLE.COPILOT,
-                }],
-              },
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          userIds: [40051331],
+          handles: ['test_customer1'],
           role: 'copilot',
         })
         .expect('Content-Type', /json/)
@@ -758,7 +787,7 @@ describe('Project Member Invite create', () => {
 
     it('should return 403 and failed list when trying add already invited member by lowercase email', (done) => {
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -784,7 +813,7 @@ describe('Project Member Invite create', () => {
 
     it('should return 403 and failed list when trying add already invited member by uppercase email', (done) => {
       request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -800,7 +829,7 @@ describe('Project Member Invite create', () => {
           } else {
             const resJson = res.body.failed;
             should.exist(resJson);
-            resJson[0].email.should.equal('DUPLICATE_UPPERCASE@test.com'); // email is masked
+            resJson[0].email.should.equal('DUPLICATE_UPPERCASE@test.com');
             resJson[0].message.should.equal('User with such email is already invited to this project.');
             resJson.length.should.equal(1);
             done();
@@ -811,7 +840,7 @@ describe('Project Member Invite create', () => {
     xit('should return 403 and failed list when trying add already invited member by gmail email with dot',
       (done) => {
         request(server)
-          .post(`/v5/projects/${project1.id}/members/invite`)
+          .post(`/v5/projects/${project1.id}/invites`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -837,7 +866,7 @@ describe('Project Member Invite create', () => {
     xit('should return 403 and failed list when trying add already invited member by gmail email without dot',
       (done) => {
         request(server)
-          .post(`/v5/projects/${project1.id}/members/invite`)
+          .post(`/v5/projects/${project1.id}/invites`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -872,23 +901,14 @@ describe('Project Member Invite create', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('should send correct BUS API messages when invite added by userId', (done) => {
-        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-          get: () => Promise.resolve({
-            status: 200,
-            data: [{
-              roleName: USER_ROLE.MANAGER,
-            }],
-          }),
-        });
-        sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      it('should send correct BUS API messages when invite added by handle', (done) => {
         request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          userIds: [3],
+          handles: ['test_user2'],
           role: PROJECT_MEMBER_ROLE.CUSTOMER,
         })
         .expect(201)
@@ -902,14 +922,14 @@ describe('Project Member Invite create', () => {
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
                 resource: RESOURCES.PROJECT_MEMBER_INVITE,
                 projectId: project1.id,
-                userId: 3,
+                userId: 40011578,
                 email: null,
               })).should.be.true;
 
               // Check Notification Service events
               createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
                 projectId: project1.id,
-                userId: 3,
+                userId: 40011578,
                 email: null,
                 isSSO: false,
               })).should.be.true;
@@ -931,7 +951,7 @@ describe('Project Member Invite create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v5/projects/${project1.id}/members/invite`)
+        .post(`/v5/projects/${project1.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -946,6 +966,10 @@ describe('Project Member Invite create', () => {
           } else {
             testUtil.wait(() => {
               createEventSpy.callCount.should.be.eql(3);
+
+              createEventSpy.getCalls().forEach((call) => {
+                console.log(call.args) // eslint-disable-line
+              });
 
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
                 resource: RESOURCES.PROJECT_MEMBER_INVITE,

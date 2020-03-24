@@ -14,12 +14,11 @@ import {
   RESOURCES,
   PROJECT_MEMBER_ROLE,
   INVITE_STATUS,
-  CONNECT_NOTIFICATION_EVENT,
 } from '../../constants';
 
 const should = chai.should();
 
-describe('Project member invite update', () => {
+describe('Project member invite delete', () => {
   let project1;
   let project2;
 
@@ -171,7 +170,7 @@ describe('Project member invite update', () => {
     testUtil.clearDb(done);
   });
 
-  describe('PUT /projects/{id}/invites', () => {
+  describe('DELETE /projects/{id}/invites', () => {
     const body = {
       status: 'accepted',
     };
@@ -186,19 +185,16 @@ describe('Project member invite update', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .patch(`/v5/projects/${project1.id}/invites/1`)
+        .delete(`/v5/projects/${project1.id}/invites/1`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 404 if invitation id and project id doesn\'t match', (done) => {
       request(server)
-        .patch(`/v5/projects/${project1.id}/invites/5`)
+        .delete(`/v5/projects/${project1.id}/invites/5`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(404)
@@ -209,12 +205,9 @@ describe('Project member invite update', () => {
 
     it('should return 404 if project id doesn\'t exist', (done) => {
       request(server)
-        .patch('/v5/projects/99999/invites/1')
+        .delete('/v5/projects/99999/invites/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(404)
@@ -225,12 +218,9 @@ describe('Project member invite update', () => {
 
     it('should return 404 if invitation id doesn\'t exist', (done) => {
       request(server)
-        .patch(`/v5/projects/${project1.id}/invites/99999`)
+        .delete(`/v5/projects/${project1.id}/invites/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(404)
@@ -241,12 +231,9 @@ describe('Project member invite update', () => {
 
     it('should return 404 if invitation status is not pending or requested', (done) => {
       request(server)
-        .patch(`/v5/projects/${project2.id}/invites/6`)
+        .delete(`/v5/projects/${project2.id}/invites/6`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(404)
@@ -255,14 +242,11 @@ describe('Project member invite update', () => {
         });
     });
 
-    it('should return 403 if try to update others invite with CUSTOMER', (done) => {
+    it('should return 403 if try to cancel MANAGER role invite with copilot', (done) => {
       request(server)
-        .patch(`/v5/projects/${project1.id}/invites/1`)
+        .delete(`/v5/projects/${project1.id}/invites/3`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -273,92 +257,93 @@ describe('Project member invite update', () => {
             const resJson = res.body;
             should.exist(resJson);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(
-              errorMessage,
-              'You don\'t have permissions to update invites for other users.',
-            );
+            sinon.assert.match(errorMessage,
+              'You don\'t have permissions to cancel invites to Topcoder Team for other users.');
             done();
           }
         });
     });
 
-    it('should return 403 if try to update COPILOT role invite with copilot', (done) => {
+    it('should return 403 if try to cancel others Topcoder Team invite with CUSTOMER', (done) => {
       request(server)
-        .patch(`/v5/projects/${project1.id}/invites/2`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
-        })
-        .expect('Content-Type', /json/)
-        .expect(403)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, 'You don\'t have permissions to update requested invites.');
-            done();
-          }
-        });
-    });
-
-    it('should return 200 if member accepts his/her invitation', (done) => {
-      request(server)
-        .patch(`/v5/projects/${project1.id}/invites/1`)
+        .delete(`/v5/projects/${project1.id}/invites/3`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
-        })
         .expect('Content-Type', /json/)
-        .expect(200)
-        .end(() => done());
+        .expect(403)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            const errorMessage = _.get(resJson, 'message', '');
+            sinon.assert.match(errorMessage,
+              'You don\'t have permissions to cancel invites to Topcoder Team for other users.');
+            done();
+          }
+        });
     });
 
-    it('should return 200 if admin accepts his/her invitation', (done) => {
+    it('should return 403 if try to cancel COPILOT role invite with copilot', (done) => {
       request(server)
-        .patch(`/v5/projects/${project1.id}/invites/1`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end(() => done());
-    });
-
-    it('should return 200 if copilot accepts his/her invitation', (done) => {
-      request(server)
-        .patch(`/v5/projects/${project1.id}/invites/2`)
+        .delete(`/v5/projects/${project1.id}/invites/2`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
-        })
         .expect('Content-Type', /json/)
-        .expect(200)
+        .expect(403)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            const errorMessage = _.get(resJson, 'message', '');
+            sinon.assert.match(errorMessage, 'You don\'t have permissions to cancel requested invites.');
+            done();
+          }
+        });
+    });
+
+    it('should return 204 if member cancels his/her invitation', (done) => {
+      request(server)
+        .delete(`/v5/projects/${project1.id}/invites/1`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect(204)
         .end(() => done());
     });
 
-    it('should return 200 if user accept invitation by email', (done) => {
+    it('should return 204 if admin cancels his/her invitation', (done) => {
       request(server)
-        .patch(`/v5/projects/${project1.id}/invites/5`)
+        .delete(`/v5/projects/${project2.id}/invites/4`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(204)
+        .end(() => done());
+    });
+
+    it('should return 204 if copilot cancels his/her invitation', (done) => {
+      request(server)
+        .delete(`/v5/projects/${project1.id}/invites/2`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(204)
+        .end(() => done());
+    });
+
+    it('should return 204 if user cancels invitation', (done) => {
+      request(server)
+        .delete(`/v5/projects/${project1.id}/invites/5`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.romit}`,
         })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
+        .expect(204)
         .end(() => done());
     });
 
@@ -383,59 +368,23 @@ describe('Project member invite update', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .patch(`/v5/projects/${project1.id}/invites/1`)
+        .delete(`/v5/projects/${project1.id}/invites/3`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
+        .expect(204)
         .end((err) => {
           if (err) {
             done(err);
           } else {
             testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(5);
+              createEventSpy.callCount.should.be.eql(1);
 
               // Events for accepted invite
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REMOVED, sinon.match({
                 resource: RESOURCES.PROJECT_MEMBER_INVITE,
                 projectId: project1.id,
-                userId: testUtil.userIds.member,
-                status: INVITE_STATUS.ACCEPTED,
-                email: null,
-              })).should.be.true;
-
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
-                projectId: project1.id,
-                userId: testUtil.userIds.member,
-                status: INVITE_STATUS.ACCEPTED,
-                email: null,
-                isSSO: false,
-              })).should.be.true;
-
-              // Events for created member (after invite acceptance)
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER,
-                projectId: project1.id,
-                userId: testUtil.userIds.member,
-              })).should.be.true;
-
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: testUtil.userIds.member,
-                initiatorUserId: testUtil.userIds.member,
-              })).should.be.true;
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: testUtil.userIds.member,
-                initiatorUserId: testUtil.userIds.member,
+                id: 3,
               })).should.be.true;
 
               done();
