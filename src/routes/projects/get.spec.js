@@ -357,61 +357,6 @@ describe('GET Project', () => {
           });
     });
 
-    it('should return attachment with downloadUrl', (done) => {
-      models.ProjectAttachment.create({
-        projectId: project1.id,
-        path: 'projects/1/spec.pdf',
-        type: ATTACHMENT_TYPES.FILE,
-        tags: ['tag2'],
-        contentType: 'application/pdf',
-        createdBy: 1,
-        updatedBy: 1,
-        name: 'spec.pdf',
-        description: 'blah',
-      }).then((attachment) => {
-        const mockHttpClient = {
-          defaults: { headers: { common: {} } },
-          post: () => new Promise(resolve => resolve({
-            status: 200,
-            data: {
-              result: {
-                status: 200,
-                content: {
-                  path: 'projects/1/spec.pdf',
-                  preSignedURL: 'https://www.topcoder-dev.com/downloadUrl',
-                },
-              },
-            },
-          })),
-        };
-        const spy = sinon.spy(mockHttpClient, 'post');
-        const stub = sinon.stub(util, 'getHttpClient', () => mockHttpClient);
-
-        request(server)
-            .get(`/v5/projects/${project1.id}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.admin}`,
-            })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end((err, res) => {
-              stub.restore();
-              if (err) {
-                done(err);
-              } else {
-                const resJson = res.body;
-                should.exist(resJson);
-                spy.should.have.been.calledOnce;
-                resJson.attachments.should.have.lengthOf(1);
-                resJson.attachments[0].path.should.equal(attachment.path);
-                // downloadUrl no more needed
-                // resJson.attachments[0].downloadUrl.should.exist;
-                done();
-              }
-            });
-      });
-    });
-
     describe('URL Query fields', () => {
       it('should not return "email" for project members when "fields" query param is not defined (to non-admin users)', (done) => {
         request(server)
