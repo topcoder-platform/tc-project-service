@@ -22,7 +22,7 @@ const data = [
     type: 'generic',
     billingAccountId: 1,
     name: 'test1',
-    description: 'test project1',
+    description: 'test project1 abc/d',
     status: 'active',
     details: {
       utm: {
@@ -64,6 +64,12 @@ const data = [
         userId: 40051335,
         email: 'test@topcoder.com',
         status: 'pending',
+      },
+      {
+        id: 2,
+        email: 'hello@world.com',
+        status: 'pending',
+        createdBy: 1,
       },
     ],
     phases: [
@@ -174,7 +180,7 @@ const data = [
       role: 'manager',
       firstName: 'first',
       lastName: 'last',
-      handle: 'manager_handle',
+      handle: 'MANAGER_HANDLE',
       isPrimary: true,
       createdBy: 1,
       updatedBy: 1,
@@ -752,7 +758,7 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return all projects that match when filtering by customer handle', (done) => {
+    it('should return all projects that match when filtering by customer handle (lowercase)', (done) => {
       request(server)
         .get('/v5/projects/?customer=*tourist*')
         .set({
@@ -775,9 +781,101 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return all projects that match when filtering by manager handle', (done) => {
+    it('should return all projects that match when filtering by customer handle (uppercase)', (done) => {
+      request(server)
+        .get('/v5/projects/?customer=*TOUR*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members[0].userId.should.equal(40051331);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by customer handle (mixed case)', (done) => {
+      request(server)
+        .get('/v5/projects/?customer=*tOURiS*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test1');
+            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members[0].userId.should.equal(40051331);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager handle (lowercase)', (done) => {
       request(server)
         .get('/v5/projects/?manager=*_handle')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test3');
+            resJson[0].members.should.have.deep.property('[0].role', 'manager');
+            resJson[0].members[0].userId.should.equal(40051334);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager handle (uppercase)', (done) => {
+      request(server)
+        .get('/v5/projects/?manager=MANAG*')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            resJson[0].name.should.equal('test3');
+            resJson[0].members.should.have.deep.property('[0].role', 'manager');
+            resJson[0].members[0].userId.should.equal(40051334);
+            done();
+          }
+        });
+    });
+
+    it('should return all projects that match when filtering by manager handle (mixed case)', (done) => {
+      request(server)
+        .get('/v5/projects/?manager=*_HAndLe')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -1007,6 +1105,10 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');
+              resJson[0].invites.should.have.lengthOf(2);
+              resJson[0].invites[0].should.have.property('email');
+              should.not.exist(resJson[0].invites[0].userId);
+              resJson[0].invites[1].email.should.equal('h***o@w***d.com');
               done();
             }
           });
@@ -1055,7 +1157,7 @@ describe('LIST Project', () => {
       });
 
 
-      it('should not return "email" for project members even if it\'s defined in "fields" query param (to non-admin users)', (done) => {
+      it('should not return "email" for project members even if it\'s listed in "fields" query param (to non-admin users)', (done) => {
         request(server)
         .get('/v5/projects/?fields=members.email,members.id')
         .set({
@@ -1094,13 +1196,13 @@ describe('LIST Project', () => {
             resJson.should.have.lengthOf(1);
             resJson[0].should.have.property('description');
             resJson[0].should.not.have.property('cancelReason');
-            resJson[0].description.should.be.eq('test project1');
+            resJson[0].description.should.be.eq('test project1 abc/d');
             done();
           }
         });
       });
 
-      it('should not return "email" for project members when "fields" query param is not defined (to admin users)', (done) => {
+      it('should not return "email" for project members when it is not listed in "fields" query param (to admin users)', (done) => {
         request(server)
         .get('/v5/projects/?fields=description,members.id')
         .set({
@@ -1123,7 +1225,7 @@ describe('LIST Project', () => {
       });
 
 
-      it('should return "email" for project members if it\'s defined in "fields" query param (to admin users', (done) => {
+      it('should return "email" for project members if it\'s listed in "fields" query param (to admin users)', (done) => {
         request(server)
         .get('/v5/projects/?fields=description,members.id,members.email')
         .set({
@@ -1146,7 +1248,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "id" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "id" field, when it\'s the only fields listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=id')
         .set({
@@ -1167,7 +1269,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "invites.userId" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "invites.userId" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=invites.userId')
         .set({
@@ -1188,7 +1290,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "members.role" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "members.role" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=members.role')
         .set({
@@ -1209,7 +1311,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "attachments.title" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "attachments.title" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=attachments.title')
         .set({
@@ -1230,7 +1332,7 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "phases.name" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "phases.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get('/v5/projects/?fields=phases.name')
         .set({
@@ -1252,9 +1354,9 @@ describe('LIST Project', () => {
         });
       });
 
-      it('should only return "phases.products.name" field, when it\'s defined in "fields" query param and "phases" is also defined', (done) => {
+      it('should only return "phases.products.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=phases.products.name,phases.name')
+        .get('/v5/projects/?fields=phases.products.name')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -1272,6 +1374,46 @@ describe('LIST Project', () => {
             done();
           }
         });
+      });
+
+      it('should find a project by quoted keyword with a special symbol in the name', (done) => {
+        request(server)
+          .get('/v5/projects/?keyword="abc/d"')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              done();
+            }
+          });
+      });
+
+      it('should find a project by keyword with a special symbol in the name', (done) => {
+        request(server)
+          .get('/v5/projects/?keyword=abc/d')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              done();
+            }
+          });
       });
     });
   });

@@ -1,6 +1,7 @@
 
 import { EVENT, CONNECT_NOTIFICATION_EVENT } from '../constants';
 import { projectCreatedHandler,
+  projectCreatedHandlerForPhases,
   projectUpdatedKafkaHandler } from './projects';
 import { projectPhaseAddedHandler, projectPhaseRemovedHandler,
   projectPhaseUpdatedHandler } from './projectPhases';
@@ -39,7 +40,7 @@ const voidRabbitHandler = (logger, msg, channel) => {
 //       we should completely remove the handlers for this events.
 export const rabbitHandlers = {
   'project.initial': projectCreatedHandler, // is only used `seedElasticsearchIndex.js` and can be removed
-  [EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED]: voidRabbitHandler, // DISABLED
+  [EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED]: projectCreatedHandlerForPhases, // we have to call it, because it triggers topics creating for phases
   [EVENT.ROUTING_KEY.PROJECT_UPDATED]: voidRabbitHandler, // DISABLED
   [EVENT.ROUTING_KEY.PROJECT_DELETED]: voidRabbitHandler, // DISABLED
   [EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED]: voidRabbitHandler, // DISABLED

@@ -69,7 +69,7 @@ module.exports = [
           // check context for project members
           project.members = _.map(currentProjectMembers, m => _.pick(m, fields.project_members));
           logger.debug('project.members => ', project.members);
-          const userIds = project.members ? project.members.map(single => `userId:${single.userId}`) : [];
+          const userIds = project.members ? _.map(project.members, 'userId') : [];
           logger.debug('userIds => ', userIds);
           return util.getMemberDetailsByUserIds(userIds, logger, req.id)
           .then((memberDetails) => {

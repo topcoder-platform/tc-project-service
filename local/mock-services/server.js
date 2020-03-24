@@ -25,7 +25,7 @@ server.use(authMiddleware);
 server.get('/v3/members/_search', (req, res) => {
   const fields = _.isString(req.query.fields) ? req.query.fields.split(',') : [];
   const filter = _.isString(req.query.query) ?
-    req.query.query.replace('%2520', ' ').replace('%20', ' ').split(' OR ') : [];
+    req.query.query.replace(/%2520/g, ' ').replace(/%20/g, ' ').split(' OR ') : [];
   const criteria = _.map(filter, (single) => {
     const ret = {};
     const splitted = single.split(':');
@@ -45,6 +45,7 @@ server.get('/v3/members/_search', (req, res) => {
   });
   const userIds = _.map(criteria, 'userId');
   const handles = _.map(criteria, 'handle');
+  const handleLowers = _.map(criteria, 'handleLower');
   const cloned = _.cloneDeep(members);
   const response = {
     id: 'res1',
@@ -66,6 +67,12 @@ server.get('/v3/members/_search', (req, res) => {
         found = _.pick(found, fields);
       }
       return found;
+    } else if (_.indexOf(handleLowers, single.result.content.handleLower) > -1) {
+      let found = single.result.content;
+      if (fields.length > 0) {
+        found = _.pick(found, fields);
+      }
+      return found;
     }
     return null;
   }).filter(_.identity);
@@ -76,7 +83,7 @@ server.get('/v3/members/_search', (req, res) => {
 
 // add filter route for project members
 server.get('/users', (req, res) => {
-  const filter = req.query.filter.replace('%2520', ' ').replace('%20', ' ').replace('%3D', ' ');
+  const filter = req.query.filter.replace(/%2520/g, ' ').replace(/%20/g, ' ').replace('%3D', ' ');
   const allEmails = filter.split('=')[1];
   const emails = allEmails.split('OR');
   const cloned = _.cloneDeep(members);
@@ -97,7 +104,7 @@ server.get('/users', (req, res) => {
 // add additional search route for project members
 server.get('/roles', (req, res) => {
   const filter = _.isString(req.query.filter) ?
-    req.query.filter.replace('%2520', ' ').replace('%20', ' ').split('=') : [];
+    req.query.filter.replace(/%2520/g, ' ').replace(/%20/g, ' ').split('=') : [];
   const cloned = _.cloneDeep(roles);
   const response = {
     id: 'res1',

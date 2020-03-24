@@ -247,7 +247,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         },
         handle: {
           type: 'string',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',
