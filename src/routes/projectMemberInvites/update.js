@@ -62,10 +62,9 @@ module.exports = [
           && !util.hasPermission(PERMISSION.UPDATE_REQUESTED_INVITE, req.authUser, req.context.currentProjectMembers)
         ) {
           error = 'You don\'t have permissions to update requested invites.';
-        }
-
-        if (
-          !ownInvite
+        } else if (
+          invite.status !== INVITE_STATUS.REQUESTED
+          && !ownInvite
           && !util.hasPermission(PERMISSION.UPDATE_NOT_OWN_INVITE, req.authUser, req.context.currentProjectMembers)
         ) {
           error = 'You don\'t have permissions to update invites for other users.';
