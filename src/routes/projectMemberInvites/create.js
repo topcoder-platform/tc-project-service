@@ -5,7 +5,6 @@ import _ from 'lodash';
 import Joi from 'joi';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import md5 from 'md5';
 import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
@@ -154,9 +153,6 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
 
           dataNew.userId = user.id;
           dataNew.email = user.email ? user.email.toLowerCase() : user.email;
-          if (user.email) {
-            dataNew.hashEmail = md5(dataNew.email);
-          }
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });
@@ -179,7 +175,6 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
           const dataNew = _.clone(data);
 
           dataNew.email = email.toLowerCase();
-          dataNew.hashEmail = md5(dataNew.email);
 
           invitePromises.push(models.ProjectMemberInvite.create(dataNew));
         });

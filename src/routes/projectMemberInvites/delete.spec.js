@@ -3,7 +3,6 @@ import _ from 'lodash';
 import request from 'supertest';
 import sinon from 'sinon';
 import chai from 'chai';
-import md5 from 'md5';
 import models from '../../models';
 import server from '../../app';
 import util from '../../util';
@@ -137,7 +136,6 @@ describe('Project member invite delete', () => {
             projectId: project2.id,
             userId: null,
             email: 'romit.choudhary@rivigo.com',
-            hashEmail: md5('romit.choudhary@rivigo.com'),
             role: PROJECT_MEMBER_ROLE.CUSTOMER,
             status: INVITE_STATUS.PENDING,
             createdBy: 1,

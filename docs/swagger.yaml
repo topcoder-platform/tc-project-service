@@ -6180,9 +6180,6 @@ definitions:
       email:
         type: string
         description: The user email
-      hashEmail:
-        type: string
-        description: The email hash value
       role:
         description: The user role in the project
         type: string

@@ -3,7 +3,6 @@ import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
-import md5 from 'md5';
 
 import models from '../../models';
 import util from '../../util';
@@ -105,7 +104,6 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'duplicate_lowercase@test.com',
-                  hashEmail: md5('duplicate_lowercase@test.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -116,7 +114,6 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'DUPLICATE_UPPERCASE@test.com',
-                  hashEmail: md5('DUPLICATE_UPPERCASE@test.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -127,7 +124,6 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'with.dot@gmail.com',
-                  hashEmail: md5('with.dot@gmail.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -138,7 +134,6 @@ describe('Project Member Invite create', () => {
                 models.ProjectMemberInvite.create({
                   projectId: project1.id,
                   email: 'withoutdot@gmail.com',
-                  hashEmail: md5('withoutdot@gmail.com'),
                   role: PROJECT_MEMBER_ROLE.MANAGER,
                   status: INVITE_STATUS.PENDING,
                   createdBy: 1,
@@ -244,7 +239,6 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project1.id);
             resJson.email.should.equal('hello@world.com');
-            resJson.hashEmail.should.equal(md5('hello@world.com'));
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
@@ -394,7 +388,6 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
             resJson.email.should.equal('hello@world.com');
-            resJson.hashEmail.should.equal(md5('hello@world.com'));
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
@@ -495,7 +488,6 @@ describe('Project Member Invite create', () => {
             resJson.projectId.should.equal(project2.id);
             resJson.userId.should.equal(40051331);
             should.not.exist(resJson.email);
-            should.not.exist(resJson.hashEmail);
             server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }

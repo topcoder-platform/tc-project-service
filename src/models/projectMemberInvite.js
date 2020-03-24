@@ -27,10 +27,6 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
         isIn: [_.values(INVITE_STATUS)],
       },
     },
-    hashEmail: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     deletedAt: { type: DataTypes.DATE, allowNull: true },

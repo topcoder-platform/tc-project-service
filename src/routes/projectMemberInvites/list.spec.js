@@ -2,7 +2,6 @@
 import _ from 'lodash';
 import chai from 'chai';
 import request from 'supertest';
-import md5 from 'md5';
 
 import models from '../../models';
 import server from '../../app';
@@ -86,7 +85,6 @@ describe('GET Project Member Invites', () => {
             id: 3,
             userId: null,
             email: 'test@topcoder.com',
-            hashEmail: md5('test@topcoder.com'),
             projectId: project2.id,
             role: 'customer',
             createdBy: 1,
