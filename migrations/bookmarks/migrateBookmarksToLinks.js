@@ -17,7 +17,7 @@ console.log('Migrate project.bookmarks to project.attachments for all projects i
  */
 const getProjectsWithBookmarks = () => models.Project.findAll({
   raw: false,
-  attributes: ['id', 'bookmarks'],
+  attributes: ['id', 'bookmarks', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy'],
   where: sequelize.where(
     sequelize.fn('json_array_length', sequelize.col('bookmarks')),
     { [sequelize.Op.gt]: 0 },
