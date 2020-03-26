@@ -10,6 +10,7 @@ import server from '../../app';
 import testUtil from '../../tests/util';
 import RabbitMQService from '../../services/rabbitmq';
 import models from '../../models';
+import { ATTACHMENT_TYPES } from '../../constants';
 
 const should = chai.should();
 const expect = chai.expect;
@@ -271,6 +272,35 @@ describe('Project create', () => {
       }],
     };
 
+    const bodyWithAttachments = {
+      type: 'generic',
+      description: 'test project',
+      details: {},
+      billingAccountId: 1,
+      name: 'test project1',
+      attachments: [
+        {
+          title: 'file1.txt',
+          description: 'blah',
+          contentType: 'application/unknown',
+          size: 12312,
+          category: 'categ1',
+          path: 'https://media.topcoder.com/projects/1/test.txt',
+          type: ATTACHMENT_TYPES.FILE,
+          tags: ['tag1', 'tag2'],
+        },
+        {
+          title: 'Test Link 1',
+          description: 'Test link 1 description',
+          size: 123456,
+          category: 'categ1',
+          path: 'https://connect.topcoder-dev.com/projects/8600/assets',
+          type: ATTACHMENT_TYPES.LINK,
+          tags: ['tag3', 'tag4'],
+        },
+      ],
+    };
+
     let sandbox;
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
@@ -477,6 +507,88 @@ describe('Project create', () => {
           }
         });
     });
+
+    it('should return 201 if valid user and data with attachments', (done) => {
+      const validBody = _.cloneDeep(bodyWithAttachments);
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.status.should.be.eql('in_review');
+            resJson.type.should.be.eql(bodyWithAttachments.type);
+            resJson.version.should.be.eql('v2');
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+
+            resJson.attachments.should.have.lengthOf(2);
+
+            should.exist(resJson.attachments[0].id);
+            should.exist(resJson.attachments[0].createdAt);
+            should.exist(resJson.attachments[0].updatedAt);
+            resJson.attachments[0].createdBy.should.equal(40051331);
+            resJson.attachments[0].updatedBy.should.equal(40051331);
+            resJson.attachments[0].title.should.equal(bodyWithAttachments.attachments[0].title);
+            resJson.attachments[0].description.should.equal(bodyWithAttachments.attachments[0].description);
+            resJson.attachments[0].contentType.should.equal(bodyWithAttachments.attachments[0].contentType);
+            resJson.attachments[0].size.should.equal(bodyWithAttachments.attachments[0].size);
+            resJson.attachments[0].category.should.equal(bodyWithAttachments.attachments[0].category);
+            resJson.attachments[0].path.should.equal(bodyWithAttachments.attachments[0].path);
+            resJson.attachments[0].type.should.equal(bodyWithAttachments.attachments[0].type);
+            resJson.attachments[0].tags.should.eql(bodyWithAttachments.attachments[0].tags);
+
+            should.exist(resJson.attachments[1].id);
+            should.exist(resJson.attachments[1].createdAt);
+            should.exist(resJson.attachments[1].updatedAt);
+            resJson.attachments[1].createdBy.should.equal(40051331);
+            resJson.attachments[1].updatedBy.should.equal(40051331);
+            resJson.attachments[1].title.should.equal(bodyWithAttachments.attachments[1].title);
+            resJson.attachments[1].description.should.equal(bodyWithAttachments.attachments[1].description);
+            resJson.attachments[1].size.should.equal(bodyWithAttachments.attachments[1].size);
+            resJson.attachments[1].category.should.equal(bodyWithAttachments.attachments[1].category);
+            resJson.attachments[1].path.should.equal(bodyWithAttachments.attachments[1].path);
+            resJson.attachments[1].type.should.equal(bodyWithAttachments.attachments[1].type);
+            resJson.attachments[1].tags.should.eql(bodyWithAttachments.attachments[1].tags);
+
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            // should not create phases without a template id
+            resJson.phases.should.have.lengthOf(0);
+            done();
+          }
+        });
+    });
+
 
     it('should return 201 if valid user and data (with templateId)', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {

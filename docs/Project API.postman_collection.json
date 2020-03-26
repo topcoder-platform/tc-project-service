@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a0a9f1a7-84b1-45ad-a4c0-baa3552118cb",
+		"_postman_id": "c69ab4dd-8c6a-48c9-ba48-c6663b1a0c81",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -248,7 +248,7 @@
 					"_postman_isSubFolder": true
 				},
 				{
-					"name": "Upload attachment",
+					"name": "Upload file attachment",
 					"event": [
 						{
 							"listen": "test",
@@ -257,7 +257,7 @@
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"    pm.environment.set(\"attachmentId\", pm.response.json().id);",
+									"    pm.environment.set(\"fileAttachmentId\", pm.response.json().id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -278,7 +278,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\t\"title\": \"first attachment submission\",\n\t\t\"filePath\": \"/home/phoenix/a.png\",\n\t\t\"s3Bucket\": \"topcoder-project-service\",\n\t\t\"contentType\": \"application/png\"\n\t}"
+							"raw": "{\n\t\"title\": \"first file attachment\",\n\t\"path\": \"/home/files/phoenix/a.png\",\n\t\"type\": \"file\",\n\t\"s3Bucket\": \"topcoder-project-service\",\n\t\"contentType\": \"application/png\",\n\t\"tags\": [\"design preview\"]\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/attachments",
@@ -296,7 +296,55 @@
 					"response": []
 				},
 				{
-					"name": "Update attachment",
+					"name": "Create link as attachment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6547ada6-53f5-4e2d-bda0-f0ec5bfbe38f",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"linkAttachmentId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"title\": \"link attachment\",\n\t\"path\": \"https://connect.topcoder-dev.com/projects/8600/assets.zip\",\n\t\"type\": \"link\",\n\t\"tags\": [\"specification\", \"design preview\", \"billing information\"]\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"attachments"
+							]
+						},
+						"description": "Create an project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Update file attachment",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -311,10 +359,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\"\n\t}"
+							"raw": "{\n\t\t\"title\": \"first attachment submission updated\",\n\t\t\"description\": \"updated project attachment\",\n\t\t\"tags\": [\"anotherTag\"]\n\t}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{attachmentId}}",
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{fileAttachmentId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -322,7 +370,7 @@
 								"projects",
 								"{{projectId}}",
 								"attachments",
-								"{{attachmentId}}"
+								"{{fileAttachmentId}}"
 							]
 						},
 						"description": "Update project attachment"
@@ -330,9 +378,9 @@
 					"response": []
 				},
 				{
-					"name": "Delete attachment",
+					"name": "Update link attachment",
 					"request": {
-						"method": "DELETE",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
@@ -345,10 +393,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": ""
+							"raw": "{\n\t\t\"title\": \"updated link title\",\n\t\t\"description\": \"updated link description\",\n\t\t\"tags\": [\"linkTag1\"]\n\t}"
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{attachmentId}}",
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{linkAttachmentId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -356,15 +404,15 @@
 								"projects",
 								"{{projectId}}",
 								"attachments",
-								"{{attachmentId}}"
+								"{{linkAttachmentId}}"
 							]
 						},
-						"description": "Delete a project attachment"
+						"description": "Update project attachment"
 					},
 					"response": []
 				},
 				{
-					"name": "Download attachment",
+					"name": "Get file attachment",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -385,7 +433,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{attachmentId}}",
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{fileAttachmentId}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -393,7 +441,44 @@
 								"projects",
 								"{{projectId}}",
 								"attachments",
-								"{{attachmentId}}"
+								"{{fileAttachmentId}}"
+							]
+						},
+						"description": "Delete a project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Get link attachment",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{linkAttachmentId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"attachments",
+								"{{linkAttachmentId}}"
 							]
 						},
 						"description": "Delete a project attachment"
@@ -430,6 +515,74 @@
 								"projects",
 								"{{projectId}}",
 								"attachments"
+							]
+						},
+						"description": "Delete a project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete link attachment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{linkAttachmentId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"attachments",
+								"{{linkAttachmentId}}"
+							]
+						},
+						"description": "Delete a project attachment"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete file attachment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/attachments/{{fileAttachmentId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"attachments",
+								"{{fileAttachmentId}}"
 							]
 						},
 						"description": "Delete a project attachment"

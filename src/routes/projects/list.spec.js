@@ -8,6 +8,7 @@ import config from 'config';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import { ATTACHMENT_TYPES } from '../../constants';
 
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -93,8 +94,21 @@ const data = [
         title: 'Spec',
         projectId: 1,
         description: 'specification',
-        filePath: 'projects/1/spec.pdf',
+        path: 'projects/1/spec.pdf',
+        type: ATTACHMENT_TYPES.FILE,
+        tags: ['tag1'],
         contentType: 'application/pdf',
+        createdBy: 1,
+        updatedBy: 1,
+      },
+      {
+        id: 2,
+        title: 'Link 1',
+        projectId: 1,
+        description: 'specification link',
+        path: 'projects/1/linkA',
+        type: ATTACHMENT_TYPES.LINK,
+        tags: ['tag2'],
         createdBy: 1,
         updatedBy: 1,
       },
@@ -222,7 +236,9 @@ describe('LIST Project', () => {
             title: 'Spec',
             projectId: project1.id,
             description: 'specification',
-            filePath: 'projects/1/spec.pdf',
+            path: 'projects/1/spec.pdf',
+            type: ATTACHMENT_TYPES.FILE,
+            tags: ['tag1'],
             contentType: 'application/pdf',
             createdBy: 1,
             updatedBy: 1,
@@ -424,15 +440,28 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(3);
               resJson[0].should.have.property('attachments');
-              resJson[0].attachments.should.have.lengthOf(1);
+              resJson[0].attachments.should.have.lengthOf(2);
               resJson[0].attachments[0].should.have.property('id');
               resJson[0].attachments[0].should.have.property('projectId');
               resJson[0].attachments[0].should.have.property('title');
               resJson[0].attachments[0].should.have.property('description');
-              resJson[0].attachments[0].should.have.property('filePath');
+              resJson[0].attachments[0].should.have.property('path');
+              resJson[0].attachments[0].should.have.property('type');
+              resJson[0].attachments[0].should.have.property('tags');
               resJson[0].attachments[0].should.have.property('contentType');
               resJson[0].attachments[0].should.have.property('createdBy');
               resJson[0].attachments[0].should.have.property('updatedBy');
+
+              resJson[0].attachments[1].should.have.property('id');
+              resJson[0].attachments[1].should.have.property('projectId');
+              resJson[0].attachments[1].should.have.property('title');
+              resJson[0].attachments[1].should.have.property('description');
+              resJson[0].attachments[1].should.have.property('path');
+              resJson[0].attachments[1].should.have.property('type');
+              resJson[0].attachments[1].should.have.property('tags');
+              resJson[0].attachments[1].should.have.property('createdBy');
+              resJson[0].attachments[1].should.have.property('updatedBy');
+
               resJson[0].should.have.property('description');
               resJson[0].should.have.property('billingAccountId');
               done();

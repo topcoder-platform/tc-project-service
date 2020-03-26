@@ -276,3 +276,4 @@ docker exec -it tc-projects-kafka /opt/kafka/bin/kafka-console-producer.sh --bro
 ## References
 
 - [Projects Service Architecture](./docs/guides/architercture/architecture.md)
+- [Projects Service Architecture](./docs/guides/architercture/architecture.md)
