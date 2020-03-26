@@ -14,7 +14,10 @@ console.log('Migrate project.attachments of type \'link\' to project.bookmarks f
  *
  * @returns {Promise} the DB data
  */
-const getAllProjectsFromDB = async () => models.Project.findAll({ raw: false });
+const getAllProjectsFromDB = async () => models.Project.findAll({
+  raw: false,
+  attributes: ['id', 'bookmarks'],
+});
 
 /**
  * Gets the active project links (Links that were not deleted) for the given project.
@@ -23,14 +26,13 @@ const getAllProjectsFromDB = async () => models.Project.findAll({ raw: false });
  * @returns {Promise} The active project links promise
  */
 const getActiveProjectLinks = async projectId => models.ProjectAttachment
-                 .findAll({
-                   where: {
-                     projectId,
-                     deletedAt: { $eq: null },
-                     type: ATTACHMENT_TYPES.LINK,
-                   },
-                   raw: false,
-                 });
+  .findAll({
+    where: {
+      projectId,
+      type: ATTACHMENT_TYPES.LINK,
+    },
+    raw: true,
+  });
 
 /**
  * Executes the migration of link attachments to bookmarks for all projects in the database.
@@ -38,27 +40,50 @@ const getActiveProjectLinks = async projectId => models.ProjectAttachment
  */
 const migrateLinksToBookmarks = async () => {
   const projects = await getAllProjectsFromDB();
+  let count = 0;
+
+  console.log(`Found ${projects.length} projects in total.`);
 
   for (const project of projects) {
-      // get the project links
-    const links = await getActiveProjectLinks(project.id);
-    const bookmarks = [];
+    await models.sequelize.transaction(async (tr) => { // eslint-disable-line no-loop-func
+      count += 1;
+      const percentage = Math.round((count / projects.length) * 100);
 
-    _.each(links, async (link) => {
-      bookmarks.push({
+      console.log(`Processing project id ${project.id}: ${count}/${projects.length} (${percentage}%)...`);
+
+      const links = await getActiveProjectLinks(project.id);
+      console.log(`Processing project id ${project.id}: found ${links.length} link attachments`);
+
+      if (links.length === 0) {
+        console.log(`Processing project id ${project.id}: skipped.`);
+        return;
+      }
+
+      const bookmarks = links.map(link => ({
         title: link.title,
         address: link.path,
         createdAt: link.createdAt,
         createdBy: link.createdBy,
         updatedAt: link.updatedAt,
         updatedBy: link.updatedBy,
+      }));
+
+      project.bookmarks = bookmarks;
+      await project.save({
+        transaction: tr,
       });
+      console.log(`Processing project id ${project.id}: bookmarks created.`);
 
-      await link.destroy();
+      await models.ProjectAttachment.destroy({
+        where: {
+          id: _.map(links, 'id'),
+        },
+        transaction: tr,
+      });
+      console.log(`Processing project id ${project.id}: attachments removed.`);
+
+      console.log(`Processing project id ${project.id}: done.`);
     });
-
-    project.bookmarks = bookmarks;
-    await project.save();
   }
 };
 
@@ -66,6 +91,7 @@ migrateLinksToBookmarks().then(() => {
   console.log('Migration of projects link attachments to project bookmarks finished!');
   process.exit();
 }).catch((e) => {
+  console.error('Migration of projects link attachments to project bookmarks failed!');
   console.log(e);
   process.exit();
 });
