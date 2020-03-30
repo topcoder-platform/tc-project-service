@@ -19,6 +19,7 @@ describe('Project Attachments delete', () => {
   beforeEach((done) => {
     attachments = [];
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
         .then(() => {
           models.Project.create({
             type: 'generic',

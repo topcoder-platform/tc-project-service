@@ -299,6 +299,9 @@ describe('LIST Project', () => {
         });
 
         return Promise.all([p1, p2, p3]).then(() => {
+          data[0].id = project1.id;
+          data[1].id = project2.id;
+          data[2].id = project3.id;
           const esp1 = server.services.es.index({
             index: ES_PROJECT_INDEX,
             type: ES_PROJECT_TYPE,
@@ -377,7 +380,7 @@ describe('LIST Project', () => {
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             // since project 2 is indexed with id 2
-            resJson[0].id.should.equal(2);
+            resJson[0].id.should.equal(project2.id);
             done();
           }
         });
@@ -484,9 +487,10 @@ describe('LIST Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
-            resJson[0].should.have.property('attachments');
-            resJson[0].should.have.property('description');
-            resJson[0].should.have.property('billingAccountId');
+            const project = _.find(resJson, p => p.id === project1.id);
+            project.should.have.property('attachments');
+            project.should.have.property('description');
+            project.should.have.property('billingAccountId');
             done();
           }
         });
@@ -507,16 +511,17 @@ describe('LIST Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
-            resJson[0].should.have.property('id');
-            resJson[0].should.have.property('type');
-            resJson[0].should.have.property('billingAccountId');
-            resJson[0].should.have.property('description');
-            resJson[0].should.have.property('status');
-            resJson[0].should.have.property('details');
-            resJson[0].should.have.property('createdBy');
-            resJson[0].should.have.property('updatedBy');
-            resJson[0].should.have.property('members');
-            resJson[0].should.have.property('attachments');
+            const project = _.find(resJson, p => p.id === project1.id);
+            project.should.have.property('id');
+            project.should.have.property('type');
+            project.should.have.property('billingAccountId');
+            project.should.have.property('description');
+            project.should.have.property('status');
+            project.should.have.property('details');
+            project.should.have.property('createdBy');
+            project.should.have.property('updatedBy');
+            project.should.have.property('members');
+            project.should.have.property('attachments');
             done();
           }
         });
@@ -606,7 +611,7 @@ describe('LIST Project', () => {
 
     it('should return project that match when filtering by id (exact)', (done) => {
       request(server)
-        .get('/v5/projects/?id=1')
+        .get(`/v5/projects/?id=${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -619,7 +624,7 @@ describe('LIST Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
-            resJson[0].id.should.equal(1);
+            resJson[0].id.should.equal(project1.id);
             resJson[0].name.should.equal('test1');
             done();
           }
@@ -1216,7 +1221,7 @@ describe('LIST Project', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            const project = _.find(resJson, p => p.id === 1);
+            const project = _.find(resJson, p => p.id === project1.id);
             const member = _.find(project.members, m => m.id === 1);
             member.should.not.have.property('email');
             done();
@@ -1239,7 +1244,7 @@ describe('LIST Project', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            const project = _.find(resJson, p => p.id === 1);
+            const project = _.find(resJson, p => p.id === project1.id);
             const member = _.find(project.members, m => m.id === 1);
             member.should.have.property('email');
             member.email.should.be.eq('test@test.com');
@@ -1283,8 +1288,9 @@ describe('LIST Project', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            resJson[0].invites[0].should.have.property('userId');
-            _.keys(resJson[0].invites[0]).length.should.be.eq(1);
+            const project = _.find(resJson, p => p.id === project1.id);
+            project.invites[0].should.have.property('userId');
+            _.keys(project.invites[0]).length.should.be.eq(1);
             done();
           }
         });
@@ -1304,8 +1310,9 @@ describe('LIST Project', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            resJson[0].members[0].should.have.property('role');
-            _.keys(resJson[0].members[0]).length.should.be.eq(1);
+            const project = _.find(resJson, p => p.id === project1.id);
+            project.members[0].should.have.property('role');
+            _.keys(project.members[0]).length.should.be.eq(1);
             done();
           }
         });
@@ -1325,8 +1332,9 @@ describe('LIST Project', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            resJson[0].attachments[0].should.have.property('title');
-            _.keys(resJson[0].attachments[0]).length.should.be.eq(1);
+            const project = _.find(resJson, p => p.id === project1.id);
+            project.attachments[0].should.have.property('title');
+            _.keys(project.attachments[0]).length.should.be.eq(1);
             done();
           }
         });
@@ -1346,7 +1354,7 @@ describe('LIST Project', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            const project = _.find(resJson, p => p.id === 1);
+            const project = _.find(resJson, p => p.id === project1.id);
             project.phases[0].should.have.property('name');
             _.keys(project.phases[0]).length.should.be.eq(1);
             done();
@@ -1368,7 +1376,7 @@ describe('LIST Project', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            const project = _.find(resJson, p => p.id === 1);
+            const project = _.find(resJson, p => p.id === project1.id);
             project.phases[0].products[0].should.have.property('name');
             _.keys(project.phases[0].products[0]).length.should.be.eq(1);
             done();
