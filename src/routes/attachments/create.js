@@ -146,7 +146,7 @@ module.exports = [
           req.log.debug('retrieving download url');
           return httpClient.post(`${fileServiceUrl}downloadurl`, {
             param: {
-              path,
+              filePath: path,
             },
           });
         }
