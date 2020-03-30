@@ -559,7 +559,7 @@ _.assignIn(util, {
       }
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
-          query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
+          query: `${_.map(userIds, id => `userId:${id}`).join(urlencode(' OR ', 'utf8'))}`,
           fields: 'userId,handle,firstName,lastName,email',
         },
         headers: {
