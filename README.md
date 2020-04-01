@@ -38,7 +38,14 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 
 2. Local config
 
-    1. Copy `sample.env` to `.env` file. And inside `.env` file set values for `AUTH0_CLIENT_ID` and `AUTH0_CLIENT_SECRET`.<br>
+    1. In the `tc-project-service` root directory create `.env` file with the environment variables _(values should be shared with you on the forum)_:<br>
+       ```
+       AUTH0_CLIENT_ID=...
+       AUTH0_CLIENT_SECRET=...
+       AUTH0_URL=...
+       AUTH0_AUDIENCE=...
+       AUTH0_PROXY_SERVER_URL=...
+       ```
        Values from this file would be automatically used by `docker-compose` and command `npm run start:dev` below.
 
     2. Copy config file `config/m2m.local.js` into `config/local.js`:
@@ -272,5 +279,4 @@ docker exec -it tc-projects-kafka /opt/kafka/bin/kafka-console-producer.sh --bro
 
 ## References
 
-- [Projects Service Architecture](./docs/guides/architercture/architecture.md)
 - [Projects Service Architecture](./docs/guides/architercture/architecture.md)
