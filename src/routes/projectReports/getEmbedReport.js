@@ -105,7 +105,7 @@ module.exports = [
       const embedUrl = REPORTS[reportName];
       req.log.trace(`Generating embed URL for ${reportName} report, using ${embedUrl} as embed URL.`);
       if (embedUrl) {
-        result = await lookerSerivce.generateEmbedUrl(req.authUser, project, member, embedUrl);
+        result = await lookerSerivce.generateEmbedUrlForProject(req.authUser, project, member, embedUrl);
       } else {
         return res.status(404).send('Report not found');
       }
