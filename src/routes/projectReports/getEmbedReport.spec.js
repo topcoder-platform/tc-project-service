@@ -178,7 +178,7 @@ describe('GET embed report', () => {
 
     it('should return 500 when get admin user error', (done) => {
       const cfg = sinon.stub(config, 'get');
-      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
+      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrlForProject', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
       cfg.withArgs('lookerConfig.EMBED_REPORTS_MAPPING').returns('{"mock-concrete-customer": "/embed/looks/2"}');
       request(server)
@@ -195,7 +195,7 @@ describe('GET embed report', () => {
 
     it('should return 404 when the project template or product template is not found', (done) => {
       const cfg = sinon.stub(config, 'get');
-      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
+      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrlForProject', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
       cfg.withArgs('lookerConfig.EMBED_REPORTS_MAPPING').returns('{"mock-concrete-customer": "/embed/looks/2"}');
       request(server)
@@ -212,7 +212,7 @@ describe('GET embed report', () => {
 
     it('should return customer url', (done) => {
       const cfg = sinon.stub(config, 'get');
-      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
+      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrlForProject', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
       cfg.withArgs('lookerConfig.EMBED_REPORTS_MAPPING')
         .returns('{"mock-concrete-customer": "/customer/embed/looks/2"}');
@@ -245,7 +245,7 @@ describe('GET embed report', () => {
 
     it('should return admin url', (done) => {
       const cfg = sinon.stub(config, 'get');
-      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
+      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrlForProject', () => 'generatedUrl');
       const getAdmin = sinon.stub(util, 'getTopcoderUser', () => ({
         firstName: 'fn',
         lastName: 'ln',
@@ -285,7 +285,7 @@ describe('GET embed report', () => {
 
     it('should return copilot url', (done) => {
       const cfg = sinon.stub(config, 'get');
-      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
+      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrlForProject', () => 'generatedUrl');
       cfg.withArgs('lookerConfig.USE_MOCK').returns(false);
       cfg.withArgs('lookerConfig.EMBED_REPORTS_MAPPING').returns('{"mock-concrete-copilot": "/copilot/embed/looks/2"}');
       request(server)
@@ -317,7 +317,7 @@ describe('GET embed report', () => {
 
     it('should return admin url for project with product template', (done) => {
       const cfg = sinon.stub(config, 'get');
-      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrl', () => 'generatedUrl');
+      const gem = sinon.stub(lookerSerivce, 'generateEmbedUrlForProject', () => 'generatedUrl');
       const getAdmin = sinon.stub(util, 'getTopcoderUser', () => ({
         firstName: 'fn',
         lastName: 'ln',
