@@ -442,31 +442,32 @@ describe('LIST Project', () => {
               const resJson = res.body;
               should.exist(resJson);
               resJson.should.have.lengthOf(3);
-              resJson[0].should.have.property('attachments');
-              resJson[0].attachments.should.have.lengthOf(2);
-              resJson[0].attachments[0].should.have.property('id');
-              resJson[0].attachments[0].should.have.property('projectId');
-              resJson[0].attachments[0].should.have.property('title');
-              resJson[0].attachments[0].should.have.property('description');
-              resJson[0].attachments[0].should.have.property('path');
-              resJson[0].attachments[0].should.have.property('type');
-              resJson[0].attachments[0].should.have.property('tags');
-              resJson[0].attachments[0].should.have.property('contentType');
-              resJson[0].attachments[0].should.have.property('createdBy');
-              resJson[0].attachments[0].should.have.property('updatedBy');
+              const project = _.find(resJson, { id: project1.id });
+              project.should.have.property('attachments');
+              project.attachments.should.have.lengthOf(2);
+              project.attachments[0].should.have.property('id');
+              project.attachments[0].should.have.property('projectId');
+              project.attachments[0].should.have.property('title');
+              project.attachments[0].should.have.property('description');
+              project.attachments[0].should.have.property('path');
+              project.attachments[0].should.have.property('type');
+              project.attachments[0].should.have.property('tags');
+              project.attachments[0].should.have.property('contentType');
+              project.attachments[0].should.have.property('createdBy');
+              project.attachments[0].should.have.property('updatedBy');
 
-              resJson[0].attachments[1].should.have.property('id');
-              resJson[0].attachments[1].should.have.property('projectId');
-              resJson[0].attachments[1].should.have.property('title');
-              resJson[0].attachments[1].should.have.property('description');
-              resJson[0].attachments[1].should.have.property('path');
-              resJson[0].attachments[1].should.have.property('type');
-              resJson[0].attachments[1].should.have.property('tags');
-              resJson[0].attachments[1].should.have.property('createdBy');
-              resJson[0].attachments[1].should.have.property('updatedBy');
+              project.attachments[1].should.have.property('id');
+              project.attachments[1].should.have.property('projectId');
+              project.attachments[1].should.have.property('title');
+              project.attachments[1].should.have.property('description');
+              project.attachments[1].should.have.property('path');
+              project.attachments[1].should.have.property('type');
+              project.attachments[1].should.have.property('tags');
+              project.attachments[1].should.have.property('createdBy');
+              project.attachments[1].should.have.property('updatedBy');
 
-              resJson[0].should.have.property('description');
-              resJson[0].should.have.property('billingAccountId');
+              project.should.have.property('description');
+              project.should.have.property('billingAccountId');
               done();
             }
           });
@@ -1112,7 +1113,6 @@ describe('LIST Project', () => {
               resJson[0].name.should.equal('test1');
               resJson[0].invites.should.have.lengthOf(2);
               resJson[0].invites[0].should.have.property('email');
-              should.not.exist(resJson[0].invites[0].userId);
               resJson[0].invites[1].email.should.equal('h***o@w***d.com');
               done();
             }

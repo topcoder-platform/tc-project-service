@@ -636,14 +636,12 @@ _.assignIn(util, {
     }
   },
   /**
-   * Post-process given invite(s) with following constraints:
-   * - email field will be omitted from invite if the invite has defined userId
-   * - email field (if existed) will be masked UNLESS current user has admin permissions OR current user created this invite
+   * Post-process given invite(s)
+   * Mask `email` and hide `userId` to prevent leaking Personally Identifiable Information (PII)
    *
-   * Email to be masked is found in the fields defined by `jsonPath` in the `data`.
    * Immutable - doesn't modify data, but creates a clone.
    *
-   * @param {String}  jsonPath   jsonpath string
+   * @param {String}  jsonPath  jsonpath string
    * @param {Object}  data      the data which  need to process
    * @param {Object}  req       The request object
    *
@@ -668,13 +666,21 @@ _.assignIn(util, {
       }
 
       if (invite.email) {
-        // mask email if non-admin or not own invite
+        const canSeeEmail = (
+          isAdmin || // admin
+          invite.createdBy === currentUserId || // user who created invite
+          invite.userId === currentUserId // user who is invited
+        );
+        // mask email if user cannot see it
         _.assign(invite, {
-          email: isAdmin || invite.createdBy === currentUserId ? invite.email : util.maskEmail(invite.email),
+          email: canSeeEmail ? invite.email : util.maskEmail(invite.email),
         });
 
-        // for non-admin users don't return `userId` for invites created by `email`
-        if (invite.userId && !isAdmin) {
+        const canGetUserId = (
+          isAdmin || // admin
+          invite.userId === currentUserId // user who is invited
+        );
+        if (invite.userId && !canGetUserId) {
           _.assign(invite, {
             userId: null,
           });
