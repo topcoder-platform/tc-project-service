@@ -23,7 +23,7 @@ const eClient = util.getElasticSearchClient();
  */
 const indexProject = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
   const data = JSON.parse(msg.content.toString());
-  const userIds = data.members ? data.members.map(single => `userId:${single.userId}`) : [];
+  const userIds = data.members ? _.map(data.members, 'userId') : [];
   try {
     // retrieve member details
     const memberDetails = yield util.getMemberDetailsByUserIds(userIds, logger, msg.properties.correlationId);
@@ -197,7 +197,9 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
   // first get the existing document and than merge the updated changes and save the new document
   try {
     const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
+    console.log(doc._source, 'Received project from ES');// eslint-disable-line no-underscore-dangle
     const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
+    console.log(merged, 'Merged project');
     // update the merged document
     await eClient.update({
       index: ES_PROJECT_INDEX,
@@ -207,6 +209,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
         doc: merged,
       },
     });
+    console.log(`Succesfully updated project document in ES (projectId: ${previousValue.id})`);
   } catch (error) {
     throw Error(`failed to updated project document in elasitcsearch index (projectId: ${previousValue.id})` +
       `. Details: '${error}'.`);

@@ -26,10 +26,12 @@ const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes),
    'utm',
    'deletedAt',
 );
-const PROJECT_MEMBER_ATTRIBUTES = _.concat(_.without(
-  _.keys(models.ProjectMember.rawAttributes),
-  'deletedAt',
-), ['firstName', 'lastName', 'handle', 'email']);
+const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes));
+// project members has some additional fields stored in ES index, which we don't have in DB
+const PROJECT_MEMBER_ATTRIBUTES_ES = _.concat(
+  PROJECT_MEMBER_ATTRIBUTES,
+  ['handle'], // more fields can be added when allowed by `addUserDetailsFieldsIfAllowed`
+);
 const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(
   _.keys(models.ProjectMemberInvite.rawAttributes),
   'deletedAt',
@@ -551,16 +553,12 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: PROJECT_MEMBER_ATTRIBUTES,
+    project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
     attachments: PROJECT_ATTACHMENT_ATTRIBUTES,
   });
-
-
-  // if user is not admin, ignore email field for project_members
-  fields = util.ignoreEmailField(req, fields);
 
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) {
@@ -631,15 +629,18 @@ module.exports = [
           // so we don't want DB to return unrelated data, ref issue #450
           if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
             req.log.debug('Don\'t fallback to DB because some filters are defined.');
-            return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+            return util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
           }
 
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
+            .then(r => util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
         }
         req.log.debug('Projects found in ES');
         // set header
-        return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+        return util.setPaginationHeaders(req, res,
+          util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
       })
         .catch(err => next(err));
     }
@@ -657,14 +658,17 @@ module.exports = [
           // so we don't want DB to return unrelated data, ref issue #450
           if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
             req.log.debug('Don\'t fallback to DB because some filters are defined.');
-            return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+            return util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
           }
 
           return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', r, req)));
+            .then(r => util.setPaginationHeaders(req, res,
+              util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
         }
         req.log.debug('Projects found in ES');
-        return util.setPaginationHeaders(req, res, util.maskInviteEmails('$[*].invites[?(@.email)]', result, req));
+        return util.setPaginationHeaders(req, res,
+          util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
       })
       .catch(err => next(err));
   },

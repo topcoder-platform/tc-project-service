@@ -215,7 +215,7 @@ export const CONNECT_NOTIFICATION_EVENT = {
   PROJECT_FILE_UPLOADED: 'connect.notification.project.fileUploaded',
   PROJECT_SPECIFICATION_MODIFIED: 'connect.notification.project.updated.spec',
   PROJECT_PROGRESS_MODIFIED: 'connect.notification.project.updated.progress',
-  PROJECT_FILES_UPDATED: 'connect.notification.project.files.updated',
+  PROJECT_ATTACHMENT_UPDATED: 'connect.notification.project.attachment.updated',
   PROJECT_TEAM_UPDATED: 'connect.notification.project.team.updated',
 
   // When phase is added/updated/deleted from the project,
@@ -354,4 +354,9 @@ export const RESOURCES = {
   MILESTONE: 'milestone',
   MILESTONE_TEMPLATE: 'milestone.template',
   ATTACHMENT: 'attachment',
+};
+
+export const ATTACHMENT_TYPES = {
+  FILE: 'file',
+  LINK: 'link',
 };

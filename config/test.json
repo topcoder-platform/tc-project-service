@@ -4,6 +4,7 @@
     "logLevel": "debug",
     "captureLogs": "false",
     "logentriesToken": "",
+    "enableFileUpload": "false",
     "elasticsearchConfig": {
       "host": "http://localhost:9200",
       "apiVersion": "6.8",
