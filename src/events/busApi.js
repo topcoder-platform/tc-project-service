@@ -11,6 +11,7 @@ import {
   ROUTES,
   MILESTONE_STATUS,
   INVITE_STATUS,
+  ATTACHMENT_TYPES,
 } from '../constants';
 import { createEvent } from '../services/busApi';
 import models from '../models';
@@ -336,19 +337,32 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
       .then((project) => {
-        createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_FILE_UPLOADED, {
-          projectId,
-          projectName: project.name,
-          refCode: _.get(project, 'details.utm.code'),
-          projectUrl: connectProjectUrl(projectId),
-          fileName: attachment.filePath.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
-          fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
-          allowedUsers: attachment.allowedUsers,
-          userId: req.authUser.userId,
-          initiatorUserId: req.authUser.userId,
-        }, logger);
+        if (attachment.type === ATTACHMENT_TYPES.FILE) {
+          createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_FILE_UPLOADED, {
+            projectId,
+            projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
+            projectUrl: connectProjectUrl(projectId),
+            fileName: attachment.path.replace(/^.*[\\\/]/, ''),    // eslint-disable-line
+            fileUrl: connectProjectAttachmentUrl(projectId, attachment.id),
+            allowedUsers: attachment.allowedUsers,
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
 
-        createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED, {
+        if (attachment.type === ATTACHMENT_TYPES.LINK) {
+          createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_LINK_CREATED, {
+            projectId,
+            projectName: project.name,
+            refCode: _.get(project, 'details.utm.code'),
+            projectUrl: connectProjectUrl(projectId),
+            userId: req.authUser.userId,
+            initiatorUserId: req.authUser.userId,
+          }, logger);
+        }
+
+        createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, {
           projectId: project.id,
           projectName: project.name,
           refCode: _.get(project, 'details.utm.code'),
@@ -376,7 +390,7 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
     .then((project) => {
-      createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED, {
+      createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, {
         projectId: project.id,
         projectName: project.name,
         refCode: _.get(project, 'details.utm.code'),
@@ -404,7 +418,7 @@ module.exports = (app, logger) => {
       where: { id: projectId },
     })
     .then((project) => {
-      createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_FILES_UPDATED, {
+      createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, {
         projectId: project.id,
         projectName: project.name,
         refCode: _.get(project, 'details.utm.code'),

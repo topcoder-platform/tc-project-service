@@ -46,7 +46,7 @@ services:
     build:
       context: ./generic-tc-service
       args:
-        NODE_VERSION: 8.2.1
+        NODE_VERSION: 8.11.3
         GIT_URL: https://github.com/topcoder-platform/tc-bus-api
         GIT_BRANCH: dev
         BYPASS_TOKEN_VALIDATION: 1
@@ -62,13 +62,18 @@ services:
       - KAFKA_URL=kafka:9093
       - JWT_TOKEN_SECRET=secret
       - VALID_ISSUERS="[\"https://topcoder-newauth.auth0.com/\",\"https://api.topcoder-dev.com\"]"
+      - AUTH0_CLIENT_ID
+      - AUTH0_CLIENT_SECRET
+      - AUTH0_URL
+      - AUTH0_AUDIENCE
+      - AUTH0_PROXY_SERVER_URL
   project-processor-es:
     build:
       context: ./generic-tc-service
       args:
         NODE_VERSION: 8.11.3
         GIT_URL: https://github.com/topcoder-platform/project-processor-es
-        GIT_BRANCH: develop
+        GIT_BRANCH: feature/link-attachments
     command: start kafka-client
     expose:
       - "5000"
@@ -80,6 +85,11 @@ services:
       - PORT=5000
       - KAFKA_URL=kafka:9093
       - ES_HOST=esearch:9200
+      - AUTH0_CLIENT_ID
+      - AUTH0_CLIENT_SECRET
+      - AUTH0_URL
+      - AUTH0_AUDIENCE
+      - AUTH0_PROXY_SERVER_URL
   tc-notifications-reset-db:
     extends:
       file: ./docker-compose.base.yml

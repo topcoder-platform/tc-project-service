@@ -1,14 +1,13 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable max-len */
 import chai from 'chai';
-import sinon from 'sinon';
 import request from 'supertest';
 import _ from 'lodash';
 import config from 'config';
 import models from '../../models';
-import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import { ATTACHMENT_TYPES } from '../../constants';
 
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -88,8 +87,21 @@ const data = [
         title: 'Spec',
         projectId: 1,
         description: 'specification',
-        filePath: 'projects/1/spec.pdf',
+        path: 'projects/1/spec.pdf',
+        type: ATTACHMENT_TYPES.FILE,
+        tags: ['tag1'],
         contentType: 'application/pdf',
+        createdBy: 1,
+        updatedBy: 1,
+      },
+      {
+        id: 2,
+        title: 'Link 1',
+        projectId: 1,
+        description: 'specification link',
+        path: 'projects/1/linkA',
+        type: ATTACHMENT_TYPES.LINK,
+        tags: ['tag2'],
         createdBy: 1,
         updatedBy: 1,
       },
@@ -257,6 +269,27 @@ describe('GET Project', () => {
               resJson.description.should.be.eql('es_project');
               resJson.members.should.have.lengthOf(2);
               resJson.members[0].firstName.should.equal('es_member_1_firstName');
+
+              resJson.attachments.should.have.lengthOf(2);
+              resJson.attachments[0].id.should.eql(data[0].attachments[0].id);
+              resJson.attachments[0].title.should.eql(data[0].attachments[0].title);
+              resJson.attachments[0].projectId.should.eql(data[0].attachments[0].projectId);
+              resJson.attachments[0].description.should.eql(data[0].attachments[0].description);
+              resJson.attachments[0].path.should.eql(data[0].attachments[0].path);
+              resJson.attachments[0].tags.should.eql(data[0].attachments[0].tags);
+              resJson.attachments[0].contentType.should.eql(data[0].attachments[0].contentType);
+              resJson.attachments[0].createdBy.should.eql(data[0].attachments[0].createdBy);
+              resJson.attachments[0].updatedBy.should.eql(data[0].attachments[0].updatedBy);
+
+              resJson.attachments[1].id.should.eql(data[0].attachments[1].id);
+              resJson.attachments[1].title.should.eql(data[0].attachments[1].title);
+              resJson.attachments[1].projectId.should.eql(data[0].attachments[1].projectId);
+              resJson.attachments[1].description.should.eql(data[0].attachments[1].description);
+              resJson.attachments[1].path.should.eql(data[0].attachments[1].path);
+              resJson.attachments[1].tags.should.eql(data[0].attachments[1].tags);
+              resJson.attachments[1].createdBy.should.eql(data[0].attachments[1].createdBy);
+              resJson.attachments[1].updatedBy.should.eql(data[0].attachments[1].updatedBy);
+
               done();
             }
           });
@@ -322,63 +355,10 @@ describe('GET Project', () => {
           });
     });
 
-    it('should return attachment with downloadUrl', (done) => {
-      models.ProjectAttachment.create({
-        projectId: project1.id,
-        filePath: 'projects/1/spec.pdf',
-        contentType: 'application/pdf',
-        createdBy: 1,
-        updatedBy: 1,
-        name: 'spec.pdf',
-        description: 'blah',
-      }).then((attachment) => {
-        const mockHttpClient = {
-          defaults: { headers: { common: {} } },
-          post: () => new Promise(resolve => resolve({
-            status: 200,
-            data: {
-              result: {
-                status: 200,
-                content: {
-                  filePath: 'projects/1/spec.pdf',
-                  preSignedURL: 'https://www.topcoder-dev.com/downloadUrl',
-                },
-              },
-            },
-          })),
-        };
-        const spy = sinon.spy(mockHttpClient, 'post');
-        const stub = sinon.stub(util, 'getHttpClient', () => mockHttpClient);
-
-        request(server)
-            .get(`/v5/projects/${project1.id}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.admin}`,
-            })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end((err, res) => {
-              stub.restore();
-              if (err) {
-                done(err);
-              } else {
-                const resJson = res.body;
-                should.exist(resJson);
-                spy.should.have.been.calledOnce;
-                resJson.attachments.should.have.lengthOf(1);
-                resJson.attachments[0].filePath.should.equal(attachment.filePath);
-                // downloadUrl no more needed
-                // resJson.attachments[0].downloadUrl.should.exist;
-                done();
-              }
-            });
-      });
-    });
-
     describe('URL Query fields', () => {
       it('should not return "email" for project members when "fields" query param is not defined (to non-admin users)', (done) => {
         request(server)
-        .get(`/v5/projects/${project1.id}?fields=members.handle`)
+        .get(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -397,7 +377,7 @@ describe('GET Project', () => {
         });
       });
 
-      it('should not return "email" for project members even if it\'s defined in "fields" query param (to non-admin users)', (done) => {
+      it('should not return "email" for project members even if it\'s listed in "fields" query param (to non-admin users)', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}?fields=members.email,members.handle`)
         .set({
@@ -441,7 +421,7 @@ describe('GET Project', () => {
         });
       });
 
-      it('should not return "email" for project members when "fields" query param is not defined (to admin users)', (done) => {
+      it('should not return "email" for project members if it\'s not listed in "fields" query param (to admin users)', (done) => {
         request(server)
           .get(`/v5/projects/${project1.id}?fields=description,members.id`)
           .set({
@@ -462,7 +442,7 @@ describe('GET Project', () => {
           });
       });
 
-      it('should return "email" for project members if it\'s defined in "fields" query param (to admin users', (done) => {
+      it('should return "email" for project members if it\'s listed in "fields" query param (to admin users)', (done) => {
         request(server)
           .get(`/v5/projects/${project1.id}?fields=description,members.id,members.email`)
           .set({
@@ -484,8 +464,7 @@ describe('GET Project', () => {
           });
       });
 
-
-      it('should only return "id" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "id" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}?fields=id`)
         .set({
@@ -506,7 +485,7 @@ describe('GET Project', () => {
         });
       });
 
-      it('should only return "invites.userId" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "invites.userId" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}?fields=invites.userId`)
         .set({
@@ -527,7 +506,29 @@ describe('GET Project', () => {
         });
       });
 
-      it('should only return "members.role" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should not return "userId" for any invite which has "email" field', (done) => {
+        request(server)
+        .get(`/v5/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.invites.length.should.be.eql(1);
+            resJson.invites[0].should.have.property('email');
+            should.not.exist(resJson.invites[0].userId);
+            done();
+          }
+        });
+      });
+
+      it('should only return "members.role" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}?fields=members.role`)
         .set({
@@ -548,7 +549,7 @@ describe('GET Project', () => {
         });
       });
 
-      it('should only return "attachments.title" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "attachments.title" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}?fields=attachments.title`)
         .set({
@@ -569,7 +570,7 @@ describe('GET Project', () => {
         });
       });
 
-      it('should only return "phases.name" field, when it\'s defined in "fields"  query param', (done) => {
+      it('should only return "phases.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
         .get(`/v5/projects/${project1.id}?fields=phases.name`)
         .set({
@@ -590,9 +591,9 @@ describe('GET Project', () => {
         });
       });
 
-      it('should only return "phases.products.name" field, when it\'s defined in "fields" query param and "phases" is also defined', (done) => {
+      it('should only return "phases.products.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get(`/v5/projects/${project1.id}?fields=phases.products.name,phases.name`)
+        .get(`/v5/projects/${project1.id}?fields=phases.products.name`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

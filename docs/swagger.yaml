@@ -353,7 +353,7 @@ paths:
           required: true
           description: Specify only those properties that needs to be updated
           schema:
-            $ref: '#/definitions/NewProjectAttachment'
+            $ref: '#/definitions/UpdateProjectAttachment'
       responses:
         '200':
           description: Returns the newly created project
@@ -2890,7 +2890,7 @@ paths:
             example:
               'work.create': true
               'workItem.edit': true
-                    
+
         '401':
           description: Unauthorized
           schema:
@@ -3519,31 +3519,26 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/projects/{projectId}/members/invite':
+  '/projects/{projectId}/invites':
     get:
       tags:
         - project member invite
-      operationId: getCurrentUserInvite
+      operationId: listProjectInvites
       security:
         - Bearer: []
-      description: Retrieve the invite for current user.
+      description: >-
+        If user can "view" this project, he/she can get all invitations.
+        Otherwise user can only see his/her own invitation in this project.
+        If user has no invitation in this project or this project doesn't exist, an empty array will be returned.
       parameters:
         - $ref: '#/parameters/projectIdParam'
       responses:
         '200':
           description: The invite for current user
           schema:
-            $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
-        '400':
-          description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '404':
-          description: Invite not found
+            $ref: '#/definitions/ProjectMemberInviteListResult'
+        '403':
+          description: Forbidden
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
@@ -3567,16 +3562,12 @@ paths:
           schema:
             $ref: '#/definitions/AddProjectMemberInvitesRequest'
       responses:
-        '200':
-          description: Returns the newly created invite
+        '201':
+          description: Created
           schema:
             $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
         '400':
           description: Bad request
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '401':
-          description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorModel'
         '403':
@@ -3587,7 +3578,38 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorModel'
-    put:
+  '/projects/{projectId}/invites/{inviteId}':
+    get:
+      tags:
+        - project member invite
+      operationId: getProjectMemberInvite
+      security:
+        - Bearer: []
+      description: >-
+        Get an invite. Users who can "view" this project can see this invitation.
+        User got invited by this inviteId can also see this invitation.
+        If project/invitation doesn't exist, or this invitation is not for logged-in user, it will return 404 response.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/inviteIdParam'
+      responses:
+        '200':
+          description: Returns the newly updated invite
+          schema:
+            $ref: '#/definitions/ProjectMemberInvite'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    patch:
       tags:
         - project member invite
       operationId: updateProjectMemberInvite
@@ -3598,6 +3620,7 @@ paths:
         restriction will be applied based on role to be updated.
       parameters:
         - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/inviteIdParam'
         - in: body
           name: body
           required: true
@@ -3607,17 +3630,48 @@ paths:
         '200':
           description: Returns the newly updated invite
           schema:
-            $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
+            $ref: '#/definitions/ProjectMemberInvite'
         '400':
           description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
-        '401':
-          description: Unauthorized
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - project member invite
+      operationId: deleteProjectMemberInvite
+      security:
+        - Bearer: []
+      description: >-
+        Cancel an invite. All users who can access this endpoint, however more
+        restriction will be applied based on role to be cancelled.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/inviteIdParam'
+      responses:
+        '204':
+          description: Cancel success
+        '400':
+          description: Bad request
           schema:
             $ref: '#/definitions/ErrorModel'
         '403':
           description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
@@ -4794,6 +4848,13 @@ parameters:
     required: true
     type: integer
     format: int64
+  inviteIdParam:
+    name: inviteId
+    in: path
+    description: project member invite identifier
+    required: true
+    type: integer
+    format: int64
 definitions:
   ErrorModel:
     type: object
@@ -5137,20 +5198,30 @@ definitions:
     title: Project attachment request
     type: object
     required:
-      - filePath
-      - s3Bucket
+      - path
+      - type
       - title
-      - contentType
     properties:
-      filePath:
+      path:
         type: string
         description: path where file is stored
+      type:
+        type: string
+        description: The attachment type, one of 'link' or 'file'
+        enum: 
+         - link
+         - file
+      tags:
+        type: array
+        description: The attachment tags
+        items:
+          type: string
       s3Bucket:
         type: string
         description: The s3 bucket of attachment
       contentType:
         type: string
-        description: Uploaded file content type
+        description: Uploaded file content type (optional for 'link')
       title:
         type: string
         description: Name of the attachment
@@ -5170,6 +5241,27 @@ definitions:
           type: integer
           format: int64
           description: Users allowed to access the attachment
+  UpdateProjectAttachment:
+    title: Project attachment request
+    type: object
+    properties:
+      tags:
+        type: array
+        description: The attachment tags
+        items:
+          type: string
+      title:
+        type: string
+        description: Name of the attachment
+      description:
+        type: string
+        description: Optional description for the attached file.
+      allowedUsers:
+        type: array
+        items:
+          type: integer
+          format: int64
+          description: Users allowed to access the attachment
   ProjectAttachment:
     title: Project attachment
     type: object
@@ -5177,6 +5269,28 @@ definitions:
       id:
         type: number
         description: unique id for the attachment
+      projectId:
+        type: number
+        description: the projectId to which this attachment belongs
+      type:
+        type: string
+        description: The attachment type, one of 'file' or 'link'
+        enum:
+         - link
+         - file
+      tags:
+        type: array
+        description: The attachment tags array
+        items:
+         type: string
+      allowedUsers:
+        type: array
+        description: The array of ids of the users allowed to access this attachment
+        items:
+         type: number
+      path:
+        type: string
+        description: The attachment path
       size:
         type: number
         format: float
@@ -5193,9 +5307,9 @@ definitions:
       description:
         type: string
         description: Optional description for the attached file.
-      downloadUrl:
+      url:
         type: string
-        description: download link for the attachment.
+        description: download link for the attachment of type file
       createdAt:
         type: string
         description: Datetime (GMT) when task was created
@@ -6156,26 +6270,41 @@ definitions:
     type: object
     properties:
       success:
-        $ref: '#/definitions/ProjectMemberInvite'
+        type: array
+        items:
+          $ref: '#/definitions/ProjectMemberInvite'
       failed:
         type: array
         items:
           type: object
+          properties:
+            email:
+              description: invitation user email(Optional)
+              type: string
+            handle:
+              description: invitation user handle(Optional)
+              type: string
+            message:
+              description: create invitation error message
+              type: string
+  ProjectMemberInviteListResult:
+    type: array
+    items:
+      $ref: '#/definitions/ProjectMemberInvite'
   AddProjectMemberInvitesRequest:
     title: Add project member invites request object
     type: object
     properties:
-      userIds:
-        description: 'The user Id list, could not present with emails'
+      handles:
+        description: 'The user handle list, could not present with emails'
         type: array
         items:
-          type: integer
-          format: int64
+          type: string
       emails:
         type: array
         items:
           type: string
-        description: 'The user email list, could not present with userIds'
+        description: 'The user email list, could not present with handles'
       role:
         description: The target role in the project
         type: string
@@ -6187,13 +6316,6 @@ definitions:
     title: Update project member invite request object
     type: object
     properties:
-      userId:
-        type: integer
-        format: int64
-        description: 'The user Id, could not present with email'
-      email:
-        type: string
-        description: 'The user email, could not present with userId'
       status:
         description: The invite status
         type: string

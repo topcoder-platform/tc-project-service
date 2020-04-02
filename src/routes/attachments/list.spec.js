@@ -5,6 +5,7 @@ import request from 'supertest';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import { ATTACHMENT_TYPES } from '../../constants';
 
 const should = chai.should();
 
@@ -13,6 +14,7 @@ describe('Project Attachments download', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
         .then(() => {
           models.Project.create({
             type: 'generic',
@@ -43,17 +45,20 @@ describe('Project Attachments download', () => {
               contentType: 'application/unknown',
               size: 12312,
               category: null,
-              filePath: 'https://media.topcoder.com/projects/1/test.txt',
+              path: 'https://media.topcoder.com/projects/1/test.txt',
+              type: ATTACHMENT_TYPES.FILE,
+              tags: ['tag1', 'tag2'],
               createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
             }, {
               projectId: project1.id,
-              title: 'test2.txt',
-              description: 'blah 2',
-              contentType: 'application/unknown',
-              size: 12312,
+              title: 'link test 1',
+              description: 'link test description',
+              size: 123456,
               category: null,
-              filePath: 'https://media.topcoder.com/projects/1/test2.txt',
+              path: 'https://media.topcoder.com/projects/1/test2.txt',
+              type: ATTACHMENT_TYPES.LINK,
+              tags: ['tag3'],
               createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
             }]).then(() => done()));
@@ -114,8 +119,23 @@ describe('Project Attachments download', () => {
           const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].description.should.be.eql('blah');
-          resJson[0].filePath.should.be.eql('https://media.topcoder.com/projects/1/test.txt');
+          resJson[0].path.should.be.eql('https://media.topcoder.com/projects/1/test.txt');
           resJson[0].projectId.should.be.eql(project1.id);
+          resJson[0].type.should.be.eql(ATTACHMENT_TYPES.FILE);
+          resJson[0].createdBy.should.be.eql(testUtil.userIds.copilot);
+          resJson[0].updatedBy.should.be.eql(1);
+          should.exist(resJson[0].createdAt);
+          should.exist(resJson[0].updatedAt);
+          should.not.exist(resJson[0].deletedBy);
+          should.not.exist(resJson[0].deletedAt);
+
+          resJson[1].projectId.should.be.eql(project1.id);
+          resJson[1].description.should.be.eql('link test description');
+          resJson[1].path.should.be.eql('https://media.topcoder.com/projects/1/test2.txt');
+          resJson[1].type.should.be.eql(ATTACHMENT_TYPES.LINK);
+          resJson[1].tags.should.be.eql(['tag3']);
+          resJson[1].createdBy.should.be.eql(testUtil.userIds.copilot);
+          resJson[1].updatedBy.should.be.eql(1);
           should.exist(resJson[0].createdAt);
           should.exist(resJson[0].updatedAt);
           should.not.exist(resJson[0].deletedBy);

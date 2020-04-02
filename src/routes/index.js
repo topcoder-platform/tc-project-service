@@ -139,7 +139,7 @@ router.route('/v5/projects/:projectId(\\d+)/attachments')
   .get(require('./attachments/list'));
 
 router.route('/v5/projects/:projectId(\\d+)/attachments/:id(\\d+)')
-  .get(require('./attachments/download'))
+  .get(require('./attachments/get'))
   .patch(require('./attachments/update'))
   .delete(require('./attachments/delete'));
 
@@ -229,13 +229,14 @@ router.route('/v5/timelines/metadata/milestoneTemplates/:milestoneTemplateId(\\d
   .patch(require('./milestoneTemplates/update'))
   .delete(require('./milestoneTemplates/delete'));
 
-router.route('/v5/projects/:projectId(\\d+)/members/invite')
-  .post(require('./projectMemberInvites/create'))
-  .put(require('./projectMemberInvites/update'))
-  .get(require('./projectMemberInvites/get'));
+router.route('/v5/projects/:projectId(\\d+)/invites')
+  .get(require('./projectMemberInvites/list'))
+  .post(require('./projectMemberInvites/create'));
 
-router.route('/v5/projects/:projectId(\\d+)/members/invites')
-  .get(require('./projectMemberInvites/list'));
+router.route('/v5/projects/:projectId(\\d+)/invites/:inviteId(\\d+)')
+  .patch(require('./projectMemberInvites/update'))
+  .get(require('./projectMemberInvites/get'))
+  .delete(require('./projectMemberInvites/delete'));
 
 router.route('/v5/projects/metadata/orgConfig')
   .post(require('./orgConfig/create'));
