@@ -17,7 +17,7 @@ module.exports = function defineProjectAttachment(sequelize, DataTypes) {
     size: { type: DataTypes.INTEGER, allowNull: true }, // size in MB
     category: { type: DataTypes.STRING, allowNull: true }, // size in MB
     description: { type: DataTypes.STRING, allowNull: true },
-    path: { type: DataTypes.STRING, allowNull: false },
+    path: { type: DataTypes.STRING(2048), allowNull: false },
     contentType: { type: DataTypes.STRING, allowNull: true },
     allowedUsers: DataTypes.ARRAY({ type: DataTypes.INTEGER, allowNull: true }),
     deletedAt: { type: DataTypes.DATE, allowNull: true },
