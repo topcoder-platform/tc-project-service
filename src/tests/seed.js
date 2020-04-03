@@ -1,5 +1,5 @@
 import models from '../models';
-import { TIMELINE_REFERENCES } from '../constants';
+import { TIMELINE_REFERENCES, ATTACHMENT_TYPES } from '../constants';
 
 models.sequelize.sync({ force: true })
   .then(() =>
@@ -157,7 +157,8 @@ models.sequelize.sync({ force: true })
       title: 'Spec',
       projectId: project1.id,
       description: 'specification',
-      filePath: 'projects/1/spec.pdf',
+      path: 'projects/1/spec.pdf',
+      type: ATTACHMENT_TYPES.FILE,
       contentType: 'application/pdf',
       createdBy: 1,
       updatedBy: 1,

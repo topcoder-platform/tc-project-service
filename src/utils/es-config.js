@@ -69,7 +69,13 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         description: {
           type: 'string',
         },
-        filePath: {
+        path: {
+          type: 'string',
+        },
+        type: {
+          type: 'string',
+        },
+        tags: {
           type: 'string',
         },
         id: {
@@ -241,7 +247,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         },
         handle: {
           type: 'string',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',

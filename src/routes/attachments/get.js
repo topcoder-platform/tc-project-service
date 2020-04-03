@@ -3,19 +3,36 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { ATTACHMENT_TYPES } from '../../constants';
 
 /**
- * API to download a project attachment.
- *
+ * API to get a project attachment.
  */
 
 const permissions = tcMiddleware.permissions;
 
-const getFileDownloadUrl = (req, filePath) => {
-  if (process.env.NODE_ENV === 'development' && config.get('enableFileUpload') === 'false') {
-    return ['', 'dummy://url'];
+/**
+ * This private function gets the pre-signed url if the attachment is a file
+ *
+ * @param {Object} req The http request
+ * @param {Object} attachment The project attachment object
+ * @returns {Array<Promise>} The array of two promises, first one if the attachment object promise,
+ *                           The second promise is for the file pre-signed url (if attachment type is file)
+ */
+const getPreSignedUrl = async (req, attachment) => {
+  // If the attachment is a link return it as-is without getting the pre-signed url
+  if (attachment.type === ATTACHMENT_TYPES.LINK) {
+    return [attachment, ''];
   }
-  return util.getFileDownloadUrl(req, filePath);
+
+  // The attachment is a file
+  // In development mode, if file upload is disabled, we return the dummy attachment object
+  if (_.includes(['development'], process.env.NODE_ENV) && config.get('enableFileUpload') === 'false') {
+    return [attachment, 'dummy://url'];
+  }
+  // Not in development mode or file upload is not disabled
+  const url = await util.getFileDownloadUrl(req, attachment.path);
+  return [attachment, url];
 };
 
 module.exports = [
@@ -61,11 +78,7 @@ module.exports = [
             err.status = 404;
             return Promise.reject(err);
           }
-          if (process.env.NODE_ENV === 'development' && config.get('enableFileUpload') === 'false') {
-            return ['dummy://url'];
-          }
-
-          return getFileDownloadUrl(req, attachment.filePath);
+          return getPreSignedUrl(req, attachment);
         })
         .catch((error) => {
           req.log.error('Error fetching attachment', error);
@@ -76,12 +89,16 @@ module.exports = [
       }
       req.log.debug('attachment found in ES');
       const attachment = data[0].inner_hits.attachments.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
-      return getFileDownloadUrl(req, attachment.filePath);
+
+      return getPreSignedUrl(req, attachment);
     })
     .then((result) => {
-      req.log.debug('getFileDownloadUrl result: ', JSON.stringify(result));
-      const url = result[1];
-      return res.json({ url });
+      req.log.debug('getPresigned url result: ', JSON.stringify(result));
+      if (_.isEmpty(result[1])) {
+        return res.json(result[0]);
+      }
+
+      return res.json(_.extend(result[0], { url: result[1] }));
     })
     .catch(next);
   },

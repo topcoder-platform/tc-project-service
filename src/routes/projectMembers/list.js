@@ -9,6 +9,8 @@ import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE } from '../../constants';
 
+const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes));
+
 const permissions = tcMiddleware.permissions;
 
 const schema = {
@@ -31,7 +33,7 @@ module.exports = [
   permissions('project.viewMember'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
-    const fields = req.query.fields ? req.query.fields.split(',') : null;
+    const fields = req.query.fields ? req.query.fields.split(',') : [];
     const must = [
       { term: { 'members.projectId': projectId } },
     ];
@@ -89,13 +91,23 @@ module.exports = [
         });
       }
       req.log.debug('project members found in ES');
-      return data[0].inner_hits.members.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
+      return data[0].inner_hits.members.hits.hits.map(hit => _.pick(
+        hit._source, // eslint-disable-line no-underscore-dangle
+        // Elasticsearch index might have additional fields added to members like
+        // 'handle', 'firstName', 'lastName', 'email'
+        // but we shouldn't return them, as they might be outdated
+        // method "getObjectsWithMemberDetails" would populate these fields again
+        // with up to date data from Member Service if necessary
+        PROJECT_MEMBER_ATTRIBUTES,
+      ));
     })
     .then(members => (
       util.getObjectsWithMemberDetails(members, fields, req)
         .catch((err) => {
           req.log.error('Cannot get user details for member.');
           req.log.debug('Error during getting user details for member.', err);
+          // continues without details anyway
+          return members;
         })
     ))
     .then(members => res.json(members))

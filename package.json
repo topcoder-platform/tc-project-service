@@ -15,6 +15,8 @@
     "sync:es:metadata": "./node_modules/.bin/babel-node migrations/elasticsearch_sync.js --index-name metadata",
     "migrate:es": "./node_modules/.bin/babel-node migrations/seedElasticsearchIndex.js",
     "migrate:es:metadata": "./node_modules/.bin/babel-node migrations/helpers/indexMetadataDirectly.js",
+    "migrate:bookmarks": "./node_modules/.bin/babel-node migrations/bookmarks/migrateBookmarksToLinks.js",
+    "migrate:bookmarks:revert": "./node_modules/.bin/babel-node migrations/bookmarks/migrateLinksToBookmarks.js",
     "prestart": "npm run -s build",
     "start": "node dist",
     "start:dev": "NODE_ENV=development PORT=8001 nodemon -w src --exec \"babel-node src --presets es2015\" | ./node_modules/.bin/bunyan",

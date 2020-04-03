@@ -7,6 +7,8 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 
+const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes));
+
 /**
  * API to get project member.
  *
@@ -30,7 +32,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
-    const fields = req.query.fields ? req.query.fields.split(',') : null;
+    const fields = req.query.fields ? req.query.fields.split(',') : [];
 
     util.fetchByIdFromES('members', {
       query: {
@@ -74,13 +76,23 @@ module.exports = [
         });
       }
       req.log.debug('project member found in ES');
-      return data[0].inner_hits.members.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
+      return _.pick(
+        data[0].inner_hits.members.hits.hits[0]._source, // eslint-disable-line no-underscore-dangle
+        // Elasticsearch index might have additional fields added to members like
+        // 'handle', 'firstName', 'lastName', 'email'
+        // but we shouldn't return them, as they might be outdated
+        // method "getObjectsWithMemberDetails" would populate these fields again
+        // with up to date data from Member Service if necessary
+        PROJECT_MEMBER_ATTRIBUTES,
+      );
     }).then(member => (
       util.getObjectsWithMemberDetails([member], fields, req)
         .then(([memberWithDetails]) => memberWithDetails)
         .catch((err) => {
           req.log.error('Cannot get user details for member.');
           req.log.debug('Error during getting user details for member.', err);
+          // continues without details anyway
+          return member;
         })
     ))
     .then(member => res.json(member))

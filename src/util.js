@@ -16,7 +16,7 @@ import config from 'config';
 import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
-// import jp from 'jsonpath';
+import jp from 'jsonpath';
 import Promise from 'bluebird';
 import models from './models';
 
@@ -28,6 +28,7 @@ import {
   VALUE_TYPE,
   ESTIMATION_TYPE,
   RESOURCES,
+  USER_ROLE,
 } from './constants';
 
 const tcCoreLibAuth = require('tc-core-library-js').auth;
@@ -230,19 +231,52 @@ _.assignIn(util, {
     if (queryFields.length) {
       // remove any inavlid fields
       fields.projects = _.intersection(queryFields, allowedFields.projects);
-      fields.project_members = _.filter(queryFields, f => f.indexOf('members.') === 0);
-      // remove members. prefix
-      fields.project_members = _.map(fields.project_members, f => f.substring(8));
-      // remove any errorneous fields
-      fields.project_members = _.intersection(fields.project_members, allowedFields.project_members);
-      if (fields.project_members.length === 0 && _.indexOf(queryFields, 'members') > -1) {
-        fields.project_members = allowedFields.project_members;
+
+      const parseSubFields = (name, strName) => {
+        fields[name] = _.filter(queryFields, f => f.indexOf(`${strName}.`) === 0);
+        fields[name] = _.map(fields[name], f => f.substring(strName.length + 1));
+        fields[name] = _.intersection(fields[name], allowedFields[name]);
+        if (fields[name].length === 0 && _.indexOf(queryFields, strName) > -1) {
+          fields[name] = allowedFields[name];
+        }
+      };
+
+      if (allowedFields.project_members) {
+        parseSubFields('project_members', 'members');
       }
-      // remove attachments if not requested
-      if (fields.attachments && _.indexOf(queryFields, 'attachments') === -1) {
-        fields.attachments = null;
+      if (allowedFields.project_member_invites) {
+        parseSubFields('project_member_invites', 'invites');
+      }
+
+      if (allowedFields.attachments) {
+        parseSubFields('attachments', 'attachments');
+      }
+
+      if (allowedFields.project_phases) {
+        parseSubFields('project_phases', 'phases');
+      }
+
+      if (allowedFields.project_phases_products) {
+        parseSubFields('project_phases_products', 'phases.products');
       }
     }
+    return fields;
+  },
+
+  /**
+   * Add user details fields to the list of field, if it's allowed to a user who made the request
+   *
+   * @param  {Array}  fields fields list
+   * @param  {Object} req    request object
+   *
+   * @return {Array} fields list with 'email' if allowed
+   */
+  addUserDetailsFieldsIfAllowed: (fields, req) => {
+    // Only Topcoder Admins can get email
+    if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
+      return _.concat(fields, ['email', 'firstName', 'lastName']);
+    }
+
     return fields;
   },
 
@@ -337,10 +371,7 @@ _.assignIn(util, {
         if (resp.status !== 200 || resp.data.result.status !== 200) {
           return Promise.reject(new Error('Unable to fetch pre-signed url'));
         }
-        return [
-          filePath,
-          resp.data.result.content.preSignedURL,
-        ];
+        return resp.data.result.content.preSignedURL;
       });
   },
   getProjectAttachments: (req, projectId) => {
@@ -528,7 +559,36 @@ _.assignIn(util, {
       }
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
-          query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
+          query: `${_.map(userIds, id => `userId:${id}`).join(urlencode(' OR ', 'utf8'))}`,
+          fields: 'userId,handle,firstName,lastName,email',
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(res => _.get(res, 'data.result.content', null));
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
+
+  /**
+   * Retrieve member details from user handles
+   */
+  getMemberDetailsByHandles: Promise.coroutine(function* (handles, logger, requestId) { // eslint-disable-line func-names
+    if (_.isNil(handles) || (_.isArray(handles) && handles.length <= 0)) {
+      return Promise.resolve([]);
+    }
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      if (logger) {
+        logger.trace(handles);
+      }
+      const handleArr = _.map(handles, h => `handleLower:${h.toLowerCase()}`);
+      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
+        params: {
+          query: `${handleArr.join(urlencode(' OR ', 'utf8'))}`,
           fields: 'userId,handle,firstName,lastName,email',
         },
         headers: {
@@ -551,67 +611,96 @@ _.assignIn(util, {
   maskEmail: (email) => {
     // common function for formating
     const addMask = (str) => {
-      let newStr;
       const len = str.length;
-      if (len <= 3) {
-        newStr = _.repeat('*', len);
-      } else {
-        newStr = str.substr(0, 2) + _.repeat('*', len - 3) + str.substr(-1);
+      if (len === 1) {
+        return `${str}***${str}`;
       }
-      return newStr;
+      return `${str[0]}***${str[len - 1]}`;
     };
 
     try {
       const mailParts = email.split('@');
-      const domainParts = mailParts[1].split('.');
 
       let userName = mailParts[0];
       userName = addMask(userName);
       mailParts[0] = userName;
 
-      let domainName = domainParts[0];
-      domainName = addMask(domainName);
-      domainParts[0] = domainName;
+      const index = mailParts[1].lastIndexOf('.');
+      if (index !== -1) {
+        mailParts[1] = `${addMask(mailParts[1].slice(0, index))}.${mailParts[1].slice(index + 1)}`;
+      }
 
-      mailParts[1] = domainParts.join('.');
       return mailParts.join('@');
     } catch (e) {
       return email;
     }
   },
   /**
-   * Filter member details by input fields
+   * Post-process given invite(s)
+   * Mask `email` and hide `userId` to prevent leaking Personally Identifiable Information (PII)
    *
-   * @param {String}  jsonPath   jsonpath string
+   * Immutable - doesn't modify data, but creates a clone.
+   *
+   * @param {String}  jsonPath  jsonpath string
    * @param {Object}  data      the data which  need to process
    * @param {Object}  req       The request object
    *
    * @return {Object} data has been processed
    */
-  maskInviteEmails: (jsonPath, data, req) => { // eslint-disable-line
-    // temporary disable this feature, because it has some side effects
-    // see relative issues:
-    // - https://github.com/topcoder-platform/tc-project-service/issues/420
-    // - https://github.com/appirio-tech/connect-app/issues/3412
-    // - https://github.com/topcoder-platform/tc-project-service/issues/422
-    // - https://github.com/appirio-tech/connect-app/issues/3413
-    // uncomment code below, to enable masking emails again
+  postProcessInvites: (jsonPath, data, req) => {
+    // clone data to avoid mutations
+    const dataClone = _.cloneDeep(data);
 
-    /*
-    const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
+    const isAdmin = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
+    const currentUserId = req.authUser.userId;
+
+    // admins can get data as it is
     if (isAdmin) {
-      return data;
+      // even though we didn't make any changes to the data, return a clone here for consistency
+      return dataClone;
     }
-    jp.apply(data, jsonPath, (value) => {
-      if (_.isObject(value)) {
-        _.assign(value, { email: util.maskEmail(value.email) });
-        return value;
+
+    const postProcessInvite = (invite) => {
+      if (!_.has(invite, 'email')) {
+        return invite;
       }
-      // isString or null
-      return util.maskEmail(value);
+
+      if (invite.email) {
+        const canSeeEmail = (
+          isAdmin || // admin
+          invite.createdBy === currentUserId || // user who created invite
+          invite.userId === currentUserId // user who is invited
+        );
+        // mask email if user cannot see it
+        _.assign(invite, {
+          email: canSeeEmail ? invite.email : util.maskEmail(invite.email),
+        });
+
+        const canGetUserId = (
+          isAdmin || // admin
+          invite.userId === currentUserId // user who is invited
+        );
+        if (invite.userId && !canGetUserId) {
+          _.assign(invite, {
+            userId: null,
+          });
+        }
+      }
+
+      return invite;
+    };
+
+    jp.apply(dataClone, jsonPath, (value) => {
+      if (_.isObject(value)) {
+        // data contains nested invite object
+        return postProcessInvite(value);
+      }
+      // data is single invite object
+      // value is string or null
+      return postProcessInvite(dataClone).email;
     });
-    */
-    return data;
+
+    return dataClone;
   },
 
   /**
@@ -628,7 +717,12 @@ _.assignIn(util, {
       return members;
     }
     const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
-    const memberDetailFields = ['handle', 'firstName', 'lastName'];
+    let memberDetailFields = ['handle'];
+
+    // Only Topcoder admins can get emails, first and last name for users
+    if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
+      memberDetailFields = memberDetailFields.concat(['email', 'firstName', 'lastName']);
+    }
 
     let allMemberDetails = [];
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
@@ -681,18 +775,7 @@ _.assignIn(util, {
     // pick valid fields from fetched member details
     return _.map(members, (member) => {
       let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
-      memberDetails = _.assign({}, member, memberDetails);
-      // this case would be only valid for invites:
-      // don't return `email` for non-admins if invitation has `userId`
-      // if invitation doesn't have `userId` means it is invitation by email
-      // then we are still returning emails to all users
-      if (
-        memberDetails.email &&
-        memberDetails.userId &&
-        !util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser)
-      ) {
-        delete memberDetails.email;
-      }
+      memberDetails = _.assign({}, member, _.pick(memberDetails, _.union(memberDetailFields, memberTraitFields)));
       return _(memberDetails).pick(fields).defaults(memberDefaults).value();
     });
   },

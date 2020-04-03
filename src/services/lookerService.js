@@ -110,7 +110,7 @@ function generateEmbedUrl(authUser, project, member, reportUrl) {
     group_ids: [],
     first_name: member.firstName,
     last_name: member.lastName,
-    permissions: ['access_data', 'see_looks', 'see_user_dashboards'],
+    permissions: ['access_data', 'see_looks', 'see_user_dashboards', 'schedule_look_emails', 'download_with_limit'],
     models: ['projects_tc_employees'],
     access_filters: {
       projects_tc_employees: {

@@ -8,7 +8,7 @@ import moment from 'moment';
 
 import models from '../../models';
 import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, PROJECT_STATUS, PROJECT_PHASE_STATUS,
-  EVENT, RESOURCES, REGEX, WORKSTREAM_STATUS } from '../../constants';
+  EVENT, RESOURCES, REGEX, WORKSTREAM_STATUS, ATTACHMENT_TYPES } from '../../constants';
 import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
 
@@ -70,9 +70,11 @@ const createProjectValidations = {
     })).optional(),
     attachments: Joi.array().items(Joi.object().keys({
       category: Joi.string().required(),
-      contentType: Joi.string().required(),
+      contentType: Joi.string().when('type', { is: ATTACHMENT_TYPES.FILE, then: Joi.string().required() }),
       description: Joi.string().allow(null).allow('').optional(),
-      filePath: Joi.string().required(),
+      path: Joi.string().required(),
+      type: Joi.string().required(),
+      tags: Joi.array().items(Joi.string().min(1)).optional(),
       size: Joi.number().required(),
       title: Joi.string().required(),
     })).optional(),
