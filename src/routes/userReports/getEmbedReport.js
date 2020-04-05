@@ -42,7 +42,7 @@ module.exports = [
       const member = {
         firstName: callerUser.firstName,
         lastName: callerUser.lastName,
-        userId: callerUser.userId,
+        userId: authUser.userId,
         role: '',
       };
       let roleKey = '';
