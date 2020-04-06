@@ -20,7 +20,8 @@ module.exports = [
     let REPORTS = null;
     let allowedUsers = null;
     try {
-      allowedUsers = JSON.parse(_.get(config, 'lookerConfig.ALLOWED_USERS', '[]'));
+      allowedUsers = config.get('lookerConfig.ALLOWED_USERS');
+      allowedUsers = allowedUsers ? JSON.parse(allowedUsers) : [];
       req.log.trace(allowedUsers, 'allowedUsers');
       REPORTS = JSON.parse(config.get('lookerConfig.EMBED_REPORTS_MAPPING'));
     } catch (error) {

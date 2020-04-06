@@ -4,7 +4,6 @@ import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import { USER_ROLE, ADMIN_ROLES, MANAGER_ROLES } from '../../constants';
-import models from '../../models';
 import lookerSerivce from '../../services/lookerService';
 
 const permissions = tcMiddleware.permissions;
@@ -18,7 +17,8 @@ module.exports = [
     let REPORTS = null;
     let allowedUsers = null;
     try {
-      allowedUsers = JSON.parse(_.get(config, 'lookerConfig.ALLOWED_USERS', '[]'));
+      allowedUsers = config.get('lookerConfig.ALLOWED_USERS');
+      allowedUsers = allowedUsers ? JSON.parse(allowedUsers) : [];
       req.log.trace(allowedUsers, 'allowedUsers');
       REPORTS = JSON.parse(config.get('lookerConfig.EMBED_REPORTS_MAPPING'));
     } catch (error) {
@@ -49,8 +49,7 @@ module.exports = [
       if (!mockReport) {
         if (util.hasRoles(req, [USER_ROLE.COPILOT])) {
           roleKey = 'copilot';
-        }
-        if (isAdmin || util.hasRoles(req, MANAGER_ROLES)) {
+        } else if (isAdmin || util.hasRoles(req, MANAGER_ROLES)) {
           roleKey = 'topcoder';
         } else {
           roleKey = 'customer';
