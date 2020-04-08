@@ -4,7 +4,7 @@
   "description": "Projects microservice",
   "main": "index.js",
   "engines": {
-    "node": ">=6.9"
+    "node": ">=12"
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
