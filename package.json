@@ -96,7 +96,6 @@
     "sequelize-cli": "^5.5.0",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
-    "sleep": "^5.1.0",
     "supertest": "^4.0.2"
   }
 }
