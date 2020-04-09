@@ -101,7 +101,7 @@ describe('Kafka service', () => {
       }], 'topic2', {});
 
       expect(handlers.topic2.calledOnce, 'topic2 handler should be called once').to.be.true;
-      expect(mockedLogger.error.getCalls().length, 'logger.error should be called once').to.be.equal(1);
+      expect(mockedLogger.error.calledOnce, 'logger.error should be called once').to.be.true;
       mockedLogger.error.calledWith('Message processing failed: failure');
     });
 
