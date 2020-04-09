@@ -89,7 +89,6 @@ describe('Kafka service', () => {
 
     it('logs error and continues when handler fails', async () => {
       handlers.topic2 = sinon.stub().returns(Promise.reject('failure'));
-      await startKafkaConsumer(handlers, mockedApp, mockedLogger);
 
       await consumerFunction([{
         message: {
