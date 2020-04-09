@@ -115,7 +115,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['develop', 'hotfix/user_level_reports']
+              only: ['develop']
       - deployProd:
           context : org-global
           requires:
