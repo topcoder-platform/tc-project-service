@@ -40,9 +40,11 @@ export default async function startKafkaConsumer(handlers, app, logger) {
    * @return  {Promise}               Promise
    */
   const onConsume = async (messageSet, topic, partition) => {
+    console.log('on consume');
     messageSet.forEach(async (kafkaMessage) => {
       logger.debug(`Consume topic '${topic}' with message: '${kafkaMessage.message.value.toString('utf8')}'.`);
       try {
+        console.log('try start');
         const handler = handlers[topic];
         if (!handler) {
           logger.info(`No handler configured for topic: ${topic}`);
@@ -54,7 +56,9 @@ export default async function startKafkaConsumer(handlers, app, logger) {
         await handler(app, topic, payload);
         await consumer.commitOffset({ topic, partition, offset: kafkaMessage.offset });
         logger.info(`Message for topic '${topic}' was successfully processed`);
+        console.log('try end');
       } catch (error) {
+        console.log('catch');
         logger.error(`Message processing failed: ${error}`);
       }
     });
