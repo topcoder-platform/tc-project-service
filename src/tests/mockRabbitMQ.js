@@ -1,8 +1,6 @@
 /**
  * Mock RabbitMQ service
  */
-/* globals Promise */
-
 import sinon from 'sinon';
 import _ from 'lodash';
 

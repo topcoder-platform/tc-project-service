@@ -1,6 +1,3 @@
-
-/* globals Promise */
-
 import sinon from 'sinon';
 import _ from 'lodash';
 // we do need to test elasticsearch indexing

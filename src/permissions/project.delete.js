@@ -1,6 +1,3 @@
-
-/* globals Promise */
-
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
