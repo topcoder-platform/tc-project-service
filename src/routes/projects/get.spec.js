@@ -186,8 +186,6 @@ describe('GET Project', () => {
                 id: data[0].id,
                 body: data[0],
               })).then(() => {
-                // sleep for some time, let elasticsearch indices be settled
-                // sleep.sleep(5);
                 testUtil.wait(done);
                 // done();
               });
