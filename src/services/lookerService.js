@@ -96,12 +96,50 @@ function createdSignedEmbedUrl(options) {
  * Generates the looker embed URL for the given look/dashboard.
  *
  * @param {Object} authUser requesting user
+ * @param {Object} member member object for the requesting user
+ * @param {String} reportUrl embed URL (look,dashboard etc)
+ * @returns {String} URL for embedding the looker report, it can be GET only once
+ */
+function generateEmbedUrlForUser(authUser, member, reportUrl) {
+  const SESSION_LENGTH = parseInt(config.lookerConfig.SESSION_LENGTH, 10);
+  const urlData = {
+    host: config.lookerConfig.LOOKER_HOST,
+    secret: config.lookerConfig.EMBED_KEY,
+    external_user_id: authUser.userId,
+    group_ids: [],
+    first_name: member.firstName,
+    last_name: member.lastName,
+    permissions: ['access_data', 'see_looks', 'see_user_dashboards', 'schedule_look_emails', 'download_with_limit'],
+    models: ['tc_user_projects'],
+    access_filters: {
+      tc_user_projects: {
+        tc_user_id: `${member.userId}`,
+      },
+    },
+    user_attributes: {
+      user_roles_project: member.role,
+      user_roles_platform: authUser.roles,
+      tc_user_id: member.userId,
+    },
+    session_length: SESSION_LENGTH,
+    embed_url: reportUrl,
+    force_logout_login: true,
+  };
+
+  const url = createdSignedEmbedUrl(urlData);
+  return `https://${url}`;
+}
+
+/**
+ * Generates the looker embed URL for the given look/dashboard.
+ *
+ * @param {Object} authUser requesting user
  * @param {Object} project project for which report URL is to be generated
  * @param {Object} member member object for the requesting user
  * @param {String} reportUrl embed URL (look,dashboard etc)
  * @returns {String} URL for embedding the looker report, it can be GET only once
  */
-function generateEmbedUrl(authUser, project, member, reportUrl) {
+function generateEmbedUrlForProject(authUser, project, member, reportUrl) {
   const SESSION_LENGTH = parseInt(config.lookerConfig.SESSION_LENGTH, 10);
   const urlData = {
     host: config.lookerConfig.LOOKER_HOST,
@@ -121,6 +159,7 @@ function generateEmbedUrl(authUser, project, member, reportUrl) {
       connect_project_id: `${project.id}`,
       user_roles_project: member.role,
       user_roles_platform: authUser.roles,
+      tc_user_id: member.userId,
     },
     session_length: SESSION_LENGTH,
     embed_url: reportUrl,
@@ -132,5 +171,6 @@ function generateEmbedUrl(authUser, project, member, reportUrl) {
 }
 
 module.exports = {
-  generateEmbedUrl,
+  generateEmbedUrlForUser,
+  generateEmbedUrlForProject,
 };

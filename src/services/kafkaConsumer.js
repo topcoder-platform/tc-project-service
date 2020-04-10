@@ -40,7 +40,8 @@ export default async function startKafkaConsumer(handlers, app, logger) {
    * @return  {Promise}               Promise
    */
   const onConsume = async (messageSet, topic, partition) => {
-    messageSet.forEach(async (kafkaMessage) => {
+    for (let messageIndex = 0; messageIndex < messageSet.length; messageIndex += 1) {
+      const kafkaMessage = messageSet[messageIndex];
       logger.debug(`Consume topic '${topic}' with message: '${kafkaMessage.message.value.toString('utf8')}'.`);
       try {
         const handler = handlers[topic];
@@ -51,13 +52,14 @@ export default async function startKafkaConsumer(handlers, app, logger) {
 
         const busMessage = JSON.parse(kafkaMessage.message.value.toString('utf8'));
         const payload = busMessage.payload;
-        await handler(app, topic, payload);
-        await consumer.commitOffset({ topic, partition, offset: kafkaMessage.offset });
+        // we want message to be processed one by one, so we use `await` inside a loop
+        await handler(app, topic, payload); // eslint-disable-line no-await-in-loop
+        await consumer.commitOffset({ topic, partition, offset: kafkaMessage.offset }); // eslint-disable-line no-await-in-loop
         logger.info(`Message for topic '${topic}' was successfully processed`);
       } catch (error) {
         logger.error(`Message processing failed: ${error}`);
       }
-    });
+    }
   };
 
   // Subscribe for all topics defined in handlers

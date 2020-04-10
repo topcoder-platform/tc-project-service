@@ -1,6 +1,4 @@
 
-/* globals Promise */
-
 import _ from 'lodash';
 import config from 'config';
 import Promise from 'bluebird';

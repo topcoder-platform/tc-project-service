@@ -7,7 +7,6 @@ import config from 'config';
 import cors from 'cors';
 import coreLib from 'tc-core-library-js';
 import expressRequestId from 'express-request-id';
-import memWatch from 'memwatch-next';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import performanceRequestLogger from './middlewares/performanceRequestLogger';
@@ -69,32 +68,6 @@ const logger = coreLib.logger({
 });
 app.use(performanceRequestLogger(logger));
 app.logger = logger;
-
-// ========================
-// Memory leak detection
-// ========================
-if (process.env.NODE_ENV.toLowerCase() === 'development') {
-  let heapDiff = null;
-
-  // A leak event will be emitted when the heap usage has increased
-  // for five consecutive garbage collections
-  memWatch.on('leak', (info) => {
-    logger.error('memwatch::leak=>', info);
-
-    if (!heapDiff) {
-      heapDiff = new memWatch.HeapDiff();
-    } else {
-      const diff = heapDiff.end();
-      logger.error('memwatch::diff=>', diff);
-      heapDiff = null;
-    }
-  });
-
-  // When V8 performs a garbage collection, memwatch will emit a stats event
-  memWatch.on('stats', (stats) => {
-    logger.debug('memwatch::stats=>', stats);
-  });
-}
 
 // =======================
 // CORS ================
