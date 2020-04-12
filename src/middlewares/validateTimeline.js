@@ -7,11 +7,12 @@ import util from '../util';
 /**
  * Common validation code for types of timeline references.
  * @param {{ reference: string, referenceId: string|number }} sourceObject
- * @param {object} req
+ * @param {object} request
  * @param {boolean} [validateProjectExists]
  * @returns {Promise}
  */
-async function validateReference(sourceObject, req, validateProjectExists) {
+async function validateReference(sourceObject, request, validateProjectExists) {
+  const req = request;
   // The source object refers to a project
   if (sourceObject.reference === TIMELINE_REFERENCES.PROJECT) {
     // Set projectId to the params so it can be used in the permission check middleware
@@ -137,12 +138,13 @@ const validateTimeline = {
    * The middleware to validate and get the projectId specified by the timelineId from request
    * path parameter, and set to the request params. This should be called after the validate()
    * middleware, and before the permissions() middleware.
-   * @param {Object} req the express request instance
+   * @param {Object} request the express request instance
    * @param {Object} res the express response instance
    * @param {Function} next the express next middleware
    */
   // eslint-disable-next-line valid-jsdoc
-  validateTimelineIdParam: (req, res, next) => {
+  validateTimelineIdParam: (request, res, next) => {
+    const req = request;
     models.Timeline.findByPk(req.params.timelineId)
       .then((timeline) => {
         if (!timeline) {

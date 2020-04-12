@@ -35,7 +35,8 @@ router.all(
 );
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/.*`), (req, res, next) => {
+  RegExp(`\\/${apiVersion}\\/.*`), (request, res, next) => {
+    const req = request;
     // if it is an M2M call, hard code user id to a deafult value to avoid errors
     // Ideally, the m2m token should have unique userId, which may not be an actual user, as well
     const isMachineToken = _.get(req, 'authUser.isMachine', false);

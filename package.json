@@ -26,7 +26,9 @@
     "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha -w --require babel-core/register $(find src -path '*spec.js*')",
     "seed": "babel-node src/tests/seed.js --presets es2015",
     "demo-data": "babel-node local/seed",
-    "es-db-compare": "babel-node scripts/es-db-compare"
+    "es-db-compare": "babel-node scripts/es-db-compare",
+    "data:export": "babel-node scripts/data/export",
+    "data:import": "babel-node scripts/data/import"
   },
   "repository": {
     "type": "git",
@@ -72,7 +74,7 @@
     "pg-native": "^3.0.0",
     "sequelize": "^5.8.7",
     "swagger-ui-express": "^4.0.6",
-    "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.6.3",
+    "tc-core-library-js": "github:appirio-tech/tc-core-library-js#v2.6.3",
     "traverse": "^0.6.6",
     "urlencode": "^1.1.0",
     "yamljs": "^0.3.0"

@@ -4,20 +4,23 @@ Microservice to manage CRUD operations for all things Projects.
 
 **Note : Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.**
 
-- [Local Development](#local-development)
-  - [Requirements](#requirements)
-  - [Steps to run locally](#steps-to-run-locally)
-  - [Import sample metadata projects](#import-sample-metadata-projects)
-  - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
-- [Test](#test)
-  - [JWT Authentication](#jwt-authentication)
-- [Deploying with docker (might need updates)](#deploying-with-docker-might-need-updates)
-- [Kafka commands](#kafka-commands)
-  - [Create Topic](#create-topic)
-  - [List Topics](#list-topics)
-  - [Watch Topic](#watch-topic)
-  - [Post Message to Topic (from stdin)](#post-message-to-topic-from-stdin)
-- [References](#references)
+- [Topcoder Projects Service](#topcoder-projects-service)
+  - [Local Development](#local-development)
+    - [Requirements](#requirements)
+    - [Steps to run locally](#steps-to-run-locally)
+    - [Export database to json file](#export-database-to-json-file)
+    - [Import database from json file, and index it](#import-database-from-json-file-and-index-it)
+    - [Import sample metadata projects(Using projects service apis)](#import-sample-metadata-projectsusing-projects-service-apis)
+    - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
+  - [Test](#test)
+    - [JWT Authentication](#jwt-authentication)
+  - [Deploying with docker (might need updates)](#deploying-with-docker-might-need-updates)
+  - [Kafka commands](#kafka-commands)
+    - [Create Topic](#create-topic)
+    - [List Topics](#list-topics)
+    - [Watch Topic](#watch-topic)
+    - [Post Message to Topic (from stdin)](#post-message-to-topic-from-stdin)
+  - [References](#references)
 
 ## Local Development
 
@@ -180,7 +183,34 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
    npm run startKafkaConsumers:dev
    ```
 
-### Import sample metadata projects
+### Export database to json file
+
+To export data of certain models from database to json file.
+
+`npm run data:export -- --file path/to-file.json`
+
+List of models that will be exported is defined in `scripts/data/dataModels.js`. You can add new models to this list,
+but make sure that new models are added to list such that each model comes after its dependencies.
+
+When we run `npm run data:export` without specifying json file , data will be exported to `data/demo-data.json`.
+
+### Import database from json file, and index it
+
+To import data of certain models from file to database, and create ES indices.
+
+`npm run data:import -- --file path/to-file.json`
+
+List of models that will be imported is defined in `scripts/data/dataModels.js`. You can add new models to this list,
+but make sure that new models are added to list such that each model comes after its dependencies.
+
+When we run `npm run data:import` without specifying json file , data will be imported from `data/demo-data.json`.
+There is sample file located at `data/demo-data.json` that can used to import and index sample data.
+
+Because this commands calls topcoder services to get data like members details, so you have to set environment variables AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_URL, AUTH0_AUDIENCE, AUTH0_PROXY_SERVER_URL
+
+If you encounter conflicts errors, you may need to clear database using `npm run sync:db`, and clear ES (Elasticsearch) indices using `NODE_ENV=development npm run sync:es`
+
+### Import sample metadata projects(Using projects service apis)
 
 ```bash
 CONNECT_USER_TOKEN=<connect user token> npm run demo-data
