@@ -40,7 +40,8 @@ const validateMilestoneTemplate = {
    * @param {Function} next the express next middleware
    */
   // eslint-disable-next-line valid-jsdoc
-  validateRequestBody: (req, res, next) => {
+  validateRequestBody: (request, res, next) => {
+    const req = request;
     validateReference(req.body, req)
       .then(() => {
         if (req.body.sourceReference) {
@@ -109,12 +110,13 @@ const validateMilestoneTemplate = {
    * The middleware to validate milestoneTemplateId from request
    * path parameter, and set to the request params. This should be called after the validate()
    * middleware, and before the permissions() middleware.
-   * @param {Object} req the express request instance
+   * @param {Object} request the express request instance
    * @param {Object} res the express response instance
    * @param {Function} next the express next middleware
    */
   // eslint-disable-next-line valid-jsdoc
-  validateIdParam: (req, res, next) => {
+  validateIdParam: (request, res, next) => {
+    const req = request;
     models.MilestoneTemplate.findByPk(req.params.milestoneTemplateId)
       .then((milestoneTemplate) => {
         if (!milestoneTemplate) {

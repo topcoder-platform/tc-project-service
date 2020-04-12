@@ -11,7 +11,9 @@ module.exports = function logRequest(logger) {
   }
 
   // Use the logger with memory usage info
-  return (req, res, next) => {
+  return (request, response, next) => {
+    const req = request;
+    const res = response;
     const startOpts = {
       method: req.method,
       url: req.url,

@@ -6,10 +6,11 @@ import models from '../models';
 
 /**
  * Only Connect Manager, Connect Admin, and administrator are allowed to perform the operations
- * @param {Object}    req         the express request instance
+ * @param {Object}    request         the express request instance
  * @return {Promise}              returns a promise
  */
-module.exports = req => new Promise(async (resolve, reject) => {
+module.exports = request => new Promise(async (resolve, reject) => {
+  const req = request;
   const hasAccess = util.hasRoles(req, MANAGER_ROLES);
 
   if (!hasAccess) {
