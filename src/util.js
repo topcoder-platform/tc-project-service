@@ -1,5 +1,4 @@
 
-/* globals Promise */
 /*
  * Copyright (C) 2016 TopCoder Inc., All Rights Reserved.
  */

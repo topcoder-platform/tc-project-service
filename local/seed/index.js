@@ -7,7 +7,7 @@ const token =
 
 async function seed() {
   await seedMetadata(targetUrl, token);
-  await seedProjects(targetUrl, token);
+  // await seedProjects(targetUrl, token);
 }
 
 seed().then(() => process.exit());

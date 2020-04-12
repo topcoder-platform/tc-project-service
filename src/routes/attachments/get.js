@@ -19,17 +19,20 @@ const permissions = tcMiddleware.permissions;
  * @returns {Array<Promise>} The array of two promises, first one if the attachment object promise,
  *                           The second promise is for the file pre-signed url (if attachment type is file)
  */
-const getPreSignedUrl = (req, attachment) => {
+const getPreSignedUrl = async (req, attachment) => {
+  // If the attachment is a link return it as-is without getting the pre-signed url
   if (attachment.type === ATTACHMENT_TYPES.LINK) {
-    // If the attachment is a link return it as-is without getting the pre-signed url
     return [attachment, ''];
-  }  // The attachment is a file
-    // In development/test mode, if file upload is disabled, we return the dummy attachment object
-  if (_.includes(['development', 'test'], process.env.NODE_ENV) && config.get('enableFileUpload') === 'false') {
+  }
+
+  // The attachment is a file
+  // In development mode, if file upload is disabled, we return the dummy attachment object
+  if (_.includes(['development'], process.env.NODE_ENV) && config.get('enableFileUpload') === 'false') {
     return [attachment, 'dummy://url'];
   }
-      // Not in development mode or file upload is not disabled
-  return [attachment, util.getFileDownloadUrl(req, attachment.path)];
+  // Not in development mode or file upload is not disabled
+  const url = await util.getFileDownloadUrl(req, attachment.path);
+  return [attachment, url];
 };
 
 module.exports = [

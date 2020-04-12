@@ -3,7 +3,6 @@
  */
 import chai from 'chai';
 import request from 'supertest';
-// import sleep from 'sleep';
 import config from 'config';
 import _ from 'lodash';
 
@@ -208,8 +207,6 @@ describe('LIST timelines', () => {
                   });
                 }))
                   .then(() => {
-                    // sleep for some time, let elasticsearch indices be settled
-                    // sleep.sleep(5);
                     done();
                   }));
           });

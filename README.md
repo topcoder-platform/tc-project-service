@@ -26,7 +26,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 ### Requirements
 
 * [docker-compose](https://docs.docker.com/compose/install/) - We use docker-compose for running dependencies locally.
-* Nodejs 8.9.4 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
+* Nodejs 12.16.1 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
 * Install [libpg](https://www.npmjs.com/package/pg-native)
 
 ### Steps to run locally
