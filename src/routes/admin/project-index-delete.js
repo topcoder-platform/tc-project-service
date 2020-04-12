@@ -1,6 +1,4 @@
 
-/* globals Promise */
-
 import _ from 'lodash';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';

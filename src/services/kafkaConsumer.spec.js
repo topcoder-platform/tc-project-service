@@ -6,6 +6,7 @@ import chai from 'chai';
 import startKafkaConsumer from './kafkaConsumer';
 
 chai.should();
+const expect = chai.expect;
 
 describe('Kafka service', () => {
   const sandbox = sinon.sandbox.create();
@@ -99,8 +100,8 @@ describe('Kafka service', () => {
         },
       }], 'topic2', {});
 
-      handlers.topic2.calledOnce.should.be.true;
-      mockedLogger.error.calledOnce.should.be.true;
+      expect(handlers.topic2.calledOnce, 'topic2 handler should be called once').to.be.true;
+      expect(mockedLogger.error.calledOnce, 'logger.error should be called once').to.be.true;
       mockedLogger.error.calledWith('Message processing failed: failure');
     });
 

@@ -311,6 +311,10 @@ router.route('/v5/projects/metadata/planConfig/:key/versions/:version(\\d+)')
   .patch(require('./planConfig/version/update'))
   .delete(require('./planConfig/version/delete'));
 
+// user level reports
+router.route('/v5/projects/reports/embed')
+.get(require('./userReports/getEmbedReport'));
+
 // work streams
 router.route('/v5/projects/:projectId(\\d+)/workstreams')
   .get(require('./workStreams/list'))

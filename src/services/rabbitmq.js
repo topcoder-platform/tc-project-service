@@ -1,10 +1,8 @@
-/* globals Promise */
 import _ from 'lodash';
 import amqplib from 'amqplib';
 import { rabbitHandlers as handlers } from '../events';
 
 module.exports = class RabbitMQService {
-
   /**
    * constructor
    * @param {Object} logger logger object
