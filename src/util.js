@@ -765,8 +765,7 @@ _.assignIn(util, {
     }
 
     // set default null value for all valid fields
-    const memberDefaults = _.reduce(fields, (ac, field) => {
-      const acc = ac;
+    const memberDefaults = _.reduce(fields, (acc, field) => {
       const isValidField = _.includes(_.union(memberDetailFields, memberTraitFields), field);
       if (isValidField) {
         acc[field] = null;

@@ -7,7 +7,7 @@ import util from '../util';
 /**
  * Common validation code for types of timeline references.
  * @param {{ reference: string, referenceId: string|number }} sourceObject
- * @param {object} request
+ * @param {object} req
  * @param {boolean} [validateProjectExists]
  * @returns {Promise}
  */
