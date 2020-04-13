@@ -10,9 +10,9 @@ import { dataModels, validateDataModels } from '../dataModels';
  * @return {Promise}              Returns a promise
  */
 function saveExportedData(filePath, data, logger) {
-  logger.log('Start Saving data to file....');
+  logger.info('Start Saving data to file....');
   fs.writeFileSync(filePath, JSON.stringify(data));
-  logger.log('End Saving data to file....');
+  logger.info('End Saving data to file....');
 }
 /**
  * loads data  from database and export it to specified file path
@@ -38,7 +38,7 @@ async function exportDatabaseToJson(filePath, logger) {
     const modelName = dataModels[index];
     const modelRecords = results[index][0];
     allModelsRecords[modelName] = modelRecords;
-    logger.log(
+    logger.info(
       `Records loaded for model: ${modelName} = ${modelRecords.length}`,
     );
   }

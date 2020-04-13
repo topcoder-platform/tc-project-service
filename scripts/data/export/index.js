@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
+import Promise from 'bluebird';
 import util from '../../../src/util';
 import { exportData } from './exportData';
 /**
@@ -12,7 +13,7 @@ import { exportData } from './exportData';
 function runExportData(filePath, logger) {
   exportData(filePath, logger)
     .then(() => {
-      logger.log('Successfully exported data');
+      logger.info('Successfully exported data');
       process.exit(0);
     })
     .catch((err) => {
@@ -20,16 +21,16 @@ function runExportData(filePath, logger) {
       process.exit(1);
     });
 }
-
-setTimeout(() => {
-  const logger = console;
+  const logger = util.getAppLogger();
   const filePath =
     process.argv[2] === '--file' && process.argv[3]
       ? process.argv[3]
       : 'data/demo-data.json';
-  logger.log('\nScript will export data to file:', filePath);
+  logger.info('Script will export data to file:', filePath);
   // check if file exists
   if (fs.existsSync(filePath)) {
+  // We delay question for overwrite file, because the question overlaps with a warning message from sequelize module
+  Promise.delay(1).then(() => {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -40,14 +41,15 @@ setTimeout(() => {
       (answer) => {
         rl.close();
         if (answer.toLowerCase() === 'y') {
-          logger.log('File will be overwritten.');
+          logger.info('File will be overwritten.');
           runExportData(filePath, logger);
         } else {
-          logger.log('Exit without exporting any data');
+          logger.info('Exit without exporting any data');
           process.exit(0);
         }
       },
     ); // question()
+  });
   } else {
     // get base directory of the file
     const baseDir = path.resolve(filePath, '..');
@@ -55,4 +57,3 @@ setTimeout(() => {
     util.mkdirSyncRecursive(baseDir);
     runExportData(filePath, logger);
   }
-});

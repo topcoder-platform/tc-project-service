@@ -18,6 +18,7 @@ import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';
 import Promise from 'bluebird';
+import coreLib from 'tc-core-library-js';
 import models from './models';
 
 import {
@@ -1342,6 +1343,15 @@ _.assignIn(util, {
 
       return curDir;
     }, initDir);
+  },
+  getAppLogger: () => {
+    const appName = 'tc-projects-service';
+    return coreLib.logger({
+      name: appName,
+      level: _.get(config, 'logLevel', 'debug').toLowerCase(),
+      captureLogs: config.get('captureLogs'),
+      logentriesToken: _.get(config, 'logentriesToken', null),
+    });
   },
 
 });

@@ -7,11 +7,10 @@ import { PERMISSION } from './constants';
  * Permission to allow copilot and above roles to perform certain operations
  * - User with Topcoder admins roles should be able to perform the operations.
  * - Project members with copilot and manager Project roles should be also able to perform the operations.
- * @param {Object}    request         the express request instance
+ * @param {Object}    req         the express request instance
  * @return {Promise}              returns a promise
  */
-module.exports = request => new Promise((resolve, reject) => {
-  const req = request;
+module.exports = req => new Promise((resolve, reject) => {
   const projectId = _.parseInt(req.params.projectId);
 
   return models.ProjectMember.getActiveProjectMembers(projectId)

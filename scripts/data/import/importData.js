@@ -16,6 +16,7 @@ async function writeDataToDatabase(filePath, logger) {
     // Start a transaction
     transaction = await models.sequelize.transaction();
     const jsonData = JSON.parse(fs.readFileSync(filePath).toString());
+    // we disable no-await-in-loop because we need to run insert operations sequentially to avoid FK constraints errors
     /* eslint-disable no-await-in-loop */
     for (let index = 0; index < dataModels.length; index += 1) {
       const modelName = dataModels[index];
@@ -25,21 +26,21 @@ async function writeDataToDatabase(filePath, logger) {
         await models[modelName].bulkCreate(modelRecords, {
           transaction,
         });
-        logger.log(
+        logger.info(
           `Records to save for model: ${modelName} = ${modelRecords.length}`,
         );
       } else {
-        logger.log(`No records to save for model: ${modelName}`);
+        logger.info(`No records to save for model: ${modelName}`);
       }
     }
     // commit transaction only if all things went ok
-    logger.log('committing transaction to database...');
+    logger.info('committing transaction to database...');
     await transaction.commit();
   } catch (error) {
     logger.error('Error while writing data of model:', currentModelName);
     // rollback all insert operations
     if (transaction) {
-      logger.log('rollback database transaction...');
+      logger.info('rollback database transaction...');
       transaction.rollback();
     }
     if (error.name && error.errors && error.fields) {
@@ -65,10 +66,10 @@ async function writeDataToDatabase(filePath, logger) {
  * @return {Promise}              Returns a promise
  */
 async function indexDataToES(logger) {
-  logger.log('Indexing metatdata...');
+  logger.info('Indexing metatdata...');
   await indexMetadata();
 
-  logger.log('Indexing projects data...');
+  logger.info('Indexing projects data...');
   const req = {
     logger,
     projectIdStart: 1,
@@ -78,19 +79,7 @@ async function indexDataToES(logger) {
     fields: null,
     id: 0,
   };
-  await new Promise((resolve, reject) => {
-    indexProjectsRange(
-      req,
-      null,
-      (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      },
-    );
-  });
+  await indexProjectsRange(req);
 }
 
 /**
