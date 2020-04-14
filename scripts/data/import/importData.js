@@ -21,14 +21,32 @@ async function writeDataToDatabase(filePath, logger) {
     for (let index = 0; index < dataModels.length; index += 1) {
       const modelName = dataModels[index];
       currentModelName = modelName;
+      const model = models[modelName];
       const modelRecords = jsonData[modelName];
       if (modelRecords && modelRecords.length > 0) {
-        await models[modelName].bulkCreate(modelRecords, {
+        logger.info(
+          `Importing data for model: ${modelName}`,
+        );
+        await model.bulkCreate(modelRecords, {
           transaction,
         });
         logger.info(
-          `Records to save for model: ${modelName} = ${modelRecords.length}`,
+          `Records imported for model: ${modelName} = ${modelRecords.length}`,
         );
+        const modelAttributes = Object.keys(model.rawAttributes);
+        const tableName = model.getTableName();
+        /* eslint-disable no-await-in-loop */
+        for (let attributeIndex = 0; attributeIndex < modelAttributes.length; attributeIndex += 1) {
+          const field = modelAttributes[attributeIndex];
+          const fieldInfo = model.rawAttributes[field];
+          if (fieldInfo.autoIncrement) {
+          const query = `SELECT setval('${tableName}_${field}_seq', (SELECT MAX(${field}) FROM ${tableName}))`;
+          const setValue = (await models.sequelize.query(query, {
+            transaction,
+          }))[0][0].setval;
+          logger.info(`Updated autoIncrement for ${modelName}.${field} with max value = ${setValue}`);
+        }
+      }
       } else {
         logger.info(`No records to save for model: ${modelName}`);
       }
