@@ -9,13 +9,12 @@ const whitelistedOrigins = JSON.parse(config.get('whitelistedOriginsForUserIdAut
 
 /**
  * The userId authentication middleware.
- * @param {Object} request the request
+ * @param {Object} req the request
  * @param {Object} res the response
  * @param {Function} next the next middleware
  * @returns {Promise<void>} void
  */
-module.exports = function userIdAuth(request, res, next) { // eslint-disable-line consistent-return
-  const req = request;
+module.exports = function userIdAuth(req, res, next) { // eslint-disable-line consistent-return
   req.log.debug('Enter userIdAuth middleware');
 
   const bearerUserId = 'Bearer userId_';

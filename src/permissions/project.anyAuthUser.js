@@ -10,8 +10,7 @@
 import _ from 'lodash';
 import models from '../models';
 
-module.exports = (request) => {
-  const req = request;
+module.exports = (req) => {
   if (_.isUndefined(req.params.projectId)) {
     return Promise.reject(new Error('Policy "project.anyAuthUser" cannot be used for route without "projectId".'));
   }

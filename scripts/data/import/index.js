@@ -1,17 +1,18 @@
 import * as fs from 'fs';
+import util from '../../../src/util';
 import { importData } from './importData';
 
-const logger = console;
+const logger = util.getAppLogger();
 const filePath = (process.argv[2] === '--file' && process.argv[3]) ? process.argv[3] : 'data/demo-data.json';
 // check if file exists
 if (!fs.existsSync(filePath)) {
   logger.error('File is not existing:', filePath);
   process.exit(1);
 } else {
-  logger.log('Script will import data from file:', filePath);
+  logger.info('Script will import data from file:', filePath);
   importData(filePath, logger)
     .then(() => {
-      logger.log('Successfully imported data');
+      logger.info('Successfully imported data');
       process.exit(0);
     })
     .catch((err) => {

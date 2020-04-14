@@ -1,4 +1,3 @@
-
 import _ from 'lodash';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -32,24 +31,31 @@ module.exports = [
     const docType = _.get(req, 'body.docType', ES_PROJECT_TYPE);
     const fields = req.query.fields;
     const id = req.id;
-    indexProjectsRange(
-      {
-        logger,
-        projectIdStart,
-        projectIdEnd,
-        indexName,
-        docType,
-        fields,
-        id,
-      },
-      (esIndexingBody) => {
-        res.status(200).json({
-          message: `Reindex request successfully submitted for ${
-            esIndexingBody.length / 2
-          } projects`,
-        });
-      },
-      next,
-    );
+    return indexProjectsRange(
+        {
+          logger,
+          projectIdStart,
+          projectIdEnd,
+          indexName,
+          docType,
+          fields,
+          id,
+        },
+        (esIndexingBody) => {
+          res.status(200).json({
+            message: `Reindex request successfully submitted for ${
+              esIndexingBody.length / 2
+            } projects`,
+          });
+        },
+      ).then((result) => {
+        logger.debug(`project indexed successfully (projectId: ${projectIdStart}-${projectIdEnd})`, result);
+        logger.debug(result);
+      }).catch((error) => {
+        logger.error(
+          `Error in getting project details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`,
+        error);
+        next(error);
+      });
   },
 ];

@@ -18,6 +18,7 @@ import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';
 import Promise from 'bluebird';
+import coreLib from 'tc-core-library-js';
 import models from './models';
 
 import {
@@ -764,8 +765,7 @@ _.assignIn(util, {
     }
 
     // set default null value for all valid fields
-    const memberDefaults = _.reduce(fields, (ac, field) => {
-      const acc = ac;
+    const memberDefaults = _.reduce(fields, (acc, field) => {
       const isValidField = _.includes(_.union(memberDetailFields, memberTraitFields), field);
       if (isValidField) {
         acc[field] = null;
@@ -1342,6 +1342,15 @@ _.assignIn(util, {
 
       return curDir;
     }, initDir);
+  },
+  getAppLogger: () => {
+    const appName = 'tc-projects-service';
+    return coreLib.logger({
+      name: appName,
+      level: _.get(config, 'logLevel', 'debug').toLowerCase(),
+      captureLogs: config.get('captureLogs'),
+      logentriesToken: _.get(config, 'logentriesToken', null),
+    });
   },
 
 });

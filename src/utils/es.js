@@ -119,20 +119,25 @@ const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 /**
  * prepare project for indexing
  *
- * @param {object} projectObj project object
+ * @param {object} dbProject project object
  * @param {object} logger logger
  * @param {object} usersCache users cache
  * @param {object} fields fields to index
  * @param {int} requestId   request Id
- * @param {function} completedCallback   callback function
  *
- * @return {Object} create index request
+ * @return {Object} prepared project object for indexing
  */
-function prepareProject(projectObj, logger, usersCache, fields, requestId, completedCallback) {
-  if (!projectObj) {
+async function prepareProject(
+  dbProject,
+  logger,
+  usersCache,
+  fields,
+  requestId,
+) {
+  if (!dbProject) {
     return Promise.resolve(null);
   }
-  const project = projectObj.toJSON();
+  const project = dbProject.toJSON();
   const membersCache = usersCache;
   logger.debug('phases', project.phases);
   if (project.phases) {
@@ -141,80 +146,45 @@ function prepareProject(projectObj, logger, usersCache, fields, requestId, compl
       _.omit(phase, ['deletedAt', 'deletedBy']),
     );
   }
-  return models.ProjectMember.getActiveProjectMembers(project.id)
-    .then((currentProjectMembers) => {
-      logger.debug('currentProjectMembers : ', currentProjectMembers);
-      // check context for project members
-      project.members = _.map(currentProjectMembers, m =>
-        _.pick(m, fields.project_members),
-      );
-      logger.debug('project.members => ', project.members);
-      const userIds = project.members ? _.map(project.members, 'userId') : [];
-      logger.debug('userIds => ', userIds);
-      const newUsersIds = [];
-      userIds.forEach((userId) => {
-        if (!membersCache[userId]) {
-          newUsersIds.push(userId);
-        }
-      });
-      if (newUsersIds.length > 0) {
-        logger.debug('getting details for userIds', newUsersIds);
-        return util
-          .getMemberDetailsByUserIds(
-            newUsersIds,
-            logger,
-            requestId,
-          )
-          .then((membersDetails) => {
-            logger.debug('membersDetails => ', membersDetails);
-            membersDetails.forEach((md) => {
-              membersCache[md.userId] = md;
-            });
-            // update project member record with details
-            project.members = project.members.map((single) => {
-              const detail = membersCache[single.userId];
-              return _.merge(
-                single,
-                _.pick(detail, 'handle', 'firstName', 'lastName', 'email'),
-              );
-            });
-            logger.debug(
-              'After adding details, project.members => ',
-              project.members,
-            );
-            return Promise.delay(1000).return(project);
-          })
-          .catch((error) => {
-            logger.error(
-              `Error in getting project member details for (projectId: ${project.id})`,
-              error,
-            );
-            completedCallback(error);
-            return null;
-          });
-      }
-        // update project member record with details
-      project.members = project.members.map((single) => {
-        const detail = membersCache[single.userId];
-        return _.merge(
-            single,
-            _.pick(detail, 'handle', 'firstName', 'lastName', 'email'),
-          );
-      });
-      logger.debug(
-          'After adding details, project.members => ',
-          project.members,
-        );
-      return Promise.delay(1000).return(project);
-    })
-    .catch((error) => {
-      logger.error(
-        `Error in getting project active members (projectId: ${project.id})`,
-        error,
-      );
-      completedCallback(error);
-      return null;
+  const currentProjectMembers = await models.ProjectMember.getActiveProjectMembers(
+    project.id,
+  );
+  logger.debug('currentProjectMembers : ', currentProjectMembers);
+  // check context for project members
+  project.members = _.map(currentProjectMembers, m =>
+    _.pick(m, fields.project_members),
+  );
+  logger.debug('project.members => ', project.members);
+  const userIds = project.members ? _.map(project.members, 'userId') : [];
+  logger.debug('userIds => ', userIds);
+  const newUsersIds = [];
+  userIds.forEach((userId) => {
+    if (!membersCache[userId]) {
+      newUsersIds.push(userId);
+    }
+  });
+  if (newUsersIds.length > 0) {
+    logger.debug('getting details for userIds', newUsersIds);
+    const membersDetails = await util.getMemberDetailsByUserIds(
+      newUsersIds,
+      logger,
+      requestId,
+    );
+    logger.debug('membersDetails => ', membersDetails);
+    membersDetails.forEach((md) => {
+      membersCache[md.userId] = md;
     });
+  }
+  // update project member record with details
+  project.members = project.members.map((single) => {
+    const detail = membersCache[single.userId];
+    return _.merge(
+      single,
+      _.pick(detail, 'handle', 'firstName', 'lastName', 'email'),
+    );
+  });
+  logger.debug('After adding details, project.members => ', project.members);
+  return Promise.delay(1000).return(project);
 }
 
 /**
@@ -223,14 +193,12 @@ function prepareProject(projectObj, logger, usersCache, fields, requestId, compl
  * @param {object} projectIndexingParameters object contains these properties
  * logger,projectIdStart, projectIdEnd, indexName, docType, fields, id
  * @param {function} beforeBulkIndexingCallback   function to be called when data is ready for peforming ES indexing
- * @param {function} completedCallback   function to be called if operations succeed or fails
  *
  * @return {Promise}              Returns a promise
  */
-function indexProjectsRange(
+async function indexProjectsRange(
   projectIndexingParameters,
-  beforeBulkIndexingCallback,
-  completedCallback,
+  beforeBulkIndexingCallback = null,
 ) {
   const logger = projectIndexingParameters.logger;
   logger.debug('Entered Admin#index');
@@ -252,93 +220,60 @@ function indexProjectsRange(
   logger.debug('fields', fields);
 
   const membersCache = {};
-  return models.Project.findProjectRange(
+  const projects = await models.Project.findProjectRange(
     models,
     projectIdStart,
     projectIdEnd,
     fields,
     false,
-  )
-    .then((_projects) => {
-      logger.debug('Projects in range: ', _projects.length);
+  );
+  logger.debug('Projects in range: ', projects.length);
 
-      const projectResponses = [];
-      const allProjectsProcessedHandler = () => {
-        const body = [];
-        projectResponses.map((p) => {
-          if (p) {
-            body.push({
-              index: { _index: indexName, _type: docType, _id: p.id },
-            });
-            body.push(p);
-          }
-          // dummy return
-          return p;
-        });
-        logger.debug('body.length', body.length);
-        if (body.length > 0) {
-          logger.trace('body[0]', body[0]);
-          logger.trace('body[length-1]', body[body.length - 1]);
-        }
-        if (beforeBulkIndexingCallback) {
-          beforeBulkIndexingCallback(body);
-        }
-        // bulk index
-        if (body.length > 0) {
-          eClient
-            .bulk({
-              body,
-            })
-            .then((result) => {
-              logger.debug(
-                `project indexed successfully (projectId: ${projectIdStart}-${projectIdEnd})`,
-                result,
-              );
-              logger.debug(result);
-              completedCallback();
-            })
-            .catch((error) => {
-              logger.error(
-                `Error in indexing project (projectId: ${projectIdStart}-${projectIdEnd})`,
-                error,
-              );
-              completedCallback(error);
-            });
-        } else {
-          completedCallback();
-        }
-      };
-      const prepareProjectHandler = (project) => {
-        if (project) {
-          projectResponses.push(project);
-        }
-        if (_projects.length > 0) {
-          const projectObj = _projects.pop();
-          prepareProject(projectObj, logger, membersCache, fields, projectIndexingParameters.id, completedCallback)
-            .then(prepareProjectHandler)
-            .catch((error) => {
-              logger.error(
-                `Error in getting projects details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`,
-                error,
-              );
-              completedCallback(error);
-            });
-        } else {
-          allProjectsProcessedHandler();
-        }
-      };
-      prepareProject(_projects.pop(), logger, membersCache, fields, projectIndexingParameters.id, completedCallback)
-        .then(prepareProjectHandler)
-        .catch((error) => {
-          logger.error(
-            `Error in getting projects details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`,
-            error,
-          );
-        });
-    })
-    .catch((error) => {
-      completedCallback(error);
+  const projectResponses = [];
+  /* eslint-disable no-await-in-loop */
+
+  for (let index = 0; index < projects.length; index += 1) {
+    const dbProject = projects[index];
+    const project = await prepareProject(
+      dbProject,
+      logger,
+      membersCache,
+      fields,
+      projectIndexingParameters.id,
+    );
+    projectResponses.push(project);
+  }
+
+  const body = [];
+  projectResponses.map((p) => {
+    if (p) {
+      body.push({
+        index: { _index: indexName, _type: docType, _id: p.id },
+      });
+      body.push(p);
+    }
+    // dummy return
+    return p;
+  });
+  logger.debug('body.length', body.length);
+  if (body.length > 0) {
+    logger.trace('body[0]', body[0]);
+    logger.trace('body[length-1]', body[body.length - 1]);
+  }
+  if (beforeBulkIndexingCallback) {
+    beforeBulkIndexingCallback(body);
+  }
+  // bulk index
+  if (body.length > 0) {
+    const result = await eClient.bulk({
+      body,
     });
+    logger.debug(
+      `project indexed successfully (projectId: ${projectIdStart}-${projectIdEnd})`,
+      result,
+    );
+    logger.debug(result);
+  }
 }
 
 module.exports = {

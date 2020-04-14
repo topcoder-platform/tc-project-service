@@ -27,8 +27,7 @@ module.exports = [
   // handles request validations
   validate(updateMemberValidations),
   permissions('projectMemberInvite.edit'),
-  (request, res, next) => {
-    const req = request;
+  (req, res, next) => {
     const newStatus = req.body.status;
     if (newStatus === INVITE_STATUS.CANCELED) {
       const err = new Error('Cannot change invite status to “canceled”. Please, delete the invite instead.');
