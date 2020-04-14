@@ -28,7 +28,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 ### Requirements
 
 * [docker-compose](https://docs.docker.com/compose/install/) - We use docker-compose for running dependencies locally.
-* Nodejs 12.16.1 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
+* [Node.js](https://nodejs.org/) version 12 - consider using [nvm](https://github.com/creationix/nvm) or equivalent to manage your node version
 * Install [libpg](https://www.npmjs.com/package/pg-native)
 
 ### Steps to run locally
@@ -38,15 +38,39 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
    npm install
    ```
 
+2. Local config
+
+    1. In the `tc-project-service` root directory create `.env` file with the environment variables _(values should be shared with you on the forum)_:<br>
+       ```
+       AUTH0_CLIENT_ID=...
+       AUTH0_CLIENT_SECRET=...
+       AUTH0_URL=...
+       AUTH0_AUDIENCE=...
+       AUTH0_PROXY_SERVER_URL=...
+       ```
+       Values from this file would be automatically used by `docker-compose` and command `npm run start:dev` below.
+
+    2. Copy config file `config/m2m.local.js` into `config/local.js`:
+        ```bash
+        cp config/m2m.local.js config/local.js
+        ```
+
+    3. Set `dockerhost` to point the IP address of Docker. Docker IP address depends on your system. For example if docker is run on IP `127.0.0.1` add a the next line to your `/etc/hosts` file:
+       ```
+       127.0.0.1       dockerhost
+       ```
+
+       Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.
+
 3. Start **ONE** of the docker-compose files with dependant services which are required for Project Service to work
 
    1. **Minimal** `./local/docker-compose.yml`:
 
       *Use this docker-compose if you only want to test and modify code of Project Service and you don't need Elasticsearch (ES) to work.*
 
-      Run, inside folder `./local`:
+      Run, in the project root folder:
       ```bash
-      docker-compose up
+      docker-compose -f local/docker-compose.yml up
       ```
 
       <details><summary>Click to see details</summary>
@@ -66,17 +90,16 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 
       *Use this docker-compose if you  want to test and modify code of Project Service together with one of the next relative services: [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api), [project-processor-es](https://github.com/topcoder-platform/project-processor-es), [tc-notifications](https://github.com/topcoder-platform/tc-notifications) or you need Elasticsearch (ES) to work.*
 
-      1. Set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`
-      2. Run, inside folder `./local/full`
+      1. Run, in the project root folder:
 
           ```bash
-          docker-compose up -d
+          docker-compose -f local/full/docker-compose.yml up -d
           ```
 
-      3. Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
+      2. Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
 
          ```bash
-         docker-compose logs -f project-processor-es
+         docker-compose -f local/full/docker-compose.yml logs -f project-processor-es
          ```
 
         <details><summary>Click to see example logs</summary>
@@ -97,7 +120,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
           ```
         </details>
 
-      4. If you want to modify the code of any of the services which are run inside this docker-compose file, you can stop such service inside docker-compose by command `docker-compose stop -f <SERVICE_NAME>` and run the service separately, following its README file.
+      3. If you want to modify the code of any of the services which are run inside this docker-compose file, you can stop such service inside docker-compose by command `docker-compose -f local/full/docker-compose.yml stop -f <SERVICE_NAME>` and run the service separately, following its README file.
 
       <details><summary>Click to see details</summary>
       <br>
@@ -123,56 +146,37 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
       - To view the logs from any container inside docker-compose use the following command, replacing `SERVICE_NAME` with the corresponding value under the **Name** column in the above table:
 
         ```bash
-        cd local/full
-        docker-compose logs -f SERVICE_NAME
+        docker-compose -f local/full/docker-compose.yml logs -f SERVICE_NAME
         ```
 
       </details>
 
    *NOTE: In production these dependencies / services are hosted & managed outside Project Service.*
 
-4. Local config
-
-    1. Copy config file `config/m2m.local.js` into `config/local.js`:
-        ```bash
-        cp config/m2m.local.js config/local.js
-        ```
-
-    2. Set `dockerhost` to point the IP address of Docker. Docker IP address depends on your system. For example if docker is run on IP `127.0.0.1` add a the next line to your `/etc/hosts` file:
-       ```
-       127.0.0.1       dockerhost
-       ```
-
-       Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.
-
-5. Create tables in DB
+4. Create tables in DB
     ```bash
     NODE_ENV=development npm run sync:db
     ```
 
     *NOTE: this will drop tables if they already exist.*
 
-6. Create ES (Elasticsearch) indexes
+5. Create ES (Elasticsearch) indexes
     ```bash
     NODE_ENV=development npm run sync:es
     ```
 
     *NOTE: This will first clear all the indices and than recreate them. So use with caution.*
 
-7. Start Project Service
+6. Start Project Service
 
-   1. Set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`
+   ```bash
+   npm run start:dev
+   ```
 
-   2. Run
+   Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
+   The project service will be served on `http://localhost:8001`.
 
-      ```bash
-      npm run start:dev
-      ```
-
-      Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
-      The project service will be served on `http://localhost:8001`.
-
-8. *(Optional)* Start Project Service Kafka Consumer
+7. *(Optional)* Start Project Service Kafka Consumer
 
    *Run this only if you want to test or modify logic of `lastActivityAt` or `lastActivityBy`.*
 
@@ -304,5 +308,4 @@ docker exec -it tc-projects-kafka /opt/kafka/bin/kafka-console-producer.sh --bro
 
 ## References
 
-- [Projects Service Architecture](./docs/guides/architercture/architecture.md)
 - [Projects Service Architecture](./docs/guides/architercture/architecture.md)
