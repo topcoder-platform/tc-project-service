@@ -27,8 +27,8 @@
     "seed": "babel-node src/tests/seed.js --presets es2015",
     "demo-data": "babel-node local/seed",
     "es-db-compare": "babel-node scripts/es-db-compare",
-    "data:export": "LOG_LEVEL=info babel-node scripts/data/export",
-    "data:import": "LOG_LEVEL=info babel-node scripts/data/import"
+    "data:export": "LOG_LEVEL=info babel-node scripts/data/export | bunyan -o short",
+    "data:import": "LOG_LEVEL=info babel-node scripts/data/import | bunyan -o short"
   },
   "repository": {
     "type": "git",
