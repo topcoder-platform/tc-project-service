@@ -21,14 +21,51 @@ async function writeDataToDatabase(filePath, logger) {
     for (let index = 0; index < dataModels.length; index += 1) {
       const modelName = dataModels[index];
       currentModelName = modelName;
+      const model = models[modelName];
       const modelRecords = jsonData[modelName];
       if (modelRecords && modelRecords.length > 0) {
-        await models[modelName].bulkCreate(modelRecords, {
+        logger.info(`Importing data for model: ${modelName}`);
+        await model.bulkCreate(modelRecords, {
           transaction,
         });
         logger.info(
-          `Records to save for model: ${modelName} = ${modelRecords.length}`,
+          `Records imported for model: ${modelName} = ${modelRecords.length}`,
         );
+
+        // Set autoincrement sequencers in the database to be set to max of the autoincrement column,
+        // so that, when next insertions don't provide value of autoincrement column, as in case of using APIs,
+        // it should be set automatically based on last value of sequencers.
+        const modelAttributes = Object.keys(model.rawAttributes);
+        const tableName = model.getTableName();
+        /* eslint-disable no-await-in-loop */
+        for (
+          let attributeIndex = 0;
+          attributeIndex < modelAttributes.length;
+          attributeIndex += 1
+        ) {
+          const field = modelAttributes[attributeIndex];
+          const fieldInfo = model.rawAttributes[field];
+          if (fieldInfo.autoIncrement) {
+            // Get sequence name corresponding to automincrment column in a table
+            const selectSequenceQuery = `SELECT pg_get_serial_sequence('${tableName}', '${field}')`;
+            const sequenceName = (
+              await models.sequelize.query(selectSequenceQuery, {
+                transaction,
+              })
+            )[0][0].pg_get_serial_sequence;
+
+            // update sequence value to be set to max value of the autoincrement column in the table
+            const query = `SELECT setval('${sequenceName}', (SELECT MAX(${field}) FROM ${tableName}))`;
+            const setValue = (
+              await models.sequelize.query(query, {
+                transaction,
+              })
+            )[0][0].setval;
+            logger.info(
+              `Updated autoIncrement for ${modelName}.${field} with max value = ${setValue}`,
+            );
+          }
+        }
       } else {
         logger.info(`No records to save for model: ${modelName}`);
       }
