@@ -653,6 +653,7 @@ _.assignIn(util, {
 
     const isAdmin = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
     const currentUserId = req.authUser.userId;
+    const currentUserEmail = req.authUser.email;
 
     // admins can get data as it is
     if (isAdmin) {
@@ -669,7 +670,13 @@ _.assignIn(util, {
         const canSeeEmail = (
           isAdmin || // admin
           invite.createdBy === currentUserId || // user who created invite
-          invite.userId === currentUserId // user who is invited
+          (invite.userId !== null && invite.userId === currentUserId) || // user who is invited by `handle`
+          ( // user who is invited by `email` (invite doesn't have `userId`)
+            invite.userId === null &&
+            invite.email &&
+            currentUserEmail &&
+            invite.email.toLowerCase() === currentUserEmail.toLowerCase()
+          )
         );
         // mask email if user cannot see it
         _.assign(invite, {
