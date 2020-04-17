@@ -227,7 +227,8 @@ describe('GET Project Member Invite', () => {
             should.exist(resJson);
             should.exist(resJson.projectId);
             resJson.id.should.be.eql(3);
-            resJson.email.should.be.eql('t***t@t***r.com'); // masked
+            // not masked, because user who is invited by email is the user who is calling this endpoint
+            resJson.email.should.be.eql('test@topcoder.com');
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
             done();
           }
