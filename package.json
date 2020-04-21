@@ -27,8 +27,10 @@
     "seed": "babel-node src/tests/seed.js --presets es2015",
     "demo-data": "babel-node local/seed",
     "es-db-compare": "babel-node scripts/es-db-compare",
-    "data:export": "LOG_LEVEL=info babel-node scripts/data/export | bunyan -o short",
-    "data:import": "LOG_LEVEL=info babel-node scripts/data/import | bunyan -o short"
+    "data:export": "LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/export | bunyan -o short",
+    "data:import": "LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/import | bunyan -o short",
+    "local:run-docker": "docker-compose -f ./local/full/docker-compose.yml up -d",
+    "local:setup": "NODE_ENV=development npm run sync:db && NODE_ENV=development npm run sync:es && npm run data:import"
   },
   "repository": {
     "type": "git",
