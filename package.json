@@ -10,6 +10,7 @@
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix || true",
     "build": "babel src -d dist --presets es2015 --copy-files",
+    "sync:all": "NODE_ENV=development npm run sync:db && NODE_ENV=development npm run sync:es",
     "sync:db": "./node_modules/.bin/babel-node migrations/sync.js",
     "sync:es": "./node_modules/.bin/babel-node migrations/elasticsearch_sync.js",
     "sync:es:metadata": "./node_modules/.bin/babel-node migrations/elasticsearch_sync.js --index-name metadata",
@@ -26,10 +27,10 @@
     "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha -w --require babel-core/register $(find src -path '*spec.js*')",
     "demo-data": "babel-node local/seed",
     "es-db-compare": "babel-node scripts/es-db-compare",
-    "data:export": "LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/export | bunyan -o short",
-    "data:import": "LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/import | bunyan -o short",
+    "data:export": "NODE_ENV=development LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/export",
+    "data:import": "NODE_ENV=development LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/import",
     "local:run-docker": "docker-compose -f ./local/full/docker-compose.yml up -d",
-    "local:setup": "NODE_ENV=development npm run sync:db && NODE_ENV=development npm run sync:es && npm run data:import"
+    "local:init": "npm run sync:all && npm run data:import"
   },
   "repository": {
     "type": "git",

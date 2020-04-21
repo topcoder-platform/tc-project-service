@@ -22,7 +22,7 @@ function runExportData(filePath, logger) {
     });
 }
 
-const logger = util.getAppLogger();
+const logger = util.getScriptsLogger();
 const filePath =
   process.argv[2] === '--file' && process.argv[3]
     ? process.argv[3]

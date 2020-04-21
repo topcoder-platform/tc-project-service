@@ -61,13 +61,13 @@ async function writeDataToDatabase(filePath, logger) {
                 transaction,
               })
             )[0][0].setval;
-            logger.info(
+            logger.debug(
               `Updated autoIncrement for ${modelName}.${field} with max value = ${setValue}`,
             );
           }
         }
       } else {
-        logger.info(`No records to save for model: ${modelName}`);
+        logger.info(`No records to import for model: ${modelName}`);
       }
     }
     // commit transaction only if all things went ok

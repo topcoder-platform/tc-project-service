@@ -154,7 +154,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 4. ♻ Init DB, ES and demo data (it clears any existent data)
 
    ```bash
-   npm run local:setup
+   npm run local:init
    ```
 
    This command will do 3 things:
@@ -215,7 +215,7 @@ npm run data:import -- --file path/to-file.json
 
 - As this commands calls topcoder services to get data like members details, so you have to provide environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`, they would automatically picked up from the `.env` file if provided.
 
-- If you encounter conflicts errors during import, you may need to clear database using `NODE_ENV=development  npm run sync:db`, and clear ES (Elasticsearch) indices using `NODE_ENV=development npm run sync:es`.
+- If you encounter conflicts errors during import, you may need to recreated database tables and Elasticssearch indexes by `npm run sync:all`.
 
 - List of models that will be imported are defined in `scripts/data/dataModels.js`. You can add new models to this list, but make sure that new models are added to list such that each model comes after its dependencies.
 

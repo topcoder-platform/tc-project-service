@@ -1350,7 +1350,8 @@ _.assignIn(util, {
       return curDir;
     }, initDir);
   },
-  getAppLogger: () => {
+
+  getScriptsLogger: () => {
     const appName = 'tc-projects-service';
     return coreLib.logger({
       name: appName,
