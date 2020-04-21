@@ -24,7 +24,6 @@
     "startKafkaConsumers:dev": "NODE_ENV=development nodemon -w src --exec \"babel-node src/index-kafka.js --presets es2015\" | ./node_modules/.bin/bunyan",
     "test": "NODE_ENV=test npm run lint && NODE_ENV=test npm run sync:es && NODE_ENV=test npm run sync:db && NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- --timeout 10000 --require babel-core/register $(find src -path '*spec.js*') --exit",
     "test:watch": "NODE_ENV=test ./node_modules/.bin/mocha -w --require babel-core/register $(find src -path '*spec.js*')",
-    "seed": "babel-node src/tests/seed.js --presets es2015",
     "demo-data": "babel-node local/seed",
     "es-db-compare": "babel-node scripts/es-db-compare",
     "data:export": "LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/export | bunyan -o short",
