@@ -270,7 +270,12 @@ module.exports = [
     }
 
     // get member details by handles first
-    return util.getMemberDetailsByHandles(invite.handles, req.log, req.id).then((inviteUsers) => {
+    return util.getMemberDetailsByHandles(invite.handles, req.log, req.id)
+    // we have to filter users returned by the Message Service so we only invite the users
+    // whom we are inviting, because Message Service has a loose search logic and may return
+    // users with handles whom we didn't search for
+    .then(foundUsers => foundUsers.filter(foundUser => _.includes(invite.handles, foundUser.handle)))
+    .then((inviteUsers) => {
       const members = req.context.currentProjectMembers;
       const projectId = _.parseInt(req.params.projectId);
       // check user handle exists in returned result
