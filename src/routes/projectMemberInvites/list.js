@@ -27,7 +27,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const currentUserId = req.authUser.userId;
-    const email = req.authUser.email;
+    const currentUserEmail = req.authUser.email ? req.authUser.email.toLowerCase() : req.authUser.email;
     const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     const esSearchParam = {
@@ -64,7 +64,7 @@ module.exports = [
       esSearchParam.query.nested.query.filtered.filter.bool.must.push({
         bool: {
           should: [
-            { term: { 'invites.email': email } },
+            { term: { 'invites.email': currentUserEmail } },
             { term: { 'invites.userId': currentUserId } },
           ],
           minimum_number_should_match: 1,
@@ -90,7 +90,7 @@ module.exports = [
           }
           // get invitation only for user
           return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(
-            projectId, email, currentUserId);
+            projectId, currentUserEmail, currentUserId);
         }
         req.log.debug('project member found in ES');
         return data[0].inner_hits.invites.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle

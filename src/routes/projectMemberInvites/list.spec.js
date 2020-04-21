@@ -252,7 +252,8 @@ describe('GET Project Member Invites', () => {
             resJson.length.should.be.eql(1);
             // check invitations
             _.filter(resJson, inv => inv.id === 3).length.should.be.eql(1);
-            resJson[0].email.should.be.eql('t***t@t***r.com'); // masked
+            // not masked, because user who is invited by email is the user who is calling this endpoint
+            resJson[0].email.should.be.eql('test@topcoder.com');
             done();
           }
         });

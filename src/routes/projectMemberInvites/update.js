@@ -36,7 +36,7 @@ module.exports = [
     }
     const projectId = _.parseInt(req.params.projectId);
     const inviteId = _.parseInt(req.params.inviteId);
-    const email = req.authUser.email;
+    const currentUserEmail = req.authUser.email ? req.authUser.email.toLowerCase() : req.authUser.email;
     const currentUserId = req.authUser.userId;
 
     // get invite by id and project id
@@ -45,13 +45,13 @@ module.exports = [
         // if invite doesn't exist, return 404
         if (!invite) {
           const err = new Error(`invite not found for project id ${projectId}, inviteId ${inviteId},` +
-            ` email ${email} and userId ${currentUserId}`,
+            ` email ${currentUserEmail} and userId ${currentUserId}`,
           );
           err.status = 404;
           return next(err);
         }
         // check this invitation is for logged-in user or not
-        const ownInvite = (!!invite && (invite.userId === currentUserId || invite.email === email));
+        const ownInvite = (!!invite && (invite.userId === currentUserId || invite.email === currentUserEmail));
 
         // check permission
         req.log.debug('Checking user permission for updating invite');
@@ -103,7 +103,7 @@ module.exports = [
                   req.context.currentProjectMembers = members;
                   let userId = updatedInvite.userId;
                   // if the requesting user is updating his/her own invite
-                  if (!userId && email === updatedInvite.email) {
+                  if (!userId && currentUserEmail === updatedInvite.email) {
                     userId = currentUserId;
                   }
                   // if we are not able to identify the user yet, it must be something wrong and we should not create
