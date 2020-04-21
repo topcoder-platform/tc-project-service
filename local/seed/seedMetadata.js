@@ -7,6 +7,28 @@ if (!process.env.CONNECT_USER_TOKEN) {
   process.exit(1);
 }
 
+/**
+ * Iteratively goes through the object and replaces prices with random values.
+ *
+ * This method MUTATES object.
+ *
+ * @param {Object} o object
+ */
+function dummifyPrices(o) {
+  Object.keys(o).forEach(function (k) {
+      if (o[k] !== null && typeof o[k] === 'object') {
+        dummifyPrices(o[k]);
+          return;
+      }
+      if (k === 'price' && typeof o[k] === 'number') {
+          o[k] = 100 + Math.round(Math.random() * 10000);
+      }
+      if (k === 'price' && typeof o[k] === 'string') {
+        o[k] = (100 + Math.round(Math.random() * 10000)).toFixed(0);
+    }
+  });
+}
+
 // we need to know any logged in Connect user token to retrieve data from DEV
 const CONNECT_USER_TOKEN = process.env.CONNECT_USER_TOKEN;
 
@@ -29,6 +51,7 @@ module.exports = (targetUrl, token) => {
   })
   .then(async function (response) {
     let data = response.data;
+    dummifyPrices(data)
 
     console.log('Creating metadata objects locally...');
 
