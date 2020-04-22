@@ -105,8 +105,8 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
     // if for some emails there are already existent users, we will invite them by userId,
     // to avoid sending them registration email
     return util.lookupMultipleUserEmails(req, inviteEmails, MAX_PARALLEL_REQUEST_QTY)
-      // we have to filter emails returned by the Message Service so we only invite the users
-      // whom we are inviting, because Message Service has a loose search logic and may return
+      // we have to filter emails returned by the Identity Service so we only invite the users
+      // whom we are inviting, because Identity Service could possibly (maybe) return
       // users with emails whom we didn't search for
       .then(foundUsers => foundUsers.filter(foundUser => _.includes(inviteEmails, foundUser.email)))
       .then((existentUsers) => {
@@ -275,8 +275,8 @@ module.exports = [
 
     // get member details by handles first
     return util.getMemberDetailsByHandles(invite.handles, req.log, req.id)
-    // we have to filter users returned by the Message Service so we only invite the users
-    // whom we are inviting, because Message Service has a loose search logic and may return
+    // we have to filter users returned by the Member Service so we only invite the users
+    // whom we are inviting, because Member Service has a loose search logic and may return
     // users with handles whom we didn't search for
     .then(foundUsers => foundUsers.filter(foundUser => _.includes(invite.handles, foundUser.handle)))
     .then((inviteUsers) => {
