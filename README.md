@@ -4,20 +4,24 @@ Microservice to manage CRUD operations for all things Projects.
 
 **Note : Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.**
 
-- [Local Development](#local-development)
-  - [Requirements](#requirements)
-  - [Steps to run locally](#steps-to-run-locally)
-  - [Import sample metadata projects](#import-sample-metadata-projects)
-  - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
-- [Test](#test)
-  - [JWT Authentication](#jwt-authentication)
-- [Deploying with docker (might need updates)](#deploying-with-docker-might-need-updates)
-- [Kafka commands](#kafka-commands)
-  - [Create Topic](#create-topic)
-  - [List Topics](#list-topics)
-  - [Watch Topic](#watch-topic)
-  - [Post Message to Topic (from stdin)](#post-message-to-topic-from-stdin)
-- [References](#references)
+- [Topcoder Projects Service](#topcoder-projects-service)
+  - [Local Development](#local-development)
+    - [Requirements](#requirements)
+    - [Steps to run locally](#steps-to-run-locally)
+    - [Import and Export data](#import-and-export-data)
+      - [📤 Export data](#%f0%9f%93%a4-export-data)
+      - [📥 Import data](#%f0%9f%93%a5-import-data)
+    - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
+    - [Import metadata from api.topcoder-dev.com (deprecated)](#import-metadata-from-apitopcoder-devcom-deprecated)
+  - [Test](#test)
+    - [JWT Authentication](#jwt-authentication)
+  - [Deploying with docker (might need updates)](#deploying-with-docker-might-need-updates)
+  - [Kafka commands](#kafka-commands)
+    - [Create Topic](#create-topic)
+    - [List Topics](#list-topics)
+    - [Watch Topic](#watch-topic)
+    - [Post Message to Topic (from stdin)](#post-message-to-topic-from-stdin)
+  - [References](#references)
 
 ## Local Development
 
@@ -30,13 +34,13 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 * Install [libpg](https://www.npmjs.com/package/pg-native)
 
 ### Steps to run locally
-1. Install node dependencies
+1. 📦 Install npm dependencies
 
    ```bash
    npm install
    ```
 
-2. Local config
+2. ⚙ Local config
 
     1. In the `tc-project-service` root directory create `.env` file with the environment variables _(values should be shared with you on the forum)_:<br>
        ```
@@ -46,7 +50,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
        AUTH0_AUDIENCE=...
        AUTH0_PROXY_SERVER_URL=...
        ```
-       Values from this file would be automatically used by `docker-compose` and command `npm run start:dev` below.
+       Values from this file would be automatically used by `docker-compose` , command `npm run start:dev` and some other command during local development.
 
     2. Copy config file `config/m2m.local.js` into `config/local.js`:
         ```bash
@@ -60,68 +64,40 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 
        Alternatively, you may update `config/local.js` and replace `dockerhost` with your docker IP address.
 
-3. Start **ONE** of the docker-compose files with dependant services which are required for Project Service to work
+3. 🚢 Start docker-compose with services which are required to start Project Service locally
 
-   1. **Minimal** `./local/docker-compose.yml`:
+   ```bash
+   npm run local:run-docker
+   ```
 
-      *Use this docker-compose if you only want to test and modify code of Project Service and you don't need Elasticsearch (ES) to work.*
+   Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
 
-      Run, in the project root folder:
-      ```bash
-      docker-compose -f local/docker-compose.yml up
-      ```
+   ```bash
+   docker-compose -f local/full/docker-compose.yml logs -f project-processor-es
+   ```
 
-      <details><summary>Click to see details</summary>
-      <br>
+   <details><summary>Click to see a good logs example</summary>
+   <br>
 
-      This docker-compose file starts the next services:
-      |  Service | Name | Port  |
-      |----------|:-----:|:----:|
-      | PostgreSQL | db | 5432 |
-      | Elasticsearch | esearch | 9200 |
-      | RabbitMQ | queue | 5672, 15672  |
-      | Mock Service (not in use) | jsonserver | 3001  |
+      - first it would be waiting for `kafka-client` to create all the required topics and exit, you would see:
 
-      </details>
-
-   2. **Full** `./local/full/docker-compose.yml`:
-
-      *Use this docker-compose if you  want to test and modify code of Project Service together with one of the next relative services: [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api), [project-processor-es](https://github.com/topcoder-platform/project-processor-es), [tc-notifications](https://github.com/topcoder-platform/tc-notifications) or you need Elasticsearch (ES) to work.*
-
-      1. Run, in the project root folder:
-
-          ```bash
-          docker-compose -f local/full/docker-compose.yml up -d
-          ```
-
-      2. Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
-
-         ```bash
-         docker-compose -f local/full/docker-compose.yml logs -f project-processor-es
+         ```
+         project-processor-es_1        | Waiting for kafka-client to exit....
          ```
 
-        <details><summary>Click to see example logs</summary>
-        <br>
+      - after that, `project-processor-es` would be started itself. Make sure it successfully connected to Kafka, you should see 3 lines with text `Subscribed to project.action.`:
 
-         - first it would be waiting for `kafka-client` to create all the required topics and exit, you would see:
+      ```
+      project-processor-es_1        | 2020-02-19T03:18:46.523Z DEBUG no-kafka-client Subscribed to project.action.update:0 offset 0 leader kafka:9093
+      project-processor-es_1        | 2020-02-19T03:18:46.524Z DEBUG no-kafka-client Subscribed to project.action.delete:0 offset 0 leader kafka:9093
+      project-processor-es_1        | 2020-02-19T03:18:46.528Z DEBUG no-kafka-client Subscribed to project.action.create:0 offset 0 leader kafka:9093
+      ```
+   </details>
 
-           ```
-           project-processor-es_1        | Waiting for kafka-client to exit....
-           ```
-
-        - after that, `project-processor-es` would be started itself. Make sure it successfully connected to Kafka, you should see 3 lines with text `Subscribed to project.action.`:
-
-          ```
-          project-processor-es_1        | 2020-02-19T03:18:46.523Z DEBUG no-kafka-client Subscribed to project.action.update:0 offset 0 leader kafka:9093
-          project-processor-es_1        | 2020-02-19T03:18:46.524Z DEBUG no-kafka-client Subscribed to project.action.delete:0 offset 0 leader kafka:9093
-          project-processor-es_1        | 2020-02-19T03:18:46.528Z DEBUG no-kafka-client Subscribed to project.action.create:0 offset 0 leader kafka:9093
-          ```
-        </details>
-
-      3. If you want to modify the code of any of the services which are run inside this docker-compose file, you can stop such service inside docker-compose by command `docker-compose -f local/full/docker-compose.yml stop -f <SERVICE_NAME>` and run the service separately, following its README file.
-
-      <details><summary>Click to see details</summary>
-      <br>
+   <br>
+   If you want to learn more about docker-compose configuration
+   <details><summary>see more details here</summary>
+   <br>
 
       This docker-compose file starts the next services:
       |  Service | Name | Port  |
@@ -137,7 +113,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
       | [tc-notifications-api](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-api | 4000  |
       | [tc-notifications-processor](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-processor | 4001  |
 
-      - as many of the Topcoder services which are run in this docker-compose require Auth0 configuration for M2M calls, that's why if we want to start this docker-compose file, we have to set environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL` first and they would be passed inside containers.
+      - as many of the Topcoder services in this docker-compose require Auth0 configuration for M2M calls, our docker-compose file passes environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL` to its containers. docker-compose takes them from `.env` file if provided.
 
       - `docker-compose` automatically would create Kafka topics which are used by `tc-project-service` listed in `local/full/kafka-client/topics.txt`.
 
@@ -147,25 +123,46 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
         docker-compose -f local/full/docker-compose.yml logs -f SERVICE_NAME
         ```
 
-      </details>
+      - If you want to modify the code of any of the services which are run inside this docker-compose file, you can stop such service inside docker-compose by command `docker-compose -f local/full/docker-compose.yml stop -f <SERVICE_NAME>` and run the service separately, following its README file.
+
+      - We also have a minimal docker-compose which doesn't start all the required services. Use it only if are sure that you don't need all the services.
+
+         <details><summary>Click to see details about minimal docker-compose</summary>
+         <br>
+
+         *Use this docker-compose if you only want to test and modify code of Project Service and you don't need Elasticsearch (ES) to work.*
+
+         Run, in the project root folder:
+         ```bash
+         docker-compose -f local/docker-compose.yml up -d
+         ```
+
+         This docker-compose file starts the next services:
+         |  Service | Name | Port  |
+         |----------|:-----:|:----:|
+         | PostgreSQL | db | 5432 |
+         | Elasticsearch | esearch | 9200 |
+         | RabbitMQ | queue | 5672, 15672  |
+         | Mock Service (not in use) | jsonserver | 3001  |
+
+         </details>
+
+   </details>
 
    *NOTE: In production these dependencies / services are hosted & managed outside Project Service.*
 
-4. Create tables in DB
-    ```bash
-    NODE_ENV=development npm run sync:db
-    ```
+4. ♻ Init DB, ES and demo data (it clears any existent data)
 
-    *NOTE: this will drop tables if they already exist.*
+   ```bash
+   npm run local:init
+   ```
 
-5. Create ES (Elasticsearch) indexes
-    ```bash
-    NODE_ENV=development npm run sync:es
-    ```
+   This command will do 3 things:
+   - create Database tables (remove if exists)
+   - create Elasticsearch indexes (remove if exists)
+   - import demo data from `data/demo-data.json`
 
-    *NOTE: This will first clear all the indices and than recreate them. So use with caution.*
-
-6. Start Project Service
+5. 🚀 Start Project Service
 
    ```bash
    npm run start:dev
@@ -174,7 +171,7 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
    Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
    The project service will be served on `http://localhost:8001`.
 
-7. *(Optional)* Start Project Service Kafka Consumer
+6. *(Optional)* Start Project Service Kafka Consumer
 
    *Run this only if you want to test or modify logic of `lastActivityAt` or `lastActivityBy`.*
 
@@ -184,29 +181,55 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
    npm run startKafkaConsumers:dev
    ```
 
-### Import sample metadata projects
+### Import and Export data
+
+#### 📤 Export data
+
+To export data to the default file `data/demo-data.json`, run:
+```bash
+npm run data:export
+```
+
+If you want to export data to another file, run:
 
 ```bash
-CONNECT_USER_TOKEN=<connect user token> npm run demo-data
+npm run data:export -- --file path/to-file.json
 ```
-To retrieve data from DEV env we have to provide a valid user token (`CONNECT_USER_TOKEN`). You may login to http://connect.topcoder-dev.com and find the Bearer token in the request headers using browser dev tools.
 
-This command for importing data uses API to create demo data. Which has a few pecularities:
-- data in DB would be for sure created
-- data in ElasticSearch Index (ES) would be only created if services [project-processor-es](https://github.com/topcoder-platform/project-processor-es) and [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) are also started locally. If you don't start them, then imported data wouldn't be indexed in ES, and would be only added to DB. You may start them locally separately, or better use `local/full/docker-compose.yml` as described [next section](#local-deployment-with-other-topcoder-services) which would start them automatically.
-   - **NOTE** During data importing a lot of records has to be indexed in ES, so you have to wait about 5-10 minutes after `npm run demo-data` is finished until imported data is indexed in ES. You may watch logs of `project-processor-es` to see if its done or no.
+- List of models that will be exported are defined in `scripts/data/dataModels.js`. You can add new models to this list, but make sure that new models are added to list such that each model comes after its dependencies.
+
+#### 📥 Import data
+
+*During importing, data would be first imported to the database, and after from the database it would be indexed to the Elasticsearch index.*
+
+To import data from the default file `data/demo-data.json`, run:
+```bash
+npm run data:import
+```
+
+If you want to import data from another file, run:
+
+```bash
+npm run data:import -- --file path/to-file.json
+```
+
+- As this commands calls topcoder services to get data like members details, so you have to provide environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`, they would automatically picked up from the `.env` file if provided.
+
+- If you encounter conflicts errors during import, you may need to recreated database tables and Elasticssearch indexes by `npm run sync:all`.
+
+- List of models that will be imported are defined in `scripts/data/dataModels.js`. You can add new models to this list, but make sure that new models are added to list such that each model comes after its dependencies.
 
 ### Run Connect App with Project Service locally
 
 To be able to run [Connect App](https://github.com/appirio-tech/connect-app) with the local setup of Project Service we have to do two things:
-1. Configurate Connect App to use locally deployed Project service inside `connect-app/config/constants/dev.js` set
+1. Configure Connect App to use locally deployed Project service inside `connect-app/config/constants/dev.js` set
 
    ```js
    PROJECTS_API_URL: 'http://localhost:8001'
    TC_NOTIFICATION_URL: 'http://localhost:4000/v5/notifications' # if tc-notfication-api has been locally deployed
    ```
 
-2. Bypass token validation in Project Service.
+1. Bypass token validation in Project Service.
 
    In `tc-project-service/node_modules/tc-core-library-js/lib/auth/verifier.js` add this to line 23:
    ```js
@@ -217,7 +240,19 @@ To be able to run [Connect App](https://github.com/appirio-tech/connect-app) wit
 
    *NOTE: this change only let us bypass validation during local development process*.
 
-3. Restart both Connect App and Project Service if they were running.
+2. Restart both Connect App and Project Service if they were running.
+
+### Import metadata from api.topcoder-dev.com (deprecated)
+
+```bash
+CONNECT_USER_TOKEN=<connect user token> npm run demo-data
+```
+To retrieve data from DEV env we have to provide a valid user token (`CONNECT_USER_TOKEN`). You may login to http://connect.topcoder-dev.com and find the Bearer token in the request headers using browser dev tools.
+
+This command for importing data uses API to create demo data. Which has a few pecularities:
+- data in DB would be for sure created
+- data in ElasticSearch Index (ES) would be only created if services [project-processor-es](https://github.com/topcoder-platform/project-processor-es) and [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) are also started locally. If you don't start them, then imported data wouldn't be indexed in ES, and would be only added to DB. You may start them locally separately, or better use `local/full/docker-compose.yml` as described [next section](#local-deployment-with-other-topcoder-services) which would start them automatically.
+   - **NOTE** During data importing a lot of records has to be indexed in ES, so you have to wait about 5-10 minutes after `npm run demo-data` is finished until imported data is indexed in ES. You may watch logs of `project-processor-es` to see if its done or no.
 
 ## Test
 ```bash
