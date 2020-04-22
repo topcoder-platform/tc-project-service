@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import { indexProjectsRange } from '../../../src/utils/es';
+import { indexProjectsRange } from '../../utils/es';
 
 /**
 /**
