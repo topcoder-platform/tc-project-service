@@ -8,7 +8,8 @@
  * @version 1.0
  */
 
-
+import * as fs from 'fs';
+import * as path from 'path';
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
@@ -17,6 +18,7 @@ import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';
 import Promise from 'bluebird';
+import coreLib from 'tc-core-library-js';
 import models from './models';
 
 import {
@@ -1312,6 +1314,53 @@ _.assignIn(util, {
       throw new Error(`values ${disallowedFieldsString} are not allowed`);
     }
   },
+  /**
+   * creates directory recursively.
+   * NodeJS < 10.12.0 has no native support to create a directory recursively
+   * So, we added this function. check this url for more details:
+   * https://stackoverflow.com/questions/31645738/how-to-create-full-path-with-nodes-fs-mkdirsync
+   * @param {string}    targetDir        directory path
+   * @return {void}              Returns void
+   */
+  mkdirSyncRecursive: (targetDir) => {
+    const sep = path.sep;
+    const initDir = path.isAbsolute(targetDir) ? sep : '';
+    const baseDir = __dirname;
+
+    return targetDir.split(sep).reduce((parentDir, childDir) => {
+      const curDir = path.resolve(baseDir, parentDir, childDir);
+      try {
+        fs.mkdirSync(curDir);
+      } catch (err) {
+        if (err.code === 'EEXIST') { // curDir already exists!
+          return curDir;
+        }
+
+        // To avoid `EISDIR` error on Mac and `EACCES`-->`ENOENT` and `EPERM` on Windows.
+        if (err.code === 'ENOENT') { // Throw the original parentDir error on curDir `ENOENT` failure.
+          throw new Error(`EACCES: permission denied, mkdir '${parentDir}'`);
+        }
+
+        const caughtErr = ['EACCES', 'EPERM', 'EISDIR'].indexOf(err.code) > -1;
+        if ((!caughtErr) || (caughtErr && curDir === path.resolve(targetDir))) {
+          throw err; // Throw if it's just the last created dir.
+        }
+      }
+
+      return curDir;
+    }, initDir);
+  },
+
+  getScriptsLogger: () => {
+    const appName = 'tc-projects-service';
+    return coreLib.logger({
+      name: appName,
+      level: _.get(config, 'logLevel', 'debug').toLowerCase(),
+      captureLogs: config.get('captureLogs'),
+      logentriesToken: _.get(config, 'logentriesToken', null),
+    });
+  },
+
 });
 
 export default util;
