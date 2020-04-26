@@ -43,7 +43,7 @@ const createProjectMemberValidations = {
 module.exports = [
   // handles request validations
   validate(createProjectMemberValidations),
-  permissions('project.addMember'),
+  permissions('projectMember.create'),
   async (req, res, next) => {
     try {
       // by default, we would add the current user as a member

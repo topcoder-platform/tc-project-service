@@ -23,7 +23,7 @@ const permissions = tcMiddleware.permissions;
 
 module.exports = [
   validate(schema),
-  permissions('projectMemberInvite.get'),
+  permissions('projectMemberInvite.view'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const inviteId = _.parseInt(req.params.inviteId);

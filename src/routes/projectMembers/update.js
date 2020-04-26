@@ -36,7 +36,7 @@ const updateProjectMemberValdiations = {
 module.exports = [
   // handles request validations
   validate(updateProjectMemberValdiations),
-  permissions('project.updateMember'),
+  permissions('projectMember.edit'),
   /**
    * Update a projectMember if the user has access
    */

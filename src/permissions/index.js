@@ -24,10 +24,15 @@ module.exports = () => {
   Authorizer.setPolicy('project.edit', generalPermission(PERMISSION.UPDATE_PROJECT));
   Authorizer.setPolicy('project.delete', generalPermission(PERMISSION.DELETE_PROJECT));
 
-  Authorizer.setPolicy('project.addMember', generalPermission(PERMISSION.CREATE_PROJECT_MEMBER));
-  Authorizer.setPolicy('project.viewMember', generalPermission(PERMISSION.READ_PROJECT_MEMBER));
-  Authorizer.setPolicy('project.updateMember', generalPermission(PERMISSION.UPDATE_PROJECT_MEMBER));
-  Authorizer.setPolicy('project.removeMember', generalPermission(PERMISSION.DELETE_PROJECT_MEMBER));
+  Authorizer.setPolicy('projectMember.create', generalPermission(PERMISSION.CREATE_PROJECT_MEMBER));
+  Authorizer.setPolicy('projectMember.view', generalPermission(PERMISSION.READ_PROJECT_MEMBER));
+  Authorizer.setPolicy('projectMember.edit', generalPermission(PERMISSION.UPDATE_PROJECT_MEMBER));
+  Authorizer.setPolicy('projectMember.delete', generalPermission(PERMISSION.DELETE_PROJECT_MEMBER));
+
+  Authorizer.setPolicy('projectMemberInvite.create', projectView);
+  Authorizer.setPolicy('projectMemberInvite.view', projectMemberInviteView);
+  Authorizer.setPolicy('projectMemberInvite.edit', projectAnyAuthUser);
+  Authorizer.setPolicy('projectMemberInvite.delete', projectAnyAuthUser);
 
   Authorizer.setPolicy('project.addAttachment', projectEdit);
   Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);
@@ -88,12 +93,6 @@ module.exports = () => {
   Authorizer.setPolicy('milestone.view', projectView);
 
   Authorizer.setPolicy('metadata.list', true); // anyone can view all metadata
-
-  Authorizer.setPolicy('projectMemberInvite.create', projectView);
-  Authorizer.setPolicy('projectMemberInvite.edit', projectAnyAuthUser);
-  Authorizer.setPolicy('projectMemberInvite.delete', projectAnyAuthUser);
-  Authorizer.setPolicy('projectMemberInvite.get', projectMemberInviteView);
-  Authorizer.setPolicy('projectMemberInvite.list', projectMemberInviteView);
 
   Authorizer.setPolicy('form.create', projectAdmin);
   Authorizer.setPolicy('form.edit', projectAdmin);

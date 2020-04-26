@@ -14,7 +14,7 @@ import { PERMISSION } from '../../permissions/constants';
 const permissions = tcMiddleware.permissions;
 
 module.exports = [
-  permissions('project.removeMember'),
+  permissions('projectMember.delete'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
