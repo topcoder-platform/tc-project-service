@@ -698,6 +698,31 @@ describe('Project Member Invite create', () => {
         });
     });
 
+    it('should invite a user as "manager" using M2M token with "write:project-members" scope', (done) => {
+      util.getUserRoles.restore();
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
+      request(server)
+        .post(`/v5/projects/${project1.id}/invites`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+        })
+        .send({
+          handles: ['test_manager1'],
+          role: 'manager',
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          const resJson = res.body.success[0];
+          should.exist(resJson);
+          resJson.role.should.equal('manager');
+          resJson.projectId.should.equal(project1.id);
+          resJson.userId.should.equal(40051333);
+          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
+          done();
+        });
+    });
+
     it('should return 201 if try to create account_manager with MANAGER_ROLES', (done) => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
@@ -744,13 +769,15 @@ describe('Project Member Invite create', () => {
             const resJson = res.body.failed[0];
             should.exist(resJson);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*cannot be added with a Manager role to the project/);
+            sinon.assert.match(errorMessage, /.*cannot be invited with a "account_manager" role to the project/);
             done();
           }
         });
     });
 
     it('should return 201 if try to create customer with COPILOT', (done) => {
+      util.getUserRoles.restore();
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve(['Connect Copilot']));
       request(server)
         .post(`/v5/projects/${project1.id}/invites`)
         .set({

@@ -4,25 +4,45 @@
  *
  * This "middleware" uses unified permissions rules to check access.
  *
- * Usage:
- *   ```js
- *   Authorizer.setPolicy('project.view', generalPermission(PERMISSION.VIEW_PROJECT));
- *   ```
+ * - `permissions` can be an array of permissions rules or one permission rule object
  *
- *    where `PERMISSION.VIEW_PROJECT` is defined as any object which could be processed by
- *    the method `util.hasPermission`.
+ * Usage:
+ *   1. One permission
+ *      ```js
+ *      Authorizer.setPolicy('project.view', generalPermission(PERMISSION.VIEW_PROJECT));
+ *      ```
+ *
+ *       where `PERMISSION.VIEW_PROJECT` is defined as any object which could be processed by
+ *       the method `util.hasPermission`.
+ *
+ *   2. Multiple permissions
+ *      ```js
+ *      Authorizer.setPolicy('project.view', generalPermission([
+ *        PERMISSION.READ_PROJECT_INVITE_OWN,
+ *        PERMISSION.READ_PROJECT_INVITE_NOT_OWN,
+ *      ]));
+ *      ```
+ *
+ *      In this case if user who is making request has at least of one listed permissions access would be allowed.
  */
 import _ from 'lodash';
 import util from '../util';
 import models from '../models';
 
-module.exports = permission => async (req) => {
+/**
+ * @param {Object|Array} permissions permission object or array of permissions
+ */
+module.exports = permissions => async (req) => {
   const projectId = _.parseInt(req.params.projectId);
 
-  // if `permission` requires to know Project Members, but current route doesn't belong to any project
+  // if one of the `permission` requires to know Project Members, but current route doesn't belong to any project
   // this means such `permission` most likely has been applied by mistake, so we throw an error
-  if (_.isUndefined(req.params.projectId) && util.isPermissionRequireProjectMembers(permission)) {
-    throw new Error(`Permission ${JSON.stringify(permission)} requires Project Members` +
+  const permissionsRequireProjectMembers = _.isArray(permissions)
+    ? _.some(permissions, permission => util.hasPermissionByReq(permission, req))
+    : util.isPermissionRequireProjectMembers(permissions);
+
+  if (_.isUndefined(req.params.projectId) && permissionsRequireProjectMembers) {
+    throw new Error('Permissions for this route requires Project Members' +
       ', but this route doesn\'t have "projectId".');
 
   // if we have `projectId`, then retrieve project members no matter if `permission` requires them or no
@@ -43,8 +63,11 @@ module.exports = permission => async (req) => {
     }
   }
 
+  const hasPermission = _.isArray(permissions)
+    ? _.some(permissions, permission => util.hasPermissionByReq(permission, req))
+    : util.hasPermissionByReq(permissions, req);
 
-  if (!util.hasPermissionByReq(permission, req)) {
+  if (!hasPermission) {
     throw new Error('You do not have permissions to perform this action');
   }
 };

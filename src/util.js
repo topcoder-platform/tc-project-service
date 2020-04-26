@@ -1287,6 +1287,8 @@ const projectServiceUtils = {
       return false;
     }
 
+    console.log('hasPermission', permission, user);
+
     const allowRule = permission.allowRule ? permission.allowRule : permission;
     const denyRule = permission.denyRule ? permission.denyRule : null;
 
@@ -1296,8 +1298,14 @@ const projectServiceUtils = {
     return allow && !deny;
   },
 
-  hasPermissionByReq: (permission, req) =>
-    util.hasPermission(permission, _.get(req, 'authUser'), _.get(req, 'context.currentProjectMembers')),
+  hasPermissionByReq: (permission, req) => {
+    // as it's very easy to forget "req" argument, throw error to make debugging easier
+    if (!req) {
+      throw new Error('Method "hasPermissionByReq" requires "req" argument.');
+    }
+
+    return util.hasPermission(permission, _.get(req, 'authUser'), _.get(req, 'context.currentProjectMembers'));
+  },
 
   /**
    * Check if permission requires us to provide the list Project Members or no.

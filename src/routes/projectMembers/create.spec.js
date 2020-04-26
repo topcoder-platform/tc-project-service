@@ -79,7 +79,7 @@ describe('Project Members create', () => {
             email: 'test_copilot1@email.com',
           };
           const testRoleName = {
-            roleName: USER_ROLE.COPILOT_MANAGER,
+            roleName: USER_ROLE.COPILOT,
           };
           const ret = {
             status: 200,
@@ -434,7 +434,7 @@ describe('Project Members create', () => {
               email: 'test_copilot1@email.com',
             };
             const testRoleName = {
-              roleName: USER_ROLE.COPILOT_MANAGER,
+              roleName: USER_ROLE.COPILOT,
             };
             const ret = {
               status: 200,
@@ -461,7 +461,7 @@ describe('Project Members create', () => {
         request(server)
         .post(`/v5/projects/${project1.id}/invites`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
           handles: ['test_copilot1'],

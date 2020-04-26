@@ -10,6 +10,17 @@
         font-size: 62.5%;
         line-height: 120%;
       }
+
+      .permission-variable {
+        line-height: 80%;
+        margin: 5px 0;
+        word-break: break-word;
+      }
+
+      .permission-title {
+        line-height: 120%;
+        margin: 5px 0;
+      }
     </style>
   </head>
   <body>
@@ -38,8 +49,8 @@
         {{#each permissions}}
           <div class="row border-top">
             <div class="col py-2">
-              {{meta.title}}
-              <div><small><code>{{meta.key}}</code></small></div>
+              <div class="permission-title">{{meta.title}}</div>
+              <div class="permission-variable"><small><code>{{meta.key}}</code></small></div>
               <div class="text-black-50 small-text">{{meta.description}}</div>
             </div>
             <div class="col-9 py-2">

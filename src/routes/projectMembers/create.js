@@ -55,7 +55,7 @@ module.exports = [
         addUserId = _.get(req, 'body.userId');
 
         // check if current user has permissions to add other users
-        if (!util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_MEMBER_FOR_OTHERS, req)) {
+        if (!util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_MEMBER_NOT_OWN, req)) {
           const err = new Error('You don\'t have permissions to add other users as a project member.');
           err.status = 403;
           throw err;

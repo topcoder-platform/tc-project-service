@@ -47,12 +47,13 @@
 import _ from 'lodash';
  import {
   PROJECT_MEMBER_ROLE,
-  PROJECT_MEMBER_MANAGER_ROLES,
-  ADMIN_ROLES as TOPCODER_ROLES_ADMINS,
   USER_ROLE,
+  ADMIN_ROLES as TOPCODER_ROLES_ADMINS,
   MANAGER_ROLES as TOPCODER_ROLES_MANAGERS_AND_ADMINS,
   M2M_SCOPES,
 } from '../constants';
+
+const ALL = true;
 
 const SCOPES_PROJECTS_READ = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
@@ -77,10 +78,6 @@ const SCOPES_PROJECT_MEMBERS_WRITE = [
   M2M_SCOPES.PROJECT_MEMBERS.ALL,
   M2M_SCOPES.PROJECT_MEMBERS.WRITE,
 ];
-
-const TOPCODER_ROLES_ALL = _.values(USER_ROLE);
-
-const ALL = true;
 
 export const PERMISSION = { // eslint-disable-line import/prefer-default-export
   /*
@@ -193,19 +190,19 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_MEMBERS_READ,
   },
 
-  CREATE_PROJECT_MEMBER: {
+  CREATE_PROJECT_MEMBER_OWN: {
     meta: {
-      title: 'Create Project Member',
+      title: 'Create Project Member (own)',
       group: 'Project Member',
+      description: 'Who can add themselves as project members.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
-    projectRoles: ALL,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
-  CREATE_PROJECT_MEMBER_FOR_OTHERS: {
+  CREATE_PROJECT_MEMBER_NOT_OWN: {
     meta: {
-      title: 'Create Project Member (for other users)',
+      title: 'Create Project Member (not own)',
       group: 'Project Member',
       description: 'Who can add other users as project members.',
     },
@@ -213,10 +210,11 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
-  UPDATE_PROJECT_MEMBER: {
+  UPDATE_PROJECT_MEMBER_CUSTOMER: {
     meta: {
-      title: 'Update Project Member',
+      title: 'Update Project Member (customer)',
       group: 'Project Member',
+      description: 'Who can update project members with "customer" role.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
     projectRoles: ALL,
@@ -246,10 +244,11 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
-  DELETE_PROJECT_MEMBER: {
+  DELETE_PROJECT_MEMBER_CUSTOMER: {
     meta: {
-      title: 'Delete Project Member',
+      title: 'Delete Project Member (customer)',
       group: 'Project Member',
+      description: 'Who can delete project members with "customer" role.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
     projectRoles: ALL,
@@ -266,6 +265,141 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
+  /*
+   * Project Invite
+   */
+  READ_PROJECT_INVITE_OWN: {
+    meta: {
+      title: 'Read Project Invite (own)',
+      group: 'Project Invite',
+      description: 'Who can view own invite.',
+    },
+    topcoderRoles: ALL,
+    scopes: SCOPES_PROJECT_MEMBERS_READ,
+  },
+
+  READ_PROJECT_INVITE_NOT_OWN: {
+    meta: {
+      title: 'Read Project Invite (not own)',
+      group: 'Project Invite',
+      description: 'Who can view invites of other users.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    projectRoles: ALL,
+    scopes: SCOPES_PROJECT_MEMBERS_READ,
+  },
+
+  CREATE_PROJECT_INVITE_CUSTOMER: {
+    meta: {
+      title: 'Create Project Invite (customer)',
+      group: 'Project Invite',
+      description: 'Who can invite project members with "customer" role.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    projectRoles: ALL,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  CREATE_PROJECT_MEMBER_NON_CUSTOMER: {
+    meta: {
+      title: 'Create Project Invite (non-customer)',
+      group: 'Project Invite',
+      description: 'Who can invite project members with non "customer" role.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  CREATE_PROJECT_INVITE_COPILOT_DIRECTLY: {
+    meta: {
+      title: 'Create Project Invite (copilot)',
+      group: 'Project Invite',
+      description: 'Who can invite user with "copilot" role directly without requesting.',
+    },
+    topcoderRoles: [
+      ...TOPCODER_ROLES_ADMINS,
+      USER_ROLE.COPILOT_MANAGER,
+    ],
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  UPDATE_PROJECT_INVITE_OWN: {
+    meta: {
+      title: 'Update Project Invite (own)',
+      group: 'Project Invite',
+      description: 'Who can update own invite.',
+    },
+    topcoderRoles: ALL,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  UPDATE_PROJECT_INVITE_NOT_OWN: {
+    meta: {
+      title: 'Update Project Invite (not own)',
+      group: 'Project Invite',
+      description: 'Who can update invites for other members.',
+    },
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  UPDATE_PROJECT_INVITE_REQUESTED: {
+    meta: {
+      title: 'Update Project Invite (requested)',
+      group: 'Project Invite',
+      description: 'Who can update requested invites.',
+    },
+    topcoderRoles: [
+      ...TOPCODER_ROLES_ADMINS,
+      USER_ROLE.COPILOT_MANAGER,
+    ],
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  DELETE_PROJECT_INVITE_OWN: {
+    meta: {
+      title: 'Delete Project Member (own)',
+      group: 'Project Invite',
+      description: 'Who can delete own invite.',
+    },
+    topcoderRoles: ALL,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER: {
+    meta: {
+      title: 'Delete Project Invite (not own, customer)',
+      group: 'Project Invite',
+      description: 'Who can delete invites for other members with "customer" role.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    projectRoles: ALL,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER: {
+    meta: {
+      title: 'Delete Project Invite (not own, non-customer)',
+      group: 'Project Invite',
+      description: 'Who can delete project invites for other members with non "customer" role.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  DELETE_PROJECT_INVITE_REQUESTED: {
+    meta: {
+      title: 'Delete Project Invite (requested)',
+      group: 'Project Invite',
+      description: 'Who can delete requested invites.',
+    },
+    topcoderRoles: [
+      ...TOPCODER_ROLES_ADMINS,
+      USER_ROLE.COPILOT_MANAGER,
+    ],
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
   /**
    * Permissions defined by logic: **WHO** can do actions with such a permission.
    */
@@ -277,55 +411,6 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
       PROJECT_MEMBER_ROLE.MANAGER,
       PROJECT_MEMBER_ROLE.COPILOT,
-    ],
-  },
-
-  /**
-   * Permissions defined by logic: **WHAT** can be done with such a permission.
-   */
-
-  /*
-   * Update invite permissions
-   */
-  UPDATE_NOT_OWN_INVITE: {
-    topcoderRoles: [
-      USER_ROLE.TOPCODER_ADMIN,
-      USER_ROLE.CONNECT_ADMIN,
-    ],
-  },
-
-  UPDATE_REQUESTED_INVITE: {
-    topcoderRoles: [
-      USER_ROLE.TOPCODER_ADMIN,
-      USER_ROLE.CONNECT_ADMIN,
-      USER_ROLE.COPILOT_MANAGER,
-    ],
-  },
-
-  /*
-   * Delete invite permissions
-   */
-  DELETE_CUSTOMER_INVITE: {
-    topcoderRoles: [
-      USER_ROLE.TOPCODER_ADMIN,
-      USER_ROLE.CONNECT_ADMIN,
-    ],
-    projectRoles: ALL,
-  },
-
-  DELETE_NON_CUSTOMER_INVITE: {
-    topcoderRoles: [
-      USER_ROLE.TOPCODER_ADMIN,
-      USER_ROLE.CONNECT_ADMIN,
-    ],
-    projectRoles: PROJECT_MEMBER_MANAGER_ROLES,
-  },
-
-  DELETE_REQUESTED_INVITE: {
-    topcoderRoles: [
-      USER_ROLE.TOPCODER_ADMIN,
-      USER_ROLE.CONNECT_ADMIN,
-      USER_ROLE.COPILOT_MANAGER,
     ],
   },
 };
@@ -361,7 +446,7 @@ export const PROJECT_TO_TOPCODER_ROLES_MATRIX = {
   [PROJECT_MEMBER_ROLE.COPILOT]: [
     USER_ROLE.COPILOT,
   ],
-  [PROJECT_MEMBER_ROLE.CUSTOMER]: TOPCODER_ROLES_ALL,
+  [PROJECT_MEMBER_ROLE.CUSTOMER]: _.values(USER_ROLE),
 };
 
 /**
