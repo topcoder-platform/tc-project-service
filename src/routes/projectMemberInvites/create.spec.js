@@ -959,10 +959,6 @@ describe('Project Member Invite create', () => {
             testUtil.wait(() => {
               createEventSpy.callCount.should.be.eql(3);
 
-              createEventSpy.getCalls().forEach((call) => {
-                console.log(call.args) // eslint-disable-line
-              });
-
               createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
                 resource: RESOURCES.PROJECT_MEMBER_INVITE,
                 projectId: project1.id,
