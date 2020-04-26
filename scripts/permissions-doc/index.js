@@ -9,10 +9,15 @@ import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import handlebars from 'handlebars';
-import { PERMISSION } from '../../src/permissions/constants';
+import {
+  PERMISSION,
+  PROJECT_TO_TOPCODER_ROLES_MATRIX,
+} from '../../src/permissions/constants';
 import {
   PROJECT_MEMBER_ROLE,
+  USER_ROLE,
 } from '../../src/constants';
+import util from '../../src/util';
 
 const docTemplatePath = path.resolve(__dirname, './template.hbs');
 const outputDocPath = path.resolve(__dirname, '../../docs/permissions.html');
@@ -74,6 +79,44 @@ function normalizePermission(permission) {
   return normalizedPermission;
 }
 
+/**
+ * @returns {Object} project/topcoder roles matrix
+ */
+function getNormalizedRolesMatrix() {
+  const topcoderRolesAll = _.values(USER_ROLE);
+  const projectRolesAll = _.keys(PROJECT_TO_TOPCODER_ROLES_MATRIX);
+
+  const isDefaultRole = (topcoderRole, projectRole) =>
+    util.getDefaultProjectRole({ roles: [topcoderRole] }) === projectRole;
+
+  const isAllowedRole = (topcoderRole, projectRole) =>
+    (PROJECT_TO_TOPCODER_ROLES_MATRIX[projectRole] || []).includes(topcoderRole);
+
+  const columns = ['Project \\ Topcoder'].concat(topcoderRolesAll);
+  const rows = projectRolesAll.map(projectRole => ({
+    rowHeader: projectRole,
+    cells: topcoderRolesAll.map(topcoderRole => ({
+      isAllowed: isAllowedRole(topcoderRole, projectRole),
+      isDefault: isDefaultRole(topcoderRole, projectRole),
+    })),
+  }));
+
+  // Uncomment if you want to switch columns and rows
+  // const columns = ['Topcoder \\ Project'].concat(topcoderRolesAll);
+  // const rows = topcoderRolesAll.map(topcoderRole => ({
+  //   rowHeader: topcoderRole,
+  //   cells: projectRolesAll.map(projectRole => ({
+  //     isAllowed: isAllowedRole(topcoderRole, projectRole),
+  //     isDefault: isDefaultRole(topcoderRole, projectRole),
+  //   })),
+  // }));
+
+  return {
+    columns,
+    rows,
+  };
+}
+
 const templateStr = fs.readFileSync(docTemplatePath).toString();
 const renderDocument = handlebars.compile(templateStr);
 
@@ -91,7 +134,11 @@ const allPermissions = permissionKeys.map((key) => {
   });
 });
 const groupsObj = _.groupBy(allPermissions, 'meta.group');
-const groups = _.toPairs(groupsObj).map(([title, permissions]) => ({ title, permissions }));
+const groups = _.toPairs(groupsObj).map(([title, permissions]) => ({
+  title,
+  anchor: `section-${title.toLowerCase().replace(' ', '-')}`,
+  permissions,
+}));
 
 groups.forEach((group) => {
   group.permissions = group.permissions.map(normalizePermission); // eslint-disable-line no-param-reassign
@@ -99,6 +146,7 @@ groups.forEach((group) => {
 
 const data = {
   groups,
+  rolesMatrix: getNormalizedRolesMatrix(),
 };
 
 fs.writeFileSync(outputDocPath, renderDocument(data));

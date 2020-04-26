@@ -21,6 +21,57 @@
         line-height: 120%;
         margin: 5px 0;
       }
+
+      .anchor-container .anchor {
+        float: left;
+        opacity: 1;
+        line-height: 1;
+        margin-left: -20px;
+      }
+
+      .anchor-container .anchor::before {
+        visibility: hidden;
+        font-size: 16px;
+        content: '🔗';
+        display: inline-block;
+        width: 20px;
+      }
+
+      .anchor-container:hover .anchor {
+        text-decoration: none;
+      }
+
+      .anchor-container:hover .anchor::before {
+        visibility: visible;
+      }
+
+      .roles-matrix-table td {
+        vertical-align: center;
+        text-align: center;
+      }
+
+      .roles-matrix-table thead th:not(:first-child),
+      .roles-matrix-table td {
+        border-left: 1px solid #dee2e6;
+      }
+
+      .roles-matrix-table thead th {
+        height: 320px;
+      }
+
+      .roles-matrix-table thead th:not(:first-child) {
+        width: 40px;
+      }
+
+      .roles-matrix-table thead th div {
+        white-space: nowrap;
+      }
+
+      .roles-matrix-table thead th:not(:first-child) div {
+        padding-left: 10px;
+        transform: rotate(-90deg);
+        width: 40px;
+      }
     </style>
   </head>
   <body>
@@ -42,12 +93,16 @@
 
         <div class="row">
           <div class="col pt-5 pb-2">
-            <h2>Project</h2>
+            <h2 class="anchor-container">
+              <a href="#section-project" name="section-project" class="anchor"></a>Project
+            </h2>
           </div>
         </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Create Project</div>
+              <div class="permission-title anchor-container">
+                <a href="#CREATE_PROJECT" name="CREATE_PROJECT" class="anchor"></a>Create Project
+              </div>
               <div class="permission-variable"><small><code>CREATE_PROJECT</code></small></div>
               <div class="text-black-50 small-text"></div>
             </div>
@@ -68,7 +123,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Create Project as a &quot;manager&quot;</div>
+              <div class="permission-title anchor-container">
+                <a href="#CREATE_PROJECT_AS_MANAGER" name="CREATE_PROJECT_AS_MANAGER" class="anchor"></a>Create Project as a &quot;manager&quot;
+              </div>
               <div class="permission-variable"><small><code>CREATE_PROJECT_AS_MANAGER</code></small></div>
               <div class="text-black-50 small-text">When user creates a project they become a project member.
         If user has this permission they would join project with &quot;manager&quot;
@@ -101,7 +158,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Read Project</div>
+              <div class="permission-title anchor-container">
+                <a href="#READ_PROJECT" name="READ_PROJECT" class="anchor"></a>Read Project
+              </div>
               <div class="permission-variable"><small><code>READ_PROJECT</code></small></div>
               <div class="text-black-50 small-text"></div>
             </div>
@@ -133,7 +192,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Read Any Project</div>
+              <div class="permission-title anchor-container">
+                <a href="#READ_PROJECT_ANY" name="READ_PROJECT_ANY" class="anchor"></a>Read Any Project
+              </div>
               <div class="permission-variable"><small><code>READ_PROJECT_ANY</code></small></div>
               <div class="text-black-50 small-text">Read any project, even when not a member.</div>
             </div>
@@ -164,7 +225,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT" name="UPDATE_PROJECT" class="anchor"></a>Update Project
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT</code></small></div>
               <div class="text-black-50 small-text">There are additional limitations on editing some parts of the project.</div>
             </div>
@@ -196,7 +259,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project property &quot;directProjectId&quot;</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_DIRECT_PROJECT_ID" name="UPDATE_PROJECT_DIRECT_PROJECT_ID" class="anchor"></a>Update Project property &quot;directProjectId&quot;
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT_DIRECT_PROJECT_ID</code></small></div>
               <div class="text-black-50 small-text"></div>
             </div>
@@ -218,7 +283,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Delete Project</div>
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT" name="DELETE_PROJECT" class="anchor"></a>Delete Project
+              </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT</code></small></div>
               <div class="text-black-50 small-text">Has different set of permission unlike to update.</div>
             </div>
@@ -254,12 +321,16 @@
           </div>
         <div class="row">
           <div class="col pt-5 pb-2">
-            <h2>Project Member</h2>
+            <h2 class="anchor-container">
+              <a href="#section-project-member" name="section-project-member" class="anchor"></a>Project Member
+            </h2>
           </div>
         </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Read Project Member</div>
+              <div class="permission-title anchor-container">
+                <a href="#READ_PROJECT_MEMBER" name="READ_PROJECT_MEMBER" class="anchor"></a>Read Project Member
+              </div>
               <div class="permission-variable"><small><code>READ_PROJECT_MEMBER</code></small></div>
               <div class="text-black-50 small-text"></div>
             </div>
@@ -291,7 +362,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Read Project Member Details</div>
+              <div class="permission-title anchor-container">
+                <a href="#READ_PROJECT_MEMBER_DETAILS" name="READ_PROJECT_MEMBER_DETAILS" class="anchor"></a>Read Project Member Details
+              </div>
               <div class="permission-variable"><small><code>READ_PROJECT_MEMBER_DETAILS</code></small></div>
               <div class="text-black-50 small-text">Who can see user details (PII) like email, first name and last name.</div>
             </div>
@@ -312,7 +385,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Create Project Member (own)</div>
+              <div class="permission-title anchor-container">
+                <a href="#CREATE_PROJECT_MEMBER_OWN" name="CREATE_PROJECT_MEMBER_OWN" class="anchor"></a>Create Project Member (own)
+              </div>
               <div class="permission-variable"><small><code>CREATE_PROJECT_MEMBER_OWN</code></small></div>
               <div class="text-black-50 small-text">Who can add themselves as project members.</div>
             </div>
@@ -343,7 +418,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Create Project Member (not own)</div>
+              <div class="permission-title anchor-container">
+                <a href="#CREATE_PROJECT_MEMBER_NOT_OWN" name="CREATE_PROJECT_MEMBER_NOT_OWN" class="anchor"></a>Create Project Member (not own)
+              </div>
               <div class="permission-variable"><small><code>CREATE_PROJECT_MEMBER_NOT_OWN</code></small></div>
               <div class="text-black-50 small-text">Who can add other users as project members.</div>
             </div>
@@ -365,7 +442,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project Member (customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_MEMBER_CUSTOMER" name="UPDATE_PROJECT_MEMBER_CUSTOMER" class="anchor"></a>Update Project Member (customer)
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT_MEMBER_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can update project members with &quot;customer&quot; role.</div>
             </div>
@@ -397,7 +476,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project Member (non-customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_MEMBER_NON_CUSTOMER" name="UPDATE_PROJECT_MEMBER_NON_CUSTOMER" class="anchor"></a>Update Project Member (non-customer)
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT_MEMBER_NON_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can update project members with non &quot;customer&quot; role.</div>
             </div>
@@ -428,7 +509,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project Member (to copilot)</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_MEMBER_TO_COPILOT" name="UPDATE_PROJECT_MEMBER_TO_COPILOT" class="anchor"></a>Update Project Member (to copilot)
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT_MEMBER_TO_COPILOT</code></small></div>
               <div class="text-black-50 small-text">Who can update project member role to &quot;copilot&quot;.</div>
             </div>
@@ -451,7 +534,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Delete Project Member (customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_MEMBER_CUSTOMER" name="DELETE_PROJECT_MEMBER_CUSTOMER" class="anchor"></a>Delete Project Member (customer)
+              </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT_MEMBER_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can delete project members with &quot;customer&quot; role.</div>
             </div>
@@ -483,7 +568,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Delete Project Member (non-customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_MEMBER_NON_CUSTOMER" name="DELETE_PROJECT_MEMBER_NON_CUSTOMER" class="anchor"></a>Delete Project Member (non-customer)
+              </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT_MEMBER_NON_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can delete project members with non &quot;customer&quot; role.</div>
             </div>
@@ -514,12 +601,16 @@
           </div>
         <div class="row">
           <div class="col pt-5 pb-2">
-            <h2>Project Invite</h2>
+            <h2 class="anchor-container">
+              <a href="#section-project-invite" name="section-project-invite" class="anchor"></a>Project Invite
+            </h2>
           </div>
         </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Read Project Invite (own)</div>
+              <div class="permission-title anchor-container">
+                <a href="#READ_PROJECT_INVITE_OWN" name="READ_PROJECT_INVITE_OWN" class="anchor"></a>Read Project Invite (own)
+              </div>
               <div class="permission-variable"><small><code>READ_PROJECT_INVITE_OWN</code></small></div>
               <div class="text-black-50 small-text">Who can view own invite.</div>
             </div>
@@ -540,7 +631,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Read Project Invite (not own)</div>
+              <div class="permission-title anchor-container">
+                <a href="#READ_PROJECT_INVITE_NOT_OWN" name="READ_PROJECT_INVITE_NOT_OWN" class="anchor"></a>Read Project Invite (not own)
+              </div>
               <div class="permission-variable"><small><code>READ_PROJECT_INVITE_NOT_OWN</code></small></div>
               <div class="text-black-50 small-text">Who can view invites of other users.</div>
             </div>
@@ -572,7 +665,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Create Project Invite (customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#CREATE_PROJECT_INVITE_CUSTOMER" name="CREATE_PROJECT_INVITE_CUSTOMER" class="anchor"></a>Create Project Invite (customer)
+              </div>
               <div class="permission-variable"><small><code>CREATE_PROJECT_INVITE_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can invite project members with &quot;customer&quot; role.</div>
             </div>
@@ -604,7 +699,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Create Project Invite (non-customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#CREATE_PROJECT_MEMBER_NON_CUSTOMER" name="CREATE_PROJECT_MEMBER_NON_CUSTOMER" class="anchor"></a>Create Project Invite (non-customer)
+              </div>
               <div class="permission-variable"><small><code>CREATE_PROJECT_MEMBER_NON_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can invite project members with non &quot;customer&quot; role.</div>
             </div>
@@ -635,7 +732,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Create Project Invite (copilot)</div>
+              <div class="permission-title anchor-container">
+                <a href="#CREATE_PROJECT_INVITE_COPILOT_DIRECTLY" name="CREATE_PROJECT_INVITE_COPILOT_DIRECTLY" class="anchor"></a>Create Project Invite (copilot)
+              </div>
               <div class="permission-variable"><small><code>CREATE_PROJECT_INVITE_COPILOT_DIRECTLY</code></small></div>
               <div class="text-black-50 small-text">Who can invite user with &quot;copilot&quot; role directly without requesting.</div>
             </div>
@@ -658,7 +757,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project Invite (own)</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_INVITE_OWN" name="UPDATE_PROJECT_INVITE_OWN" class="anchor"></a>Update Project Invite (own)
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT_INVITE_OWN</code></small></div>
               <div class="text-black-50 small-text">Who can update own invite.</div>
             </div>
@@ -679,7 +780,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project Invite (not own)</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_INVITE_NOT_OWN" name="UPDATE_PROJECT_INVITE_NOT_OWN" class="anchor"></a>Update Project Invite (not own)
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT_INVITE_NOT_OWN</code></small></div>
               <div class="text-black-50 small-text">Who can update invites for other members.</div>
             </div>
@@ -701,7 +804,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Update Project Invite (requested)</div>
+              <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_INVITE_REQUESTED" name="UPDATE_PROJECT_INVITE_REQUESTED" class="anchor"></a>Update Project Invite (requested)
+              </div>
               <div class="permission-variable"><small><code>UPDATE_PROJECT_INVITE_REQUESTED</code></small></div>
               <div class="text-black-50 small-text">Who can update requested invites.</div>
             </div>
@@ -724,7 +829,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Delete Project Member (own)</div>
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_INVITE_OWN" name="DELETE_PROJECT_INVITE_OWN" class="anchor"></a>Delete Project Member (own)
+              </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT_INVITE_OWN</code></small></div>
               <div class="text-black-50 small-text">Who can delete own invite.</div>
             </div>
@@ -745,7 +852,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Delete Project Invite (not own, customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER" name="DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER" class="anchor"></a>Delete Project Invite (not own, customer)
+              </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can delete invites for other members with &quot;customer&quot; role.</div>
             </div>
@@ -777,7 +886,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Delete Project Invite (not own, non-customer)</div>
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER" name="DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER" class="anchor"></a>Delete Project Invite (not own, non-customer)
+              </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER</code></small></div>
               <div class="text-black-50 small-text">Who can delete project invites for other members with non &quot;customer&quot; role.</div>
             </div>
@@ -808,7 +919,9 @@
           </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">Delete Project Invite (requested)</div>
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_INVITE_REQUESTED" name="DELETE_PROJECT_INVITE_REQUESTED" class="anchor"></a>Delete Project Invite (requested)
+              </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT_INVITE_REQUESTED</code></small></div>
               <div class="text-black-50 small-text">Who can delete requested invites.</div>
             </div>
@@ -831,12 +944,16 @@
           </div>
         <div class="row">
           <div class="col pt-5 pb-2">
-            <h2>undefined</h2>
+            <h2 class="anchor-container">
+              <a href="#section-deprecated" name="section-deprecated" class="anchor"></a>Deprecated
+            </h2>
           </div>
         </div>
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title"></div>
+              <div class="permission-title anchor-container">
+                <a href="#ROLES_COPILOT_AND_ABOVE" name="ROLES_COPILOT_AND_ABOVE" class="anchor"></a>
+              </div>
               <div class="permission-variable"><small><code>ROLES_COPILOT_AND_ABOVE</code></small></div>
               <div class="text-black-50 small-text"></div>
             </div>
@@ -858,6 +975,369 @@
               </div>
             </div>
           </div>
+
+      <h1 class="anchor-container">
+        <a href="#roles-matrix" name="roles-matrix" class="anchor"></a>Roles Matrix
+      </h1>
+
+      <table class="table table-hover roles-matrix-table">
+        <thead>
+          <tr>
+              <th><div>Project \ Topcoder</div></th>
+              <th><div>administrator</div></th>
+              <th><div>Connect Manager</div></th>
+              <th><div>Connect Account Manager</div></th>
+              <th><div>Connect Copilot</div></th>
+              <th><div>Connect Admin</div></th>
+              <th><div>Connect Copilot Manager</div></th>
+              <th><div>Business Development Representative</div></th>
+              <th><div>Presales</div></th>
+              <th><div>Account Executive</div></th>
+              <th><div>Program Manager</div></th>
+              <th><div>Solution Architect</div></th>
+              <th><div>Project Manager</div></th>
+              <th><div>Topcoder User</div></th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr>
+              <th>customer</th>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+            </tr>
+            <tr>
+              <th>manager</th>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+            </tr>
+            <tr>
+              <th>copilot</th>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+            </tr>
+            <tr>
+              <th>account_manager</th>
+                <td >
+                  
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+            </tr>
+            <tr>
+              <th>account_executive</th>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+            </tr>
+            <tr>
+              <th>project_manager</th>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+            </tr>
+            <tr>
+              <th>solution_architect</th>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+            </tr>
+            <tr>
+              <th>program_manager</th>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+            </tr>
+        </tbody>
+      </table>
     </div>
   </body>
 </html>

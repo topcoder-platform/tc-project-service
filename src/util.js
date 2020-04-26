@@ -32,7 +32,7 @@ import {
   USER_ROLE,
   INVITE_STATUS,
 } from './constants';
-import { PERMISSION } from './permissions/constants';
+import { PERMISSION, DEFAULT_PROJECT_ROLE } from './permissions/constants';
 
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
@@ -1390,6 +1390,26 @@ const projectServiceUtils = {
     const markupKey = markupMatch && markupMatch[1] ? markupMatch[1] : null;
 
     return markupKey ? _.includes(_.values(ESTIMATION_TYPE), markupKey) : false;
+  },
+
+  /**
+   * Get default Project Role for a user by they Topcoder Roles.
+   *
+   * @param {Object} user       user
+   * @param {Array}  user.roles user Topcoder roles
+   *
+   * @returns {String} project role
+   */
+  getDefaultProjectRole: (user) => {
+    for (let i = 0; i < DEFAULT_PROJECT_ROLE.length; i += 1) {
+      const rule = DEFAULT_PROJECT_ROLE[i];
+
+      if (util.hasPermission({ topcoderRoles: [rule.topcoderRole] }, user)) {
+        return rule.projectRole;
+      }
+    }
+
+    return undefined;
   },
 
   /**

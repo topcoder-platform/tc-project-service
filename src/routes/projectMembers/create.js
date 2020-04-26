@@ -4,7 +4,7 @@ import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import models from '../../models';
-import { PROJECT_TO_TOPCODER_ROLES_MATRIX, DEFAULT_PROJECT_ROLE, PERMISSION } from '../../permissions/constants';
+import { PROJECT_TO_TOPCODER_ROLES_MATRIX, PERMISSION } from '../../permissions/constants';
 
 /**
  * API to add a project member.
@@ -12,26 +12,6 @@ import { PROJECT_TO_TOPCODER_ROLES_MATRIX, DEFAULT_PROJECT_ROLE, PERMISSION } fr
  * user being added is current user
  */
 const permissions = tcMiddleware.permissions;
-
-/**
- * Get default Project Role for a user by they Topcoder Roles.
- *
- * @param {Object} user       user
- * @param {Array}  user.roles user Topcoder roles
- *
- * @returns {String} project role
- */
-const getDefaultProjectRole = (user) => {
-  for (let i = 0; i < DEFAULT_PROJECT_ROLE.length; i += 1) {
-    const rule = DEFAULT_PROJECT_ROLE[i];
-
-    if (util.hasPermission({ topcoderRoles: [rule.topcoderRole] }, user)) {
-      return rule.projectRole;
-    }
-  }
-
-  return undefined;
-};
 
 const createProjectMemberValidations = {
   body: Joi.object().keys({
@@ -72,7 +52,7 @@ module.exports = [
         }
       }
 
-      const targetRole = _.get(req, 'body.role', getDefaultProjectRole(addUser));
+      const targetRole = _.get(req, 'body.role', util.getDefaultProjectRole(addUser));
 
       if (!targetRole) {
         throw new Error('Cannot automatically detect role for a new member.');

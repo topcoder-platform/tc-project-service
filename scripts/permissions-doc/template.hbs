@@ -21,6 +21,57 @@
         line-height: 120%;
         margin: 5px 0;
       }
+
+      .anchor-container .anchor {
+        float: left;
+        opacity: 1;
+        line-height: 1;
+        margin-left: -20px;
+      }
+
+      .anchor-container .anchor::before {
+        visibility: hidden;
+        font-size: 16px;
+        content: '🔗';
+        display: inline-block;
+        width: 20px;
+      }
+
+      .anchor-container:hover .anchor {
+        text-decoration: none;
+      }
+
+      .anchor-container:hover .anchor::before {
+        visibility: visible;
+      }
+
+      .roles-matrix-table td {
+        vertical-align: center;
+        text-align: center;
+      }
+
+      .roles-matrix-table thead th:not(:first-child),
+      .roles-matrix-table td {
+        border-left: 1px solid #dee2e6;
+      }
+
+      .roles-matrix-table thead th {
+        height: 320px;
+      }
+
+      .roles-matrix-table thead th:not(:first-child) {
+        width: 40px;
+      }
+
+      .roles-matrix-table thead th div {
+        white-space: nowrap;
+      }
+
+      .roles-matrix-table thead th:not(:first-child) div {
+        padding-left: 10px;
+        transform: rotate(-90deg);
+        width: 40px;
+      }
     </style>
   </head>
   <body>
@@ -43,13 +94,17 @@
       {{#each groups}}
         <div class="row">
           <div class="col pt-5 pb-2">
-            <h2>{{title}}</h2>
+            <h2 class="anchor-container">
+              <a href="#{{anchor}}" name="{{anchor}}" class="anchor"></a>{{title}}
+            </h2>
           </div>
         </div>
         {{#each permissions}}
           <div class="row border-top">
             <div class="col py-2">
-              <div class="permission-title">{{meta.title}}</div>
+              <div class="permission-title anchor-container">
+                <a href="#{{meta.key}}" name="{{meta.key}}" class="anchor"></a>{{meta.title}}
+              </div>
               <div class="permission-variable"><small><code>{{meta.key}}</code></small></div>
               <div class="text-black-50 small-text">{{meta.description}}</div>
             </div>
@@ -92,6 +147,32 @@
           </div>
         {{/each}}
       {{/each}}
+
+      <h1 class="anchor-container">
+        <a href="#roles-matrix" name="roles-matrix" class="anchor"></a>Roles Matrix
+      </h1>
+
+      <table class="table table-hover roles-matrix-table">
+        <thead>
+          <tr>
+            {{#each rolesMatrix.columns}}
+              <th><div>{{this}}</div></th>
+            {{/each}}
+          </tr>
+        </thead>
+        <tbody>
+          {{#each rolesMatrix.rows}}
+            <tr>
+              <th>{{this.rowHeader}}</th>
+              {{#each this.cells}}
+                <td {{#if this.isDefault}}class="table-primary" title="Default role"{{/if}}>
+                  {{#if this.isAllowed}}✅{{/if}}
+                </td>
+              {{/each}}
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
     </div>
   </body>
 </html>
