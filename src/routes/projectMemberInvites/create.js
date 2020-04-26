@@ -275,7 +275,7 @@ module.exports = [
 
     if (
       invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
-      !util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_MEMBER_NON_CUSTOMER, req)
+      !util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER, req)
     ) {
       const err = new Error(`You are not allowed to invite user as ${invite.role}.`);
       err.status = 403;

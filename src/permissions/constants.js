@@ -300,7 +300,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
-  CREATE_PROJECT_MEMBER_NON_CUSTOMER: {
+  CREATE_PROJECT_INVITE_NON_CUSTOMER: {
     meta: {
       title: 'Create Project Invite (non-customer)',
       group: 'Project Invite',
