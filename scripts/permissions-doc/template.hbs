@@ -72,6 +72,19 @@
         transform: rotate(-90deg);
         width: 40px;
       }
+
+      .roles-matrix-table tfoot td {
+        border-left: 0;
+        text-align: left;
+      }
+
+      .roles-matrix-default-color {
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        background-color: #b8daff;
+        vertical-align: middle;
+      }
     </style>
   </head>
   <body>
@@ -172,6 +185,13 @@
             </tr>
           {{/each}}
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="{{rolesMatrix.columns.length}}">
+              <div class="roles-matrix-default-color"></div> - means default <strong>Project Role</strong> if user with according <strong>Topcoder Role</strong> directly joins the project (if they are allowed to join directly). If user has multiple <strong>Topcoder Roles</strong> then the most left <strong>Topcoder Role</strong> on the table would define default <strong>Project Role</strong>.
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </body>

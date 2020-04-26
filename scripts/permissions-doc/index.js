@@ -12,10 +12,10 @@ import handlebars from 'handlebars';
 import {
   PERMISSION,
   PROJECT_TO_TOPCODER_ROLES_MATRIX,
+  DEFAULT_PROJECT_ROLE,
 } from '../../src/permissions/constants';
 import {
   PROJECT_MEMBER_ROLE,
-  USER_ROLE,
 } from '../../src/constants';
 import util from '../../src/util';
 
@@ -83,7 +83,7 @@ function normalizePermission(permission) {
  * @returns {Object} project/topcoder roles matrix
  */
 function getNormalizedRolesMatrix() {
-  const topcoderRolesAll = _.values(USER_ROLE);
+  const topcoderRolesAll = _.values(_.map(DEFAULT_PROJECT_ROLE, 'topcoderRole'));
   const projectRolesAll = _.keys(PROJECT_TO_TOPCODER_ROLES_MATRIX);
 
   const isDefaultRole = (topcoderRole, projectRole) =>

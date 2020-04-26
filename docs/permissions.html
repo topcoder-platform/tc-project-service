@@ -72,6 +72,19 @@
         transform: rotate(-90deg);
         width: 40px;
       }
+
+      .roles-matrix-table tfoot td {
+        border-left: 0;
+        text-align: left;
+      }
+
+      .roles-matrix-default-color {
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        background-color: #b8daff;
+        vertical-align: middle;
+      }
     </style>
   </head>
   <body>
@@ -984,14 +997,13 @@
         <thead>
           <tr>
               <th><div>Project \ Topcoder</div></th>
-              <th><div>administrator</div></th>
               <th><div>Connect Manager</div></th>
-              <th><div>Connect Account Manager</div></th>
-              <th><div>Connect Copilot</div></th>
               <th><div>Connect Admin</div></th>
-              <th><div>Connect Copilot Manager</div></th>
+              <th><div>administrator</div></th>
+              <th><div>Connect Account Manager</div></th>
               <th><div>Business Development Representative</div></th>
               <th><div>Presales</div></th>
+              <th><div>Connect Copilot</div></th>
               <th><div>Account Executive</div></th>
               <th><div>Program Manager</div></th>
               <th><div>Solution Architect</div></th>
@@ -1002,9 +1014,6 @@
         <tbody>
             <tr>
               <th>customer</th>
-                <td >
-                  ✅
-                </td>
                 <td >
                   ✅
                 </td>
@@ -1050,14 +1059,11 @@
                 <td class="table-primary" title="Default role">
                   ✅
                 </td>
-                <td >
-                  
-                </td>
-                <td >
-                  
-                </td>
                 <td class="table-primary" title="Default role">
                   ✅
+                </td>
+                <td >
+                  
                 </td>
                 <td >
                   
@@ -1095,20 +1101,17 @@
                 <td >
                   
                 </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
+                <td >
+                  
+                </td>
                 <td class="table-primary" title="Default role">
                   ✅
-                </td>
-                <td >
-                  
-                </td>
-                <td >
-                  
-                </td>
-                <td >
-                  
-                </td>
-                <td >
-                  
                 </td>
                 <td >
                   
@@ -1129,16 +1132,7 @@
             <tr>
               <th>account_manager</th>
                 <td >
-                  
-                </td>
-                <td >
                   ✅
-                </td>
-                <td class="table-primary" title="Default role">
-                  ✅
-                </td>
-                <td >
-                  
                 </td>
                 <td >
                   
@@ -1151,6 +1145,12 @@
                 </td>
                 <td class="table-primary" title="Default role">
                   ✅
+                </td>
+                <td class="table-primary" title="Default role">
+                  ✅
+                </td>
+                <td >
+                  
                 </td>
                 <td >
                   ✅
@@ -1170,9 +1170,6 @@
             </tr>
             <tr>
               <th>account_executive</th>
-                <td >
-                  
-                </td>
                 <td >
                   
                 </td>
@@ -1242,9 +1239,6 @@
                 <td >
                   
                 </td>
-                <td >
-                  
-                </td>
                 <td class="table-primary" title="Default role">
                   ✅
                 </td>
@@ -1254,9 +1248,6 @@
             </tr>
             <tr>
               <th>solution_architect</th>
-                <td >
-                  
-                </td>
                 <td >
                   
                 </td>
@@ -1320,9 +1311,6 @@
                 <td >
                   
                 </td>
-                <td >
-                  
-                </td>
                 <td class="table-primary" title="Default role">
                   ✅
                 </td>
@@ -1337,6 +1325,13 @@
                 </td>
             </tr>
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="13">
+              <div class="roles-matrix-default-color"></div> - means default <strong>Project Role</strong> if user with according <strong>Topcoder Role</strong> directly joins the project (if they are allowed to join directly). If user has multiple <strong>Topcoder Roles</strong> then the most left <strong>Topcoder Role</strong> on the table would define default <strong>Project Role</strong>.
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </body>
