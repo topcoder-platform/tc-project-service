@@ -30,7 +30,9 @@
     "data:export": "NODE_ENV=development LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/export",
     "data:import": "NODE_ENV=development LOG_LEVEL=info node --require dotenv/config --require babel-core/register scripts/data/import",
     "local:run-docker": "docker-compose -f ./local/full/docker-compose.yml up -d",
-    "local:init": "npm run sync:all && npm run data:import"
+    "local:init": "npm run sync:all && npm run data:import",
+    "generate:doc:permissions": "babel-node scripts/permissions-doc",
+    "generate:doc:permissions:dev": "nodemon --watch scripts/permissions-doc --watch src --ext js,jsx,hbs --exec babel-node scripts/permissions-doc"
   },
   "repository": {
     "type": "git",

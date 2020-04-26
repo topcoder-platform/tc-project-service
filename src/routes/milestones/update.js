@@ -184,8 +184,8 @@ module.exports = [
           }
 
           if (entityToUpdate.completionDate || entityToUpdate.actualStartDate) {
-            if (!util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser)) {
-              const apiErr = new Error('You are not authorised to perform this action');
+            if (!util.hasPermissionByReq({ topcoderRoles: ADMIN_ROLES }, req)) {
+              const apiErr = new Error('You are not authorized to perform this action');
               apiErr.status = 403;
               return Promise.reject(apiErr);
             }

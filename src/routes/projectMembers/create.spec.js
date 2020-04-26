@@ -4,6 +4,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
 
+import config from 'config';
 import models from '../../models';
 import util from '../../util';
 import server from '../../app';
@@ -218,6 +219,64 @@ describe('Project Members create', () => {
             resJson.isPrimary.should.be.truthy;
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40051334);
+            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should add another user as "manager" using M2M token with "write:project-members" scope', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{
+                roleName: USER_ROLE.MANAGER,
+              }],
+            },
+          },
+        }),
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {},
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post(`/v5/projects/${project1.id}/members/`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+        })
+        .send({
+          userId: testUtil.userIds.manager,
+          role: 'manager',
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.role.should.equal('manager');
+            resJson.isPrimary.should.be.truthy;
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(40051334);
+            resJson.createdBy.should.equal(config.DEFAULT_M2M_USERID);
             server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
           }
@@ -470,8 +529,8 @@ describe('Project Members create', () => {
                     projectId: project1.id,
                     projectName: project1.name,
                     projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                    userId: 40051336,
-                    initiatorUserId: 40051336,
+                    userId: 40051332,
+                    initiatorUserId: testUtil.userIds.connectAdmin,
                   })).should.be.true;
                   done();
                 });

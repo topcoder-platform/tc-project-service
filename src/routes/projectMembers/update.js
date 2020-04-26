@@ -5,7 +5,8 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES, MANAGER_ROLES } from '../../constants';
+import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE } from '../../constants';
+import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
 
 /**
  * API to update a project member.
@@ -64,7 +65,16 @@ module.exports = [
           projectMember = _member;
           previousValue = _.clone(projectMember.get({ plain: true }));
           _.assign(projectMember, updatedProps);
-          // newValue = projectMember.get({ plain: true });
+
+          if (
+            previousValue.userId !== req.authUser.userId &&
+            previousValue.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
+            !util.hasPermissionByReq(PERMISSION.UPDATE_PROJECT_MEMBER_NON_CUSTOMER, req)
+          ) {
+            const err = new Error('You don\'t have permission to update a non-customer member.');
+            err.status = 403;
+            return Promise.reject(err);
+          }
 
           // no updates if no change
           if (updatedProps.role === previousValue.role &&
@@ -74,11 +84,18 @@ module.exports = [
           }
 
           return util.getUserRoles(projectMember.userId, req.log, req.id).then((roles) => {
-            if (_.includes(PROJECT_MEMBER_MANAGER_ROLES, updatedProps.role)
-                && !util.hasIntersection(MANAGER_ROLES, roles)) {
-              const err = new Error('User role can not be updated to Manager role');
+            if (
+              previousValue.role !== updatedProps.role &&
+              !util.matchPermissionRule(
+                { topcoderRoles: PROJECT_TO_TOPCODER_ROLES_MATRIX[updatedProps.role] },
+                { roles },
+              )
+            ) {
+              const err = new Error(
+                `User doesn't have required Topcoder roles to have project role "${updatedProps.role}".`,
+              );
               err.status = 401;
-              return Promise.reject(err);
+              throw err;
             }
 
             projectMember.updatedBy = req.authUser.userId;

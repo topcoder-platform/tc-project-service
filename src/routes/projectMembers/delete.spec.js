@@ -105,7 +105,7 @@ describe('Project members delete', () => {
         .expect(403, done);
     });
 
-    it('should return 403 if user not found', (done) => {
+    it('should return 404 if user not found', (done) => {
       request(server)
         .delete(`/v5/projects/${project1.id}/members/8888888`)
         .set({
@@ -116,7 +116,7 @@ describe('Project members delete', () => {
           projectId: project1.id,
           role: 'customer',
         })
-        .expect(403, done);
+        .expect(404, done);
     });
 
     it('should return 204 if copilot user has access to the project', (done) => {
@@ -241,6 +241,45 @@ describe('Project members delete', () => {
         .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .expect(204)
+        .end((err) => {
+          expectAfterDelete(project1.id, member2.id, err, () => {
+            const removedMember = {
+              projectId: project1.id,
+              userId: 40051334,
+              role: 'manager',
+              isPrimary: true,
+            };
+            server.services.pubsub.publish.calledWith('project.member.removed',
+              sinon.match(removedMember)).should.be.true;
+            postSpy.should.have.been.calledOnce;
+            done();
+          });
+        });
+    });
+
+    it('should remove manager from project using M2M token with "write:project-members" scope', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {},
+            },
+          },
+        }),
+      });
+      const postSpy = sinon.spy(mockHttpClient, 'post');
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
         })
         .expect(204)
         .end((err) => {
@@ -403,8 +442,8 @@ describe('Project members delete', () => {
                   projectId: project1.id,
                   projectName: project1.name,
                   projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                  userId: 40051334,
-                  initiatorUserId: 40051334,
+                  userId: member1.userId,
+                  initiatorUserId: testUtil.userIds.manager,
                 })).should.be.true;
 
                 done();

@@ -2,8 +2,9 @@ import _ from 'lodash';
 import config from 'config';
 
 import models from '../../models';
-import { MANAGER_ROLES, INVITE_STATUS, PROJECT_MEMBER_NON_CUSTOMER_ROLES } from '../../constants';
+import { INVITE_STATUS, PROJECT_MEMBER_NON_CUSTOMER_ROLES } from '../../constants';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -612,9 +613,7 @@ module.exports = [
     };
     req.log.info(criteria);
     // TODO refactor (DRY) code below so we don't repeat the same logic for admins and non-admin users
-    if (!memberOnly
-      && (util.hasAdminRole(req)
-          || util.hasRoles(req, MANAGER_ROLES))) {
+    if (!memberOnly && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser)) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
       .then((result) => {

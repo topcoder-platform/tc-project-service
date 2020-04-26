@@ -5,6 +5,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE } from '../../constants';
+import { PERMISSION } from '../../permissions/constants';
 
 /**
  * API to delete a project member.
@@ -27,6 +28,16 @@ module.exports = [
         if (!member) {
           const err = new Error(`Project member not found for member id ${req.params.id}`);
           err.status = 404;
+          return Promise.reject(err);
+        }
+
+        if (
+          member.userId !== req.authUser.userId &&
+          member.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
+          !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_MEMBER_NON_CUSTOMER, req)
+        ) {
+          const err = new Error('You don\'t have permissions to delete other members with non-customer role.');
+          err.status = 403;
           return Promise.reject(err);
         }
         return member.update({ deletedBy: req.authUser.userId });

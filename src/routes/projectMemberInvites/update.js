@@ -59,13 +59,13 @@ module.exports = [
 
         if (
           invite.status === INVITE_STATUS.REQUESTED
-          && !util.hasPermission(PERMISSION.UPDATE_REQUESTED_INVITE, req.authUser, req.context.currentProjectMembers)
+          && !util.hasPermissionByReq(PERMISSION.UPDATE_REQUESTED_INVITE, req)
         ) {
           error = 'You don\'t have permissions to update requested invites.';
         } else if (
           invite.status !== INVITE_STATUS.REQUESTED
           && !ownInvite
-          && !util.hasPermission(PERMISSION.UPDATE_NOT_OWN_INVITE, req.authUser, req.context.currentProjectMembers)
+          && !util.hasPermissionByReq(PERMISSION.UPDATE_NOT_OWN_INVITE, req)
         ) {
           error = 'You don\'t have permissions to update invites for other users.';
         }

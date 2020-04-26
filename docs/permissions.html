@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Permissions</title>
+    <style>
+      .small-text {
+        font-size: 62.5%;
+        line-height: 120%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="jumbotron">
+        <h1 class="display-4">Permissions</h1>
+        <p class="lead">List of all the possible user permissions inside Topcoder Project Service</p>
+        <hr class="my-4">
+        <p>Legend:</p>
+        <ul>
+          <li><span class="badge badge-primary">allowed Project Role</span> - users with such a <strong>Project Role</strong> are allowed to perform the action</li>
+          <li><span class="badge badge-warning">denied Project Role</span> - users with such a <strong>Project Role</strong> are denied to perform the action even they have some other allow roles</li>
+          <li><span class="badge badge-success">allowed Topcoder Role</span> - users with such a <strong>Topcoder Role</strong> are allowed to perform the action</li>
+          <li><span class="badge badge-danger">denied Topcoder Role</span> - users with such a <strong>Topcoder Role</strong> are denied to perform the action even they have some other allow roles</li>
+          <li><span class="badge badge-dark">allowed M2M Scope</span> - M2M tokens with such a <strong>scope</strong> are allowed to perform the action</li>
+          <li><span class="badge badge-secondary">denied M2M Scope</span> - M2M tokens with such a <strong>scope</strong> are allowed to perform the action even they have some other allow scopes</li>
+        </ul>
+      </div>
+
+        <div class="row">
+          <div class="col pt-5 pb-2">
+            <h2>Project</h2>
+          </div>
+        </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Create Project
+              <div><small><code>CREATE_PROJECT</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                  <span class="badge badge-success" title="Allowed">Any Logged-in User</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Create Project as a &quot;manager&quot;
+              <div><small><code>CREATE_PROJECT_AS_MANAGER</code></small></div>
+              <div class="text-black-50 small-text">When user creates a project they become a project member.
+        If user has this permission they would join project with &quot;manager&quot;
+        project role, otherwise with &quot;customer&quot;.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Read Project
+              <div><small><code>READ_PROJECT</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">read:projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Read Any Project
+              <div><small><code>READ_PROJECT_ANY</code></small></div>
+              <div class="text-black-50 small-text">Read any project, even when not a member.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">read:projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Update Project
+              <div><small><code>UPDATE_PROJECT</code></small></div>
+              <div class="text-black-50 small-text">There are additional limitations on editing some parts of the project.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Update Project property &quot;directProjectId&quot;
+              <div><small><code>UPDATE_PROJECT_DIRECT_PROJECT_ID</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Delete Project
+              <div><small><code>DELETE_PROJECT</code></small></div>
+              <div class="text-black-50 small-text">Has different set of permission unlike to update.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                    <span class="badge badge-primary" title="Allowed Project Role">owner</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">program_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">project_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">solution_architect</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:projects</span>
+              </div>
+            </div>
+          </div>
+        <div class="row">
+          <div class="col pt-5 pb-2">
+            <h2>Project Member</h2>
+          </div>
+        </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Read Project Member
+              <div><small><code>READ_PROJECT_MEMBER</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">read:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Read Project Member Details
+              <div><small><code>READ_PROJECT_MEMBER_DETAILS</code></small></div>
+              <div class="text-black-50 small-text">Who can see user details (PII) like email, first name and last name.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">read:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Create Project Member
+              <div><small><code>CREATE_PROJECT_MEMBER</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Create Project Member (for other users)
+              <div><small><code>CREATE_PROJECT_MEMBER_FOR_OTHERS</code></small></div>
+              <div class="text-black-50 small-text">Who can add other users as project members.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Update Project Member
+              <div><small><code>UPDATE_PROJECT_MEMBER</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Update Project Member (non-customer)
+              <div><small><code>UPDATE_PROJECT_MEMBER_NON_CUSTOMER</code></small></div>
+              <div class="text-black-50 small-text">Who can update project members with non &quot;customer&quot; role.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Update Project Member (to copilot)
+              <div><small><code>UPDATE_PROJECT_MEMBER_TO_COPILOT</code></small></div>
+              <div class="text-black-50 small-text">Who can update project member role to &quot;copilot&quot;.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Delete Project Member
+              <div><small><code>DELETE_PROJECT_MEMBER</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              Delete Project Member (non-customer)
+              <div><small><code>DELETE_PROJECT_MEMBER_NON_CUSTOMER</code></small></div>
+              <div class="text-black-50 small-text">Who can delete project members with non &quot;customer&quot; role.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+        <div class="row">
+          <div class="col pt-5 pb-2">
+            <h2>undefined</h2>
+          </div>
+        </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              
+              <div><small><code>ROLES_COPILOT_AND_ABOVE</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                    <span class="badge badge-primary" title="Allowed Project Role">program_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">solution_architect</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">project_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">copilot</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+              </div>
+
+              <div>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              
+              <div><small><code>UPDATE_NOT_OWN_INVITE</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+              </div>
+
+              <div>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              
+              <div><small><code>UPDATE_REQUESTED_INVITE</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+              </div>
+
+              <div>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              
+              <div><small><code>DELETE_CUSTOMER_INVITE</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+              </div>
+
+              <div>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              
+              <div><small><code>DELETE_NON_CUSTOMER_INVITE</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                    <span class="badge badge-primary" title="Allowed Project Role">manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">observer</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">account_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">account_executive</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">project_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">program_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">solution_architect</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+              </div>
+
+              <div>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              
+              <div><small><code>DELETE_REQUESTED_INVITE</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
+              </div>
+
+              <div>
+              </div>
+            </div>
+          </div>
+    </div>
+  </body>
+</html>

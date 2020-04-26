@@ -7,10 +7,11 @@ import config from 'config';
 import moment from 'moment';
 
 import models from '../../models';
-import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, PROJECT_STATUS, PROJECT_PHASE_STATUS,
+import { PROJECT_MEMBER_ROLE, PROJECT_STATUS, PROJECT_PHASE_STATUS,
   EVENT, RESOURCES, REGEX, WORKSTREAM_STATUS, ATTACHMENT_TYPES } from '../../constants';
 import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
 
@@ -387,7 +388,7 @@ module.exports = [
   (req, res, next) => {
     const project = req.body;
     // by default connect admin and managers joins projects as manager
-    const userRole = util.hasRoles(req, MANAGER_ROLES)
+    const userRole = util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_AS_MANAGER, req)
       ? PROJECT_MEMBER_ROLE.MANAGER
       : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults
