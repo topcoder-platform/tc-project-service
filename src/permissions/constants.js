@@ -53,6 +53,13 @@ import _ from 'lodash';
   M2M_SCOPES,
 } from '../constants';
 
+const PROJECT_ROLES_ALL = _.values(PROJECT_MEMBER_ROLE);
+const PROJECT_ROLES_MANAGEMENT = _.difference(PROJECT_ROLES_ALL, [
+  PROJECT_MEMBER_ROLE.COPILOT,
+  PROJECT_MEMBER_ROLE.CUSTOMER,
+  PROJECT_MEMBER_ROLE.OBSERVER,
+]);
+
 const ALL = true;
 
 const SCOPES_PROJECTS_READ = [
@@ -216,7 +223,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can update project members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: ALL,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
@@ -227,7 +234,8 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can update project members with non "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -250,7 +258,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can delete project members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: ALL,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
@@ -261,7 +269,8 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can delete project members with non "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -306,7 +315,8 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Invite',
       description: 'Who can invite project members with non "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -372,7 +382,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Invite',
       description: 'Who can delete invites for other members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: ALL,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
@@ -383,7 +393,8 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Invite',
       description: 'Who can delete project invites for other members with non "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 

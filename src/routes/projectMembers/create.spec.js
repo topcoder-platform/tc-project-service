@@ -40,7 +40,16 @@ describe('Project Members create', () => {
           lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
-          done();
+          return models.ProjectMember.create({
+            userId: testUtil.userIds.member2,
+            projectId: project1.id,
+            role: 'manager',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }).then(() => {
+            done();
+          });
         });
       });
   });
@@ -461,7 +470,7 @@ describe('Project Members create', () => {
         request(server)
         .post(`/v5/projects/${project1.id}/invites`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
+          Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
         .send({
           handles: ['test_copilot1'],
