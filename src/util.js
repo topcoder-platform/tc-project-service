@@ -884,7 +884,7 @@ const projectServiceUtils = {
         .then((invite) => {
           if (invite) {
             return invite.update({
-              status: INVITE_STATUS.ACCEPTED,
+              status: INVITE_STATUS.CANCELED,
             }, {
               transaction,
             });
