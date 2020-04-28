@@ -345,6 +345,16 @@ describe('Project member invite delete', () => {
         .end(() => done());
     });
 
+    it('should return 204 if cancel invitation using M2M token with "write:project-members" scope', (done) => {
+      request(server)
+        .delete(`/v5/projects/${project1.id}/invites/6`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+        })
+        .expect(204)
+        .end(() => done());
+    });
+
     describe('Bus api', () => {
       let createEventSpy;
 

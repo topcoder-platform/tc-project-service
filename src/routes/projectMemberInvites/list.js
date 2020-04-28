@@ -6,6 +6,7 @@ import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
 
 const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
 
@@ -23,7 +24,7 @@ const permissions = tcMiddleware.permissions;
 
 module.exports = [
   validate(schema),
-  permissions('projectMemberInvite.list'),
+  permissions('projectMemberInvite.view'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const currentUserId = req.authUser.userId;
@@ -58,9 +59,8 @@ module.exports = [
       },
     };
 
-    if (req.context.inviteType === 'list') {
-      // user has no "view" project permission
-      // try to search from es, add search by user id or email
+    // if user doesn't have permission to view all invites, then get only invites for the current user
+    if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
       esSearchParam.query.nested.query.filtered.filter.bool.must.push({
         bool: {
           should: [
@@ -84,11 +84,11 @@ module.exports = [
       .then((data) => {
         if (data.length === 0) {
           req.log.debug('No project member invites found in ES');
-          // if user has "view" project permission, get all invites
-          if (req.context.inviteType === 'all') {
+          // if user can read all invites, then get all
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
             return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(projectId);
           }
-          // get invitation only for user
+          // otherwise, get invitation only for current user
           return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(
             projectId, currentUserEmail, currentUserId);
         }

@@ -149,5 +149,17 @@ describe('Project delete test', () => {
           expectAfterDelete(project1.id, err, done);
         });
     });
+
+    it('should remove project successfully using M2M token with "write:projects" scope', (done) => {
+      request(server)
+        .delete(`/v5/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .expect(204)
+        .end((err) => {
+          expectAfterDelete(project1.id, err, done);
+        });
+    });
   });
 });

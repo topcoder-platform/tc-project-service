@@ -30,7 +30,7 @@ const schema = {
 
 module.exports = [
   validate(schema),
-  permissions('project.viewMember'),
+  permissions('projectMember.view'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const fields = req.query.fields ? req.query.fields.split(',') : [];

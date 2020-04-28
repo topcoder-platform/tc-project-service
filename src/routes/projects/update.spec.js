@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions */
+import config from 'config';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
@@ -13,6 +14,7 @@ import {
   PROJECT_STATUS,
   BUS_API_EVENT,
   CONNECT_NOTIFICATION_EVENT,
+  M2M_SCOPES,
 } from '../../constants';
 
 const should = chai.should();
@@ -184,6 +186,32 @@ describe('Project', () => {
           if (err) {
             done(err);
           } else {
+            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it(`should return the project using M2M token with "${M2M_SCOPES.PROJECTS.WRITE}" scope`, (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m[M2M_SCOPES.PROJECTS.WRITE]}`,
+        })
+        .send({
+          name: 'updateProject name by M2M',
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.name.should.equal('updateProject name by M2M');
+            resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
+            resJson.updatedBy.should.equal(config.DEFAULT_M2M_USERID);
             server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }

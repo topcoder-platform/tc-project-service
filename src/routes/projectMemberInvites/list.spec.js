@@ -166,6 +166,30 @@ describe('GET Project Member Invites', () => {
           });
     });
 
+    it('should get invites using M2M token with "read:project-members" scope', (done) => {
+      request(server)
+          .get(`/v5/projects/${project1.id}/invites`)
+          .set({
+            Authorization: `Bearer ${testUtil.m2m['read:project-members']}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.be.an('array');
+              resJson.length.should.be.eql(2);
+              // check invitations
+              _.filter(resJson, inv => inv.id === 1).length.should.be.eql(1);
+              _.filter(resJson, inv => inv.id === 2).length.should.be.eql(1);
+              done();
+            }
+          });
+    });
+
     it('should return only pending/requested invitation if user can view the project', (done) => {
       request(server)
           .get(`/v5/projects/${project2.id}/invites`)

@@ -39,8 +39,8 @@
     "url": "localhost:9092"
   },
   "analyticsKey": "",
-  "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
-  "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
+  "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\",\"https:\/\/topcoder-dev.auth0.com\/\"]",
+  "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\",\"https:\/\/topcoder-dev.auth0.com\/\"]",
   "jwksUri": "",
   "busApiUrl": "http://api.topcoder-dev.com/v5",
   "messageApiUrl": "http://api.topcoder-dev.com/v5",
