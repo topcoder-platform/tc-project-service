@@ -186,8 +186,6 @@ describe('GET Project', () => {
                 id: data[0].id,
                 body: data[0],
               })).then(() => {
-                // sleep for some time, let elasticsearch indices be settled
-                // sleep.sleep(5);
                 testUtil.wait(done);
                 // done();
               });
@@ -233,6 +231,30 @@ describe('GET Project', () => {
           .get(`/v5/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              should.not.exist(resJson.deletedAt);
+              should.not.exist(resJson.billingAccountId);
+              should.exist(resJson.name);
+              resJson.status.should.be.eql('draft');
+              resJson.members.should.have.lengthOf(2);
+              done();
+            }
+          });
+    });
+
+    it('should return the project using M2M token with "read:projects" scope', (done) => {
+      request(server)
+          .get(`/v5/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`)
+          .set({
+            Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
           })
           .expect('Content-Type', /json/)
           .expect(200)

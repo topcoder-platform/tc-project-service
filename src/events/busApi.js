@@ -224,7 +224,7 @@ module.exports = (app, logger) => {
           projectName: project.name,
           refCode: _.get(project, 'details.utm.code'),
           projectUrl: connectProjectUrl(project.id),
-          userId: req.authUser.userId,
+          userId: member.userId,
           initiatorUserId: req.authUser.userId,
         }, logger);
       }).catch(err => null);    // eslint-disable-line no-unused-vars
@@ -269,7 +269,7 @@ module.exports = (app, logger) => {
             projectName: project.name,
             refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(project.id),
-            userId: req.authUser.userId,
+            userId: member.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
         }
@@ -312,7 +312,7 @@ module.exports = (app, logger) => {
             projectName: project.name,
             refCode: _.get(project, 'details.utm.code'),
             projectUrl: connectProjectUrl(project.id),
-            userId: req.authUser.userId,
+            userId: updated.userId,
             initiatorUserId: req.authUser.userId,
           }, logger);
         }

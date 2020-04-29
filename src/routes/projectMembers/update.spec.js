@@ -183,7 +183,7 @@ describe('Project members update', () => {
       request(server)
         .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
           role: 'customer',
@@ -198,7 +198,7 @@ describe('Project members update', () => {
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.isPrimary.should.be.true;
-            resJson.updatedBy.should.equal(40051332);
+            resJson.updatedBy.should.equal(testUtil.userIds.manager);
             server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
             done();
           }
@@ -232,7 +232,7 @@ describe('Project members update', () => {
           request(server)
             .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
             .set({
-              Authorization: `Bearer ${testUtil.jwts.copilot}`,
+              Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
             .send(body)
             .expect('Content-Type', /json/)
@@ -245,7 +245,7 @@ describe('Project members update', () => {
                 should.exist(resJson);
                 resJson.role.should.equal(body.role);
                 resJson.isPrimary.should.be.false;
-                resJson.updatedBy.should.equal(40051332);
+                resJson.updatedBy.should.equal(testUtil.userIds.manager);
                 server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
                 done();
               }
@@ -273,7 +273,7 @@ describe('Project members update', () => {
       request(server)
         .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
@@ -286,7 +286,7 @@ describe('Project members update', () => {
             should.exist(resJson);
             resJson.role.should.equal(body.role);
             resJson.isPrimary.should.be.false;
-            resJson.updatedBy.should.equal(40051332);
+            resJson.updatedBy.should.equal(testUtil.userIds.manager);
             deleteSpy.should.have.been.calledOnce;
             server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
             done();
@@ -421,6 +421,18 @@ describe('Project members update', () => {
 
     it('should return 200 if valid user(become copilot) and data', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{ roleName: 'Connect Copilot' }],
+            },
+          },
+        }),
         post: () => Promise.resolve({
           status: 200,
           data: {
@@ -441,7 +453,7 @@ describe('Project members update', () => {
       request(server)
         .patch(`/v5/projects/${project1.id}/members/${member1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
           role: 'copilot',
@@ -458,7 +470,7 @@ describe('Project members update', () => {
             resJson.role.should.equal('copilot');
             resJson.isPrimary.should.be.true;
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
-            resJson.updatedBy.should.equal(40051332);
+            resJson.updatedBy.should.equal(testUtil.userIds.manager);
             postSpy.should.have.been.calledOnce;
             done();
           }
@@ -496,7 +508,7 @@ describe('Project members update', () => {
         request(server)
         .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
           role: 'customer',
@@ -523,7 +535,7 @@ describe('Project members update', () => {
                 projectName: project1.name,
                 projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
                 userId: 40051332,
-                initiatorUserId: 40051332,
+                initiatorUserId: testUtil.userIds.manager,
               })).should.be.true;
 
               done();

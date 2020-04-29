@@ -7,10 +7,16 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, PROJECT_MEMBER_MANAGER_ROLES,
-  MANAGER_ROLES, INVITE_STATUS, EVENT, RESOURCES, USER_ROLE,
-  MAX_PARALLEL_REQUEST_QTY, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import {
+  PROJECT_MEMBER_ROLE,
+  INVITE_STATUS,
+  EVENT,
+  RESOURCES,
+  MAX_PARALLEL_REQUEST_QTY,
+  CONNECT_NOTIFICATION_EVENT,
+} from '../../constants';
 import { createEvent } from '../../services/busApi';
+import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
 
 const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
 
@@ -105,6 +111,10 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
     // if for some emails there are already existent users, we will invite them by userId,
     // to avoid sending them registration email
     return util.lookupMultipleUserEmails(req, inviteEmails, MAX_PARALLEL_REQUEST_QTY)
+      // we have to filter emails returned by the Identity Service so we only invite the users
+      // whom we are inviting, because Identity Service could possibly (maybe) return
+      // users with emails whom we didn't search for
+      .then(foundUsers => foundUsers.filter(foundUser => _.includes(inviteEmails, foundUser.email)))
       .then((existentUsers) => {
         // existent user we will invite by userId and email
         const existentUsersWithNumberId = existentUsers.map((user) => {
@@ -263,14 +273,22 @@ module.exports = [
       return next(err);
     }
 
-    if (!util.hasRoles(req, MANAGER_ROLES) && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
-      const err = new Error(`You are not allowed to invite user as ${invite.role}`);
+    if (
+      invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
+      !util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER, req)
+    ) {
+      const err = new Error(`You are not allowed to invite user as ${invite.role}.`);
       err.status = 403;
       return next(err);
     }
 
     // get member details by handles first
-    return util.getMemberDetailsByHandles(invite.handles, req.log, req.id).then((inviteUsers) => {
+    return util.getMemberDetailsByHandles(invite.handles, req.log, req.id)
+    // we have to filter users returned by the Member Service so we only invite the users
+    // whom we are inviting, because Member Service has a loose search logic and may return
+    // users with handles whom we didn't search for
+    .then(foundUsers => foundUsers.filter(foundUser => _.includes(invite.handles, foundUser.handle)))
+    .then((inviteUsers) => {
       const members = req.context.currentProjectMembers;
       const projectId = _.parseInt(req.params.projectId);
       // check user handle exists in returned result
@@ -299,10 +317,11 @@ module.exports = [
           }
           return isPresent;
         }));
-        // permission:
-        // user has to have constants.MANAGER_ROLES role
-        // to be invited as PROJECT_MEMBER_ROLE.MANAGER
-        if (_.includes(PROJECT_MEMBER_MANAGER_ROLES, invite.role)) {
+
+        // for each user invited by `handle` (userId) we have to load they Topcoder Roles,
+        // so we can check if such a user can be invited with desired Project Role
+        // for customers we don't check it to avoid extra call, as any Topcoder user can be invited as customer
+        if (invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
           _.forEach(inviteUserIds, (userId) => {
             req.log.info(userId);
             promises.push(util.getUserRoles(userId, req.log, req.id));
@@ -322,21 +341,28 @@ module.exports = [
         promises.push(Promise.resolve());
       }
       return Promise.all(promises).then((rolesList) => {
-        if (!!inviteUserIds && _.includes(PROJECT_MEMBER_MANAGER_ROLES, invite.role)) {
-          req.log.debug('Checking if userId is allowed as manager');
+        if (inviteUserIds && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
+          req.log.debug('Checking if users are allowed to be invited with desired Project Role.');
           const forbidUserList = [];
           _.zip(inviteUserIds, rolesList).forEach((data) => {
             const [userId, roles] = data;
-            req.log.debug(roles);
 
-            if (roles && !util.hasIntersection(MANAGER_ROLES, roles)) {
+            if (roles) {
+              req.log.debug(`Got user (id: ${userId}) Topcoder roles: ${roles.join(', ')}.`);
+
+              if (!util.hasPermission({ topcoderRoles: PROJECT_TO_TOPCODER_ROLES_MATRIX[invite.role] }, { roles })) {
+                forbidUserList.push(userId);
+              }
+            } else {
+              req.log.debug(`Didn't get any Topcoder roles for user (id: ${userId}).`);
               forbidUserList.push(userId);
             }
           });
           if (forbidUserList.length > 0) {
-            const message = 'cannot be added with a Manager role to the project';
+            const message = `cannot be invited with a "${invite.role}" role to the project`;
             failed = _.concat(failed, _.map(forbidUserList,
               id => _.assign({}, { handle: getUserHandleById(id, inviteUsers), message })));
+            req.log.debug(`Users with id(s) ${forbidUserList.join(', ')} ${message}`);
             inviteUserIds = _.filter(inviteUserIds, userId => !_.includes(forbidUserList, userId));
           }
         }
@@ -345,9 +371,9 @@ module.exports = [
             const data = {
               projectId,
               role: invite.role,
-              // invite directly if user is admin or copilot manager
+              // invite copilots directly if user has permissions
               status: (invite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
-                util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.COPILOT_MANAGER]))
+                util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_COPILOT_DIRECTLY, req))
                 ? INVITE_STATUS.PENDING
                 : INVITE_STATUS.REQUESTED,
               createdBy: req.authUser.userId,

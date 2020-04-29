@@ -28,7 +28,7 @@ const schema = {
 module.exports = [
   // handles request validations
   validate(schema),
-  permissions('project.viewMember'),
+  permissions('projectMember.view'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);

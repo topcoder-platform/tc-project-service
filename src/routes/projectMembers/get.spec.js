@@ -166,6 +166,27 @@ describe('GET project member', () => {
         });
     });
 
+    it('should return member using using M2M token with "read:project-members" scope', (done) => {
+      request(server)
+        .get(`/v5/projects/${projectId}/members/${memberId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['read:project-members']}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          const resJson = res.body;
+          resJson.userId.should.be.eql(_.parseInt(copilotUser.userId));
+          resJson.role.should.be.eql('copilot');
+          resJson.projectId.should.be.eql(projectId);
+          should.exist(resJson.createdAt);
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+
+          done();
+        });
+    });
+
     it('should return 200 for admin when retrieve member with id=2', (done) => {
       request(server)
         .get(`/v5/projects/${projectId}/members/${memberId2}`)

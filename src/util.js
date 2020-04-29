@@ -1,5 +1,4 @@
 
-/* globals Promise */
 /*
  * Copyright (C) 2016 TopCoder Inc., All Rights Reserved.
  */
@@ -9,7 +8,8 @@
  * @version 1.0
  */
 
-
+import * as fs from 'fs';
+import * as path from 'path';
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
@@ -18,23 +18,29 @@ import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';
 import Promise from 'bluebird';
+import coreLib from 'tc-core-library-js';
 import models from './models';
 
 import {
   ADMIN_ROLES,
-  TOKEN_SCOPES,
+  M2M_SCOPES,
   EVENT,
   PROJECT_MEMBER_ROLE,
   VALUE_TYPE,
   ESTIMATION_TYPE,
   RESOURCES,
   USER_ROLE,
+  INVITE_STATUS,
 } from './constants';
+import { PERMISSION, DEFAULT_PROJECT_ROLE } from './permissions/constants';
 
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
 const m2m = tcCoreLibAuth.m2m(config);
 
+/**
+ * @type {projectServiceUtils}
+ */
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
 
 const ssoRefCodes = JSON.parse(config.get('SSO_REFCODES'));
@@ -42,7 +48,7 @@ const ssoRefCodes = JSON.parse(config.get('SSO_REFCODES'));
 // the client modifies the config object, so always passed the cloned object
 let esClient = null;
 
-_.assignIn(util, {
+const projectServiceUtils = {
   /**
    * Build API error
    * @param {string} message the API error message
@@ -169,7 +175,7 @@ _.assignIn(util, {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
       return false;
     }
     let roles = _.get(req, 'authUser.roles', []);
@@ -186,7 +192,7 @@ _.assignIn(util, {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
       return false;
     }
     let authRoles = _.get(req, 'authUser.roles', []);
@@ -212,7 +218,7 @@ _.assignIn(util, {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
       return false;
     }
     let roles = _.get(req, 'authUser.roles', []);
@@ -273,7 +279,7 @@ _.assignIn(util, {
    */
   addUserDetailsFieldsIfAllowed: (fields, req) => {
     // Only Topcoder Admins can get email
-    if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
+    if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER_DETAILS, req)) {
       return _.concat(fields, ['email', 'firstName', 'lastName']);
     }
 
@@ -651,7 +657,7 @@ _.assignIn(util, {
     // clone data to avoid mutations
     const dataClone = _.cloneDeep(data);
 
-    const isAdmin = util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser);
+    const isAdmin = util.hasPermissionByReq({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req);
     const currentUserId = req.authUser.userId;
     const currentUserEmail = req.authUser.email;
 
@@ -727,7 +733,7 @@ _.assignIn(util, {
     let memberDetailFields = ['handle'];
 
     // Only Topcoder admins can get emails, first and last name for users
-    if (util.hasPermission({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req.authUser)) {
+    if (util.hasPermissionByReq({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req)) {
       memberDetailFields = memberDetailFields.concat(['email', 'firstName', 'lastName']);
     }
 
@@ -852,8 +858,9 @@ _.assignIn(util, {
    * Add userId to project
    * @param  {object} req  Request object that should contain project info and user info
    * @param  {object} member  the member to be added to project
+   * @param  {sequalize.Transaction} transaction
   */
-  addUserToProject: Promise.coroutine(function* (req, member) {    // eslint-disable-line
+  addUserToProject: Promise.coroutine(function* (req, member, transaction) {    // eslint-disable-line
     const members = req.context.currentProjectMembers;
 
     // check if member is already registered
@@ -868,23 +875,40 @@ _.assignIn(util, {
     let newMember = null;
     // register member
 
-    return models.ProjectMember.create(member)
+    return models.ProjectMember.create(member, { transaction })
     .then((_newMember) => {
       newMember = _newMember.get({ plain: true });
-      // publish event
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-        newMember,
-        { correlationId: req.id },
-      );
-      // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-        RESOURCES.PROJECT_MEMBER,
-        newMember);
 
-      return newMember;
+      // we have to remove all pending invites for the member if any, as we can add a member directly without invite
+      return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(member.projectId, null, newMember.userId)
+        .then((invite) => {
+          if (invite) {
+            return invite.update({
+              status: INVITE_STATUS.CANCELED,
+            }, {
+              transaction,
+            });
+          }
+
+          return Promise.resolve();
+        }).then(() => {
+          // TODO Should we also send Kafka event in case we removed some invite above?
+
+          // publish event
+          req.app.services.pubsub.publish(
+            EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+            newMember,
+            { correlationId: req.id },
+          );
+          // emit the event
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+            RESOURCES.PROJECT_MEMBER,
+            newMember);
+
+            return newMember;
+        });
     })
     .catch((err) => {
       req.log.error('Unable to register ', err);
@@ -1132,36 +1156,81 @@ _.assignIn(util, {
    * If we define a rule with `projectRoles` list, we also should provide `projectMembers`
    * - the list of project members.
    *
+   * `permissionRule.projectRoles` may be equal to `true` which means user is a project member with any role
+   *
+   * `permissionRule.topcoderRoles` may be equal to `true` which means user is a logged-in user
+   *
    * @param {Object}        permissionRule               permission rule
-   * @param {Array<String>} permissionRule.projectRoles  the list of project roles of the user
-   * @param {Array<String>} permissionRule.topcoderRoles the list of Topcoder roles of the user
+   * @param {Array<String>|Array<Object>|Boolean} permissionRule.projectRoles  the list of project roles of the user
+   * @param {Array<String>|Boolean} permissionRule.topcoderRoles the list of Topcoder roles of the user
    * @param {Object}        user                         user for whom we check permissions
    * @param {Object}        user.roles                   list of user roles
-   * @param {Object}        user.isMachine               `true` - if it's machine, `false` - real user
    * @param {Object}        user.scopes                  scopes of user token
    * @param {Array}         projectMembers               (optional) list of project members - required to check `topcoderRoles`
    *
    * @returns {Boolean}     true, if has permission
    */
   matchPermissionRule: (permissionRule, user, projectMembers) => {
-    const member = _.find(projectMembers, { userId: user.userId });
     let hasProjectRole = false;
     let hasTopcoderRole = false;
+    let hasScope = false;
 
-    if (permissionRule) {
-      if (permissionRule.projectRoles
-        && permissionRule.projectRoles.length > 0
-        && !!member
-      ) {
-        hasProjectRole = _.includes(permissionRule.projectRoles, member.role);
-      }
+    // if no rule defined, no access by default
+    if (!permissionRule) {
+      return false;
+    }
 
-      if (permissionRule.topcoderRoles && permissionRule.topcoderRoles.length > 0) {
-        hasTopcoderRole = util.hasRoles({ authUser: user }, permissionRule.topcoderRoles);
+    // check Project Roles
+    if (permissionRule.projectRoles && projectMembers) {
+      const userId = !_.isNumber(user.userId) ? parseInt(user.userId, 10) : user.userId;
+      const member = _.find(projectMembers, { userId });
+
+      // check if user has one of allowed Project roles
+      if (permissionRule.projectRoles.length > 0) {
+        // as we support `projectRoles` as strings and as objects like:
+        // { role: "...", isPrimary: true } we have normalize them to a common shape
+        const normalizedProjectRoles = permissionRule.projectRoles.map(rule => (
+          _.isString(rule) ? { role: rule } : rule
+        ));
+
+        hasProjectRole = member && _.some(normalizedProjectRoles, rule => (
+          // checks that common properties are equal
+          _.isMatch(member, rule)
+        ));
+
+      // `projectRoles === true` means that we check if user is a member of the project
+      // with any role
+      } else if (permissionRule.projectRoles === true) {
+        hasProjectRole = !!member;
       }
     }
 
-    return hasProjectRole || hasTopcoderRole;
+    // check Topcoder Roles
+    if (permissionRule.topcoderRoles) {
+      // check if user has one of allowed Topcoder roles
+      if (permissionRule.topcoderRoles.length > 0) {
+        hasTopcoderRole = _.intersection(
+          _.get(user, 'roles', []).map(role => role.toLowerCase()),
+          permissionRule.topcoderRoles.map(role => role.toLowerCase()),
+        ).length > 0;
+
+      // `topcoderRoles === true` means that we check if user is has any Topcoder role
+      // basically this equals to logged-in user, as all the Topcoder users
+      // have at least one role `Topcoder User`
+      } else if (permissionRule.topcoderRoles === true) {
+        hasTopcoderRole = _.get(user, 'roles', []).length > 0;
+      }
+    }
+
+    // check M2M scopes
+    if (permissionRule.scopes) {
+      hasScope = _.intersection(
+        _.get(user, 'scopes', []),
+        permissionRule.scopes,
+      ).length > 0;
+    }
+
+    return hasProjectRole || hasTopcoderRole || hasScope;
   },
 
   /**
@@ -1208,13 +1277,18 @@ _.assignIn(util, {
    * @param {Object} permission     permission or permissionRule
    * @param {Object} user           user for whom we check permissions
    * @param {Object} user.roles     list of user roles
-   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
    * @param {Object} user.scopes    scopes of user token
    * @param {Array}  projectMembers (optional) list of project members - required to check `topcoderRoles`
    *
    * @returns {Boolean}     true, if has permission
    */
   hasPermission: (permission, user, projectMembers) => {
+    if (!permission) {
+      return false;
+    }
+
+    console.log('hasPermission', permission, user);
+
     const allowRule = permission.allowRule ? permission.allowRule : permission;
     const denyRule = permission.denyRule ? permission.denyRule : null;
 
@@ -1222,6 +1296,34 @@ _.assignIn(util, {
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
 
     return allow && !deny;
+  },
+
+  hasPermissionByReq: (permission, req) => {
+    // as it's very easy to forget "req" argument, throw error to make debugging easier
+    if (!req) {
+      throw new Error('Method "hasPermissionByReq" requires "req" argument.');
+    }
+
+    return util.hasPermission(permission, _.get(req, 'authUser'), _.get(req, 'context.currentProjectMembers'));
+  },
+
+  /**
+   * Check if permission requires us to provide the list Project Members or no.
+   *
+   * @param {Object} permission     permission or permissionRule
+   */
+  isPermissionRequireProjectMembers: (permission) => {
+    if (!permission) {
+      return false;
+    }
+
+    const allowRule = permission.allowRule ? permission.allowRule : permission;
+    const denyRule = permission.denyRule ? permission.denyRule : null;
+
+    const allowRuleRequiresProjectMembers = _.get(allowRule, 'projectRoles.length') > 0;
+    const denyRuleRequiresProjectMembers = _.get(denyRule, 'projectRoles.length') > 0;
+
+    return allowRuleRequiresProjectMembers || denyRuleRequiresProjectMembers;
   },
 
   /**
@@ -1265,7 +1367,6 @@ _.assignIn(util, {
    * @param {Object} permission     permission or permissionRule
    * @param {Object} user           user for whom we check permissions
    * @param {Object} user.roles     list of user roles
-   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
    * @param {Object} user.scopes    scopes of user token
    * @param {Number} projectId      project id to check permissions for
    *
@@ -1292,6 +1393,26 @@ _.assignIn(util, {
   },
 
   /**
+   * Get default Project Role for a user by they Topcoder Roles.
+   *
+   * @param {Object} user       user
+   * @param {Array}  user.roles user Topcoder roles
+   *
+   * @returns {String} project role
+   */
+  getDefaultProjectRole: (user) => {
+    for (let i = 0; i < DEFAULT_PROJECT_ROLE.length; i += 1) {
+      const rule = DEFAULT_PROJECT_ROLE[i];
+
+      if (util.hasPermission({ topcoderRoles: [rule.topcoderRole] }, user)) {
+        return rule.projectRole;
+      }
+    }
+
+    return undefined;
+  },
+
+  /**
    * Validate if `fields` list has only allowed values from `allowedFields` or throws error.
    *
    * @param {Array} fields        fields to validate
@@ -1313,6 +1434,55 @@ _.assignIn(util, {
       throw new Error(`values ${disallowedFieldsString} are not allowed`);
     }
   },
-});
+  /**
+   * creates directory recursively.
+   * NodeJS < 10.12.0 has no native support to create a directory recursively
+   * So, we added this function. check this url for more details:
+   * https://stackoverflow.com/questions/31645738/how-to-create-full-path-with-nodes-fs-mkdirsync
+   * @param {string}    targetDir        directory path
+   * @return {void}              Returns void
+   */
+  mkdirSyncRecursive: (targetDir) => {
+    const sep = path.sep;
+    const initDir = path.isAbsolute(targetDir) ? sep : '';
+    const baseDir = __dirname;
+
+    return targetDir.split(sep).reduce((parentDir, childDir) => {
+      const curDir = path.resolve(baseDir, parentDir, childDir);
+      try {
+        fs.mkdirSync(curDir);
+      } catch (err) {
+        if (err.code === 'EEXIST') { // curDir already exists!
+          return curDir;
+        }
+
+        // To avoid `EISDIR` error on Mac and `EACCES`-->`ENOENT` and `EPERM` on Windows.
+        if (err.code === 'ENOENT') { // Throw the original parentDir error on curDir `ENOENT` failure.
+          throw new Error(`EACCES: permission denied, mkdir '${parentDir}'`);
+        }
+
+        const caughtErr = ['EACCES', 'EPERM', 'EISDIR'].indexOf(err.code) > -1;
+        if ((!caughtErr) || (caughtErr && curDir === path.resolve(targetDir))) {
+          throw err; // Throw if it's just the last created dir.
+        }
+      }
+
+      return curDir;
+    }, initDir);
+  },
+
+  getScriptsLogger: () => {
+    const appName = 'tc-projects-service';
+    return coreLib.logger({
+      name: appName,
+      level: _.get(config, 'logLevel', 'debug').toLowerCase(),
+      captureLogs: config.get('captureLogs'),
+      logentriesToken: _.get(config, 'logentriesToken', null),
+    });
+  },
+
+};
+
+_.assignIn(util, projectServiceUtils);
 
 export default util;

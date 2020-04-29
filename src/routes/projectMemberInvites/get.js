@@ -6,6 +6,7 @@ import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
 
 const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
 
@@ -23,7 +24,7 @@ const permissions = tcMiddleware.permissions;
 
 module.exports = [
   validate(schema),
-  permissions('projectMemberInvite.get'),
+  permissions('projectMemberInvite.view'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const inviteId = _.parseInt(req.params.inviteId);
@@ -61,8 +62,8 @@ module.exports = [
       return next(err);
     }
 
-    if (req.context.inviteType === 'list') {
-      // user can only his/her own invite with specific id
+    // if user doesn't have permission to view all invites, then get only invite for the current user
+    if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
       esSearchParam.query.nested.query.filtered.filter.bool.must.push({
         bool: {
           should: [
@@ -78,8 +79,11 @@ module.exports = [
       if (data.length === 0) {
         req.log.debug('No project member invite found in ES');
         let getInvitePromise;
-        if (req.context.inviteType === 'all') {
+        // if user can read all invites, then get all
+        if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
           getInvitePromise = models.ProjectMemberInvite.getPendingInviteByIdForUser(projectId, inviteId);
+
+        // otherwise, get invitation only for current user
         } else {
           getInvitePromise = models.ProjectMemberInvite.getPendingInviteByIdForUser(
             projectId, inviteId, email, currentUserId);
