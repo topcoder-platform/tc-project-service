@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
+import config from 'config';
 import chai from 'chai';
 import moment from 'moment';
 import sinon from 'sinon';
@@ -447,6 +448,62 @@ describe('Project create', () => {
             resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
             // Check that activity fields are set
             resJson.lastActivityUserId.should.be.eql('40051331');
+            resJson.lastActivityAt.should.be.not.null;
+            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should create project successfully using M2M token with "write:projects" scope', (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.templateId = 3;
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.status.should.be.eql('in_review');
+            resJson.type.should.be.eql(body.type);
+            resJson.version.should.be.eql('v3');
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('manager');
+            resJson.members[0].userId.should.be.eql(config.DEFAULT_M2M_USERID);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            // Check that activity fields are set
+            resJson.lastActivityUserId.should.be.eql(config.DEFAULT_M2M_USERID.toString());
             resJson.lastActivityAt.should.be.not.null;
             server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();

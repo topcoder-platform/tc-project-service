@@ -33,7 +33,7 @@ const permissionsConfigs = [
 
   // Project Copilots can get only 'community' type of Project Estimation Items
   {
-    permission: { projectRoles: PROJECT_MEMBER_ROLE.COPILOT },
+    permission: { projectRoles: [PROJECT_MEMBER_ROLE.COPILOT] },
     types: [ESTIMATION_TYPE.COMMUNITY],
   },
 ];

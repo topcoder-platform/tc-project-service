@@ -16,7 +16,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const inviteId = _.parseInt(req.params.inviteId);
-    const email = req.authUser.email;
+    const currentUserEmail = req.authUser.email ? req.authUser.email.toLowerCase() : req.authUser.email;
     const currentUserId = req.authUser.userId;
 
     // get invite by id and project id
@@ -25,13 +25,13 @@ module.exports = [
         // if invite doesn't exist, return 404
         if (!invite) {
           const err = new Error(`invite not found for project id ${projectId}, inviteId ${inviteId},` +
-            ` email ${email} and userId ${currentUserId}`,
+            ` email ${currentUserEmail} and userId ${currentUserId}`,
           );
           err.status = 404;
           return next(err);
         }
         // check this invitation is for logged-in user or not
-        const ownInvite = (!!invite && (invite.userId === currentUserId || invite.email === email));
+        const ownInvite = (!!invite && (invite.userId === currentUserId || invite.email === currentUserEmail));
 
         // check permission
         req.log.debug('Checking user permission for deleting invite');
@@ -39,19 +39,19 @@ module.exports = [
 
         if (
           invite.status === INVITE_STATUS.REQUESTED
-          && !util.hasPermission(PERMISSION.DELETE_REQUESTED_INVITE, req.authUser, req.context.currentProjectMembers)
+          && !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_INVITE_REQUESTED, req)
         ) {
           error = 'You don\'t have permissions to cancel requested invites.';
         } else if (
           invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER
           && !ownInvite
-          && !util.hasPermission(PERMISSION.DELETE_NON_CUSTOMER_INVITE, req.authUser, req.context.currentProjectMembers)
+          && !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER, req)
         ) {
           error = 'You don\'t have permissions to cancel invites to Topcoder Team for other users.';
         } else if (
           invite.role === PROJECT_MEMBER_ROLE.CUSTOMER
           && !ownInvite
-          && !util.hasPermission(PERMISSION.DELETE_CUSTOMER_INVITE, req.authUser, req.context.currentProjectMembers)
+          && !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER, req)
         ) {
           error = 'You don\'t have permissions to cancel invites to Customer Team for other users.';
         }

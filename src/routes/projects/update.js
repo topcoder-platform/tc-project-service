@@ -10,10 +10,10 @@ import {
   PROJECT_MEMBER_ROLE,
   EVENT,
   RESOURCES,
-  USER_ROLE,
   REGEX,
 } from '../../constants';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
 
@@ -143,7 +143,7 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     //   }
   }
   if (_.has(updatedProps, 'directProjectId') &&
-    !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
+    !util.hasPermissionByReq(PERMISSION.UPDATE_PROJECT_DIRECT_PROJECT_ID, req)) {
     errors.push('Don\'t have permission to update \'directProjectId\' property');
   }
   if ((existingProject.status !== PROJECT_STATUS.DRAFT) && (updatedProps.status === PROJECT_STATUS.DRAFT)) {

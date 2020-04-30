@@ -3,8 +3,6 @@
 const Authorizer = require('tc-core-library-js').Authorizer;
 const projectView = require('./project.view');
 const projectEdit = require('./project.edit');
-const projectDelete = require('./project.delete');
-const projectMemberDelete = require('./projectMember.delete');
 const projectAdmin = require('./admin.ops');
 const projectAttachmentUpdate = require('./project.updateAttachment');
 const projectAttachmentDownload = require('./project.downloadAttachment');
@@ -12,26 +10,56 @@ const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
 const projectSettingEdit = require('./projectSetting.edit');
-const projectMemberInviteView = require('./projectMemberInvite.view');
-const projectAnyAuthUser = require('./project.anyAuthUser');
+
+const generalPermission = require('./generalPermission');
+const { PERMISSION } = require('./constants');
 
 module.exports = () => {
   Authorizer.setDeniedStatusCode(403);
 
-  // anyone can create a project
-  Authorizer.setPolicy('project.create', true);
-  Authorizer.setPolicy('project.view', projectView);
-  Authorizer.setPolicy('project.edit', projectEdit);
-  Authorizer.setPolicy('project.delete', projectDelete);
-  Authorizer.setPolicy('project.addMember', projectView);
-  Authorizer.setPolicy('project.viewMember', projectView);
-  Authorizer.setPolicy('project.removeMember', projectMemberDelete);
+  Authorizer.setPolicy('project.create', generalPermission(PERMISSION.CREATE_PROJECT));
+  Authorizer.setPolicy('project.view', generalPermission(PERMISSION.READ_PROJECT));
+  Authorizer.setPolicy('project.edit', generalPermission(PERMISSION.UPDATE_PROJECT));
+  Authorizer.setPolicy('project.delete', generalPermission(PERMISSION.DELETE_PROJECT));
+
+  Authorizer.setPolicy('projectMember.create', generalPermission([
+    PERMISSION.CREATE_PROJECT_MEMBER_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.CREATE_PROJECT_MEMBER_NOT_OWN,
+  ]));
+  Authorizer.setPolicy('projectMember.view', generalPermission(PERMISSION.READ_PROJECT_MEMBER));
+  Authorizer.setPolicy('projectMember.edit', generalPermission([
+    PERMISSION.UPDATE_PROJECT_MEMBER_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.UPDATE_PROJECT_MEMBER_NON_CUSTOMER,
+  ]));
+  Authorizer.setPolicy('projectMember.delete', generalPermission([
+    PERMISSION.DELETE_PROJECT_MEMBER_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.DELETE_PROJECT_MEMBER_NON_CUSTOMER,
+  ]));
+
+  Authorizer.setPolicy('projectMemberInvite.create', generalPermission([
+    PERMISSION.CREATE_PROJECT_INVITE_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER,
+  ]));
+  Authorizer.setPolicy('projectMemberInvite.view', generalPermission([
+    PERMISSION.READ_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.READ_PROJECT_INVITE_NOT_OWN,
+  ]));
+  Authorizer.setPolicy('projectMemberInvite.edit', generalPermission([
+    PERMISSION.UPDATE_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.UPDATE_PROJECT_INVITE_NOT_OWN,
+  ]));
+  Authorizer.setPolicy('projectMemberInvite.delete', generalPermission([
+    PERMISSION.DELETE_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER,
+    PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER,
+  ]));
+
   Authorizer.setPolicy('project.addAttachment', projectEdit);
   Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);
   Authorizer.setPolicy('project.removeAttachment', projectAttachmentUpdate);
   Authorizer.setPolicy('project.downloadAttachment', projectAttachmentDownload);
   Authorizer.setPolicy('project.listAttachment', projectView);
-  Authorizer.setPolicy('project.updateMember', projectEdit);
+
   Authorizer.setPolicy('project.admin', projectAdmin);
 
   Authorizer.setPolicy('projectTemplate.create', projectAdmin);
@@ -86,12 +114,6 @@ module.exports = () => {
   Authorizer.setPolicy('milestone.view', projectView);
 
   Authorizer.setPolicy('metadata.list', true); // anyone can view all metadata
-
-  Authorizer.setPolicy('projectMemberInvite.create', projectView);
-  Authorizer.setPolicy('projectMemberInvite.edit', projectAnyAuthUser);
-  Authorizer.setPolicy('projectMemberInvite.delete', projectAnyAuthUser);
-  Authorizer.setPolicy('projectMemberInvite.get', projectMemberInviteView);
-  Authorizer.setPolicy('projectMemberInvite.list', projectMemberInviteView);
 
   Authorizer.setPolicy('form.create', projectAdmin);
   Authorizer.setPolicy('form.edit', projectAdmin);

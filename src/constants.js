@@ -65,6 +65,7 @@ export const USER_ROLE = {
   PROGRAM_MANAGER: 'Program Manager',
   SOLUTION_ARCHITECT: 'Solution Architect',
   PROJECT_MANAGER: 'Project Manager',
+  TOPCODER_USER: 'Topcoder User',
 };
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN];
@@ -266,8 +267,18 @@ export const REGEX = {
   URL: /^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=;]*)?$/, // eslint-disable-line
 };
 
-export const TOKEN_SCOPES = {
+export const M2M_SCOPES = {
   CONNECT_PROJECT_ADMIN: 'all:connect_project',
+  PROJECTS: {
+    ALL: 'all:projects',
+    READ: 'read:projects',
+    WRITE: 'write:projects',
+  },
+  PROJECT_MEMBERS: {
+    ALL: 'all:project-members',
+    READ: 'read:project-members',
+    WRITE: 'write:project-members',
+  },
 };
 
 export const TIMELINE_REFERENCES = {

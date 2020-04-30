@@ -158,7 +158,20 @@ describe('Project member invite update', () => {
             updatedAt: '2016-06-30 00:33:07+00',
           });
 
-          return Promise.all([pm, invite4, invite5, invite6]);
+          const invite7 = models.ProjectMemberInvite.create({
+            id: 7,
+            projectId: project2.id,
+            userId: testUtil.userIds.romit,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+            status: INVITE_STATUS.PENDING,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          return Promise.all([pm, invite4, invite5, invite6, invite7]);
         });
 
         Promise.all([p1, p2]).then(() => done());
@@ -351,6 +364,20 @@ describe('Project member invite update', () => {
         .patch(`/v5/projects/${project1.id}/invites/5`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.romit}`,
+        })
+        .send({
+          status: INVITE_STATUS.ACCEPTED,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(() => done());
+    });
+
+    it('should return 200 if accept invitation using M2M token with "write:project-members" scope', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/invites/7`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
         })
         .send({
           status: INVITE_STATUS.ACCEPTED,

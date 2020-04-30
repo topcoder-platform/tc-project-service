@@ -189,6 +189,29 @@ describe('GET Project Member Invite', () => {
           });
     });
 
+    it('should return the invite using M2M token with "read:project-members" scope', (done) => {
+      request(server)
+          .get(`/v5/projects/${project1.id}/invites/1`)
+          .set({
+            Authorization: `Bearer ${testUtil.m2m['read:project-members']}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              should.exist(resJson.projectId);
+              resJson.id.should.be.eql(1);
+              resJson.userId.should.be.eql(testUtil.userIds.member);
+              resJson.status.should.be.eql(INVITE_STATUS.PENDING);
+              done();
+            }
+          });
+    });
+
     it('should return the invite if this invitation is for logged-in user', (done) => {
       request(server)
         .get(`/v5/projects/${project1.id}/invites/2`)
@@ -227,7 +250,8 @@ describe('GET Project Member Invite', () => {
             should.exist(resJson);
             should.exist(resJson.projectId);
             resJson.id.should.be.eql(3);
-            resJson.email.should.be.eql('t***t@t***r.com'); // masked
+            // not masked, because user who is invited by email is the user who is calling this endpoint
+            resJson.email.should.be.eql('test@topcoder.com');
             resJson.status.should.be.eql(INVITE_STATUS.PENDING);
             done();
           }

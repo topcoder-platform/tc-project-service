@@ -383,6 +383,28 @@ describe('LIST Project', () => {
         });
     });
 
+    it('should return the project using M2M token with "read:projects" scope', (done) => {
+      request(server)
+        .get('/v5/projects/?status=draft')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            // since project 2 is indexed with id 2
+            resJson[0].id.should.equal(project2.id);
+            done();
+          }
+        });
+    });
+
     it('should return the project when project that is in reviewed state in which the copilot is its member or has been invited', (done) => {
       request(server)
           .get('/v5/projects')
