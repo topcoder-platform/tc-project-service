@@ -12,6 +12,7 @@ Microservice to manage CRUD operations for all things Projects.
       - [📤 Export data](#%f0%9f%93%a4-export-data)
       - [📥 Import data](#%f0%9f%93%a5-import-data)
     - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
+    - [NPM Commands](#npm-commands)
     - [Import metadata from api.topcoder-dev.com (deprecated)](#import-metadata-from-apitopcoder-devcom-deprecated)
   - [Test](#test)
     - [JWT Authentication](#jwt-authentication)
@@ -67,13 +68,13 @@ Local setup should work good on **Linux** and **macOS**. But **Windows** is not 
 3. 🚢 Start docker-compose with services which are required to start Project Service locally
 
    ```bash
-   npm run local:run-docker
+   npm run local:docker:up
    ```
 
    Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
 
    ```bash
-   docker-compose -f local/full/docker-compose.yml logs -f project-processor-es
+   npm run local:docker:logs -- -f project-processor-es
    ```
 
    <details><summary>Click to see a good logs example</summary>
@@ -241,6 +242,32 @@ To be able to run [Connect App](https://github.com/appirio-tech/connect-app) wit
    *NOTE: this change only let us bypass validation during local development process*.
 
 2. Restart both Connect App and Project Service if they were running.
+
+### NPM Commands
+
+| Command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description |
+|--------------------|--|
+| `npm run lint`     | Check for for lint errors. |
+| `npm run lint:fix` | Check for for lint errors and fix error automatically when possible. |
+| `npm run build`    | Build source code for production run into `dist` folder. |
+| `npm run sync:all` | Recreate Database and Elasticsearch indexes (removes any existent data). |
+| `npm run sync:db`  | Recreate Database schemas (removes any existent data). |
+| `npm run sync:es`  | Recreate Elasticsearch indexes (removes any existent data). |
+| `npm run start`  | Start app in the production mode from prebuilt `dist` folder. |
+| `npm run start:dev`  | Start app in the development mode using `nodemon`. |
+| `npm run test`  | Run tests. |
+| `npm run test:watch`  | Run tests and re-run them on changes (not useful now as it re-runs all the test). |
+| `npm run demo-data`  | Import Metadata from DEV environment, see [docs](#import-metadata-from-apitopcoder-devcom-deprecated). |
+| `npm run es-db-compare`  | Run helper script to compare data in Database and Elasticsearch indexes, see [docs](./scripts/es-db-compare/README.md). |
+| `npm run data:export`  | Export data from Database to file, see [docs](#📤-export-data) |
+| `npm run data:import`  | Import data from file to Database and index it to Elasticsearch, see [docs](#📥-import-data) |
+| `npm run local:docker:up`  | Start docker-compose for local development. |
+| `npm run local:docker:down`  | Stop docker-compose for local development. |
+| `npm run local:docker:logs -- -f <service_name>`  | View logs of some service inside docker-compose. |
+| `npm run local:init`  | Recreate Database and Elasticsearch indexes and populate demo data for local development (removes any existent data). |
+| `npm run generate:doc:permissions` | Generate [permissions.html](docs/permissions.html) which later can be viewed by [link](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html). |
+| `npm run generate:doc:permissions:dev` | Generate [permissions.html](docs/permissions.html) on any changes (useful during development). |
+
 
 ### Import metadata from api.topcoder-dev.com (deprecated)
 
