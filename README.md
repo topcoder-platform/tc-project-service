@@ -255,6 +255,8 @@ To be able to run [Connect App](https://github.com/appirio-tech/connect-app) wit
 | `npm run sync:es`  | Recreate Elasticsearch indexes (removes any existent data). |
 | `npm run start`  | Start app in the production mode from prebuilt `dist` folder. |
 | `npm run start:dev`  | Start app in the development mode using `nodemon`. |
+| `npm run startKafkaConsumers`  | Start Kafka consumer app in production mode from prebuilt `dist` folder. |
+| `npm run startKafkaConsumers`  | Start Kafka consumer app in the development mode using `nodemon`. |
 | `npm run test`  | Run tests. |
 | `npm run test:watch`  | Run tests and re-run them on changes (not useful now as it re-runs all the test). |
 | `npm run demo-data`  | Import Metadata from DEV environment, see [docs](#import-metadata-from-apitopcoder-devcom-deprecated). |
