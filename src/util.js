@@ -733,9 +733,7 @@ const projectServiceUtils = {
     let memberDetailFields = ['handle'];
 
     // Only Topcoder admins can get emails, first and last name for users
-    if (util.hasPermissionByReq({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req)) {
-      memberDetailFields = memberDetailFields.concat(['email', 'firstName', 'lastName']);
-    }
+    memberDetailFields = util.addUserDetailsFieldsIfAllowed(memberDetailFields, req);
 
     let allMemberDetails = [];
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
