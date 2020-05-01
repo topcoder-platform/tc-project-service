@@ -2,7 +2,7 @@
 
 Microservice to manage CRUD operations for all things Projects.
 
-💡**Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.**
+**Note: Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.**
 
 - [Topcoder Projects Service](#topcoder-projects-service)
   - [Local Development](#local-development)
