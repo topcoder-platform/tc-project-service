@@ -301,6 +301,7 @@ This command for importing data uses API to create demo data. Which has a few pe
 | `npm run services:down`  | Stop services via docker-compose for local development. |
 | `npm run services:logs -- -f <service_name>`  | View logs of some service inside docker-compose. |
 | `npm run local:init` | Recreate Database and Elasticsearch indexes and populate demo data for local development (removes any existent data). |
+| `npm run babel-node-script -- <path/to/script>` | Helper command which is used by other commands to run node scripts using `babel-node` and `dotenv` so variables from `.env` file are automatically applied. |
 | `npm run generate:doc:permissions` | Generate [permissions.html](docs/permissions.html) which later can be viewed by [link](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html). |
 | `npm run generate:doc:permissions:dev` | Generate [permissions.html](docs/permissions.html) on any changes (useful during development). |
 
