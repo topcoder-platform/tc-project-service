@@ -1,0 +1,23 @@
+version: "2"
+services:
+  jsonserver:
+    extends:
+      file: ../full/docker-compose.yml
+      service: jsonserver
+
+  db:
+    extends:
+      file: ../full/docker-compose.yml
+      service: db
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=projectsdb,projectsdb_test
+
+  esearch:
+    extends:
+      file: ../full/docker-compose.yml
+      service: esearch
+
+  queue:
+    extends:
+      file: ../full/docker-compose.yml
+      service: queue
