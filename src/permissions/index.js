@@ -23,33 +23,33 @@ module.exports = () => {
   Authorizer.setPolicy('project.delete', generalPermission(PERMISSION.DELETE_PROJECT));
 
   Authorizer.setPolicy('projectMember.create', generalPermission([
-    PERMISSION.CREATE_PROJECT_MEMBER_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.CREATE_PROJECT_MEMBER_OWN,
     PERMISSION.CREATE_PROJECT_MEMBER_NOT_OWN,
   ]));
   Authorizer.setPolicy('projectMember.view', generalPermission(PERMISSION.READ_PROJECT_MEMBER));
   Authorizer.setPolicy('projectMember.edit', generalPermission([
-    PERMISSION.UPDATE_PROJECT_MEMBER_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.UPDATE_PROJECT_MEMBER_CUSTOMER,
     PERMISSION.UPDATE_PROJECT_MEMBER_NON_CUSTOMER,
   ]));
   Authorizer.setPolicy('projectMember.delete', generalPermission([
-    PERMISSION.DELETE_PROJECT_MEMBER_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.DELETE_PROJECT_MEMBER_CUSTOMER,
     PERMISSION.DELETE_PROJECT_MEMBER_NON_CUSTOMER,
   ]));
 
   Authorizer.setPolicy('projectMemberInvite.create', generalPermission([
-    PERMISSION.CREATE_PROJECT_INVITE_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.CREATE_PROJECT_INVITE_CUSTOMER,
     PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER,
   ]));
   Authorizer.setPolicy('projectMemberInvite.view', generalPermission([
-    PERMISSION.READ_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.READ_PROJECT_INVITE_OWN,
     PERMISSION.READ_PROJECT_INVITE_NOT_OWN,
   ]));
   Authorizer.setPolicy('projectMemberInvite.edit', generalPermission([
-    PERMISSION.UPDATE_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.UPDATE_PROJECT_INVITE_OWN,
     PERMISSION.UPDATE_PROJECT_INVITE_NOT_OWN,
   ]));
   Authorizer.setPolicy('projectMemberInvite.delete', generalPermission([
-    PERMISSION.DELETE_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.DELETE_PROJECT_INVITE_OWN,
     PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER,
     PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER,
   ]));
