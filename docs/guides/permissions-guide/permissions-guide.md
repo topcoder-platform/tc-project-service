@@ -2,12 +2,11 @@
 
 What kind of permissions we have, how they work and how to use them.
 
-- [Permissions Guide](#permissions-guide)
-  - [Overview](#overview)
-    - [Topcoder Roles](#topcoder-roles)
-    - [Project Role](#project-role)
-  - [How to Use](#how-to-use)
-  - [References](#references)
+- [Overview](#overview)
+  - [Topcoder Roles](#topcoder-roles)
+  - [Project Role](#project-role)
+- [How to Use](#how-to-use)
+- [References](#references)
 
 ## Overview
 

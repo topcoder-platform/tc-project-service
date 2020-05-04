@@ -4,25 +4,24 @@ Microservice to manage CRUD operations for all things Projects.
 
 **Note: Steps mentioned below are best to our capability as guide for local deployment, however, we expect from contributor, being a developer, to resolve run-time issues (e.g. OS and node version issues etc), if any.**
 
-- [Topcoder Projects Service](#topcoder-projects-service)
-  - [Local Development](#local-development)
-    - [Requirements](#requirements)
-    - [Steps to run locally](#steps-to-run-locally)
-  - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
-  - [Import and Export data](#import-and-export-data)
-    - [📤 Export data](#%f0%9f%93%a4-export-data)
-    - [📥 Import data](#%f0%9f%93%a5-import-data)
-  - [Import metadata from api.topcoder-dev.com (deprecated)](#import-metadata-from-apitopcoder-devcom-deprecated)
-  - [Run via Docker](#run-via-docker)
-  - [NPM Commands](#npm-commands)
-  - [Kafka commands](#kafka-commands)
-    - [Create Topic](#create-topic)
-    - [List Topics](#list-topics)
-    - [Watch Topic](#watch-topic)
-    - [Post Message to Topic (from stdin)](#post-message-to-topic-from-stdin)
-  - [Test](#test)
-  - [JWT Authentication](#jwt-authentication)
-  - [Documentation](#documentation)
+- [Local Development](#local-development)
+  - [Requirements](#requirements)
+  - [Steps to run locally](#steps-to-run-locally)
+- [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
+- [Import and Export data](#import-and-export-data)
+  - [📤 Export data](#%f0%9f%93%a4-export-data)
+  - [📥 Import data](#%f0%9f%93%a5-import-data)
+- [Import metadata from api.topcoder-dev.com (deprecated)](#import-metadata-from-apitopcoder-devcom-deprecated)
+- [Run via Docker](#run-via-docker)
+- [NPM Commands](#npm-commands)
+- [Kafka commands](#kafka-commands)
+  - [Create Topic](#create-topic)
+  - [List Topics](#list-topics)
+  - [Watch Topic](#watch-topic)
+  - [Post Message to Topic (from stdin)](#post-message-to-topic-from-stdin)
+- [Test](#test)
+- [JWT Authentication](#jwt-authentication)
+- [Documentation](#documentation)
 
 ## Local Development
 
@@ -353,6 +352,7 @@ It's been signed with the secret 'secret'. This secret should match your entry i
 
 ## Documentation
 
-- [Swagger API Definition](http://editor.swagger.io/?url=https://raw.githubusercontent.com/topcoder-platform/tc-project-service/develop/docs/swagger.yaml) - click to open it via Online Swagger Editor.
-- [Permissions]() - the list of all permissions in Project Service.
 - [Projects Service Architecture](./docs/guides/architercture/architecture.md)
+- [Permissions Guide](https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/guides/permissions-guide/permissions-guide.md) - what kind of permissions we have, how they work and how to use them.
+- [Permissions](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html) - the list of all permissions in Project Service.
+- [Swagger API Definition](http://editor.swagger.io/?url=https://raw.githubusercontent.com/topcoder-platform/tc-project-service/develop/docs/swagger.yaml) - click to open it via Online Swagger Editor.
