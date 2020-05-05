@@ -78,7 +78,7 @@ services:
       args:
         NODE_VERSION: 8.11.3
         GIT_URL: https://github.com/topcoder-platform/project-processor-es
-        GIT_BRANCH: develop
+        GIT_BRANCH: feature/bulk-milestone-updates
     command: start kafka-client
     expose:
       - "5000"
