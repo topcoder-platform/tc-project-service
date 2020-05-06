@@ -493,7 +493,8 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
   const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
-  const retrieveMembers = !req.query.fields || !!fields.project_members.length;
+  const retrieveMembers = (!req.query.fields || !!fields.project_members.length)
+    && util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req);
 
   return models.Project.searchText({
     filters: criteria.filters,
@@ -551,7 +552,8 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
+    project_members: util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req) ?
+      util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req) : null,
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
