@@ -14,19 +14,19 @@ import { MANAGER_ROLES } from '../constants';
 module.exports = freq => new Promise((resolve, reject) => {
   const projectId = _.parseInt(freq.params.projectId);
   return models.ProjectMember.getActiveProjectMembers(projectId)
-      .then((members) => {
-        const req = freq;
-        req.context = req.context || {};
-        req.context.currentProjectMembers = members;
-        // check if auth user has acecss to this project
-        const hasAccess = util.hasAdminRole(req)
+    .then((members) => {
+      const req = freq;
+      req.context = req.context || {};
+      req.context.currentProjectMembers = members;
+      // check if auth user has acecss to this project
+      const hasAccess = util.hasAdminRole(req)
           || util.hasRoles(req, MANAGER_ROLES)
           || !_.isUndefined(_.find(members, m => m.userId === req.authUser.userId));
 
-        if (!hasAccess) {
-          // user is not an admin nor is a registered project member
-          return reject(new Error('You do not have permissions to perform this action'));
-        }
-        return resolve(true);
-      });
+      if (!hasAccess) {
+        // user is not an admin nor is a registered project member
+        return reject(new Error('You do not have permissions to perform this action'));
+      }
+      return resolve(true);
+    });
 });

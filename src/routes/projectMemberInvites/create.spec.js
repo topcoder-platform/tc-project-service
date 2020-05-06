@@ -217,56 +217,56 @@ describe('Project Member Invite create', () => {
     });
 
     it('should return 201 if userIds and emails are presented the same time',
-        (done) => {
-          request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          handles: ['test_customer1'],
-          emails: ['hello@world.com'],
-          role: 'customer',
-        })
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body.success[1];
-            should.exist(resJson);
-            resJson.role.should.equal('customer');
-            resJson.projectId.should.equal(project1.id);
-            resJson.email.should.equal('hello@world.com');
-            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
-            done();
-          }
-        });
-        });
+      (done) => {
+        request(server)
+          .post(`/v5/projects/${project1.id}/invites`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({
+            handles: ['test_customer1'],
+            emails: ['hello@world.com'],
+            role: 'customer',
+          })
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body.success[1];
+              should.exist(resJson);
+              resJson.role.should.equal('customer');
+              resJson.projectId.should.equal(project1.id);
+              resJson.email.should.equal('hello@world.com');
+              server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
+              done();
+            }
+          });
+      });
 
     it('should return 400 if neither handles or email is presented',
-        (done) => {
-          request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({
-          role: 'customer',
-        })
-        .expect('Content-Type', /json/)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const errorMessage = _.get(res.body, 'message', '');
-            sinon.assert.match(errorMessage, /.*Either handles or emails are required/);
-            done();
-          }
-        });
-        });
+      (done) => {
+        request(server)
+          .post(`/v5/projects/${project1.id}/invites`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({
+            role: 'customer',
+          })
+          .expect('Content-Type', /json/)
+          .expect(400)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const errorMessage = _.get(res.body, 'message', '');
+              sinon.assert.match(errorMessage, /.*Either handles or emails are required/);
+              done();
+            }
+          });
+      });
 
     it('should return 403 if try to create copilot without MANAGER_ROLES', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
@@ -922,41 +922,41 @@ describe('Project Member Invite create', () => {
 
       it('should send correct BUS API messages when invite added by handle', (done) => {
         request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          handles: ['test_user2'],
-          role: PROJECT_MEMBER_ROLE.CUSTOMER,
-        })
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(2);
+          .post(`/v5/projects/${project1.id}/invites`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({
+            handles: ['test_user2'],
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+          })
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(2);
 
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER_INVITE,
-                projectId: project1.id,
-                userId: 40011578,
-                email: null,
-              })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                  projectId: project1.id,
+                  userId: 40011578,
+                  email: null,
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                projectId: project1.id,
-                userId: 40011578,
-                email: null,
-                isSSO: false,
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                  projectId: project1.id,
+                  userId: 40011578,
+                  email: null,
+                  isSSO: false,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
 
       it('should send correct BUS API messages when invite added by email', (done) => {
@@ -970,44 +970,44 @@ describe('Project Member Invite create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          emails: ['hello@world.com'],
-          role: PROJECT_MEMBER_ROLE.CUSTOMER,
-        })
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(3);
+          .post(`/v5/projects/${project1.id}/invites`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({
+            emails: ['hello@world.com'],
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+          })
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(3);
 
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER_INVITE,
-                projectId: project1.id,
-                userId: null,
-                email: 'hello@world.com',
-              })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                  projectId: project1.id,
+                  userId: null,
+                  email: 'hello@world.com',
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                projectId: project1.id,
-                userId: null,
-                email: 'hello@world.com',
-                isSSO: false,
-              })).should.be.true;
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED, sinon.match({
-                recipients: ['hello@world.com'],
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                  projectId: project1.id,
+                  userId: null,
+                  email: 'hello@world.com',
+                  isSSO: false,
+                })).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED, sinon.match({
+                  recipients: ['hello@world.com'],
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
     });
   });

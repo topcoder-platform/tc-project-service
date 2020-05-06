@@ -43,10 +43,10 @@ describe('CREATE work management permission', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((t) => {
-          templateId = t.id;
-          body.projectTemplateId = templateId;
-        }).then(() => done());
+          .then((t) => {
+            templateId = t.id;
+            body.projectTemplateId = templateId;
+          }).then(() => done());
       });
   });
 

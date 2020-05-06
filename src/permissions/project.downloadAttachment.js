@@ -17,21 +17,21 @@ module.exports = freq => new Promise((resolve, reject) => {
     return resolve(true);
   }
   return models.ProjectAttachment.getAttachmentById(projectId, attachmentId)
-      .then((attachment) => {
-        const req = freq;
-        req.context = req.context || {};
-        req.context.existingAttachment = attachment;
+    .then((attachment) => {
+      const req = freq;
+      req.context = req.context || {};
+      req.context.existingAttachment = attachment;
 
-        // deligate not found to the actual handler
-        if (!attachment) {
-          return resolve(true);
-        }
+      // deligate not found to the actual handler
+      if (!attachment) {
+        return resolve(true);
+      }
 
-        if (attachment.createdBy === userId || attachment.allowedUsers === null ||
+      if (attachment.createdBy === userId || attachment.allowedUsers === null ||
           attachment.allowedUsers.indexOf(userId) >= 0) {
-          return resolve(true);
-        }
+        return resolve(true);
+      }
 
-        return reject(new Error('You\'re not allowed to download'));
-      });
+      return reject(new Error('You\'re not allowed to download'));
+    });
 });

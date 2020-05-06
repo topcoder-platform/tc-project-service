@@ -149,43 +149,43 @@ describe('LIST timelines', () => {
               },
             ]).then(() =>
               // Create phase
-               models.ProjectPhase.bulkCreate([
-                 {
-                   projectId: 1,
-                   name: 'test project phase 1',
-                   status: 'active',
-                   startDate: '2018-05-15T00:00:00Z',
-                   endDate: '2018-05-15T12:00:00Z',
-                   budget: 20.0,
-                   progress: 1.23456,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 1,
-                   updatedBy: 1,
-                 },
-                 {
-                   projectId: 2,
-                   name: 'test project phase 2',
-                   status: 'active',
-                   startDate: '2018-05-16T00:00:00Z',
-                   endDate: '2018-05-16T12:00:00Z',
-                   budget: 21.0,
-                   progress: 1.234567,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 2,
-                   updatedBy: 2,
-                 },
-               ]))
+              models.ProjectPhase.bulkCreate([
+                {
+                  projectId: 1,
+                  name: 'test project phase 1',
+                  status: 'active',
+                  startDate: '2018-05-15T00:00:00Z',
+                  endDate: '2018-05-15T12:00:00Z',
+                  budget: 20.0,
+                  progress: 1.23456,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 1,
+                  updatedBy: 1,
+                },
+                {
+                  projectId: 2,
+                  name: 'test project phase 2',
+                  status: 'active',
+                  startDate: '2018-05-16T00:00:00Z',
+                  endDate: '2018-05-16T12:00:00Z',
+                  budget: 21.0,
+                  progress: 1.234567,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 2,
+                  updatedBy: 2,
+                },
+              ]))
               .then(() =>
                 // Create timelines
                 models.Timeline.bulkCreate(timelines, { returning: true })
                   .then(createdTimelines => (
                     // create milestones after timelines
                     models.Milestone.bulkCreate(milestones))
-                      .then(createdMilestones => [createdTimelines, createdMilestones]),
+                    .then(createdMilestones => [createdTimelines, createdMilestones]),
                   ),
               ).then(([createdTimelines, createdMilestones]) =>
                 // Index to ES

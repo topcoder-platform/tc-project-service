@@ -51,65 +51,65 @@ const projects = {
 
 // Register all the routes
 router.route('/v3/direct/projects')
-    .get((req, res) => {
-      app.logger.info('get direct projects');
-      res.json(util.wrapResponse(req.id, { projects }));
-    })
-    .post((freq, res) => {
-      const req = freq;
-      app.logger.info({ body: req.body }, 'create direct project');
-      const newId = projectId + 1;
-      req.body.id = newId;
-      projects[newId] = req.body;
-      res.json(util.wrapResponse(req.id, { projectId: newId }));
-    });
+  .get((req, res) => {
+    app.logger.info('get direct projects');
+    res.json(util.wrapResponse(req.id, { projects }));
+  })
+  .post((freq, res) => {
+    const req = freq;
+    app.logger.info({ body: req.body }, 'create direct project');
+    const newId = projectId + 1;
+    req.body.id = newId;
+    projects[newId] = req.body;
+    res.json(util.wrapResponse(req.id, { projectId: newId }));
+  });
 
 router.route('/v3/direct/projects/:projectId(\\d+)/billingaccount')
-    .post((req, res) => {
-      const pId = req.params.projectId;
-      app.logger.info({ body: req.body, pId }, 'add billingaccount to Project');
-      if (projects[pId]) {
-        projects[pId] = _.merge(projects[pId], req.body);
-        res.json(util.wrapResponse(req.id, { billingAccountName: 'mock account name for ' +
+  .post((req, res) => {
+    const pId = req.params.projectId;
+    app.logger.info({ body: req.body, pId }, 'add billingaccount to Project');
+    if (projects[pId]) {
+      projects[pId] = _.merge(projects[pId], req.body);
+      res.json(util.wrapResponse(req.id, { billingAccountName: 'mock account name for ' +
           `${req.body.billingAccountId}` }));
-      } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
-      }
-    });
+    } else {
+      res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
+    }
+  });
 
 
 router.route('/v3/direct/projects/:projectId(\\d+)/copilot')
-    .post((req, res) => {
-      const pId = req.params.projectId;
-      app.logger.info({ body: req.body, pId }, 'add copilot to Project');
-      if (projects[pId]) {
-        projects[pId] = _.merge(projects[pId], req.body);
-        res.json(util.wrapResponse(req.id, { copilotProjectId: pId }));
-      } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
-      }
-    })
-    .delete((req, res) => {
-      const pId = req.params.projectId;
-      app.logger.info({ body: req.body, pId }, 'remove copilot from Project');
-      if (projects[pId]) {
-        projects[pId] = _.omit(projects[pId], 'copilotUserId');
-        res.json(util.wrapResponse(req.id, true));
-      } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
-      }
-    });
+  .post((req, res) => {
+    const pId = req.params.projectId;
+    app.logger.info({ body: req.body, pId }, 'add copilot to Project');
+    if (projects[pId]) {
+      projects[pId] = _.merge(projects[pId], req.body);
+      res.json(util.wrapResponse(req.id, { copilotProjectId: pId }));
+    } else {
+      res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
+    }
+  })
+  .delete((req, res) => {
+    const pId = req.params.projectId;
+    app.logger.info({ body: req.body, pId }, 'remove copilot from Project');
+    if (projects[pId]) {
+      projects[pId] = _.omit(projects[pId], 'copilotUserId');
+      res.json(util.wrapResponse(req.id, true));
+    } else {
+      res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
+    }
+  });
 
 router.route('/v3/direct/projects/:projectId(\\d+)/permissions')
-    .post((req, res) => {
-      const pId = req.params.projectId;
-      app.logger.info({ body: req.body, pId }, 'add permissions to Project');
-      if (projects[pId]) {
-        res.json();
-      } else {
-        res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
-      }
-    });
+  .post((req, res) => {
+    const pId = req.params.projectId;
+    app.logger.info({ body: req.body, pId }, 'add permissions to Project');
+    if (projects[pId]) {
+      res.json();
+    } else {
+      res.json(util.wrapErrorResponse(req.id, 404, `Cannot find direct project ${pId}`));
+    }
+  });
 
 app.use(router);
 

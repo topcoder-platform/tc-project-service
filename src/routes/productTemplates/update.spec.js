@@ -71,34 +71,34 @@ describe('UPDATE product template', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-    .then(() => models.Form.create(forms[0]))
-    .then(() => models.Form.create(forms[1]))
-    .then(() => models.ProductCategory.bulkCreate([
-      {
-        key: 'generic',
-        displayName: 'Generic',
-        icon: 'http://example.com/icon1.ico',
-        question: 'question 1',
-        info: 'info 1',
-        aliases: ['key-1', 'key_1'],
-        createdBy: 1,
-        updatedBy: 1,
-      },
-      {
-        key: 'concrete',
-        displayName: 'Concrete',
-        icon: 'http://example.com/icon1.ico',
-        question: 'question 2',
-        info: 'info 2',
-        aliases: ['key-2', 'key_2'],
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ]))
-    .then(() => models.ProductTemplate.create(template).then((createdTemplate) => {
-      templateId = createdTemplate.id;
-      done();
-    }));
+      .then(() => models.Form.create(forms[0]))
+      .then(() => models.Form.create(forms[1]))
+      .then(() => models.ProductCategory.bulkCreate([
+        {
+          key: 'generic',
+          displayName: 'Generic',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: ['key-1', 'key_1'],
+          createdBy: 1,
+          updatedBy: 1,
+        },
+        {
+          key: 'concrete',
+          displayName: 'Concrete',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 2',
+          info: 'info 2',
+          aliases: ['key-2', 'key_2'],
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      ]))
+      .then(() => models.ProductTemplate.create(template).then((createdTemplate) => {
+        templateId = createdTemplate.id;
+        done();
+      }));
   });
   after((done) => {
     testUtil.clearDb(done);

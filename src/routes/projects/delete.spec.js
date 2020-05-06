@@ -9,28 +9,28 @@ import testUtil from '../../tests/util';
 const expectAfterDelete = (id, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.Project.findOne({
-    where: {
-      id,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        chai.assert.isNotNull(res.deletedAt);
-        chai.assert.isNotNull(res.deletedBy);
+    models.Project.findOne({
+      where: {
+        id,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          chai.assert.isNotNull(res.deletedAt);
+          chai.assert.isNotNull(res.deletedBy);
 
-        request(server)
-          .get(`/v5/projects/${id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404)
-          .end(next);
-      }
-    }), 500);
+          request(server)
+            .get(`/v5/projects/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(404)
+            .end(next);
+        }
+      }), 500);
 };
 describe('Project delete test', () => {
   let project1;

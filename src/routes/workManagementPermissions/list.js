@@ -35,9 +35,9 @@ module.exports = [
       attributes: { exclude: ['deletedAt', 'deletedBy'] },
       raw: true,
     })
-    .then((result) => {
-      res.json(result);
-    })
-    .catch(next);
+      .then((result) => {
+        res.json(result);
+      })
+      .catch(next);
   },
 ];

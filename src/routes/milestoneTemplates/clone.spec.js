@@ -115,8 +115,8 @@ const milestoneTemplates = [
 describe('CLONE milestone template', () => {
   beforeEach((done) => {
     testUtil.clearDb()
-    .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
+      .then(() => models.ProductTemplate.bulkCreate(productTemplates))
+      .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
   },
   );
   after((done) => {

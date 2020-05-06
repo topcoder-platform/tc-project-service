@@ -249,7 +249,7 @@ const removePhaseFromIndex = Promise.coroutine(function* (logger, msg) { // esli
     const phase = _.get(data, 'deleted', {});
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: phase.projectId });
     const phases = _.filter(doc._source.phases, single => single.id !== phase.id); // eslint-disable-line no-underscore-dangle
-    const merged = _.assign(doc._source, { phases });       // eslint-disable-line no-underscore-dangle
+    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({
       index: ES_PROJECT_INDEX,
       type: ES_PROJECT_TYPE,

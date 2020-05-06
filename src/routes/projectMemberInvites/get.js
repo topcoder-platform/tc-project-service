@@ -118,7 +118,7 @@ module.exports = [
           return invite;
         })
     ))
-    .then(invite => res.json(util.postProcessInvites('$.email', invite, req)))
-    .catch(next);
+      .then(invite => res.json(util.postProcessInvites('$.email', invite, req)))
+      .catch(next);
   },
 ];

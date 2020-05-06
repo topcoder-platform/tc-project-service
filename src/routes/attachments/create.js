@@ -34,7 +34,7 @@ module.exports = [
   // handles request validations
   validate(addAttachmentValidations),
   permissions('project.addAttachment'),
-  /**
+  /*
    * Add project attachment
    * In development mode we have to mock the ec2 file transfer and file service calls
    */
@@ -109,17 +109,17 @@ module.exports = [
         res.status(201).json(link);
         return Promise.resolve();
       })
-      .catch((error) => {
-        req.log.error('Error adding link attachment', error);
-        const rerr = error;
-        rerr.status = rerr.status || 500;
-        next(rerr);
-      });
+        .catch((error) => {
+          req.log.error('Error adding link attachment', error);
+          const rerr = error;
+          rerr.status = rerr.status || 500;
+          next(rerr);
+        });
     } else {
     // don't actually transfer file in development mode if file uploading is disabled, so we can test this endpoint
       const fileTransferPromise = (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true')
-      ? util.s3FileTransfer(req, sourceBucket, sourceKey, destBucket, destKey)
-      : Promise.resolve();
+        ? util.s3FileTransfer(req, sourceBucket, sourceKey, destBucket, destKey)
+        : Promise.resolve();
 
       fileTransferPromise.then(() => {
         // file copied to final destination, create DB record
@@ -164,17 +164,17 @@ module.exports = [
               response.downloadUrl = resp.data.result.content.preSignedURL;
               // publish event
               req.app.services.pubsub.publish(
-              EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-              newAttachment,
-              { correlationId: req.id },
-            );
+                EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
+                newAttachment,
+                { correlationId: req.id },
+              );
 
               // emit the event
               util.sendResourceToKafkaBus(
-              req,
-              EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-              RESOURCES.ATTACHMENT,
-              newAttachment);
+                req,
+                EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
+                RESOURCES.ATTACHMENT,
+                newAttachment);
               res.status(201).json(response);
               accept();
             }
@@ -186,26 +186,26 @@ module.exports = [
         response.downloadUrl = path;
         // publish event
         req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-        newAttachment,
-        { correlationId: req.id },
-      );
+          EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
+          newAttachment,
+          { correlationId: req.id },
+        );
         // emit the event
         util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-        RESOURCES.ATTACHMENT,
-        newAttachment);
+          req,
+          EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
+          RESOURCES.ATTACHMENT,
+          newAttachment);
 
         res.status(201).json(response);
         return Promise.resolve();
       })
-      .catch((error) => {
-        req.log.error('Error adding file attachment', error);
-        const rerr = error;
-        rerr.status = rerr.status || 500;
-        next(rerr);
-      });
+        .catch((error) => {
+          req.log.error('Error adding file attachment', error);
+          const rerr = error;
+          rerr.status = rerr.status || 500;
+          next(rerr);
+        });
     }
   },
 ];

@@ -8,13 +8,13 @@ const jwt = require('jsonwebtoken');
 
 export default {
   clearDb: done => models.sequelize.sync({ force: true })
-      .then(() => {
-        if (done) done();
-      }),
+    .then(() => {
+      if (done) done();
+    }),
   clearES: done => elasticsearchSync.sync()
-      .then(() => {
-        if (done) done();
-      }),
+    .then(() => {
+      if (done) done();
+    }),
   mockHttpClient: {
     defaults: { headers: { common: {} } },
     interceptors: { response: { use: () => {} } },

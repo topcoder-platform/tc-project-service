@@ -72,45 +72,45 @@ describe('LIST priceConfig revisions', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-      .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
-      .expect(403, done);
+        .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
+        .expect(403, done);
     });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-      .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-      })
+        .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+        })
         .expect(200)
         .end(done);
     });
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-      .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.manager}`,
-      })
+        .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
         .expect(200)
         .end(done);
     });
 
     it('should return 200 for member', (done) => {
       request(server)
-      .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.member}`,
-      })
+        .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
         .expect(200, done);
     });
 
     it('should return 200 for copilot', (done) => {
       request(server)
-      .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.copilot}`,
-      })
+        .get('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
         .expect(200, done);
     });
   });

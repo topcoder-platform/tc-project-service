@@ -134,26 +134,26 @@ module.exports = [
             });
         }),
     )
-    .then(() => {
+      .then(() => {
       // Send events to buses
-      req.log.debug('Sending event to RabbitMQ bus for project phase %d', newProjectPhase.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-        { added: newProjectPhase, route: TIMELINE_REFERENCES.WORK },
-        { correlationId: req.id },
-      );
+        req.log.debug('Sending event to RabbitMQ bus for project phase %d', newProjectPhase.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
+          { added: newProjectPhase, route: TIMELINE_REFERENCES.WORK },
+          { correlationId: req.id },
+        );
 
-      req.log.debug('Sending event to Kafka bus for project phase %d', newProjectPhase.id);
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-        RESOURCES.PHASE,
-        newProjectPhase,
-      );
+        req.log.debug('Sending event to Kafka bus for project phase %d', newProjectPhase.id);
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
+          RESOURCES.PHASE,
+          newProjectPhase,
+        );
 
-      res.status(201).json(newProjectPhase);
-    })
-    .catch((err) => {
-      util.handleError('Error creating work', err, req, next);
-    });
+        res.status(201).json(newProjectPhase);
+      })
+      .catch((err) => {
+        util.handleError('Error creating work', err, req, next);
+      });
   },
 ];

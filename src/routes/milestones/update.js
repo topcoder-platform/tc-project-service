@@ -323,38 +323,38 @@ module.exports = [
           return Promise.resolve({});
         }),
     )
-    .then(({ originalMilestones, updatedMilestones }) => {
-      const cascadedMilestones = _.map(originalMilestones, om => ({
-        original: om, updated: _.find(updatedMilestones, um => um.id === om.id),
-      }));
-      const cascadedUpdates = { milestones: cascadedMilestones };
-      // if there is a change in timeline, add it to the cascadedUpdates
-      if (originalTimeline.updatedAt !== timeline.updatedAt) {
-        cascadedUpdates.timeline = {
-          original: originalTimeline,
-          updated: _.omit(timeline.toJSON(), 'deletedAt', 'deletedBy'),
-        };
-      }
-      // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
-        { original, updated, cascadedUpdates },
-        { correlationId: req.id },
-      );
+      .then(({ originalMilestones, updatedMilestones }) => {
+        const cascadedMilestones = _.map(originalMilestones, om => ({
+          original: om, updated: _.find(updatedMilestones, um => um.id === om.id),
+        }));
+        const cascadedUpdates = { milestones: cascadedMilestones };
+        // if there is a change in timeline, add it to the cascadedUpdates
+        if (originalTimeline.updatedAt !== timeline.updatedAt) {
+          cascadedUpdates.timeline = {
+            original: originalTimeline,
+            updated: _.omit(timeline.toJSON(), 'deletedAt', 'deletedBy'),
+          };
+        }
+        // Send event to bus
+        req.log.debug('Sending event to RabbitMQ bus for milestone %d', updated.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+          { original, updated, cascadedUpdates },
+          { correlationId: req.id },
+        );
 
-      // emit the event
-      // we cannot use `util.sendResourceToKafkaBus` as we have to pass a custom param `cascadedUpdates`
-      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_UPDATED, {
-        req,
-        resource: _.assign({ resource: RESOURCES.MILESTONE }, updated),
-        originalResource: _.assign({ resource: RESOURCES.MILESTONE }, original),
-        cascadedUpdates,
-      });
+        // emit the event
+        // we cannot use `util.sendResourceToKafkaBus` as we have to pass a custom param `cascadedUpdates`
+        req.app.emit(EVENT.ROUTING_KEY.MILESTONE_UPDATED, {
+          req,
+          resource: _.assign({ resource: RESOURCES.MILESTONE }, updated),
+          originalResource: _.assign({ resource: RESOURCES.MILESTONE }, original),
+          cascadedUpdates,
+        });
 
-      // Write to response
-      res.json(updated);
-      return Promise.resolve();
-    })
-    .catch(next);
+        // Write to response
+        res.json(updated);
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

@@ -21,48 +21,48 @@ describe('Get Project attachments Tests', () => {
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => testUtil.clearES())
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            directProjectId: 1,
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          directProjectId: 1,
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          project1 = p;
+          // create members
+          return models.ProjectMember.create({
+            userId: 40051332,
+            projectId: project1.id,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            project1 = p;
-            // create members
-            return models.ProjectMember.create({
-              userId: 40051332,
-              projectId: project1.id,
-              role: 'copilot',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }).then(() => models.ProjectAttachment.create({
-              projectId: project1.id,
-              title: 'test.txt',
-              description: 'blah',
-              contentType: 'application/unknown',
-              size: 12312,
-              category: null,
-              path: 'https://media.topcoder.com/projects/1/test.txt',
-              type: ATTACHMENT_TYPES.FILE,
-              tags: ['tag1', 'tag2'],
-              createdBy: testUtil.userIds.copilot,
-              updatedBy: 1,
-              allowedUsers: [testUtil.userIds.member],
-            }).then((a1) => {
-              attachment = a1;
-              done();
-            }));
-          });
+          }).then(() => models.ProjectAttachment.create({
+            projectId: project1.id,
+            title: 'test.txt',
+            description: 'blah',
+            contentType: 'application/unknown',
+            size: 12312,
+            category: null,
+            path: 'https://media.topcoder.com/projects/1/test.txt',
+            type: ATTACHMENT_TYPES.FILE,
+            tags: ['tag1', 'tag2'],
+            createdBy: testUtil.userIds.copilot,
+            updatedBy: 1,
+            allowedUsers: [testUtil.userIds.member],
+          }).then((a1) => {
+            attachment = a1;
+            done();
+          }));
         });
+      });
   });
 
   after((done) => {

@@ -59,10 +59,10 @@ describe('LIST work streams', () => {
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              models.WorkStream.bulkCreate(_.map(workStreams, w => _.assign(w, { projectId }))).then(() => done());
-            });
+              .then((project) => {
+                projectId = project.id;
+                models.WorkStream.bulkCreate(_.map(workStreams, w => _.assign(w, { projectId }))).then(() => done());
+              });
           });
       });
   });

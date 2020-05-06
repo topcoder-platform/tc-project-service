@@ -186,7 +186,7 @@ describe('GET timeline', () => {
                   .then(createdTimelines => (
                     // create milestones after timelines
                     models.Milestone.bulkCreate(milestones))
-                      .then(createdMilestones => [createdTimelines, createdMilestones]),
+                    .then(createdMilestones => [createdTimelines, createdMilestones]),
                   ),
               ).then(([createdTimelines, createdMilestones]) =>
                 // Index to ES

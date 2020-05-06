@@ -146,37 +146,37 @@ module.exports = (sequelize, DataTypes) => {
       attributes: ['id', 'duration', 'startDate', 'endDate', 'actualStartDate', 'completionDate'],
       raw: true,
     })
-    .then((milestones) => {
-      let scheduledDuration = 0;
-      let completedDuration = 0;
-      let duration = 0;
-      let progress = 0;
-      if (milestones) {
-        const fMilestone = milestones[0];
-        const lMilestone = milestones[milestones.length - 1];
-        const startDate = fMilestone.actualStartDate ? fMilestone.actualStartDate : fMilestone.startDate;
-        const endDate = lMilestone.completionDate ? lMilestone.completionDate : lMilestone.endDate;
-        duration = moment.utc(endDate).diff(moment.utc(startDate), 'days') + 1;
-        milestones.forEach((m) => {
-          if (m.completionDate !== null) {
-            let mDuration = 0;
-            if (m.actualStartDate !== null) {
-              mDuration = moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
+      .then((milestones) => {
+        let scheduledDuration = 0;
+        let completedDuration = 0;
+        let duration = 0;
+        let progress = 0;
+        if (milestones) {
+          const fMilestone = milestones[0];
+          const lMilestone = milestones[milestones.length - 1];
+          const startDate = fMilestone.actualStartDate ? fMilestone.actualStartDate : fMilestone.startDate;
+          const endDate = lMilestone.completionDate ? lMilestone.completionDate : lMilestone.endDate;
+          duration = moment.utc(endDate).diff(moment.utc(startDate), 'days') + 1;
+          milestones.forEach((m) => {
+            if (m.completionDate !== null) {
+              let mDuration = 0;
+              if (m.actualStartDate !== null) {
+                mDuration = moment.utc(m.completionDate).diff(moment.utc(m.actualStartDate), 'days') + 1;
+              } else {
+                mDuration = moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
+              }
+              scheduledDuration += mDuration;
+              completedDuration += mDuration;
             } else {
-              mDuration = moment.utc(m.completionDate).diff(moment.utc(m.startDate), 'days') + 1;
+              scheduledDuration += m.duration;
             }
-            scheduledDuration += mDuration;
-            completedDuration += mDuration;
-          } else {
-            scheduledDuration += m.duration;
+          });
+          if (scheduledDuration > 0) {
+            progress = Math.round((completedDuration / scheduledDuration) * 100);
           }
-        });
-        if (scheduledDuration > 0) {
-          progress = Math.round((completedDuration / scheduledDuration) * 100);
         }
-      }
-      return Promise.resolve({ duration, progress });
-    });
+        return Promise.resolve({ duration, progress });
+      });
   };
 
   return Milestone;

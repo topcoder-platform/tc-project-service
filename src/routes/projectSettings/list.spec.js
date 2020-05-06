@@ -79,30 +79,30 @@ describe('LIST Project Settings', () => {
           lastActivityAt: 1,
           lastActivityUserId: '1',
         })
-        .then((project) => {
-          projectId = project.id;
-          // create members
-          models.ProjectMember.bulkCreate([{
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 2,
-            userId: memberUser.userId,
-            projectId,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1,
-          }])
-          .then(() => {
-            models.ProjectSetting.bulkCreate(_.map(settings, s => _.assign(s, { projectId }))).then(() => done());
+          .then((project) => {
+            projectId = project.id;
+            // create members
+            models.ProjectMember.bulkCreate([{
+              id: 1,
+              userId: copilotUser.userId,
+              projectId,
+              role: 'copilot',
+              isPrimary: false,
+              createdBy: 1,
+              updatedBy: 1,
+            }, {
+              id: 2,
+              userId: memberUser.userId,
+              projectId,
+              role: 'customer',
+              isPrimary: true,
+              createdBy: 1,
+              updatedBy: 1,
+            }])
+              .then(() => {
+                models.ProjectSetting.bulkCreate(_.map(settings, s => _.assign(s, { projectId }))).then(() => done());
+              });
           });
-        });
       });
   });
 

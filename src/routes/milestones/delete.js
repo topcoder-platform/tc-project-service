@@ -48,25 +48,25 @@ module.exports = [
             .then(() => milestone.destroy());
         }),
     )
-    .then((deleted) => {
+      .then((deleted) => {
       // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for milestone %d', deleted.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_REMOVED,
-        deleted,
-        { correlationId: req.id },
-      );
+        req.log.debug('Sending event to RabbitMQ bus for milestone %d', deleted.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_REMOVED,
+          deleted,
+          { correlationId: req.id },
+        );
 
-      // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.MILESTONE_REMOVED,
-        RESOURCES.MILESTONE,
-        { id: deleted.id });
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.MILESTONE_REMOVED,
+          RESOURCES.MILESTONE,
+          { id: deleted.id });
 
-      // Write to response
-      res.status(204).end();
-      return Promise.resolve();
-    })
-    .catch(next);
+        // Write to response
+        res.status(204).end();
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

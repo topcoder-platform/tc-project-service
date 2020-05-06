@@ -17,20 +17,20 @@ module.exports = freq => new Promise((resolve, reject) => {
   }
 
   return models.ProjectAttachment.getAttachmentById(projectId, attachmentId)
-      .then((attachment) => {
-        const req = freq;
-        req.context = req.context || {};
-        req.context.existingAttachment = attachment;
+    .then((attachment) => {
+      const req = freq;
+      req.context = req.context || {};
+      req.context.existingAttachment = attachment;
 
-        // deligate not found to the actual handler
-        if (!attachment) {
-          return resolve(true);
-        }
+      // deligate not found to the actual handler
+      if (!attachment) {
+        return resolve(true);
+      }
 
-        if (attachment.createdBy === req.authUser.userId) {
-          return resolve(true);
-        }
+      if (attachment.createdBy === req.authUser.userId) {
+        return resolve(true);
+      }
 
-        return reject(new Error('Only admins and the user that uploaded the docs can modify'));
-      });
+      return reject(new Error('Only admins and the user that uploaded the docs can modify'));
+    });
 });

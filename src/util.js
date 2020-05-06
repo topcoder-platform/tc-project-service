@@ -116,9 +116,9 @@ const projectServiceUtils = {
    */
   calculateProjectEstimationItems: (req, projectId) =>
     // delete ALL existent ProjectEstimationItems for the project
-     models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
-       includeAllProjectEstimatinoItemsForInternalUsage: true,
-     })
+    models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
+      includeAllProjectEstimatinoItemsForInternalUsage: true,
+    })
 
       // retrieve ProjectSettings and ProjectEstimations
       .then(() => Promise.all([
@@ -486,12 +486,12 @@ const projectServiceUtils = {
     }
 
     const data = query ? (yield esClient.search({ index: INDEX, type: TYPE, body: query })) :
-    (yield esClient.search({ index: INDEX, type: TYPE }));
+      (yield esClient.search({ index: INDEX, type: TYPE }));
     if (data.hits.hits.length > 0 && data.hits.hits[0].inner_hits) {
       return data.hits.hits[0].inner_hits;
     }
 
-    return data.hits.hits.length > 0 ? data.hits.hits[0]._source : {  // eslint-disable-line no-underscore-dangle
+    return data.hits.hits.length > 0 ? data.hits.hits[0]._source : { // eslint-disable-line no-underscore-dangle
       productTemplates: [],
       forms: [],
       projectTemplates: [],
@@ -807,7 +807,7 @@ const projectServiceUtils = {
           Authorization: `Bearer ${token}`,
         },
       }).then(res => _.get(res, 'data.result.content', [])
-          .map(r => r.roleName));
+        .map(r => r.roleName));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -829,7 +829,7 @@ const projectServiceUtils = {
       }
     }),
 
-    /**
+  /**
      * Send resource to kafka bus
      * @param  {object} req  Request object
      * @param  {String} key  the event key
@@ -840,17 +840,17 @@ const projectServiceUtils = {
      * @param  {Boolean}[skipNotification] if true, than event is not send to Notification Service
     */
     sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource, originalResource, route, skipNotification) {    // eslint-disable-line
-      req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
+    req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
 
-      // emit event
-      req.app.emit(key, {
-        req,
-        resource: _.assign({ resource: name }, resource),
-        originalResource: originalResource ? _.assign({ resource: name }, originalResource) : undefined,
-        route,
-        skipNotification,
-      });
-    }),
+    // emit event
+    req.app.emit(key, {
+      req,
+      resource: _.assign({ resource: name }, resource),
+      originalResource: originalResource ? _.assign({ resource: name }, originalResource) : undefined,
+      route,
+      skipNotification,
+    });
+  }),
 
   /**
    * Add userId to project
@@ -874,44 +874,44 @@ const projectServiceUtils = {
     // register member
 
     return models.ProjectMember.create(member, { transaction })
-    .then((_newMember) => {
-      newMember = _newMember.get({ plain: true });
+      .then((_newMember) => {
+        newMember = _newMember.get({ plain: true });
 
-      // we have to remove all pending invites for the member if any, as we can add a member directly without invite
-      return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(member.projectId, null, newMember.userId)
-        .then((invite) => {
-          if (invite) {
-            return invite.update({
-              status: INVITE_STATUS.CANCELED,
-            }, {
-              transaction,
-            });
-          }
+        // we have to remove all pending invites for the member if any, as we can add a member directly without invite
+        return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(member.projectId, null, newMember.userId)
+          .then((invite) => {
+            if (invite) {
+              return invite.update({
+                status: INVITE_STATUS.CANCELED,
+              }, {
+                transaction,
+              });
+            }
 
-          return Promise.resolve();
-        }).then(() => {
+            return Promise.resolve();
+          }).then(() => {
           // TODO Should we also send Kafka event in case we removed some invite above?
 
-          // publish event
-          req.app.services.pubsub.publish(
-            EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-            newMember,
-            { correlationId: req.id },
-          );
-          // emit the event
-          util.sendResourceToKafkaBus(
-            req,
-            EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-            RESOURCES.PROJECT_MEMBER,
-            newMember);
+            // publish event
+            req.app.services.pubsub.publish(
+              EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+              newMember,
+              { correlationId: req.id },
+            );
+            // emit the event
+            util.sendResourceToKafkaBus(
+              req,
+              EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+              RESOURCES.PROJECT_MEMBER,
+              newMember);
 
             return newMember;
-        });
-    })
-    .catch((err) => {
-      req.log.error('Unable to register ', err);
-      return Promise.reject(err);
-    });
+          });
+      })
+      .catch((err) => {
+        req.log.error('Unable to register ', err);
+        return Promise.reject(err);
+      });
   }),
 
   /**
@@ -929,29 +929,29 @@ const projectServiceUtils = {
     }
     req.log.trace('filter for users api call', filter);
     return util.getM2MToken()
-    .then((token) => {
-      req.log.debug(`Bearer ${token}`);
-      const httpClient = util.getHttpClient({ id: req.id, log: req.log });
-      return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        params: {
-          fields: 'handle,id,email',
-          filter,
-        },
-        // set longer timeout as default 3000 could be not enough for identity service response
-        timeout: 15000,
-      })
-      .then((response) => {
-        const data = _.get(response, 'data.result.content', null);
-        if (!data) { throw new Error('Response does not have result.content'); }
-        req.log.debug('UserHandle response', data);
-        return data;
+      .then((token) => {
+        req.log.debug(`Bearer ${token}`);
+        const httpClient = util.getHttpClient({ id: req.id, log: req.log });
+        return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          params: {
+            fields: 'handle,id,email',
+            filter,
+          },
+          // set longer timeout as default 3000 could be not enough for identity service response
+          timeout: 15000,
+        })
+          .then((response) => {
+            const data = _.get(response, 'data.result.content', null);
+            if (!data) { throw new Error('Response does not have result.content'); }
+            req.log.debug('UserHandle response', data);
+            return data;
+          });
       });
-    });
   },
 
   /**
@@ -999,7 +999,7 @@ const projectServiceUtils = {
       const start = batch * maximumRequests;
       const end = (batch + 1) * maximumRequests;
       const requests = emails.slice(start, end).map(userEmail =>
-          generateRequest({ token, email: userEmail }));
+        generateRequest({ token, email: userEmail }));
       return Promise.all(requests)
         .then((responses) => {
           const data = responses.reduce((contents, response) => {
@@ -1044,22 +1044,22 @@ const projectServiceUtils = {
   setPaginationHeaders: (req, res, data) => {
     const totalPages = Math.ceil(data.count / data.pageSize);
     let fullUrl = `${req.protocol}://${req.get('host')}${req.url.replace(`&page=${data.page}`, '')}`;
-  // URL formatting to add pagination parameters accordingly
+    // URL formatting to add pagination parameters accordingly
     if (fullUrl.indexOf('?') === -1) {
       fullUrl += '?';
     } else {
       fullUrl += '&';
     }
 
-  // Pagination follows github style
+    // Pagination follows github style
     if (data.count > 0) { // Set Pagination headers only if there is data to paginate
       let link = ''; // Content for Link header
 
-    // Set first and last page in Link header
+      // Set first and last page in Link header
       link += `<${fullUrl}page=1>; rel="first"`;
       link += `, <${fullUrl}page=${totalPages}>; rel="last"`;
 
-    // Set Prev-Page only if it's not first page and within page limits
+      // Set Prev-Page only if it's not first page and within page limits
       if (data.page > 1 && data.page <= totalPages) {
         const prevPage = (data.page - 1);
         res.set({
@@ -1068,7 +1068,7 @@ const projectServiceUtils = {
         link += `, <${fullUrl}page=${prevPage}>; rel="prev"`;
       }
 
-    // Set Next-Page only if it's not Last page and within page limits
+      // Set Next-Page only if it's not Last page and within page limits
       if (data.page < totalPages) {
         const nextPage = (_.parseInt(data.page) + 1);
         res.set({
@@ -1077,7 +1077,7 @@ const projectServiceUtils = {
         link += `, <${fullUrl}page=${nextPage}>; rel="next"`;
       }
 
-    // Allow browsers access pagination data in headers
+      // Allow browsers access pagination data in headers
       let accessControlExposeHeaders = res.get('Access-Control-Expose-Headers') || '';
       accessControlExposeHeaders += accessControlExposeHeaders ? ', ' : '';
       accessControlExposeHeaders += 'X-Page, X-Per-Page, X-Total, X-Total-Pages';
@@ -1091,7 +1091,7 @@ const projectServiceUtils = {
         Link: link,
       });
     }
-  // Return the data after setting pagination headers
+    // Return the data after setting pagination headers
     res.json(data.rows);
   },
 
@@ -1309,6 +1309,8 @@ const projectServiceUtils = {
    * Check if permission requires us to provide the list Project Members or no.
    *
    * @param {Object} permission     permission or permissionRule
+   *
+   * @return {Boolean} true if has permission
    */
   isPermissionRequireProjectMembers: (permission) => {
     if (!permission) {

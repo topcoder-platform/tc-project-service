@@ -239,17 +239,17 @@ const getObjToIndex = (items) => {
 describe('GET all metadata from DB', () => {
   before((done) => {
     testUtil.clearES()
-    .then(() => testUtil.clearDb())
-    .then(() => models.ProjectTemplate.bulkCreate(projectTemplates))
-    .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates))
-    .then(() => models.ProjectType.bulkCreate(projectTypes))
-    .then(() => models.ProductCategory.bulkCreate(productCategories))
-    .then(() => models.Form.bulkCreate(forms))
-    .then(() => models.PriceConfig.bulkCreate(priceConfigs))
-    .then(() => models.PlanConfig.bulkCreate(planConfigs))
-    .then(() => models.BuildingBlock.bulkCreate(buildingBlocks))
-    .then(() => done());
+      .then(() => testUtil.clearDb())
+      .then(() => models.ProjectTemplate.bulkCreate(projectTemplates))
+      .then(() => models.ProductTemplate.bulkCreate(productTemplates))
+      .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates))
+      .then(() => models.ProjectType.bulkCreate(projectTypes))
+      .then(() => models.ProductCategory.bulkCreate(productCategories))
+      .then(() => models.Form.bulkCreate(forms))
+      .then(() => models.PriceConfig.bulkCreate(priceConfigs))
+      .then(() => models.PlanConfig.bulkCreate(planConfigs))
+      .then(() => models.BuildingBlock.bulkCreate(buildingBlocks))
+      .then(() => done());
   });
 
   after((done) => {
@@ -381,43 +381,43 @@ describe('GET all metadata from ES', () => {
     const esData = {};
 
     testUtil.clearES()
-    .then(() => testUtil.clearDb())
-    .then(() => models.ProjectTemplate.bulkCreate(projectTemplates, { returning: true }))
-    .then((created) => { esData.projectTemplates = getObjToIndex(created); })
-    .then(() => models.ProductTemplate.bulkCreate(productTemplates, { returning: true }))
-    .then((created) => { esData.productTemplates = getObjToIndex(created); })
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates, { returning: true }))
-    .then((created) => { esData.milestoneTemplates = getObjToIndex(created); })
-    .then(() => models.ProjectType.bulkCreate(projectTypes, { returning: true }))
-    .then((created) => { esData.projectTypes = getObjToIndex(created); })
-    .then(() => models.ProductCategory.bulkCreate(productCategories, { returning: true }))
-    .then((created) => { esData.productCategories = getObjToIndex(created); })
-    .then(() => models.Form.bulkCreate(forms, { returning: true }))
-    .then((created) => {
+      .then(() => testUtil.clearDb())
+      .then(() => models.ProjectTemplate.bulkCreate(projectTemplates, { returning: true }))
+      .then((created) => { esData.projectTemplates = getObjToIndex(created); })
+      .then(() => models.ProductTemplate.bulkCreate(productTemplates, { returning: true }))
+      .then((created) => { esData.productTemplates = getObjToIndex(created); })
+      .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates, { returning: true }))
+      .then((created) => { esData.milestoneTemplates = getObjToIndex(created); })
+      .then(() => models.ProjectType.bulkCreate(projectTypes, { returning: true }))
+      .then((created) => { esData.projectTypes = getObjToIndex(created); })
+      .then(() => models.ProductCategory.bulkCreate(productCategories, { returning: true }))
+      .then((created) => { esData.productCategories = getObjToIndex(created); })
+      .then(() => models.Form.bulkCreate(forms, { returning: true }))
+      .then((created) => {
       // only index form with key `productKey 1`
-      const v2Form = _(created).filter(c => c.key === 'productKey 1');
-      esData.forms = getObjToIndex(v2Form);
-    })
-    .then(() => models.PriceConfig.bulkCreate(priceConfigs, { returning: true }))
-    .then((created) => {
+        const v2Form = _(created).filter(c => c.key === 'productKey 1');
+        esData.forms = getObjToIndex(v2Form);
+      })
+      .then(() => models.PriceConfig.bulkCreate(priceConfigs, { returning: true }))
+      .then((created) => {
       // only index latest versions
-      const v2PriceConfigs = _(created).filter(c => c.version === 2);
-      esData.priceConfigs = getObjToIndex(v2PriceConfigs);
-    })
-    .then(() => models.PlanConfig.bulkCreate(planConfigs, { returning: true }))
-    .then((created) => {
+        const v2PriceConfigs = _(created).filter(c => c.version === 2);
+        esData.priceConfigs = getObjToIndex(v2PriceConfigs);
+      })
+      .then(() => models.PlanConfig.bulkCreate(planConfigs, { returning: true }))
+      .then((created) => {
       // only index latest versions
-      const v2PlanConfigs = _(created).filter(c => c.version === 2);
-      esData.planConfigs = getObjToIndex(v2PlanConfigs);
-    })
-    .then(() => models.BuildingBlock.bulkCreate(buildingBlocks, { returning: true }))
-    .then((created) => { esData.buildingBlocks = getObjToIndex(created); })
-    .then(() => server.services.es.index({
-      index: ES_METADATA_INDEX,
-      type: ES_METADATA_TYPE,
-      body: esData,
-    }))
-    .then(() => done());
+        const v2PlanConfigs = _(created).filter(c => c.version === 2);
+        esData.planConfigs = getObjToIndex(v2PlanConfigs);
+      })
+      .then(() => models.BuildingBlock.bulkCreate(buildingBlocks, { returning: true }))
+      .then((created) => { esData.buildingBlocks = getObjToIndex(created); })
+      .then(() => server.services.es.index({
+        index: ES_METADATA_INDEX,
+        type: ES_METADATA_TYPE,
+        body: esData,
+      }))
+      .then(() => done());
   });
 
   after((done) => {

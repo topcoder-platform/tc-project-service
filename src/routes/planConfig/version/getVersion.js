@@ -20,46 +20,48 @@ module.exports = [
   validate(schema),
   permissions('planConfig.view'),
   (req, res, next) =>
-  util.fetchByIdFromES('planConfigs', {
-    query: {
-      nested: {
-        path: 'planConfigs',
-        query: {
-          filtered: {
-            filter: {
-              bool: {
-                must: [
-                  { term: { 'planConfigs.key': req.params.key } },
-                  { term: { 'planConfigs.version': req.params.version } },
-                ],
+    util.fetchByIdFromES('planConfigs', {
+      query: {
+        nested: {
+          path: 'planConfigs',
+          query: {
+            filtered: {
+              filter: {
+                bool: {
+                  must: [
+                    { term: { 'planConfigs.key': req.params.key } },
+                    { term: { 'planConfigs.version': req.params.version } },
+                  ],
+                },
               },
             },
           },
+          inner_hits: {},
         },
-        inner_hits: {},
       },
-    },
-    sort: { 'planConfigs.revision': 'desc' },
-  }, 'metadata')
-  .then((data) => {
-    if (data.length === 0) {
-      req.log.debug('No planConfig found in ES');
-      return models.PlanConfig.findOneWithLatestRevision(req.params)
-        .then((planConfig) => {
-          // Not found
-          if (!planConfig) {
-            const apiErr = new Error(`PlanConfig not found for key ${req.params.key} version ${req.params.version}`);
-            apiErr.status = 404;
-            return Promise.reject(apiErr);
-          }
-          res.json(planConfig);
-          return Promise.resolve();
-        })
-        .catch(next);
-    }
-    req.log.debug('planConfigs found in ES');
-    res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-    return Promise.resolve();
-  })
-  .catch(next),
+      sort: { 'planConfigs.revision': 'desc' },
+    }, 'metadata')
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No planConfig found in ES');
+          return models.PlanConfig.findOneWithLatestRevision(req.params)
+            .then((planConfig) => {
+              // Not found
+              if (!planConfig) {
+                const apiErr = new Error(
+                  `PlanConfig not found for key ${req.params.key} version ${req.params.version}`,
+                );
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+              res.json(planConfig);
+              return Promise.resolve();
+            })
+            .catch(next);
+        }
+        req.log.debug('planConfigs found in ES');
+        res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        return Promise.resolve();
+      })
+      .catch(next),
 ];

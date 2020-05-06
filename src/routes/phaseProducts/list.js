@@ -9,7 +9,7 @@ const retrieveFromDB = async (req, res, next) => {
   const projectId = _.parseInt(req.params.projectId);
   const phaseId = _.parseInt(req.params.phaseId);
 
-    // check if the project and phase are exist
+  // check if the project and phase are exist
   return models.ProjectPhase.findOne({
     where: { id: phaseId, projectId },
     raw: true,
@@ -27,9 +27,9 @@ const retrieveFromDB = async (req, res, next) => {
     };
 
     return models.PhaseProduct.search(parameters, req.log)
-        .then(({ rows }) => res.json(rows));
+      .then(({ rows }) => res.json(rows));
   })
-      .catch(err => next(err));
+    .catch(err => next(err));
 };
 
 module.exports = [
@@ -68,8 +68,8 @@ module.exports = [
           return retrieveFromDB(req, res, next);
         }
         req.log.debug('phase product found in ES');
-          // Get the phases
-        const phases = data[0].inner_hits.phases.hits.hits[0]._source;  // eslint-disable-line no-underscore-dangle
+        // Get the phases
+        const phases = data[0].inner_hits.phases.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
         const products = _.isArray(phases.products) ? phases.products : [];
         return res.json(products);
       })

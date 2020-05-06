@@ -41,8 +41,8 @@ const schema = {
     updatedBy: Joi.any().strip(),
     deletedBy: Joi.any().strip(),
   })
-      .xor('form', 'template')
-      .required(),
+    .xor('form', 'template')
+    .required(),
 };
 
 module.exports = [

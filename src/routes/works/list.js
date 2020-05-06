@@ -71,26 +71,26 @@ module.exports = [
       include: [include],
       order: [[models.ProjectPhase, sortParameters[0], sortParameters[1]]],
     })
-    .then((existingWorkStream) => {
-      if (!existingWorkStream) {
+      .then((existingWorkStream) => {
+        if (!existingWorkStream) {
         // handle 404
-        const err = new Error(`active work stream not found for project id ${projectId} ` +
+          const err = new Error(`active work stream not found for project id ${projectId} ` +
           `and work stream id ${workStreamId}`);
-        err.status = 404;
-        throw err;
-      }
-
-      // rename 'products' to 'workItems'
-      return existingWorkStream.ProjectPhases.map((phase) => {
-        const phaseObj = phase.get({ plain: true });
-        if (_.has(phaseObj, 'products')) {
-          _.set(phaseObj, 'workItems', _.get(phaseObj, 'products'));
-          _.unset(phaseObj, 'products');
+          err.status = 404;
+          throw err;
         }
-        return phaseObj;
-      });
-    })
-    .then(phases => res.json(phases))
-    .catch(next);
+
+        // rename 'products' to 'workItems'
+        return existingWorkStream.ProjectPhases.map((phase) => {
+          const phaseObj = phase.get({ plain: true });
+          if (_.has(phaseObj, 'products')) {
+            _.set(phaseObj, 'workItems', _.get(phaseObj, 'products'));
+            _.unset(phaseObj, 'products');
+          }
+          return phaseObj;
+        });
+      })
+      .then(phases => res.json(phases))
+      .catch(next);
   },
 ];
