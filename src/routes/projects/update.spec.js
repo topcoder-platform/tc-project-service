@@ -663,7 +663,7 @@ describe('Project', () => {
       request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.m2m['write:projects-billing-accounts']}`,
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
         })
         .send({
           billingAccountId: 123,
