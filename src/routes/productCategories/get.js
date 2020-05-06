@@ -30,32 +30,32 @@ module.exports = [
         },
       },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No productCategory found in ES');
-        models.ProductCategory.findOne({
-          where: {
-            key: req.params.key,
-          },
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-        })
-          .then((productCategory) => {
-            // Not found
-            if (!productCategory) {
-              const apiErr = new Error(`Product category not found for key ${req.params.key}`);
-              apiErr.status = 404;
-              return Promise.reject(apiErr);
-            }
-
-            res.json(productCategory);
-            return Promise.resolve();
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No productCategory found in ES');
+          models.ProductCategory.findOne({
+            where: {
+              key: req.params.key,
+            },
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
           })
-          .catch(next);
-      } else {
-        req.log.debug('productCategories found in ES');
-        res.json(data[0].inner_hits.productCategories.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-      }
-    })
-    .catch(next);
+            .then((productCategory) => {
+            // Not found
+              if (!productCategory) {
+                const apiErr = new Error(`Product category not found for key ${req.params.key}`);
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+
+              res.json(productCategory);
+              return Promise.resolve();
+            })
+            .catch(next);
+        } else {
+          req.log.debug('productCategories found in ES');
+          res.json(data[0].inner_hits.productCategories.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        }
+      })
+      .catch(next);
   },
 ];

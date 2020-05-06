@@ -59,8 +59,8 @@ module.exports = function defineProjectAttachment(sequelize, DataTypes) {
       }, {
         allowedUsers: {
           $or: [
-              { $contains: [userId] },
-              { $eq: null },
+            { $contains: [userId] },
+            { $eq: null },
           ],
         },
       }],

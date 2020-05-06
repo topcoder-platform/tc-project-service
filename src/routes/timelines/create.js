@@ -96,10 +96,10 @@ module.exports = [
                   return milestone;
                 });
                 return models.Milestone.bulkCreate(milestones, { returning: true })
-                .then((createdMilestones) => {
-                  req.log.debug('Milestones created for timeline with template id %d', templateId);
-                  result.milestones = _.map(createdMilestones, cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'));
-                });
+                  .then((createdMilestones) => {
+                    req.log.debug('Milestones created for timeline with template id %d', templateId);
+                    result.milestones = _.map(createdMilestones, cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'));
+                  });
               }
               // no milestone template found for the template
               req.log.debug('no milestone template found for the template id %d', templateId);
@@ -110,31 +110,31 @@ module.exports = [
         })
         .catch(next);
     })
-    .then(() => {
+      .then(() => {
       // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for timeline %d', result.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_ADDED,
-        _.assign({ projectId: req.params.projectId }, result),
-        { correlationId: req.id },
-      );
+        req.log.debug('Sending event to RabbitMQ bus for timeline %d', result.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_ADDED,
+          _.assign({ projectId: req.params.projectId }, result),
+          { correlationId: req.id },
+        );
 
-      // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.TIMELINE_ADDED,
-        RESOURCES.TIMELINE,
-        result);
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.TIMELINE_ADDED,
+          RESOURCES.TIMELINE,
+          result);
 
-      // emit the event for milestones
-      _.map(result.milestones, milestone => util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        RESOURCES.MILESTONE,
-        milestone));
+        // emit the event for milestones
+        _.map(result.milestones, milestone => util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.MILESTONE_ADDED,
+          RESOURCES.MILESTONE,
+          milestone));
 
-      // Write to the response
-      res.status(201).json(result);
-      return Promise.resolve();
-    })
-    .catch(next);
+        // Write to the response
+        res.status(201).json(result);
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

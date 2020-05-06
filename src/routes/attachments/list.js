@@ -44,22 +44,22 @@ module.exports = [
         },
       },
     })
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No attachment found in ES');
-        return models.ProjectAttachment.findAll({
-          where: {
-            projectId,
-          },
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-          raw: true,
-        })
-        .then(attachments => res.json(attachments))
-        .catch(next);
-      }
-      req.log.debug('attachments found in ES');
-      return res.json(data[0].inner_hits.attachments.hits.hits.map(hit => hit._source)); // eslint-disable-line no-underscore-dangle
-    })
-    .catch(next);
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No attachment found in ES');
+          return models.ProjectAttachment.findAll({
+            where: {
+              projectId,
+            },
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
+            raw: true,
+          })
+            .then(attachments => res.json(attachments))
+            .catch(next);
+        }
+        req.log.debug('attachments found in ES');
+        return res.json(data[0].inner_hits.attachments.hits.hits.map(hit => hit._source)); // eslint-disable-line no-underscore-dangle
+      })
+      .catch(next);
   },
 ];

@@ -43,14 +43,14 @@ describe('GET work management permission', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((t) => {
-          permission = _.assign({}, permission, { projectTemplateId: t.id });
-          models.WorkManagementPermission.create(permission)
-          .then((p) => {
-            permissionId = p.id;
-          })
-          .then(() => done());
-        });
+          .then((t) => {
+            permission = _.assign({}, permission, { projectTemplateId: t.id });
+            models.WorkManagementPermission.create(permission)
+              .then((p) => {
+                permissionId = p.id;
+              })
+              .then(() => done());
+          });
       });
   });
 

@@ -50,10 +50,10 @@ const schema = {
     updatedBy: Joi.any().strip(),
     deletedBy: Joi.any().strip(),
   })
-      .xor('form', 'scope')
-      .xor('phases', 'planConfig')
-      .nand('priceConfig', 'scope')
-      .required(),
+    .xor('form', 'scope')
+    .xor('phases', 'planConfig')
+    .nand('priceConfig', 'scope')
+    .required(),
 };
 
 module.exports = [
@@ -69,19 +69,19 @@ module.exports = [
       util.checkModel(priceConfig, 'PriceConfig', models.PriceConfig, 'project template'),
       util.checkModel(planConfig, 'PlanConfig', models.PlanConfig, 'project template'),
     ])
-        .then(() => {
-          const entityToUpdate = _.assign(req.body, {
-            updatedBy: req.authUser.userId,
-          });
+      .then(() => {
+        const entityToUpdate = _.assign(req.body, {
+          updatedBy: req.authUser.userId,
+        });
 
-          return models.ProjectTemplate.findOne({
-            where: {
-              deletedAt: { $eq: null },
-              id: req.params.templateId,
-            },
-            attributes: { exclude: ['deletedAt', 'deletedBy'] },
+        return models.ProjectTemplate.findOne({
+          where: {
+            deletedAt: { $eq: null },
+            id: req.params.templateId,
+          },
+          attributes: { exclude: ['deletedAt', 'deletedBy'] },
 
-          })
+        })
           .then((projectTemplate) => {
             // Not found
             if (!projectTemplate) {
@@ -112,6 +112,6 @@ module.exports = [
 
             res.json(projectTemplate);
           });
-        }).catch(next);
+      }).catch(next);
   },
 ];

@@ -73,10 +73,10 @@ describe('CREATE Form version', () => {
       });
 
       request(server)
-      .post('/v5/projects/metadata/form/dev/versions/')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .post('/v5/projects/metadata/form/dev/versions/')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(invalidBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
@@ -84,10 +84,10 @@ describe('CREATE Form version', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-      .post('/v5/projects/metadata/form/dev/versions/')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .post('/v5/projects/metadata/form/dev/versions/')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
@@ -110,10 +110,10 @@ describe('CREATE Form version', () => {
 
     it('should return 403 for member', (done) => {
       request(server)
-      .post('/v5/projects/metadata/form/dev/versions/')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.member}`,
-      })
+        .post('/v5/projects/metadata/form/dev/versions/')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
         .send(body)
         .expect(403, done);
     });

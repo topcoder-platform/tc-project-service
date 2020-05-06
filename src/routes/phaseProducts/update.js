@@ -49,7 +49,7 @@ module.exports = [
       },
     }).then(existing => new Promise((accept, reject) => {
       if (!existing) {
-          // handle 404
+        // handle 404
         const err = new Error('No active phase product found for project id ' +
               `${projectId}, phase id ${phaseId} and product id ${productId}`);
         err.status = 404;
@@ -61,28 +61,28 @@ module.exports = [
         existing.save().then(accept).catch(reject);
       }
     })))
-    .then((updated) => {
-      req.log.debug('updated phase product', JSON.stringify(updated, null, 2));
+      .then((updated) => {
+        req.log.debug('updated phase product', JSON.stringify(updated, null, 2));
 
-      const updatedValue = updated.get({ plain: true });
+        const updatedValue = updated.get({ plain: true });
 
-      // emit original and updated project phase information
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
-        { original: previousValue, updated: updatedValue },
-        { correlationId: req.id },
-      );
+        // emit original and updated project phase information
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
+          { original: previousValue, updated: updatedValue },
+          { correlationId: req.id },
+        );
 
-      // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
-        RESOURCES.PHASE_PRODUCT,
-        updatedValue,
-        previousValue,
-        ROUTES.PHASE_PRODUCTS.UPDATE);
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
+          RESOURCES.PHASE_PRODUCT,
+          updatedValue,
+          previousValue,
+          ROUTES.PHASE_PRODUCTS.UPDATE);
 
-      res.json(updated);
-    }).catch(err => next(err));
+        res.json(updated);
+      }).catch(err => next(err));
   },
 ];

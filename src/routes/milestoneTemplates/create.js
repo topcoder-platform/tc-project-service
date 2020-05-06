@@ -81,26 +81,26 @@ module.exports = [
           return Promise.resolve();
         }),
     )
-    .then((otherUpdated) => {
+      .then((otherUpdated) => {
       // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_ADDED,
-        RESOURCES.MILESTONE_TEMPLATE,
-        result);
-
-      // emit the event for other milestone templates order updated
-      _.map(otherUpdated, milestoneTemplate =>
         util.sendResourceToKafkaBus(
           req,
-          EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_UPDATED,
+          EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_ADDED,
           RESOURCES.MILESTONE_TEMPLATE,
-          _.assign(_.pick(milestoneTemplate.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
-      );
+          result);
 
-      // Write to response
-      res.status(201).json(result);
-    })
-    .catch(next);
+        // emit the event for other milestone templates order updated
+        _.map(otherUpdated, milestoneTemplate =>
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_UPDATED,
+            RESOURCES.MILESTONE_TEMPLATE,
+            _.assign(_.pick(milestoneTemplate.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+        );
+
+        // Write to response
+        res.status(201).json(result);
+      })
+      .catch(next);
   },
 ];

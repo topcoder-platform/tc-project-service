@@ -24,9 +24,9 @@ const projectAttachmentAddedHandler = Promise.coroutine(function* (logger, msg, 
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
-    const attachments = _.isArray(doc._source.attachments) ? doc._source.attachments : [];    // eslint-disable-line no-underscore-dangle
+    const attachments = _.isArray(doc._source.attachments) ? doc._source.attachments : []; // eslint-disable-line no-underscore-dangle
     attachments.push(data);
-    const merged = _.merge(doc._source, { attachments });       // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, { attachments }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId, body: { doc: merged } });
     logger.debug('project attachment added to project document successfully');
     channel.ack(msg);
@@ -48,13 +48,13 @@ const projectAttachmentUpdatedHandler = Promise.coroutine(function* (logger, msg
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.projectId });
-    const attachments = _.map(doc._source.attachments, (single) => {   // eslint-disable-line no-underscore-dangle
+    const attachments = _.map(doc._source.attachments, (single) => { // eslint-disable-line no-underscore-dangle
       if (single.id === data.original.id) {
         return _.merge(single, data.updated);
       }
       return single;
     });
-    const merged = _.merge(doc._source, { attachments });       // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, { attachments }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({
       index: ES_PROJECT_INDEX,
       type: ES_PROJECT_TYPE,
@@ -83,8 +83,8 @@ const projectAttachmentRemovedHandler = Promise.coroutine(function* (logger, msg
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
-    const attachments = _.filter(doc._source.attachments, single => single.id !== data.id);     // eslint-disable-line no-underscore-dangle
-    const merged = _.merge(doc._source, { attachments });       // eslint-disable-line no-underscore-dangle
+    const attachments = _.filter(doc._source.attachments, single => single.id !== data.id); // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, { attachments }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({
       index: ES_PROJECT_INDEX,
       type: ES_PROJECT_TYPE,

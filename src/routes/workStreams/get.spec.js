@@ -46,21 +46,21 @@ describe('GET work stream', () => {
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              models.WorkStream.create({
-                name: 'Work Stream',
-                type: 'generic',
-                status: 'active',
-                projectId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((entity) => {
-                id = entity.id;
-                workStream = entity;
-                done();
+              .then((project) => {
+                projectId = project.id;
+                models.WorkStream.create({
+                  name: 'Work Stream',
+                  type: 'generic',
+                  status: 'active',
+                  projectId,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }).then((entity) => {
+                  id = entity.id;
+                  workStream = entity;
+                  done();
+                });
               });
-            });
           });
       });
   });

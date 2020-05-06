@@ -53,17 +53,17 @@ module.exports = [
         // if no project template found, try to find product template (for old project v2)
         } else {
           const productTemplate = _.get(project, 'details.products[0]')
-          ? await models.ProductTemplate.findOne(
-            {
-              where: {
-                productKey: _.get(project, 'details.products[0]'),
+            ? await models.ProductTemplate.findOne(
+              {
+                where: {
+                  productKey: _.get(project, 'details.products[0]'),
+                },
               },
-            },
-            {
-              attributes: ['category'],
-              raw: true,
-            },
-          ) : null;
+              {
+                attributes: ['category'],
+                raw: true,
+              },
+            ) : null;
 
           category = _.get(productTemplate, 'category', '');
         }

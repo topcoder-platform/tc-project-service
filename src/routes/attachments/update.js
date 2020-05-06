@@ -28,7 +28,7 @@ module.exports = [
   // handles request validations
   validate(updateProjectAttachmentValidation),
   permissions('project.updateAttachment'),
-  /**
+  /*
    * Update a attachment if the user has access
    */
   (req, res, next) => {
@@ -44,7 +44,7 @@ module.exports = [
       },
     }).then(existing => new Promise((accept, reject) => {
       if (!existing) {
-          // handle 404
+        // handle 404
         const err = new Error('project attachment not found for project id ' +
               `${projectId} and member id ${attachmentId}`);
         err.status = 404;

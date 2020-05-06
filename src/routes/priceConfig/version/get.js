@@ -41,26 +41,28 @@ module.exports = [
       },
       sort: { 'priceConfigs.version': 'desc' },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No priceConfig found in ES');
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No priceConfig found in ES');
 
-        models.PriceConfig.latestRevisionOfLatestVersion(req.params.key)
-          .then((priceConfig) => {
-            if (priceConfig == null) {
-              const apiErr = new Error(`PriceConfig not found for key ${req.params.key} version ${req.params.version}`);
-              apiErr.status = 404;
-              return Promise.reject(apiErr);
-            }
-            res.json(priceConfig);
-            return Promise.resolve();
-          })
-        .catch(next);
-      } else {
-        req.log.debug('priceConfigs found in ES');
-        res.json(data[0].inner_hits.priceConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-      }
-    })
-    .catch(next);
+          models.PriceConfig.latestRevisionOfLatestVersion(req.params.key)
+            .then((priceConfig) => {
+              if (priceConfig == null) {
+                const apiErr = new Error(
+                  `PriceConfig not found for key ${req.params.key} version ${req.params.version}`,
+                );
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+              res.json(priceConfig);
+              return Promise.resolve();
+            })
+            .catch(next);
+        } else {
+          req.log.debug('priceConfigs found in ES');
+          res.json(data[0].inner_hits.priceConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        }
+      })
+      .catch(next);
   },
 ];

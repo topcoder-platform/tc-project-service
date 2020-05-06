@@ -76,7 +76,7 @@ const parseElasticSearchCriteria = (projectId, fields) => {
   }
 
   if (sourceInclude) {
-    searchCriteria._sourceIncludes = sourceInclude;        // eslint-disable-line no-underscore-dangle
+    searchCriteria._sourceIncludes = sourceInclude; // eslint-disable-line no-underscore-dangle
   }
 
 
@@ -114,7 +114,7 @@ const retrieveProjectFromES = (projectId, req) => {
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
-      const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      const rows = _.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
       accept(rows[0]);
     }).catch(reject);
   });
@@ -137,43 +137,43 @@ const retrieveProjectFromDB = (projectId, req) => {
     }).then((_project) => {
       project = _project;
       if (!project) {
-          // returning 404
+        // returning 404
         const apiErr = new Error(`project not found for id ${projectId}`);
         apiErr.status = 404;
         return Promise.reject(apiErr);
       }
-        // check context for project members
+      // check context for project members
       project.members = _.map(req.context.currentProjectMembers, m => _.pick(m, fields.project_members));
-        // check if attachments field was requested
+      // check if attachments field was requested
       if (!req.query.fields || _.indexOf(req.query.fields, 'attachments') > -1) {
         return util.getProjectAttachments(req, project.id);
       }
-          // return null if attachments were not requested.
+      // return null if attachments were not requested.
       return Promise.resolve(null);
     })
-      .then((attachments) => {
-        // if attachments were requested
-        if (attachments) {
-          project.attachments = attachments;
-        }
-        return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
-      })
-      .then((invites) => {
-        project.invites = invites;
-        return project;
-      });
+    .then((attachments) => {
+      // if attachments were requested
+      if (attachments) {
+        project.attachments = attachments;
+      }
+      return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+    })
+    .then((invites) => {
+      project.invites = invites;
+      return project;
+    });
 };
 
 
 module.exports = [
   permissions('project.view'),
-  /**
+  /*
    * GET projects/{projectId}
    * Get a project by id
    */
   (req, res, next) => {
     const projectId = Number(req.params.projectId);
-      // parse the fields string to determine what fields are to be returned
+    // parse the fields string to determine what fields are to be returned
 
     return retrieveProjectFromES(projectId, req).then((result) => {
       if (result === undefined) {

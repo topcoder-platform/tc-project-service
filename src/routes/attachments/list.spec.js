@@ -15,55 +15,55 @@ describe('Project Attachments download', () => {
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => testUtil.clearES())
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            directProjectId: 1,
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          directProjectId: 1,
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          project1 = p;
+          // create members
+          return models.ProjectMember.create({
+            userId: 40051332,
+            projectId: project1.id,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            project1 = p;
-            // create members
-            return models.ProjectMember.create({
-              userId: 40051332,
-              projectId: project1.id,
-              role: 'copilot',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }).then(() => models.ProjectAttachment.bulkCreate([{
-              projectId: project1.id,
-              title: 'test.txt',
-              description: 'blah',
-              contentType: 'application/unknown',
-              size: 12312,
-              category: null,
-              path: 'https://media.topcoder.com/projects/1/test.txt',
-              type: ATTACHMENT_TYPES.FILE,
-              tags: ['tag1', 'tag2'],
-              createdBy: testUtil.userIds.copilot,
-              updatedBy: 1,
-            }, {
-              projectId: project1.id,
-              title: 'link test 1',
-              description: 'link test description',
-              size: 123456,
-              category: null,
-              path: 'https://media.topcoder.com/projects/1/test2.txt',
-              type: ATTACHMENT_TYPES.LINK,
-              tags: ['tag3'],
-              createdBy: testUtil.userIds.copilot,
-              updatedBy: 1,
-            }]).then(() => done()));
-          });
+          }).then(() => models.ProjectAttachment.bulkCreate([{
+            projectId: project1.id,
+            title: 'test.txt',
+            description: 'blah',
+            contentType: 'application/unknown',
+            size: 12312,
+            category: null,
+            path: 'https://media.topcoder.com/projects/1/test.txt',
+            type: ATTACHMENT_TYPES.FILE,
+            tags: ['tag1', 'tag2'],
+            createdBy: testUtil.userIds.copilot,
+            updatedBy: 1,
+          }, {
+            projectId: project1.id,
+            title: 'link test 1',
+            description: 'link test description',
+            size: 123456,
+            category: null,
+            path: 'https://media.topcoder.com/projects/1/test2.txt',
+            type: ATTACHMENT_TYPES.LINK,
+            tags: ['tag3'],
+            createdBy: testUtil.userIds.copilot,
+            updatedBy: 1,
+          }]).then(() => done()));
         });
+      });
   });
 
   after((done) => {

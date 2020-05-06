@@ -149,14 +149,14 @@ function getTopicByTag(projectId, tag, logger) {
     logger.debug(`calling message service for fetching ${tag}`);
     const encodedFilter = encodeURIComponent(`reference=project&referenceId=${projectId}&tag=${tag}`);
     return msgClient.get(`/topics/list/db?filter=${encodedFilter}`)
-    .then((resp) => {
-      const topics = _.get(resp.data, 'result.content', []);
-      logger.debug(`Fetched ${topics.length} topics`);
-      if (topics && topics.length > 0) {
-        return topics[0];
-      }
-      return null;
-    });
+      .then((resp) => {
+        const topics = _.get(resp.data, 'result.content', []);
+        logger.debug(`Fetched ${topics.length} topics`);
+        if (topics && topics.length > 0) {
+          return topics[0];
+        }
+        return null;
+      });
   });
 }
 

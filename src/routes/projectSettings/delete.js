@@ -32,32 +32,32 @@ module.exports = [
           projectId,
         },
       })
-      .then((entity) => {
+        .then((entity) => {
         // Not found
-        if (!entity) {
-          const apiErr = new Error(`Project setting not found for id ${id} and project id ${projectId}`);
-          apiErr.status = 404;
-          return Promise.reject(apiErr);
-        }
+          if (!entity) {
+            const apiErr = new Error(`Project setting not found for id ${id} and project id ${projectId}`);
+            apiErr.status = 404;
+            return Promise.reject(apiErr);
+          }
 
-        deletedEntity = entity;
-        // Update the deletedBy, then delete
-        return entity.update({ deletedBy: req.authUser.userId });
-      })
-      .then(entity => entity.destroy())
-      .then(() => {
+          deletedEntity = entity;
+          // Update the deletedBy, then delete
+          return entity.update({ deletedBy: req.authUser.userId });
+        })
+        .then(entity => entity.destroy())
+        .then(() => {
         // Calculate for valid estimation type
-        if (util.isProjectSettingForEstimation(deletedEntity.key)) {
-          req.log.debug(`Recalculate price breakdown for project id ${projectId}`);
-          return util.calculateProjectEstimationItems(req, projectId);
-        }
+          if (util.isProjectSettingForEstimation(deletedEntity.key)) {
+            req.log.debug(`Recalculate price breakdown for project id ${projectId}`);
+            return util.calculateProjectEstimationItems(req, projectId);
+          }
 
-        return Promise.resolve();
-      }),
+          return Promise.resolve();
+        }),
     ) // transaction end
-    .then(() => {
-      res.status(204).end();
-    })
-    .catch(next);
+      .then(() => {
+        res.status(204).end();
+      })
+      .catch(next);
   },
 ];

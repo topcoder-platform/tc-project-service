@@ -16,7 +16,9 @@ const validateProductTemplates = (count, resJson, expectedTemplates) => {
 
   resJson.forEach((pt, idx) => {
     pt.should.include.all.keys('id', 'name', 'productKey', 'category', 'subCategory', 'icon', 'brief', 'details',
-    'aliases', 'template', 'disabled', 'form', 'hidden', 'isAddOn', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt');
+      'aliases', 'template', 'disabled', 'form', 'hidden', 'isAddOn', 'createdBy', 'createdAt', 'updatedBy',
+      'updatedAt',
+    );
     pt.should.not.include.all.keys('deletedAt', 'deletedBy');
     pt.name.should.be.eql(expectedTemplates[idx].name);
     pt.productKey.should.be.eql(expectedTemplates[idx].productKey);
@@ -93,11 +95,11 @@ describe('LIST product templates', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-    .then(() => models.ProductTemplate.create(templates[0]))
-    .then((createdTemplate) => {
-      templateId = createdTemplate.id;
-      return models.ProductTemplate.create(templates[1]).then(() => done());
-    });
+      .then(() => models.ProductTemplate.create(templates[0]))
+      .then((createdTemplate) => {
+        templateId = createdTemplate.id;
+        return models.ProductTemplate.create(templates[1]).then(() => done());
+      });
   });
   after((done) => {
     testUtil.clearDb(done);

@@ -117,15 +117,15 @@ describe('CREATE Project Setting', () => {
           lastActivityAt: 1,
           lastActivityUserId: '1',
         })
-        .then((project) => {
-          projectId = project.id;
+          .then((project) => {
+            projectId = project.id;
 
-          models.ProjectEstimation.create(_.assign(estimation, { projectId }))
-          .then((e) => {
-            estimationId = e.id;
-            done();
+            models.ProjectEstimation.create(_.assign(estimation, { projectId }))
+              .then((e) => {
+                estimationId = e.id;
+                done();
+              });
           });
-        });
       });
   });
 
@@ -293,34 +293,34 @@ describe('CREATE Project Setting', () => {
 
     it('should return 201 for manager, calculating project estimation items', (done) => {
       request(server)
-          .post(`/v5/projects/${projectId}/settings`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.manager}`,
-          })
-          .send(body)
-          .expect('Content-Type', /json/)
-          .expect(201)
-          .end((err, res) => {
-            if (err) done(err);
+        .post(`/v5/projects/${projectId}/settings`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(body)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) done(err);
 
-            const resJson = res.body;
-            resJson.key.should.be.eql(body.key);
-            resJson.value.should.be.eql(body.value);
-            resJson.valueType.should.be.eql(body.valueType);
-            resJson.projectId.should.be.eql(projectId);
-            resJson.createdBy.should.be.eql(40051334);
-            should.exist(resJson.createdAt);
-            resJson.updatedBy.should.be.eql(40051334);
-            should.exist(resJson.updatedAt);
-            should.not.exist(resJson.deletedBy);
-            should.not.exist(resJson.deletedAt);
-            expectAfterCreate(resJson.id, projectId, _.assign(estimation, {
-              id: estimationId,
-              value: body.value,
-              valueType: body.valueType,
-              key: body.key,
-            }), 1, 0, err, done);
-          });
+          const resJson = res.body;
+          resJson.key.should.be.eql(body.key);
+          resJson.value.should.be.eql(body.value);
+          resJson.valueType.should.be.eql(body.valueType);
+          resJson.projectId.should.be.eql(projectId);
+          resJson.createdBy.should.be.eql(40051334);
+          should.exist(resJson.createdAt);
+          resJson.updatedBy.should.be.eql(40051334);
+          should.exist(resJson.updatedAt);
+          should.not.exist(resJson.deletedBy);
+          should.not.exist(resJson.deletedAt);
+          expectAfterCreate(resJson.id, projectId, _.assign(estimation, {
+            id: estimationId,
+            value: body.value,
+            valueType: body.valueType,
+            key: body.key,
+          }), 1, 0, err, done);
+        });
     });
 
     it('should return 201 for admin', (done) => {

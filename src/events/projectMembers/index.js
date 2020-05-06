@@ -20,7 +20,7 @@ const updateESPromise = Promise.coroutine(function* a(logger, requestId, project
       id: projectId,
       body: { doc: updatedDoc },
     })
-    .then(() => logger.debug('elasticsearch project document updated successfully'));
+      .then(() => logger.debug('elasticsearch project document updated successfully'));
   } catch (error) {
     logger.error('Error caught updating ES document', error);
     return Promise.reject(error);
@@ -76,8 +76,8 @@ const projectMemberRemovedHandler = Promise.coroutine(function* (logger, msg, ch
     const member = JSON.parse(msg.content.toString());
     const projectId = member.projectId;
     const updateDocPromise = (doc) => {
-      const members = _.filter(doc._source.members, single => single.id !== member.id);   // eslint-disable-line no-underscore-dangle
-      return Promise.resolve(_.set(doc._source, 'members', members));    // eslint-disable-line no-underscore-dangle
+      const members = _.filter(doc._source.members, single => single.id !== member.id); // eslint-disable-line no-underscore-dangle
+      return Promise.resolve(_.set(doc._source, 'members', members)); // eslint-disable-line no-underscore-dangle
     };
     yield Promise.all([
       updateESPromise(logger, origRequestId, projectId, updateDocPromise),
@@ -107,13 +107,13 @@ const projectMemberUpdatedHandler = Promise.coroutine(function* a(logger, msg, c
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.projectId });
 
     // merge the changes and update the elasticsearch index
-    const members = _.map(doc._source.members, (single) => {   // eslint-disable-line no-underscore-dangle
+    const members = _.map(doc._source.members, (single) => { // eslint-disable-line no-underscore-dangle
       if (single.id === data.original.id) {
         return _.merge(single, payload);
       }
       return single;
     });
-    const merged = _.merge(doc._source, { members });     // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, { members }); // eslint-disable-line no-underscore-dangle
     // update the merged document
     yield eClient.update({
       index: ES_PROJECT_INDEX,

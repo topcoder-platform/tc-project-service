@@ -42,47 +42,47 @@ describe('Project Phases', () => {
   before((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => testUtil.clearES())
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => testUtil.clearES())
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
-              createdBy: 1,
-              updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              _.assign(body, { projectId });
-              models.ProjectPhase.create(body).then((phase) => {
-                phaseId = phase.id;
-                done();
-              });
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            _.assign(body, { projectId });
+            models.ProjectPhase.create(body).then((phase) => {
+              phaseId = phase.id;
+              done();
             });
           });
         });
+      });
   });
 
   after((done) => {

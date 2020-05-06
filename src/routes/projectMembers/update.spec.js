@@ -506,42 +506,42 @@ describe('Project members update', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          role: 'customer',
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.equal(2);
+          .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({
+            role: 'customer',
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.equal(2);
 
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER,
-                id: member2.id,
-                role: 'customer',
-                userId: 40051332,
-              })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  id: member2.id,
+                  role: 'customer',
+                  userId: 40051332,
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051332,
-                initiatorUserId: testUtil.userIds.manager,
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051332,
+                  initiatorUserId: testUtil.userIds.manager,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
     });
   });

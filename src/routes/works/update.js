@@ -66,41 +66,41 @@ module.exports = [
         },
       }],
     })
-    .then((existing) => {
-      if (!existing) {
+      .then((existing) => {
+        if (!existing) {
         // handle 404
-        const err = new Error('No active project phase found for project id ' +
+          const err = new Error('No active project phase found for project id ' +
           `${projectId} and work stream ${workStreamId} and phase id ${phaseId}`);
-        err.status = 404;
-        throw err;
-      } else {
-        previousValue = _.clone(existing.get({ plain: true }));
-
-        // make sure startDate < endDate
-        let startDate;
-        let endDate;
-        if (updatedProps.startDate) {
-          startDate = new Date(updatedProps.startDate);
-        } else {
-          startDate = existing.startDate !== null ? new Date(existing.startDate) : null;
-        }
-
-        if (updatedProps.endDate) {
-          endDate = new Date(updatedProps.endDate);
-        } else {
-          endDate = existing.endDate !== null ? new Date(existing.endDate) : null;
-        }
-
-        if (startDate !== null && endDate !== null && startDate > endDate) {
-          const err = new Error('startDate must not be after endDate.');
-          err.status = 400;
+          err.status = 404;
           throw err;
         } else {
-          _.extend(existing, updatedProps);
-          return existing.save().catch(next);
+          previousValue = _.clone(existing.get({ plain: true }));
+
+          // make sure startDate < endDate
+          let startDate;
+          let endDate;
+          if (updatedProps.startDate) {
+            startDate = new Date(updatedProps.startDate);
+          } else {
+            startDate = existing.startDate !== null ? new Date(existing.startDate) : null;
+          }
+
+          if (updatedProps.endDate) {
+            endDate = new Date(updatedProps.endDate);
+          } else {
+            endDate = existing.endDate !== null ? new Date(existing.endDate) : null;
+          }
+
+          if (startDate !== null && endDate !== null && startDate > endDate) {
+            const err = new Error('startDate must not be after endDate.');
+            err.status = 400;
+            throw err;
+          } else {
+            _.extend(existing, updatedProps);
+            return existing.save().catch(next);
+          }
         }
-      }
-    })
+      })
       .then((updatedPhase) => {
         updated = updatedPhase;
         // Ignore re-ordering if there's no order specified for this phase

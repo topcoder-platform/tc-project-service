@@ -438,42 +438,42 @@ describe('Project Phases', () => {
 
       it('should send correct BUS API messages when phase added', (done) => {
         request(server)
-        .post(`/v5/projects/${projectId}/phases/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send(body)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(2);
+          .post(`/v5/projects/${projectId}/phases/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(2);
 
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
-                resource: RESOURCES.PHASE,
-                name: body.name,
-                status: body.status,
-                budget: body.budget,
-                progress: body.progress,
-                projectId,
-              })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                  resource: RESOURCES.PHASE,
+                  name: body.name,
+                  status: body.status,
+                  budget: body.budget,
+                  progress: body.progress,
+                  projectId,
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId,
+                  projectName,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
     });
 
@@ -532,30 +532,30 @@ describe('Project Phases', () => {
         });
         sandbox.stub(messageService, 'getClient', () => mockHttpClient);
         request(server)
-            .post(`/v5/projects/${projectId}/phases/`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.copilot}`,
-            })
-            .send(body)
-            .expect('Content-Type', /json/)
-            .expect(201)
-            .end((err) => {
-              if (err) {
-                done(err);
-              } else {
-                testUtil.wait(() => {
-                  publishSpy.calledOnce.should.be.true;
-                  publishSpy.calledWith('project.phase.added').should.be.true;
-                  createMessageSpy.calledOnce.should.be.true;
-                  createMessageSpy.calledWith(sinon.match({ reference: 'project',
-                    referenceId: '1',
-                    tag: 'phase#1',
-                    title: 'test project phase',
-                  })).should.be.true;
-                  done();
-                });
-              }
-            });
+          .post(`/v5/projects/${projectId}/phases/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                publishSpy.calledOnce.should.be.true;
+                publishSpy.calledWith('project.phase.added').should.be.true;
+                createMessageSpy.calledOnce.should.be.true;
+                createMessageSpy.calledWith(sinon.match({ reference: 'project',
+                  referenceId: '1',
+                  tag: 'phase#1',
+                  title: 'test project phase',
+                })).should.be.true;
+                done();
+              });
+            }
+          });
       });
     });
   });

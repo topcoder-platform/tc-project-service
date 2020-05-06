@@ -45,7 +45,7 @@
  * - Add a comment to such rules explaining why allow-rule cannot be created.
  */
 import _ from 'lodash';
- import {
+import {
   PROJECT_MEMBER_ROLE,
   USER_ROLE,
   ADMIN_ROLES as TOPCODER_ROLES_ADMINS,

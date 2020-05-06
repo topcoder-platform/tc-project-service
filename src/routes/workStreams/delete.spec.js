@@ -10,27 +10,27 @@ import testUtil from '../../tests/util';
 const expectAfterDelete = (id, projectId, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.WorkStream.findOne({
-    where: {
-      id,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        chai.assert.isNotNull(res.deletedAt);
-        chai.assert.isNotNull(res.deletedBy);
+    models.WorkStream.findOne({
+      where: {
+        id,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          chai.assert.isNotNull(res.deletedAt);
+          chai.assert.isNotNull(res.deletedBy);
 
-        request(server)
-          .get(`/v5/projects/${projectId}/workstreams/${id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, next);
-      }
-    }), 500);
+          request(server)
+            .get(`/v5/projects/${projectId}/workstreams/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(404, next);
+        }
+      }), 500);
 };
 
 describe('DELETE work stream', () => {
@@ -68,20 +68,20 @@ describe('DELETE work stream', () => {
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              models.WorkStream.create({
-                name: 'Work Stream',
-                type: 'generic',
-                status: 'active',
-                projectId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((entity) => {
-                id = entity.id;
-                done();
+              .then((project) => {
+                projectId = project.id;
+                models.WorkStream.create({
+                  name: 'Work Stream',
+                  type: 'generic',
+                  status: 'active',
+                  projectId,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }).then((entity) => {
+                  id = entity.id;
+                  done();
+                });
               });
-            });
           });
       });
   });

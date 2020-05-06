@@ -79,93 +79,93 @@ describe('CREATE work', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((template) => {
-          models.WorkManagementPermission.create({
-            policy: 'work.create',
-            permission: {
-              allowRule: {
-                projectRoles: ['customer', 'copilot'],
-                topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+          .then((template) => {
+            models.WorkManagementPermission.create({
+              policy: 'work.create',
+              permission: {
+                allowRule: {
+                  projectRoles: ['customer', 'copilot'],
+                  topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+                },
+                denyRule: { projectRoles: ['copilot'] },
               },
-              denyRule: { projectRoles: ['copilot'] },
-            },
-            projectTemplateId: template.id,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then(() => {
-            // Create projects
-            models.Project.create(_.assign(project, { templateId: template.id }))
-            .then((_project) => {
-              projectId = _project.id;
-              projectName = _project.name;
-              models.WorkStream.create({
-                name: 'Work Stream',
-                type: 'generic',
-                status: 'active',
-                projectId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((entity) => {
-                workStreamId = entity.id;
-                // create members
-                models.ProjectMember.bulkCreate([{
-                  id: 1,
-                  userId: copilotUser.userId,
-                  projectId,
-                  role: 'copilot',
-                  isPrimary: false,
-                  createdBy: 1,
-                  updatedBy: 1,
-                }, {
-                  id: 2,
-                  userId: memberUser.userId,
-                  projectId,
-                  role: 'customer',
-                  isPrimary: true,
-                  createdBy: 1,
-                  updatedBy: 1,
-                }])
-                .then(() =>
-                  models.ProductTemplate.create({
-                    name: 'name 1',
-                    productKey: 'productKey 1',
-                    category: 'generic',
-                    subCategory: 'generic',
-                    icon: 'http://example.com/icon1.ico',
-                    brief: 'brief 1',
-                    details: 'details 1',
-                    aliases: ['product key 1', 'product_key_1'],
-                    template: {
-                      template1: {
-                        name: 'template 1',
-                        details: {
-                          anyDetails: 'any details 1',
-                        },
-                        others: ['others 11', 'others 12'],
-                      },
-                      template2: {
-                        name: 'template 2',
-                        details: {
-                          anyDetails: 'any details 2',
-                        },
-                        others: ['others 21', 'others 22'],
-                      },
-                    },
-                    createdBy: 1,
-                    updatedBy: 2,
-                  }).then((productTemplate) => {
-                    productTemplateId = productTemplate.id;
-                    done();
-                  }),
-                );
+              projectTemplateId: template.id,
+              details: {},
+              createdBy: 1,
+              updatedBy: 1,
+              lastActivityAt: 1,
+              lastActivityUserId: '1',
+            })
+              .then(() => {
+                // Create projects
+                models.Project.create(_.assign(project, { templateId: template.id }))
+                  .then((_project) => {
+                    projectId = _project.id;
+                    projectName = _project.name;
+                    models.WorkStream.create({
+                      name: 'Work Stream',
+                      type: 'generic',
+                      status: 'active',
+                      projectId,
+                      createdBy: 1,
+                      updatedBy: 1,
+                    }).then((entity) => {
+                      workStreamId = entity.id;
+                      // create members
+                      models.ProjectMember.bulkCreate([{
+                        id: 1,
+                        userId: copilotUser.userId,
+                        projectId,
+                        role: 'copilot',
+                        isPrimary: false,
+                        createdBy: 1,
+                        updatedBy: 1,
+                      }, {
+                        id: 2,
+                        userId: memberUser.userId,
+                        projectId,
+                        role: 'customer',
+                        isPrimary: true,
+                        createdBy: 1,
+                        updatedBy: 1,
+                      }])
+                        .then(() =>
+                          models.ProductTemplate.create({
+                            name: 'name 1',
+                            productKey: 'productKey 1',
+                            category: 'generic',
+                            subCategory: 'generic',
+                            icon: 'http://example.com/icon1.ico',
+                            brief: 'brief 1',
+                            details: 'details 1',
+                            aliases: ['product key 1', 'product_key_1'],
+                            template: {
+                              template1: {
+                                name: 'template 1',
+                                details: {
+                                  anyDetails: 'any details 1',
+                                },
+                                others: ['others 11', 'others 12'],
+                              },
+                              template2: {
+                                name: 'template 2',
+                                details: {
+                                  anyDetails: 'any details 2',
+                                },
+                                others: ['others 21', 'others 22'],
+                              },
+                            },
+                            createdBy: 1,
+                            updatedBy: 2,
+                          }).then((productTemplate) => {
+                            productTemplateId = productTemplate.id;
+                            done();
+                          }),
+                        );
+                    });
+                  });
               });
-            });
           });
-        });
       });
   });
 
@@ -339,42 +339,42 @@ describe('CREATE work', () => {
 
       it('should send correct BUS API messages when work added', (done) => {
         request(server)
-        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send(body)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(2);
+          .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(2);
 
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
-                resource: RESOURCES.PHASE,
-                name: body.name,
-                status: body.status,
-                budget: body.budget,
-                progress: body.progress,
-                projectId,
-              })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                  resource: RESOURCES.PHASE,
+                  name: body.name,
+                  status: body.status,
+                  budget: body.budget,
+                  progress: body.progress,
+                  projectId,
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051331,
-                initiatorUserId: 40051331,
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId,
+                  projectName,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                  userId: 40051331,
+                  initiatorUserId: 40051331,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
     });
 

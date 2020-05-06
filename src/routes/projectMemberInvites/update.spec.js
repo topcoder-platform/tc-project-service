@@ -408,65 +408,65 @@ describe('Project member invite update', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .patch(`/v5/projects/${project1.id}/invites/1`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          status: INVITE_STATUS.ACCEPTED,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(5);
+          .patch(`/v5/projects/${project1.id}/invites/1`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send({
+            status: INVITE_STATUS.ACCEPTED,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(5);
 
-              // Events for accepted invite
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER_INVITE,
-                projectId: project1.id,
-                userId: testUtil.userIds.member,
-                status: INVITE_STATUS.ACCEPTED,
-                email: null,
-              })).should.be.true;
+                // Events for accepted invite
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                  projectId: project1.id,
+                  userId: testUtil.userIds.member,
+                  status: INVITE_STATUS.ACCEPTED,
+                  email: null,
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
-                projectId: project1.id,
-                userId: testUtil.userIds.member,
-                status: INVITE_STATUS.ACCEPTED,
-                email: null,
-                isSSO: false,
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  userId: testUtil.userIds.member,
+                  status: INVITE_STATUS.ACCEPTED,
+                  email: null,
+                  isSSO: false,
+                })).should.be.true;
 
-              // Events for created member (after invite acceptance)
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER,
-                projectId: project1.id,
-                userId: testUtil.userIds.member,
-              })).should.be.true;
+                // Events for created member (after invite acceptance)
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  projectId: project1.id,
+                  userId: testUtil.userIds.member,
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: testUtil.userIds.member,
-                initiatorUserId: testUtil.userIds.member,
-              })).should.be.true;
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: testUtil.userIds.member,
-                initiatorUserId: testUtil.userIds.member,
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  userId: testUtil.userIds.member,
+                  initiatorUserId: testUtil.userIds.member,
+                })).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  userId: testUtil.userIds.member,
+                  initiatorUserId: testUtil.userIds.member,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
     });
   });

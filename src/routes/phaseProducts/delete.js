@@ -36,7 +36,7 @@ module.exports = [
         }
         return existing.update({ deletedBy: req.authUser.userId });
       })
-      .then(entity => entity.destroy()))
+        .then(entity => entity.destroy()))
       .then((deleted) => {
         req.log.debug('deleted phase product', JSON.stringify(deleted, null, 2));
 

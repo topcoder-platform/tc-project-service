@@ -1,4 +1,4 @@
- /**
+/**
  * API to list all metadata
  */
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -178,49 +178,49 @@ module.exports = [
     // Disadvantage:
     // - we have to filter disabled Project Templates and Product Templates by JS
     util.fetchFromES(null, null, 'metadata')
-    .then((data) => {
-      const esDataToReturn = _.pick(data, metadataProperties);
-      // if some metadata properties are not returned from ES, then initialize such properties with empty array
-      // for consistency
-      metadataProperties.forEach((prop) => {
-        if (!esDataToReturn[prop]) {
-          esDataToReturn[prop] = [];
+      .then((data) => {
+        const esDataToReturn = _.pick(data, metadataProperties);
+        // if some metadata properties are not returned from ES, then initialize such properties with empty array
+        // for consistency
+        metadataProperties.forEach((prop) => {
+          if (!esDataToReturn[prop]) {
+            esDataToReturn[prop] = [];
+          }
+        });
+
+        // return only non-disabled Project Templates
+        if (esDataToReturn.projectTemplates && esDataToReturn.projectTemplates.length > 0) {
+          esDataToReturn.projectTemplates = _.filter(esDataToReturn.projectTemplates, { disabled: false });
         }
-      });
 
-      // return only non-disabled Project Templates
-      if (esDataToReturn.projectTemplates && esDataToReturn.projectTemplates.length > 0) {
-        esDataToReturn.projectTemplates = _.filter(esDataToReturn.projectTemplates, { disabled: false });
-      }
+        // return only non-disabled Product Templates
+        if (esDataToReturn.productTemplates && esDataToReturn.productTemplates.length > 0) {
+          esDataToReturn.productTemplates = _.filter(esDataToReturn.productTemplates, { disabled: false });
+        }
 
-      // return only non-disabled Product Templates
-      if (esDataToReturn.productTemplates && esDataToReturn.productTemplates.length > 0) {
-        esDataToReturn.productTemplates = _.filter(esDataToReturn.productTemplates, { disabled: false });
-      }
+        // WARNING: `BuildingBlock` model contains sensitive data!
+        //
+        // We should NEVER return `privateConfig` property for `buildingBlocks`.
+        // For the DB we use hooks to always clear it out, see `src/models/buildingBlock.js`.
+        // For the ES so far we should always remember about it and filter it out.
+        if (esDataToReturn.buildingBlocks && esDataToReturn.buildingBlocks.length > 0) {
+          esDataToReturn.buildingBlocks = _.map(
+            esDataToReturn.buildingBlocks,
+            buildingBlock => _.omit(buildingBlock, 'privateConfig'),
+          );
+        }
 
-      // WARNING: `BuildingBlock` model contains sensitive data!
-      //
-      // We should NEVER return `privateConfig` property for `buildingBlocks`.
-      // For the DB we use hooks to always clear it out, see `src/models/buildingBlock.js`.
-      // For the ES so far we should always remember about it and filter it out.
-      if (esDataToReturn.buildingBlocks && esDataToReturn.buildingBlocks.length > 0) {
-        esDataToReturn.buildingBlocks = _.map(
-          esDataToReturn.buildingBlocks,
-          buildingBlock => _.omit(buildingBlock, 'privateConfig'),
-        );
-      }
+        // check if any data is returned from ES
+        const hasDataInES = _.some(esDataToReturn, propData => propData && propData.length > 0);
 
-      // check if any data is returned from ES
-      const hasDataInES = _.some(esDataToReturn, propData => propData && propData.length > 0);
+        if (hasDataInES) {
+          req.log.debug('Metadata is found in ES');
+          return res.json(esDataToReturn);
+        }
 
-      if (hasDataInES) {
-        req.log.debug('Metadata is found in ES');
-        return res.json(esDataToReturn);
-      }
-
-      req.log.debug('Metadata is not found in ES');
-      return loadMetadataFromDb(req.query.includeAllReferred).then(dbDataToReturn => res.json(dbDataToReturn));
-    })
-    .catch(next);
+        req.log.debug('Metadata is not found in ES');
+        return loadMetadataFromDb(req.query.includeAllReferred).then(dbDataToReturn => res.json(dbDataToReturn));
+      })
+      .catch(next);
   },
 ];

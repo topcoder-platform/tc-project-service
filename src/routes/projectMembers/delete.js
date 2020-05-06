@@ -21,81 +21,81 @@ module.exports = [
 
     models.sequelize.transaction(() =>
       // soft delete the record
-       models.ProjectMember.findOne({
-         where: { id: memberRecordId, projectId },
-       })
-      .then((member) => {
-        if (!member) {
-          const err = new Error(`Project member not found for member id ${req.params.id}`);
-          err.status = 404;
-          return Promise.reject(err);
-        }
+      models.ProjectMember.findOne({
+        where: { id: memberRecordId, projectId },
+      })
+        .then((member) => {
+          if (!member) {
+            const err = new Error(`Project member not found for member id ${req.params.id}`);
+            err.status = 404;
+            return Promise.reject(err);
+          }
 
-        if (
-          member.userId !== req.authUser.userId &&
+          if (
+            member.userId !== req.authUser.userId &&
           member.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
           !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_MEMBER_NON_CUSTOMER, req)
-        ) {
-          const err = new Error('You don\'t have permissions to delete other members with non-customer role.');
-          err.status = 403;
-          return Promise.reject(err);
-        }
-        return member.update({ deletedBy: req.authUser.userId });
-      })
-      .then(member => member.destroy({ logging: console.log })) // eslint-disable-line no-console
-      .then(member => member.save())
+          ) {
+            const err = new Error('You don\'t have permissions to delete other members with non-customer role.');
+            err.status = 403;
+            return Promise.reject(err);
+          }
+          return member.update({ deletedBy: req.authUser.userId });
+        })
+        .then(member => member.destroy({ logging: console.log })) // eslint-disable-line no-console
+        .then(member => member.save())
       // if primary co-pilot is removed promote the next co-pilot to primary #43
-      .then(member => new Promise((accept, reject) => {
-        if (member.role === PROJECT_MEMBER_ROLE.COPILOT && member.isPrimary) {
+        .then(member => new Promise((accept, reject) => {
+          if (member.role === PROJECT_MEMBER_ROLE.COPILOT && member.isPrimary) {
             // find the next copilot
-          models.ProjectMember.findAll({
-            limit: 1,
+            models.ProjectMember.findAll({
+              limit: 1,
               // return only non-deleted records
-            paranoid: true,
-            where: {
-              projectId,
-              role: PROJECT_MEMBER_ROLE.COPILOT,
-            },
-            order: [['createdAt', 'ASC']],
-          }).then((members) => {
-            if (members && members.length > 0) {
+              paranoid: true,
+              where: {
+                projectId,
+                role: PROJECT_MEMBER_ROLE.COPILOT,
+              },
+              order: [['createdAt', 'ASC']],
+            }).then((members) => {
+              if (members && members.length > 0) {
                 // mark the copilot as primary
-              const nextMember = members[0];
-              nextMember.set({ isPrimary: true });
-              nextMember.save().then(() => {
-                accept(member);
-              }).catch((err) => {
-                reject(err);
-              });
-            } else {
+                const nextMember = members[0];
+                nextMember.set({ isPrimary: true });
+                nextMember.save().then(() => {
+                  accept(member);
+                }).catch((err) => {
+                  reject(err);
+                });
+              } else {
                 // no copilot found nothing to do
-              accept(member);
-            }
-          }).catch((err) => {
-            reject(err);
-          });
-        } else {
+                accept(member);
+              }
+            }).catch((err) => {
+              reject(err);
+            });
+          } else {
             // nothing to do
-          accept(member);
-        }
-      }))).then((member) => {
-        // only return the response after transaction is committed
-        // fire event
-        const pmember = member.get({ plain: true });
-        req.log.debug(pmember);
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
-          pmember,
-          { correlationId: req.id },
-        );
+            accept(member);
+          }
+        }))).then((member) => {
+      // only return the response after transaction is committed
+      // fire event
+      const pmember = member.get({ plain: true });
+      req.log.debug(pmember);
+      req.app.services.pubsub.publish(
+        EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
+        pmember,
+        { correlationId: req.id },
+      );
 
-        // emit the event
-        util.sendResourceToKafkaBus(
-          req,
-          EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
-          RESOURCES.PROJECT_MEMBER,
-          pmember);
-        res.status(204).json({});
-      }).catch(err => next(err));
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
+        RESOURCES.PROJECT_MEMBER,
+        pmember);
+      res.status(204).json({});
+    }).catch(err => next(err));
   },
 ];
