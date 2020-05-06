@@ -14,7 +14,6 @@ import {
   PROJECT_STATUS,
   BUS_API_EVENT,
   CONNECT_NOTIFICATION_EVENT,
-  M2M_SCOPES,
 } from '../../constants';
 
 const should = chai.should();
@@ -192,11 +191,11 @@ describe('Project', () => {
         });
     });
 
-    it(`should return the project using M2M token with "${M2M_SCOPES.PROJECTS.WRITE}" scope`, (done) => {
+    it('should return the project using M2M token with "write:projects" scope', (done) => {
       request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.m2m[M2M_SCOPES.PROJECTS.WRITE]}`,
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
         })
         .send({
           name: 'updateProject name by M2M',
@@ -584,7 +583,7 @@ describe('Project', () => {
       request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
           billingAccountId: 123,
@@ -600,7 +599,7 @@ describe('Project', () => {
             should.exist(resJson);
             resJson.billingAccountId.should.equal(123);
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
-            resJson.updatedBy.should.equal(40051332);
+            resJson.updatedBy.should.equal(40051334);
             server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }
@@ -611,7 +610,7 @@ describe('Project', () => {
       request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
           billingAccountId: 1,
@@ -657,6 +656,20 @@ describe('Project', () => {
             done();
           }
         });
+    });
+
+    it('should return 400 when updating billingAccountId without "write:projects-billing-accounts" scope in M2M token',
+      (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send({
+          billingAccountId: 123,
+        })
+        .expect('Content-Type', /json/)
+        .expect(400, done);
     });
 
     it.skip('should return 200 and update bookmarks', (done) => {
