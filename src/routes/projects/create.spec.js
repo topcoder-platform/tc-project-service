@@ -265,7 +265,6 @@ describe('Project create', () => {
       type: 'generic',
       description: 'test project',
       details: {},
-      billingAccountId: 1,
       name: 'test project1',
       bookmarks: [{
         title: 'title1',
@@ -277,7 +276,6 @@ describe('Project create', () => {
       type: 'generic',
       description: 'test project',
       details: {},
-      billingAccountId: 1,
       name: 'test project1',
       attachments: [
         {
@@ -399,6 +397,34 @@ describe('Project create', () => {
         .expect(400, done);
     });
 
+    it(`should return 400 when creating project with billingAccountId
+      without "write:projects-billing-accounts" scope in M2M token`, (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.billingAccountId = 1;
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(400, done);
+    });
+
+    it(`should return 400 when creating project with directProjectId
+      without "write:projects" scope in M2M token`, (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.directProjectId = 1;
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(400, done);
+    });
+
     it('should return 201 if valid user and data', (done) => {
       const validBody = _.cloneDeep(body);
       validBody.templateId = 3;
@@ -433,7 +459,7 @@ describe('Project create', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('in_review');
             resJson.type.should.be.eql(body.type);
@@ -489,7 +515,7 @@ describe('Project create', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('in_review');
             resJson.type.should.be.eql(body.type);
@@ -544,7 +570,7 @@ describe('Project create', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('in_review');
             resJson.type.should.be.eql(body.type);
@@ -598,7 +624,7 @@ describe('Project create', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('in_review');
             resJson.type.should.be.eql(bodyWithAttachments.type);
@@ -679,7 +705,7 @@ describe('Project create', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('in_review');
             resJson.type.should.be.eql(body.type);
@@ -752,7 +778,7 @@ describe('Project create', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('in_review');
             resJson.type.should.be.eql(body.type);
@@ -885,7 +911,7 @@ describe('Project create', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('in_review');
             resJson.type.should.be.eql(body.type);
