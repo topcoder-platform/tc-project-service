@@ -3,6 +3,7 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -115,7 +116,23 @@ const retrieveProjectFromES = (projectId, req) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
-      accept(rows[0]);
+      const project = rows[0];
+      if (project && project.invites) {
+        if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          let invites;
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+            // only include own invites
+            const currentUserId = req.authUser.userId;
+            const email = req.authUser.email;
+            invites = _.filter(project.invites, invite => invite.userId === currentUserId || invite.email === email);
+          } else {
+            // return empty invites
+            invites = [];
+          }
+          _.set(project, 'invites', invites);
+        }
+      }
+      accept(project);
     }).catch(reject);
   });
 };
@@ -156,7 +173,17 @@ const retrieveProjectFromDB = (projectId, req) => {
         if (attachments) {
           project.attachments = attachments;
         }
-        return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+        if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          // include all invites
+          return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+        } else if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+          // include only own invites
+          const currentUserId = req.authUser.userId;
+          const email = req.authUser.email;
+          return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(projectId, email, currentUserId);
+        }
+        // empty
+        return Promise.resolve([]);
       })
       .then((invites) => {
         project.invites = invites;

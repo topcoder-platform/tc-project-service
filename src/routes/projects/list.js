@@ -568,6 +568,24 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      if (rows) {
+        if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+            // only include own invites
+            const currentUserId = req.authUser.userId;
+            const email = req.authUser.email;
+            _.forEach(rows, (fp) => {
+              const invites = _.filter(fp.invites, invite => invite.userId === currentUserId || invite.email === email);
+              _.set(fp, 'invites', invites);
+            });
+          } else {
+            // return empty invites
+            _.forEach(rows, (fp) => {
+              _.set(fp, 'invites', []);
+            });
+          }
+        }
+      }
       accept({ rows, count: docs.hits.total, pageSize: criteria.limit, page: criteria.page });
     }).catch(reject);
   });
