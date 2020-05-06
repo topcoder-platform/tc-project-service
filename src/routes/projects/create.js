@@ -387,6 +387,18 @@ module.exports = [
    */
   (req, res, next) => {
     const project = req.body;
+    if (_.has(project, 'directProjectId') &&
+      !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_DIRECT_PROJECT_ID, req)) {
+      const err = new Error('You do not have permission to set \'directProjectId\' property');
+      err.status = 400;
+      throw err;
+    }
+    if (_.has(project, 'billingAccountId') &&
+      !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_BILLING_ACCOUNT_ID, req)) {
+      const err = new Error('You do not have permission to set \'billingAccountId\' property');
+      err.status = 400;
+      throw err;
+    }
     // by default connect admin and managers joins projects as manager
     const userRole = util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_AS_MANAGER, req)
       ? PROJECT_MEMBER_ROLE.MANAGER
