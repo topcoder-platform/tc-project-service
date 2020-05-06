@@ -268,6 +268,7 @@ export const REGEX = {
 };
 
 export const M2M_SCOPES = {
+  // for backward compatibility we should allow ALL M2M operations with `CONNECT_PROJECT_ADMIN`
   CONNECT_PROJECT_ADMIN: 'all:connect_project',
   PROJECTS: {
     ALL: 'all:projects',

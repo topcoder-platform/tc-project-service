@@ -14,7 +14,6 @@ import {
   PROJECT_STATUS,
   BUS_API_EVENT,
   CONNECT_NOTIFICATION_EVENT,
-  M2M_SCOPES,
 } from '../../constants';
 
 const should = chai.should();
@@ -192,11 +191,11 @@ describe('Project', () => {
         });
     });
 
-    it(`should return the project using M2M token with "${M2M_SCOPES.PROJECTS.WRITE}" scope`, (done) => {
+    it('should return the project using M2M token with "write:projects" scope', (done) => {
       request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.m2m[M2M_SCOPES.PROJECTS.WRITE]}`,
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
         })
         .send({
           name: 'updateProject name by M2M',
@@ -664,7 +663,7 @@ describe('Project', () => {
       request(server)
         .patch(`/v5/projects/${project1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.m2m[M2M_SCOPES.PROJECTS.WRITE]}`,
+          Authorization: `Bearer ${testUtil.m2m['write:projects-billing-accounts']}`,
         })
         .send({
           billingAccountId: 123,

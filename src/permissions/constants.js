@@ -76,7 +76,6 @@ const SCOPES_PROJECTS_WRITE = [
 
 const SCOPES_PROJECTS_WRITE_BILLING_ACCOUNTS = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
-  M2M_SCOPES.PROJECTS.ALL,
   M2M_SCOPES.PROJECTS.WRITE_BILLING_ACCOUNTS,
 ];
 
@@ -161,6 +160,19 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
+  MANAGE_PROJECT_BILLING_ACCOUNT_ID: {
+    meta: {
+      title: 'Manage Project property "billingAccountId"',
+      group: 'Project',
+      description: 'Who can set or update the "billingAccountId" property.',
+    },
+    topcoderRoles: [
+      USER_ROLE.MANAGER,
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE_BILLING_ACCOUNTS,
+  },
+
   DELETE_PROJECT: {
     meta: {
       title: 'Delete Project',
@@ -177,19 +189,6 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
     ],
     scopes: SCOPES_PROJECTS_WRITE,
-  },
-
-  MANAGE_PROJECT_BILLING_ACCOUNT_ID: {
-    meta: {
-      title: 'Manage Project property "billingAccountId"',
-      group: 'Project',
-      description: 'Who can set or update the "billingAccountId" property.',
-    },
-    topcoderRoles: [
-      USER_ROLE.MANAGER,
-      USER_ROLE.TOPCODER_ADMIN,
-    ],
-    scopes: SCOPES_PROJECTS_WRITE_BILLING_ACCOUNTS,
   },
 
   /*
