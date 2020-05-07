@@ -5,6 +5,7 @@ import models from '../../models';
 import { INVITE_STATUS, PROJECT_MEMBER_NON_CUSTOMER_ROLES } from '../../constants';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
+import permissionUtils from '../../utils/permissions';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -654,17 +655,30 @@ module.exports = [
           // so we don't want DB to return unrelated data, ref issue #450
           if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
             req.log.debug('Don\'t fallback to DB because some filters are defined.');
-            return util.setPaginationHeaders(req, res,
-              util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+
+            return result;
           }
 
-          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res,
-              util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
+          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields);
         }
+
         req.log.debug('Projects found in ES');
-        return util.setPaginationHeaders(req, res,
-          util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+
+        return result;
+      }).then((result) => {
+        const postProcessedResult = util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req);
+
+        postProcessedResult.rows.forEach((project) => {
+          // filter out attachments which user cannot see
+          if (project.attachments) {
+            // eslint-disable-next-line no-param-reassign
+            project.attachments = project.attachments.filter(attachment =>
+              permissionUtils.hasReadAccessToAttachment(attachment, req),
+            );
+          }
+        });
+
+        return util.setPaginationHeaders(req, res, postProcessedResult);
       })
       .catch(err => next(err));
   },

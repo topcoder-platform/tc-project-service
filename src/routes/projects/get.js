@@ -3,6 +3,7 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import permissionUtils from '../../utils/permissions';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -183,7 +184,15 @@ module.exports = [
       req.log.debug('Project found in ES');
       return result;
     }).then((project) => {
-      res.status(200).json(util.postProcessInvites('$.invites[?(@.email)]', project, req));
+      const postProcessedProject = util.postProcessInvites('$.invites[?(@.email)]', project, req);
+
+      // filter out attachments which user cannot see
+      if (postProcessedProject.attachments) {
+        postProcessedProject.attachments = postProcessedProject.attachments.filter(attachment =>
+          permissionUtils.hasReadAccessToAttachment(attachment, req),
+        );
+      }
+      res.status(200).json(postProcessedProject);
     })
       .catch(err => next(err));
   },
