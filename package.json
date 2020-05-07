@@ -30,7 +30,7 @@
     "local:init": "npm run reset:all && npm run data:import",
     "babel-node-script": "node --require dotenv/config --require babel-core/register",
     "generate:doc:permissions": "npm run babel-node-script -- scripts/permissions-doc",
-    "generate:doc:permissions:dev": "nodemon --watch scripts/permissions-doc --watch src --ext js,jsx,hbs --exec --exec \"npm run babel-node-script scripts/permissions-doc\""
+    "generate:doc:permissions:dev": "nodemon --watch scripts/permissions-doc --watch src --ext js,jsx,hbs --exec \"npm run babel-node-script -- scripts/permissions-doc\""
   },
   "repository": {
     "type": "git",
