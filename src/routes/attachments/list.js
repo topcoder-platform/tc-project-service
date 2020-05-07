@@ -4,6 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import permissionUtils from '../../utils/permissions';
 
 /**
  * API to get project attachments.
@@ -20,7 +21,7 @@ const schema = {
 
 module.exports = [
   validate(schema),
-  permissions('project.listAttachment'),
+  permissions('projectAttachment.view'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
 
@@ -54,12 +55,16 @@ module.exports = [
             attributes: { exclude: ['deletedAt', 'deletedBy'] },
             raw: true,
           })
-            .then(attachments => res.json(attachments))
             .catch(next);
         }
         req.log.debug('attachments found in ES');
-        return res.json(data[0].inner_hits.attachments.hits.hits.map(hit => hit._source)); // eslint-disable-line no-underscore-dangle
+        return data[0].inner_hits.attachments.hits.hits.map(hit => hit._source); // eslint-disable-line no-underscore-dangle
       })
+      // filter out attachments which user cannot see
+      .then(attachments => attachments.filter(attachment =>
+        permissionUtils.hasReadAccessToAttachment(attachment, req),
+      ))
+      .then(attachments => res.json(attachments))
       .catch(next);
   },
 ];

@@ -93,7 +93,7 @@ module.exports = [
             // check there is an existing invite for the user with status PENDING
             // handle 404
             let errMsg;
-            if (req.context.inviteType === 'all') {
+            if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
               errMsg = `invite not found for project id ${projectId}, inviteId ${inviteId}`;
             } else {
               errMsg = `invite not found for project id ${projectId}, inviteId ${inviteId}, ` +

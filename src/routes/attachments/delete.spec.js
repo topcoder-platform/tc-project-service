@@ -268,6 +268,61 @@ describe('Project Attachments delete', () => {
         });
     });
 
+    it('should remove attachment file using M2M token with "write:projects" scope', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        delete: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: true,
+            },
+          },
+        }),
+      });
+      const deleteSpy = sinon.spy(mockHttpClient, 'delete');
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .delete(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            setTimeout(() =>
+              models.ProjectAttachment.findOne({
+                where: {
+                  projectId: project1.id,
+                  id: attachments[1].id,
+                },
+                paranoid: false,
+              })
+                .then((res) => {
+                  if (!res) {
+                    throw new Error('Should found the entity');
+                  } else {
+                    deleteSpy.called.should.be.false;
+                    chai.assert.isNotNull(res.deletedAt);
+                    chai.assert.isNotNull(res.deletedBy);
+
+                    request(server)
+                      .get(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+                      .set({
+                        Authorization: `Bearer ${testUtil.jwts.admin}`,
+                      })
+                      .expect(404, done);
+                  }
+                }), 500);
+          }
+        });
+    });
+
     describe('Bus api', () => {
       let createEventSpy;
 

@@ -205,6 +205,34 @@ describe('Project Attachments', () => {
         });
     });
 
+    it('should create project successfully using M2M token with "write:projects" scope', (done) => {
+      request(server)
+        .post(`/v5/projects/${project1.id}/attachments/`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send(fileAttachmentBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            postSpy.should.have.been.calledOnce;
+            getSpy.should.have.been.calledOnce;
+            stub.restore();
+            resJson.title.should.equal(fileAttachmentBody.title);
+            resJson.tags.should.eql(fileAttachmentBody.tags);
+            resJson.type.should.eql(fileAttachmentBody.type);
+            resJson.downloadUrl.should.exist;
+            resJson.projectId.should.equal(project1.id);
+            done();
+          }
+        });
+    });
+
     describe('Bus api', () => {
       let createEventSpy;
 
