@@ -33,7 +33,7 @@ const addAttachmentValidations = {
 module.exports = [
   // handles request validations
   validate(addAttachmentValidations),
-  permissions('project.addAttachment'),
+  permissions('projectAttachment.create'),
   /*
    * Add project attachment
    * In development mode we have to mock the ec2 file transfer and file service calls

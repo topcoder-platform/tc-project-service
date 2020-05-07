@@ -40,38 +40,46 @@ describe('Project Attachments update', () => {
             isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-          }).then(() => models.ProjectAttachment.create({
+          }).then(() => models.ProjectMember.create({
+            userId: 40051331,
             projectId: project1.id,
-            title: 'test.txt',
-            description: 'blah',
-            contentType: 'application/unknown',
-            size: 12312,
-            category: null,
-            path: 'https://media.topcoder.com/projects/1/test.txt',
-            type: ATTACHMENT_TYPES.FILE,
-            tags: ['tag1', 'tag2', 'tag3'],
-            createdBy: testUtil.userIds.copilot,
+            role: 'customer',
+            isPrimary: false,
+            createdBy: 1,
             updatedBy: 1,
-            allowedUsers: [],
-          }).then((a1) => {
-            attachment = a1;
-            models.ProjectAttachment.create(
-              {
-                projectId: project1.id,
-                title: 'Test Link 1',
-                description: 'Test link 1 description',
-                size: 123456,
-                category: null,
-                path: 'https://connect.topcoder-dev.com/projects/8600/assets',
-                type: ATTACHMENT_TYPES.LINK,
-                tags: ['tag3', 'tag4'],
-                createdBy: testUtil.userIds.copilot,
-                updatedBy: 1,
-              }).then((_link) => {
-              link = _link;
-              done();
-            });
-          }));
+          }))
+            .then(() => models.ProjectAttachment.create({
+              projectId: project1.id,
+              title: 'test.txt',
+              description: 'blah',
+              contentType: 'application/unknown',
+              size: 12312,
+              category: null,
+              path: 'https://media.topcoder.com/projects/1/test.txt',
+              type: ATTACHMENT_TYPES.FILE,
+              tags: ['tag1', 'tag2', 'tag3'],
+              createdBy: testUtil.userIds.copilot,
+              updatedBy: 1,
+              allowedUsers: [],
+            }).then((a1) => {
+              attachment = a1;
+              models.ProjectAttachment.create(
+                {
+                  projectId: project1.id,
+                  title: 'Test Link 1',
+                  description: 'Test link 1 description',
+                  size: 123456,
+                  category: null,
+                  path: 'https://connect.topcoder-dev.com/projects/8600/assets',
+                  type: ATTACHMENT_TYPES.LINK,
+                  tags: ['tag3', 'tag4'],
+                  createdBy: testUtil.userIds.copilot,
+                  updatedBy: 1,
+                }).then((_link) => {
+                link = _link;
+                done();
+              });
+            }));
         });
       });
   });
@@ -181,6 +189,27 @@ describe('Project Attachments update', () => {
             should.exist(resJson);
             resJson.title.should.equal('updated title 1');
             resJson.description.should.equal('updated description 1');
+            done();
+          }
+        });
+    });
+
+    it('should update the project using M2M token with "write:projects" scope', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send({ title: 'updated title m2m', description: 'updated description m2m' })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.title.should.equal('updated title m2m');
+            resJson.description.should.equal('updated description m2m');
             done();
           }
         });

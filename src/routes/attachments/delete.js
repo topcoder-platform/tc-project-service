@@ -19,7 +19,7 @@ import { EVENT, RESOURCES, ATTACHMENT_TYPES } from '../../constants';
 const permissions = tcMiddleware.permissions;
 
 module.exports = [
-  permissions('project.removeAttachment'),
+  permissions('projectAttachment.delete'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const attachmentId = _.parseInt(req.params.id);
