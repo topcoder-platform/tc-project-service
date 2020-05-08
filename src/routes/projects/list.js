@@ -552,8 +552,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
     // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req) ?
-      util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req) : null,
+    project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
@@ -564,12 +563,36 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   if (_.indexOf(fields.projects, 'id') < 0) {
     fields.projects.push('id');
   }
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
+  }
 
   const searchCriteria = parseElasticSearchCriteria(criteria, fields, order) || {};
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      if (rows) {
+        _.forEach(rows, (p) => {
+          const fp = p;
+          if (fp.members) {
+            // check if have permission to read project members
+            if (!util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, fp.members)) {
+              delete fp.members;
+            }
+            if (fp.members && addMembersUserId) {
+              // remove the userId from the returned members array if it was added before
+              // as it is only needed for checking permission.
+              _.forEach(fp.members, (m) => {
+                const fm = m;
+                delete fm.userId;
+              });
+            }
+          }
+        });
+      }
       accept({ rows, count: docs.hits.total, pageSize: criteria.limit, page: criteria.page });
     }).catch(reject);
   });

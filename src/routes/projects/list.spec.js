@@ -1182,12 +1182,11 @@ describe('LIST Project', () => {
     });
 
     describe('URL Query fields', () => {
-      it(`should not include project members when "fields" query param is not defined (to non-admin users)
-      without READ_PROJECT_MEMBER permission`, (done) => {
+      it('should not return "email" for project members when "fields" query param is not defined (to non-admin users)', (done) => {
         request(server)
         .get('/v5/projects/')
         .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
+          Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -1198,19 +1197,18 @@ describe('LIST Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
-            should.not.exist(resJson[0].members);
+            resJson[0].members[0].should.not.have.property('email');
             done();
           }
         });
       });
 
 
-      it(`should not include project members even if it's listed in "fields" query param (to non-admin users)
-      without READ_PROJECT_MEMBER permission`, (done) => {
+      it('should not return "email" for project members even if it\'s listed in "fields" query param (to non-admin users)', (done) => {
         request(server)
         .get('/v5/projects/?fields=members.email,members.id')
         .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
+          Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -1221,7 +1219,7 @@ describe('LIST Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
-            should.not.exist(resJson[0].members);
+            resJson[0].members[0].should.not.have.property('email');
             done();
           }
         });
