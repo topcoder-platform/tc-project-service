@@ -575,7 +575,10 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
             const currentUserId = req.authUser.userId;
             const email = req.authUser.email;
             _.forEach(rows, (fp) => {
-              const invites = _.filter(fp.invites, invite => invite.userId === currentUserId || invite.email === email);
+              const invites = _.filter(fp.invites, invite => (
+                (invite.userId !== null && invite.userId === currentUserId) ||
+                (invite.email && currentUserEmail && invite.email.toLowerCase() === currentUserEmail.toLowerCase())
+              ));
               _.set(fp, 'invites', invites);
             });
           } else {
