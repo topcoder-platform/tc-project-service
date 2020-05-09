@@ -492,9 +492,13 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
 
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
+  }
   const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
-  const retrieveMembers = (!req.query.fields || !!fields.project_members.length)
-    && util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req);
+  const retrieveMembers = !req.query.fields || !!fields.project_members.length;
 
   return models.Project.searchText({
     filters: criteria.filters,
@@ -534,7 +538,19 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
           const p = fp;
           // if values length is 1 it could be either attachments or members
           if (retrieveMembers) {
-            p.members = _.filter(allMembers, m => m.projectId === p.id);
+            const pMembers = _.filter(allMembers, m => m.projectId === p.id);
+            // check if have permission to read project members
+            if (util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, pMembers)) {
+              if (addMembersUserId) {
+                // remove the userId from the returned members array if it was added before
+                // as it is only needed for checking permission.
+                _.forEach(pMembers, (m) => {
+                  const fm = m;
+                  delete fm.userId;
+                });
+              }
+              p.members = pMembers;
+            }
           }
           if (retrieveAttachments) {
             p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
