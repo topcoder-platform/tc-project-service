@@ -405,6 +405,52 @@ describe('LIST Project', () => {
         });
     });
 
+    it('should return the project with empty invites using M2M token without "read:project-invites" scope', (done) => {
+      request(server)
+        .get('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson.forEach((project) => {
+              project.invites.should.be.empty;
+            });
+            done();
+          }
+        });
+    });
+
+    it('should not include the project members using M2M token without "read:project-members" scope', (done) => {
+      request(server)
+        .get('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson.forEach((project) => {
+              should.not.exist(project.members);
+            });
+            done();
+          }
+        });
+    });
+
     it('should return the project when project that is in reviewed state in which the copilot is its member or has been invited', (done) => {
       request(server)
         .get('/v5/projects')
@@ -1130,9 +1176,9 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');
-              resJson[0].invites.should.have.lengthOf(2);
+              resJson[0].invites.should.have.lengthOf(1);
               resJson[0].invites[0].should.have.property('email');
-              resJson[0].invites[1].email.should.equal('h***o@w***d.com');
+              resJson[0].invites[0].userId.should.equal(40051335);
               done();
             }
           });
@@ -1163,7 +1209,7 @@ describe('LIST Project', () => {
         request(server)
           .get('/v5/projects/')
           .set({
-            Authorization: `Bearer ${testUtil.jwts.member2}`,
+            Authorization: `Bearer ${testUtil.jwts.member}`,
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -1185,7 +1231,7 @@ describe('LIST Project', () => {
         request(server)
           .get('/v5/projects/?fields=members.email,members.id')
           .set({
-            Authorization: `Bearer ${testUtil.jwts.member2}`,
+            Authorization: `Bearer ${testUtil.jwts.member}`,
           })
           .expect('Content-Type', /json/)
           .expect(200)

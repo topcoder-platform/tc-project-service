@@ -281,6 +281,11 @@ export const M2M_SCOPES = {
     READ: 'read:project-members',
     WRITE: 'write:project-members',
   },
+  PROJECT_INVITES: {
+    ALL: 'all:project-invites',
+    READ: 'read:project-invites',
+    WRITE: 'write:project-invites',
+  },
 };
 
 export const TIMELINE_REFERENCES = {

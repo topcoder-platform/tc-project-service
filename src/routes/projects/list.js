@@ -493,6 +493,11 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
 
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
+  }
   const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
   const retrieveMembers = !req.query.fields || !!fields.project_members.length;
 
@@ -534,7 +539,19 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
             const p = fp;
             // if values length is 1 it could be either attachments or members
             if (retrieveMembers) {
-              p.members = _.filter(allMembers, m => m.projectId === p.id);
+              const pMembers = _.filter(allMembers, m => m.projectId === p.id);
+              // check if have permission to read project members
+              if (util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, pMembers)) {
+                if (addMembersUserId) {
+                // remove the userId from the returned members array if it was added before
+                // as it is only needed for checking permission.
+                  _.forEach(pMembers, (m) => {
+                    const fm = m;
+                    delete fm.userId;
+                  });
+                }
+                p.members = pMembers;
+              }
             }
             if (retrieveAttachments) {
               p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
@@ -563,12 +580,55 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   if (_.indexOf(fields.projects, 'id') < 0) {
     fields.projects.push('id');
   }
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
+  }
 
   const searchCriteria = parseElasticSearchCriteria(criteria, fields, order) || {};
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
+      if (rows) {
+        if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+            // only include own invites
+            const currentUserId = req.authUser.userId;
+            const currentUserEmail = req.authUser.email;
+            _.forEach(rows, (fp) => {
+              const invites = _.filter(fp.invites, invite => (
+                (invite.userId !== null && invite.userId === currentUserId) ||
+                (invite.email && currentUserEmail && invite.email.toLowerCase() === currentUserEmail.toLowerCase())
+              ));
+              _.set(fp, 'invites', invites);
+            });
+          } else {
+            // return empty invites
+            _.forEach(rows, (fp) => {
+              _.set(fp, 'invites', []);
+            });
+          }
+        }
+        _.forEach(rows, (p) => {
+          const fp = p;
+          if (fp.members) {
+            // check if have permission to read project members
+            if (!util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, fp.members)) {
+              delete fp.members;
+            }
+            if (fp.members && addMembersUserId) {
+              // remove the userId from the returned members array if it was added before
+              // as it is only needed for checking permission.
+              _.forEach(fp.members, (m) => {
+                const fm = m;
+                delete fm.userId;
+              });
+            }
+          }
+        });
+      }
       accept({ rows, count: docs.hits.total, pageSize: criteria.limit, page: criteria.page });
     }).catch(reject);
   });

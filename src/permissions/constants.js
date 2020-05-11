@@ -117,6 +117,18 @@ const SCOPES_PROJECT_MEMBERS_WRITE = [
   M2M_SCOPES.PROJECT_MEMBERS.WRITE,
 ];
 
+const SCOPES_PROJECT_INVITES_READ = [
+  M2M_SCOPES.CONNECT_PROJECT_ADMIN,
+  M2M_SCOPES.PROJECT_INVITES.ALL,
+  M2M_SCOPES.PROJECT_INVITES.READ,
+];
+
+const SCOPES_PROJECT_INVITES_WRITE = [
+  M2M_SCOPES.CONNECT_PROJECT_ADMIN,
+  M2M_SCOPES.PROJECT_INVITES.ALL,
+  M2M_SCOPES.PROJECT_INVITES.WRITE,
+];
+
 /**
  * The full list of possible permission rules in Project Service
  */
@@ -332,7 +344,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can view own invite.',
     },
     topcoderRoles: ALL,
-    scopes: SCOPES_PROJECT_MEMBERS_READ,
+    scopes: SCOPES_PROJECT_INVITES_READ,
   },
 
   READ_PROJECT_INVITE_NOT_OWN: {
@@ -343,7 +355,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
     projectRoles: ALL,
-    scopes: SCOPES_PROJECT_MEMBERS_READ,
+    scopes: SCOPES_PROJECT_INVITES_READ,
   },
 
   CREATE_PROJECT_INVITE_CUSTOMER: {
@@ -354,7 +366,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
     projectRoles: ALL,
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   CREATE_PROJECT_INVITE_NON_CUSTOMER: {
@@ -365,7 +377,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: PROJECT_ROLES_MANAGEMENT,
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   CREATE_PROJECT_INVITE_COPILOT_DIRECTLY: {
@@ -378,7 +390,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
     ],
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   UPDATE_PROJECT_INVITE_OWN: {
@@ -388,7 +400,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can update own invite.',
     },
     topcoderRoles: ALL,
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   UPDATE_PROJECT_INVITE_NOT_OWN: {
@@ -398,7 +410,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can update invites for other members.',
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   UPDATE_PROJECT_INVITE_REQUESTED: {
@@ -411,7 +423,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
     ],
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   DELETE_PROJECT_INVITE_OWN: {
@@ -421,7 +433,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can delete own invite.',
     },
     topcoderRoles: ALL,
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER: {
@@ -432,7 +444,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: ALL,
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER: {
@@ -443,7 +455,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: PROJECT_ROLES_MANAGEMENT,
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   DELETE_PROJECT_INVITE_REQUESTED: {
@@ -456,7 +468,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
     ],
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
   /*

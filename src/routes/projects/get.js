@@ -3,6 +3,7 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
 import permissionUtils from '../../utils/permissions';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
@@ -104,7 +105,8 @@ const retrieveProjectFromES = (projectId, req) => {
   fields = fields ? fields.split(',') : [];
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
+    project_members: util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req)
+      ? util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req) : null,
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
@@ -116,7 +118,26 @@ const retrieveProjectFromES = (projectId, req) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
-      accept(rows[0]);
+      const project = rows[0];
+      if (project && project.invites) {
+        if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          let invites;
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+            // only include own invites
+            const currentUserId = req.authUser.userId;
+            const currentUserEmail = req.authUser.email;
+            invites = _.filter(project.invites, invite => (
+              (invite.userId !== null && invite.userId === currentUserId) ||
+              (invite.email && currentUserEmail && invite.email.toLowerCase() === currentUserEmail.toLowerCase())
+            ));
+          } else {
+            // return empty invites
+            invites = [];
+          }
+          _.set(project, 'invites', invites);
+        }
+      }
+      accept(project);
     }).catch(reject);
   });
 };
@@ -144,7 +165,9 @@ const retrieveProjectFromDB = (projectId, req) => {
         return Promise.reject(apiErr);
       }
       // check context for project members
-      project.members = _.map(req.context.currentProjectMembers, m => _.pick(m, fields.project_members));
+      if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req)) {
+        project.members = _.map(req.context.currentProjectMembers, m => _.pick(m, fields.project_members));
+      }
       // check if attachments field was requested
       if (!req.query.fields || _.indexOf(req.query.fields, 'attachments') > -1) {
         return util.getProjectAttachments(req, project.id);
@@ -157,7 +180,17 @@ const retrieveProjectFromDB = (projectId, req) => {
       if (attachments) {
         project.attachments = attachments;
       }
-      return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+      if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+        // include all invites
+        return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+      } else if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+        // include only own invites
+        const currentUserId = req.authUser.userId;
+        const email = req.authUser.email;
+        return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(projectId, email, currentUserId);
+      }
+      // empty
+      return Promise.resolve([]);
     })
     .then((invites) => {
       project.invites = invites;

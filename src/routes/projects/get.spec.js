@@ -268,7 +268,27 @@ describe('GET Project', () => {
             should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
             resJson.status.should.be.eql('draft');
-            resJson.members.should.have.lengthOf(2);
+            should.not.exist(resJson.members);
+            done();
+          }
+        });
+    });
+
+    it('should return the project with empty invites using M2M token without "read:project-invites" scope', (done) => {
+      request(server)
+        .get(`/v5/projects/${project1.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.invites.should.be.empty;
             done();
           }
         });
