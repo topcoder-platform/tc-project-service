@@ -85,7 +85,7 @@ describe('Get Project attachments Tests', () => {
       sandbox.restore();
     });
 
-    it.only('should return 404 if USER does not have permissions', (done) => {
+    it('should return 404 if USER does not have permissions', (done) => {
       request(server)
         .get(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
         .set({
