@@ -698,13 +698,13 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should invite a user as "manager" using M2M token with "write:project-members" scope', (done) => {
+    it('should invite a user as "manager" using M2M token with "write:project-invites" scope', (done) => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
       request(server)
         .post(`/v5/projects/${project1.id}/invites`)
         .set({
-          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+          Authorization: `Bearer ${testUtil.m2m['write:project-invites']}`,
         })
         .send({
           handles: ['test_manager1'],

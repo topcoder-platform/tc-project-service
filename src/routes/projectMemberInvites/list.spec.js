@@ -166,11 +166,11 @@ describe('GET Project Member Invites', () => {
         });
     });
 
-    it('should get invites using M2M token with "read:project-members" scope', (done) => {
+    it('should get invites using M2M token with "read:project-invites" scope', (done) => {
       request(server)
         .get(`/v5/projects/${project1.id}/invites`)
         .set({
-          Authorization: `Bearer ${testUtil.m2m['read:project-members']}`,
+          Authorization: `Bearer ${testUtil.m2m['read:project-invites']}`,
         })
         .expect('Content-Type', /json/)
         .expect(200)

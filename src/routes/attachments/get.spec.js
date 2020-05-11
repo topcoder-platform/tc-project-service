@@ -45,7 +45,14 @@ describe('Get Project attachments Tests', () => {
             createdBy: 1,
             updatedBy: 1,
           }).then(() => models.ProjectMember.create({
-            userId: 40051335,
+            userId: testUtil.userIds.member,
+            projectId: project1.id,
+            role: 'customer',
+            isPrimary: false,
+            createdBy: 1,
+            updatedBy: 1,
+          })).then(() => models.ProjectMember.create({
+            userId: testUtil.userIds.member2,
             projectId: project1.id,
             role: 'customer',
             isPrimary: false,
