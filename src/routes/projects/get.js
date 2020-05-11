@@ -104,7 +104,8 @@ const retrieveProjectFromES = (projectId, req) => {
   fields = fields ? fields.split(',') : [];
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
+    project_members: util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req)
+      ? util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req) : null,
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
@@ -163,7 +164,9 @@ const retrieveProjectFromDB = (projectId, req) => {
         return Promise.reject(apiErr);
       }
         // check context for project members
-      project.members = _.map(req.context.currentProjectMembers, m => _.pick(m, fields.project_members));
+      if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req)) {
+        project.members = _.map(req.context.currentProjectMembers, m => _.pick(m, fields.project_members));
+      }
         // check if attachments field was requested
       if (!req.query.fields || _.indexOf(req.query.fields, 'attachments') > -1) {
         return util.getProjectAttachments(req, project.id);
