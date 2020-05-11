@@ -268,7 +268,7 @@ describe('GET Project', () => {
               should.not.exist(resJson.billingAccountId);
               should.exist(resJson.name);
               resJson.status.should.be.eql('draft');
-              resJson.members.should.have.lengthOf(2);
+              should.not.exist(resJson.members);
               done();
             }
           });
