@@ -404,7 +404,7 @@ describe('LIST Project', () => {
           }
         });
     });
-    
+
     it('should return the project with empty invites using M2M token without "read:project-invites" scope', (done) => {
       request(server)
         .get('/v5/projects')
