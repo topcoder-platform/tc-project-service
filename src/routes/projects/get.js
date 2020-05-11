@@ -117,7 +117,26 @@ const retrieveProjectFromES = (projectId, req) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
       const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
-      accept(rows[0]);
+      const project = rows[0];
+      if (project && project.invites) {
+        if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          let invites;
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+            // only include own invites
+            const currentUserId = req.authUser.userId;
+            const currentUserEmail = req.authUser.email;
+            invites = _.filter(project.invites, invite => (
+              (invite.userId !== null && invite.userId === currentUserId) ||
+              (invite.email && currentUserEmail && invite.email.toLowerCase() === currentUserEmail.toLowerCase())
+            ));
+          } else {
+            // return empty invites
+            invites = [];
+          }
+          _.set(project, 'invites', invites);
+        }
+      }
+      accept(project);
     }).catch(reject);
   });
 };
@@ -160,7 +179,17 @@ const retrieveProjectFromDB = (projectId, req) => {
         if (attachments) {
           project.attachments = attachments;
         }
-        return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+        if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          // include all invites
+          return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+        } else if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+          // include only own invites
+          const currentUserId = req.authUser.userId;
+          const email = req.authUser.email;
+          return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(projectId, email, currentUserId);
+        }
+        // empty
+        return Promise.resolve([]);
       })
       .then((invites) => {
         project.invites = invites;
