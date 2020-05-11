@@ -41,23 +41,23 @@ module.exports = [
       },
       ],
     })
-    .then((existing) => {
-      if (!existing) {
+      .then((existing) => {
+        if (!existing) {
           // handle 404
-        const err = new Error('No active phase product found for project id ' +
+          const err = new Error('No active phase product found for project id ' +
               `${projectId}, work stream id ${workStreamId} and phase id ${phaseId}`);
-        err.status = 404;
-        throw err;
-      }
+          err.status = 404;
+          throw err;
+        }
 
-      return models.PhaseProduct.findAll({
-        where: {
-          phaseId,
-          projectId,
-        },
-      });
-    })
-    .then(products => res.json(products))
-    .catch(err => next(err));
+        return models.PhaseProduct.findAll({
+          where: {
+            phaseId,
+            projectId,
+          },
+        });
+      })
+      .then(products => res.json(products))
+      .catch(err => next(err));
   },
 ];

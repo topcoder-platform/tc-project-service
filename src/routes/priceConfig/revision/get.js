@@ -43,35 +43,35 @@ module.exports = [
         },
       },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No priceConfi found in ES');
-        models.PriceConfig.findOne({
-          where: {
-            key: req.params.key,
-            version: req.params.version,
-            revision: req.params.revision,
-          },
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-        })
-          .then((priceConfig) => {
-            // Not found
-            if (!priceConfig) {
-              const apiErr = new Error('PriceConfig not found for key' +
-                ` ${req.params.key} version ${req.params.version} revision ${req.params.revision}`);
-              apiErr.status = 404;
-              return Promise.reject(apiErr);
-            }
-
-            res.json(priceConfig);
-            return Promise.resolve();
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No priceConfi found in ES');
+          models.PriceConfig.findOne({
+            where: {
+              key: req.params.key,
+              version: req.params.version,
+              revision: req.params.revision,
+            },
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
           })
-          .catch(next);
-      } else {
-        req.log.debug('priceConfigs found in ES');
-        res.json(data[0].inner_hits.priceConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-      }
-    })
-    .catch(next);
+            .then((priceConfig) => {
+            // Not found
+              if (!priceConfig) {
+                const apiErr = new Error('PriceConfig not found for key' +
+                ` ${req.params.key} version ${req.params.version} revision ${req.params.revision}`);
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+
+              res.json(priceConfig);
+              return Promise.resolve();
+            })
+            .catch(next);
+        } else {
+          req.log.debug('priceConfigs found in ES');
+          res.json(data[0].inner_hits.priceConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        }
+      })
+      .catch(next);
   },
 ];

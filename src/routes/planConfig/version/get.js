@@ -41,26 +41,28 @@ module.exports = [
       },
       sort: { 'planConfigs.version': 'desc' },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No planConfig found in ES');
-        models.PlanConfig.latestRevisionOfLatestVersion(req.params.key)
-          .then((planConfig) => {
-            if (planConfig == null) {
-              const apiErr = new Error(`PlanConfig not found for key ${req.params.key} version ${req.params.version}`);
-              apiErr.status = 404;
-              return Promise.reject(apiErr);
-            }
-            res.json(planConfig);
-            return Promise.resolve();
-          })
-        .catch(next);
-      } else {
-        req.log.debug('planConfigs found in ES');
-        res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-      }
-    })
-    .catch(next);
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No planConfig found in ES');
+          models.PlanConfig.latestRevisionOfLatestVersion(req.params.key)
+            .then((planConfig) => {
+              if (planConfig == null) {
+                const apiErr = new Error(
+                  `PlanConfig not found for key ${req.params.key} version ${req.params.version}`,
+                );
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+              res.json(planConfig);
+              return Promise.resolve();
+            })
+            .catch(next);
+        } else {
+          req.log.debug('planConfigs found in ES');
+          res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        }
+      })
+      .catch(next);
   },
 
 

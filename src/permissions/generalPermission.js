@@ -31,6 +31,8 @@ import models from '../models';
 
 /**
  * @param {Object|Array} permissions permission object or array of permissions
+ *
+ * @return {Function} which would be resolved if `req` is allowed and rejected otherwise
  */
 module.exports = permissions => async (req) => {
   const projectId = _.parseInt(req.params.projectId);

@@ -22,51 +22,51 @@ const expectAfterUpdate = (id, projectId, estimation, len, deletedLen, err, next
       projectId,
     },
   })
-  .then((res) => {
-    if (!res) {
-      throw new Error('Should found the entity');
-    } else {
+    .then((res) => {
+      if (!res) {
+        throw new Error('Should found the entity');
+      } else {
       // find deleted ProjectEstimationItems for project
-      models.ProjectEstimationItem.findAllByProject(models, projectId, {
-        where: {
-          deletedAt: { $ne: null },
-        },
-        includeAllProjectEstimatinoItemsForInternalUsage: true,
-        paranoid: false,
-      }).then((items) => {
-        // deleted project estimation items
-        items.should.have.lengthOf(deletedLen, 'Number of deleted ProjectEstimationItems doesn\'t match');
-
-        _.each(items, (item) => {
-          should.exist(item.deletedBy);
-          should.exist(item.deletedAt);
-        });
-
-        // find (non-deleted) ProjectEstimationItems for project
-        return models.ProjectEstimationItem.findAllByProject(models, projectId, {
+        models.ProjectEstimationItem.findAllByProject(models, projectId, {
+          where: {
+            deletedAt: { $ne: null },
+          },
           includeAllProjectEstimatinoItemsForInternalUsage: true,
-        });
-      }).then((entities) => {
-        entities.should.have.lengthOf(len, 'Number of created ProjectEstimationItems doesn\'t match');
-        if (len) {
-          entities[0].projectEstimationId.should.be.eql(estimation.id);
-          if (estimation.valueType === VALUE_TYPE.PERCENTAGE) {
-            entities[0].price.should.be.eql((estimation.price * estimation.value) / 100);
-          } else {
-            entities[0].price.should.be.eql(Number(estimation.value));
-          }
-          entities[0].type.should.be.eql(estimation.key.split('markup_')[1]);
-          entities[0].markupUsedReference.should.be.eql('projectSetting');
-          entities[0].markupUsedReferenceId.should.be.eql(id);
-          should.exist(entities[0].updatedAt);
-          should.not.exist(entities[0].deletedBy);
-          should.not.exist(entities[0].deletedAt);
-        }
+          paranoid: false,
+        }).then((items) => {
+        // deleted project estimation items
+          items.should.have.lengthOf(deletedLen, 'Number of deleted ProjectEstimationItems doesn\'t match');
 
-        next();
-      });
-    }
-  });
+          _.each(items, (item) => {
+            should.exist(item.deletedBy);
+            should.exist(item.deletedAt);
+          });
+
+          // find (non-deleted) ProjectEstimationItems for project
+          return models.ProjectEstimationItem.findAllByProject(models, projectId, {
+            includeAllProjectEstimatinoItemsForInternalUsage: true,
+          });
+        }).then((entities) => {
+          entities.should.have.lengthOf(len, 'Number of created ProjectEstimationItems doesn\'t match');
+          if (len) {
+            entities[0].projectEstimationId.should.be.eql(estimation.id);
+            if (estimation.valueType === VALUE_TYPE.PERCENTAGE) {
+              entities[0].price.should.be.eql((estimation.price * estimation.value) / 100);
+            } else {
+              entities[0].price.should.be.eql(Number(estimation.value));
+            }
+            entities[0].type.should.be.eql(estimation.key.split('markup_')[1]);
+            entities[0].markupUsedReference.should.be.eql('projectSetting');
+            entities[0].markupUsedReferenceId.should.be.eql(id);
+            should.exist(entities[0].updatedAt);
+            should.not.exist(entities[0].deletedBy);
+            should.not.exist(entities[0].deletedAt);
+          }
+
+          next();
+        });
+      }
+    });
 };
 
 describe('UPDATE Project Setting', () => {
@@ -146,41 +146,41 @@ describe('UPDATE Project Setting', () => {
           lastActivityAt: 1,
           lastActivityUserId: '1',
         })
-        .then((project) => {
-          projectId = project.id;
+          .then((project) => {
+            projectId = project.id;
 
-          models.ProjectMember.bulkCreate([{
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 2,
-            userId: memberUser.userId,
-            projectId,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1,
-          }])
-          .then(() => {
-            models.ProjectSetting.create(_.assign({}, body, bodyNonMutable, {
+            models.ProjectMember.bulkCreate([{
+              id: 1,
+              userId: copilotUser.userId,
               projectId,
-            }))
-            .then((s) => {
-              id = s.id;
+              role: 'copilot',
+              isPrimary: false,
+              createdBy: 1,
+              updatedBy: 1,
+            }, {
+              id: 2,
+              userId: memberUser.userId,
+              projectId,
+              role: 'customer',
+              isPrimary: true,
+              createdBy: 1,
+              updatedBy: 1,
+            }])
+              .then(() => {
+                models.ProjectSetting.create(_.assign({}, body, bodyNonMutable, {
+                  projectId,
+                }))
+                  .then((s) => {
+                    id = s.id;
 
-              models.ProjectEstimation.create(_.assign(estimation, { projectId }))
-              .then((e) => {
-                estimationId = e.id;
-                done();
+                    models.ProjectEstimation.create(_.assign(estimation, { projectId }))
+                      .then((e) => {
+                        estimationId = e.id;
+                        done();
+                      });
+                  }).catch(done);
               });
-            }).catch(done);
           });
-        });
       });
   });
 
@@ -272,55 +272,55 @@ describe('UPDATE Project Setting', () => {
     });
 
     it('should return 200, for member with permission (team member), value updated but no project estimation present',
-    (done) => {
-      const notPresent = _.cloneDeep(body);
-      notPresent.value = '4500';
+      (done) => {
+        const notPresent = _.cloneDeep(body);
+        notPresent.value = '4500';
 
-      models.ProjectEstimation.destroy({
-        where: {
-          id: estimationId,
-        },
-      }).then(() => {
-        models.ProjectEstimationItem.destroy({
+        models.ProjectEstimation.destroy({
           where: {
-            markupUsedReference: 'projectSetting',
-            markupUsedReferenceId: id,
+            id: estimationId,
           },
         }).then(() => {
-          request(server)
-            .patch(`/v5/projects/${projectId}/settings/${id}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.member}`,
-            })
-            .send({
-              value: notPresent.value,
-            })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end((err, res) => {
-              if (err) done(err);
-
-              const resJson = res.body;
-              resJson.id.should.be.eql(id);
-              resJson.key.should.be.eql(bodyNonMutable.key);
-              resJson.value.should.be.eql(notPresent.value);
-              resJson.valueType.should.be.eql(notPresent.valueType);
-              resJson.projectId.should.be.eql(projectId);
-              resJson.createdBy.should.be.eql(bodyNonMutable.createdBy);
-              resJson.updatedBy.should.be.eql(40051331);
-              should.exist(resJson.updatedAt);
-              should.not.exist(resJson.deletedBy);
-              should.not.exist(resJson.deletedAt);
-              expectAfterUpdate(id, projectId, _.assign(estimation, {
-                id: estimationId,
+          models.ProjectEstimationItem.destroy({
+            where: {
+              markupUsedReference: 'projectSetting',
+              markupUsedReferenceId: id,
+            },
+          }).then(() => {
+            request(server)
+              .patch(`/v5/projects/${projectId}/settings/${id}`)
+              .set({
+                Authorization: `Bearer ${testUtil.jwts.member}`,
+              })
+              .send({
                 value: notPresent.value,
-                valueType: notPresent.valueType,
-                key: bodyNonMutable.key,
-              }), 0, 0, err, done);
-            });
-        });
-      }).catch(done);
-    });
+              })
+              .expect('Content-Type', /json/)
+              .expect(200)
+              .end((err, res) => {
+                if (err) done(err);
+
+                const resJson = res.body;
+                resJson.id.should.be.eql(id);
+                resJson.key.should.be.eql(bodyNonMutable.key);
+                resJson.value.should.be.eql(notPresent.value);
+                resJson.valueType.should.be.eql(notPresent.valueType);
+                resJson.projectId.should.be.eql(projectId);
+                resJson.createdBy.should.be.eql(bodyNonMutable.createdBy);
+                resJson.updatedBy.should.be.eql(40051331);
+                should.exist(resJson.updatedAt);
+                should.not.exist(resJson.deletedBy);
+                should.not.exist(resJson.deletedAt);
+                expectAfterUpdate(id, projectId, _.assign(estimation, {
+                  id: estimationId,
+                  value: notPresent.value,
+                  valueType: notPresent.valueType,
+                  key: bodyNonMutable.key,
+                }), 0, 0, err, done);
+              });
+          });
+        }).catch(done);
+      });
 
     it('should return 200 for admin when value updated, calculating project estimation items', (done) => {
       body.value = '4500';

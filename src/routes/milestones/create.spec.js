@@ -72,72 +72,72 @@ describe('CREATE milestone', () => {
               },
             ]).then(() =>
               // Create phase
-               models.ProjectPhase.bulkCreate([
-                 {
-                   projectId: projectId1,
-                   name: 'test project phase 1',
-                   status: 'active',
-                   startDate: '2018-05-15T00:00:00Z',
-                   endDate: '2018-05-15T12:00:00Z',
-                   budget: 20.0,
-                   progress: 1.23456,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 1,
-                   updatedBy: 1,
-                 },
-                 {
-                   projectId: projectId2,
-                   name: 'test project phase 2',
-                   status: 'active',
-                   startDate: '2018-05-16T00:00:00Z',
-                   endDate: '2018-05-16T12:00:00Z',
-                   budget: 21.0,
-                   progress: 1.234567,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 2,
-                   updatedBy: 2,
-                   deletedAt: '2018-05-15T00:00:00Z',
-                 },
-               ]))
+              models.ProjectPhase.bulkCreate([
+                {
+                  projectId: projectId1,
+                  name: 'test project phase 1',
+                  status: 'active',
+                  startDate: '2018-05-15T00:00:00Z',
+                  endDate: '2018-05-15T12:00:00Z',
+                  budget: 20.0,
+                  progress: 1.23456,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 1,
+                  updatedBy: 1,
+                },
+                {
+                  projectId: projectId2,
+                  name: 'test project phase 2',
+                  status: 'active',
+                  startDate: '2018-05-16T00:00:00Z',
+                  endDate: '2018-05-16T12:00:00Z',
+                  budget: 21.0,
+                  progress: 1.234567,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 2,
+                  updatedBy: 2,
+                  deletedAt: '2018-05-15T00:00:00Z',
+                },
+              ]))
               .then(() =>
                 // Create timelines
-                 models.Timeline.bulkCreate([
-                   {
-                     name: 'name 1',
-                     description: 'description 1',
-                     startDate: '2018-05-02T00:00:00.000Z',
-                     endDate: '2018-06-12T00:00:00.000Z',
-                     reference: 'project',
-                     referenceId: 1,
-                     createdBy: 1,
-                     updatedBy: 1,
-                   },
-                   {
-                     name: 'name 2',
-                     description: 'description 2',
-                     startDate: '2018-05-12T00:00:00.000Z',
-                     endDate: '2018-06-13T00:00:00.000Z',
-                     reference: 'phase',
-                     referenceId: 1,
-                     createdBy: 1,
-                     updatedBy: 1,
-                   },
-                   {
-                     name: 'name 3',
-                     description: 'description 3',
-                     startDate: '2018-05-13T00:00:00.000Z',
-                     endDate: '2018-06-14T00:00:00.000Z',
-                     reference: 'phase',
-                     referenceId: 1,
-                     createdBy: 1,
-                     updatedBy: 1,
-                     deletedAt: '2018-05-14T00:00:00.000Z',
-                   },
-                 ]))
+                models.Timeline.bulkCreate([
+                  {
+                    name: 'name 1',
+                    description: 'description 1',
+                    startDate: '2018-05-02T00:00:00.000Z',
+                    endDate: '2018-06-12T00:00:00.000Z',
+                    reference: 'project',
+                    referenceId: 1,
+                    createdBy: 1,
+                    updatedBy: 1,
+                  },
+                  {
+                    name: 'name 2',
+                    description: 'description 2',
+                    startDate: '2018-05-12T00:00:00.000Z',
+                    endDate: '2018-06-13T00:00:00.000Z',
+                    reference: 'phase',
+                    referenceId: 1,
+                    createdBy: 1,
+                    updatedBy: 1,
+                  },
+                  {
+                    name: 'name 3',
+                    description: 'description 3',
+                    startDate: '2018-05-13T00:00:00.000Z',
+                    endDate: '2018-06-14T00:00:00.000Z',
+                    reference: 'phase',
+                    referenceId: 1,
+                    createdBy: 1,
+                    updatedBy: 1,
+                    deletedAt: '2018-05-14T00:00:00.000Z',
+                  },
+                ]))
               .then(() => {
                 // Create milestones
                 models.Milestone.bulkCreate([

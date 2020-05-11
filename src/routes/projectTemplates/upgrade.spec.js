@@ -182,10 +182,10 @@ describe('Upgrade project template', () => {
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
-      .post('/v5/projects/metadata/projectTemplates/123/upgrade')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .post('/v5/projects/metadata/projectTemplates/123/upgrade')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect(404, done);
     });
@@ -194,10 +194,10 @@ describe('Upgrade project template', () => {
       models.ProjectTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-           .post(`/v5/projects/metadata/projectTemplates/${templateId}/upgrade`)
-           .set({
-             Authorization: `Bearer ${testUtil.jwts.admin}`,
-           })
+            .post(`/v5/projects/metadata/projectTemplates/${templateId}/upgrade`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
             .send(body)
             .expect(404, done);
         });
@@ -205,10 +205,10 @@ describe('Upgrade project template', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-      .post(`/v5/projects/metadata/projectTemplates/${templateId}/upgrade`)
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .post(`/v5/projects/metadata/projectTemplates/${templateId}/upgrade`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect(200)
         .end((err, res) => {

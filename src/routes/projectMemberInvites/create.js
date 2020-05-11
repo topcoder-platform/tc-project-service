@@ -287,142 +287,142 @@ module.exports = [
     // we have to filter users returned by the Member Service so we only invite the users
     // whom we are inviting, because Member Service has a loose search logic and may return
     // users with handles whom we didn't search for
-    .then(foundUsers => foundUsers.filter(foundUser => _.includes(invite.handles, foundUser.handle)))
-    .then((inviteUsers) => {
-      const members = req.context.currentProjectMembers;
-      const projectId = _.parseInt(req.params.projectId);
-      // check user handle exists in returned result
-      const errorMessageHandleNotExist = 'User with such handle does not exist';
-      if (!!invite.handles && invite.handles.length > 0) {
-        const existentHandles = _.map(inviteUsers, 'handle');
-        failed = _.concat(failed, _.map(_.difference(invite.handles, existentHandles), handle => _.assign({}, {
-          handle,
-          message: errorMessageHandleNotExist,
-        })));
-      }
+      .then(foundUsers => foundUsers.filter(foundUser => _.includes(invite.handles, foundUser.handle)))
+      .then((inviteUsers) => {
+        const members = req.context.currentProjectMembers;
+        const projectId = _.parseInt(req.params.projectId);
+        // check user handle exists in returned result
+        const errorMessageHandleNotExist = 'User with such handle does not exist';
+        if (!!invite.handles && invite.handles.length > 0) {
+          const existentHandles = _.map(inviteUsers, 'handle');
+          failed = _.concat(failed, _.map(_.difference(invite.handles, existentHandles), handle => _.assign({}, {
+            handle,
+            message: errorMessageHandleNotExist,
+          })));
+        }
 
-      let inviteUserIds = _.map(inviteUsers, 'userId');
-      const promises = [];
-      const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
+        let inviteUserIds = _.map(inviteUsers, 'userId');
+        const promises = [];
+        const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
-      if (inviteUserIds) {
+        if (inviteUserIds) {
         // remove members already in the team
-        _.remove(inviteUserIds, u => _.some(members, (m) => {
-          const isPresent = m.userId === u;
-          if (isPresent) {
-            failed.push(_.assign({}, {
-              handle: getUserHandleById(m.userId, inviteUsers),
-              message: errorMessageForAlreadyMemberUser,
-            }));
+          _.remove(inviteUserIds, u => _.some(members, (m) => {
+            const isPresent = m.userId === u;
+            if (isPresent) {
+              failed.push(_.assign({}, {
+                handle: getUserHandleById(m.userId, inviteUsers),
+                message: errorMessageForAlreadyMemberUser,
+              }));
+            }
+            return isPresent;
+          }));
+
+          // for each user invited by `handle` (userId) we have to load they Topcoder Roles,
+          // so we can check if such a user can be invited with desired Project Role
+          // for customers we don't check it to avoid extra call, as any Topcoder user can be invited as customer
+          if (invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
+            _.forEach(inviteUserIds, (userId) => {
+              req.log.info(userId);
+              promises.push(util.getUserRoles(userId, req.log, req.id));
+            });
           }
-          return isPresent;
-        }));
-
-        // for each user invited by `handle` (userId) we have to load they Topcoder Roles,
-        // so we can check if such a user can be invited with desired Project Role
-        // for customers we don't check it to avoid extra call, as any Topcoder user can be invited as customer
-        if (invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
-          _.forEach(inviteUserIds, (userId) => {
-            req.log.info(userId);
-            promises.push(util.getUserRoles(userId, req.log, req.id));
-          });
         }
-      }
 
-      if (invite.emails) {
+        if (invite.emails) {
         // email invites can only be used for CUSTOMER role
-        if (invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {  // eslint-disable-line no-lonely-if
-          const message = `Emails can only be used for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
-          failed = _.concat(failed, _.map(invite.emails, email => _.assign({}, { email, message })));
-          delete invite.emails;
+          if (invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) { // eslint-disable-line no-lonely-if
+            const message = `Emails can only be used for ${PROJECT_MEMBER_ROLE.CUSTOMER}`;
+            failed = _.concat(failed, _.map(invite.emails, email => _.assign({}, { email, message })));
+            delete invite.emails;
+          }
         }
-      }
-      if (promises.length === 0) {
-        promises.push(Promise.resolve());
-      }
-      return Promise.all(promises).then((rolesList) => {
-        if (inviteUserIds && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
-          req.log.debug('Checking if users are allowed to be invited with desired Project Role.');
-          const forbidUserList = [];
-          _.zip(inviteUserIds, rolesList).forEach((data) => {
-            const [userId, roles] = data;
+        if (promises.length === 0) {
+          promises.push(Promise.resolve());
+        }
+        return Promise.all(promises).then((rolesList) => {
+          if (inviteUserIds && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
+            req.log.debug('Checking if users are allowed to be invited with desired Project Role.');
+            const forbidUserList = [];
+            _.zip(inviteUserIds, rolesList).forEach((data) => {
+              const [userId, roles] = data;
 
-            if (roles) {
-              req.log.debug(`Got user (id: ${userId}) Topcoder roles: ${roles.join(', ')}.`);
+              if (roles) {
+                req.log.debug(`Got user (id: ${userId}) Topcoder roles: ${roles.join(', ')}.`);
 
-              if (!util.hasPermission({ topcoderRoles: PROJECT_TO_TOPCODER_ROLES_MATRIX[invite.role] }, { roles })) {
+                if (!util.hasPermission({ topcoderRoles: PROJECT_TO_TOPCODER_ROLES_MATRIX[invite.role] }, { roles })) {
+                  forbidUserList.push(userId);
+                }
+              } else {
+                req.log.debug(`Didn't get any Topcoder roles for user (id: ${userId}).`);
                 forbidUserList.push(userId);
               }
+            });
+            if (forbidUserList.length > 0) {
+              const message = `cannot be invited with a "${invite.role}" role to the project`;
+              failed = _.concat(failed, _.map(forbidUserList,
+                id => _.assign({}, { handle: getUserHandleById(id, inviteUsers), message })));
+              req.log.debug(`Users with id(s) ${forbidUserList.join(', ')} ${message}`);
+              inviteUserIds = _.filter(inviteUserIds, userId => !_.includes(forbidUserList, userId));
+            }
+          }
+          return models.ProjectMemberInvite.getPendingInvitesForProject(projectId)
+            .then((invites) => {
+              const data = {
+                projectId,
+                role: invite.role,
+                // invite copilots directly if user has permissions
+                status: (invite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
+                util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_COPILOT_DIRECTLY, req))
+                  ? INVITE_STATUS.PENDING
+                  : INVITE_STATUS.REQUESTED,
+                createdBy: req.authUser.userId,
+                updatedBy: req.authUser.userId,
+              };
+              req.log.debug('Creating invites');
+              return models.Sequelize.Promise.all(buildCreateInvitePromises(
+                req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
+                .then((values) => {
+                  values.forEach((v) => {
+                  // emit the event
+                    util.sendResourceToKafkaBus(
+                      req,
+                      EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
+                      RESOURCES.PROJECT_MEMBER_INVITE,
+                      v.toJSON());
+
+                    req.app.services.pubsub.publish(
+                      EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
+                      v,
+                      { correlationId: req.id },
+                    );
+                    // send email invite (async)
+                    if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
+                      sendInviteEmail(req, projectId, v);
+                    }
+                  });
+                  return values.map(value => value.get({ plain: true }));
+                }); // models.sequelize.Promise.all
+            }); // models.ProjectMemberInvite.getPendingInvitesForProject
+        })
+          .then(values => (
+          // populate successful invites with user details if required
+            util.getObjectsWithMemberDetails(values, fields, req)
+              .catch((err) => {
+                req.log.error('Cannot get user details for invites.');
+                req.log.debug('Error during getting user details for invites', err);
+                // continues without details anyway
+                return values;
+              })
+          ))
+          .then((values) => {
+            const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
+            if (failed.length) {
+              res.status(403).json(_.assign({}, response, { failed }));
             } else {
-              req.log.debug(`Didn't get any Topcoder roles for user (id: ${userId}).`);
-              forbidUserList.push(userId);
+              res.status(201).json(response);
             }
           });
-          if (forbidUserList.length > 0) {
-            const message = `cannot be invited with a "${invite.role}" role to the project`;
-            failed = _.concat(failed, _.map(forbidUserList,
-              id => _.assign({}, { handle: getUserHandleById(id, inviteUsers), message })));
-            req.log.debug(`Users with id(s) ${forbidUserList.join(', ')} ${message}`);
-            inviteUserIds = _.filter(inviteUserIds, userId => !_.includes(forbidUserList, userId));
-          }
-        }
-        return models.ProjectMemberInvite.getPendingInvitesForProject(projectId)
-          .then((invites) => {
-            const data = {
-              projectId,
-              role: invite.role,
-              // invite copilots directly if user has permissions
-              status: (invite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
-                util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_COPILOT_DIRECTLY, req))
-                ? INVITE_STATUS.PENDING
-                : INVITE_STATUS.REQUESTED,
-              createdBy: req.authUser.userId,
-              updatedBy: req.authUser.userId,
-            };
-            req.log.debug('Creating invites');
-            return models.Sequelize.Promise.all(buildCreateInvitePromises(
-              req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
-              .then((values) => {
-                values.forEach((v) => {
-                  // emit the event
-                  util.sendResourceToKafkaBus(
-                    req,
-                    EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
-                    RESOURCES.PROJECT_MEMBER_INVITE,
-                    v.toJSON());
-
-                  req.app.services.pubsub.publish(
-                    EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
-                    v,
-                    { correlationId: req.id },
-                  );
-                  // send email invite (async)
-                  if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
-                    sendInviteEmail(req, projectId, v);
-                  }
-                });
-                return values.map(value => value.get({ plain: true }));
-              }); // models.sequelize.Promise.all
-          }); // models.ProjectMemberInvite.getPendingInvitesForProject
-      })
-        .then(values => (
-          // populate successful invites with user details if required
-          util.getObjectsWithMemberDetails(values, fields, req)
-            .catch((err) => {
-              req.log.error('Cannot get user details for invites.');
-              req.log.debug('Error during getting user details for invites', err);
-              // continues without details anyway
-              return values;
-            })
-        ))
-        .then((values) => {
-          const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
-          if (failed.length) {
-            res.status(403).json(_.assign({}, response, { failed }));
-          } else {
-            res.status(201).json(response);
-          }
-        });
-    }).catch(err => next(err));
+      }).catch(err => next(err));
   },
 ];

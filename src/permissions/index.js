@@ -4,8 +4,6 @@ const Authorizer = require('tc-core-library-js').Authorizer;
 const projectView = require('./project.view');
 const projectEdit = require('./project.edit');
 const projectAdmin = require('./admin.ops');
-const projectAttachmentUpdate = require('./project.updateAttachment');
-const projectAttachmentDownload = require('./project.downloadAttachment');
 const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
@@ -23,42 +21,50 @@ module.exports = () => {
   Authorizer.setPolicy('project.delete', generalPermission(PERMISSION.DELETE_PROJECT));
 
   Authorizer.setPolicy('projectMember.create', generalPermission([
-    PERMISSION.CREATE_PROJECT_MEMBER_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.CREATE_PROJECT_MEMBER_OWN,
     PERMISSION.CREATE_PROJECT_MEMBER_NOT_OWN,
   ]));
   Authorizer.setPolicy('projectMember.view', generalPermission(PERMISSION.READ_PROJECT_MEMBER));
   Authorizer.setPolicy('projectMember.edit', generalPermission([
-    PERMISSION.UPDATE_PROJECT_MEMBER_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.UPDATE_PROJECT_MEMBER_CUSTOMER,
     PERMISSION.UPDATE_PROJECT_MEMBER_NON_CUSTOMER,
   ]));
   Authorizer.setPolicy('projectMember.delete', generalPermission([
-    PERMISSION.DELETE_PROJECT_MEMBER_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.DELETE_PROJECT_MEMBER_CUSTOMER,
     PERMISSION.DELETE_PROJECT_MEMBER_NON_CUSTOMER,
   ]));
 
   Authorizer.setPolicy('projectMemberInvite.create', generalPermission([
-    PERMISSION.CREATE_PROJECT_INVITE_CUSTOMER, // actually this permission includes the second permission and is enough
+    PERMISSION.CREATE_PROJECT_INVITE_CUSTOMER,
     PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER,
   ]));
   Authorizer.setPolicy('projectMemberInvite.view', generalPermission([
-    PERMISSION.READ_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.READ_PROJECT_INVITE_OWN,
     PERMISSION.READ_PROJECT_INVITE_NOT_OWN,
   ]));
   Authorizer.setPolicy('projectMemberInvite.edit', generalPermission([
-    PERMISSION.UPDATE_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.UPDATE_PROJECT_INVITE_OWN,
     PERMISSION.UPDATE_PROJECT_INVITE_NOT_OWN,
   ]));
   Authorizer.setPolicy('projectMemberInvite.delete', generalPermission([
-    PERMISSION.DELETE_PROJECT_INVITE_OWN, // actually this permission includes the second permission and is enough
+    PERMISSION.DELETE_PROJECT_INVITE_OWN,
     PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER,
     PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER,
   ]));
 
-  Authorizer.setPolicy('project.addAttachment', projectEdit);
-  Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);
-  Authorizer.setPolicy('project.removeAttachment', projectAttachmentUpdate);
-  Authorizer.setPolicy('project.downloadAttachment', projectAttachmentDownload);
-  Authorizer.setPolicy('project.listAttachment', projectView);
+  Authorizer.setPolicy('projectAttachment.create', generalPermission(PERMISSION.CREATE_PROJECT_ATTACHMENT));
+  Authorizer.setPolicy('projectAttachment.view', generalPermission([
+    PERMISSION.READ_PROJECT_ATTACHMENT_OWN_OR_ALLOWED,
+    PERMISSION.READ_PROJECT_ATTACHMENT_NOT_OWN_AND_NOT_ALLOWED,
+  ]));
+  Authorizer.setPolicy('projectAttachment.edit', generalPermission([
+    PERMISSION.UPDATE_PROJECT_ATTACHMENT_OWN,
+    PERMISSION.UPDATE_PROJECT_ATTACHMENT_NOT_OWN,
+  ]));
+  Authorizer.setPolicy('projectAttachment.delete', generalPermission([
+    PERMISSION.DELETE_PROJECT_ATTACHMENT_OWN,
+    PERMISSION.DELETE_PROJECT_ATTACHMENT_NOT_OWN,
+  ]));
 
   Authorizer.setPolicy('project.admin', projectAdmin);
 

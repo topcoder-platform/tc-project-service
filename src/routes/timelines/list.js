@@ -45,22 +45,22 @@ function retrieveTimelines(esTerms) {
  */
 function retrieveTimelinesFromDB(req, filters) {
   return models.Timeline.search(filters, req.log)
-  .then((timelines) => {
-    const timelineIds = _.map(timelines, 'id');
+    .then((timelines) => {
+      const timelineIds = _.map(timelines, 'id');
 
-    // retrieve milestones
-    return models.Milestone.findAll({
-      attributes: MILESTONE_ATTRIBUTES,
-      where: { timelineId: { $in: timelineIds } },
-      raw: true,
-    })
-    .then((values) => {
-      _.forEach(timelines, (t) => {
-        t.milestones = _.filter(values, m => m.timelineId === t.id);  // eslint-disable-line no-param-reassign
-      });
-      return timelines;
+      // retrieve milestones
+      return models.Milestone.findAll({
+        attributes: MILESTONE_ATTRIBUTES,
+        where: { timelineId: { $in: timelineIds } },
+        raw: true,
+      })
+        .then((values) => {
+          _.forEach(timelines, (t) => {
+            t.milestones = _.filter(values, m => m.timelineId === t.id); // eslint-disable-line no-param-reassign
+          });
+          return timelines;
+        });
     });
-  });
 }
 
 const permissions = tcMiddleware.permissions;

@@ -53,16 +53,16 @@ module.exports = [
       type: ES_TIMELINE_TYPE,
       id: req.params.timelineId,
     })
-    .then((doc) => {
-      req.log.debug('timeline found in ES');
-      return res.json(doc._source);  // eslint-disable-line no-underscore-dangle
-    })
-    .catch((err) => {
-      if (err.status === 404) {
-        req.log.debug('No timeline found in ES');
-        return loadMilestones(req.timeline).then(timeline => res.json(timeline));
-      }
-      return next(err);
-    });
+      .then((doc) => {
+        req.log.debug('timeline found in ES');
+        return res.json(doc._source); // eslint-disable-line no-underscore-dangle
+      })
+      .catch((err) => {
+        if (err.status === 404) {
+          req.log.debug('No timeline found in ES');
+          return loadMilestones(req.timeline).then(timeline => res.json(timeline));
+        }
+        return next(err);
+      });
   },
 ];

@@ -79,7 +79,7 @@ module.exports = [
 
           return Promise.resolve();
         }),
-      ) // transaction end
+    ) // transaction end
       .then(() => {
         req.log.debug('new project setting created (id# %d, key: %s)',
           setting.id, setting.key);

@@ -22,15 +22,15 @@ const expectAfterDelete = (projectId, phaseId, id, err, next) => {
       },
       paranoid: false,
     })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        chai.assert.isNotNull(res.deletedAt);
-        chai.assert.isNotNull(res.deletedBy);
-      }
-      next();
-    }), 500);
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          chai.assert.isNotNull(res.deletedAt);
+          chai.assert.isNotNull(res.deletedBy);
+        }
+        next();
+      }), 500);
 };
 const body = {
   name: 'test phase product',
@@ -65,63 +65,63 @@ describe('Phase Products', () => {
   beforeEach((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            models.ProjectPhase.create({
+              name: 'test project phase',
+              status: 'active',
+              startDate: '2018-05-15T00:00:00Z',
+              endDate: '2018-05-15T12:00:00Z',
+              budget: 20.0,
+              progress: 1.23456,
+              details: {
+                message: 'This can be any json',
+              },
               createdBy: 1,
               updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
               projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              models.ProjectPhase.create({
-                name: 'test project phase',
-                status: 'active',
-                startDate: '2018-05-15T00:00:00Z',
-                endDate: '2018-05-15T12:00:00Z',
-                budget: 20.0,
-                progress: 1.23456,
-                details: {
-                  message: 'This can be any json',
-                },
-                createdBy: 1,
-                updatedBy: 1,
-                projectId,
-              }).then((phase) => {
-                phaseId = phase.id;
-                _.assign(body, { phaseId, projectId });
+            }).then((phase) => {
+              phaseId = phase.id;
+              _.assign(body, { phaseId, projectId });
 
-                models.PhaseProduct.create(body).then((product) => {
-                  productId = product.id;
-                  done();
-                });
+              models.PhaseProduct.create(body).then((product) => {
+                productId = product.id;
+                done();
               });
             });
           });
         });
+      });
   });
 
   afterEach((done) => {
@@ -234,12 +234,12 @@ describe('Phase Products', () => {
         where: { userId: testUtil.userIds.copilot, projectId },
       }).then(() => {
         request(server)
-        .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .expect(403)
-        .end(done);
+          .delete(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .expect(403)
+          .end(done);
       });
     });
 

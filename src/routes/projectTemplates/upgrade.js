@@ -118,6 +118,6 @@ module.exports = [
 
       res.status(201).json(_.omit(newPt.toJSON(), 'deletedAt', 'deletedBy'));
     })
-    .catch(next));
+      .catch(next));
   },
 ];

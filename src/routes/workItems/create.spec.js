@@ -62,92 +62,92 @@ describe('CREATE Work Item', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((template) => {
-          models.WorkManagementPermission.create({
-            policy: 'workItem.create',
-            permission: {
-              allowRule: {
-                projectRoles: ['customer', 'copilot'],
-                topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+          .then((template) => {
+            models.WorkManagementPermission.create({
+              policy: 'workItem.create',
+              permission: {
+                allowRule: {
+                  projectRoles: ['customer', 'copilot'],
+                  topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+                },
+                denyRule: { projectRoles: ['copilot'] },
               },
-              denyRule: { projectRoles: ['copilot'] },
-            },
-            projectTemplateId: template.id,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then(() => {
-            // Create projects
-            models.Project.create({
-              type: 'generic',
-              billingAccountId: 1,
-              name: 'test1',
-              description: 'test project1',
-              status: 'draft',
-              templateId: template.id,
+              projectTemplateId: template.id,
               details: {},
               createdBy: 1,
               updatedBy: 1,
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              models.WorkStream.create({
-                name: 'Work Stream',
-                type: 'generic',
-                status: 'active',
-                projectId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((entity) => {
-                workStreamId = entity.id;
-                models.ProjectPhase.create({
-                  name: 'test project phase',
-                  status: 'active',
-                  startDate: '2018-05-15T00:00:00Z',
-                  endDate: '2018-05-15T12:00:00Z',
-                  budget: 20.0,
-                  progress: 1.23456,
-                  details: {
-                    message: 'This can be any json',
-                  },
+              .then(() => {
+                // Create projects
+                models.Project.create({
+                  type: 'generic',
+                  billingAccountId: 1,
+                  name: 'test1',
+                  description: 'test project1',
+                  status: 'draft',
+                  templateId: template.id,
+                  details: {},
                   createdBy: 1,
                   updatedBy: 1,
-                  projectId,
-                }).then((phase) => {
-                  workId = phase.id;
-                  models.PhaseWorkStream.create({
-                    phaseId: workId,
-                    workStreamId,
-                  }).then(() => {
-                    // create members
-                    models.ProjectMember.bulkCreate([{
-                      id: 1,
-                      userId: copilotUser.userId,
+                  lastActivityAt: 1,
+                  lastActivityUserId: '1',
+                })
+                  .then((project) => {
+                    projectId = project.id;
+                    models.WorkStream.create({
+                      name: 'Work Stream',
+                      type: 'generic',
+                      status: 'active',
                       projectId,
-                      role: 'copilot',
-                      isPrimary: false,
                       createdBy: 1,
                       updatedBy: 1,
-                    }, {
-                      id: 2,
-                      userId: memberUser.userId,
-                      projectId,
-                      role: 'customer',
-                      isPrimary: true,
-                      createdBy: 1,
-                      updatedBy: 1,
-                    }]).then(() => done());
+                    }).then((entity) => {
+                      workStreamId = entity.id;
+                      models.ProjectPhase.create({
+                        name: 'test project phase',
+                        status: 'active',
+                        startDate: '2018-05-15T00:00:00Z',
+                        endDate: '2018-05-15T12:00:00Z',
+                        budget: 20.0,
+                        progress: 1.23456,
+                        details: {
+                          message: 'This can be any json',
+                        },
+                        createdBy: 1,
+                        updatedBy: 1,
+                        projectId,
+                      }).then((phase) => {
+                        workId = phase.id;
+                        models.PhaseWorkStream.create({
+                          phaseId: workId,
+                          workStreamId,
+                        }).then(() => {
+                          // create members
+                          models.ProjectMember.bulkCreate([{
+                            id: 1,
+                            userId: copilotUser.userId,
+                            projectId,
+                            role: 'copilot',
+                            isPrimary: false,
+                            createdBy: 1,
+                            updatedBy: 1,
+                          }, {
+                            id: 2,
+                            userId: memberUser.userId,
+                            projectId,
+                            role: 'customer',
+                            isPrimary: true,
+                            createdBy: 1,
+                            updatedBy: 1,
+                          }]).then(() => done());
+                        });
+                      });
+                    });
                   });
-                });
               });
-            });
           });
-        });
       });
   });
 
@@ -316,28 +316,28 @@ describe('CREATE Work Item', () => {
 
       it('should send correct BUS API messages when work item created', (done) => {
         request(server)
-        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send(body)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(1);
+          .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(1);
 
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
-                resource: RESOURCES.PHASE_PRODUCT,
-              })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
     });
   });

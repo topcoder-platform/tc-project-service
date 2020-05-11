@@ -45,7 +45,7 @@
  * - Add a comment to such rules explaining why allow-rule cannot be created.
  */
 import _ from 'lodash';
- import {
+import {
   PROJECT_MEMBER_ROLE,
   USER_ROLE,
   ADMIN_ROLES as TOPCODER_ROLES_ADMINS,
@@ -53,38 +53,64 @@ import _ from 'lodash';
   M2M_SCOPES,
 } from '../constants';
 
+/**
+ * All Project Roles
+ */
 const PROJECT_ROLES_ALL = _.values(PROJECT_MEMBER_ROLE);
+
+/**
+ * "Management Level" Project Roles
+ */
 const PROJECT_ROLES_MANAGEMENT = _.difference(PROJECT_ROLES_ALL, [
   PROJECT_MEMBER_ROLE.COPILOT,
   PROJECT_MEMBER_ROLE.CUSTOMER,
   PROJECT_MEMBER_ROLE.OBSERVER,
 ]);
 
+/**
+ * This is a special constant to indicate that all project members or any logged-in user
+ * has permission.
+ */
 const ALL = true;
 
+/**
+ * M2M scopes to "read" projects
+ */
 const SCOPES_PROJECTS_READ = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
   M2M_SCOPES.PROJECTS.ALL,
   M2M_SCOPES.PROJECTS.READ,
 ];
 
+/**
+ * M2M scopes to "write" projects
+ */
 const SCOPES_PROJECTS_WRITE = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
   M2M_SCOPES.PROJECTS.ALL,
   M2M_SCOPES.PROJECTS.WRITE,
 ];
 
+/**
+ * M2M scopes to "write" billingAccountId property
+ */
 const SCOPES_PROJECTS_WRITE_BILLING_ACCOUNTS = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
   M2M_SCOPES.PROJECTS.WRITE_BILLING_ACCOUNTS,
 ];
 
+/**
+ * M2M scopes to "read" projects members
+ */
 const SCOPES_PROJECT_MEMBERS_READ = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
   M2M_SCOPES.PROJECT_MEMBERS.ALL,
   M2M_SCOPES.PROJECT_MEMBERS.READ,
 ];
 
+/**
+ * M2M scopes to "write" projects members
+ */
 const SCOPES_PROJECT_MEMBERS_WRITE = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
   M2M_SCOPES.PROJECT_MEMBERS.ALL,
@@ -103,6 +129,9 @@ const SCOPES_PROJECT_INVITES_WRITE = [
   M2M_SCOPES.PROJECT_INVITES.WRITE,
 ];
 
+/**
+ * The full list of possible permission rules in Project Service
+ */
 export const PERMISSION = { // eslint-disable-line import/prefer-default-export
   /*
    * Project
@@ -442,7 +471,85 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
-  /**
+  /*
+   * Project Attachments
+   */
+  CREATE_PROJECT_ATTACHMENT: {
+    meta: {
+      title: 'Create Project Attachment',
+      group: 'Project Attachment',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    projectRoles: ALL,
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
+  READ_PROJECT_ATTACHMENT_OWN_OR_ALLOWED: {
+    meta: {
+      title: 'Read Project Attachment (own or allowed)',
+      group: 'Project Attachment',
+      description: 'Who can view own attachment or an attachment of another user when they are in the "allowed" list.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    projectRoles: ALL,
+    scopes: SCOPES_PROJECTS_READ,
+  },
+
+  READ_PROJECT_ATTACHMENT_NOT_OWN_AND_NOT_ALLOWED: {
+    meta: {
+      title: 'Read Project Attachment (not own and not allowed)',
+      group: 'Project Attachment',
+      description: 'Who can view attachment of another user when they are not in "allowed" users list.',
+    },
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    scopes: SCOPES_PROJECTS_READ,
+  },
+
+  UPDATE_PROJECT_ATTACHMENT_OWN: {
+    meta: {
+      title: 'Update Project Attachment (own)',
+      group: 'Project Attachment',
+      description: 'Who can edit attachment they created.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    projectRoles: ALL,
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
+  UPDATE_PROJECT_ATTACHMENT_NOT_OWN: {
+    meta: {
+      title: 'Update Project Attachment (not own)',
+      group: 'Project Attachment',
+      description: 'Who can edit attachment created by another user.',
+    },
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
+  DELETE_PROJECT_ATTACHMENT_OWN: {
+    meta: {
+      title: 'Delete Project Attachment (own)',
+      group: 'Project Attachment',
+      description: 'Who can delete attachment they created.',
+    },
+    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    projectRoles: ALL,
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
+  DELETE_PROJECT_ATTACHMENT_NOT_OWN: {
+    meta: {
+      title: 'Delete Project Attachment (not own)',
+      group: 'Project Attachment',
+      description: 'Who can delete attachment created by another user.',
+    },
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
+  /*
+   * DEPRECATED - THIS PERMISSION RULE HAS TO BE REMOVED
+   *
    * Permissions defined by logic: **WHO** can do actions with such a permission.
    */
   ROLES_COPILOT_AND_ABOVE: {
@@ -460,6 +567,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
   },
 };
 
+/**
+ * Matrix which define Project Roles and corresponding Topcoder Roles of users
+ * who may join with such Project Roles.
+ */
 export const PROJECT_TO_TOPCODER_ROLES_MATRIX = {
   [PROJECT_MEMBER_ROLE.CUSTOMER]: _.values(USER_ROLE),
   [PROJECT_MEMBER_ROLE.MANAGER]: [

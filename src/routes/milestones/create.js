@@ -101,47 +101,47 @@ module.exports = [
           return Promise.resolve();
         }),
     )
-    .then((otherUpdated) => {
+      .then((otherUpdated) => {
       // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for milestone %d', result.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        result,
-        { correlationId: req.id },
-      );
+        req.log.debug('Sending event to RabbitMQ bus for milestone %d', result.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_ADDED,
+          result,
+          { correlationId: req.id },
+        );
 
-      // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
-      //      Even though we send this event to the Kafka, the "project-processor-es" shouldn't process it.
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        RESOURCES.MILESTONE,
-        result);
-
-      // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
-      //      Even though we send these events to the Kafka, the "project-processor-es" shouldn't process them.
-      //
-      //      We don't process these event in "project-processor-es"
-      //      because it will make 'version conflict' error in ES.
-      //      The order of the other milestones need to be updated in the PROJECT_PHASE_UPDATED event handler
-      _.map(otherUpdated, milestone =>
+        // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
+        //      Even though we send this event to the Kafka, the "project-processor-es" shouldn't process it.
         util.sendResourceToKafkaBus(
           req,
-          EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+          EVENT.ROUTING_KEY.MILESTONE_ADDED,
           RESOURCES.MILESTONE,
-          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
-          // Pass the same object as original milestone even though, their time has changed.
-          // So far we don't use time properties in the handler so it's ok. But in general, we should pass
-          // the original milestones. <- TODO
-          _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
-          null, // no route
-          true, // don't send event to Notification Service as the main event here is updating one milestone
-        ),
-      );
+          result);
 
-      // Write to the response
-      res.status(201).json(result);
-      return Promise.resolve();
-    })
-    .catch(next);
+        // NOTE So far this logic is implemented in RabbitMQ handler of MILESTONE_ADDED
+        //      Even though we send these events to the Kafka, the "project-processor-es" shouldn't process them.
+        //
+        //      We don't process these event in "project-processor-es"
+        //      because it will make 'version conflict' error in ES.
+        //      The order of the other milestones need to be updated in the PROJECT_PHASE_UPDATED event handler
+        _.map(otherUpdated, milestone =>
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+            RESOURCES.MILESTONE,
+            _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
+            // Pass the same object as original milestone even though, their time has changed.
+            // So far we don't use time properties in the handler so it's ok. But in general, we should pass
+            // the original milestones. <- TODO
+            _.assign(_.pick(milestone.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
+            null, // no route
+            true, // don't send event to Notification Service as the main event here is updating one milestone
+          ),
+        );
+
+        // Write to the response
+        res.status(201).json(result);
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

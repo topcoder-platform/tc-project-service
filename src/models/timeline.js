@@ -55,11 +55,11 @@ module.exports = (sequelize, DataTypes) => {
     // select timelines
     return sequelize.query(`SELECT * FROM timelines AS timelines
       WHERE ${query}`,
-      { type: sequelize.QueryTypes.SELECT,
-        replacements,
-        logging: (str) => { log.debug(str); },
-        raw: true,
-      })
+    { type: sequelize.QueryTypes.SELECT,
+      replacements,
+      logging: (str) => { log.debug(str); },
+      raw: true,
+    })
       .then(timelines => timelines);
   };
 

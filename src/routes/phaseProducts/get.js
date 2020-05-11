@@ -59,11 +59,11 @@ module.exports = [
           }).catch(err => next(err));
         }
         req.log.debug('phase product found in ES');
-          // Get the phases
-        const phases = data[0].inner_hits.phases.hits.hits[0]._source;  // eslint-disable-line no-underscore-dangle
+        // Get the phases
+        const phases = data[0].inner_hits.phases.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
         const product = _.isArray(phases.products) ? _.find(phases.products, p => p.id === productId) : {};
         if (!product) {
-            // handle 404
+          // handle 404
           const err = new Error('phase product not found for project id ' +
                   `${projectId}, phase id ${phaseId} and product id ${productId}`);
           err.status = 404;

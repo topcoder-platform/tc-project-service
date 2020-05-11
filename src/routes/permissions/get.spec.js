@@ -74,47 +74,47 @@ describe('GET permissions', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((t) => {
-          templateId = t.id;
-          // Create projects
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            templateId,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then((project) => {
-            projectId = project.id;
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
+          .then((t) => {
+            templateId = t.id;
+            // Create projects
+            models.Project.create({
+              type: 'generic',
+              billingAccountId: 1,
+              name: 'test1',
+              description: 'test project1',
+              status: 'draft',
+              templateId,
+              details: {},
               createdBy: 1,
               updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              const newPermissions = _.map(permissions, p => _.assign({}, p, { projectTemplateId: templateId }));
-              models.WorkManagementPermission.bulkCreate(newPermissions, { returning: true })
-                .then(() => done());
-            });
+              lastActivityAt: 1,
+              lastActivityUserId: '1',
+            })
+              .then((project) => {
+                projectId = project.id;
+                models.ProjectMember.bulkCreate([{
+                  id: 1,
+                  userId: copilotUser.userId,
+                  projectId,
+                  role: 'copilot',
+                  isPrimary: false,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }, {
+                  id: 2,
+                  userId: memberUser.userId,
+                  projectId,
+                  role: 'customer',
+                  isPrimary: true,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }]).then(() => {
+                  const newPermissions = _.map(permissions, p => _.assign({}, p, { projectTemplateId: templateId }));
+                  models.WorkManagementPermission.bulkCreate(newPermissions, { returning: true })
+                    .then(() => done());
+                });
+              });
           });
-        });
       });
   });
 

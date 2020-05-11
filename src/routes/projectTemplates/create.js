@@ -47,10 +47,10 @@ const schema = {
     updatedBy: Joi.any().strip(),
     deletedBy: Joi.any().strip(),
   })
-      .xor('form', 'scope')
-      .xor('phases', 'planConfig')
-      .nand('priceConfig', 'scope')
-      .required(),
+    .xor('form', 'scope')
+    .xor('phases', 'planConfig')
+    .nand('priceConfig', 'scope')
+    .required(),
 };
 
 module.exports = [

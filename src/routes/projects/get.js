@@ -4,6 +4,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
+import permissionUtils from '../../utils/permissions';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -77,7 +78,7 @@ const parseElasticSearchCriteria = (projectId, fields) => {
   }
 
   if (sourceInclude) {
-    searchCriteria._sourceIncludes = sourceInclude;        // eslint-disable-line no-underscore-dangle
+    searchCriteria._sourceIncludes = sourceInclude; // eslint-disable-line no-underscore-dangle
   }
 
 
@@ -116,7 +117,7 @@ const retrieveProjectFromES = (projectId, req) => {
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
-      const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      const rows = _.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
       const project = rows[0];
       if (project && project.invites) {
         if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
@@ -158,55 +159,55 @@ const retrieveProjectFromDB = (projectId, req) => {
     }).then((_project) => {
       project = _project;
       if (!project) {
-          // returning 404
+        // returning 404
         const apiErr = new Error(`project not found for id ${projectId}`);
         apiErr.status = 404;
         return Promise.reject(apiErr);
       }
-        // check context for project members
+      // check context for project members
       if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER, req)) {
         project.members = _.map(req.context.currentProjectMembers, m => _.pick(m, fields.project_members));
       }
-        // check if attachments field was requested
+      // check if attachments field was requested
       if (!req.query.fields || _.indexOf(req.query.fields, 'attachments') > -1) {
         return util.getProjectAttachments(req, project.id);
       }
-          // return null if attachments were not requested.
+      // return null if attachments were not requested.
       return Promise.resolve(null);
     })
-      .then((attachments) => {
-        // if attachments were requested
-        if (attachments) {
-          project.attachments = attachments;
-        }
-        if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
-          // include all invites
-          return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
-        } else if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
-          // include only own invites
-          const currentUserId = req.authUser.userId;
-          const email = req.authUser.email;
-          return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(projectId, email, currentUserId);
-        }
-        // empty
-        return Promise.resolve([]);
-      })
-      .then((invites) => {
-        project.invites = invites;
-        return project;
-      });
+    .then((attachments) => {
+      // if attachments were requested
+      if (attachments) {
+        project.attachments = attachments;
+      }
+      if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+        // include all invites
+        return models.ProjectMemberInvite.getPendingAndReguestedInvitesForProject(projectId);
+      } else if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+        // include only own invites
+        const currentUserId = req.authUser.userId;
+        const email = req.authUser.email;
+        return models.ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser(projectId, email, currentUserId);
+      }
+      // empty
+      return Promise.resolve([]);
+    })
+    .then((invites) => {
+      project.invites = invites;
+      return project;
+    });
 };
 
 
 module.exports = [
   permissions('project.view'),
-  /**
+  /*
    * GET projects/{projectId}
    * Get a project by id
    */
   (req, res, next) => {
     const projectId = Number(req.params.projectId);
-      // parse the fields string to determine what fields are to be returned
+    // parse the fields string to determine what fields are to be returned
 
     return retrieveProjectFromES(projectId, req).then((result) => {
       if (result === undefined) {
@@ -216,7 +217,15 @@ module.exports = [
       req.log.debug('Project found in ES');
       return result;
     }).then((project) => {
-      res.status(200).json(util.postProcessInvites('$.invites[?(@.email)]', project, req));
+      const postProcessedProject = util.postProcessInvites('$.invites[?(@.email)]', project, req);
+
+      // filter out attachments which user cannot see
+      if (postProcessedProject.attachments) {
+        postProcessedProject.attachments = postProcessedProject.attachments.filter(attachment =>
+          permissionUtils.hasReadAccessToAttachment(attachment, req),
+        );
+      }
+      res.status(200).json(postProcessedProject);
     })
       .catch(err => next(err));
   },

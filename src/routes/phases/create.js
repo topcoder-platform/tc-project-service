@@ -169,7 +169,7 @@ module.exports = [
             // So far we don't use the order so it's ok. But in general, we should pass
             // the original phases. <- TODO
             _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
-            true, // don't send event to Notification Service as the main event here is updating one phase
+        true, // don't send event to Notification Service as the main event here is updating one phase
         );
 
         res.status(201).json(newProjectPhase);

@@ -18,7 +18,7 @@ module.exports = (fapp, logger) => {
   const app = fapp;
   app.services = app.service || {};
   if (process.env.NODE_ENV.toLowerCase() === 'test') {
-    require('../tests/serviceMocks')(app);                       // eslint-disable-line global-require
+    require('../tests/serviceMocks')(app); // eslint-disable-line global-require
   } else {
     logger.info('initializing RabbitMQ service');
     // RabbitMQ Initialization
@@ -30,16 +30,16 @@ module.exports = (fapp, logger) => {
       config.get('pubsubExchangeName'),
       config.get('pubsubQueueName'),
     )
-    .then(() => {
-      logger.info('RabbitMQ service initialized');
-    })
+      .then(() => {
+        logger.info('RabbitMQ service initialized');
+      })
     // .then(() => startKafkaConsumer(kafkaHandlers, app, logger))
     // .then(() => {
     //   logger.info('Kafka consumer service initialized');
     // })
-    .catch((err) => {
-      logger.error('Error initializing services', err);
+      .catch((err) => {
+        logger.error('Error initializing services', err);
       // gracefulShutdown()
-    });
+      });
   }
 };

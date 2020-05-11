@@ -16,20 +16,20 @@ const should = chai.should();
 const expectAfterDelete = (projectId, id, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.ProjectMember.findOne({
-    where: {
-      id,
-      projectId,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        next();
-      }
-    }), 500);
+    models.ProjectMember.findOne({
+      where: {
+        id,
+        projectId,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          next();
+        }
+      }), 500);
 };
 describe('Project members delete', () => {
   let project1;

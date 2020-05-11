@@ -56,7 +56,7 @@ describe('GET report', () => {
           }).then(() => {
             done();
           }),
-            ),
+          ),
           );
         });
       });

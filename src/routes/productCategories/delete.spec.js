@@ -12,27 +12,27 @@ import testUtil from '../../tests/util';
 const expectAfterDelete = (key, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.ProductCategory.findOne({
-    where: {
-      key,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        chai.assert.isNotNull(res.deletedAt);
-        chai.assert.isNotNull(res.deletedBy);
+    models.ProductCategory.findOne({
+      where: {
+        key,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          chai.assert.isNotNull(res.deletedAt);
+          chai.assert.isNotNull(res.deletedBy);
 
-        request(server)
-          .get(`/v5/projects/metadata/productCategories/${key}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, next);
-      }
-    }), 500);
+          request(server)
+            .get(`/v5/projects/metadata/productCategories/${key}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(404, next);
+        }
+      }), 500);
 };
 
 describe('DELETE product category', () => {

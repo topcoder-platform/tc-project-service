@@ -45,55 +45,55 @@ describe('GET work', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((template) => {
+          .then((template) => {
           // Create projects
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            templateId: template.id,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then((project) => {
-            projectId = project.id;
-            models.WorkStream.create({
-              name: 'Work Stream',
+            models.Project.create({
               type: 'generic',
-              status: 'active',
-              projectId,
+              billingAccountId: 1,
+              name: 'test1',
+              description: 'test project1',
+              status: 'draft',
+              templateId: template.id,
+              details: {},
               createdBy: 1,
               updatedBy: 1,
-            }).then((entity) => {
-              workStreamId = entity.id;
-              models.ProjectPhase.create({
-                name: 'test project phase',
-                status: 'active',
-                startDate: '2018-05-15T00:00:00Z',
-                endDate: '2018-05-15T12:00:00Z',
-                budget: 20.0,
-                progress: 1.23456,
-                details: {
-                  message: 'This can be any json',
-                },
-                createdBy: 1,
-                updatedBy: 1,
-                projectId,
-              }).then((phase) => {
-                workId = phase.id;
-                models.PhaseWorkStream.create({
-                  phaseId: workId,
-                  workStreamId,
-                }).then(() => done());
+              lastActivityAt: 1,
+              lastActivityUserId: '1',
+            })
+              .then((project) => {
+                projectId = project.id;
+                models.WorkStream.create({
+                  name: 'Work Stream',
+                  type: 'generic',
+                  status: 'active',
+                  projectId,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }).then((entity) => {
+                  workStreamId = entity.id;
+                  models.ProjectPhase.create({
+                    name: 'test project phase',
+                    status: 'active',
+                    startDate: '2018-05-15T00:00:00Z',
+                    endDate: '2018-05-15T12:00:00Z',
+                    budget: 20.0,
+                    progress: 1.23456,
+                    details: {
+                      message: 'This can be any json',
+                    },
+                    createdBy: 1,
+                    updatedBy: 1,
+                    projectId,
+                  }).then((phase) => {
+                    workId = phase.id;
+                    models.PhaseWorkStream.create({
+                      phaseId: workId,
+                      workStreamId,
+                    }).then(() => done());
+                  });
+                });
               });
-            });
           });
-        });
       });
   });
 
