@@ -36,9 +36,7 @@ Let's say you would like to add a new place in code where you want to check user
 
    - Follow the guides on how to add a new permission in the header of this file.
 
-3. After you add a new permission, regenerate [permissions list](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html) by running `npm run generate:doc:permissions`.
-
-4. There are 2 places where you would usually check permissions:
+3. There are 2 places where you would usually check permissions:
    1. Check if user can call some endpoint (https://github.com/topcoder-platform/tc-project-service/blob/develop/src/permissions/index.js):
 
       ```js
@@ -68,6 +66,8 @@ Let's say you would like to add a new place in code where you want to check user
          ...
       }
       ```
+
+4. After you've added all the new permissions you wanted, regenerate [permissions list](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html) by running `npm run generate:doc:permissions`. Or run `npm run generate:doc:permissions:dev` which would automatically regenerate HTML file on every change - very useful during development.
 
 ## References
 
