@@ -17,30 +17,38 @@ describe('Project Attachments update', () => {
   let link;
   beforeEach((done) => {
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            directProjectId: 1,
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          directProjectId: 1,
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          project1 = p;
+          // create members
+          return models.ProjectMember.create({
+            userId: 40051332,
+            projectId: project1.id,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            project1 = p;
-            // create members
-            return models.ProjectMember.create({
-              userId: 40051332,
-              projectId: project1.id,
-              role: 'copilot',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }).then(() => models.ProjectAttachment.create({
+          }).then(() => models.ProjectMember.create({
+            userId: 40051331,
+            projectId: project1.id,
+            role: 'customer',
+            isPrimary: false,
+            createdBy: 1,
+            updatedBy: 1,
+          }))
+            .then(() => models.ProjectAttachment.create({
               projectId: project1.id,
               title: 'test.txt',
               description: 'blah',
@@ -68,12 +76,12 @@ describe('Project Attachments update', () => {
                   createdBy: testUtil.userIds.copilot,
                   updatedBy: 1,
                 }).then((_link) => {
-                  link = _link;
-                  done();
-                });
+                link = _link;
+                done();
+              });
             }));
-          });
         });
+      });
   });
 
   after((done) => {
@@ -181,6 +189,27 @@ describe('Project Attachments update', () => {
             should.exist(resJson);
             resJson.title.should.equal('updated title 1');
             resJson.description.should.equal('updated description 1');
+            done();
+          }
+        });
+    });
+
+    it('should update the project using M2M token with "write:projects" scope', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/attachments/${attachment.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send({ title: 'updated title m2m', description: 'updated description m2m' })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.title.should.equal('updated title m2m');
+            resJson.description.should.equal('updated description m2m');
             done();
           }
         });

@@ -244,7 +244,7 @@ npm run data:import -- --file path/to-file.json
 
 - As this commands calls topcoder services to get data like members details, so you have to provide environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`, they would automatically picked up from the `.env` file if provided.
 
-- If you encounter conflicts errors during import, you may need to recreated database tables and Elasticssearch indexes by `npm run sync:all`.
+- If you encounter conflicts errors during import, you may need to recreated database tables and Elasticssearch indexes by `npm run local:reset`.
 
 - List of models that will be imported are defined in `scripts/data/dataModels.js`. You can add new models to this list, but make sure that new models are added to list such that each model comes after its dependencies.
 
@@ -289,7 +289,6 @@ This command for importing data uses API to create demo data. Which has a few pe
 | `npm run startKafkaConsumers:dev`  | Start Kafka consumer app in the development mode using `nodemon`. |
 | `npm run test`  | Run tests. |
 | `npm run test:watch`  | Run tests and re-run them on changes (not useful now as it re-runs all the test). |
-| `npm run reset:all` | Recreate Database and Elasticsearch indexes (removes any existent data). |
 | `npm run reset:db`  | Recreate Database schemas (removes any existent data). |
 | `npm run reset:es`  | Recreate Elasticsearch indexes (removes any existent data). |
 | `npm run import-from-api`  | Import Metadata from DEV environment, see [docs](#import-metadata-from-apitopcoder-devcom-deprecated). |
@@ -300,6 +299,7 @@ This command for importing data uses API to create demo data. Which has a few pe
 | `npm run services:down`  | Stop services via docker-compose for local development. |
 | `npm run services:logs -- -f <service_name>`  | View logs of some service inside docker-compose. |
 | `npm run local:init` | Recreate Database and Elasticsearch indexes and populate demo data for local development (removes any existent data). |
+| `npm run local:reset` | Recreate Database and Elasticsearch indexes (removes any existent data). |
 | `npm run babel-node-script -- <path/to/script>` | Helper command which is used by other commands to run node scripts using `babel-node` and `dotenv` so variables from `.env` file are automatically applied. |
 | `npm run generate:doc:permissions` | Generate [permissions.html](docs/permissions.html) which later can be viewed by [link](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html). |
 | `npm run generate:doc:permissions:dev` | Generate [permissions.html](docs/permissions.html) on any changes (useful during development). |

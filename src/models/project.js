@@ -79,7 +79,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
     attributes: ['directProjectId'],
     raw: true,
   })
-        .then(res => res.directProjectId);
+    .then(res => res.directProjectId);
 
 
   /**
@@ -167,11 +167,11 @@ module.exports = function defineProject(sequelize, DataTypes) {
     return sequelize.query(`SELECT COUNT(1) FROM projects AS projects
       ${joinQuery}
       WHERE ${query}`,
-      { type: sequelize.QueryTypes.SELECT,
-        replacements,
-        logging: (str) => { log.debug(str); },
-        raw: true,
-      })
+    { type: sequelize.QueryTypes.SELECT,
+      replacements,
+      logging: (str) => { log.debug(str); },
+      raw: true,
+    })
       .then((fcount) => {
         let count = fcount.length;
         if (fcount.length === 1) {
@@ -185,11 +185,11 @@ module.exports = function defineProject(sequelize, DataTypes) {
           ${joinQuery}
           WHERE ${query} ORDER BY ` +
           ` projects.${orderStr} LIMIT :limit OFFSET :offset`,
-          { type: sequelize.QueryTypes.SELECT,
-            replacements,
-            logging: (str) => { log.debug(str); },
-            raw: true,
-          })
+        { type: sequelize.QueryTypes.SELECT,
+          replacements,
+          logging: (str) => { log.debug(str); },
+          raw: true,
+        })
           .then(projects => ({ rows: projects, count }));
       });
   };
@@ -202,7 +202,7 @@ module.exports = function defineProject(sequelize, DataTypes) {
       model: models.ProjectPhase,
       as: 'phases',
       order: [['startDate', 'asc']],
-        // where: phasesWhere,
+      // where: phasesWhere,
       include: [{
         model: models.PhaseProduct,
         as: 'products',

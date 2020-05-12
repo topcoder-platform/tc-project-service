@@ -243,7 +243,7 @@ export const CONNECT_NOTIFICATION_EVENT = {
   MILESTONE_TRANSITION_ACTIVE: 'connect.notification.project.timeline.milestone.transition.active',
   // When milestone is marked as completed
   MILESTONE_TRANSITION_COMPLETED: 'connect.notification.project.timeline.milestone.transition.completed',
-   // When milestone is marked as paused
+  // When milestone is marked as paused
   MILESTONE_TRANSITION_PAUSED: 'connect.notification.project.timeline.milestone.transition.paused',
   // When milestone is waiting for customers's input
   MILESTONE_WAITING_CUSTOMER: 'connect.notification.project.timeline.milestone.waiting.customer',
@@ -280,6 +280,11 @@ export const M2M_SCOPES = {
     ALL: 'all:project-members',
     READ: 'read:project-members',
     WRITE: 'write:project-members',
+  },
+  PROJECT_INVITES: {
+    ALL: 'all:project-invites',
+    READ: 'read:project-invites',
+    WRITE: 'write:project-invites',
   },
 };
 

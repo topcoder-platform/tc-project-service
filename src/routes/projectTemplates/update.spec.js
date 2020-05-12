@@ -54,63 +54,63 @@ describe('UPDATE project template', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-    .then(() => models.ProjectType.bulkCreate([
-      {
-        key: 'generic',
-        displayName: 'Generic',
-        icon: 'http://example.com/icon1.ico',
-        question: 'question 1',
-        info: 'info 1',
-        aliases: ['key-1', 'key_1'],
-        metadata: {},
+      .then(() => models.ProjectType.bulkCreate([
+        {
+          key: 'generic',
+          displayName: 'Generic',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: ['key-1', 'key_1'],
+          metadata: {},
+          createdBy: 1,
+          updatedBy: 1,
+        },
+        {
+          key: 'concrete',
+          displayName: 'Concrete',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 2',
+          info: 'info 2',
+          aliases: ['key-2', 'key_2'],
+          metadata: {},
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      ]))
+      .then(() => models.ProjectTemplate.create(template).then((createdTemplate) => {
+        templateId = createdTemplate.id;
+      }))
+      .then(() => models.Form.create({
+        key: 'test',
+        config: {
+          test: 'test1',
+        },
+        version: 1,
+        revision: 1,
         createdBy: 1,
         updatedBy: 1,
-      },
-      {
-        key: 'concrete',
-        displayName: 'Concrete',
-        icon: 'http://example.com/icon1.ico',
-        question: 'question 2',
-        info: 'info 2',
-        aliases: ['key-2', 'key_2'],
-        metadata: {},
+      }))
+      .then(() => models.PlanConfig.create({
+        key: 'test',
+        config: {
+          test: 'test1',
+        },
+        version: 1,
+        revision: 1,
         createdBy: 1,
         updatedBy: 1,
-      },
-    ]))
-    .then(() => models.ProjectTemplate.create(template).then((createdTemplate) => {
-      templateId = createdTemplate.id;
-    }))
-    .then(() => models.Form.create({
-      key: 'test',
-      config: {
-        test: 'test1',
-      },
-      version: 1,
-      revision: 1,
-      createdBy: 1,
-      updatedBy: 1,
-    }))
-    .then(() => models.PlanConfig.create({
-      key: 'test',
-      config: {
-        test: 'test1',
-      },
-      version: 1,
-      revision: 1,
-      createdBy: 1,
-      updatedBy: 1,
-    }))
-    .then(() => models.PriceConfig.create({
-      key: 'test',
-      config: {
-        test: 'test1',
-      },
-      version: 1,
-      revision: 1,
-      createdBy: 1,
-      updatedBy: 1,
-    }).then(() => done()));
+      }))
+      .then(() => models.PriceConfig.create({
+        key: 'test',
+        config: {
+          test: 'test1',
+        },
+        version: 1,
+        revision: 1,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => done()));
   });
   after((done) => {
     testUtil.clearDb(done);

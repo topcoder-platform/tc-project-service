@@ -24,7 +24,7 @@ const phaseProductAddedHandler = Promise.coroutine(function* (logger, msg, chann
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
-    const phases = _.isArray(doc._source.phases) ? doc._source.phases : [];    // eslint-disable-line no-underscore-dangle
+    const phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
 
     _.each(phases, (phase) => {
       if (phase.id === data.phaseId) {
@@ -33,7 +33,7 @@ const phaseProductAddedHandler = Promise.coroutine(function* (logger, msg, chann
       }
     });
 
-    const merged = _.assign(doc._source, { phases });       // eslint-disable-line no-underscore-dangle
+    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId, body: { doc: merged } });
     logger.debug('phase product added to project document successfully');
     channel.ack(msg);
@@ -55,7 +55,7 @@ const phaseProductUpdatedHandler = Promise.coroutine(function* (logger, msg, cha
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.projectId });
-    const phases = _.map(doc._source.phases, (phase) => {   // eslint-disable-line no-underscore-dangle
+    const phases = _.map(doc._source.phases, (phase) => { // eslint-disable-line no-underscore-dangle
       if (phase.id === data.original.phaseId) {
         phase.products = _.map(phase.products, (product) => { // eslint-disable-line no-param-reassign
           if (product.id === data.original.id) {
@@ -66,7 +66,7 @@ const phaseProductUpdatedHandler = Promise.coroutine(function* (logger, msg, cha
       }
       return phase;
     });
-    const merged = _.assign(doc._source, { phases });       // eslint-disable-line no-underscore-dangle
+    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({
       index: ES_PROJECT_INDEX,
       type: ES_PROJECT_TYPE,
@@ -95,14 +95,14 @@ const phaseProductRemovedHandler = Promise.coroutine(function* (logger, msg, cha
   try {
     const data = JSON.parse(msg.content.toString());
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.projectId });
-    const phases = _.map(doc._source.phases, (phase) => {   // eslint-disable-line no-underscore-dangle
+    const phases = _.map(doc._source.phases, (phase) => { // eslint-disable-line no-underscore-dangle
       if (phase.id === data.phaseId) {
         phase.products = _.filter(phase.products, product => product.id !== data.id); // eslint-disable-line no-param-reassign
       }
       return phase;
     });
 
-    const merged = _.assign(doc._source, { phases });       // eslint-disable-line no-underscore-dangle
+    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
 
     yield eClient.update({
       index: ES_PROJECT_INDEX,

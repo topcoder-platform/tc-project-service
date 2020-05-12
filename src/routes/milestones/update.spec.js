@@ -1039,12 +1039,12 @@ describe('UPDATE Milestone', () => {
       const newBody = _.cloneDeep(body);
       newBody.status = 'paused';
       request(server)
-      .patch('/v5/timelines/1/milestones/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(400, done);
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(400, done);
     });
 
     it('should return 400 if try to pause not active milestone', (done) => {
@@ -1052,12 +1052,12 @@ describe('UPDATE Milestone', () => {
       newBody.status = 'paused';
       newBody.statusComment = 'milestone paused';
       request(server)
-      .patch('/v5/timelines/1/milestones/2')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(400, done);
+        .patch('/v5/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(400, done);
     });
 
     it('should return 200 if try to pause and should have one status history created', (done) => {
@@ -1065,45 +1065,45 @@ describe('UPDATE Milestone', () => {
       newBody.status = 'paused';
       newBody.statusComment = 'milestone paused';
       request(server)
-      .patch('/v5/timelines/1/milestones/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(200)
-      .end((err) => {
-        if (err) {
-          done(err);
-        } else {
-          models.Milestone.findByPk(1).then((milestone) => {
-            milestone.status.should.be.eql('paused');
-            return models.StatusHistory.findAll({
-              where: {
-                reference: 'milestone',
-                referenceId: milestone.id,
-                status: milestone.status,
-                comment: 'milestone paused',
-              },
-              paranoid: false,
-            }).then((statusHistories) => {
-              statusHistories.length.should.be.eql(1);
-              done();
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            models.Milestone.findByPk(1).then((milestone) => {
+              milestone.status.should.be.eql('paused');
+              return models.StatusHistory.findAll({
+                where: {
+                  reference: 'milestone',
+                  referenceId: milestone.id,
+                  status: milestone.status,
+                  comment: 'milestone paused',
+                },
+                paranoid: false,
+              }).then((statusHistories) => {
+                statusHistories.length.should.be.eql(1);
+                done();
+              });
             });
-          });
-        }
-      });
+          }
+        });
     });
 
     it('should return 400 if try to resume not paused milestone', (done) => {
       const newBody = _.cloneDeep(body);
       newBody.status = 'resume';
       request(server)
-      .patch('/v5/timelines/1/milestones/2')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(400, done);
+        .patch('/v5/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(400, done);
     });
 
     it('should return 200 if try to resume then status should update to last status and ' +
@@ -1144,34 +1144,34 @@ describe('UPDATE Milestone', () => {
         .then(milestone => milestone.update(_.assign({}, milestone.toJSON(), { status: 'paused' }))),
       ).then(() => {
         request(server)
-        .patch('/v5/timelines/1/milestones/7')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(newBody)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            models.Milestone.findByPk(7).then((milestone) => {
-              milestone.status.should.be.eql('active');
+          .patch('/v5/timelines/1/milestones/7')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(newBody)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              models.Milestone.findByPk(7).then((milestone) => {
+                milestone.status.should.be.eql('active');
 
-              return models.StatusHistory.findAll({
-                where: {
-                  reference: 'milestone',
-                  referenceId: milestone.id,
-                  status: 'active',
-                  comment: 'new comment',
-                },
-                paranoid: false,
-              }).then((statusHistories) => {
-                statusHistories.length.should.be.eql(1);
-                done();
+                return models.StatusHistory.findAll({
+                  where: {
+                    reference: 'milestone',
+                    referenceId: milestone.id,
+                    status: 'active',
+                    comment: 'new comment',
+                  },
+                  paranoid: false,
+                }).then((statusHistories) => {
+                  statusHistories.length.should.be.eql(1);
+                  done();
+                }).catch(done);
               }).catch(done);
-            }).catch(done);
-          }
-        });
+            }
+          });
       });
     });
 

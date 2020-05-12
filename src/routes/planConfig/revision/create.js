@@ -60,7 +60,7 @@ module.exports = [
         EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
         RESOURCES.PLAN_CONFIG_REVISION,
         createdEntity.toJSON());
-        // Omit deletedAt, deletedBy
+      // Omit deletedAt, deletedBy
       res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
     })
       .catch(next));

@@ -32,24 +32,24 @@ module.exports = [
           revision: req.params.revision,
         },
       }).then((priceConfig) => {
-        if (!priceConfig) {
-          const apiErr = new Error('PriceConfig not found for key' +
+      if (!priceConfig) {
+        const apiErr = new Error('PriceConfig not found for key' +
             ` ${req.params.key} version ${req.params.version} revision ${req.params.revision}`);
-          apiErr.status = 404;
-          return Promise.reject(apiErr);
-        }
-        return priceConfig.update({
-          deletedBy: req.authUser.userId,
-        });
-      }).then(priceConfig =>
-        priceConfig.destroy(),
-      ).then((priceConfig) => {
-        util.sendResourceToKafkaBus(req,
-          EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
-          RESOURCES.PRICE_CONFIG_REVISION,
-          _.pick(priceConfig.toJSON(), 'id'));
-        res.status(204).end();
-      })
+        apiErr.status = 404;
+        return Promise.reject(apiErr);
+      }
+      return priceConfig.update({
+        deletedBy: req.authUser.userId,
+      });
+    }).then(priceConfig =>
+      priceConfig.destroy(),
+    ).then((priceConfig) => {
+      util.sendResourceToKafkaBus(req,
+        EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
+        RESOURCES.PRICE_CONFIG_REVISION,
+        _.pick(priceConfig.toJSON(), 'id'));
+      res.status(204).end();
+    })
       .catch(next));
   },
 ];

@@ -45,31 +45,31 @@ module.exports = [
           limit: itemsDeleted,
         })),
     )
-    .then((milestones) => {
+      .then((milestones) => {
       // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for timeline %d', deleted.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_REMOVED,
-        deleted,
-        { correlationId: req.id },
-      );
+        req.log.debug('Sending event to RabbitMQ bus for timeline %d', deleted.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_REMOVED,
+          deleted,
+          { correlationId: req.id },
+        );
 
-      // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.TIMELINE_REMOVED,
-        RESOURCES.TIMELINE,
-        { id: req.params.timelineId });
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.TIMELINE_REMOVED,
+          RESOURCES.TIMELINE,
+          { id: req.params.timelineId });
 
-      // emit the event for milestones
-      _.map(milestones, milestone => util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.MILESTONE_REMOVED,
-        RESOURCES.MILESTONE,
-        milestone.toJSON()));
+        // emit the event for milestones
+        _.map(milestones, milestone => util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.MILESTONE_REMOVED,
+          RESOURCES.MILESTONE,
+          milestone.toJSON()));
 
-      // Write to response
-      res.status(204).end();
-      return Promise.resolve();
-    })
-    .catch(next);
+        // Write to response
+        res.status(204).end();
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

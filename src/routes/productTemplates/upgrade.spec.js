@@ -62,71 +62,71 @@ describe('UPGRADE product template', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-    .then(() => models.ProductCategory.bulkCreate([
-      {
-        key: 'generic',
-        displayName: 'Generic',
-        icon: 'http://example.com/icon1.ico',
-        question: 'question 1',
-        info: 'info 1',
-        aliases: ['key-1', 'key_1'],
-        createdBy: 1,
-        updatedBy: 1,
-      },
-      {
-        key: 'concrete',
-        displayName: 'Concrete',
-        icon: 'http://example.com/icon1.ico',
-        question: 'question 2',
-        info: 'info 2',
-        aliases: ['key-2', 'key_2'],
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ]))
-    .then(() => {
-      const config = {
-        sections: [{
-          id: 'appDefinition',
-          title: 'Sample Project',
-          required: true,
-          description: 'Please answer a few basic questions',
-          subSections: [{
-            id: 'projectName',
-            required: true,
-            validationError: 'Please provide a name for your project',
-            fieldName: 'name',
-            description: '',
-            title: 'Project Name',
-            type: 'project-name',
-          }, {
-            id: 'notes',
-            fieldName: 'details.appDefinition.notes',
-            title: 'Notes',
-            description: 'Add any other important information',
-            type: 'notes',
-          }],
-        }],
-      };
-      models.Form.bulkCreate([
+      .then(() => models.ProductCategory.bulkCreate([
         {
-          key: 'newKey',
-          version: 1,
-          revision: 1,
-          config,
+          key: 'generic',
+          displayName: 'Generic',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 1',
+          info: 'info 1',
+          aliases: ['key-1', 'key_1'],
           createdBy: 1,
           updatedBy: 1,
         },
-      ]);
-    })
-    .then(() => models.ProductTemplate.create(productTemplate))
-    .then((createdTemplate) => {
-      templateId = createdTemplate.id;
-    })
-    .then(() => models.ProductTemplate.create(productTemplateMissed).then((createdTemplate) => {
-      missingTemplateId = createdTemplate.id;
-      done();
-    }));
+        {
+          key: 'concrete',
+          displayName: 'Concrete',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 2',
+          info: 'info 2',
+          aliases: ['key-2', 'key_2'],
+          createdBy: 1,
+          updatedBy: 1,
+        },
+      ]))
+      .then(() => {
+        const config = {
+          sections: [{
+            id: 'appDefinition',
+            title: 'Sample Project',
+            required: true,
+            description: 'Please answer a few basic questions',
+            subSections: [{
+              id: 'projectName',
+              required: true,
+              validationError: 'Please provide a name for your project',
+              fieldName: 'name',
+              description: '',
+              title: 'Project Name',
+              type: 'project-name',
+            }, {
+              id: 'notes',
+              fieldName: 'details.appDefinition.notes',
+              title: 'Notes',
+              description: 'Add any other important information',
+              type: 'notes',
+            }],
+          }],
+        };
+        models.Form.bulkCreate([
+          {
+            key: 'newKey',
+            version: 1,
+            revision: 1,
+            config,
+            createdBy: 1,
+            updatedBy: 1,
+          },
+        ]);
+      })
+      .then(() => models.ProductTemplate.create(productTemplate))
+      .then((createdTemplate) => {
+        templateId = createdTemplate.id;
+      })
+      .then(() => models.ProductTemplate.create(productTemplateMissed).then((createdTemplate) => {
+        missingTemplateId = createdTemplate.id;
+        done();
+      }));
   });
   after((done) => {
     testUtil.clearDb(done);

@@ -147,7 +147,7 @@ async function getProductTimelinesFromES() {
   };
   return es.search(searchCriteria)
     .then((docs) => {
-      const rows = lodash.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      const rows = lodash.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
       return rows;
     });
 }
@@ -161,7 +161,7 @@ async function getProjectsFromES() {
   const searchCriteria = getESSearchCriteriaForProject();
   const projects = await es.search(searchCriteria)
     .then((docs) => {
-      const rows = lodash.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      const rows = lodash.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
       return rows;
     });
   const timelines = await getProductTimelinesFromES();
@@ -188,7 +188,7 @@ async function getMetadataFromES() {
   };
   return es.search(searchCriteria)
     .then((docs) => {
-      const rows = lodash.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      const rows = lodash.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
       if (!rows.length) {
         return lodash.reduce(
           Object.keys(scriptConstants.associations.metadata),

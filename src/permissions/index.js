@@ -4,8 +4,6 @@ const Authorizer = require('tc-core-library-js').Authorizer;
 const projectView = require('./project.view');
 const projectEdit = require('./project.edit');
 const projectAdmin = require('./admin.ops');
-const projectAttachmentUpdate = require('./project.updateAttachment');
-const projectAttachmentDownload = require('./project.downloadAttachment');
 const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
@@ -54,11 +52,19 @@ module.exports = () => {
     PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER,
   ]));
 
-  Authorizer.setPolicy('project.addAttachment', projectEdit);
-  Authorizer.setPolicy('project.updateAttachment', projectAttachmentUpdate);
-  Authorizer.setPolicy('project.removeAttachment', projectAttachmentUpdate);
-  Authorizer.setPolicy('project.downloadAttachment', projectAttachmentDownload);
-  Authorizer.setPolicy('project.listAttachment', projectView);
+  Authorizer.setPolicy('projectAttachment.create', generalPermission(PERMISSION.CREATE_PROJECT_ATTACHMENT));
+  Authorizer.setPolicy('projectAttachment.view', generalPermission([
+    PERMISSION.READ_PROJECT_ATTACHMENT_OWN_OR_ALLOWED,
+    PERMISSION.READ_PROJECT_ATTACHMENT_NOT_OWN_AND_NOT_ALLOWED,
+  ]));
+  Authorizer.setPolicy('projectAttachment.edit', generalPermission([
+    PERMISSION.UPDATE_PROJECT_ATTACHMENT_OWN,
+    PERMISSION.UPDATE_PROJECT_ATTACHMENT_NOT_OWN,
+  ]));
+  Authorizer.setPolicy('projectAttachment.delete', generalPermission([
+    PERMISSION.DELETE_PROJECT_ATTACHMENT_OWN,
+    PERMISSION.DELETE_PROJECT_ATTACHMENT_NOT_OWN,
+  ]));
 
   Authorizer.setPolicy('project.admin', projectAdmin);
 

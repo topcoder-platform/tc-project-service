@@ -44,15 +44,15 @@ describe('UPDATE work management permission', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((t) => {
-          templateId = t.id;
-          permission = _.assign({}, permission, { projectTemplateId: templateId });
-          models.WorkManagementPermission.create(permission)
-          .then((p) => {
-            permissionId = p.id;
-          })
-          .then(() => done());
-        });
+          .then((t) => {
+            templateId = t.id;
+            permission = _.assign({}, permission, { projectTemplateId: templateId });
+            models.WorkManagementPermission.create(permission)
+              .then((p) => {
+                permissionId = p.id;
+              })
+              .then(() => done());
+          });
       });
   });
 

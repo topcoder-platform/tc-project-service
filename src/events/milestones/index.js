@@ -86,7 +86,7 @@ const milestoneUpdatedHandler = Promise.coroutine(function* (logger, msg, channe
     // if timeline has been modified during milestones updates
     if (data.cascadedUpdates && data.cascadedUpdates.timeline && data.cascadedUpdates.timeline.updated) {
       // merge updated timeline with the object in ES index, the same way as we do when updating timeline in ES using timeline endpoints
-      updatedTimeline = _.merge(doc._source, data.cascadedUpdates.timeline.updated);  // eslint-disable-line no-underscore-dangle
+      updatedTimeline = _.merge(doc._source, data.cascadedUpdates.timeline.updated); // eslint-disable-line no-underscore-dangle
     }
 
     const merged = _.assign(updatedTimeline, { milestones });
@@ -119,7 +119,7 @@ const milestoneRemovedHandler = Promise.coroutine(function* (logger, msg, channe
   try {
     const doc = yield eClient.get({ index: ES_TIMELINE_INDEX, type: ES_TIMELINE_TYPE, id: data.timelineId });
     const milestones = _.filter(doc._source.milestones, single => single.id !== data.id); // eslint-disable-line no-underscore-dangle
-    const merged = _.assign(doc._source, { milestones });       // eslint-disable-line no-underscore-dangle
+    const merged = _.assign(doc._source, { milestones }); // eslint-disable-line no-underscore-dangle
     yield eClient.update({
       index: ES_TIMELINE_INDEX,
       type: ES_TIMELINE_TYPE,

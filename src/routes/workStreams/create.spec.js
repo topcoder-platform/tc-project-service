@@ -85,9 +85,9 @@ describe('CREATE work stream', () => {
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-            })
+              .then((project) => {
+                projectId = project.id;
+              })
               .then(() => done());
           });
       });

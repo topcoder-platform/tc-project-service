@@ -4,6 +4,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { ATTACHMENT_TYPES } from '../../constants';
+import permissionUtils from '../../utils/permissions';
 
 /**
  * API to get a project attachment.
@@ -36,7 +37,7 @@ const getPreSignedUrl = async (req, attachment) => {
 };
 
 module.exports = [
-  permissions('project.downloadAttachment'),
+  permissions('projectAttachment.view'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const attachmentId = _.parseInt(req.params.id);
@@ -62,44 +63,51 @@ module.exports = [
         },
       },
     })
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No attachment found in ES');
-        return models.ProjectAttachment.findOne(
-          {
-            where: {
-              id: attachmentId,
-              projectId,
-            },
-          })
-        .then((attachment) => {
-          if (!attachment) {
-            const err = new Error('Record not found');
-            err.status = 404;
-            return Promise.reject(err);
-          }
-          return getPreSignedUrl(req, attachment);
-        })
-        .catch((error) => {
-          req.log.error('Error fetching attachment', error);
-          const rerr = error;
-          rerr.status = rerr.status || 500;
-          next(rerr);
-        });
-      }
-      req.log.debug('attachment found in ES');
-      const attachment = data[0].inner_hits.attachments.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No attachment found in ES');
+          return models.ProjectAttachment.findOne(
+            {
+              where: {
+                id: attachmentId,
+                projectId,
+              },
+            })
+            .catch((error) => {
+              req.log.error('Error fetching attachment', error);
+              const rerr = error;
+              rerr.status = rerr.status || 500;
+              next(rerr);
+            });
+        }
+        req.log.debug('attachment found in ES');
+        return data[0].inner_hits.attachments.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
+      })
+      // check permissions
+      .then((attachment) => {
+        // if don't have permissions we would return 404 below as users shouldn't even know if attachment exists
+        if (!permissionUtils.hasReadAccessToAttachment(attachment, req)) {
+          return null;
+        }
 
-      return getPreSignedUrl(req, attachment);
-    })
-    .then((result) => {
-      req.log.debug('getPresigned url result: ', JSON.stringify(result));
-      if (_.isEmpty(result[1])) {
-        return res.json(result[0]);
-      }
+        return attachment;
+      })
+      .then((attachment) => {
+        if (!attachment) {
+          const err = new Error('Record not found');
+          err.status = 404;
+          return Promise.reject(err);
+        }
+        return getPreSignedUrl(req, attachment);
+      })
+      .then((result) => {
+        req.log.debug('getPresigned url result: ', JSON.stringify(result));
+        if (_.isEmpty(result[1])) {
+          return res.json(result[0]);
+        }
 
-      return res.json(_.extend(result[0], { url: result[1] }));
-    })
-    .catch(next);
+        return res.json(_.extend(result[0], { url: result[1] }));
+      })
+      .catch(next);
   },
 ];

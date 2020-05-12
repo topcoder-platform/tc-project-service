@@ -11,22 +11,22 @@ module.exports = [
   permissions('projectType.view'),
   (req, res, next) => {
     util.fetchFromES('projectTypes')
-    .then((data) => {
-      if (data.projectTypes.length === 0) {
-        req.log.debug('No projectType found in ES');
-        models.ProjectType.findAll({
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-          raw: true,
-        })
-          .then((projectTypes) => {
-            res.json(projectTypes);
+      .then((data) => {
+        if (data.projectTypes.length === 0) {
+          req.log.debug('No projectType found in ES');
+          models.ProjectType.findAll({
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
+            raw: true,
           })
-          .catch(next);
-      } else {
-        req.log.debug('projectTypes found in ES');
-        res.json(data.projectTypes);
-      }
-    });
+            .then((projectTypes) => {
+              res.json(projectTypes);
+            })
+            .catch(next);
+        } else {
+          req.log.debug('projectTypes found in ES');
+          res.json(data.projectTypes);
+        }
+      });
   },
 
 ];

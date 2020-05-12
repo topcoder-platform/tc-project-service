@@ -45,29 +45,29 @@ describe('LIST project members', () => {
           lastActivityAt: 1,
           lastActivityUserId: '1',
         })
-        .then((project) => {
-          id = project.id;
-          // create members
-          models.ProjectMember.create({
-            id: 1,
-            userId: copilotUser.userId,
-            projectId: id,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }).then(() => {
+          .then((project) => {
+            id = project.id;
+            // create members
             models.ProjectMember.create({
-              id: 2,
-              userId: memberUser.userId,
+              id: 1,
+              userId: copilotUser.userId,
               projectId: id,
-              role: 'customer',
-              isPrimary: true,
+              role: 'copilot',
+              isPrimary: false,
               createdBy: 1,
               updatedBy: 1,
-            }).then(() => done());
+            }).then(() => {
+              models.ProjectMember.create({
+                id: 2,
+                userId: memberUser.userId,
+                projectId: id,
+                role: 'customer',
+                isPrimary: true,
+                createdBy: 1,
+                updatedBy: 1,
+              }).then(() => done());
+            });
           });
-        });
       });
   });
 

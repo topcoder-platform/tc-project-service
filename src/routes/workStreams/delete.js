@@ -19,7 +19,7 @@ module.exports = [
   validate(schema),
   permissions('workStream.delete'),
   (req, res, next) =>
-     models.sequelize.transaction(() =>
+    models.sequelize.transaction(() =>
       models.WorkStream.findOne({
         where: {
           id: req.params.id,
@@ -37,8 +37,8 @@ module.exports = [
           return entity.update({ deletedBy: req.authUser.userId });
         })
         .then(entity => entity.destroy()))
-        .then(() => {
-          res.status(204).end();
-        })
-        .catch(next),
+      .then(() => {
+        res.status(204).end();
+      })
+      .catch(next),
 ];

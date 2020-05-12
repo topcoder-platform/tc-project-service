@@ -43,35 +43,35 @@ module.exports = [
         },
       },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No plan config found in ES');
-        models.PlanConfig.findOne({
-          where: {
-            key: req.params.key,
-            version: req.params.version,
-            revision: req.params.revision,
-          },
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-        })
-          .then((planConfig) => {
-            // Not found
-            if (!planConfig) {
-              const apiErr = new Error('PlanConfig not found for key' +
-                `${req.params.key} version ${req.params.version} revision ${req.params.revision}`);
-              apiErr.status = 404;
-              return Promise.reject(apiErr);
-            }
-
-            res.json(planConfig);
-            return Promise.resolve();
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No plan config found in ES');
+          models.PlanConfig.findOne({
+            where: {
+              key: req.params.key,
+              version: req.params.version,
+              revision: req.params.revision,
+            },
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
           })
-          .catch(next);
-      } else {
-        req.log.debug('plan config found in ES');
-        res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-      }
-    })
-    .catch(next);
+            .then((planConfig) => {
+            // Not found
+              if (!planConfig) {
+                const apiErr = new Error('PlanConfig not found for key' +
+                `${req.params.key} version ${req.params.version} revision ${req.params.revision}`);
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+
+              res.json(planConfig);
+              return Promise.resolve();
+            })
+            .catch(next);
+        } else {
+          req.log.debug('plan config found in ES');
+          res.json(data[0].inner_hits.planConfigs.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        }
+      })
+      .catch(next);
   },
 ];

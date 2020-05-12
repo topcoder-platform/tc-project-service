@@ -96,13 +96,13 @@ describe('LIST work management permissions', () => {
     testUtil.clearDb()
       .then(() => {
         models.ProjectTemplate.bulkCreate(templates, { returning: true })
-        .then((t) => {
-          templateIds = _.map(t, template => template.id);
-          const newPermissions = _.map(permissions, p => _.assign({}, p, { projectTemplateId: templateIds[0] }));
-          newPermissions.push(_.assign({}, permissions[0], { projectTemplateId: templateIds[1] }));
-          models.WorkManagementPermission.bulkCreate(newPermissions, { returning: true })
-            .then(() => done());
-        });
+          .then((t) => {
+            templateIds = _.map(t, template => template.id);
+            const newPermissions = _.map(permissions, p => _.assign({}, p, { projectTemplateId: templateIds[0] }));
+            newPermissions.push(_.assign({}, permissions[0], { projectTemplateId: templateIds[1] }));
+            models.WorkManagementPermission.bulkCreate(newPermissions, { returning: true })
+              .then(() => done());
+          });
       });
   });
 

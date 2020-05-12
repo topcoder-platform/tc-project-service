@@ -31,6 +31,8 @@ import models from '../models';
 
 /**
  * @param {Object|Array} permissions permission object or array of permissions
+ *
+ * @return {Function} which would be resolved if `req` is allowed and rejected otherwise
  */
 module.exports = permissions => async (req) => {
   const projectId = _.parseInt(req.params.projectId);
@@ -38,7 +40,7 @@ module.exports = permissions => async (req) => {
   // if one of the `permission` requires to know Project Members, but current route doesn't belong to any project
   // this means such `permission` most likely has been applied by mistake, so we throw an error
   const permissionsRequireProjectMembers = _.isArray(permissions)
-    ? _.some(permissions, permission => util.hasPermissionByReq(permission, req))
+    ? _.some(permissions, permission => util.isPermissionRequireProjectMembers(permission))
     : util.isPermissionRequireProjectMembers(permissions);
 
   if (_.isUndefined(req.params.projectId) && permissionsRequireProjectMembers) {
@@ -60,6 +62,7 @@ module.exports = permissions => async (req) => {
       // - if user has permissions to access endpoint even we don't know if he is a member or no,
       //   then code would proceed and endpoint would decide to throw 404 if project doesn't exist
       //   or perform endpoint operation if loading project members above failed because of some other reason
+      req.log.error(`Cannot load project members: ${err.message}.`);
     }
   }
 

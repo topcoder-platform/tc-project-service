@@ -45,17 +45,17 @@ module.exports = [
         projectId,
       },
     })
-    .then((workStream) => {
-      if (!workStream) {
+      .then((workStream) => {
+        if (!workStream) {
         // handle 404
-        const err = new Error(`work stream not found for project id ${projectId} ` +
+          const err = new Error(`work stream not found for project id ${projectId} ` +
           `and work stream id ${workStreamId}`);
-        err.status = 404;
-        return Promise.reject(err);
-      }
+          err.status = 404;
+          return Promise.reject(err);
+        }
 
-      return workStream.update(entityToUpdate);
-    })
+        return workStream.update(entityToUpdate);
+      })
       .then((workStream) => {
         res.json(workStream);
         return Promise.resolve();

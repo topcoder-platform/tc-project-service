@@ -48,33 +48,33 @@ describe('GET project member', () => {
           lastActivityAt: 1,
           lastActivityUserId: '1',
         })
-        .then((project) => {
-          projectId = project.id;
-          // create members
-          models.ProjectMember.create({
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }).then((_member) => {
-            memberId = _member.id;
+          .then((project) => {
+            projectId = project.id;
+            // create members
             models.ProjectMember.create({
-              id: 2,
-              userId: memberUser.userId,
+              id: 1,
+              userId: copilotUser.userId,
               projectId,
-              role: 'customer',
-              isPrimary: true,
+              role: 'copilot',
+              isPrimary: false,
               createdBy: 1,
               updatedBy: 1,
-            }).then((m) => {
-              memberId2 = m.id;
-              done();
+            }).then((_member) => {
+              memberId = _member.id;
+              models.ProjectMember.create({
+                id: 2,
+                userId: memberUser.userId,
+                projectId,
+                role: 'customer',
+                isPrimary: true,
+                createdBy: 1,
+                updatedBy: 1,
+              }).then((m) => {
+                memberId2 = m.id;
+                done();
+              });
             });
           });
-        });
       });
   });
 
@@ -91,20 +91,20 @@ describe('GET project member', () => {
 
     it('should return 404 if requested project doesn\'t exist', (done) => {
       request(server)
-          .get('/v5/projects/9999999/members/1')
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, done);
+        .get('/v5/projects/9999999/members/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(404, done);
     });
 
     it('should return 404 if requested project member doesn\'t exist', (done) => {
       request(server)
-          .get(`/v5/projects/${projectId}/members/9999`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, done);
+        .get(`/v5/projects/${projectId}/members/9999`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(404, done);
     });
 
     it('should return 200 for connect admin', (done) => {

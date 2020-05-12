@@ -376,29 +376,29 @@ describe('Project member invite delete', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .delete(`/v5/projects/${project1.id}/invites/3`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-        })
-        .expect(204)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(1);
+          .delete(`/v5/projects/${project1.id}/invites/3`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+          })
+          .expect(204)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(1);
 
-              // Events for accepted invite
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REMOVED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER_INVITE,
-                projectId: project1.id,
-                id: 3,
-              })).should.be.true;
+                // Events for accepted invite
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REMOVED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                  projectId: project1.id,
+                  id: 3,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
     });
   });

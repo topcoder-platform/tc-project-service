@@ -24,22 +24,22 @@ module.exports = [
         id: projectId,
       },
     })
-    .then((countProject) => {
-      if (countProject === 0) {
-        const apiErr = new Error(`active project not found for project id ${projectId}`);
-        apiErr.status = 404;
-        throw apiErr;
-      }
+      .then((countProject) => {
+        if (countProject === 0) {
+          const apiErr = new Error(`active project not found for project id ${projectId}`);
+          apiErr.status = 404;
+          throw apiErr;
+        }
 
-      return models.WorkStream.findAll({
-        where: {
-          projectId,
-        },
-        attributes: { exclude: ['deletedAt', 'deletedBy'] },
-        raw: true,
-      });
-    })
-    .then(workStreams => res.json(workStreams))
-    .catch(next);
+        return models.WorkStream.findAll({
+          where: {
+            projectId,
+          },
+          attributes: { exclude: ['deletedAt', 'deletedBy'] },
+          raw: true,
+        });
+      })
+      .then(workStreams => res.json(workStreams))
+      .catch(next);
   },
 ];

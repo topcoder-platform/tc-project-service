@@ -60,25 +60,25 @@ module.exports = [
         },
       },
     }, 'metadata')
-    .then((data) => {
-      if (data.orgConfigs.length === 0) {
-        req.log.debug('No orgConfig found in ES');
+      .then((data) => {
+        if (data.orgConfigs.length === 0) {
+          req.log.debug('No orgConfig found in ES');
 
-        // Get all organization config
-        const where = filters ? _.assign({}, filters, { orgId: { $in: orgIds } }) : {};
-        models.OrgConfig.findAll({
-          where,
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-          raw: true,
-        })
-        .then((orgConfigs) => {
-          res.json(orgConfigs);
-        })
-        .catch(next);
-      } else {
-        req.log.debug('orgConfigs found in ES');
-        res.json(data.orgConfigs.hits.hits.map(hit => hit._source)); // eslint-disable-line no-underscore-dangle
-      }
-    });
+          // Get all organization config
+          const where = filters ? _.assign({}, filters, { orgId: { $in: orgIds } }) : {};
+          models.OrgConfig.findAll({
+            where,
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
+            raw: true,
+          })
+            .then((orgConfigs) => {
+              res.json(orgConfigs);
+            })
+            .catch(next);
+        } else {
+          req.log.debug('orgConfigs found in ES');
+          res.json(data.orgConfigs.hits.hits.map(hit => hit._source)); // eslint-disable-line no-underscore-dangle
+        }
+      });
   },
 ];

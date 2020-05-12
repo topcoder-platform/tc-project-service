@@ -405,24 +405,70 @@ describe('LIST Project', () => {
         });
     });
 
+    it('should return the project with empty invites using M2M token without "read:project-invites" scope', (done) => {
+      request(server)
+        .get('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson.forEach((project) => {
+              project.invites.should.be.empty;
+            });
+            done();
+          }
+        });
+    });
+
+    it('should not include the project members using M2M token without "read:project-members" scope', (done) => {
+      request(server)
+        .get('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson.forEach((project) => {
+              should.not.exist(project.members);
+            });
+            done();
+          }
+        });
+    });
+
     it('should return the project when project that is in reviewed state in which the copilot is its member or has been invited', (done) => {
       request(server)
-          .get('/v5/projects')
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .end((err, res) => {
-            if (err) {
-              done(err);
-            } else {
-              const resJson = res.body;
-              should.exist(resJson);
-              resJson.should.have.lengthOf(2);
-              done();
-            }
-          });
+        .get('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(2);
+            done();
+          }
+        });
     });
 
     it('should return the project for administrator ', (done) => {
@@ -1130,9 +1176,9 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].name.should.equal('test1');
-              resJson[0].invites.should.have.lengthOf(2);
+              resJson[0].invites.should.have.lengthOf(1);
               resJson[0].invites[0].should.have.property('email');
-              resJson[0].invites[1].email.should.equal('h***o@w***d.com');
+              resJson[0].invites[0].userId.should.equal(40051335);
               done();
             }
           });
@@ -1161,246 +1207,246 @@ describe('LIST Project', () => {
     describe('URL Query fields', () => {
       it('should not return "email" for project members when "fields" query param is not defined (to non-admin users)', (done) => {
         request(server)
-        .get('/v5/projects/')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            resJson.should.have.lengthOf(1);
-            resJson[0].members[0].should.not.have.property('email');
-            done();
-          }
-        });
+          .get('/v5/projects/')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              resJson[0].members[0].should.not.have.property('email');
+              done();
+            }
+          });
       });
 
 
       it('should not return "email" for project members even if it\'s listed in "fields" query param (to non-admin users)', (done) => {
         request(server)
-        .get('/v5/projects/?fields=members.email,members.id')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            resJson.should.have.lengthOf(1);
-            resJson[0].members[0].should.not.have.property('email');
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=members.email,members.id')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              resJson[0].members[0].should.not.have.property('email');
+              done();
+            }
+          });
       });
 
 
       it('should not return "cancelReason" if it is not listed in "fields" query param ', (done) => {
         request(server)
-        .get('/v5/projects/?fields=description')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            resJson.should.have.lengthOf(1);
-            resJson[0].should.have.property('description');
-            resJson[0].should.not.have.property('cancelReason');
-            resJson[0].description.should.be.eq('test project1 abc/d');
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=description')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member2}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(1);
+              resJson[0].should.have.property('description');
+              resJson[0].should.not.have.property('cancelReason');
+              resJson[0].description.should.be.eq('test project1 abc/d');
+              done();
+            }
+          });
       });
 
       it('should not return "email" for project members when it is not listed in "fields" query param (to admin users)', (done) => {
         request(server)
-        .get('/v5/projects/?fields=description,members.id')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === project1.id);
-            const member = _.find(project.members, m => m.id === 1);
-            member.should.not.have.property('email');
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=description,members.id')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              const project = _.find(resJson, p => p.id === project1.id);
+              const member = _.find(project.members, m => m.id === 1);
+              member.should.not.have.property('email');
+              done();
+            }
+          });
       });
 
 
       it('should return "email" for project members if it\'s listed in "fields" query param (to admin users)', (done) => {
         request(server)
-        .get('/v5/projects/?fields=description,members.id,members.email')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === project1.id);
-            const member = _.find(project.members, m => m.id === 1);
-            member.should.have.property('email');
-            member.email.should.be.eq('test@test.com');
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=description,members.id,members.email')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              const project = _.find(resJson, p => p.id === project1.id);
+              const member = _.find(project.members, m => m.id === 1);
+              member.should.have.property('email');
+              member.email.should.be.eq('test@test.com');
+              done();
+            }
+          });
       });
 
       it('should only return "id" field, when it\'s the only fields listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=id')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            resJson[0].should.have.property('id');
-            _.keys(resJson[0]).length.should.be.eq(1);
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=id')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson[0].should.have.property('id');
+              _.keys(resJson[0]).length.should.be.eq(1);
+              done();
+            }
+          });
       });
 
       it('should only return "invites.userId" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=invites.userId')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === project1.id);
-            project.invites[0].should.have.property('userId');
-            _.keys(project.invites[0]).length.should.be.eq(1);
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=invites.userId')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              const project = _.find(resJson, p => p.id === project1.id);
+              project.invites[0].should.have.property('userId');
+              _.keys(project.invites[0]).length.should.be.eq(1);
+              done();
+            }
+          });
       });
 
       it('should only return "members.role" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=members.role')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === project1.id);
-            project.members[0].should.have.property('role');
-            _.keys(project.members[0]).length.should.be.eq(1);
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=members.role')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              const project = _.find(resJson, p => p.id === project1.id);
+              project.members[0].should.have.property('role');
+              _.keys(project.members[0]).length.should.be.eq(1);
+              done();
+            }
+          });
       });
 
       it('should only return "attachments.title" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=attachments.title')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === project1.id);
-            project.attachments[0].should.have.property('title');
-            _.keys(project.attachments[0]).length.should.be.eq(1);
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=attachments.title')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              const project = _.find(resJson, p => p.id === project1.id);
+              project.attachments[0].should.have.property('title');
+              _.keys(project.attachments[0]).length.should.be.eq(1);
+              done();
+            }
+          });
       });
 
       it('should only return "phases.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=phases.name')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === project1.id);
-            project.phases[0].should.have.property('name');
-            _.keys(project.phases[0]).length.should.be.eq(1);
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=phases.name')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              const project = _.find(resJson, p => p.id === project1.id);
+              project.phases[0].should.have.property('name');
+              _.keys(project.phases[0]).length.should.be.eq(1);
+              done();
+            }
+          });
       });
 
       it('should only return "phases.products.name" field, when it\'s the only field listed in "fields" query param', (done) => {
         request(server)
-        .get('/v5/projects/?fields=phases.products.name')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            should.exist(resJson);
-            const project = _.find(resJson, p => p.id === project1.id);
-            project.phases[0].products[0].should.have.property('name');
-            _.keys(project.phases[0].products[0]).length.should.be.eq(1);
-            done();
-          }
-        });
+          .get('/v5/projects/?fields=phases.products.name')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              const project = _.find(resJson, p => p.id === project1.id);
+              project.phases[0].products[0].should.have.property('name');
+              _.keys(project.phases[0].products[0]).length.should.be.eq(1);
+              done();
+            }
+          });
       });
 
       it('should find a project by quoted keyword with a special symbol in the name', (done) => {

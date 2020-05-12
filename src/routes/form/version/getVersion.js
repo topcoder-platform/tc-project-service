@@ -43,26 +43,26 @@ module.exports = [
       },
       sort: { 'forms.revision': 'desc' },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No form found in ES');
-        return models.Form.findOneWithLatestRevision(req.params)
-          .then((form) => {
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No form found in ES');
+          return models.Form.findOneWithLatestRevision(req.params)
+            .then((form) => {
             // Not found
-            if (!form) {
-              const apiErr = new Error(`Form not found for key ${req.params.key} version ${req.params.version}`);
-              apiErr.status = 404;
-              return Promise.reject(apiErr);
-            }
-            res.json(form);
-            return Promise.resolve();
-          })
-          .catch(next);
-      }
-      req.log.debug('forms found in ES');
-      res.json(data[0].inner_hits.forms.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-      return Promise.resolve();
-    })
-    .catch(next);
+              if (!form) {
+                const apiErr = new Error(`Form not found for key ${req.params.key} version ${req.params.version}`);
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+              res.json(form);
+              return Promise.resolve();
+            })
+            .catch(next);
+        }
+        req.log.debug('forms found in ES');
+        res.json(data[0].inner_hits.forms.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

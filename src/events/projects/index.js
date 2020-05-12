@@ -115,7 +115,7 @@ const projectUpdatedHandler = Promise.coroutine(function* (logger, msg, channel)
   try {
     // first get the existing document and than merge the updated changes and save the new document
     const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.id });
-    const merged = _.merge(doc._source, data.updated);        // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, data.updated); // eslint-disable-line no-underscore-dangle
     // update the merged document
     yield eClient.update({
       index: ES_PROJECT_INDEX,
@@ -198,7 +198,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
   try {
     const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
     console.log(doc._source, 'Received project from ES');// eslint-disable-line no-underscore-dangle
-    const merged = _.merge(doc._source, project.get({ plain: true }));        // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, project.get({ plain: true })); // eslint-disable-line no-underscore-dangle
     console.log(merged, 'Merged project');
     // update the merged document
     await eClient.update({
