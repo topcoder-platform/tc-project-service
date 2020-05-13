@@ -116,9 +116,11 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
 
   // only admins can update values of 'completionDate' and 'actualStartDate' if they are already set
   const isUpdatedCompletionDate = milestone.completionDate && entityToUpdate.completionDate
-    && milestone.completionDate !== entityToUpdate.completionDate;
+    && !moment(milestone.completionDate).isSame(entityToUpdate.completionDate);
   const isUpdatedActualStartDate = milestone.actualStartDate && entityToUpdate.actualStartDate
-    && milestone.actualStartDate !== entityToUpdate.actualStartDate;
+    && !moment(milestone.actualStartDate).isSame(entityToUpdate.actualStartDate);
+
+
   if (
     (isUpdatedCompletionDate || isUpdatedActualStartDate)
     && !util.hasPermission({ topcoderRoles: ADMIN_ROLES }, authUser)
