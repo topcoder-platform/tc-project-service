@@ -123,9 +123,9 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
     (isUpdatedCompletionDate || isUpdatedActualStartDate)
     && !util.hasPermission({ topcoderRoles: ADMIN_ROLES }, authUser)
   ) {
-    // const apiErr = new Error('You are not allowed to perform this action.');
-    // apiErr.status = 403;
-    // throw apiErr;
+    const apiErr = new Error('You are not allowed to perform this action.');
+    apiErr.status = 403;
+    throw apiErr;
   }
 
   if (
