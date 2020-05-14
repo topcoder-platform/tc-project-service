@@ -99,10 +99,19 @@ module.exports = [
       [
         [created, EVENT.ROUTING_KEY.MILESTONE_ADDED],
         [deleted, EVENT.ROUTING_KEY.MILESTONE_REMOVED],
-        [updated, EVENT.ROUTING_KEY.MILESTONE_UPDATED],
       ].forEach(([results, routingKey]) =>
         results.forEach(result => util.sendResourceToKafkaBus(req, routingKey, RESOURCES.MILESTONE, result)),
       );
+
+      updated.forEach(({ updated: updatedMilestone, original: originalMilestone }) => {
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.MILESTONE_UPDATED,
+          RESOURCES.MILESTONE,
+          updatedMilestone,
+          originalMilestone,
+        );
+      });
 
       // return all the timeline milestones after all updates
       const milestones = await req.timeline.getMilestones()

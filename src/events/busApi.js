@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import moment from 'moment';
 import config from 'config';
 import {
   EVENT,
@@ -715,7 +714,6 @@ module.exports = (app, logger) => {
     req,
     resource,
     originalResource,
-    cascadedUpdates,
     skipNotification,
   }) => { // eslint-disable-line no-unused-vars
     logger.debug(`receive MILESTONE_UPDATED event for milestone ${resource.id}`);
@@ -742,15 +740,9 @@ module.exports = (app, logger) => {
               timeline.progress = progress;
               sendMilestoneNotification(req, original, updated, project, timeline);
 
-              logger.debug('cascadedUpdates', cascadedUpdates);
-              if (cascadedUpdates && cascadedUpdates.milestones && cascadedUpdates.milestones.length > 0) {
-                _.each(cascadedUpdates.milestones, cascadedUpdate =>
-                  sendMilestoneNotification(req, cascadedUpdate.original, cascadedUpdate.updated, project, timeline),
-                );
-              }
-
+              // TODO raise this event again
               // if timeline is modified
-              if (cascadedUpdates && cascadedUpdates.timeline) {
+              /* if (cascadedUpdates && cascadedUpdates.timeline) {
                 const cTimeline = cascadedUpdates.timeline;
                 // if endDate of the timeline is modified, raise TIMELINE_ADJUSTED event
                 if (!moment(cTimeline.original.endDate).isSame(cTimeline.updated.endDate)) {
@@ -766,7 +758,7 @@ module.exports = (app, logger) => {
                     initiatorUserId: req.authUser.userId,
                   }, logger);
                 }
-              }
+              } */
             });
         }).catch(err => null); // eslint-disable-line no-unused-vars
     }

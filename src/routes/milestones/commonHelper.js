@@ -65,7 +65,7 @@ async function deleteMilestone(authUser, timelineId, id, transaction, item) {
  * @param {Object} data The updated data
  * @param {Object} transaction The transaction to use
  * @param {Object} [item] The item to update
- * @returns {Object} The updated milestone
+ * @returns {{updated: Object, original: Object}} The updated and original milestones
  * @throws {Error} If something went wrong
  */
 async function updateMilestone(authUser, timelineId, data, transaction, item) {
@@ -87,6 +87,9 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
     apiErr.status = 404;
     throw apiErr;
   }
+
+  const original = milestone.toJSON();
+
   if (entityToUpdate.status === MILESTONE_STATUS.PAUSED && !validStatuses.includes(milestone.status)) {
     const validStatutesStr = validStatuses.join(', ');
     const apiErr = new Error(`Milestone can only be paused from the next statuses: ${validStatutesStr}`);
@@ -196,7 +199,10 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
   */
 
   const result = await milestone.update(entityToUpdate, { comment: entityToUpdate.statusComment, transaction });
-  return _.omit(result.toJSON(), ['deletedBy', 'deletedAt']);
+  return {
+    original: _.omit(original, ['deletedBy', 'deletedAt']),
+    updated: _.omit(result.toJSON(), ['deletedBy', 'deletedAt']),
+  };
 }
 
 

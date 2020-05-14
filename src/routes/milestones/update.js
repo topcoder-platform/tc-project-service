@@ -59,13 +59,15 @@ module.exports = [
         req.params.timelineId,
         Object.assign({}, req.body, { id: req.params.milestoneId }),
         t))
-      .then((result) => {
+      .then(({ updated, original }) => {
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.MILESTONE_UPDATED,
           RESOURCES.MILESTONE,
-          result);
-        res.json(result);
+          updated,
+          original,
+        );
+        res.json(updated);
       })
       .catch(next),
 ];

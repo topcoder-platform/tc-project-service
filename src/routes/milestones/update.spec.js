@@ -1209,7 +1209,7 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.callCount.should.be.eql(4);
+                createEventSpy.callCount.should.be.eql(3);
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   resource: RESOURCES.MILESTONE,
@@ -1302,7 +1302,7 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.callCount.should.be.eql(3);
+                createEventSpy.callCount.should.be.eql(2);
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   resource: RESOURCES.MILESTONE,
@@ -1329,7 +1329,7 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.callCount.should.be.eql(3);
+                createEventSpy.callCount.should.be.eql(2);
 
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
                   resource: RESOURCES.MILESTONE,
