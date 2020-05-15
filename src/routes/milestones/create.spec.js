@@ -10,7 +10,7 @@ import server from '../../app';
 import testUtil from '../../tests/util';
 import models from '../../models';
 import busApi from '../../services/busApi';
-import { EVENT, RESOURCES, BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import { RESOURCES, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -430,14 +430,7 @@ describe('CREATE milestone', () => {
           // validate statusHistory
           should.exist(resJson.statusHistory);
           resJson.statusHistory.should.be.an('array');
-          resJson.statusHistory.length.should.be.eql(1);
-          resJson.statusHistory.forEach((statusHistory) => {
-            statusHistory.reference.should.be.eql('milestone');
-            statusHistory.referenceId.should.be.eql(resJson.id);
-          });
-
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_ADDED).should.be.true;
+          resJson.statusHistory.length.should.be.eql(0);
 
           // Verify 'order' of the other milestones
           models.Milestone.findAll({ where: { timelineId: 1 } })
@@ -446,9 +439,9 @@ describe('CREATE milestone', () => {
                 if (milestone.id === 11) {
                   milestone.order.should.be.eql(1);
                 } else if (milestone.id === 12) {
-                  milestone.order.should.be.eql(2 + 1);
+                  milestone.order.should.be.eql(1 + 1);
                 } else if (milestone.id === 13) {
-                  milestone.order.should.be.eql(3 + 1);
+                  milestone.order.should.be.eql(2 + 1);
                 }
               });
 
@@ -556,7 +549,7 @@ describe('CREATE milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.callCount.should.be.eql(4);
+                createEventSpy.callCount.should.be.eql(2);
 
                 // added a new milestone
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED, sinon.match({
@@ -564,25 +557,6 @@ describe('CREATE milestone', () => {
                   name: 'milestone 4',
                   description: 'description 4',
                   order: 2,
-                })).should.be.true;
-
-                // as order of the next milestones after the added one have been updated, we send events about their update
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
-                  resource: RESOURCES.MILESTONE,
-                  order: 3,
-                })).should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
-                  resource: RESOURCES.MILESTONE,
-                  order: 4,
-                })).should.be.true;
-
-                // Check Notification Service events
-                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_ADDED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
                 })).should.be.true;
 
                 done();

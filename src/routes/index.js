@@ -210,6 +210,7 @@ router.route('/v5/timelines/:timelineId(\\d+)')
 
 router.route('/v5/timelines/:timelineId(\\d+)/milestones')
   .post(require('./milestones/create'))
+  .patch(require('./milestones/bulkUpdate'))
   .get(require('./milestones/list'));
 
 router.route('/v5/timelines/:timelineId(\\d+)/milestones/:milestoneId(\\d+)')

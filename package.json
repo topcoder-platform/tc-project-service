@@ -60,7 +60,7 @@
     "express-list-routes": "^0.1.4",
     "express-request-id": "^1.1.0",
     "express-sanitizer": "^1.0.2",
-    "express-validation": "^0.6.0",
+    "express-validation": "^1.0.3",
     "handlebars": "^4.5.3",
     "http-aws-es": "^4.0.0",
     "joi": "^8.0.5",
