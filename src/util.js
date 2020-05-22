@@ -1285,7 +1285,7 @@ const projectServiceUtils = {
       return false;
     }
 
-    console.log('hasPermission', permission, user);
+    // console.log('hasPermission', permission, user);
 
     const allowRule = permission.allowRule ? permission.allowRule : permission;
     const denyRule = permission.denyRule ? permission.denyRule : null;
