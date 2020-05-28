@@ -146,10 +146,10 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_DIRECT_PROJECT_ID, req)) {
     errors.push('You do not have permission to update \'directProjectId\' property');
   }
-  if (_.has(updatedProps, 'billingAccountId') &&
-    !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_BILLING_ACCOUNT_ID, req)) {
-    errors.push('You do not have permission to update \'billingAccountId\' property');
-  }
+  // if (_.has(updatedProps, 'billingAccountId') &&
+  //   !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_BILLING_ACCOUNT_ID, req)) {
+  //   errors.push('You do not have permission to update \'billingAccountId\' property');
+  // }
   if ((existingProject.status !== PROJECT_STATUS.DRAFT) && (updatedProps.status === PROJECT_STATUS.DRAFT)) {
     errors.push('cannot update a project status to draft');
   }
