@@ -32,13 +32,13 @@ module.exports = [
         },
       },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No milestoneTemplate found in ES');
-        return res.json(_.omit(req.milestoneTemplate.toJSON(), 'deletedAt', 'deletedBy'));
-      }
-      req.log.debug('milestoneTemplate found in ES');
-      return res.json(data[0].inner_hits.milestoneTemplates.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-    })
-    .catch(next),
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No milestoneTemplate found in ES');
+          return res.json(_.omit(req.milestoneTemplate.toJSON(), 'deletedAt', 'deletedBy'));
+        }
+        req.log.debug('milestoneTemplate found in ES');
+        return res.json(data[0].inner_hits.milestoneTemplates.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+      })
+      .catch(next),
 ];

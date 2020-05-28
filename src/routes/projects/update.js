@@ -74,7 +74,7 @@ const updateProjectValdiations = {
       users: Joi.array().items(Joi.number().positive()),
       groups: Joi.array().items(Joi.number().positive()),
     })).allow(null),
-      // cancel reason is mandatory when project status is cancelled
+    // cancel reason is mandatory when project status is cancelled
     cancelReason: Joi.when('status', {
       is: PROJECT_STATUS.CANCELLED,
       then: Joi.string().required(),
@@ -143,8 +143,12 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     //   }
   }
   if (_.has(updatedProps, 'directProjectId') &&
-    !util.hasPermissionByReq(PERMISSION.UPDATE_PROJECT_DIRECT_PROJECT_ID, req)) {
-    errors.push('Don\'t have permission to update \'directProjectId\' property');
+    !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_DIRECT_PROJECT_ID, req)) {
+    errors.push('You do not have permission to update \'directProjectId\' property');
+  }
+  if (_.has(updatedProps, 'billingAccountId') &&
+    !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_BILLING_ACCOUNT_ID, req)) {
+    errors.push('You do not have permission to update \'billingAccountId\' property');
   }
   if ((existingProject.status !== PROJECT_STATUS.DRAFT) && (updatedProps.status === PROJECT_STATUS.DRAFT)) {
     errors.push('cannot update a project status to draft');
@@ -156,7 +160,7 @@ module.exports = [
   // handles request validations
   validate(updateProjectValdiations),
   permissions('project.edit'),
-  /**
+  /*
    * Validate project type to be existed.
    */
   (req, res, next) => {
@@ -175,7 +179,7 @@ module.exports = [
       next();
     }
   },
-  /**
+  /*
    * POST projects/
    * Create a project if the user has access
    */
@@ -204,7 +208,7 @@ module.exports = [
         }
         if (!_prj.templateId) return Promise.resolve({ _prj });
         return models.ProjectTemplate.getTemplate(_prj.templateId)
-        .then(template => Promise.resolve({ _prj, template }));
+          .then(template => Promise.resolve({ _prj, template }));
       })
       .then(({ _prj, template }) => {
         project = _prj;

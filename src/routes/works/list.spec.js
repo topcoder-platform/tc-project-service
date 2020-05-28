@@ -59,35 +59,35 @@ describe('LIST works', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-        .then(() => {
-          models.ProjectTemplate.create({
-            name: 'template 2',
-            key: 'key 2',
-            category: 'category 2',
-            icon: 'http://example.com/icon1.ico',
-            question: 'question 2',
-            info: 'info 2',
-            aliases: ['key-2', 'key_2'],
-            scope: {},
-            phases: {},
-            createdBy: 1,
-            updatedBy: 2,
-          })
-            .then((template) => {
-              // Create projects
-              models.Project.create({
-                type: 'generic',
-                billingAccountId: 1,
-                name: 'test1',
-                description: 'test project1',
-                status: 'draft',
-                templateId: template.id,
-                details: {},
-                createdBy: 1,
-                updatedBy: 1,
-                lastActivityAt: 1,
-                lastActivityUserId: '1',
-              })
+      .then(() => {
+        models.ProjectTemplate.create({
+          name: 'template 2',
+          key: 'key 2',
+          category: 'category 2',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 2',
+          info: 'info 2',
+          aliases: ['key-2', 'key_2'],
+          scope: {},
+          phases: {},
+          createdBy: 1,
+          updatedBy: 2,
+        })
+          .then((template) => {
+            // Create projects
+            models.Project.create({
+              type: 'generic',
+              billingAccountId: 1,
+              name: 'test1',
+              description: 'test project1',
+              status: 'draft',
+              templateId: template.id,
+              details: {},
+              createdBy: 1,
+              updatedBy: 1,
+              lastActivityAt: 1,
+              lastActivityUserId: '1',
+            })
               .then((project) => {
                 projectId = project.id;
                 models.WorkStream.create({
@@ -118,8 +118,8 @@ describe('LIST works', () => {
                     });
                 });
               });
-            });
-        });
+          });
+      });
   });
 
   after((done) => {

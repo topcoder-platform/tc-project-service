@@ -1,23 +1,27 @@
 version: "2"
 services:
   jsonserver:
-    extends:
-      file: ../docker-compose.yml
-      service: jsonserver
+    build: "../mock-services"
+    ports:
+      - "3001:3001"
   db:
-    extends:
-      file: ../docker-compose.yml
-      service: db
+    build: "../postgres-db"
+    ports:
+      - "5432:5432"
     environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_USER=coder
       - POSTGRES_MULTIPLE_DATABASES=projectsdb,projectsdb_test,tc_notifications
   esearch:
-    extends:
-      file: ../docker-compose.yml
-      service: esearch
+    image: "elasticsearch:2.3"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
   queue:
-    extends:
-      file: ../docker-compose.yml
-      service: queue
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
   zookeeper:
     image: wurstmeister/zookeeper
     ports:

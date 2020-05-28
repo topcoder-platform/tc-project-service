@@ -42,33 +42,33 @@ module.exports = [
       },
       ],
     })
-    .then((existing) => {
-      if (!existing) {
+      .then((existing) => {
+        if (!existing) {
         // handle 404
-        const err = new Error('No active work item found for project id ' +
+          const err = new Error('No active work item found for project id ' +
           `${projectId}, phase id ${phaseId} and work stream id ${workStreamId}`);
-        err.status = 404;
-        return Promise.reject(err);
-      }
+          err.status = 404;
+          return Promise.reject(err);
+        }
 
-      return models.PhaseProduct.findOne({
-        where: {
-          id: productId,
-          projectId,
-          phaseId,
-          deletedAt: { $eq: null },
-        },
-      });
-    }).then((product) => {
-      if (!product) {
+        return models.PhaseProduct.findOne({
+          where: {
+            id: productId,
+            projectId,
+            phaseId,
+            deletedAt: { $eq: null },
+          },
+        });
+      }).then((product) => {
+        if (!product) {
         // handle 404
-        const err = new Error('phase product not found for project id ' +
+          const err = new Error('phase product not found for project id ' +
               `${projectId}, phase id ${phaseId} and product id ${productId}`);
-        err.status = 404;
-        throw err;
-      } else {
-        res.json(product);
-      }
-    }).catch(err => next(err));
+          err.status = 404;
+          throw err;
+        } else {
+          res.json(product);
+        }
+      }).catch(err => next(err));
   },
 ];

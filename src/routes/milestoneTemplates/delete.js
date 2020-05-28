@@ -22,19 +22,19 @@ module.exports = [
   validateMilestoneTemplate.validateIdParam,
   permissions('milestoneTemplate.delete'),
   (req, res, next) => models.sequelize.transaction(() =>
-      // soft delete the record
-      req.milestoneTemplate.update({ deletedBy: req.authUser.userId })
-        .then(entity => entity.destroy()),
-    )
-      .then(() => {
-        // emit the event
-        util.sendResourceToKafkaBus(
-          req,
-          EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_REMOVED,
-          RESOURCES.MILESTONE_TEMPLATE,
-          { id: req.params.milestoneTemplateId });
+  // soft delete the record
+    req.milestoneTemplate.update({ deletedBy: req.authUser.userId })
+      .then(entity => entity.destroy()),
+  )
+    .then(() => {
+      // emit the event
+      util.sendResourceToKafkaBus(
+        req,
+        EVENT.ROUTING_KEY.MILESTONE_TEMPLATE_REMOVED,
+        RESOURCES.MILESTONE_TEMPLATE,
+        { id: req.params.milestoneTemplateId });
 
-        res.status(204).end();
-      })
-      .catch(next),
+      res.status(204).end();
+    })
+    .catch(next),
 ];

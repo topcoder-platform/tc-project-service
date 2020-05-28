@@ -61,10 +61,10 @@ describe('CREATE PriceConfig Revision', () => {
 
     it('should return 404 if missing key', (done) => {
       request(server)
-      .post('/v5/projects/metadata/priceConfig/no-exist-key/versions/1/revisions')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .post('/v5/projects/metadata/priceConfig/no-exist-key/versions/1/revisions')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -72,10 +72,10 @@ describe('CREATE PriceConfig Revision', () => {
 
     it('should return 404 if missing version', (done) => {
       request(server)
-      .post('/v5/projects/metadata/priceConfig/dev/versions/100/revisions')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .post('/v5/projects/metadata/priceConfig/dev/versions/100/revisions')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
@@ -98,10 +98,10 @@ describe('CREATE PriceConfig Revision', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-      .post('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .post('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
@@ -124,7 +124,7 @@ describe('CREATE PriceConfig Revision', () => {
 
     it('should return 403 for member', (done) => {
       request(server)
-      .post('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
+        .post('/v5/projects/metadata/priceConfig/dev/versions/1/revisions')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })

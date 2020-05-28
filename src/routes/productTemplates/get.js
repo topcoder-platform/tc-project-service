@@ -30,34 +30,34 @@ module.exports = [
         },
       },
     }, 'metadata')
-    .then((data) => {
-      if (data.length === 0) {
-        req.log.debug('No productTemplate found in ES');
-        models.ProductTemplate.findOne({
-          where: {
-            deletedAt: { $eq: null },
-            id: req.params.templateId,
-          },
-          attributes: { exclude: ['deletedAt', 'deletedBy'] },
-          raw: true,
-        })
-          .then((productTemplate) => {
-            // Not found
-            if (!productTemplate) {
-              const apiErr = new Error(`Product template not found for product id ${req.params.templateId}`);
-              apiErr.status = 404;
-              return Promise.reject(apiErr);
-            }
-
-            res.json(productTemplate);
-            return Promise.resolve();
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No productTemplate found in ES');
+          models.ProductTemplate.findOne({
+            where: {
+              deletedAt: { $eq: null },
+              id: req.params.templateId,
+            },
+            attributes: { exclude: ['deletedAt', 'deletedBy'] },
+            raw: true,
           })
-          .catch(next);
-      } else {
-        req.log.debug('productTemplates found in ES');
-        res.json(data[0].inner_hits.productTemplates.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
-      }
-    })
-    .catch(next);
+            .then((productTemplate) => {
+            // Not found
+              if (!productTemplate) {
+                const apiErr = new Error(`Product template not found for product id ${req.params.templateId}`);
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
+
+              res.json(productTemplate);
+              return Promise.resolve();
+            })
+            .catch(next);
+        } else {
+          req.log.debug('productTemplates found in ES');
+          res.json(data[0].inner_hits.productTemplates.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        }
+      })
+      .catch(next);
   },
 ];

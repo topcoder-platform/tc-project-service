@@ -37,7 +37,7 @@ module.exports = [
   // handles request validations
   validate(updateProjectMemberValdiations),
   permissions('projectMember.edit'),
-  /**
+  /*
    * Update a projectMember if the user has access
    */
   (req, res, next) => {
@@ -53,104 +53,104 @@ module.exports = [
     models.sequelize.transaction(() => models.ProjectMember.findOne({
       where: { id: memberRecordId, projectId },
     })
-        .then((_member) => {
-          if (!_member) {
-            // handle 404
-            const err = new Error(`project member not found for project id ${projectId} ` +
+      .then((_member) => {
+        if (!_member) {
+          // handle 404
+          const err = new Error(`project member not found for project id ${projectId} ` +
               `and member id ${memberRecordId}`);
-            err.status = 404;
-            return Promise.reject(err);
-          }
+          err.status = 404;
+          return Promise.reject(err);
+        }
 
-          projectMember = _member;
-          previousValue = _.clone(projectMember.get({ plain: true }));
-          _.assign(projectMember, updatedProps);
+        projectMember = _member;
+        previousValue = _.clone(projectMember.get({ plain: true }));
+        _.assign(projectMember, updatedProps);
 
-          if (
-            previousValue.userId !== req.authUser.userId &&
+        if (
+          previousValue.userId !== req.authUser.userId &&
             previousValue.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
             !util.hasPermissionByReq(PERMISSION.UPDATE_PROJECT_MEMBER_NON_CUSTOMER, req)
-          ) {
-            const err = new Error('You don\'t have permission to update a non-customer member.');
-            err.status = 403;
-            return Promise.reject(err);
-          }
+        ) {
+          const err = new Error('You don\'t have permission to update a non-customer member.');
+          err.status = 403;
+          return Promise.reject(err);
+        }
 
-          // no updates if no change
-          if (updatedProps.role === previousValue.role &&
+        // no updates if no change
+        if (updatedProps.role === previousValue.role &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
-            return Promise.resolve();
-          }
+          return Promise.resolve();
+        }
 
-          return util.getUserRoles(projectMember.userId, req.log, req.id).then((roles) => {
-            if (
-              previousValue.role !== updatedProps.role &&
+        return util.getUserRoles(projectMember.userId, req.log, req.id).then((roles) => {
+          if (
+            previousValue.role !== updatedProps.role &&
               !util.matchPermissionRule(
                 { topcoderRoles: PROJECT_TO_TOPCODER_ROLES_MATRIX[updatedProps.role] },
                 { roles },
               )
-            ) {
-              const err = new Error(
-                `User doesn't have required Topcoder roles to have project role "${updatedProps.role}".`,
-              );
-              err.status = 401;
-              throw err;
-            }
+          ) {
+            const err = new Error(
+              `User doesn't have required Topcoder roles to have project role "${updatedProps.role}".`,
+            );
+            err.status = 401;
+            throw err;
+          }
 
-            projectMember.updatedBy = req.authUser.userId;
-            const operations = [];
-            operations.push(projectMember.save());
+          projectMember.updatedBy = req.authUser.userId;
+          const operations = [];
+          operations.push(projectMember.save());
 
-            if (updatedProps.isPrimary) {
-              // if set as primary, other users with same role should no longer be primary
-              operations.push(models.ProjectMember.update({ isPrimary: false,
-                updatedBy: req.authUser.userId },
-                {
-                  where: {
-                    projectId,
-                    isPrimary: true,
-                    role: updatedProps.role,
-                    id: {
-                      $ne: projectMember.id,
-                    },
-                  },
-                }));
-            }
-            return Promise.all(operations);
-          });
-        })
-        .then(() => projectMember.reload(projectMember.id))
-        .then(() => {
-          projectMember = projectMember.get({ plain: true });
-          projectMember = _.omit(projectMember, ['deletedAt']);
-        })
-        .then(() => (
-          util.getObjectsWithMemberDetails([projectMember], fields, req)
-            .then(([memberWithDetails]) => memberWithDetails)
-            .catch((err) => {
-              req.log.error('Cannot get user details for member.');
-              req.log.debug('Error during getting user details for member.', err);
-              // continues without details anyway
-              return projectMember;
-            })
-        ))
-        .then((memberWithDetails) => {
-          // emit original and updated project information
-          req.app.services.pubsub.publish(
-            EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
-            { original: previousValue, updated: projectMember },
-            { correlationId: req.id },
-          );
-          util.sendResourceToKafkaBus(
-              req,
-              EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
-              RESOURCES.PROJECT_MEMBER,
-              projectMember,
-              previousValue);
-          req.log.debug('updated project member', projectMember);
-          res.json(memberWithDetails || projectMember);
-        })
-        .catch(err => next(err)));
+          if (updatedProps.isPrimary) {
+            // if set as primary, other users with same role should no longer be primary
+            operations.push(models.ProjectMember.update({ isPrimary: false,
+              updatedBy: req.authUser.userId },
+            {
+              where: {
+                projectId,
+                isPrimary: true,
+                role: updatedProps.role,
+                id: {
+                  $ne: projectMember.id,
+                },
+              },
+            }));
+          }
+          return Promise.all(operations);
+        });
+      })
+      .then(() => projectMember.reload(projectMember.id))
+      .then(() => {
+        projectMember = projectMember.get({ plain: true });
+        projectMember = _.omit(projectMember, ['deletedAt']);
+      })
+      .then(() => (
+        util.getObjectsWithMemberDetails([projectMember], fields, req)
+          .then(([memberWithDetails]) => memberWithDetails)
+          .catch((err) => {
+            req.log.error('Cannot get user details for member.');
+            req.log.debug('Error during getting user details for member.', err);
+            // continues without details anyway
+            return projectMember;
+          })
+      ))
+      .then((memberWithDetails) => {
+        // emit original and updated project information
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
+          { original: previousValue, updated: projectMember },
+          { correlationId: req.id },
+        );
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
+          RESOURCES.PROJECT_MEMBER,
+          projectMember,
+          previousValue);
+        req.log.debug('updated project member', projectMember);
+        res.json(memberWithDetails || projectMember);
+      })
+      .catch(err => next(err)));
   },
 ];

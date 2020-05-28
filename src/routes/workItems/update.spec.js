@@ -74,97 +74,97 @@ describe('UPDATE Work Item', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((template) => {
-          models.WorkManagementPermission.create({
-            policy: 'workItem.edit',
-            permission: {
-              allowRule: {
-                projectRoles: ['customer', 'copilot'],
-                topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+          .then((template) => {
+            models.WorkManagementPermission.create({
+              policy: 'workItem.edit',
+              permission: {
+                allowRule: {
+                  projectRoles: ['customer', 'copilot'],
+                  topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+                },
+                denyRule: { projectRoles: ['copilot'] },
               },
-              denyRule: { projectRoles: ['copilot'] },
-            },
-            projectTemplateId: template.id,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then(() => {
-            // Create projects
-            models.Project.create({
-              type: 'generic',
-              billingAccountId: 1,
-              name: 'test1',
-              description: 'test project1',
-              status: 'draft',
-              templateId: template.id,
+              projectTemplateId: template.id,
               details: {},
               createdBy: 1,
               updatedBy: 1,
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              models.WorkStream.create({
-                name: 'Work Stream',
-                type: 'generic',
-                status: 'active',
-                projectId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((entity) => {
-                workStreamId = entity.id;
-                models.ProjectPhase.create({
-                  name: 'test project phase',
-                  status: 'active',
-                  startDate: '2018-05-15T00:00:00Z',
-                  endDate: '2018-05-15T12:00:00Z',
-                  budget: 20.0,
-                  progress: 1.23456,
-                  details: {
-                    message: 'This can be any json',
-                  },
+              .then(() => {
+                // Create projects
+                models.Project.create({
+                  type: 'generic',
+                  billingAccountId: 1,
+                  name: 'test1',
+                  description: 'test project1',
+                  status: 'draft',
+                  templateId: template.id,
+                  details: {},
                   createdBy: 1,
                   updatedBy: 1,
-                  projectId,
-                }).then((phase) => {
-                  workId = phase.id;
-                  models.PhaseWorkStream.create({
-                    phaseId: workId,
-                    workStreamId,
-                  })
-                  .then(() => {
-                    _.assign(body, { phaseId: workId, projectId });
-                    models.PhaseProduct.create(body).then((product) => {
-                      productId = product.id;
-                      // create members
-                      models.ProjectMember.bulkCreate([{
-                        id: 1,
-                        userId: copilotUser.userId,
-                        projectId,
-                        role: 'copilot',
-                        isPrimary: false,
+                  lastActivityAt: 1,
+                  lastActivityUserId: '1',
+                })
+                  .then((project) => {
+                    projectId = project.id;
+                    models.WorkStream.create({
+                      name: 'Work Stream',
+                      type: 'generic',
+                      status: 'active',
+                      projectId,
+                      createdBy: 1,
+                      updatedBy: 1,
+                    }).then((entity) => {
+                      workStreamId = entity.id;
+                      models.ProjectPhase.create({
+                        name: 'test project phase',
+                        status: 'active',
+                        startDate: '2018-05-15T00:00:00Z',
+                        endDate: '2018-05-15T12:00:00Z',
+                        budget: 20.0,
+                        progress: 1.23456,
+                        details: {
+                          message: 'This can be any json',
+                        },
                         createdBy: 1,
                         updatedBy: 1,
-                      }, {
-                        id: 2,
-                        userId: memberUser.userId,
                         projectId,
-                        role: 'customer',
-                        isPrimary: true,
-                        createdBy: 1,
-                        updatedBy: 1,
-                      }]).then(() => done());
+                      }).then((phase) => {
+                        workId = phase.id;
+                        models.PhaseWorkStream.create({
+                          phaseId: workId,
+                          workStreamId,
+                        })
+                          .then(() => {
+                            _.assign(body, { phaseId: workId, projectId });
+                            models.PhaseProduct.create(body).then((product) => {
+                              productId = product.id;
+                              // create members
+                              models.ProjectMember.bulkCreate([{
+                                id: 1,
+                                userId: copilotUser.userId,
+                                projectId,
+                                role: 'copilot',
+                                isPrimary: false,
+                                createdBy: 1,
+                                updatedBy: 1,
+                              }, {
+                                id: 2,
+                                userId: memberUser.userId,
+                                projectId,
+                                role: 'customer',
+                                isPrimary: true,
+                                createdBy: 1,
+                                updatedBy: 1,
+                              }]).then(() => done());
+                            });
+                          });
+                      });
                     });
                   });
-                });
               });
-            });
           });
-        });
       });
   });
 

@@ -53,26 +53,26 @@ module.exports = [
       }
       return Promise.resolve(forms[0]);
     })
-    .then((form) => {
-      const revision = form.revision + 1;
-      const entity = {
-        version: req.params.version,
-        revision,
-        createdBy: req.authUser.userId,
-        updatedBy: req.authUser.userId,
-        key: req.params.key,
-        config: req.body.config,
-      };
-      return models.Form.create(entity);
-    })
-    .then((createdEntity) => {
-      util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
-        RESOURCES.FORM_VERSION,
-        createdEntity.toJSON());
-      // Omit deletedAt, deletedBy
-      res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
-    })
-    .catch(next));
+      .then((form) => {
+        const revision = form.revision + 1;
+        const entity = {
+          version: req.params.version,
+          revision,
+          createdBy: req.authUser.userId,
+          updatedBy: req.authUser.userId,
+          key: req.params.key,
+          config: req.body.config,
+        };
+        return models.Form.create(entity);
+      })
+      .then((createdEntity) => {
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
+          RESOURCES.FORM_VERSION,
+          createdEntity.toJSON());
+        // Omit deletedAt, deletedBy
+        res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
+      })
+      .catch(next));
   },
 ];

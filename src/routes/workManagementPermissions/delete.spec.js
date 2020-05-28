@@ -11,28 +11,28 @@ import testUtil from '../../tests/util';
 const expectAfterDelete = (permissionId, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.WorkManagementPermission.findOne({
-    where: {
-      id: permissionId,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        chai.assert.isNotNull(res.deletedAt);
-        chai.assert.isNotNull(res.deletedBy);
+    models.WorkManagementPermission.findOne({
+      where: {
+        id: permissionId,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          chai.assert.isNotNull(res.deletedAt);
+          chai.assert.isNotNull(res.deletedBy);
 
-        request(server)
-          .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404)
-          .end(next);
-      }
-    }), 500);
+          request(server)
+            .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(404)
+            .end(next);
+        }
+      }), 500);
 };
 
 describe('DELETE work management permission', () => {
@@ -82,49 +82,49 @@ describe('DELETE work management permission', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((t) => {
-          permission = _.assign({}, permission, { projectTemplateId: t.id });
-          // Create projects
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            templateId: t.id,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then((project) => {
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId: project.id,
-              role: 'copilot',
-              isPrimary: false,
+          .then((t) => {
+            permission = _.assign({}, permission, { projectTemplateId: t.id });
+            // Create projects
+            models.Project.create({
+              type: 'generic',
+              billingAccountId: 1,
+              name: 'test1',
+              description: 'test project1',
+              status: 'draft',
+              templateId: t.id,
+              details: {},
               createdBy: 1,
               updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId: project.id,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              models.WorkManagementPermission.create(permission)
-              .then((p) => {
-                permissionId = p.id;
-              })
-              .then(() => done());
-            });
+              lastActivityAt: 1,
+              lastActivityUserId: '1',
+            })
+              .then((project) => {
+                // create members
+                models.ProjectMember.bulkCreate([{
+                  id: 1,
+                  userId: copilotUser.userId,
+                  projectId: project.id,
+                  role: 'copilot',
+                  isPrimary: false,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }, {
+                  id: 2,
+                  userId: memberUser.userId,
+                  projectId: project.id,
+                  role: 'customer',
+                  isPrimary: true,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }]).then(() => {
+                  models.WorkManagementPermission.create(permission)
+                    .then((p) => {
+                      permissionId = p.id;
+                    })
+                    .then(() => done());
+                });
+              });
           });
-        });
       });
   });
 

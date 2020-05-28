@@ -63,10 +63,10 @@ describe('UPDATE PriceConfig version', () => {
         config: undefined,
       });
       request(server)
-      .patch('/v5/projects/metadata/priceConfig/dev/versions/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .patch('/v5/projects/metadata/priceConfig/dev/versions/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(invalidBody)
         .expect('Content-Type', /json/)
         .expect(400, done);
@@ -74,10 +74,10 @@ describe('UPDATE PriceConfig version', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-      .patch('/v5/projects/metadata/priceConfig/dev/versions/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .patch('/v5/projects/metadata/priceConfig/dev/versions/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
@@ -100,10 +100,10 @@ describe('UPDATE PriceConfig version', () => {
 
     it('should return 403 for member', (done) => {
       request(server)
-      .patch('/v5/projects/metadata/priceConfig/dev/versions/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.member}`,
-      })
+        .patch('/v5/projects/metadata/priceConfig/dev/versions/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
         .send(body)
         .expect(403, done);
     });

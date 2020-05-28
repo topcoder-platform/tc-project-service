@@ -8,6 +8,7 @@ import {
 import models from '../../models';
 import util from '../../util';
 import { EVENT, RESOURCES } from '../../constants';
+import { PERMISSION } from '../../permissions/constants';
 
 /**
  * API to update a project member.
@@ -27,8 +28,8 @@ const updateProjectAttachmentValidation = {
 module.exports = [
   // handles request validations
   validate(updateProjectAttachmentValidation),
-  permissions('project.updateAttachment'),
-  /**
+  permissions('projectAttachment.edit'),
+  /*
    * Update a attachment if the user has access
    */
   (req, res, next) => {
@@ -44,16 +45,25 @@ module.exports = [
       },
     }).then(existing => new Promise((accept, reject) => {
       if (!existing) {
-          // handle 404
+        // handle 404
         const err = new Error('project attachment not found for project id ' +
               `${projectId} and member id ${attachmentId}`);
         err.status = 404;
-        reject(err);
-      } else {
-        previousValue = _.cloneDeep(existing.get({ plain: true }));
-        _.extend(existing, updatedProps);
-        existing.save().then(accept).catch(reject);
+        return reject(err);
       }
+      previousValue = _.cloneDeep(existing.get({ plain: true }));
+
+      if (
+        previousValue.createdBy !== req.authUser.userId &&
+        !util.hasPermissionByReq(PERMISSION.UPDATE_PROJECT_ATTACHMENT_NOT_OWN, req)
+      ) {
+        const err = new Error('You don\'t have permission to update attachment created by another user.');
+        err.status = 403;
+        return reject(err);
+      }
+
+      _.extend(existing, updatedProps);
+      return existing.save().then(accept).catch(reject);
     })).then((updated) => {
       req.log.debug('updated project attachment', JSON.stringify(updated, null, 2));
       res.json(updated);

@@ -90,30 +90,30 @@ module.exports = [
         throw err;
       }
       return models.PhaseProduct.create(data)
-      .then((_newPhaseProduct) => {
-        newPhaseProduct = _.cloneDeep(_newPhaseProduct);
-        req.log.debug('new phase product created (id# %d, name: %s)',
-          newPhaseProduct.id, newPhaseProduct.name);
-        newPhaseProduct = newPhaseProduct.get({ plain: true });
-        newPhaseProduct = _.omit(newPhaseProduct, ['deletedAt', 'utm']);
-      });
+        .then((_newPhaseProduct) => {
+          newPhaseProduct = _.cloneDeep(_newPhaseProduct);
+          req.log.debug('new phase product created (id# %d, name: %s)',
+            newPhaseProduct.id, newPhaseProduct.name);
+          newPhaseProduct = newPhaseProduct.get({ plain: true });
+          newPhaseProduct = _.omit(newPhaseProduct, ['deletedAt', 'utm']);
+        });
     }))
-    .then(() => {
+      .then(() => {
       // Send events to buses
-      req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
-        newPhaseProduct,
-        { correlationId: req.id },
-      );
-      // emit the event
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
-        RESOURCES.PHASE_PRODUCT,
-        newPhaseProduct);
+        req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
+        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
+          newPhaseProduct,
+          { correlationId: req.id },
+        );
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
+          RESOURCES.PHASE_PRODUCT,
+          newPhaseProduct);
 
-      res.status(201).json(newPhaseProduct);
-    })
-    .catch((err) => { next(err); });
+        res.status(201).json(newPhaseProduct);
+      })
+      .catch((err) => { next(err); });
   },
 ];

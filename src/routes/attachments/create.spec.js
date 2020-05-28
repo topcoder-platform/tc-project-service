@@ -73,38 +73,38 @@ describe('Project Attachments', () => {
 
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          project1 = p;
+          // create members
+          models.ProjectMember.create({
+            userId: 40051332,
+            projectId: project1.id,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            project1 = p;
-            // create members
-            models.ProjectMember.create({
-              userId: 40051332,
-              projectId: project1.id,
-              role: 'copilot',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }).then(() => {
-              sandbox = sinon.sandbox.create();
-              postSpy = sandbox.spy(mockHttpClient, 'post');
-              getSpy = sandbox.spy(mockHttpClient, 'get');
-              stub = sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
-              sandbox.stub(util, 's3FileTransfer').returns(Promise.resolve(true));
-              done();
-            });
+          }).then(() => {
+            sandbox = sinon.sandbox.create();
+            postSpy = sandbox.spy(mockHttpClient, 'post');
+            getSpy = sandbox.spy(mockHttpClient, 'get');
+            stub = sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+            sandbox.stub(util, 's3FileTransfer').returns(Promise.resolve(true));
+            done();
           });
         });
+      });
   });
 
   afterEach((done) => {
@@ -115,94 +115,122 @@ describe('Project Attachments', () => {
   describe('POST /projects/{id}/attachments/', () => {
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .post(`/v5/projects/${project1.id}/attachments/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member}`,
-          })
-          .send(fileAttachmentBody)
-          .expect('Content-Type', /json/)
-          .expect(403, done);
+        .post(`/v5/projects/${project1.id}/attachments/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(fileAttachmentBody)
+        .expect('Content-Type', /json/)
+        .expect(403, done);
     });
 
     it('should return 400 if contentType is not provided for file attachment', (done) => {
       const payload = _.omit(_.cloneDeep(fileAttachmentBody), 'contentType');
       request(server)
-          .post(`/v5/projects/${project1.id}/attachments/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send(payload)
-          .expect('Content-Type', /json/)
-          .expect(400, done);
+        .post(`/v5/projects/${project1.id}/attachments/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send(payload)
+        .expect('Content-Type', /json/)
+        .expect(400, done);
     });
 
     it('should return 400 if s3Bucket is not provided for file attachment', (done) => {
       const payload = _.omit(_.cloneDeep(fileAttachmentBody), 's3Bucket');
       request(server)
-          .post(`/v5/projects/${project1.id}/attachments/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send(payload)
-          .expect('Content-Type', /json/)
-          .expect(400, done);
+        .post(`/v5/projects/${project1.id}/attachments/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send(payload)
+        .expect('Content-Type', /json/)
+        .expect(400, done);
     });
 
     it('should properly create file attachment - 201', (done) => {
       request(server)
-          .post(`/v5/projects/${project1.id}/attachments/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send(fileAttachmentBody)
-          .expect('Content-Type', /json/)
-          .expect(201)
-          .end((err, res) => {
-            if (err) {
-              done(err);
-            } else {
-              const resJson = res.body;
-              should.exist(resJson);
-              postSpy.should.have.been.calledOnce;
-              getSpy.should.have.been.calledOnce;
-              stub.restore();
-              resJson.title.should.equal(fileAttachmentBody.title);
-              resJson.tags.should.eql(fileAttachmentBody.tags);
-              resJson.type.should.eql(fileAttachmentBody.type);
-              resJson.downloadUrl.should.exist;
-              resJson.projectId.should.equal(project1.id);
-              done();
-            }
-          });
+        .post(`/v5/projects/${project1.id}/attachments/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send(fileAttachmentBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            postSpy.should.have.been.calledOnce;
+            getSpy.should.have.been.calledOnce;
+            stub.restore();
+            resJson.title.should.equal(fileAttachmentBody.title);
+            resJson.tags.should.eql(fileAttachmentBody.tags);
+            resJson.type.should.eql(fileAttachmentBody.type);
+            resJson.downloadUrl.should.exist;
+            resJson.projectId.should.equal(project1.id);
+            done();
+          }
+        });
     });
 
     it('should properly create link attachment - 201', (done) => {
       request(server)
-          .post(`/v5/projects/${project1.id}/attachments/`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send(linkAttachmentBody)
-          .expect('Content-Type', /json/)
-          .expect(201)
-          .end((err, res) => {
-            if (err) {
-              done(err);
-            } else {
-              const resJson = res.body;
-              should.exist(resJson);
-              postSpy.should.have.been.calledOnce;
-              getSpy.should.have.been.calledOnce;
-              stub.restore();
-              resJson.title.should.equal(linkAttachmentBody.title);
-              resJson.path.should.equal(linkAttachmentBody.path);
-              resJson.description.should.equal(linkAttachmentBody.description);
-              resJson.type.should.equal(linkAttachmentBody.type);
-              resJson.tags.should.eql(linkAttachmentBody.tags);
-              resJson.projectId.should.equal(project1.id);
-              done();
-            }
-          });
+        .post(`/v5/projects/${project1.id}/attachments/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send(linkAttachmentBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            postSpy.should.have.been.calledOnce;
+            getSpy.should.have.been.calledOnce;
+            stub.restore();
+            resJson.title.should.equal(linkAttachmentBody.title);
+            resJson.path.should.equal(linkAttachmentBody.path);
+            resJson.description.should.equal(linkAttachmentBody.description);
+            resJson.type.should.equal(linkAttachmentBody.type);
+            resJson.tags.should.eql(linkAttachmentBody.tags);
+            resJson.projectId.should.equal(project1.id);
+            done();
+          }
+        });
+    });
+
+    it('should create project successfully using M2M token with "write:projects" scope', (done) => {
+      request(server)
+        .post(`/v5/projects/${project1.id}/attachments/`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send(fileAttachmentBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            postSpy.should.have.been.calledOnce;
+            getSpy.should.have.been.calledOnce;
+            stub.restore();
+            resJson.title.should.equal(fileAttachmentBody.title);
+            resJson.tags.should.eql(fileAttachmentBody.tags);
+            resJson.type.should.eql(fileAttachmentBody.type);
+            resJson.downloadUrl.should.exist;
+            resJson.projectId.should.equal(project1.id);
+            done();
+          }
+        });
     });
 
     describe('Bus api', () => {

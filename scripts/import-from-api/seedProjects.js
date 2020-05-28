@@ -33,7 +33,7 @@ module.exports = (targetUrl, token) => {
     const invites = _.cloneDeep(_.get(project, 'invites'));
     const acceptInvitation = _.get(project, 'acceptInvitation');
 
-    if(project.templateId) {
+    if (project.templateId) {
       await findProjectTemplate(project.templateId, targetUrl, adminHeaders).catch((ex) => {
         delete project.templateId;
       });
@@ -78,28 +78,28 @@ module.exports = (targetUrl, token) => {
 
         // creating invitations
         if (Array.isArray(invites)) {
-          let promises = []
-          invites.forEach(invite => {
-            promises.push(createProjectMemberInvite(projectId, invite, targetUrl, connectAdminHeaders))
-          })
+          const promises = [];
+          invites.forEach((invite) => {
+            promises.push(createProjectMemberInvite(projectId, invite, targetUrl, connectAdminHeaders));
+          });
 
           // accepting invitations
           console.log(`Project #${projectId}: Wait a bit to give time ES to index before creating invitation...`);
           await Promise.delay(ES_INDEX_DELAY);
-          const responses = await Promise.all(promises)
+          const responses = await Promise.all(promises);
           if (acceptInvitation) {
-            let acceptInvitationPromises = []
-            responses.forEach(response => {
-              const userId = _.get(response, 'data.success[0].userId')
+            const acceptInvitationPromises = [];
+            responses.forEach((response) => {
+              const userId = _.get(response, 'data.success[0].userId');
               acceptInvitationPromises.push(updateProjectMemberInvite(projectId, {
                 userId,
-                status: 'accepted'
-              }, targetUrl, connectAdminHeaders))
-            })
+                status: 'accepted',
+              }, targetUrl, connectAdminHeaders));
+            });
 
             console.log(`Project #${projectId}: Wait a bit to give time ES to index before accepting invitation...`);
             await Promise.delay(ES_INDEX_DELAY);
-            await Promise.all(acceptInvitationPromises)
+            await Promise.all(acceptInvitationPromises);
           }
         }
 
@@ -140,7 +140,7 @@ function createProjectMemberInvite(projectId, params, targetUrl, headers) {
     .post(projectMemberInviteUrl, params, { headers })
     .catch((err) => {
       console.log(`Failed to create project member invites ${projectId}: ${err.message}`);
-    })
+    });
 }
 
 function updateProjectMemberInvite(projectId, params, targetUrl, headers) {
@@ -150,7 +150,7 @@ function updateProjectMemberInvite(projectId, params, targetUrl, headers) {
     .put(updateProjectMemberInviteUrl, params, { headers })
     .catch((err) => {
       console.log(`Failed to update project member invites ${projectId}: ${err.message}`);
-    })
+    });
 }
 
 function findProjectTemplate(templateId, targetUrl, headers) {
@@ -159,5 +159,5 @@ function findProjectTemplate(templateId, targetUrl, headers) {
   return axios({
     url: projectTemplateUrl,
     headers,
-  })
+  });
 }

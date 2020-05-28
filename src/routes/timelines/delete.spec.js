@@ -14,27 +14,27 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 const expectAfterDelete = (id, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.Timeline.findOne({
-    where: {
-      id,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        chai.assert.isNotNull(res.deletedAt);
-        chai.assert.isNotNull(res.deletedBy);
+    models.Timeline.findOne({
+      where: {
+        id,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          chai.assert.isNotNull(res.deletedAt);
+          chai.assert.isNotNull(res.deletedBy);
 
-        request(server)
-          .get(`/v5/timelines/${id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, next);
-      }
-    }), 500);
+          request(server)
+            .get(`/v5/timelines/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(404, next);
+        }
+      }), 500);
 };
 
 describe('DELETE timeline', () => {

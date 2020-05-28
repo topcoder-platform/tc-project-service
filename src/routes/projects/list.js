@@ -5,6 +5,7 @@ import models from '../../models';
 import { INVITE_STATUS, PROJECT_MEMBER_NON_CUSTOMER_ROLES } from '../../constants';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
+import permissionUtils from '../../utils/permissions';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -21,8 +22,8 @@ const MATCH_TYPE_SINGLE_FIELD = 3;
  *
  */
 const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes),
-   'utm',
-   'deletedAt',
+  'utm',
+  'deletedAt',
 );
 const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes));
 // project members has some additional fields stored in ES index, which we don't have in DB
@@ -321,7 +322,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   }
 
   if (sourceInclude) {
-    searchCriteria._sourceIncludes = sourceInclude;        // eslint-disable-line no-underscore-dangle
+    searchCriteria._sourceIncludes = sourceInclude; // eslint-disable-line no-underscore-dangle
   }
   // prepare the elasticsearch filter criteria
   const boolQuery = [];
@@ -483,7 +484,7 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
   // order by
   const order = sort ? [sort.split(' ')] : [['createdAt', 'asc']];
   let fields = ffields ? ffields.split(',') : [];
-    // parse the fields string to determine what fields are to be returned
+  // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
     project_members: PROJECT_MEMBER_ATTRIBUTES,
@@ -492,6 +493,11 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
 
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
+  }
   const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
   const retrieveMembers = !req.query.fields || !!fields.project_members.length;
 
@@ -502,53 +508,65 @@ const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
     offset: criteria.offset,
     attributes: _.get(fields, 'projects', null),
   }, req.log)
-  .then(({ rows, count }) => {
-    const projectIds = _.map(rows, 'id');
-    const promises = [];
-    // retrieve members
-    if (projectIds.length && retrieveMembers) {
-      promises.push(
-        models.ProjectMember.findAll({
-          attributes: _.get(fields, 'ProjectMembers'),
-          where: { projectId: { $in: projectIds } },
-          raw: true,
-        }),
-      );
-    }
-    if (projectIds.length && retrieveAttachments) {
-      promises.push(
-        models.ProjectAttachment.findAll({
-          attributes: PROJECT_ATTACHMENT_ATTRIBUTES,
-          where: { projectId: { $in: projectIds } },
-          raw: true,
-        }),
-      );
-    }
-    // return results after promise(s) have resolved
-    return Promise.all(promises)
-      .then((values) => {
-        const allMembers = retrieveMembers ? values.shift() : [];
-        const allAttachments = retrieveAttachments ? values.shift() : [];
-        _.forEach(rows, (fp) => {
-          const p = fp;
-          // if values length is 1 it could be either attachments or members
-          if (retrieveMembers) {
-            p.members = _.filter(allMembers, m => m.projectId === p.id);
-          }
-          if (retrieveAttachments) {
-            p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
-          }
+    .then(({ rows, count }) => {
+      const projectIds = _.map(rows, 'id');
+      const promises = [];
+      // retrieve members
+      if (projectIds.length && retrieveMembers) {
+        promises.push(
+          models.ProjectMember.findAll({
+            attributes: _.get(fields, 'ProjectMembers'),
+            where: { projectId: { $in: projectIds } },
+            raw: true,
+          }),
+        );
+      }
+      if (projectIds.length && retrieveAttachments) {
+        promises.push(
+          models.ProjectAttachment.findAll({
+            attributes: PROJECT_ATTACHMENT_ATTRIBUTES,
+            where: { projectId: { $in: projectIds } },
+            raw: true,
+          }),
+        );
+      }
+      // return results after promise(s) have resolved
+      return Promise.all(promises)
+        .then((values) => {
+          const allMembers = retrieveMembers ? values.shift() : [];
+          const allAttachments = retrieveAttachments ? values.shift() : [];
+          _.forEach(rows, (fp) => {
+            const p = fp;
+            // if values length is 1 it could be either attachments or members
+            if (retrieveMembers) {
+              const pMembers = _.filter(allMembers, m => m.projectId === p.id);
+              // check if have permission to read project members
+              if (util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, pMembers)) {
+                if (addMembersUserId) {
+                // remove the userId from the returned members array if it was added before
+                // as it is only needed for checking permission.
+                  _.forEach(pMembers, (m) => {
+                    const fm = m;
+                    delete fm.userId;
+                  });
+                }
+                p.members = pMembers;
+              }
+            }
+            if (retrieveAttachments) {
+              p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
+            }
+          });
+          return { rows, count, pageSize: criteria.limit, page: criteria.page };
         });
-        return { rows, count, pageSize: criteria.limit, page: criteria.page };
-      });
-  });
+    });
 };
 
 const retrieveProjects = (req, criteria, sort, ffields) => {
   // order by
   const order = sort ? sort.split(' ') : ['createdAt', 'asc'];
   let fields = ffields ? ffields.split(',') : [];
-    // parse the fields string to determine what fields are to be returned
+  // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
     project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
@@ -562,19 +580,62 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   if (_.indexOf(fields.projects, 'id') < 0) {
     fields.projects.push('id');
   }
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
+  }
 
   const searchCriteria = parseElasticSearchCriteria(criteria, fields, order) || {};
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
-      const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
+      const rows = _.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
+      if (rows) {
+        if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+            // only include own invites
+            const currentUserId = req.authUser.userId;
+            const currentUserEmail = req.authUser.email;
+            _.forEach(rows, (fp) => {
+              const invites = _.filter(fp.invites, invite => (
+                (invite.userId !== null && invite.userId === currentUserId) ||
+                (invite.email && currentUserEmail && invite.email.toLowerCase() === currentUserEmail.toLowerCase())
+              ));
+              _.set(fp, 'invites', invites);
+            });
+          } else {
+            // return empty invites
+            _.forEach(rows, (fp) => {
+              _.set(fp, 'invites', []);
+            });
+          }
+        }
+        _.forEach(rows, (p) => {
+          const fp = p;
+          if (fp.members) {
+            // check if have permission to read project members
+            if (!util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, fp.members)) {
+              delete fp.members;
+            }
+            if (fp.members && addMembersUserId) {
+              // remove the userId from the returned members array if it was added before
+              // as it is only needed for checking permission.
+              _.forEach(fp.members, (m) => {
+                const fm = m;
+                delete fm.userId;
+              });
+            }
+          }
+        });
+      }
       accept({ rows, count: docs.hits.total, pageSize: criteria.limit, page: criteria.page });
     }).catch(reject);
   });
 };
 
 module.exports = [
-  /**
+  /*
    * GET projects/
    * Return a list of projects that match the criteria
    */
@@ -616,28 +677,28 @@ module.exports = [
     if (!memberOnly && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser)) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
-      .then((result) => {
-        if (result.rows.length === 0) {
-          req.log.debug('No projects found in ES');
+        .then((result) => {
+          if (result.rows.length === 0) {
+            req.log.debug('No projects found in ES');
 
-          // if we have some filters and didn't get any data from ES
-          // we don't fallback to DB, because DB doesn't support all of the filters
-          // so we don't want DB to return unrelated data, ref issue #450
-          if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
-            req.log.debug('Don\'t fallback to DB because some filters are defined.');
-            return util.setPaginationHeaders(req, res,
-              util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+            // if we have some filters and didn't get any data from ES
+            // we don't fallback to DB, because DB doesn't support all of the filters
+            // so we don't want DB to return unrelated data, ref issue #450
+            if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
+              req.log.debug('Don\'t fallback to DB because some filters are defined.');
+              return util.setPaginationHeaders(req, res,
+                util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+            }
+
+            return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
+              .then(r => util.setPaginationHeaders(req, res,
+                util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
           }
-
-          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res,
-              util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
-        }
-        req.log.debug('Projects found in ES');
-        // set header
-        return util.setPaginationHeaders(req, res,
-          util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
-      })
+          req.log.debug('Projects found in ES');
+          // set header
+          return util.setPaginationHeaders(req, res,
+            util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+        })
         .catch(err => next(err));
     }
 
@@ -654,17 +715,30 @@ module.exports = [
           // so we don't want DB to return unrelated data, ref issue #450
           if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
             req.log.debug('Don\'t fallback to DB because some filters are defined.');
-            return util.setPaginationHeaders(req, res,
-              util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+
+            return result;
           }
 
-          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
-            .then(r => util.setPaginationHeaders(req, res,
-              util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
+          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields);
         }
+
         req.log.debug('Projects found in ES');
-        return util.setPaginationHeaders(req, res,
-          util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+
+        return result;
+      }).then((result) => {
+        const postProcessedResult = util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req);
+
+        postProcessedResult.rows.forEach((project) => {
+          // filter out attachments which user cannot see
+          if (project.attachments) {
+            // eslint-disable-next-line no-param-reassign
+            project.attachments = project.attachments.filter(attachment =>
+              permissionUtils.hasReadAccessToAttachment(attachment, req),
+            );
+          }
+        });
+
+        return util.setPaginationHeaders(req, res, postProcessedResult);
       })
       .catch(err => next(err));
   },

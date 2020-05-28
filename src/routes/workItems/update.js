@@ -62,58 +62,58 @@ module.exports = [
       },
       ],
     })
-    .then((existingWork) => {
-      if (!existingWork) {
+      .then((existingWork) => {
+        if (!existingWork) {
         // handle 404
-        const err = new Error('No active work item found for project id ' +
+          const err = new Error('No active work item found for project id ' +
           `${projectId}, phase id ${phaseId} and work stream id ${workStreamId}`);
-        err.status = 404;
-        return Promise.reject(err);
-      }
+          err.status = 404;
+          return Promise.reject(err);
+        }
 
-      return models.PhaseProduct.findOne({
-        where: {
-          id: productId,
-          projectId,
-          phaseId,
-          deletedAt: { $eq: null },
-        },
-      });
-    })
-    .then((existing) => {
-      if (!existing) {
+        return models.PhaseProduct.findOne({
+          where: {
+            id: productId,
+            projectId,
+            phaseId,
+            deletedAt: { $eq: null },
+          },
+        });
+      })
+      .then((existing) => {
+        if (!existing) {
           // handle 404
-        const err = new Error('No active phase product found for project id ' +
+          const err = new Error('No active phase product found for project id ' +
               `${projectId}, phase id ${phaseId} and product id ${productId}`);
-        err.status = 404;
-        throw err;
-      }
+          err.status = 404;
+          throw err;
+        }
 
-      previousValue = _.clone(existing.get({ plain: true }));
-      _.extend(existing, updatedProps);
-      return existing.save().catch(next);
-    }))
-    .then((updated) => {
-      req.log.debug('updated work item', JSON.stringify(updated, null, 2));
+        previousValue = _.clone(existing.get({ plain: true }));
+        _.extend(existing, updatedProps);
+        return existing.save().catch(next);
+      }))
+      .then((updated) => {
+        req.log.debug('updated work item', JSON.stringify(updated, null, 2));
 
-      const updatedValue = updated.get({ plain: true });
+        const updatedValue = updated.get({ plain: true });
 
-      // emit original and updated project phase information
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
-        { original: previousValue, updated: updatedValue },
-        { correlationId: req.id },
-      );
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
-        RESOURCES.PHASE_PRODUCT,
-        updatedValue,
-        previousValue,
-        ROUTES.WORK_ITEMS.UPDATE,
-      );
+        // emit original and updated project phase information
+        req.app.services.pubsub.publish(
+          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
+          { original: previousValue, updated: updatedValue },
+          { correlationId: req.id },
+        );
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
+          RESOURCES.PHASE_PRODUCT,
+          updatedValue,
+          previousValue,
+          ROUTES.WORK_ITEMS.UPDATE,
+        );
 
-      res.json(updated);
-    }).catch(err => next(err));
+        res.json(updated);
+      }).catch(err => next(err));
   },
 ];

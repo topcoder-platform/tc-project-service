@@ -21,7 +21,7 @@ module.exports = [
   validate(schema),
   permissions('projectType.delete'),
   (req, res, next) =>
-     models.sequelize.transaction(() =>
+    models.sequelize.transaction(() =>
       models.ProjectType.findByPk(req.params.key)
         .then((entity) => {
           if (!entity) {
@@ -33,13 +33,13 @@ module.exports = [
           return entity.update({ deletedBy: req.authUser.userId });
         })
         .then(entity => entity.destroy()))
-        .then((entity) => {
-          // emit event
-          util.sendResourceToKafkaBus(req,
-            EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
-            RESOURCES.PROJECT_TYPE,
-            _.pick(entity.toJSON(), 'key'));
-          res.status(204).end();
-        })
-        .catch(next),
+      .then((entity) => {
+        // emit event
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
+          RESOURCES.PROJECT_TYPE,
+          _.pick(entity.toJSON(), 'key'));
+        res.status(204).end();
+      })
+      .catch(next),
 ];

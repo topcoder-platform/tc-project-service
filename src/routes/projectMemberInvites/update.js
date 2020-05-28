@@ -15,12 +15,12 @@ const permissions = tcMiddleware.permissions;
 
 const updateMemberValidations = {
   body: Joi.object()
-      .keys({
-        status: Joi.any()
-          .valid(_.values(INVITE_STATUS))
-          .required(),
-      })
-      .required(),
+    .keys({
+      status: Joi.any()
+        .valid(_.values(INVITE_STATUS))
+        .required(),
+    })
+    .required(),
 };
 
 module.exports = [

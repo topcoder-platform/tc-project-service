@@ -33,17 +33,17 @@ module.exports = [
           return entity.update({ deletedBy: req.authUser.userId });
         })
         .then(entity => entity.destroy()))
-        .then((entity) => {
-          // emit event
-          util.sendResourceToKafkaBus(
-            req,
-            EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
-            RESOURCES.PROJECT_TEMPLATE,
-            _.pick(entity.toJSON(), 'id'),
-          );
+      .then((entity) => {
+        // emit event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
+          RESOURCES.PROJECT_TEMPLATE,
+          _.pick(entity.toJSON(), 'id'),
+        );
 
-          res.status(204).end();
-        })
-        .catch(next);
+        res.status(204).end();
+      })
+      .catch(next);
   },
 ];

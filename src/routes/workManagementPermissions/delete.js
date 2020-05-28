@@ -18,7 +18,7 @@ module.exports = [
   validate(schema),
   permissions('workManagementPermission.delete'),
   (req, res, next) =>
-     models.sequelize.transaction(() =>
+    models.sequelize.transaction(() =>
       models.WorkManagementPermission.findByPk(req.params.id)
         .then((entity) => {
           if (!entity) {
@@ -30,8 +30,8 @@ module.exports = [
           return entity.update({ deletedBy: req.authUser.userId });
         })
         .then(entity => entity.destroy()))
-        .then(() => {
-          res.status(204).end();
-        })
-        .catch(next),
+      .then(() => {
+        res.status(204).end();
+      })
+      .catch(next),
 ];

@@ -46,29 +46,29 @@ module.exports = [
           projectId,
         },
       })
-      .then((existing) => {
+        .then((existing) => {
         // Not found
-        if (!existing) {
-          const apiErr = new Error(`Project setting not found for id ${id} and project id ${projectId}`);
-          apiErr.status = 404;
-          return Promise.reject(apiErr);
-        }
+          if (!existing) {
+            const apiErr = new Error(`Project setting not found for id ${id} and project id ${projectId}`);
+            apiErr.status = 404;
+            return Promise.reject(apiErr);
+          }
 
-        oldKey = existing.key;
-        return existing.update(entityToUpdate);
-      })
-      .then((updated) => {
-        updatedSetting = updated;
-        if (util.isProjectSettingForEstimation(updatedSetting.key) || util.isProjectSettingForEstimation(oldKey)) {
-          req.log.debug(`Recalculate price breakdown for project id ${projectId}`);
-          return util.calculateProjectEstimationItems(req, projectId);
-        }
-        return Promise.resolve();
-      }),
+          oldKey = existing.key;
+          return existing.update(entityToUpdate);
+        })
+        .then((updated) => {
+          updatedSetting = updated;
+          if (util.isProjectSettingForEstimation(updatedSetting.key) || util.isProjectSettingForEstimation(oldKey)) {
+            req.log.debug(`Recalculate price breakdown for project id ${projectId}`);
+            return util.calculateProjectEstimationItems(req, projectId);
+          }
+          return Promise.resolve();
+        }),
     ) // transaction end
-    .then(() => {
-      res.json(updatedSetting);
-    })
-    .catch(next);
+      .then(() => {
+        res.json(updatedSetting);
+      })
+      .catch(next);
   },
 ];

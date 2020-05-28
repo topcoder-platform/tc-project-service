@@ -32,52 +32,52 @@ describe('UPDATE Work Stream', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((template) => {
-          models.WorkManagementPermission.create({
-            policy: 'workStream.edit',
-            permission: {
-              allowRule: { projectRoles: ['manager', 'copilot'], topcoderRoles: ['Connect Admin', 'administrator'] },
-              denyRule: { projectRoles: ['copilot'] },
-            },
-            projectTemplateId: template.id,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then(() => {
-            // Create project
-            models.Project.create({
-              type: 'generic',
-              billingAccountId: 1,
-              name: 'test1',
-              description: 'test project1',
-              status: 'draft',
-              templateId: template.id,
+          .then((template) => {
+            models.WorkManagementPermission.create({
+              policy: 'workStream.edit',
+              permission: {
+                allowRule: { projectRoles: ['manager', 'copilot'], topcoderRoles: ['Connect Admin', 'administrator'] },
+                denyRule: { projectRoles: ['copilot'] },
+              },
+              projectTemplateId: template.id,
               details: {},
               createdBy: 1,
               updatedBy: 1,
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              models.WorkStream.create({
-                name: 'Work Stream',
-                type: 'generic',
-                status: 'active',
-                projectId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((entity) => {
-                id = entity.id;
-                workStream = entity;
-                done();
+              .then(() => {
+                // Create project
+                models.Project.create({
+                  type: 'generic',
+                  billingAccountId: 1,
+                  name: 'test1',
+                  description: 'test project1',
+                  status: 'draft',
+                  templateId: template.id,
+                  details: {},
+                  createdBy: 1,
+                  updatedBy: 1,
+                  lastActivityAt: 1,
+                  lastActivityUserId: '1',
+                })
+                  .then((project) => {
+                    projectId = project.id;
+                    models.WorkStream.create({
+                      name: 'Work Stream',
+                      type: 'generic',
+                      status: 'active',
+                      projectId,
+                      createdBy: 1,
+                      updatedBy: 1,
+                    }).then((entity) => {
+                      id = entity.id;
+                      workStream = entity;
+                      done();
+                    });
+                  });
               });
-            });
           });
-        });
       });
   });
 

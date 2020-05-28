@@ -51,26 +51,26 @@ module.exports = [
       }
       return Promise.resolve(planConfigs[0]);
     })
-    .then((planConfig) => {
-      const revision = planConfig.revision + 1;
-      const entity = {
-        version: req.params.version,
-        revision,
-        createdBy: req.authUser.userId,
-        updatedBy: req.authUser.userId,
-        key: req.params.key,
-        config: req.body.config,
-      };
-      return models.PlanConfig.create(entity);
-    })
-    .then((createdEntity) => {
-      util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
-        RESOURCES.PLAN_CONFIG_VERSION,
-        createdEntity.toJSON());
-      // Omit deletedAt, deletedBy
-      res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
-    })
-    .catch(next));
+      .then((planConfig) => {
+        const revision = planConfig.revision + 1;
+        const entity = {
+          version: req.params.version,
+          revision,
+          createdBy: req.authUser.userId,
+          updatedBy: req.authUser.userId,
+          key: req.params.key,
+          config: req.body.config,
+        };
+        return models.PlanConfig.create(entity);
+      })
+      .then((createdEntity) => {
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
+          RESOURCES.PLAN_CONFIG_VERSION,
+          createdEntity.toJSON());
+        // Omit deletedAt, deletedBy
+        res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
+      })
+      .catch(next));
   },
 ];

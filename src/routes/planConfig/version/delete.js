@@ -29,43 +29,43 @@ module.exports = [
           version: req.params.version,
         },
       }).then((allRevision) => {
-        if (allRevision.length === 0) {
-          const apiErr = new Error(`PlanConfig not found for key ${req.params.key} version ${req.params.version}`);
-          apiErr.status = 404;
-          return Promise.reject(apiErr);
-        }
-        return models.PlanConfig.update(
-          {
-            deletedBy: req.authUser.userId,
-          }, {
-            where: {
-              key: req.params.key,
-              version: req.params.version,
-            },
-          });
-      })
-    .then(() => models.PlanConfig.destroy({
-      where: {
-        key: req.params.key,
-        version: req.params.version,
-      },
-    }))
-    .then(deleted => models.PlanConfig.findAll({
-      where: {
-        key: req.params.key,
-        version: req.params.version,
-      },
-      paranoid: false,
-      order: [['deletedAt', 'DESC']],
-      limit: deleted,
-    }))
-    .then((planConfigs) => {
-      _.map(planConfigs, planConfig => util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
-        RESOURCES.PLAN_CONFIG_VERSION,
-        _.pick(planConfig.toJSON(), 'id')));
-      res.status(204).end();
+      if (allRevision.length === 0) {
+        const apiErr = new Error(`PlanConfig not found for key ${req.params.key} version ${req.params.version}`);
+        apiErr.status = 404;
+        return Promise.reject(apiErr);
+      }
+      return models.PlanConfig.update(
+        {
+          deletedBy: req.authUser.userId,
+        }, {
+          where: {
+            key: req.params.key,
+            version: req.params.version,
+          },
+        });
     })
-    .catch(next));
+      .then(() => models.PlanConfig.destroy({
+        where: {
+          key: req.params.key,
+          version: req.params.version,
+        },
+      }))
+      .then(deleted => models.PlanConfig.findAll({
+        where: {
+          key: req.params.key,
+          version: req.params.version,
+        },
+        paranoid: false,
+        order: [['deletedAt', 'DESC']],
+        limit: deleted,
+      }))
+      .then((planConfigs) => {
+        _.map(planConfigs, planConfig => util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
+          RESOURCES.PLAN_CONFIG_VERSION,
+          _.pick(planConfig.toJSON(), 'id')));
+        res.status(204).end();
+      })
+      .catch(next));
   },
 ];

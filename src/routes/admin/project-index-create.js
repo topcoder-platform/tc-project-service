@@ -19,7 +19,7 @@ const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 module.exports = [
   permissions('project.admin'),
-  /**
+  /*
    * handles request of indexing projects
    */
   (req, res, next) => {
@@ -32,30 +32,30 @@ module.exports = [
     const fields = req.query.fields;
     const id = req.id;
     return indexProjectsRange(
-        {
-          logger,
-          projectIdStart,
-          projectIdEnd,
-          indexName,
-          docType,
-          fields,
-          id,
-        },
-        (esIndexingBody) => {
-          res.status(200).json({
-            message: `Reindex request successfully submitted for ${
-              esIndexingBody.length / 2
-            } projects`,
-          });
-        },
-      ).then((result) => {
-        logger.debug(`project indexed successfully (projectId: ${projectIdStart}-${projectIdEnd})`, result);
-        logger.debug(result);
-      }).catch((error) => {
-        logger.error(
-          `Error in getting project details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`,
+      {
+        logger,
+        projectIdStart,
+        projectIdEnd,
+        indexName,
+        docType,
+        fields,
+        id,
+      },
+      (esIndexingBody) => {
+        res.status(200).json({
+          message: `Reindex request successfully submitted for ${
+            esIndexingBody.length / 2
+          } projects`,
+        });
+      },
+    ).then((result) => {
+      logger.debug(`project indexed successfully (projectId: ${projectIdStart}-${projectIdEnd})`, result);
+      logger.debug(result);
+    }).catch((error) => {
+      logger.error(
+        `Error in getting project details for indexing (projectId: ${projectIdStart}-${projectIdEnd})`,
         error);
-        next(error);
-      });
+      next(error);
+    });
   },
 ];

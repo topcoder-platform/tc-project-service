@@ -113,72 +113,72 @@ describe('Project Members create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-      .post(`/v5/projects/${project1.id}/invites`)
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send({
-        handles: ['test_copilot1'],
-        role: 'copilot',
-      })
-      .expect('Content-Type', /json/)
-      .expect(201)
-      .end((err, res) => {
-        if (err) {
-          done(err);
-        } else {
-          const resJson = res.body.success[0];
-          should.exist(resJson);
-          resJson.role.should.equal('copilot');
-          resJson.projectId.should.equal(project1.id);
-          resJson.userId.should.equal(40051332);
-          should.exist(resJson.id);
-          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
-          request(server)
-          .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-          })
-          .send({
-            status: 'accepted',
-          })
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .end((err2, res2) => {
-            if (err2) {
-              done(err2);
-            } else {
-              const resJson2 = res2.body;
-              should.exist(resJson2);
-              resJson2.role.should.equal('copilot');
-              resJson2.projectId.should.equal(project1.id);
-              resJson2.userId.should.equal(40051332);
-              server.services.pubsub.publish.calledWith('project.member.invite.updated').should.be.true;
-              server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
+        .post(`/v5/projects/${project1.id}/invites`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          handles: ['test_copilot1'],
+          role: 'copilot',
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.success[0];
+            should.exist(resJson);
+            resJson.role.should.equal('copilot');
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(40051332);
+            should.exist(resJson.id);
+            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
+            request(server)
+              .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
+              .set({
+                Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+              })
+              .send({
+                status: 'accepted',
+              })
+              .expect('Content-Type', /json/)
+              .expect(200)
+              .end((err2, res2) => {
+                if (err2) {
+                  done(err2);
+                } else {
+                  const resJson2 = res2.body;
+                  should.exist(resJson2);
+                  resJson2.role.should.equal('copilot');
+                  resJson2.projectId.should.equal(project1.id);
+                  resJson2.userId.should.equal(40051332);
+                  server.services.pubsub.publish.calledWith('project.member.invite.updated').should.be.true;
+                  server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
 
-              request(server)
-                .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
-                .set({
-                  Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-                })
-                .send({
-                  status: 'accepted',
-                })
-                .expect('Content-Type', /json/)
-                .expect(404)
-                .end((err3, res3) => {
-                  if (err3) {
-                    done(err3);
-                  } else {
-                    const errorMessage = _.get(res3.body, 'message', '');
-                    sinon.assert.match(errorMessage, /.*invite not found for project id 1, inviteId/);
-                    done();
-                  }
-                });
-            }
-          });
-        }
-      });
+                  request(server)
+                    .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
+                    .set({
+                      Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+                    })
+                    .send({
+                      status: 'accepted',
+                    })
+                    .expect('Content-Type', /json/)
+                    .expect(404)
+                    .end((err3, res3) => {
+                      if (err3) {
+                        done(err3);
+                      } else {
+                        const errorMessage = _.get(res3.body, 'message', '');
+                        sinon.assert.match(errorMessage, /.*invite not found for project id 1, inviteId/);
+                        done();
+                      }
+                    });
+                }
+              });
+          }
+        });
     });
 
     it('should return 201 and register customer member', (done) => {
@@ -398,38 +398,38 @@ describe('Project Members create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v5/projects/${project1.id}/members/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.callCount.should.be.eql(3);
+          .post(`/v5/projects/${project1.id}/members/`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(3);
 
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
-                resource: RESOURCES.PROJECT_MEMBER,
-                projectId: project1.id,
-                userId: 40051334,
-              })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  projectId: project1.id,
+                  userId: 40051334,
+                })).should.be.true;
 
-              // Check Notification Service events
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED_MANAGER).should.be.true;
-              createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051334,
-                initiatorUserId: 40051334,
-              })).should.be.true;
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED_MANAGER).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051334,
+                  initiatorUserId: 40051334,
+                })).should.be.true;
 
-              done();
-            });
-          }
-        });
+                done();
+              });
+            }
+          });
       });
 
       it('should send correct BUS API messages when copilot added', (done) => {
@@ -468,85 +468,87 @@ describe('Project Members create', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
-        })
-        .send({
-          handles: ['test_copilot1'],
-          role: 'copilot',
-        })
-        .expect(201)
-        .end((err, inviteRes) => {
-          if (err) {
-            done(err);
-          } else {
-            const inviteResJson = inviteRes.body.success[0];
-            should.exist(inviteResJson);
-            should.exist(inviteResJson.id);
-            request(server)
-            .patch(`/v5/projects/${project1.id}/invites/${inviteResJson.id}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-            })
-            .send({
-              status: 'accepted',
-            })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end((err2) => {
-              if (err2) {
-                done(err2);
-              } else {
-                testUtil.wait(() => {
-                  createEventSpy.callCount.should.equal(7);
+          .post(`/v5/projects/${project1.id}/invites`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member2}`,
+          })
+          .send({
+            handles: ['test_copilot1'],
+            role: 'copilot',
+          })
+          .expect(201)
+          .end((err, inviteRes) => {
+            if (err) {
+              done(err);
+            } else {
+              const inviteResJson = inviteRes.body.success[0];
+              should.exist(inviteResJson);
+              should.exist(inviteResJson.id);
+              request(server)
+                .patch(`/v5/projects/${project1.id}/invites/${inviteResJson.id}`)
+                .set({
+                  Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
+                })
+                .send({
+                  status: 'accepted',
+                })
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err2) => {
+                  if (err2) {
+                    done(err2);
+                  } else {
+                    testUtil.wait(() => {
+                      createEventSpy.callCount.should.equal(7);
 
-                  /*
+                      /*
                     Copilot invitation requested
                   */
-                  createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
-                    resource: RESOURCES.PROJECT_MEMBER_INVITE,
-                    projectId: project1.id,
-                    userId: 40051332,
-                    email: null,
-                  })).should.be.true;
+                      createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_CREATED, sinon.match({
+                        resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                        projectId: project1.id,
+                        userId: 40051332,
+                        email: null,
+                      })).should.be.true;
 
-                  // Check Notification Service events
-                  createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_REQUESTED).should.be.true;
+                      // Check Notification Service events
+                      createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_REQUESTED)
+                        .should.be.true;
 
-                  /*
+                      /*
                     Copilot invitation accepted
                   */
-                  createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
-                    resource: RESOURCES.PROJECT_MEMBER_INVITE,
-                    projectId: project1.id,
-                    userId: 40051332,
-                    status: INVITE_STATUS.ACCEPTED,
-                    email: null,
-                  })).should.be.true;
+                      createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+                        resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                        projectId: project1.id,
+                        userId: 40051332,
+                        status: INVITE_STATUS.ACCEPTED,
+                        email: null,
+                      })).should.be.true;
 
-                  createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
-                    resource: RESOURCES.PROJECT_MEMBER,
-                    projectId: project1.id,
-                    userId: 40051332,
-                  })).should.be.true;
+                      createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
+                        resource: RESOURCES.PROJECT_MEMBER,
+                        projectId: project1.id,
+                        userId: 40051332,
+                      })).should.be.true;
 
-                  // Check Notification Service events
-                  createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_UPDATED).should.be.true;
-                  createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED_COPILOT).should.be.true;
-                  createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                    projectId: project1.id,
-                    projectName: project1.name,
-                    projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                    userId: 40051332,
-                    initiatorUserId: testUtil.userIds.connectAdmin,
-                  })).should.be.true;
-                  done();
+                      // Check Notification Service events
+                      createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_UPDATED)
+                        .should.be.true;
+                      createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED_COPILOT).should.be.true;
+                      createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                        projectId: project1.id,
+                        projectName: project1.name,
+                        projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                        userId: 40051332,
+                        initiatorUserId: testUtil.userIds.connectAdmin,
+                      })).should.be.true;
+                      done();
+                    });
+                  }
                 });
-              }
-            });
-          }
-        });
+            }
+          });
       });
     });
   });

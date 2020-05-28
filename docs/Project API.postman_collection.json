@@ -7,9 +7,11 @@
 	"item": [
 		{
 			"name": "Project Attachments",
+			"description": null,
 			"item": [
 				{
 					"name": "bookmarks",
+					"description": null,
 					"item": [
 						{
 							"name": " Create project without bookmarks",
@@ -115,6 +117,10 @@
 										"value": "application/json"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}",
 									"host": [
@@ -231,6 +237,10 @@
 										"value": "Bearer {{jwt-token}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{api-url}}/projects",
 									"host": [
@@ -244,7 +254,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -487,9 +496,6 @@
 				},
 				{
 					"name": "List attachments",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -589,11 +595,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project With TemplateId issue",
+			"description": null,
 			"item": [
 				{
 					"name": "Create project with templateId (not existed)",
@@ -670,11 +676,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project Members",
+			"description": null,
 			"item": [
 				{
 					"name": "Create project member with no payload",
@@ -1030,6 +1036,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
@@ -1055,6 +1065,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/members?role=customer",
 							"host": [
@@ -1078,9 +1092,6 @@
 				},
 				{
 					"name": "Get project member",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1180,11 +1191,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project Members Invites",
+			"description": null,
 			"item": [
 				{
 					"name": "List project member invite",
@@ -1411,9 +1422,6 @@
 				},
 				{
 					"name": "Get project member invite",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1621,11 +1629,11 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Projects",
+			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create project without payload",
@@ -1776,6 +1784,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}",
 							"host": [
@@ -1800,6 +1812,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}?fields=id,name,description,members.id,members.projectId",
 							"host": [
@@ -1830,6 +1846,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects",
 							"host": [
@@ -1853,6 +1873,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects?perPage=1&page=1",
 							"host": [
@@ -1886,6 +1910,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects?type=generic",
 							"host": [
@@ -1915,6 +1943,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects?id=1&id=2",
 							"host": [
@@ -1948,6 +1980,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects?sort=type asc",
 							"host": [
@@ -1977,6 +2013,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects?fields=id,name,description",
 							"host": [
@@ -2006,6 +2046,10 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects",
 							"host": [
@@ -2555,12 +2599,11 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Requests for all things projects.",
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Workstream",
+			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create workstream without payload",
@@ -2686,6 +2729,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}",
 							"host": [
@@ -2712,6 +2759,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
 							"host": [
@@ -2791,12 +2842,11 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Requests for all things projects.",
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Work",
+			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create work without payload",
@@ -2963,6 +3013,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}",
 							"host": [
@@ -2991,6 +3045,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
 							"host": [
@@ -3018,6 +3076,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works?sort=startDate desc",
 							"host": [
@@ -3051,6 +3113,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works?fields=status,name,budget",
 							"host": [
@@ -3176,12 +3242,11 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Requests for all things projects.",
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Work Item",
+			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create work item without payload",
@@ -3317,6 +3382,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems/{{itemId}}",
 							"host": [
@@ -3347,6 +3416,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
 							"host": [
@@ -3438,12 +3511,11 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Requests for all things projects.",
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Work Management Permission",
+			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create work management permission without payload",
@@ -3617,6 +3689,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
 							"host": [
@@ -3643,6 +3719,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
 							"host": [
@@ -3668,6 +3748,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=template",
 							"host": [
@@ -3699,6 +3783,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=invalid%3D2%26projectTemplateId%3D1",
 							"host": [
@@ -3730,6 +3818,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1",
 							"host": [
@@ -3815,12 +3907,11 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Requests for all things projects.",
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Permissions",
+			"description": null,
 			"item": [
 				{
 					"name": "Get permissions - 404",
@@ -3832,6 +3923,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/9999/permissions",
 							"host": [
@@ -3925,6 +4020,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/permissions",
 							"host": [
@@ -3950,6 +4049,10 @@
 								"value": "Bearer {{jwt-token-manager-40051334}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/permissions",
 							"host": [
@@ -3987,11 +4090,11 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "WorkManagementForTemplate",
+			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create workstream with valid values",
@@ -4325,12 +4428,11 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Requests for all things projects.",
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "EventHandling and Integration with Direct Project API",
+			"description": null,
 			"item": [
 				{
 					"name": "mock direct projects",
@@ -4346,6 +4448,10 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "https://api.topcoder-dev.com/v3/direct/projects",
 							"protocol": "https",
@@ -4576,11 +4682,11 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project Phase",
+			"description": null,
 			"item": [
 				{
 					"name": "Create Phase",
@@ -4737,6 +4843,10 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases",
 							"host": [
@@ -4765,6 +4875,10 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases?fields=status,name,budget",
 							"host": [
@@ -4799,6 +4913,10 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=status desc",
 							"host": [
@@ -4833,6 +4951,10 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=order desc",
 							"host": [
@@ -4867,6 +4989,10 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
 							"host": [
@@ -4981,11 +5107,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Phase Products",
+			"description": null,
 			"item": [
 				{
 					"name": "Create Phase Product",
@@ -5046,6 +5172,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products",
 							"host": [
@@ -5072,6 +5202,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
 							"host": [
@@ -5155,11 +5289,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project Templates",
+			"description": null,
 			"item": [
 				{
 					"name": "Create project template",
@@ -5380,6 +5514,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates",
 							"host": [
@@ -5408,6 +5546,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates/{{projectTemplateId}}",
 							"host": [
@@ -5657,11 +5799,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Product Templates",
+			"description": null,
 			"item": [
 				{
 					"name": "Create product template",
@@ -5835,6 +5977,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productTemplates",
 							"host": [
@@ -5863,6 +6009,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productTemplates/{{productTemplateId}}",
 							"host": [
@@ -6052,11 +6202,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project Type",
+			"description": null,
 			"item": [
 				{
 					"name": "Create project type",
@@ -6119,6 +6269,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTypes",
 							"host": [
@@ -6147,6 +6301,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTypes/{{projectTypeId}}",
 							"host": [
@@ -6228,11 +6386,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Org Config",
+			"description": null,
 			"item": [
 				{
 					"name": "Create org config",
@@ -6298,6 +6456,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/orgConfig",
 							"host": [
@@ -6326,6 +6488,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/orgConfig?orgId={{orgStrId}}",
 							"host": [
@@ -6361,6 +6527,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/orgConfig?orgId={{orgStrId}}&configName={{orgConfigName}}",
 							"host": [
@@ -6474,11 +6644,11 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Product Category",
+			"description": null,
 			"item": [
 				{
 					"name": "Create product category",
@@ -6541,6 +6711,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productCategories",
 							"host": [
@@ -6569,6 +6743,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productCategories/{{productCategoryId}}",
 							"host": [
@@ -6682,11 +6860,11 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project upgrade",
+			"description": "Request to migrate projects.",
 			"item": [
 				{
 					"name": "Migrate project",
@@ -6816,12 +6994,11 @@
 					},
 					"response": []
 				}
-			],
-			"description": "Request to migrate projects.",
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Timeline",
+			"description": null,
 			"item": [
 				{
 					"name": "Create timeline",
@@ -6963,6 +7140,10 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines?reference=project&referenceId={{projectId}}",
 							"host": [
@@ -6999,6 +7180,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
@@ -7026,6 +7211,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
@@ -7163,11 +7352,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Milestone",
+			"description": null,
 			"item": [
 				{
 					"name": "Create milestone",
@@ -7200,7 +7389,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"milestone 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 4,\r\n    \"startDate\": \"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-31T00:00:00.000Z\",\r\n    \"status\": \"open\",\r\n    \"type\": \"type3\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            2,\r\n            3,\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 3\",\r\n    \"activeText\": \"activeText 3\",\r\n    \"completedText\": \"completedText 3\",\r\n    \"blockedText\": \"blockedText 3\"\r\n}"
+							"raw": "{\r\n    \"name\": \"milestone 3\",\r\n    \"description\": \"description 3\",\r\n    \"duration\": 4,\r\n    \"startDate\": \"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-31T00:00:00.000Z\",\r\n    \"status\": \"draft\",\r\n    \"type\": \"type3\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            2,\r\n            3,\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 3\",\r\n    \"activeText\": \"activeText 3\",\r\n    \"completedText\": \"completedText 3\",\r\n    \"blockedText\": \"blockedText 3\"\r\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones",
@@ -7263,6 +7452,10 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones",
 							"host": [
@@ -7291,6 +7484,10 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones?sort=order desc",
 							"host": [
@@ -7325,6 +7522,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
@@ -7335,6 +7536,53 @@
 								"{{timelineId}}",
 								"milestones",
 								"{{milestoneId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk update milestone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8fd1d5e9-8e6e-4cd7-9010-b855308be069",
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"milestoneId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\r\n    \"name\": \"milestone new\",\r\n    \"description\": \"description new\",\r\n    \"duration\": 4,\r\n    \"startDate\": \"2018-05-29T00:00:00.000Z\",\r\n    \"endDate\": \"2018-05-30T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-05-31T00:00:00.000Z\",\r\n    \"status\": \"draft\",\r\n    \"type\": \"type3\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            2,\r\n            3,\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 3\",\r\n    \"activeText\": \"activeText 3\",\r\n    \"completedText\": \"completedText 3\",\r\n    \"blockedText\": \"blockedText 3\"\r\n},\r\n{\r\n\t\"id\": 2,\r\n    \"name\": \"milestone 1-updated\",\r\n    \"description\": \"description-updated\",\r\n    \"duration\": 3,\r\n    \"startDate\": \"2018-09-25T00:00:00.000Z\",\r\n    \"completionDate\": \"2018-09-28T00:00:00.000Z\",\r\n    \"status\": \"draft\",\r\n    \"type\": \"type2\",\r\n    \"details\": {\r\n        \"detail1\": {\r\n            \"subDetail1C\": 3\r\n        },\r\n        \"detail2\": [\r\n            4\r\n        ]\r\n    },\r\n    \"order\": 1,\r\n    \"plannedText\": \"plannedText 1-updated\",\r\n    \"activeText\": \"activeText 1-updated\",\r\n    \"completedText\": \"completedText 1-updated\",\r\n    \"blockedText\": \"blockedText 1-updated\"\r\n}\r\n]"
+						},
+						"url": {
+							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"timelines",
+								"{{timelineId}}",
+								"milestones"
 							]
 						}
 					},
@@ -7670,11 +7918,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Milestone Template",
+			"description": null,
 			"item": [
 				{
 					"name": "Create milestone template",
@@ -7900,6 +8148,10 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates",
 							"host": [
@@ -7928,6 +8180,10 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?reference=productTemplate&referenceId={{productTemplateId}}",
 							"host": [
@@ -7966,6 +8222,10 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?reference=productTemplate&referenceId={{productTemplateId}}&sort=order desc",
 							"host": [
@@ -8008,6 +8268,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
@@ -8254,11 +8518,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Metadata",
+			"description": null,
 			"item": [
 				{
 					"name": "Get all metadata",
@@ -8281,6 +8545,10 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata",
 							"host": [
@@ -8309,6 +8577,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata?includeAllReferred=true",
 							"host": [
@@ -8328,11 +8600,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Form Version",
+			"description": null,
 			"item": [
 				{
 					"name": "List forms",
@@ -8349,6 +8621,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions",
 							"host": [
@@ -8380,6 +8656,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions/{{formVersion}}",
 							"host": [
@@ -8412,6 +8692,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}",
 							"host": [
@@ -8571,11 +8855,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Form Revision",
+			"description": null,
 			"item": [
 				{
 					"name": "List all revision for version",
@@ -8592,6 +8876,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions/{{formVersion}}/revisions",
 							"host": [
@@ -8625,6 +8913,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions/{{formVersion}}/revisions/{{formRevision}}",
 							"host": [
@@ -8792,11 +9084,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Price Config Version",
+			"description": null,
 			"item": [
 				{
 					"name": "List price configs",
@@ -8813,6 +9105,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/dev/versions",
 							"host": [
@@ -8844,6 +9140,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/{{priceKey}}/versions/{{priceVersion}}",
 							"host": [
@@ -8876,6 +9176,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/{{priceKey}}",
 							"host": [
@@ -9057,11 +9361,11 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Price Config Revision",
+			"description": null,
 			"item": [
 				{
 					"name": "List all revision for version",
@@ -9078,6 +9382,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/dev/versions/3/revisions",
 							"host": [
@@ -9111,6 +9419,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/{{priceKey}}/versions/{{priceVersion}}/revisions/{{priceRevision}}",
 							"host": [
@@ -9278,11 +9590,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Plan Config Version",
+			"description": null,
 			"item": [
 				{
 					"name": "List plan configs",
@@ -9299,6 +9611,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/dev/versions",
 							"host": [
@@ -9330,6 +9646,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}/versions/{{planVersion}}",
 							"host": [
@@ -9362,6 +9682,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}",
 							"host": [
@@ -9521,11 +9845,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Plan Config Revision",
+			"description": null,
 			"item": [
 				{
 					"name": "List all revision for version",
@@ -9542,6 +9866,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}/versions/{{planVersion}}/revisions",
 							"host": [
@@ -9575,6 +9903,10 @@
 						},
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}/versions/{{planVersion}}/revisions/{{planRevision}}",
 							"host": [
@@ -9742,14 +10074,15 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project Reports",
+			"description": null,
 			"item": [
 				{
 					"name": "summary",
+					"description": null,
 					"item": [
 						{
 							"name": "get report by admin",
@@ -9762,6 +10095,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary",
 									"host": [
@@ -9793,6 +10130,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary",
 									"host": [
@@ -9824,6 +10165,10 @@
 										"value": "Bearer {{jwt-token-admin-40051333}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{api-url}}/projects/123456/reports?reportName=summary",
 									"host": [
@@ -9855,6 +10200,10 @@
 										"value": "Bearer {{jwt-token-admin-40051333}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary123",
 									"host": [
@@ -9876,11 +10225,11 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "projectBudget",
+					"description": null,
 					"item": [
 						{
 							"name": "get report by admin",
@@ -9893,6 +10242,10 @@
 										"value": "Bearer {{jwt-token-admin-40051333}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=projectBudget",
 									"host": [
@@ -9914,14 +10267,13 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "Project Setting",
+			"description": null,
 			"item": [
 				{
 					"name": "Create project setting - double",
@@ -10364,6 +10716,10 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/settings",
 							"host": [
@@ -10392,6 +10748,10 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/settings",
 							"host": [
@@ -10420,6 +10780,10 @@
 								"value": "Bearer {{jwt-token-manager-40051334}}"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/settings",
 							"host": [
@@ -10632,9 +10996,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

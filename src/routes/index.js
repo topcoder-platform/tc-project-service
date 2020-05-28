@@ -115,11 +115,11 @@ router.route('/v5/projects/:projectId(\\d+)')
 
 router.route('/v5/projects/:projectId(\\d+)/scopeChangeRequests')
   .post(require('./scopeChangeRequests/create'));
-  // .get(require('./scopeChangeRequests/list'));
+// .get(require('./scopeChangeRequests/list'));
 router.route('/v5/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)')
   // .get(require('./scopeChangeRequests/get'))
   .patch(require('./scopeChangeRequests/update'));
-  // .delete(require('./scopeChangeRequests/delete'));
+// .delete(require('./scopeChangeRequests/delete'));
 
 router.route('/v5/projects/:projectId(\\d+)/members')
   .get(require('./projectMembers/list'))
@@ -210,6 +210,7 @@ router.route('/v5/timelines/:timelineId(\\d+)')
 
 router.route('/v5/timelines/:timelineId(\\d+)/milestones')
   .post(require('./milestones/create'))
+  .patch(require('./milestones/bulkUpdate'))
   .get(require('./milestones/list'));
 
 router.route('/v5/timelines/:timelineId(\\d+)/milestones/:milestoneId(\\d+)')
@@ -278,16 +279,16 @@ router.route('/v5/projects/metadata/priceConfig/:key/versions/:version(\\d+)/rev
   .post(require('./priceConfig/revision/create'));
 
 router.route('/v5/projects/metadata/priceConfig/:key')
-.get(require('./priceConfig/version/get'));
+  .get(require('./priceConfig/version/get'));
 
 router.route('/v5/projects/metadata/priceConfig/:key/versions')
-.get(require('./priceConfig/version/list'))
-.post(require('./priceConfig/version/create'));
+  .get(require('./priceConfig/version/list'))
+  .post(require('./priceConfig/version/create'));
 
 router.route('/v5/projects/metadata/priceConfig/:key/versions/:version(\\d+)')
-.get(require('./priceConfig/version/getVersion'))
-.patch(require('./priceConfig/version/update'))
-.delete(require('./priceConfig/version/delete'));
+  .get(require('./priceConfig/version/getVersion'))
+  .patch(require('./priceConfig/version/update'))
+  .delete(require('./priceConfig/version/delete'));
 
 // plan config
 router.route('/v5/projects/metadata/planConfig/:key/versions/:version(\\d+)/revisions/:revision(\\d+)')
@@ -312,7 +313,7 @@ router.route('/v5/projects/metadata/planConfig/:key/versions/:version(\\d+)')
 
 // user level reports
 router.route('/v5/projects/reports/embed')
-.get(require('./userReports/getEmbedReport'));
+  .get(require('./userReports/getEmbedReport'));
 
 // work streams
 router.route('/v5/projects/:projectId(\\d+)/workstreams')
@@ -346,7 +347,7 @@ router.route('/v5/projects/:projectId(\\d+)/workstreams/:workStreamId(\\d+)/work
 
 
 router.route('/v5/projects/:projectId/reports/embed')
-.get(require('./projectReports/getEmbedReport'));
+  .get(require('./projectReports/getEmbedReport'));
 
 router.route('/v5/projects/:projectId/reports')
   .get(require('./projectReports/getReport'));
