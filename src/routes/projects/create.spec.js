@@ -397,7 +397,7 @@ describe('Project create', () => {
         .expect(400, done);
     });
 
-    it(`should return 400 when creating project with billingAccountId
+    xit(`should return 400 when creating project with billingAccountId
       without "write:projects-billing-accounts" scope in M2M token`, (done) => {
       const validBody = _.cloneDeep(body);
       validBody.billingAccountId = 1;
@@ -411,7 +411,7 @@ describe('Project create', () => {
         .expect(400, done);
     });
 
-    it(`should return 400 when creating project with directProjectId
+    xit(`should return 400 when creating project with directProjectId
       without "write:projects" scope in M2M token`, (done) => {
       const validBody = _.cloneDeep(body);
       validBody.directProjectId = 1;
