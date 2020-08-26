@@ -289,12 +289,14 @@ module.exports = [
     // users with handles whom we didn't search for
       .then(foundUsers => foundUsers.filter(foundUser => _.includes(invite.handles, foundUser.handle)))
       .then((inviteUsers) => {
+        req.log.debug(`invite users - : ${inviteUsers}).`);
         const members = req.context.currentProjectMembers;
         const projectId = _.parseInt(req.params.projectId);
         // check user handle exists in returned result
         const errorMessageHandleNotExist = 'User with such handle does not exist';
         if (!!invite.handles && invite.handles.length > 0) {
           const existentHandles = _.map(inviteUsers, 'handle');
+          req.log.debug(`existentHandles - : ${existentHandles}).`);
           failed = _.concat(failed, _.map(_.difference(invite.handles, existentHandles), handle => _.assign({}, {
             handle,
             message: errorMessageHandleNotExist,
@@ -305,8 +307,10 @@ module.exports = [
         const promises = [];
         const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
+        req.log.debug(`before - inviteUserIds : ${inviteUserIds}).`);
         if (inviteUserIds) {
-        // remove members already in the team
+          req.log.debug(`entering - inviteUserIds : ${inviteUserIds}).`);
+          // remove members already in the team
           _.remove(inviteUserIds, u => _.some(members, (m) => {
             const isPresent = m.userId === u;
             if (isPresent) {
@@ -327,8 +331,10 @@ module.exports = [
               promises.push(util.getUserRoles(userId, req.log, req.id));
             });
           }
+          req.log.debug(`exiting - inviteUserIds : ${inviteUserIds}).`);
         }
 
+        req.log.debug(`before - invite.emails : ${invite.emails}).`);
         if (invite.emails) {
         // email invites can only be used for CUSTOMER role
           if (invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) { // eslint-disable-line no-lonely-if
@@ -337,10 +343,12 @@ module.exports = [
             delete invite.emails;
           }
         }
+        req.log.debug(`after - invite.emails : ${invite.emails}`);
         if (promises.length === 0) {
           promises.push(Promise.resolve());
         }
         return Promise.all(promises).then((rolesList) => {
+          req.log.debug(`before - invite.role : ${invite.role}`);
           if (inviteUserIds && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
             req.log.debug('Checking if users are allowed to be invited with desired Project Role.');
             const forbidUserList = [];
@@ -366,6 +374,7 @@ module.exports = [
               inviteUserIds = _.filter(inviteUserIds, userId => !_.includes(forbidUserList, userId));
             }
           }
+          req.log.debug(`after - invite.role : ${invite.role}`);
           return models.ProjectMemberInvite.getPendingInvitesForProject(projectId)
             .then((invites) => {
               const data = {
@@ -416,7 +425,9 @@ module.exports = [
               })
           ))
           .then((values) => {
+            req.log.debug('before - postProcessInvites :');
             const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
+            req.log.debug(`after - postProcessInvites : ${response}`);
             if (failed.length) {
               res.status(403).json(_.assign({}, response, { failed }));
             } else {
