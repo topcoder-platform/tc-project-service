@@ -254,11 +254,15 @@ module.exports = [
   validate(addMemberValidations),
   permissions('projectMemberInvite.create'),
   (req, res, next) => {
+    req.log.debug('Entering create invite');
     let failed = [];
     const invite = req.body;
+    req.log.debug(`invite : ${invite}).`);
     // let us request user fields during creating, probably this should be move to GET by ID endpoint instead
     const fields = req.query.fields ? req.query.fields.split(',') : null;
+    req.log.debug(`fields : ${fields}).`);
 
+    req.log.debug(`before validate fields : ${fields}).`);
     try {
       util.validateFields(fields, ALLOWED_FIELDS);
     } catch (validationError) {
@@ -266,13 +270,17 @@ module.exports = [
       err.status = 400;
       return next(err);
     }
+    req.log.debug(`after validate fields : ${fields}).`);
 
+    req.log.debug(`before handles/emails : ${invite.handles}).`);
     if (!invite.handles && !invite.emails) {
       const err = new Error('Either handles or emails are required');
       err.status = 400;
       return next(err);
     }
+    req.log.debug(`after handles/emails : ${invite.handles}).`);
 
+    req.log.debug(`before check if role allowed : ${invite.role}).`);
     if (
       invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
       !util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER, req)
@@ -281,6 +289,7 @@ module.exports = [
       err.status = 403;
       return next(err);
     }
+    req.log.debug(`before check if role allowed : ${invite.role}).`);
 
     // get member details by handles first
     return util.getMemberDetailsByHandles(invite.handles, req.log, req.id)

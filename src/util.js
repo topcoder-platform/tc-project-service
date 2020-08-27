@@ -582,9 +582,11 @@ const projectServiceUtils = {
    * Retrieve member details from user handles
    */
   getMemberDetailsByHandles: Promise.coroutine(function* (handles, logger, requestId) { // eslint-disable-line func-names
+    logger.debug(`entering getMemberDetailsByHandles : ${handles}).`);
     if (_.isNil(handles) || (_.isArray(handles) && handles.length <= 0)) {
       return Promise.resolve([]);
     }
+    logger.debug(` handles length : ${handles.length}).`);
     try {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
@@ -592,6 +594,8 @@ const projectServiceUtils = {
         logger.trace(handles);
       }
       const handleArr = _.map(handles, h => `handleLower:${h.toLowerCase()}`);
+      logger.debug(` handleArr getMemberDetailsByHandles : ${handleArr}).`);
+      logger.debug(` handleArr ENCODE : ${handleArr.join(urlencode(' OR ', 'utf8'))}).`);
       return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
         params: {
           query: `${handleArr.join(urlencode(' OR ', 'utf8'))}`,
@@ -601,8 +605,13 @@ const projectServiceUtils = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', null));
+      }).then((res) => {
+        logger.debug(` RESponse getMemberDetailsByHandles : ${res}).`);
+        logger.debug(` RESponse content getMemberDetailsByHandles : ${res.data.result.content}).`);
+        return _.get(res, 'data.result.content', null);
+      });
     } catch (err) {
+      logger.debug(` ERROR getMemberDetailsByHandles : ${err}).`);
       return Promise.reject(err);
     }
   }),
