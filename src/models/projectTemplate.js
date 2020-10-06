@@ -43,6 +43,11 @@ module.exports = (sequelize, DataTypes) => {
   ProjectTemplate.getTemplate = templateId =>
     ProjectTemplate.findByPk(templateId, { raw: true })
       .then((template) => {
+        // if `template` is not found by `id` return `template`
+        if (!template) {
+          return template; // it suppose to be `null` or whatever `findByPk` returns in this case
+        }
+
         const formRef = template.form;
         return formRef
           ? models.Form.findAll({ where: formRef, raw: true })
