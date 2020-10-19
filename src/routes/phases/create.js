@@ -5,7 +5,7 @@ import Sequelize from 'sequelize';
 
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, TIMELINE_REFERENCES } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -138,27 +138,13 @@ module.exports = [
         });
     })
       .then(() => {
-        // Send events to buses
-        req.log.debug('Sending event to RabbitMQ bus for project phase %d', newProjectPhase.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-          { added: newProjectPhase, route: TIMELINE_REFERENCES.PHASE },
-          { correlationId: req.id },
-        );
-
-        // NOTE So far this logic is implemented in RabbitMQ handler of PROJECT_PHASE_UPDATED
-        //      Even though we send this event to the Kafka, the "project-processor-es" shouldn't process it.
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
           RESOURCES.PHASE,
           newProjectPhase);
 
-        // NOTE So far this logic is implemented in RabbitMQ handler of PROJECT_PHASE_UPDATED
-        //      Even though we send these events to the Kafka, the "project-processor-es" shouldn't process them.
-        //
-        //      We don't process these event in "project-processor-es"
-        //      because it will make 'version conflict' error in ES.
-        //      The order of the other milestones need to be updated in the PROJECT_PHASE_UPDATED event handler
+        // send updated event for all other phases which have been cascading updated
         _.map(otherUpdated, phase =>
           util.sendResourceToKafkaBus(
             req,

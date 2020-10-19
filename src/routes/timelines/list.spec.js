@@ -9,9 +9,11 @@ import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
+const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -199,7 +201,7 @@ describe('LIST timelines', () => {
                     );
                   }
 
-                  return server.services.es.index({
+                  return eClient.index({
                     index: ES_TIMELINE_INDEX,
                     type: ES_TIMELINE_TYPE,
                     id: timelineJson.id,

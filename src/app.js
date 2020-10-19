@@ -117,10 +117,4 @@ app.use(router);
 app.routerRef = router;
 
 
-// =======================
-// Initialize services
-// =======================
-require('./services')(app, logger);
-
-
 module.exports = app;

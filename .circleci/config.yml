@@ -48,7 +48,6 @@ jobs:
         - POSTGRES_USER: circle_test
         - POSTGRES_DB: circle_test
       - image: elasticsearch:2.3
-      - image: rabbitmq:3-management
     environment:
       DEPLOY_ENV: "DEV"
       LOGICAL_ENV: "dev"

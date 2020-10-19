@@ -26,7 +26,6 @@ module.exports = [
   permissions('timeline.delete'),
   (req, res, next) => {
     const timeline = req.timeline;
-    const deleted = _.omit(timeline.toJSON(), ['deletedAt', 'deletedBy']);
 
     return models.sequelize.transaction(() =>
       // Update the deletedBy, then delete
@@ -46,13 +45,6 @@ module.exports = [
         })),
     )
       .then((milestones) => {
-      // Send event to bus
-        req.log.debug('Sending event to RabbitMQ bus for timeline %d', deleted.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_REMOVED,
-          deleted,
-          { correlationId: req.id },
-        );
-
         // emit the event
         util.sendResourceToKafkaBus(
           req,

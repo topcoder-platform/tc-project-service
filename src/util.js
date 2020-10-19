@@ -890,14 +890,6 @@ const projectServiceUtils = {
 
             return Promise.resolve();
           }).then(() => {
-          // TODO Should we also send Kafka event in case we removed some invite above?
-
-            // publish event
-            req.app.services.pubsub.publish(
-              EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-              newMember,
-              { correlationId: req.id },
-            );
             // emit the event
             util.sendResourceToKafkaBus(
               req,

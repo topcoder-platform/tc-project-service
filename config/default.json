@@ -6,7 +6,6 @@
   "captureLogs": "false",
   "enableFileUpload": "true",
   "logentriesToken": "",
-  "rabbitmqURL": "",
   "pubsubQueueName": "project.service",
   "pubsubExchangeName": "projects",
   "fileServiceEndpoint": "",

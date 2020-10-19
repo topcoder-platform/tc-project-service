@@ -29,11 +29,6 @@ module.exports = [
         })
         .then(project => project.destroy({ cascade: true })))
       .then((project) => {
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_DELETED,
-          { id: projectId },
-          { correlationId: req.id },
-        );
         // emit event
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED,
           { req, project: _.assign({ resource: RESOURCES.PROJECT }, _.pick(project.toJSON(), 'id')),

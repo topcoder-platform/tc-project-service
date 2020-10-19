@@ -199,7 +199,6 @@ describe('Project members update', () => {
             resJson.role.should.equal('customer');
             resJson.isPrimary.should.be.true;
             resJson.updatedBy.should.equal(testUtil.userIds.manager);
-            server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
             done();
           }
         });
@@ -246,7 +245,6 @@ describe('Project members update', () => {
                 resJson.role.should.equal(body.role);
                 resJson.isPrimary.should.be.false;
                 resJson.updatedBy.should.equal(testUtil.userIds.manager);
-                server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
                 done();
               }
             });
@@ -288,7 +286,6 @@ describe('Project members update', () => {
             resJson.isPrimary.should.be.false;
             resJson.updatedBy.should.equal(testUtil.userIds.manager);
             deleteSpy.should.have.been.calledOnce;
-            server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
             done();
           }
         });

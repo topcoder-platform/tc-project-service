@@ -80,14 +80,8 @@ module.exports = [
           }
         }))).then((member) => {
       // only return the response after transaction is committed
-      // fire event
       const pmember = member.get({ plain: true });
       req.log.debug(pmember);
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_MEMBER_REMOVED,
-        pmember,
-        { correlationId: req.id },
-      );
 
       // emit the event
       util.sendResourceToKafkaBus(

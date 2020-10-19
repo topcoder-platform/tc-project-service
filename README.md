@@ -9,8 +9,8 @@ Microservice to manage CRUD operations for all things Projects.
   - [Steps to run locally](#steps-to-run-locally)
 - [Run Connect App with Project Service locally](#run-connect-app-with-project-service-locally)
 - [Import and Export data](#import-and-export-data)
-  - [📤 Export data](#%f0%9f%93%a4-export-data)
-  - [📥 Import data](#%f0%9f%93%a5-import-data)
+  - [📤 Export data](#-export-data)
+  - [📥 Import data](#-import-data)
 - [Import metadata from api.topcoder-dev.com (deprecated)](#import-metadata-from-apitopcoder-devcom-deprecated)
 - [Run via Docker](#run-via-docker)
 - [NPM Commands](#npm-commands)
@@ -54,7 +54,6 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
        # Locally deployed services (via docker-compose)
        PROJECTS_ES_URL=dockerhost:9200
        DB_MASTER_URL=postgres://coder:mysecretpassword@dockerhost:5432/projectsdb
-       RABBITMQ_URL=amqp://dockerhost:5672
        BUS_API_URL=http://dockerhost:8002/v5
 
        # Locally we usually run in Development mode
@@ -110,7 +109,6 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
       |----------|:-----:|:----:|
       | PostgreSQL | db | 5432 |
       | Elasticsearch | esearch | 9200 |
-      | RabbitMQ | queue | 5672, 15672  |
       | Mock Service (not in use) | jsonserver | 3001  |
       | Zookeeper | zookeeper | 2181  |
       | Kafka | kafka | 9092  |
@@ -148,7 +146,6 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
          |----------|:-----:|:----:|
          | PostgreSQL | db | 5432 |
          | Elasticsearch | esearch | 9200 |
-         | RabbitMQ | queue | 5672, 15672  |
          | Mock Service (not in use) | jsonserver | 3001  |
 
          </details>

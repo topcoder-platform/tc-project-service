@@ -54,12 +54,6 @@ function updateProjectDetails(req, newScope, projectId) {
       const updated = updatedProject.get({ plain: true });
       const original = _.omit(previousValue, ['deletedAt', 'deletedBy']);
 
-      // publish original and updated project data
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_UPDATED,
-        { original, updated },
-        { correlationId: req.id },
-      );
       req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, { req, original, updated });
 
       return updatedProject;

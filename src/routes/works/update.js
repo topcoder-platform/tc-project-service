@@ -8,7 +8,7 @@ import Sequelize from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, TIMELINE_REFERENCES, ROUTES } from '../../constants';
+import { EVENT, RESOURCES, ROUTES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -139,6 +139,13 @@ module.exports = [
                   id: { $ne: updated.id },
                   order: { $between: [previousValue.order + 1, updated.order] },
                 },
+                include: [{
+                  model: models.WorkStream,
+                  where: {
+                    id: workStreamId,
+                    projectId,
+                  },
+                }],
               });
             }
 
@@ -155,29 +162,49 @@ module.exports = [
                   ],
                 },
               },
+              include: [{
+                model: models.WorkStream,
+                where: {
+                  id: workStreamId,
+                  projectId,
+                },
+              }],
             });
           });
-      })
-      .then(() =>
-        // To simpify the logic, reload the phases from DB and send to the message queue
-        models.ProjectPhase.findAll({
-          where: {
-            projectId,
-          },
-          include: [{ model: models.PhaseProduct, as: 'products' }],
-        })),
+      }),
     )
-      .then((allPhases) => {
+      .then((updatedCount) => {
+        if (updatedCount) {
+          return models.ProjectPhase.findAll({
+            where: {
+              projectId,
+              id: { $ne: updated.id },
+              order: {
+                $between: !_.isNil(previousValue.order) && previousValue.order < updated.order
+                  ? [previousValue.order + 1, updated.order]
+                  : [
+                    updated.order,
+                    (previousValue.order ? previousValue.order : Number.MAX_SAFE_INTEGER) - 1,
+                  ],
+              },
+            },
+            include: [{
+              model: models.WorkStream,
+              where: {
+                id: workStreamId,
+                projectId,
+              },
+            }],
+            order: [['updatedAt', 'DESC']],
+            limit: updatedCount[0],
+          });
+        }
+        return Promise.resolve([]);
+      })
+      .then((otherUpdated) => {
         req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
 
         const updatedValue = updated.get({ plain: true });
-
-        // emit original and updated project phase information
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-          { original: previousValue, updated: updatedValue, allPhases, route: TIMELINE_REFERENCES.WORK },
-          { correlationId: req.id },
-        );
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
@@ -185,6 +212,20 @@ module.exports = [
           updatedValue,
           previousValue,
           ROUTES.WORKS.UPDATE,
+        );
+
+        // send updated event for all other phases which have been cascading updated
+        _.map(otherUpdated, phase =>
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
+            RESOURCES.PHASE,
+            _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
+            // Pass the same object as original phase even though, the order has changed.
+            // So far we don't use the order so it's ok. But in general, we should pass
+            // the original phases. <- TODO
+            _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
+        true, // don't send event to Notification Service as the main event here is updating one phase
         );
 
         res.json(updated);
