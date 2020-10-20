@@ -161,6 +161,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     meta: {
       title: 'Read Project',
       group: 'Project',
+      description: 'Read project when user is a member.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
     projectRoles: ALL,
@@ -173,7 +174,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project',
       description: 'Read any project, even when not a member.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: [
+      ...TOPCODER_ROLES_ADMINS,
+      USER_ROLE.MANAGER,
+    ],
     scopes: SCOPES_PROJECTS_READ,
   },
 
@@ -577,12 +581,6 @@ export const PROJECT_TO_TOPCODER_ROLES_MATRIX = {
     USER_ROLE.TOPCODER_ADMIN,
     USER_ROLE.CONNECT_ADMIN,
     USER_ROLE.MANAGER,
-  ],
-  [PROJECT_MEMBER_ROLE.COPILOT]: [
-    USER_ROLE.COPILOT,
-  ],
-  [PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER]: [
-    USER_ROLE.MANAGER,
     USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
     USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
     USER_ROLE.PRESALES,
@@ -591,17 +589,8 @@ export const PROJECT_TO_TOPCODER_ROLES_MATRIX = {
     USER_ROLE.SOLUTION_ARCHITECT,
     USER_ROLE.PROJECT_MANAGER,
   ],
-  [PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE]: [
-    USER_ROLE.ACCOUNT_EXECUTIVE,
-  ],
-  [PROJECT_MEMBER_ROLE.PROJECT_MANAGER]: [
-    USER_ROLE.PROJECT_MANAGER,
-  ],
-  [PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT]: [
-    USER_ROLE.SOLUTION_ARCHITECT,
-  ],
-  [PROJECT_MEMBER_ROLE.PROGRAM_MANAGER]: [
-    USER_ROLE.PROGRAM_MANAGER,
+  [PROJECT_MEMBER_ROLE.COPILOT]: [
+    USER_ROLE.COPILOT,
   ],
 };
 
@@ -626,28 +615,28 @@ export const DEFAULT_PROJECT_ROLE = [
     projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
-    projectRole: PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
+    projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
-    projectRole: PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
+    projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.PRESALES,
-    projectRole: PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
+    projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.COPILOT,
     projectRole: PROJECT_MEMBER_ROLE.COPILOT,
   }, {
     topcoderRole: USER_ROLE.ACCOUNT_EXECUTIVE,
-    projectRole: PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
+    projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.PROGRAM_MANAGER,
-    projectRole: PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
+    projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.SOLUTION_ARCHITECT,
-    projectRole: PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
+    projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.PROJECT_MANAGER,
-    projectRole: PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
+    projectRole: PROJECT_MEMBER_ROLE.MANAGER,
   }, {
     topcoderRole: USER_ROLE.TOPCODER_USER,
     projectRole: PROJECT_MEMBER_ROLE.CUSTOMER,
