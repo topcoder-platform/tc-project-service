@@ -60,7 +60,6 @@ describe('Project Phases', () => {
   let projectId;
   let projectName;
   let phaseId;
-  let phaseId2;
   let phaseId3;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
@@ -122,7 +121,6 @@ describe('Project Phases', () => {
             models.ProjectPhase.bulkCreate(phases, { returning: true })
               .then((createdPhases) => {
                 phaseId = createdPhases[0].id;
-                phaseId2 = createdPhases[1].id;
                 phaseId3 = createdPhases[2].id;
 
                 done();
@@ -248,33 +246,6 @@ describe('Project Phases', () => {
             const resJson = res.body;
             validatePhase(resJson, bodyWithZeros);
             done();
-          }
-        });
-    });
-
-    it('should return updated phase if the order is specified', (done) => {
-      request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send(_.assign({ order: 1 }, updateBody))
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            validatePhase(resJson, updateBody);
-            resJson.order.should.be.eql(1);
-
-            // Check the order of the other phase
-            models.ProjectPhase.findOne({ where: { id: phaseId2 } })
-              .then((phase2) => {
-                phase2.order.should.be.eql(2);
-                done();
-              });
           }
         });
     });

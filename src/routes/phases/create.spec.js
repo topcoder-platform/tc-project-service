@@ -279,49 +279,6 @@ describe('Project Phases', () => {
         });
     });
 
-    it('should return 201 if payload has order specified', (done) => {
-      request(server)
-        .post(`/v5/projects/${projectId}/phases/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send(_.assign({ order: 1 }, body))
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            validatePhase(resJson, body);
-            resJson.order.should.be.eql(1);
-
-            const firstPhaseId = resJson.id;
-
-            // Create second phase
-            request(server)
-              .post(`/v5/projects/${projectId}/phases/`)
-              .set({
-                Authorization: `Bearer ${testUtil.jwts.copilot}`,
-              })
-              .send(_.assign({ order: 1 }, body))
-              .expect('Content-Type', /json/)
-              .expect(201)
-              .end((err2, res2) => {
-                const resJson2 = res2.body;
-                validatePhase(resJson2, body);
-                resJson2.order.should.be.eql(1);
-
-                models.ProjectPhase.findOne({ where: { id: firstPhaseId } })
-                  .then((firstPhase) => {
-                    firstPhase.order.should.be.eql(2);
-                    done();
-                  });
-              });
-          }
-        });
-    });
-
     it('should return 201 if payload has productTemplateId specified', (done) => {
       request(server)
         .post(`/v5/projects/${projectId}/phases/`)
@@ -336,6 +293,7 @@ describe('Project Phases', () => {
             done(err);
           } else {
             const resJson = res.body;
+            console.log(resJson);
             validatePhase(resJson, body);
             resJson.products.should.have.length(1);
 
