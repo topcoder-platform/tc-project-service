@@ -12,7 +12,6 @@ if (process.env.NODE_ENV === 'test') {
     logLevel: 'debug',
     captureLogs: 'false',
     logentriesToken: '',
-    rabbitmqURL: 'amqp://dockerhost:5672',
     fileServiceEndpoint: 'https://api.topcoder-dev.com/v3/files/',
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',

@@ -9,9 +9,11 @@ import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
+const eClient = util.getElasticSearchClient();
 
 // eslint-disable-next-line no-unused-vars
 const should = chai.should();
@@ -171,7 +173,7 @@ describe('LIST milestones', () => {
                 // Index to ES
                 timelines[0].milestones = _.map(createdMilestones, cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'));
                 timelines[0].projectId = 1;
-                return server.services.es.index({
+                return eClient.index({
                   index: ES_TIMELINE_INDEX,
                   type: ES_TIMELINE_TYPE,
                   id: timelines[0].id,

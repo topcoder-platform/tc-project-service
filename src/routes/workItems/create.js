@@ -118,12 +118,6 @@ module.exports = [
           });
       }))
       .then(() => {
-      // Send events to buses
-        req.log.debug('Sending event to RabbitMQ bus for phase product %d', newPhaseProduct.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_ADDED,
-          newPhaseProduct,
-          { correlationId: req.id },
-        );
         req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
         // emit the event
         util.sendResourceToKafkaBus(

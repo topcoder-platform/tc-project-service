@@ -181,14 +181,7 @@ describe('Project', () => {
         })
         .expect('Content-Type', /json/)
         .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
-            done();
-          }
-        });
+        .end(done);
     });
 
     it('should return the project using M2M token with "write:projects" scope', (done) => {
@@ -211,7 +204,6 @@ describe('Project', () => {
             resJson.name.should.equal('updateProject name by M2M');
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(config.DEFAULT_M2M_USERID);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }
         });
@@ -235,7 +227,6 @@ describe('Project', () => {
             resJson.name.should.equal('updatedProject name');
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051332);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }
         });
@@ -264,7 +255,6 @@ describe('Project', () => {
             resJson.name.should.equal('updatedProject name');
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051332);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             // validate that project history is updated
             models.ProjectHistory.findAll({
               limit: 1,
@@ -310,7 +300,6 @@ describe('Project', () => {
             resJson.name.should.equal('updatedProject name');
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051332);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             // validate that project history is not updated
             models.ProjectHistory.findAll({
               where: {
@@ -385,7 +374,6 @@ describe('Project', () => {
             resJson.name.should.equal('updatedProject name');
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051332);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             // validate that project history is updated
             models.ProjectHistory.findAll({
               where: {
@@ -436,7 +424,6 @@ describe('Project', () => {
                 resJson.name.should.equal('updatedProject name');
                 resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
                 resJson.updatedBy.should.equal(40051334);
-                server.services.pubsub.publish.calledWith('project.updated').should.be.true;
                 // validate that project history is updated
                 models.ProjectHistory.findAll({
                   where: {
@@ -488,7 +475,6 @@ describe('Project', () => {
                 resJson.name.should.equal('updatedProject name');
                 resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
                 resJson.updatedBy.should.equal(40051333);
-                server.services.pubsub.publish.calledWith('project.updated').should.be.true;
                 // validate that project history is updated
                 models.ProjectHistory.findAll({
                   where: {
@@ -564,7 +550,6 @@ describe('Project', () => {
             resJson.name.should.equal('updatedProject name');
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051332);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             // validate that project history is not updated
             models.ProjectHistory.findAll({
               where: {
@@ -600,7 +585,6 @@ describe('Project', () => {
             resJson.billingAccountId.should.equal(123);
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051334);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }
         });
@@ -626,7 +610,6 @@ describe('Project', () => {
             should.exist(resJson);
             resJson.billingAccountId.should.equal(1);
             resJson.billingAccountId.should.equal(1);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }
         });
@@ -652,7 +635,6 @@ describe('Project', () => {
             resJson.billingAccountId.should.equal(1);
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
             resJson.updatedBy.should.equal(40051333);
-            server.services.pubsub.publish.calledWith('project.updated').should.be.true;
             done();
           }
         });
@@ -713,7 +695,6 @@ describe('Project', () => {
                   resJson = resp.body;
                   should.exist(resJson);
                   should.not.exist(resJson.bookmarks);
-                  server.services.pubsub.publish.calledWith('project.updated').should.be.true;
                   done();
                 }
               });
@@ -754,7 +735,6 @@ describe('Project', () => {
                   resJson.name.should.equal('updatedProject name');
                   resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
                   resJson.updatedBy.should.equal(40051333);
-                  server.services.pubsub.publish.calledWith('project.updated').should.be.true;
                   // validate that project history is updated
                   models.ProjectHistory.findAll({
                     where: {

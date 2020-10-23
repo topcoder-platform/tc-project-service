@@ -1,5 +1,6 @@
 import Kafka from 'no-kafka';
 import config from 'config';
+import _ from 'lodash';
 /**
  * Initializes Kafka consumer and subscribes for the topics
  * @param   {Object}  handlers Object that holds kafka handlers. Where property name is kafka topic and value is handler
@@ -42,22 +43,46 @@ export default async function startKafkaConsumer(handlers, app, logger) {
   const onConsume = async (messageSet, topic, partition) => {
     for (let messageIndex = 0; messageIndex < messageSet.length; messageIndex += 1) {
       const kafkaMessage = messageSet[messageIndex];
-      logger.debug(`Consume topic '${topic}' with message: '${kafkaMessage.message.value.toString('utf8')}'.`);
+      // logger.debug(`Consume topic '${topic}' with message: '${kafkaMessage.message.value.toString('utf8')}'.`);
       try {
-        const handler = handlers[topic];
-        if (!handler) {
-          logger.info(`No handler configured for topic: ${topic}`);
+        const topicConfig = handlers[topic];
+        if (!topicConfig) {
+          logger.info(`No handler configured for topic "${topic}".`);
           return;
         }
 
         const busMessage = JSON.parse(kafkaMessage.message.value.toString('utf8'));
-        const payload = busMessage.payload;
-        // we want message to be processed one by one, so we use `await` inside a loop
-        await handler(app, topic, payload); // eslint-disable-line no-await-in-loop
+        const resource = _.get(busMessage, 'payload.resource');
+        // for the message with `resource` remove it from the `payload`
+        const payload = resource ? _.omit(busMessage.payload, 'resource') : busMessage.payload;
+
+        // Topic config might have a function directly or object where each resource would have its own handler
+        // Function directly:
+        //   ```
+        //   topicConfig: function() {}
+        //   ```
+        // Object with function per resource:
+        //   ```
+        //   topicConfig: {
+        //     <resource_name_1>: function() {},
+        //     <resource_name_2>: function() {},
+        //     <resource_name_3>: function() {},
+        //   }
+        const handler = _.isFunction(topicConfig) ? topicConfig : topicConfig[resource];
+
+        // some topics may have handlers only for some `resource`
+        // if we don't find a handler for particular resource then we don't process the message
+        if (handler) {
+          // we want message to be processed one by one, so we use `await` inside a loop
+          await handler(app, topic, payload); // eslint-disable-line no-await-in-loop
+          const resourceMessage = resource ? `resource '${resource}' ` : '';
+          logger.info(`Message for topic '${topic}' ${resourceMessage}was successfully processed`);
+        }
+
+        // we have commit offset even if don't process the message
         await consumer.commitOffset({ topic, partition, offset: kafkaMessage.offset }); // eslint-disable-line no-await-in-loop
-        logger.info(`Message for topic '${topic}' was successfully processed`);
       } catch (error) {
-        logger.error(`Message processing failed: ${error}`);
+        logger.error(`Message processing for topic '${topic}' failed: ${error}`);
       }
     }
   };
@@ -65,4 +90,6 @@ export default async function startKafkaConsumer(handlers, app, logger) {
   // Subscribe for all topics defined in handlers
   const promises = Object.keys(handlers).map(topic => consumer.subscribe(topic, onConsume));
   await Promise.all(promises);
+
+  return consumer;
 }

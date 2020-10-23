@@ -97,13 +97,6 @@ module.exports = [
         req.log.debug('updated work item', JSON.stringify(updated, null, 2));
 
         const updatedValue = updated.get({ plain: true });
-
-        // emit original and updated project phase information
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,
-          { original: previousValue, updated: updatedValue },
-          { correlationId: req.id },
-        );
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_UPDATED,

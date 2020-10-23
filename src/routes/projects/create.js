@@ -501,11 +501,6 @@ module.exports = [
           newProject.estimations = projectEstimations;
         }
 
-        req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
-          newProject,
-          { correlationId: req.id },
-        );
         req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
         // emit event
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,

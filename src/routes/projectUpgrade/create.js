@@ -183,28 +183,12 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
   newPhasesAndProducts.forEach(({ phase, products }) => {
     const phaseJSON = phase.toJSON();
     phaseJSON.products = products;
-    // Send events to buses (ProjectPhase)
-    req.log.debug('Sending event to RabbitMQ bus for project phase %d', phase.id);
-    req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-      phaseJSON,
-      { correlationId: req.id },
-    );
     req.log.debug('Sending event to Kafka bus for project phase %d', phase.id);
     req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phaseJSON });
   });
 
   // Send events to buses (Project)
   req.log.debug('updated project', project);
-
-  // publish original and updated project data
-  req.app.services.pubsub.publish(
-    EVENT.ROUTING_KEY.PROJECT_UPDATED, {
-      original: previousValue,
-      updated: project,
-    }, {
-      correlationId: req.id,
-    },
-  );
 
   req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
     req,

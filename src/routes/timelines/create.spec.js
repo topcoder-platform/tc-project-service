@@ -8,7 +8,7 @@ import _ from 'lodash';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import models from '../../models';
-import { EVENT, MILESTONE_STATUS } from '../../constants';
+import { MILESTONE_STATUS } from '../../constants';
 
 const should = chai.should();
 
@@ -425,9 +425,6 @@ describe('CREATE timeline', () => {
           should.not.exist(resJson.deletedBy);
           should.not.exist(resJson.deletedAt);
 
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.TIMELINE_ADDED).should.be.true;
-
           done();
         });
     });
@@ -515,9 +512,6 @@ describe('CREATE timeline', () => {
               statusHistory.referenceId.should.be.eql(milestone.id);
             });
           });
-
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.TIMELINE_ADDED).should.be.true;
 
           done();
         });

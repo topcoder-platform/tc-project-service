@@ -92,13 +92,6 @@ module.exports = [
         const link = _link.get({ plain: true });
         req.log.debug('New Link Attachment record: ', link);
 
-        // publish Rabbit MQ event
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-          link,
-          { correlationId: req.id },
-        );
-
         // emit the Kafka event
         util.sendResourceToKafkaBus(
           req,
@@ -162,12 +155,6 @@ module.exports = [
               response = _.omit(response, ['path', 'deletedAt']);
 
               response.downloadUrl = resp.data.result.content.preSignedURL;
-              // publish event
-              req.app.services.pubsub.publish(
-                EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-                newAttachment,
-                { correlationId: req.id },
-              );
 
               // emit the event
               util.sendResourceToKafkaBus(
@@ -184,12 +171,6 @@ module.exports = [
         response = _.omit(response, ['path', 'deletedAt']);
         // only in development mode
         response.downloadUrl = path;
-        // publish event
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-          newAttachment,
-          { correlationId: req.id },
-        );
         // emit the event
         util.sendResourceToKafkaBus(
           req,
