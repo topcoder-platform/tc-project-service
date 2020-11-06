@@ -565,10 +565,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: [
-      PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
-      PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
-      PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
-      PROJECT_MEMBER_ROLE.MANAGER,
+      ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
     ],
   },
