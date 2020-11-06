@@ -163,7 +163,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project',
       description: 'Read project when user is a member.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: [
+      ...TOPCODER_ROLES_ADMINS,
+      USER_ROLE.MANAGER,
+    ],
     projectRoles: ALL,
     scopes: SCOPES_PROJECTS_READ,
   },
