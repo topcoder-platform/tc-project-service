@@ -338,17 +338,6 @@ describe('Project Members create', () => {
         .expect(401, done);
     });
 
-    it('should return 401 if register admin as role other than manager (project manager) ', (done) => {
-      request(server)
-        .post(`/v5/projects/${project1.id}/members/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ role: PROJECT_MEMBER_ROLE.PROJECT_MANAGER })
-        .expect('Content-Type', /json/)
-        .expect(401, done);
-    });
-
     describe('Bus api', () => {
       let createEventSpy;
 

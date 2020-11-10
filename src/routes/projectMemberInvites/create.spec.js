@@ -709,30 +709,6 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 201 if try to create account_manager with MANAGER_ROLES', (done) => {
-      util.getUserRoles.restore();
-      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
-      request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          handles: ['test_manager4'],
-          role: 'account_manager',
-        })
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          const resJson = res.body.success[0];
-          should.exist(resJson);
-          resJson.role.should.equal('account_manager');
-          resJson.projectId.should.equal(project1.id);
-          resJson.userId.should.equal(40051336);
-          done();
-        });
-    });
-
     it('should return 403 if try to create account_manager with CUSTOMER_ROLE', (done) => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve(['Topcoder User']));
