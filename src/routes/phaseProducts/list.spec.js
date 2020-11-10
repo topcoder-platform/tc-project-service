@@ -6,9 +6,11 @@ import config from 'config';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -103,7 +105,7 @@ describe('Phase Products', () => {
                 // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
                 project.lastActivityAt = 1;
                 // Index to ES
-                return server.services.es.index({
+                return eClient.index({
                   index: ES_PROJECT_INDEX,
                   type: ES_PROJECT_TYPE,
                   id: projectId,

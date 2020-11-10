@@ -17,11 +17,6 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-  queue:
-    image: "rabbitmq:3-management"
-    ports:
-      - "5672:5672"
-      - "15672:15672"
   zookeeper:
     image: wurstmeister/zookeeper
     ports:

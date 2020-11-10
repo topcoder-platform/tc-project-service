@@ -17,7 +17,6 @@
     "metadataDocType": "METADATA_ES_DOC_TYPE",
     "metadataDocDefaultId": "METADATA_ES_DOC_DEFAULT_ID"
   },
-  "rabbitmqURL": "RABBITMQ_URL",
   "pubsubQueueName": "PUBSUB_QUEUE_NAME",
   "pubsubExchangeName": "PUBSUB_EXCHANGE_NAME",
   "directProjectServiceEndpoint": "DIRECT_PROJECT_SERVICE_ENDPOINT",

@@ -67,12 +67,6 @@ module.exports = [
     })).then((updated) => {
       req.log.debug('updated project attachment', JSON.stringify(updated, null, 2));
       res.json(updated);
-      // emit original and updated project information
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED,
-        { original: previousValue, updated: updated.get({ plain: true }) },
-        { correlationId: req.id },
-      );
 
       // emit the event
       util.sendResourceToKafkaBus(

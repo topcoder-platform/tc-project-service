@@ -15,7 +15,6 @@
       "metadataIndexName": "metadata_test",
       "metadataDocType": "doc"
     },
-    "rabbitmqUrl": "amqp://localhost:5672",
     "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
     "dbConfig": {
         "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",

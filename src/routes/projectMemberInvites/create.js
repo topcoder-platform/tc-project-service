@@ -384,18 +384,13 @@ module.exports = [
                 req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
                 .then((values) => {
                   values.forEach((v) => {
-                  // emit the event
+                    // emit the event
                     util.sendResourceToKafkaBus(
                       req,
                       EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
                       RESOURCES.PROJECT_MEMBER_INVITE,
                       v.toJSON());
 
-                    req.app.services.pubsub.publish(
-                      EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
-                      v,
-                      { correlationId: req.id },
-                    );
                     // send email invite (async)
                     if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
                       sendInviteEmail(req, projectId, v);

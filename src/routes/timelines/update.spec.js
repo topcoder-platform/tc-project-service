@@ -9,7 +9,7 @@ import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { EVENT, BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 import busApi from '../../services/busApi';
 
 const should = chai.should();
@@ -482,9 +482,6 @@ describe('UPDATE timeline', () => {
               statusHistory.referenceId.should.be.eql(milestone.id);
             });
           });
-
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.TIMELINE_UPDATED).should.be.true;
 
           done();
         });

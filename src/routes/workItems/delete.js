@@ -77,13 +77,6 @@ module.exports = [
         .then(entity => entity.destroy()))
       .then((deleted) => {
         req.log.debug('deleted work item', JSON.stringify(deleted, null, 2));
-
-        // Send events to buses
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED,
-          deleted,
-          { correlationId: req.id },
-        );
         // emit the event
         util.sendResourceToKafkaBus(
           req,
