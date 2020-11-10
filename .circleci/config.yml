@@ -114,7 +114,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['develop', 'feature/project-permissions-updates']
+              only: ['develop']
       - deployProd:
           context : org-global
           requires:
