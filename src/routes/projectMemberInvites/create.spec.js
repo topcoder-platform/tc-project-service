@@ -158,11 +158,6 @@ describe('Project Member Invite create', () => {
     let sandbox;
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
-      server.services.pubsub.init.restore();
-      server.services.pubsub.publish.restore();
-      sinon.stub(server.services.pubsub, 'init', () => {});
-      sinon.stub(server.services.pubsub, 'publish', () => {});
       // by default mock lookupMultipleUserEmails return nothing so all the cases are not broken
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([]));
       sandbox.stub(util, 'lookupMultipleUserEmails', () => Promise.resolve([]));
@@ -239,7 +234,6 @@ describe('Project Member Invite create', () => {
               resJson.role.should.equal('customer');
               resJson.projectId.should.equal(project1.id);
               resJson.email.should.equal('hello@world.com');
-              server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
               done();
             }
           });
@@ -388,7 +382,6 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('customer');
             resJson.projectId.should.equal(project2.id);
             resJson.email.should.equal('hello@world.com');
-            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
@@ -440,7 +433,6 @@ describe('Project Member Invite create', () => {
             resJson.projectId.should.equal(project2.id);
             should.not.exist(resJson.userId);
             resJson.email.should.equal('hello@world.com');
-            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
@@ -488,7 +480,6 @@ describe('Project Member Invite create', () => {
             resJson.projectId.should.equal(project2.id);
             resJson.userId.should.equal(40051331);
             should.not.exist(resJson.email);
-            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
@@ -515,7 +506,6 @@ describe('Project Member Invite create', () => {
             resJson[0].handle.should.equal('test_copilot1');
             resJson[0].message.should.equal('User with such handle is already a member of the team.');
             resJson.length.should.equal(1);
-            server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
@@ -559,7 +549,6 @@ describe('Project Member Invite create', () => {
             resJson[0].email.should.equal('romit.choudhary@rivigo.com');
             resJson[0].message.should.equal('User with such email is already a member of the team.');
             resJson.length.should.equal(1);
-            server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
@@ -586,7 +575,6 @@ describe('Project Member Invite create', () => {
             resJson.length.should.equal(1);
             resJson[0].handle.should.equal('test_manager3');
             resJson[0].message.should.equal('User with such handle is already invited to this project.');
-            server.services.pubsub.publish.neverCalledWith('project.member.invite.created').should.be.true;
             done();
           }
         });
@@ -693,7 +681,6 @@ describe('Project Member Invite create', () => {
           resJson.role.should.equal('manager');
           resJson.projectId.should.equal(project1.id);
           resJson.userId.should.equal(40051336);
-          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
           done();
         });
     });
@@ -718,32 +705,6 @@ describe('Project Member Invite create', () => {
           resJson.role.should.equal('manager');
           resJson.projectId.should.equal(project1.id);
           resJson.userId.should.equal(40051333);
-          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
-          done();
-        });
-    });
-
-    it('should return 201 if try to create account_manager with MANAGER_ROLES', (done) => {
-      util.getUserRoles.restore();
-      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.MANAGER]));
-      request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.manager}`,
-        })
-        .send({
-          handles: ['test_manager4'],
-          role: 'account_manager',
-        })
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          const resJson = res.body.success[0];
-          should.exist(resJson);
-          resJson.role.should.equal('account_manager');
-          resJson.projectId.should.equal(project1.id);
-          resJson.userId.should.equal(40051336);
-          server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
           done();
         });
     });
@@ -798,7 +759,6 @@ describe('Project Member Invite create', () => {
             resJson.role.should.equal('copilot');
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40051331);
-            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             done();
           }
         });

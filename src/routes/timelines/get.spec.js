@@ -9,11 +9,13 @@ import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const should = chai.should();
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
+const eClient = util.getElasticSearchClient();
 
 const timelines = [
   {
@@ -202,7 +204,7 @@ describe('GET timeline', () => {
                     timelineJson.description = 'from ES';
                   }
 
-                  await server.services.es.index({
+                  await eClient.index({
                     index: ES_TIMELINE_INDEX,
                     type: ES_TIMELINE_TYPE,
                     id: timelineJson.id,

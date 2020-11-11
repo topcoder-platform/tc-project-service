@@ -9,7 +9,6 @@ import request from 'supertest';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import RabbitMQService from '../../services/rabbitmq';
 import models from '../../models';
 import { ATTACHMENT_TYPES } from '../../constants';
 
@@ -18,8 +17,6 @@ const expect = chai.expect;
 
 describe('Project create', () => {
   before((done) => {
-    sinon.stub(RabbitMQService.prototype, 'init', () => {});
-    sinon.stub(RabbitMQService.prototype, 'publish', () => {});
     testUtil.clearDb()
       .then(() => testUtil.clearES())
       .then(() => models.ProjectType.bulkCreate([
@@ -255,8 +252,6 @@ describe('Project create', () => {
   });
 
   after((done) => {
-    RabbitMQService.prototype.init.restore();
-    RabbitMQService.prototype.publish.restore();
     testUtil.clearDb(done);
   });
 
@@ -475,7 +470,6 @@ describe('Project create', () => {
             // Check that activity fields are set
             resJson.lastActivityUserId.should.be.eql('40051331');
             resJson.lastActivityAt.should.be.not.null;
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }
         });
@@ -531,7 +525,6 @@ describe('Project create', () => {
             // Check that activity fields are set
             resJson.lastActivityUserId.should.be.eql(config.DEFAULT_M2M_USERID.toString());
             resJson.lastActivityAt.should.be.not.null;
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }
         });
@@ -583,7 +576,6 @@ describe('Project create', () => {
             resJson.bookmarks.should.have.lengthOf(1);
             resJson.bookmarks[0].title.should.be.eql('title1');
             resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             // should not create phases without a template id
             resJson.phases.should.have.lengthOf(0);
             done();
@@ -664,7 +656,6 @@ describe('Project create', () => {
             resJson.attachments[1].type.should.equal(bodyWithAttachments.attachments[1].type);
             resJson.attachments[1].tags.should.eql(bodyWithAttachments.attachments[1].tags);
 
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             // should not create phases without a template id
             resJson.phases.should.have.lengthOf(0);
             done();
@@ -733,7 +724,6 @@ describe('Project create', () => {
             phases[0].products.should.have.lengthOf(1);
             phases[0].products[0].name.should.be.eql('product 1');
             phases[0].products[0].templateId.should.be.eql(21);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }
         });
@@ -791,7 +781,6 @@ describe('Project create', () => {
             resJson.bookmarks[0].title.should.be.eql('title1');
             resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
             resJson.phases.should.have.lengthOf(0);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
 
             // verify that project has been marked to use workstreams
             resJson.details.settings.workstreams.should.be.true;
@@ -927,7 +916,6 @@ describe('Project create', () => {
             // Check that activity fields are set
             resJson.lastActivityUserId.should.be.eql('40051331');
             resJson.lastActivityAt.should.be.not.null;
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
 
             // Check new ProjectEstimation records are created.
             models.ProjectEstimation.findAll({
@@ -1027,7 +1015,6 @@ describe('Project create', () => {
             phases[0].products.should.have.lengthOf(1);
             phases[0].products[0].name.should.be.eql('product 1');
             phases[0].products[0].templateId.should.be.eql(21);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }
         });

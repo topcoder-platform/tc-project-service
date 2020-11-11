@@ -2,23 +2,16 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import chai from 'chai';
-import config from 'config';
 import request from 'supertest';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import messageService from '../../services/messageService';
-import RabbitMQService from '../../services/rabbitmq';
-import mockRabbitMQ from '../../tests/mockRabbitMQ';
 import {
   BUS_API_EVENT,
   RESOURCES,
   CONNECT_NOTIFICATION_EVENT,
 } from '../../constants';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 const should = chai.should();
 
@@ -67,7 +60,6 @@ describe('Project Phases', () => {
   let projectId;
   let projectName;
   let phaseId;
-  let phaseId2;
   let phaseId3;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
@@ -94,15 +86,6 @@ describe('Project Phases', () => {
     updatedBy: 1,
     lastActivityAt: 1,
     lastActivityUserId: '1',
-  };
-  const topic = {
-    id: 1,
-    title: 'test project phase',
-    posts:
-    [{ id: 1,
-      type: 'post',
-      body: 'body',
-    }],
   };
   beforeEach((done) => {
     // mocks
@@ -138,7 +121,6 @@ describe('Project Phases', () => {
             models.ProjectPhase.bulkCreate(phases, { returning: true })
               .then((createdPhases) => {
                 phaseId = createdPhases[0].id;
-                phaseId2 = createdPhases[1].id;
                 phaseId3 = createdPhases[2].id;
 
                 done();
@@ -264,33 +246,6 @@ describe('Project Phases', () => {
             const resJson = res.body;
             validatePhase(resJson, bodyWithZeros);
             done();
-          }
-        });
-    });
-
-    it('should return updated phase if the order is specified', (done) => {
-      request(server)
-        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send(_.assign({ order: 1 }, updateBody))
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body;
-            validatePhase(resJson, updateBody);
-            resJson.order.should.be.eql(1);
-
-            // Check the order of the other phase
-            models.ProjectPhase.findOne({ where: { id: phaseId2 } })
-              .then((phase2) => {
-                phase2.order.should.be.eql(2);
-                done();
-              });
           }
         });
     });
@@ -707,88 +662,6 @@ describe('Project Phases', () => {
                   updatedBy: testUtil.userIds.copilot,
                 })).should.be.true;
 
-                done();
-              });
-            }
-          });
-      });
-    });
-
-    describe('RabbitMQ Message topic', () => {
-      let updateMessageSpy;
-      let publishSpy;
-      let sandbox;
-
-      before((done) => {
-        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
-        testUtil.wait(done);
-      });
-
-      beforeEach(async () => {
-        sandbox = sinon.sandbox.create();
-        server.services.pubsub = new RabbitMQService(server.logger);
-
-        // initialize RabbitMQ
-        server.services.pubsub.init(
-          config.get('rabbitmqURL'),
-          config.get('pubsubExchangeName'),
-          config.get('pubsubQueueName'),
-        );
-
-        // add project to ES index
-        await server.services.es.index({
-          index: ES_PROJECT_INDEX,
-          type: ES_PROJECT_TYPE,
-          id: projectId,
-          body: {
-            doc: _.assign(project, { phases: [_.assign(body, { id: phaseId, projectId })] }),
-          },
-        });
-
-        return new Promise(resolve => setTimeout(() => {
-          publishSpy = sandbox.spy(server.services.pubsub, 'publish');
-          updateMessageSpy = sandbox.spy(messageService, 'updateTopic');
-          sandbox.stub(messageService, 'getTopicByTag', () => Promise.resolve(topic));
-          resolve();
-        }, 500));
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
-      after(() => {
-        mockRabbitMQ(server);
-      });
-
-      it('should send message topic when phase Updated', (done) => {
-        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-          post: () => Promise.resolve({
-            status: 200,
-            data: {},
-          }),
-        });
-        sandbox.stub(messageService, 'getClient', () => mockHttpClient);
-        request(server)
-          .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .send(_.assign(updateBody, { budget: 123 }))
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .end((err) => {
-            if (err) {
-              done(err);
-            } else {
-              testUtil.wait(() => {
-                publishSpy.calledOnce.should.be.true;
-                publishSpy.calledWith('project.phase.updated').should.be.true;
-                updateMessageSpy.calledOnce.should.be.true;
-                updateMessageSpy.calledWith(topic.id, sinon.match({
-                  title: updateBody.name,
-                  postId: topic.posts[0].id,
-                  content: topic.posts[0].body })).should.be.true;
                 done();
               });
             }

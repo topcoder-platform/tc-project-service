@@ -136,12 +136,6 @@ module.exports = [
           })
       ))
       .then((memberWithDetails) => {
-        // emit original and updated project information
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
-          { original: previousValue, updated: projectMember },
-          { correlationId: req.id },
-        );
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,

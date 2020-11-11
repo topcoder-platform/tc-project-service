@@ -7,7 +7,6 @@ import chai from 'chai';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import { EVENT } from '../../constants';
 
 const should = chai.should(); // eslint-disable-line no-unused-vars
 
@@ -283,9 +282,6 @@ describe('DELETE timeline', () => {
             .expect(204)
             .end((err) => {
               expectAfterDelete(1, err, () => {
-                // eslint-disable-next-line no-unused-expressions
-                server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.TIMELINE_REMOVED).should.be.true;
-
                 // Milestones are cascade deleted
                 setTimeout(() => {
                   models.Milestone.findAll({ where: { timelineId: 1 } })

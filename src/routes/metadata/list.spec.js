@@ -9,12 +9,14 @@ import _ from 'lodash';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const should = chai.should();
 const expect = chai.expect;
 
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
 const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
+const eClient = util.getElasticSearchClient();
 
 const projectTemplates = [
   {
@@ -412,7 +414,7 @@ describe('GET all metadata from ES', () => {
       })
       .then(() => models.BuildingBlock.bulkCreate(buildingBlocks, { returning: true }))
       .then((created) => { esData.buildingBlocks = getObjToIndex(created); })
-      .then(() => server.services.es.index({
+      .then(() => eClient.index({
         index: ES_METADATA_INDEX,
         type: ES_METADATA_TYPE,
         body: esData,

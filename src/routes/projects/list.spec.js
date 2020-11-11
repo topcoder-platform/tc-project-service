@@ -8,10 +8,11 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import { ATTACHMENT_TYPES } from '../../constants';
-
+import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 // test data for 3 projects
@@ -301,7 +302,7 @@ describe('LIST Project', () => {
           data[0].id = project1.id;
           data[1].id = project2.id;
           data[2].id = project3.id;
-          const esp1 = server.services.es.index({
+          const esp1 = eClient.index({
             index: ES_PROJECT_INDEX,
             type: ES_PROJECT_TYPE,
             id: project1.id,
@@ -309,7 +310,7 @@ describe('LIST Project', () => {
             refresh: 'wait_for',
           });
 
-          const esp2 = server.services.es.index({
+          const esp2 = eClient.index({
             index: ES_PROJECT_INDEX,
             type: ES_PROJECT_TYPE,
             id: project2.id,
@@ -317,7 +318,7 @@ describe('LIST Project', () => {
             refresh: 'wait_for',
           });
 
-          const esp3 = server.services.es.index({
+          const esp3 = eClient.index({
             index: ES_PROJECT_INDEX,
             type: ES_PROJECT_TYPE,
             id: project3.id,

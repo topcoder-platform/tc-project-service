@@ -128,14 +128,6 @@ describe('Project members delete', () => {
         .expect(204)
         .end((err) => {
           expectAfterDelete(project1.id, member1.id, err, () => {
-            const removedMember = {
-              projectId: project1.id,
-              userId: 40051332,
-              role: 'copilot',
-              isPrimary: true,
-            };
-            server.services.pubsub.publish.calledWith('project.member.removed',
-              sinon.match(removedMember)).should.be.true;
             done();
           });
 
@@ -187,14 +179,6 @@ describe('Project members delete', () => {
           .expect(204)
           .end((err) => {
             expectAfterDelete(project1.id, member1.id, err, () => {
-              const removedMember = {
-                projectId: project1.id,
-                userId: 40051332,
-                role: 'copilot',
-                isPrimary: true,
-              };
-              server.services.pubsub.publish.calledWith('project.member.removed',
-                sinon.match(removedMember)).should.be.true;
               // validate the primary copilot
               models.ProjectMember.findAll({
                 paranoid: true,
@@ -245,14 +229,6 @@ describe('Project members delete', () => {
         .expect(204)
         .end((err) => {
           expectAfterDelete(project1.id, member2.id, err, () => {
-            const removedMember = {
-              projectId: project1.id,
-              userId: 40051334,
-              role: 'manager',
-              isPrimary: true,
-            };
-            server.services.pubsub.publish.calledWith('project.member.removed',
-              sinon.match(removedMember)).should.be.true;
             postSpy.should.have.been.calledOnce;
             done();
           });
@@ -284,14 +260,6 @@ describe('Project members delete', () => {
         .expect(204)
         .end((err) => {
           expectAfterDelete(project1.id, member2.id, err, () => {
-            const removedMember = {
-              projectId: project1.id,
-              userId: 40051334,
-              role: 'manager',
-              isPrimary: true,
-            };
-            server.services.pubsub.publish.calledWith('project.member.removed',
-              sinon.match(removedMember)).should.be.true;
             postSpy.should.have.been.calledOnce;
             done();
           });
@@ -331,14 +299,6 @@ describe('Project members delete', () => {
             .expect(204)
             .end((err) => {
               expectAfterDelete(project1.id, member2.id, err, () => {
-                const removedMember = {
-                  projectId: project1.id,
-                  userId: 40051334,
-                  role: 'manager',
-                  isPrimary: true,
-                };
-                server.services.pubsub.publish.calledWith('project.member.removed',
-                  sinon.match(removedMember)).should.be.true;
                 postSpy.should.not.have.been.calledOnce;
                 done();
               });

@@ -119,7 +119,7 @@ describe('Kafka service', () => {
       handlers.topic1.notCalled.should.be.true;
       handlers.topic2.notCalled.should.be.true;
       mockedLogger.info.calledOnce.should.be.true;
-      mockedLogger.info.calledWith('No handler configured for topic: unknown-topic').should.be.true;
+      mockedLogger.info.calledWith('No handler configured for topic "unknown-topic".').should.be.true;
     });
   });
 });

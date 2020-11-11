@@ -111,13 +111,6 @@ module.exports = [
         .catch(next);
     })
       .then(() => {
-      // Send event to bus
-        req.log.debug('Sending event to RabbitMQ bus for timeline %d', result.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_ADDED,
-          _.assign({ projectId: req.params.projectId }, result),
-          { correlationId: req.id },
-        );
-
         // emit the event
         util.sendResourceToKafkaBus(
           req,

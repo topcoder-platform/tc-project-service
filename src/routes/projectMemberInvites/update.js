@@ -89,10 +89,6 @@ module.exports = [
               RESOURCES.PROJECT_MEMBER_INVITE,
               updatedInvite.toJSON());
 
-            req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED, updatedInvite, {
-              correlationId: req.id,
-            });
-
             req.log.debug('Adding user to project');
             // add user to project if accept invite
             if (updatedInvite.status === INVITE_STATUS.ACCEPTED ||

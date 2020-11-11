@@ -5,5 +5,6 @@
   "connectProjectsUrl": "https://connect.topcoder-dev.com/projects/",
   "fileServiceEndpoint": "https://api.topcoder-dev.com/v3/files/",
   "connectProjectsUrl": "https://connect.topcoder-dev.com/projects/",
-  "memberServiceEndpoint": "https://api.topcoder-dev.com/v3/members"
+  "memberServiceEndpoint": "https://api.topcoder-dev.com/v3/members",
+  "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/"
 }

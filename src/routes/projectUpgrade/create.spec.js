@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-expressions, no-await-in-loop, no-restricted-syntax */
 
 import { expect } from 'chai';
-import sinon from 'sinon';
 import request from 'supertest';
 import server from '../../app';
 import { PROJECT_STATUS } from '../../constants';
@@ -133,17 +132,9 @@ describe('Project upgrade', () => {
         targetVersion: 'v3',
         defaultProductTemplateId: defaultProductTemplate.id,
       };
-      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
-      server.services.pubsub.init.restore();
-      server.services.pubsub.publish.restore();
-      sinon.stub(server.services.pubsub, 'init', () => {});
-      sinon.stub(server.services.pubsub, 'publish', () => {});
     });
 
     afterEach(async () => {
-      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
-      // server.services.pubsub.init.restore();
-      // server.services.pubsub.publish.restore();
       await testUtil.clearDb();
     });
 
@@ -299,12 +290,6 @@ describe('Project upgrade', () => {
               });
             }
           }
-
-          expect(server.services.pubsub.publish.calledWith('project.phase.added')).to.be.true;
-          // we should not raise product added event as when we are adding a phase, it automatically adds the product
-          // product added event should be raised only when a new product is added to an existing phase
-          expect(server.services.pubsub.publish.calledWith('project.phase.product.added')).to.be.false;
-          expect(server.services.pubsub.publish.calledWith('project.updated')).to.be.true;
         };
 
         it('should migrate a non completed project to the expected state', async () => {

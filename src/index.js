@@ -4,27 +4,6 @@ const app = require('./app');
 const coreLib = require('tc-core-library-js');
 const expressListRoutes = require('express-list-routes');
 
-/**
- * Handle server shutdown gracefully
- * @returns {undefined}
- */
-function gracefulShutdown() {
-  app.services.pubsub.disconnect()
-    .then(() => {
-      app.logger.info('Gracefully shutting down server');
-      process.exit();
-    }).catch((err) => {
-      app.logger.error(err);
-    });
-  // if after
-  setTimeout(() => {
-    app.logger.error('Could not close connections in time, forcefully shutting down');
-    process.exit();
-  }, 10 * 1000);
-}
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
-
 // =======================
 // start the server ======
 // =======================

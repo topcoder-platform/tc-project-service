@@ -52,11 +52,6 @@ module.exports = [
       .then(() => {
         // fire event
         const pattachment = attachment.get({ plain: true });
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_REMOVED,
-          pattachment,
-          { correlationId: req.id },
-        );
         // emit the event
         util.sendResourceToKafkaBus(
           req,

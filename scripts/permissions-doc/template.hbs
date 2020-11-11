@@ -85,6 +85,11 @@
         background-color: #b8daff;
         vertical-align: middle;
       }
+
+      .badge-crossed {
+        opacity: 0.4;
+        text-decoration: line-through;
+      }
     </style>
   </head>
   <body>
@@ -96,11 +101,11 @@
         <p>Legend:</p>
         <ul>
           <li><span class="badge badge-primary">allowed Project Role</span> - users with such a <strong>Project Role</strong> are allowed to perform the action</li>
-          <li><span class="badge badge-warning">denied Project Role</span> - users with such a <strong>Project Role</strong> are denied to perform the action even they have some other allow roles</li>
+          <li><span class="badge badge-primary badge-crossed">denied Project Role</span> - users with such a <strong>Project Role</strong> are denied to perform the action even they have some other allow roles</li>
           <li><span class="badge badge-success">allowed Topcoder Role</span> - users with such a <strong>Topcoder Role</strong> are allowed to perform the action</li>
-          <li><span class="badge badge-danger">denied Topcoder Role</span> - users with such a <strong>Topcoder Role</strong> are denied to perform the action even they have some other allow roles</li>
+          <li><span class="badge badge-success badge-crossed">denied Topcoder Role</span> - users with such a <strong>Topcoder Role</strong> are denied to perform the action even they have some other allow roles</li>
           <li><span class="badge badge-dark">allowed M2M Scope</span> - M2M tokens with such a <strong>scope</strong> are allowed to perform the action</li>
-          <li><span class="badge badge-secondary">denied M2M Scope</span> - M2M tokens with such a <strong>scope</strong> are allowed to perform the action even they have some other allow scopes</li>
+          <li><span class="badge badge-dark badge-crossed">denied M2M Scope</span> - M2M tokens with such a <strong>scope</strong> are allowed to perform the action even they have some other allow scopes</li>
         </ul>
       </div>
 
@@ -131,7 +136,7 @@
                   {{/each}}
                 {{/if}}
                 {{#each denyRule.projectRoles}}
-                  <span class="badge badge-warning" title="Denied Project Role">{{this}}</span>
+                  <span class="badge badge-primary badge-crossed" title="Denied Project Role">{{this}}</span>
                 {{/each}}
               </div>
 
@@ -144,7 +149,7 @@
                   {{/each}}
                 {{/if}}
                 {{#each denyRule.topcoderRoles}}
-                  <span class="badge badge-danger" title="Denied Topcoder Role">{{this}}</span>
+                  <span class="badge badge-success badge-crossed" title="Denied Topcoder Role">{{this}}</span>
                 {{/each}}
               </div>
 
@@ -153,7 +158,7 @@
                   <span class="badge badge-dark" title="Allowed Topcoder Role">{{this}}</span>
                 {{/each}}
                 {{#each denyRule.scopes}}
-                  <span class="badge badge-secondary" title="Denied Topcoder Role">{{this}}</span>
+                  <span class="badge badge-darky badge-crossed" title="Denied Topcoder Role">{{this}}</span>
                 {{/each}}
               </div>
             </div>

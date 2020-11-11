@@ -1,11 +1,10 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
-import Sequelize from 'sequelize';
 
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, TIMELINE_REFERENCES } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
 
@@ -45,7 +44,6 @@ module.exports = [
     });
 
     let newProjectPhase = null;
-    let otherUpdated = null;
     models.sequelize.transaction(() => {
       req.log.debug('Create Phase - Starting transaction');
       return models.Project.findOne({
@@ -73,39 +71,8 @@ module.exports = [
               newProjectPhase = _.omit(newProjectPhase, ['deletedAt', 'deletedBy', 'utm']);
             });
         })
+        // create product if `productTemplateId` is defined
         .then(() => {
-          req.log.debug('re-ordering the other phases');
-
-          if (_.isNil(newProjectPhase.order)) {
-            return Promise.resolve();
-          }
-
-          // Increase the order of the other phases in the same project,
-          // which have `order` >= this phase order
-          return models.ProjectPhase.update({ order: Sequelize.literal('"order" + 1') }, {
-            where: {
-              projectId,
-              id: { $ne: newProjectPhase.id },
-              order: { $gte: newProjectPhase.order },
-            },
-          });
-        })
-        .then((updatedCount) => {
-          if (updatedCount) {
-            return models.ProjectPhase.findAll({
-              where: {
-                projectId,
-                id: { $ne: newProjectPhase.id },
-                order: { $gte: newProjectPhase.order },
-              },
-              order: [['updatedAt', 'DESC']],
-              limit: updatedCount[0],
-            });
-          }
-          return Promise.resolve();
-        })
-        .then((_otherUpdated) => {
-          otherUpdated = _otherUpdated || [];
           if (_.isNil(data.productTemplateId)) {
             return Promise.resolve();
           }
@@ -138,39 +105,11 @@ module.exports = [
         });
     })
       .then(() => {
-        // Send events to buses
-        req.log.debug('Sending event to RabbitMQ bus for project phase %d', newProjectPhase.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-          { added: newProjectPhase, route: TIMELINE_REFERENCES.PHASE },
-          { correlationId: req.id },
-        );
-
-        // NOTE So far this logic is implemented in RabbitMQ handler of PROJECT_PHASE_UPDATED
-        //      Even though we send this event to the Kafka, the "project-processor-es" shouldn't process it.
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
           RESOURCES.PHASE,
           newProjectPhase);
-
-        // NOTE So far this logic is implemented in RabbitMQ handler of PROJECT_PHASE_UPDATED
-        //      Even though we send these events to the Kafka, the "project-processor-es" shouldn't process them.
-        //
-        //      We don't process these event in "project-processor-es"
-        //      because it will make 'version conflict' error in ES.
-        //      The order of the other milestones need to be updated in the PROJECT_PHASE_UPDATED event handler
-        _.map(otherUpdated, phase =>
-          util.sendResourceToKafkaBus(
-            req,
-            EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
-            RESOURCES.PHASE,
-            _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt')),
-            // Pass the same object as original phase even though, the order has changed.
-            // So far we don't use the order so it's ok. But in general, we should pass
-            // the original phases. <- TODO
-            _.assign(_.pick(phase.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'))),
-        true, // don't send event to Notification Service as the main event here is updating one phase
-        );
 
         res.status(201).json(newProjectPhase);
       })

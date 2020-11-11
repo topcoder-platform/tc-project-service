@@ -8,10 +8,11 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import { ATTACHMENT_TYPES } from '../../constants';
-
+import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -180,7 +181,7 @@ describe('GET Project', () => {
           });
         });
         return Promise.all([p1, p2])
-          .then(() => server.services.es.index({
+          .then(() => eClient.index({
             index: ES_PROJECT_INDEX,
             type: ES_PROJECT_TYPE,
             id: data[0].id,

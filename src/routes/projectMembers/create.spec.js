@@ -133,7 +133,6 @@ describe('Project Members create', () => {
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40051332);
             should.exist(resJson.id);
-            server.services.pubsub.publish.calledWith('project.member.invite.created').should.be.true;
             request(server)
               .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
               .set({
@@ -153,8 +152,6 @@ describe('Project Members create', () => {
                   resJson2.role.should.equal('copilot');
                   resJson2.projectId.should.equal(project1.id);
                   resJson2.userId.should.equal(40051332);
-                  server.services.pubsub.publish.calledWith('project.member.invite.updated').should.be.true;
-                  server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
 
                   request(server)
                     .patch(`/v5/projects/${project1.id}/invites/${resJson.id}`)
@@ -228,7 +225,6 @@ describe('Project Members create', () => {
             resJson.isPrimary.should.be.truthy;
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40051334);
-            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
           }
         });
@@ -286,7 +282,6 @@ describe('Project Members create', () => {
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40051334);
             resJson.createdBy.should.equal(config.DEFAULT_M2M_USERID);
-            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
           }
         });
@@ -327,7 +322,6 @@ describe('Project Members create', () => {
             resJson.isPrimary.should.be.truthy;
             resJson.projectId.should.equal(project1.id);
             resJson.userId.should.equal(40051333);
-            server.services.pubsub.publish.calledWith('project.member.added').should.be.true;
             done();
           }
         });
@@ -340,17 +334,6 @@ describe('Project Members create', () => {
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({ role: PROJECT_MEMBER_ROLE.COPILOT })
-        .expect('Content-Type', /json/)
-        .expect(401, done);
-    });
-
-    it('should return 401 if register admin as role other than manager (project manager) ', (done) => {
-      request(server)
-        .post(`/v5/projects/${project1.id}/members/`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ role: PROJECT_MEMBER_ROLE.PROJECT_MANAGER })
         .expect('Content-Type', /json/)
         .expect(401, done);
     });
