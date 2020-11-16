@@ -8,10 +8,11 @@
  */
 import _ from 'lodash';
 
-module.exports = function patchAuthUser(roleName) {
+module.exports = function patchAuthUser(logger) {
   return function patch(req, res, next) {
     if (req.authUser) {
       if (!req.authUser.email) {
+        logger.debug(`Email not found for user with id ${req.authUser.userId}`);
         req.authUser.email = _.find(req.authUser, (value, key) => {
           return (key.indexOf('email') !== -1)
         })
