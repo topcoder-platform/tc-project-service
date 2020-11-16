@@ -10,6 +10,7 @@ import expressRequestId from 'express-request-id';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import performanceRequestLogger from './middlewares/performanceRequestLogger';
+import jwtDecodePatcher from './middlewares/jwtDecodePatcher';
 import router from './routes';
 import permissions from './permissions';
 import models from './models';
@@ -68,6 +69,8 @@ const logger = coreLib.logger({
 });
 app.use(performanceRequestLogger(logger));
 app.logger = logger;
+
+app.use(jwtDecodePatcher(logger));
 
 // =======================
 // CORS ================
