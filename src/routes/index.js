@@ -49,8 +49,8 @@ router.all(
 router.all(
   RegExp(`\\/${apiVersion}\\/.*`), (req, res, next) => {
     if (req.authUser && !req.authUser.email) {
-        logger.debug(`Email not found for user with id ${req.authUser.userId}`);
-        req.authUser.email = _.find(req.authUser, (value, key) => (key.indexOf('email') !== -1));
+      req.log.debug(`Email not found for user with id ${req.authUser.userId}`);
+      req.authUser.email = _.find(req.authUser, (value, key) => (key.indexOf('email') !== -1));
     }
     return next();
   },
