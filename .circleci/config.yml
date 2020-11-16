@@ -114,7 +114,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['develop', 'hotfix/auth0_token_fix']
+              only: ['develop']
       - deployProd:
           context : org-global
           requires:
