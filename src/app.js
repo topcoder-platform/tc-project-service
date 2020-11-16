@@ -70,8 +70,6 @@ const logger = coreLib.logger({
 app.use(performanceRequestLogger(logger));
 app.logger = logger;
 
-app.use(jwtDecodePatcher(logger));
-
 // =======================
 // CORS ================
 // =======================
