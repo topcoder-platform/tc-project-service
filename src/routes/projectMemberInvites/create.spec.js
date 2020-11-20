@@ -767,6 +767,10 @@ describe.only('Project Member Invite create', () => {
     it('should return 201 if try to create copilot invite by "Connect Copilot Manager"', (done) => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.COPILOT]));
+      console.log(JSON.stringify({
+        userToken: testUtil.jwts.copilotManager,
+        user: testUtil.getDecodedToken(testUtil.jwts.copilotManager),
+      }, null, 2));
       request(server)
         .post(`/v5/projects/${project1.id}/invites`)
         .set({

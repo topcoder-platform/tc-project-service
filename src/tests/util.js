@@ -56,6 +56,7 @@ export default {
     manager: 40051334,
     member2: 40051335,
     connectAdmin: 40051336,
+    copilotManager: 40051337,
     romit: 40158431,
   },
   getDecodedToken: token => jwt.decode(token),
