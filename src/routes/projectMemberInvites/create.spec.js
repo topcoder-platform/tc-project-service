@@ -779,12 +779,16 @@ describe('Project Member Invite create', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.success[0];
-          should.exist(resJson);
-          resJson.role.should.equal('copilot');
-          resJson.projectId.should.equal(project1.id);
-          resJson.userId.should.equal(40051331);
-          done();
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.success[0];
+            should.exist(resJson);
+            resJson.role.should.equal('copilot');
+            resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(40051331);
+            done();
+          }
         });
     });
 
