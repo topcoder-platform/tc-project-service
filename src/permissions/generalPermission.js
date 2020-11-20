@@ -35,6 +35,7 @@ import models from '../models';
  * @return {Function} which would be resolved if `req` is allowed and rejected otherwise
  */
 module.exports = permissions => async (req) => {
+  console.log(JSON.stringify({ path: req.path, body: req.body }, null, 2));
   const projectId = _.parseInt(req.params.projectId);
 
   // if one of the `permission` requires to know Project Members, but current route doesn't belong to any project
