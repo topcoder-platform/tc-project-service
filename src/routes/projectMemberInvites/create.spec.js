@@ -20,7 +20,7 @@ import {
 
 const should = chai.should();
 
-describe.only('Project Member Invite create', () => {
+describe('Project Member Invite create', () => {
   let project1;
   let project2;
   beforeEach((done) => {
@@ -767,10 +767,6 @@ describe.only('Project Member Invite create', () => {
     it('should return 201 if try to create copilot invite by "Connect Copilot Manager"', (done) => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.COPILOT]));
-      console.log('AWS', JSON.stringify({
-        userToken: testUtil.jwts.copilotManager,
-        user: testUtil.getDecodedToken(testUtil.jwts.copilotManager),
-      }, null, 2));
       request(server)
         .post(`/v5/projects/${project2.id}/invites`)
         .set({

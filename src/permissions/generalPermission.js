@@ -35,7 +35,6 @@ import models from '../models';
  * @return {Function} which would be resolved if `req` is allowed and rejected otherwise
  */
 module.exports = permissions => async (req) => {
-  console.log(JSON.stringify({ path: req.path, body: req.body, permissions }, null, 2));
   const projectId = _.parseInt(req.params.projectId);
 
   // if one of the `permission` requires to know Project Members, but current route doesn't belong to any project
@@ -70,8 +69,6 @@ module.exports = permissions => async (req) => {
   const hasPermission = _.isArray(permissions)
     ? _.some(permissions, permission => util.hasPermissionByReq(permission, req))
     : util.hasPermissionByReq(permissions, req);
-
-  console.log('hasPermission', hasPermission);
 
   if (!hasPermission) {
     throw new Error('You do not have permissions to perform this action');
