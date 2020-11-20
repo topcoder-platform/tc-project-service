@@ -772,7 +772,7 @@ describe.only('Project Member Invite create', () => {
         user: testUtil.getDecodedToken(testUtil.jwts.copilotManager),
       }, null, 2));
       request(server)
-        .post(`/v5/projects/${project1.id}/invites`)
+        .post(`/v5/projects/${project2.id}/invites`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilotManager}`,
         })
@@ -789,7 +789,7 @@ describe.only('Project Member Invite create', () => {
             const resJson = res.body.success[0];
             should.exist(resJson);
             resJson.role.should.equal('copilot');
-            resJson.projectId.should.equal(project1.id);
+            resJson.projectId.should.equal(project2.id);
             resJson.userId.should.equal(40051331);
             done();
           }
