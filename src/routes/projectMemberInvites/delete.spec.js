@@ -157,7 +157,20 @@ describe('Project member invite delete', () => {
             updatedAt: '2016-06-30 00:33:07+00',
           });
 
-          return Promise.all([pm, invite4, invite5, invite6]);
+          const invite7 = models.ProjectMemberInvite.create({
+            id: 7,
+            projectId: project2.id,
+            userId: testUtil.userIds.copilot,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.COPILOT,
+            status: INVITE_STATUS.ACCEPTED,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          return Promise.all([pm, invite4, invite5, invite6, invite7]);
         });
 
         Promise.all([p1, p2]).then(() => done());
@@ -330,6 +343,16 @@ describe('Project member invite delete', () => {
         .delete(`/v5/projects/${project1.id}/invites/2`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(204)
+        .end(() => done());
+    });
+
+    it('should return 204 if "Connect Copilot Manager" cancels invitation for copilot', (done) => {
+      request(server)
+        .delete(`/v5/projects/${project1.id}/invites/7`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilotManager}`,
         })
         .expect(204)
         .end(() => done());

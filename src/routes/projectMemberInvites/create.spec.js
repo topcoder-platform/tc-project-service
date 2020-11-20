@@ -736,7 +736,7 @@ describe('Project Member Invite create', () => {
         });
     });
 
-    it('should return 201 if try to create customer with COPILOT', (done) => {
+    it('should return 201 if try to create copilot invite with COPILOT role', (done) => {
       util.getUserRoles.restore();
       sandbox.stub(util, 'getUserRoles', () => Promise.resolve(['Connect Copilot']));
       request(server)
@@ -758,6 +758,34 @@ describe('Project Member Invite create', () => {
             should.exist(resJson);
             resJson.role.should.equal('copilot');
             resJson.projectId.should.equal(project1.id);
+            resJson.userId.should.equal(40051331);
+            done();
+          }
+        });
+    });
+
+    it('should return 201 if try to create copilot invite by "Connect Copilot Manager"', (done) => {
+      util.getUserRoles.restore();
+      sandbox.stub(util, 'getUserRoles', () => Promise.resolve([USER_ROLE.COPILOT]));
+      request(server)
+        .post(`/v5/projects/${project2.id}/invites`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilotManager}`,
+        })
+        .send({
+          handles: ['test_customer1'],
+          role: 'copilot',
+        })
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body.success[0];
+            should.exist(resJson);
+            resJson.role.should.equal('copilot');
+            resJson.projectId.should.equal(project2.id);
             resJson.userId.should.equal(40051331);
             done();
           }

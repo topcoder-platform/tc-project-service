@@ -1277,13 +1277,13 @@ const projectServiceUtils = {
       return false;
     }
 
-    // console.log('hasPermission', permission, user);
-
     const allowRule = permission.allowRule ? permission.allowRule : permission;
     const denyRule = permission.denyRule ? permission.denyRule : null;
 
     const allow = util.matchPermissionRule(allowRule, user, projectMembers);
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
+
+    // console.log('hasPermission', JSON.stringify({ permission, user, projectMembers, allow, deny }, null, 2));
 
     return allow && !deny;
   },

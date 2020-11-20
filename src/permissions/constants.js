@@ -306,19 +306,6 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
-  UPDATE_PROJECT_MEMBER_TO_COPILOT: {
-    meta: {
-      title: 'Update Project Member (to copilot)',
-      group: 'Project Member',
-      description: 'Who can update project member role to "copilot".',
-    },
-    topcoderRoles: [
-      ...TOPCODER_ROLES_ADMINS,
-      USER_ROLE.COPILOT_MANAGER,
-    ],
-    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
-  },
-
   DELETE_PROJECT_MEMBER_CUSTOMER: {
     meta: {
       title: 'Delete Project Member (customer)',
@@ -330,14 +317,28 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
-  DELETE_PROJECT_MEMBER_NON_CUSTOMER: {
+  DELETE_PROJECT_MEMBER_TOPCODER: {
     meta: {
-      title: 'Delete Project Member (non-customer)',
+      title: 'Delete Project Member (topcoder)',
       group: 'Project Member',
-      description: 'Who can delete project members with non "customer" role.',
+      description: 'Who can delete project members with some topcoder role like "manager" etc.',
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: PROJECT_ROLES_MANAGEMENT,
+    scopes: SCOPES_PROJECT_MEMBERS_WRITE,
+  },
+
+  DELETE_PROJECT_MEMBER_COPILOT: {
+    meta: {
+      title: 'Delete Project Member (copilot)',
+      group: 'Project Member',
+      description: 'Who can delete project members with "copilot" role.',
+    },
+    topcoderRoles: [
+      ...TOPCODER_ROLES_ADMINS,
+      USER_ROLE.COPILOT_MANAGER,
+    ],
+    projectRoles: ALL,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -371,23 +372,23 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Invite',
       description: 'Who can invite project members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: ALL,
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
-  CREATE_PROJECT_INVITE_NON_CUSTOMER: {
+  CREATE_PROJECT_INVITE_TOPCODER: {
     meta: {
-      title: 'Create Project Invite (non-customer)',
+      title: 'Create Project Invite (topcoder)',
       group: 'Project Invite',
-      description: 'Who can invite project members with non "customer" role.',
+      description: 'Who can invite project members with topcoder role like "manager" etc.',
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
-  CREATE_PROJECT_INVITE_COPILOT_DIRECTLY: {
+  CREATE_PROJECT_INVITE_COPILOT: {
     meta: {
       title: 'Create Project Invite (copilot)',
       group: 'Project Invite',
@@ -454,13 +455,27 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
-  DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER: {
+  DELETE_PROJECT_INVITE_NOT_OWN_TOPCODER: {
     meta: {
-      title: 'Delete Project Invite (not own, non-customer)',
+      title: 'Delete Project Invite (not own, topcoder)',
       group: 'Project Invite',
-      description: 'Who can delete project invites for other members with non "customer" role.',
+      description: 'Who can delete project invites for other members with some topcoder role like "manager" etc.',
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
+    projectRoles: PROJECT_ROLES_MANAGEMENT,
+    scopes: SCOPES_PROJECT_INVITES_WRITE,
+  },
+
+  DELETE_PROJECT_INVITE_NOT_OWN_COPILOT: {
+    meta: {
+      title: 'Delete Project Invite (not own, copilot)',
+      group: 'Project Invite',
+      description: 'Who can delete invites for other members with "copilot" role.',
+    },
+    topcoderRoles: [
+      ...TOPCODER_ROLES_ADMINS,
+      USER_ROLE.COPILOT_MANAGER,
+    ],
     projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
