@@ -174,15 +174,25 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
    Runs the Project Service using nodemon, so it would be restarted after any of the files is updated.
    The project service will be served on `http://localhost:8001`.
 
-4. *(Optional)* Start Project Service Kafka Consumer
-
-   *Run this only if you want to test or modify logic of `lastActivityAt` or `lastActivityBy`.*
+4. Start Project Service Kafka Consumer
 
    In another terminal window run:
 
    ```bash
    npm run startKafkaConsumers:dev
    ```
+
+   <details><summary>Click to learn what this service does</summary>
+   <br>
+
+   This service run Kafka Consumer which listens to some events and handles the next things:
+   - updates `lastActivityAt` and `lastActivityUserId` for projects when we make any updates related to the project like updating project, project attachments, project plan, project members create/delete topics and so on
+   - create/update/delete topics for phases when we create/update/delete phases
+   - update phase progress and duration when milestone is completed
+   - see all the Kafka handlers in file [src/events/kafkaHandlers.js](./src/events/kafkaHandlers.js)
+
+   <details>
+
 
 ## Run Connect App with Project Service locally
 
