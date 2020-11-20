@@ -31,12 +31,13 @@ module.exports = () => {
   ]));
   Authorizer.setPolicy('projectMember.delete', generalPermission([
     PERMISSION.DELETE_PROJECT_MEMBER_CUSTOMER,
-    PERMISSION.DELETE_PROJECT_MEMBER_NON_CUSTOMER,
+    PERMISSION.DELETE_PROJECT_MEMBER_TOPCODER,
+    PERMISSION.DELETE_PROJECT_MEMBER_COPILOT,
   ]));
 
   Authorizer.setPolicy('projectMemberInvite.create', generalPermission([
     PERMISSION.CREATE_PROJECT_INVITE_CUSTOMER,
-    PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER,
+    PERMISSION.CREATE_PROJECT_INVITE_TOPCODER,
   ]));
   Authorizer.setPolicy('projectMemberInvite.view', generalPermission([
     PERMISSION.READ_PROJECT_INVITE_OWN,
@@ -49,7 +50,8 @@ module.exports = () => {
   Authorizer.setPolicy('projectMemberInvite.delete', generalPermission([
     PERMISSION.DELETE_PROJECT_INVITE_OWN,
     PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER,
-    PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER,
+    PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_COPILOT,
+    PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_TOPCODER,
   ]));
 
   Authorizer.setPolicy('projectAttachment.create', generalPermission(PERMISSION.CREATE_PROJECT_ATTACHMENT));
