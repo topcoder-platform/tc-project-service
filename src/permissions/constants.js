@@ -372,7 +372,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Invite',
       description: 'Who can invite project members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
     projectRoles: ALL,
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },

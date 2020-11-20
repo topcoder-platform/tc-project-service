@@ -38,6 +38,7 @@ module.exports = () => {
   Authorizer.setPolicy('projectMemberInvite.create', generalPermission([
     PERMISSION.CREATE_PROJECT_INVITE_CUSTOMER,
     PERMISSION.CREATE_PROJECT_INVITE_TOPCODER,
+    PERMISSION.CREATE_PROJECT_INVITE_COPILOT,
   ]));
   Authorizer.setPolicy('projectMemberInvite.view', generalPermission([
     PERMISSION.READ_PROJECT_INVITE_OWN,

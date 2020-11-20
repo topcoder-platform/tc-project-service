@@ -1285,6 +1285,8 @@ const projectServiceUtils = {
     const allow = util.matchPermissionRule(allowRule, user, projectMembers);
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
 
+    console.log('hasPermission', JSON.stringify({ permission, user, projectMembers, allow, deny }, null, 2));
+
     return allow && !deny;
   },
 

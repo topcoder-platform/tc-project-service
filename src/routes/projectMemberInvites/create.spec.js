@@ -20,7 +20,7 @@ import {
 
 const should = chai.should();
 
-describe('Project Member Invite create', () => {
+describe.only('Project Member Invite create', () => {
   let project1;
   let project2;
   beforeEach((done) => {
