@@ -191,7 +191,7 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
    - update phase progress and duration when milestone is completed
    - see all the Kafka handlers in file [src/events/kafkaHandlers.js](./src/events/kafkaHandlers.js)
 
-   <details>
+   </details>
 
 
 ## Run Connect App with Project Service locally
