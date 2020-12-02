@@ -171,4 +171,3 @@ workflows:
   Performance-Testing:
     jobs:
       - Connect-Performance-Testing:
-         type: approval
