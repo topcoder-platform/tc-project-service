@@ -153,6 +153,7 @@ workflows:
           type: approval
       - deployDev:
           context : org-global
+          type: approval
           requires:
             - tc-project-service
           filters:
@@ -160,6 +161,7 @@ workflows:
               only: ['develop']
       - deployProd:
           context : org-global
+          type: approval
           requires:
             - tc-project-service
           filters:
