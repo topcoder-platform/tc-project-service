@@ -170,4 +170,4 @@ workflows:
               
   Performance-Testing:
     jobs:
-      - Connect-Performance-Testing:
+      - Connect-Performance-Testing
