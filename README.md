@@ -1,3 +1,3 @@
 # circleci
 
-JMeter performance tests into your CI flow with CircleCI.
+JMeter performance test for Topcoder connect App
