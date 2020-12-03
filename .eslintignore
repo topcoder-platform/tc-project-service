@@ -1,9 +1,0 @@
-config/local.js
-config/mock.local.js
-config/m2m.local.js
-scripts/import-from-api/
-node_modules
-dist
-.ebextensions
-.elasticbeanstalk
-coverage
