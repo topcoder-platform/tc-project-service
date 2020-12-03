@@ -1,3 +1,3 @@
 # circleci
 
-JMeter performance test for Topcoder connect App
+JMeter performance test for Topcoder connect App.
