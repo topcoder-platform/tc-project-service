@@ -22,7 +22,10 @@ const eClient = util.getElasticSearchClient();
   * @return {Object} the job created
   */
 const createTaasJob = async (data) => {
-  const token = await util.getM2MToken();
+  // TODO uncomment when TaaS API supports M2M tokens
+  //      see https://github.com/topcoder-platform/taas-apis/issues/40
+  // const token = await util.getM2MToken();
+  const token = process.env.TAAS_API_TOKEN;
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
@@ -200,18 +203,21 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
         (specialist) => {
           const startDate = new Date();
           const endDate = moment(startDate).add(Number(specialist.duration), 'M'); // the unit of duration is month
-          const skills = specialist.skills.filter(skill => skill.id).map(skill => skill.id);
+          // use both, required and additional skills for jobs
+          const skills = specialist.skills.concat(specialist.additionalSkills)
+            // only include skills with `id` and ignore custom skills in jobs
+            .filter(skill => skill.id).map(skill => skill.id);
           return createTaasJob({
             projectId: project.id,
-            externalId: _.get(project, 'external.id') || String(project.id),
+            externalId: '0', // hardcode for now
             description: specialist.roleTitle,
             startDate,
             endDate,
             skills,
             numPositions: Number(specialist.people),
             resourceType: specialist.role,
-            rateType: 'hourly',
-            workload: specialist.workLoad.title.toLowerCase(),
+            rateType: 'hourly', // hardcode for now
+            workload: _.get(specialist, 'workLoad.title', '').toLowerCase(),
           }).then((job) => {
             app.logger.debug(`jobId: ${job.id} job created for roleTitle ${specialist.roleTitle}`);
           }).catch((err) => {
