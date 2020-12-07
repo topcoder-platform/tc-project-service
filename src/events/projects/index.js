@@ -203,10 +203,13 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
         (specialist) => {
           const startDate = new Date();
           const endDate = moment(startDate).add(Number(specialist.duration), 'M'); // the unit of duration is month
-          // use both, required and additional skills for jobs
-          const skills = specialist.skills.concat(specialist.additionalSkills)
-            // only include skills with `id` and ignore custom skills in jobs
-            .filter(skill => skill.id).map(skill => skill.id);
+          // make sure that skills would be unique in the list
+          const skills = _.uniq(
+            // use both, required and additional skills for jobs
+            specialist.skills.concat(specialist.additionalSkills)
+            // only include skills with `skillId` and ignore custom skills in jobs
+              .filter(skill => skill.skillId).map(skill => skill.skillId),
+          );
           return createTaasJob({
             projectId: project.id,
             externalId: '0', // hardcode for now
