@@ -22,10 +22,7 @@ const eClient = util.getElasticSearchClient();
   * @return {Object} the job created
   */
 const createTaasJob = async (data) => {
-  // TODO uncomment when TaaS API supports M2M tokens
-  //      see https://github.com/topcoder-platform/taas-apis/issues/40
-  // const token = await util.getM2MToken();
-  const token = process.env.TAAS_API_TOKEN;
+  const token = await util.getM2MToken();
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
