@@ -75,5 +75,6 @@
     "EMBED_REPORTS_MAPPING": "{\"mock\": \"/embed/looks/2\"}",
     "ALLOWED_USERS": "[]"
   },
-  "DEFAULT_M2M_USERID": -101
+  "DEFAULT_M2M_USERID": -101,
+  "taasJobApiUrl": "https://api.topcoder.com/v5/jobs"
 }

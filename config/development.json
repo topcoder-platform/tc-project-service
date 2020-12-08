@@ -6,5 +6,6 @@
   "fileServiceEndpoint": "https://api.topcoder-dev.com/v3/files/",
   "connectProjectsUrl": "https://connect.topcoder-dev.com/projects/",
   "memberServiceEndpoint": "https://api.topcoder-dev.com/v3/members",
-  "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/"
+  "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/",
+  "taasJobApiUrl": "https://api.topcoder-dev.com/v5/jobs"
 }
