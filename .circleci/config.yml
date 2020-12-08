@@ -114,7 +114,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['develop', 'feature/create-taas-jobs']
+              only: ['develop']
       - deployProd:
           context : org-global
           requires:
