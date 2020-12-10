@@ -1,0 +1,6829 @@
+swagger: '2.0'
+info:
+  version: v5
+  title: Projects API
+  description: |
+    Project API
+
+    ### Pagination
+      Requests that return multiple items will be paginated to 20 items by default.
+      You can specify further pages with the `page` parameter.
+      You can also set a custom page size up to 100 with the `perPage` parameter.
+
+      Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
+host: 'localhost:3000'
+basePath: /v5
+schemes:
+  - http
+produces:
+  - application/json
+consumes:
+  - application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+paths:
+  '/projects':
+    get:
+      tags:
+        - project
+      operationId: findProjects
+      security:
+        - Bearer: []
+      description: Retrieve projects that match the filter
+      responses:
+        '200':
+          description: A list of projects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Project'
+          headers:
+            X-Next-Page:
+              type: integer
+              description: The index of the next page
+            X-Page:
+              type: integer
+              description: The index of the current page (starting at 1)
+            X-Per-Page:
+              type: integer
+              description: The number of items to list per page
+            X-Prev-Page:
+              type: integer
+              description: The index of the previous page
+            X-Total:
+              type: integer
+              description: The total number of items
+            X-Total-Pages:
+              type: integer
+              description: The total number of pages
+            Link:
+              type: string
+              description: Pagination link header.
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/pageParam'
+        - $ref: '#/parameters/perPageParam'
+        - $ref: '#/parameters/idQueryParam'
+        - $ref: '#/parameters/statusQueryParam'
+        - $ref: '#/parameters/typeQueryParam'
+        - $ref: '#/parameters/memberOnlyQueryParam'
+        - $ref: '#/parameters/keywordQueryParam'
+        - $ref: '#/parameters/nameQueryParam'
+        - $ref: '#/parameters/codeQueryParam'
+        - $ref: '#/parameters/customerQueryParam'
+        - $ref: '#/parameters/managerQueryParam'
+        - $ref: '#/parameters/directProjectIdQueryParam'
+        - name: sort
+          required: false
+          description: >
+            sort projects by status, name, type, createdAt, updatedAt. Default
+            is createdAt asc
+          in: query
+          type: string
+    post:
+      tags:
+        - project
+      operationId: addProject
+      security:
+        - Bearer: []
+      description: Create a project
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProject'
+      responses:
+        '200':
+          description: Returns the newly created project
+          schema:
+            $ref: '#/definitions/Project'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}':
+    get:
+      tags:
+        - project
+      description: Retrieve project by id
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project
+          schema:
+            $ref: '#/definitions/Project'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: >
+            Comma separated list of project fields to return.
+
+            Can also specify project_members, attachments to get project members
+            and project attachments.
+
+            Sub fields of project members and project attachments are also
+            allowed.
+      operationId: getProject
+    patch:
+      tags:
+        - project
+      operationId: updateProject
+      security:
+        - Bearer: []
+      description: >-
+        Update a project that user has access to. Managers and admin are able to
+        pull out a project from cancelled state.
+      responses:
+        '200':
+          description: >-
+            Successfully updated project. Returns original and updated project
+            object
+          schema:
+            $ref: '#/definitions/Project'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - name: body
+          in: body
+          required: true
+          description: >-
+            Only specify those properties that needs to be updated.
+            `cancelReason` is mandatory if status is cancelled
+          schema:
+            $ref: '#/definitions/NewProject'
+    delete:
+      tags:
+        - project
+      description: remove an existing project
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+      responses:
+        '204':
+          description: Project successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/attachments':
+    get:
+      tags:
+        - project attachments
+      description: Retrieve project attachments
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: list of project attachments
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectAttachment'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+      operationId: listProjectAttachment
+    post:
+      tags:
+        - project attachments
+      description: add a new project attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProjectAttachment'
+      responses:
+        '200':
+          description: Returns the newly created project attachment
+          schema:
+            $ref: '#/definitions/ProjectAttachment'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/attachments/{id}':
+    get:
+      tags:
+        - project attachments
+      description: Download project attachment
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project attachment
+          schema:
+            $ref: '#/definitions/ProjectAttachment'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          description: The id of attachment to download
+          type: integer
+      operationId: downloadProjectAttachment
+    patch:
+      tags:
+        - project attachments
+      description: Update an existing attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          description: The id of attachment to update
+          type: integer
+        - in: body
+          name: body
+          required: true
+          description: Specify only those properties that needs to be updated
+          schema:
+            $ref: '#/definitions/UpdateProjectAttachment'
+      responses:
+        '200':
+          description: Returns the newly created project
+          schema:
+            $ref: '#/definitions/ProjectAttachment'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project attachment is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - project attachments
+      description: remove an existing attachment
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          description: The id of attachment to delete
+          type: integer
+      responses:
+        '204':
+          description: Attachment successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If attachment is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/members':
+    get:
+      tags:
+        - project members
+      description: Retrieve project members
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: list of project members
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectMember'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - name: role
+          required: false
+          description: >
+            member role
+          in: query
+          type: string
+      operationId: listProjectMember
+    post:
+      tags:
+        - project members
+      description: add a new project member
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewProjectMember'
+      responses:
+        '200':
+          description: Returns the newly created project
+          schema:
+            $ref: '#/definitions/ProjectMember'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/members/{id}':
+    get:
+      tags:
+        - project members
+      description: Get project member
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project member
+          schema:
+            $ref: '#/definitions/ProjectMember'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          type: integer
+      operationId: getProjectMember
+    delete:
+      tags:
+        - project members
+      description: Delete a project member
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: Member successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If Project doesn't contain such Member
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    patch:
+      tags:
+        - project members
+      security:
+        - Bearer: []
+      description: Support editing project member roles & primary option.
+      responses:
+        '200':
+          description: >-
+            Successfully updated project member. Returns entire project member
+            object
+          schema:
+            $ref: '#/definitions/ProjectMember'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: path
+          name: id
+          required: true
+          type: integer
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateProjectMember'
+  '/projects/{projectId}/phases':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - phase
+      operationId: findProjectPhases
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project phases. All users who can edit project can access
+        this endpoint.
+      parameters:
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: |
+            Comma separated list of project phase fields to return.
+        - name: sort
+          required: false
+          description: >
+            sort project phases by startDate, endDate, status, order. Default is
+            startDate asc
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of project phases
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - phase
+      operationId: addProjectPhase
+      security:
+        - Bearer: []
+      description: >-
+        Create a project phase. It also updates the `order` field of all other
+        phases in the same project which have `order` greater than or equal to
+        the `order` specified in the POST body.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectPhaseRequest'
+            properties:
+              productTemplateId:
+                type: number
+                format: long
+                description: >-
+                  the optional productTemplateId used to populate a new
+                  phase product for the created phase
+      responses:
+        '200':
+          description: Returns the newly created project phase
+          schema:
+            $ref: '#/definitions/ProjectPhase'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/phases/{phaseId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+    get:
+      tags:
+        - phase
+      description: >-
+        Retrieve project phase by id. All users who can edit project can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project phase
+          schema:
+            $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getProjectPhase
+    patch:
+      tags:
+        - phase
+      operationId: updateProjectPhase
+      security:
+        - Bearer: []
+      description: >-
+        Update a project phase. All users who can edit project can access this
+        endpoint. It also updates the `order` field of all other phases in the
+        same project which have `order` greater than or equal to the `order`
+        specified in the POST body.
+      responses:
+        '200':
+          description: Successfully updated project phase.
+          schema:
+            $ref: '#/definitions/ProjectPhase'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectPhaseRequest'
+    delete:
+      tags:
+        - phase
+      description: >-
+        Remove an existing project phase. All users who can edit project can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Project phase successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - workstream
+      operationId: findWorkStreams
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project workstreams.
+      responses:
+        '200':
+          description: A list of project work streams
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/WorkStream'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - workstream
+      operationId: addWorkStream
+      security:
+        - Bearer: []
+      description: >-
+        Create a work stream.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/WorkStreamRequest'
+      responses:
+        '200':
+          description: Returns the newly created project work stream
+          schema:
+            $ref: '#/definitions/WorkStream'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - workstream
+      description: >-
+        Retrieve work stream by id.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project work stream
+          schema:
+            $ref: '#/definitions/WorkStream'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/workStreamIdParam'
+      operationId: getWorkStream
+    patch:
+      tags:
+        - workstream
+      operationId: updateWorkStream
+      security:
+        - Bearer: []
+      description: >-
+        Update a project work stream.
+      responses:
+        '200':
+          description: Successfully updated project work stream.
+          schema:
+            $ref: '#/definitions/WorkStream'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkStreamRequest'
+    delete:
+      tags:
+        - workstream
+      description: >-
+        Remove an existing project work stream.
+      security:
+        - Bearer: []
+      responses:
+        '204':
+          description: Project work stream successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work
+      operationId: findWorks
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all works for given project and workstream.
+      parameters:
+        - name: fields
+          required: false
+          type: string
+          in: query
+          description: |
+            Comma separated list of project phase fields to return.
+        - name: sort
+          required: false
+          description: >
+            sort project phases by startDate, endDate, status, order. Default is
+            startDate asc
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of project works
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectPhase'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - work
+      operationId: addWork
+      security:
+        - Bearer: []
+      description: >-
+        Create a work
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectPhaseRequest'
+      responses:
+        '200':
+          description: Returns the newly created project work
+          schema:
+            $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work
+      description: >-
+        Retrieve work by id.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project work
+          schema:
+            $ref: '#/definitions/ProjectPhase'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getWork
+    patch:
+      tags:
+        - work
+      operationId: updateWork
+      security:
+        - Bearer: []
+      description: >-
+        Update work for given project and workstream.
+      responses:
+        '200':
+          description: Successfully updated project work.
+          schema:
+            $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectPhaseRequest'
+    delete:
+      tags:
+        - work
+      description: >-
+        Remove an existing work by id for given project and workstream.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Work successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project or workstream is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}/workitems':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+    get:
+      tags:
+        - work item
+      operationId: findWorkItems
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all work items for given project, workstream and phase.
+      responses:
+        '200':
+          description: A list of work items
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PhaseProduct'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - work item
+      operationId: addWorkItem
+      security:
+        - Bearer: []
+      description: Create a work item for given project, workstream and phase.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductRequest'
+      responses:
+        '200':
+          description: Returns the newly created work item
+          schema:
+            $ref: '#/definitions/PhaseProduct'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/workstreams/{workStreamId}/works/{phaseId}/workitems/{productId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/workStreamIdParam'
+      - $ref: '#/parameters/productIdParam'
+    get:
+      tags:
+        - work item
+      description: >-
+        Retrieve work item by id for given project, workstream and phase.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a work item
+          schema:
+            $ref: '#/definitions/PhaseProduct'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getWorkItem
+    patch:
+      tags:
+        - work item
+      operationId: updateWorkItem
+      security:
+        - Bearer: []
+      description: >-
+        Update a work item for given project, workstream and phase.
+      responses:
+        '200':
+          description: Successfully updated work item.
+          schema:
+            $ref: '#/definitions/PhaseProduct'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductRequest'
+    delete:
+      tags:
+        - work item
+      description: >-
+        Remove an existing work item by id for given project, workstream and phase.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Work item successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project, workstream or phase is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/settings':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+    get:
+      tags:
+        - project settings
+      operationId: findProjectSettings
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all project settings. Only users with readPermission can get the setting
+      responses:
+        '200':
+          description: A list of project phases
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectSetting'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - project settings
+      operationId: addProjectSetting
+      security:
+        - Bearer: []
+      description: >-
+        Create a project setting and create project estimation items based on estimation type.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ProjectSettingRequest'
+      responses:
+        '200':
+          description: Returns the newly created project phase
+          schema:
+            $ref: '#/definitions/ProjectPhase'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/settings/{settingId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/settingIdParam'
+    patch:
+      tags:
+        - project settings
+      operationId: updateProjectSetting
+      security:
+        - Bearer: []
+      description: >-
+        Update a project setting. All user with write permission can edit the setting.
+      responses:
+        '200':
+          description: Successfully updated project setting.
+          schema:
+            $ref: '#/definitions/ProjectSetting'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectSettingRequest'
+    delete:
+      tags:
+        - project settings
+      description: >-
+        Remove an existing project setting. All users who are connect managers and admins
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/settingIdParam'
+      responses:
+        '204':
+          description: Project setting successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/estimations/{estimationId}/items':
+    get:
+      tags:
+        - Project Estimation Items
+      security:
+        - Bearer: []
+      description: get project estimation items
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/projectEstimationIdParam'
+      responses:
+        '200':
+          description: List of project estimation items
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectEstimationItem'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Invalid server state or unknown error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/phases/{phaseId}/products':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+    get:
+      tags:
+        - phase product
+      operationId: findPhaseProducts
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all phase products. All users who can edit project can access
+        this endpoint.
+      responses:
+        '200':
+          description: A list of phase products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PhaseProduct'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - phase product
+      operationId: addPhaseProduct
+      security:
+        - Bearer: []
+      description: Create a phase product
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductRequest'
+      responses:
+        '200':
+          description: Returns the newly created phase product
+          schema:
+            $ref: '#/definitions/PhaseProduct'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/phases/{phaseId}/products/{productId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/productIdParam'
+    get:
+      tags:
+        - phase product
+      description: >-
+        Retrieve phase product by id. All users who can edit project can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a phase product
+          schema:
+            $ref: '#/definitions/PhaseProduct'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      operationId: getPhaseProduct
+    patch:
+      tags:
+        - phase product
+      operationId: updatePhaseProduct
+      security:
+        - Bearer: []
+      description: >-
+        Update a phase product. All users who can edit project can access this
+        endpoint.
+      responses:
+        '200':
+          description: Successfully updated phase product.
+          schema:
+            $ref: '#/definitions/PhaseProduct'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PhaseProductRequest'
+    delete:
+      tags:
+        - phase product
+      description: >-
+        Remove an existing phase product. All users who can edit project can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/phaseIdParam'
+      responses:
+        '204':
+          description: Project phase successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/upgrade':
+    post:
+      tags:
+        - project
+      operationId: upgradeProject
+      security:
+        - Bearer: []
+      description: >-
+        Migrates a project to a target version. Only users with "administrator"
+        or "Connect admin" roles can access to this endpoint
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - name: body
+          in: body
+          required: true
+          description: Project upgrade body
+          schema:
+            $ref: '#/definitions/ProjectUpgrade'
+      responses:
+        '200':
+          description: Project migrated successfully
+          schema:
+            $ref: '#/definitions/ProjectUpgrade'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Project not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /projects/metadata:
+    get:
+      tags:
+        - metadata
+      operationId: getAllMetadata
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all metadata including projectTemplates, productTemplates,
+        milestoneTemplates, projectTypes, productCategories. All user roles can
+        access this endpoint.
+      responses:
+        '200':
+          description: The metadata
+          schema:
+            $ref: '#/definitions/AllMetadataResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /projects/metadata/projectTemplates:
+    get:
+      tags:
+        - projectTemplate
+      operationId: findProjectTemplates
+      security:
+        - Bearer: []
+      description: Retrieve all project templates. All user roles can access this endpoint.
+      responses:
+        '200':
+          description: A list of project templates
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - projectTemplate
+      operationId: addProjectTemplate
+      security:
+        - Bearer: []
+      description: Create a project template
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTemplateRequest'
+      responses:
+        '200':
+          description: Returns the newly created project template
+          schema:
+            $ref: '#/definitions/ProjectTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/projectTemplates/{templateId}':
+    get:
+      tags:
+        - projectTemplate
+      description: >-
+        Retrieve project template by id. All user roles can access this
+        endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project template
+          schema:
+            $ref: '#/definitions/ProjectTemplate'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+      operationId: getProjectTemplate
+    patch:
+      tags:
+        - projectTemplate
+      operationId: updateProjectTemplate
+      security:
+        - Bearer: []
+      description: >-
+        Update a project template. Only connect manager, connect admin, and
+        admin can access this endpoint. For attributes with JSON object type, it
+        would overwrite the existing fields, or add new if the fields don't
+        exist in the JSON object.
+      responses:
+        '200':
+          description: Successfully updated project template.
+          schema:
+            $ref: '#/definitions/ProjectTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTemplateRequest'
+    delete:
+      tags:
+        - projectTemplate
+      description: >-
+        Remove an existing project template. Only connect manager, connect
+        admin, and admin can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+      responses:
+        '204':
+          description: Project template successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/projectTemplates/{templateId}/upgrade':
+    post:
+      tags:
+        - projectTemplate
+      description: >-
+        upgrade projectTemplate model
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTemplateUpgradeBody'
+      responses:
+        '200':
+          description: Project template successfully upgrade
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project template is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /projects/metadata/productTemplates:
+    get:
+      tags:
+        - productTemplate
+      operationId: findProductTemplates
+      security:
+        - Bearer: []
+      description: Retrieve all product templates. All user roles can access this endpoint.
+      responses:
+        '200':
+          description: A list of product templates
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - productTemplate
+      operationId: addProductTemplate
+      security:
+        - Bearer: []
+      description: Create a product template
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProductTemplateRequest'
+      responses:
+        '200':
+          description: Returns the newly created product template
+          schema:
+            $ref: '#/definitions/ProductTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/productTemplates/{templateId}':
+    get:
+      tags:
+        - productTemplate
+      description: >-
+        Retrieve product template by id. All user roles can access this
+        endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a product template
+          schema:
+            $ref: '#/definitions/ProductTemplate'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+      operationId: getProductTemplate
+    patch:
+      tags:
+        - productTemplate
+      operationId: updateProductTemplate
+      security:
+        - Bearer: []
+      description: >-
+        Update a product template. Only connect manager, connect admin, and
+        admin can access this endpoint. For attributes with JSON object type, it
+        would overwrite the existing fields, or add new if the fields don't
+        exist in the JSON object.
+      responses:
+        '200':
+          description: Successfully updated product template.
+          schema:
+            $ref: '#/definitions/ProductTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProductTemplateRequest'
+    delete:
+      tags:
+        - productTemplate
+      description: >-
+        Remove an existing product template. Only connect manager, connect
+        admin, and admin can access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+      responses:
+        '204':
+          description: Product template successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If product is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/productTemplates/{templateId}/upgrade':
+    post:
+      tags:
+        - productTemplate
+      description: >-
+        upgrade productTemplate model
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/templateIdParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProductTemplateUpgradeBody'
+      responses:
+        '200':
+          description: Product template successfully upgraded
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If product template is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /projects/metadata/productCategories:
+    get:
+      tags:
+        - productCategory
+      operationId: findProductCategories
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all product categories. All user roles can access this
+        endpoint.
+      responses:
+        '200':
+          description: A list of product categories
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductCategory'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - productCategory
+      operationId: addProductCategory
+      security:
+        - Bearer: []
+      description: >-
+        Create a product category. Only admin or connect admin can access this
+        endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProductCategoryCreateRequest'
+      responses:
+        '200':
+          description: Returns the newly created product category
+          schema:
+            $ref: '#/definitions/ProductCategory'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/productCategories/{key}':
+    get:
+      tags:
+        - productCategory
+      description: >-
+        Retrieve product category by id. All user roles can access this
+        endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a product category
+          schema:
+            $ref: '#/definitions/ProductCategory'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/keyParam'
+      operationId: getProductCategory
+    patch:
+      tags:
+        - productCategory
+      operationId: updateProductCategory
+      security:
+        - Bearer: []
+      description: >-
+        Update a product category. Only admin or connect admin can access this
+        endpoint.
+      responses:
+        '200':
+          description: Successfully updated product category.
+          schema:
+            $ref: '#/definitions/ProductCategory'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/keyParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProductCategoryRequest'
+    delete:
+      tags:
+        - productCategory
+      description: >-
+        Remove an existing product category. Only admin or connect admin can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/keyParam'
+      responses:
+        '204':
+          description: Product category successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If product category is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /projects/metadata/projectTypes:
+    get:
+      tags:
+        - projectType
+      operationId: findProjectTypes
+      security:
+        - Bearer: []
+      description: Retrieve all project types. All user roles can access this endpoint.
+      responses:
+        '200':
+          description: A list of project types
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectType'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - projectType
+      operationId: addProjectType
+      security:
+        - Bearer: []
+      description: >-
+        Create a project type. Only admin or connect admin can access this
+        endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTypeCreateRequest'
+      responses:
+        '200':
+          description: Returns the newly created project type
+          schema:
+            $ref: '#/definitions/ProjectType'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/projectTypes/{key}':
+    get:
+      tags:
+        - projectType
+      description: Retrieve project type by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project type
+          schema:
+            $ref: '#/definitions/ProjectType'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/keyParam'
+      operationId: getProjectType
+    patch:
+      tags:
+        - projectType
+      operationId: updateProjectType
+      security:
+        - Bearer: []
+      description: >-
+        Update a project type. Only admin or connect admin can access this
+        endpoint.
+      responses:
+        '200':
+          description: Successfully updated project type.
+          schema:
+            $ref: '#/definitions/ProjectType'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/keyParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProjectTypeRequest'
+    delete:
+      tags:
+        - projectType
+      description: >-
+        Remove an existing project type. Only admin or connect admin can access
+        this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/keyParam'
+      responses:
+        '204':
+          description: Project type successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /projects/metadata/orgConfig:
+    get:
+      tags:
+        - orgConfig
+      operationId: findOrgConfigs
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all organization configs. All user roles can access this
+        endpoint.
+      parameters:
+        - name: orgId
+          required: true
+          type: string
+          in: query
+          description: organization id
+        - name: configName
+          required: false
+          type: string
+          in: query
+          description: configuration name
+      responses:
+        '200':
+          description: A list of organization configs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/OrgConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - orgConfig
+      operationId: addOrgConfig
+      security:
+        - Bearer: []
+      description: >-
+        Create a organization config. Only admin or connect admin can access
+        this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/OrgConfigCreateRequest'
+      responses:
+        '200':
+          description: Returns the newly created organization config
+          schema:
+            $ref: '#/definitions/OrgConfig'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/orgConfig/{id}':
+    get:
+      tags:
+        - orgConfig
+      description: Retrieve project type by id. All user roles can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project type
+          schema:
+            $ref: '#/definitions/OrgConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/idParam'
+      operationId: getOrgConfig
+    patch:
+      tags:
+        - orgConfig
+      operationId: updateOrgConfig
+      security:
+        - Bearer: []
+      description: >-
+        Update a organization config. Only admin or connect admin can access
+        this endpoint.
+      responses:
+        '200':
+          description: Successfully updated organization config.
+          schema:
+            $ref: '#/definitions/OrgConfig'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/idParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OrgConfigCreateRequest'
+    delete:
+      tags:
+        - orgConfig
+      description: >-
+        Remove an existing organization config. Only admin or connect admin can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/idParam'
+      responses:
+        '204':
+          description: Organization config successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If organization config is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /projects/metadata/workManagementPermission:
+    get:
+      tags:
+        - workManagementPermission
+      operationId: findWorkManagementPermissions
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all work management permissions. Only admin or connect admin can access
+        this endpoint.
+      parameters:
+        - name: filter
+          required: true
+          type: string
+          in: query
+          description: |
+            Url encoded list of Supported filters
+             - projectTemplateId (required)
+      responses:
+        '200':
+          description: A list of work management permissions
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/WorkManagementPermission'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - workManagementPermission
+      operationId: addWorkManagementPermission
+      security:
+        - Bearer: []
+      description: >-
+        Create a work management permission. Only admin or connect admin can access
+        this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionCreateRequest'
+      responses:
+        '200':
+          description: Returns the newly created work management permission
+          schema:
+            $ref: '#/definitions/WorkManagementPermission'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/workManagementPermission/{id}':
+    get:
+      tags:
+        - workManagementPermission
+      description: Retrieve work management permission by id. Only admin or connect admin can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a project type
+          schema:
+            $ref: '#/definitions/WorkManagementPermission'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+      operationId: getWorkManagementPermission
+    patch:
+      tags:
+        - workManagementPermission
+      operationId: updateWorkManagementPermission
+      security:
+        - Bearer: []
+      description: >-
+        Update a work management permission. Only admin or connect admin can access
+        this endpoint.
+      responses:
+        '200':
+          description: Successfully updated work management permission.
+          schema:
+            $ref: '#/definitions/WorkManagementPermission'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/WorkManagementPermissionCreateRequest'
+    delete:
+      tags:
+        - workManagementPermission
+      description: >-
+        Remove an existing work management permission. Only admin or connect admin can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/permissionIdParam'
+      responses:
+        '204':
+          description: Work management permission successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: If work management permission is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  '/projects/{projectId}/permissions':
+    get:
+      tags:
+        - permissions
+      description: Retrieve permissions.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: permissions
+          schema:
+            title: Single work management permission response object
+            type: object
+            example:
+              'work.create': true
+              'workItem.edit': true
+
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+      operationId: getPermissions
+  /timelines:
+    get:
+      tags:
+        - timeline
+      operationId: findTimelines
+      security:
+        - Bearer: []
+      description: Retrieve timelines which its projects are accessible by the user.
+      parameters:
+        - name: reference
+          required: false
+          type: string
+          in: query
+          description: the reference filter
+        - name: referenceId
+          required: false
+          type: string
+          in: query
+          description: the reference id filter
+      responses:
+        '200':
+          description: A list of timelines
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - timeline
+      operationId: addTimeline
+      security:
+        - Bearer: []
+      description: >-
+        Create a timeline. All users who can edit the project can access this
+        endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/TimelineRequest'
+      responses:
+        '200':
+          description: Returns the newly created timeline
+          schema:
+            $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/timelines/{timelineId}':
+    get:
+      tags:
+        - timeline
+      description: >-
+        Retrieve timeline by id. All users who can view the project can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a timeline
+          schema:
+            $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/timelineIdParam'
+      operationId: getTimeline
+    patch:
+      tags:
+        - timeline
+      operationId: updateTimeline
+      security:
+        - Bearer: []
+      description: >-
+        Update a timeline. All users who can edit the project can access this
+        endpoint.
+      responses:
+        '200':
+          description: Successfully updated timeline.
+          schema:
+            $ref: '#/definitions/Timeline'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - $ref: '#/parameters/timelineIdParam'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TimelineRequest'
+    delete:
+      tags:
+        - timeline
+      description: >-
+        Remove an existing timeline. All users who can edit the project can
+        access this endpoint.
+      security:
+        - Bearer: []
+      parameters:
+        - $ref: '#/parameters/timelineIdParam'
+      responses:
+        '204':
+          description: Timeline successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/timelines/{timelineId}/milestones':
+    parameters:
+      - $ref: '#/parameters/timelineIdParam'
+    get:
+      tags:
+        - milestone
+      operationId: findMilestones
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all milestones. All users who can view the timeline can access
+        this endpoint.
+      parameters:
+        - name: sort
+          required: false
+          description: sort by `order`. Default is `order asc`
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of milestones
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - milestone
+      operationId: addMilestone
+      security:
+        - Bearer: []
+      description: >-
+        Create a milestone. All users who can edit the timeline can access this
+        endpoint. It also updates the `order` field of all other milestones in
+        the same timeline which have `order` greater than or equal to the
+        `order` specified in the POST body.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/MilestonePostRequest'
+      responses:
+        '200':
+          description: Returns the newly created milestone
+          schema:
+            $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    patch:
+      tags:
+        - milestone
+      operationId: batchUpdateMilestone
+      security:
+        - Bearer: []
+      description: >-
+        Update a batch of milestones. All users who can edit the timeline can access this
+        endpoint. For attributes with JSON object type, it would overwrite the
+        existing fields, or add new if the fields don't exist in the JSON
+        object.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Milestone'
+      responses:
+        '200':
+          description: Aggregation of bulk operations
+          schema:
+            $ref: '#/definitions/BulkMilestoneUpdateResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/timelines/{timelineId}/milestones/{milestoneId}':
+    parameters:
+      - $ref: '#/parameters/timelineIdParam'
+      - $ref: '#/parameters/milestoneIdParam'
+    get:
+      tags:
+        - milestone
+      description: >-
+        Retrieve milestone by id. All users who can view the timeline can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a milestone
+          schema:
+            $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      operationId: getMilestone
+    patch:
+      tags:
+        - milestone
+      operationId: updateMilestone
+      security:
+        - Bearer: []
+      description: >-
+        Update a milestone. All users who can edit the timeline can access this
+        endpoint. For attributes with JSON object type, it would overwrite the
+        existing fields, or add new if the fields don't exist in the JSON
+        object.
+      responses:
+        '200':
+          description: Successfully updated milestone.
+          schema:
+            $ref: '#/definitions/Milestone'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MilestonePatchRequest'
+    delete:
+      tags:
+        - milestone
+      description: >-
+        Remove an existing milestone. All users who can edit the timeline can
+        access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '204':
+          description: Milestone successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /timelines/metadata/milestoneTemplates:
+    get:
+      tags:
+        - milestoneTemplates
+      operationId: findMilestoneTemplates
+      security:
+        - Bearer: []
+      description: >-
+        Retrieve all milestone templates. All user roles can access this
+        endpoint.
+      parameters:
+        - name: sort
+          required: false
+          description: sort by `order`. Default is `order asc`
+          in: query
+          type: string
+        - name: reference
+          required: false
+          description: the reference filter
+          in: query
+          type: string
+        - name: referenceId
+          required: false
+          description: the reference id filter
+          in: query
+          type: string
+      responses:
+        '200':
+          description: A list of milestone templates
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - milestoneTemplates
+      operationId: addMilestoneTemplate
+      security:
+        - Bearer: []
+      description: >-
+        Create a milestone template. Only connect manager, connect admin, and
+        admin can access this endpoint. It also updates the `order` field of all
+        other milestone templates in the same product template which have
+        `order` greater than or equal to the `order` specified in the POST body.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/MilestoneTemplate'
+      responses:
+        '200':
+          description: Returns the newly created milestone template
+          schema:
+            $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /timelines/metadata/milestoneTemplates/clone:
+    post:
+      tags:
+        - milestoneTemplates
+      operationId: cloneMilestoneTemplate
+      security:
+        - Bearer: []
+      description: >-
+        Clone milestone templates from one product template to the other. Only
+        connect manager, connect admin, and admin can access this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/MilestoneCloneTemplateRequest'
+      responses:
+        '200':
+          description: Returns the list of cloned milestone templates
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/timelines/metadata/milestoneTemplates/{milestoneTemplateId}':
+    parameters:
+      - $ref: '#/parameters/milestoneTemplateIdParam'
+    get:
+      tags:
+        - milestoneTemplates
+      description: >-
+        Retrieve milestone template by id. All user roles can access this
+        endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: a milestone template
+          schema:
+            $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      operationId: getMilestoneTemplate
+    patch:
+      tags:
+        - milestoneTemplates
+      operationId: updateMilestoneTemplate
+      security:
+        - Bearer: []
+      description: >-
+        Update a milestone template. Only connect manager, connect admin, and
+        admin can access this endpoint.
+      responses:
+        '200':
+          description: Successfully updated milestone template.
+          schema:
+            $ref: '#/definitions/MilestoneTemplate'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/MilestoneTemplate'
+    delete:
+      tags:
+        - milestoneTemplates
+      description: >-
+        Remove an existing milestone template. Only connect manager, connect
+        admin, and admin can access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '204':
+          description: Milestone template successfully removed
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/invites':
+    get:
+      tags:
+        - project member invite
+      operationId: listProjectInvites
+      security:
+        - Bearer: []
+      description: >-
+        If user can "view" this project, he/she can get all invitations.
+        Otherwise user can only see his/her own invitation in this project.
+        If user has no invitation in this project or this project doesn't exist, an empty array will be returned.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+      responses:
+        '200':
+          description: The invite for current user
+          schema:
+            $ref: '#/definitions/ProjectMemberInviteListResult'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - project member invite
+      operationId: addProjectMemberInvite
+      security:
+        - Bearer: []
+      description: >-
+        Create an invite. All users who can access this endpoint, however more
+        restriction will be applied based on role to be added.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/AddProjectMemberInvitesRequest'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/ProjectMemberInviteSuccessAndFailure'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/invites/{inviteId}':
+    get:
+      tags:
+        - project member invite
+      operationId: getProjectMemberInvite
+      security:
+        - Bearer: []
+      description: >-
+        Get an invite. Users who can "view" this project can see this invitation.
+        User got invited by this inviteId can also see this invitation.
+        If project/invitation doesn't exist, or this invitation is not for logged-in user, it will return 404 response.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/inviteIdParam'
+      responses:
+        '200':
+          description: Returns the newly updated invite
+          schema:
+            $ref: '#/definitions/ProjectMemberInvite'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    patch:
+      tags:
+        - project member invite
+      operationId: updateProjectMemberInvite
+      security:
+        - Bearer: []
+      description: >-
+        Update an invite. All users who can access this endpoint, however more
+        restriction will be applied based on role to be updated.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/inviteIdParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateProjectMemberInviteRequest'
+      responses:
+        '200':
+          description: Returns the newly updated invite
+          schema:
+            $ref: '#/definitions/ProjectMemberInvite'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - project member invite
+      operationId: deleteProjectMemberInvite
+      security:
+        - Bearer: []
+      description: >-
+        Cancel an invite. All users who can access this endpoint, however more
+        restriction will be applied based on role to be cancelled.
+      parameters:
+        - $ref: '#/parameters/projectIdParam'
+        - $ref: '#/parameters/inviteIdParam'
+      responses:
+        '204':
+          description: Cancel success
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  '/projects/metadata/form/{key}':
+    get:
+      tags:
+        - form version
+      security:
+        - Bearer: []
+      description: get the latest revision of latest version for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+      responses:
+        '200':
+          description: The model for the latest revision of latest version
+          schema:
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: key not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/form/{key}/versions':
+    get:
+      tags:
+        - form version
+      security:
+        - Bearer: []
+      description: get all versions for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+      responses:
+        '200':
+          description: The model list for the all version
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Form'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: key not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - form version
+      security:
+        - Bearer: []
+      description: create version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewForm'
+      responses:
+        '200':
+          description: The model created
+          schema:
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: key not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/form/{key}/versions/{version}':
+    get:
+      tags:
+        - form version
+      security:
+        - Bearer: []
+      description: get particular version for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: key not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    patch:
+      tags:
+        - form version
+      security:
+        - Bearer: []
+      description: update version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewForm'
+      responses:
+        '200':
+          description: The model updated
+          schema:
+            $ref: '#/definitions/Form'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: key not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - form version
+      security:
+        - Bearer: []
+      description: delete version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '204':
+          description: Delete succuessful
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: key not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/form/{key}/versions/{version}/revisions':
+    get:
+      tags:
+        - form revision
+      security:
+        - Bearer: []
+      description: get all revision for version.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - form revision
+      security:
+        - Bearer: []
+      description: create revision for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewForm'
+      responses:
+        '200':
+          description: The model created
+          schema:
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/form/{key}/versions/{version}/revisions/{revision}':
+    get:
+      tags:
+        - form revision
+      security:
+        - Bearer: []
+      description: get particular revision for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - $ref: '#/parameters/modelRevisionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            $ref: '#/definitions/Form'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - form revision
+      security:
+        - Bearer: []
+      description: delete particular revision
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - $ref: '#/parameters/modelRevisionParam'
+      responses:
+        '204':
+          description: Delete succuessful
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  '/projects/metadata/priceConfig/{key}':
+    get:
+      tags:
+        - priceConfig version
+      security:
+        - Bearer: []
+      description: get the latest revision of latest version for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+      responses:
+        '200':
+          description: The model for the latest revision of latest version
+          schema:
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/priceConfig/{key}/versions':
+    get:
+      tags:
+        - priceConfig version
+      security:
+        - Bearer: []
+      description: get all versions for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+      responses:
+        '200':
+          description: The model list for the all version
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - priceConfig version
+      security:
+        - Bearer: []
+      description: create version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPriceConfig'
+      responses:
+        '200':
+          description: The model created
+          schema:
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/priceConfig/{key}/versions/{version}':
+    get:
+      tags:
+        - priceConfig version
+      security:
+        - Bearer: []
+      description: get particular version for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    patch:
+      tags:
+        - priceConfig version
+      security:
+        - Bearer: []
+      description: update version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPriceConfig'
+      responses:
+        '200':
+          description: The model updated
+          schema:
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - priceConfig version
+      security:
+        - Bearer: []
+      description: delete version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '204':
+          description: Delete succuessful
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/priceConfig/{key}/versions/{version}/revisions':
+    get:
+      tags:
+        - priceConfig revision
+      security:
+        - Bearer: []
+      description: get all revision for version.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - priceConfig revision
+      security:
+        - Bearer: []
+      description: create revision for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPriceConfig'
+      responses:
+        '200':
+          description: The model created
+          schema:
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/priceConfig/{key}/versions/{version}/revisions/{revision}':
+    get:
+      tags:
+        - priceConfig revision
+      security:
+        - Bearer: []
+      description: get particular revision for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - $ref: '#/parameters/modelRevisionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            $ref: '#/definitions/PriceConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - priceConfig revision
+      security:
+        - Bearer: []
+      description: delete particular revision
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - $ref: '#/parameters/modelRevisionParam'
+      responses:
+        '204':
+          description: Delete succuessful
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  '/projects/metadata/planConfig/{key}':
+    get:
+      tags:
+        - planConfig version
+      security:
+        - Bearer: []
+      description: get the latest revision of latest version for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+      responses:
+        '200':
+          description: The model for the latest revision of latest version
+          schema:
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/planConfig/{key}/versions':
+    get:
+      tags:
+        - planConfig version
+      security:
+        - Bearer: []
+      description: get all versions for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+      responses:
+        '200':
+          description: The model list for the all version
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - planConfig version
+      security:
+        - Bearer: []
+      description: create version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPlanConfig'
+      responses:
+        '200':
+          description: The model created
+          schema:
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/planConfig/{key}/versions/{version}':
+    get:
+      tags:
+        - planConfig version
+      security:
+        - Bearer: []
+      description: get particular version for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    patch:
+      tags:
+        - planConfig version
+      security:
+        - Bearer: []
+      description: update version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPlanConfig'
+      responses:
+        '200':
+          description: The model updated
+          schema:
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - planConfig version
+      security:
+        - Bearer: []
+      description: delete version for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '204':
+          description: Delete succuessful
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/planConfig/{key}/versions/{version}/revisions':
+    get:
+      tags:
+        - planConfig revision
+      security:
+        - Bearer: []
+      description: get all revision for version.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - planConfig revision
+      security:
+        - Bearer: []
+      description: create revision for key
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPlanConfig'
+      responses:
+        '200':
+          description: The model created
+          schema:
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/metadata/planConfig/{key}/versions/{version}/revisions/{revision}':
+    get:
+      tags:
+        - planConfig revision
+      security:
+        - Bearer: []
+      description: get particular revision for key.
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - $ref: '#/parameters/modelRevisionParam'
+      responses:
+        '200':
+          description: The model for the particular version
+          schema:
+            $ref: '#/definitions/PlanConfig'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      tags:
+        - planConfig revision
+      security:
+        - Bearer: []
+      description: delete particular revision
+      parameters:
+        - $ref: '#/parameters/modelKeyParam'
+        - $ref: '#/parameters/modelVersionParam'
+        - $ref: '#/parameters/modelRevisionParam'
+      responses:
+        '204':
+          description: Delete succuessful
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Model not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+parameters:
+  projectIdParam:
+    name: projectId
+    in: path
+    description: project identifier
+    required: true
+    type: integer
+    format: int64
+  phaseIdParam:
+    name: phaseId
+    in: path
+    description: project phase identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  workStreamIdParam:
+    name: workStreamId
+    in: path
+    description: work stream identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  settingIdParam:
+    name: settingId
+    in: path
+    description: project setting identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  productIdParam:
+    name: productId
+    in: path
+    description: project phase product identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  templateIdParam:
+    name: templateId
+    in: path
+    description: template identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  keyParam:
+    name: key
+    in: path
+    description: project type key
+    required: true
+    type: string
+  timelineIdParam:
+    name: timelineId
+    in: path
+    description: timeline identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  milestoneIdParam:
+    name: milestoneId
+    in: path
+    description: milestone identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  productTemplateIdParam:
+    name: productTemplateId
+    in: path
+    description: product template identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  milestoneTemplateIdParam:
+    name: milestoneTemplateId
+    in: path
+    description: milestone template identifier
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
+  idParam:
+    name: id
+    in: path
+    description: organization config id
+    required: true
+    type: integer
+    format: int64
+  permissionIdParam:
+    name: id
+    in: path
+    description: work management permission id
+    required: true
+    type: integer
+    format: int64
+  pageParam:
+    name: page
+    in: query
+    description: The page number.
+    required: false
+    type: integer
+    default: 1
+  perPageParam:
+    name: perPage
+    in: query
+    description: The number of items to list per page.
+    required: false
+    type: integer
+    default: 20
+    maximum: 100
+  modelKeyParam:
+    name: key
+    in: path
+    description: model key identifier
+    required: true
+    type: string
+  modelVersionParam:
+    name: version
+    in: path
+    description: model version identifier
+    required: true
+    type: integer
+    format: int32
+  modelRevisionParam:
+    name: revision
+    in: path
+    description: model revision identifier
+    required: true
+    type: integer
+    format: int32
+  versionIdParam:
+    name: versionId
+    in: path
+    description: version identifier
+    required: true
+    type: integer
+    format: int64
+  revisionIdParam:
+    name: revisionId
+    in: path
+    description: revision identifier
+    required: true
+    type: integer
+    format: int64
+  idQueryParam:
+    name: id
+    in: query
+    description: id filter
+    required: false
+    type: string
+  statusQueryParam:
+    name: status
+    in: query
+    description: status filter
+    required: false
+    type: string
+  typeQueryParam:
+    name: type
+    in: query
+    description: type filter
+    required: false
+    type: string
+  memberOnlyQueryParam:
+    name: memberOnly
+    in: query
+    description: memberOnly filter
+    required: false
+    type: boolean
+  keywordQueryParam:
+    name: keyword
+    in: query
+    description: keyword filter
+    required: false
+    type: string
+  nameQueryParam:
+    name: name
+    in: query
+    description: name filter
+    required: false
+    type: string
+  codeQueryParam:
+    name: code
+    in: query
+    description: code filter
+    required: false
+    type: string
+  customerQueryParam:
+    name: customer
+    in: query
+    description: customer filter
+    required: false
+    type: string
+  managerQueryParam:
+    name: manager
+    in: query
+    description: manager filter
+    required: false
+    type: string
+  directProjectIdQueryParam:
+    name: directProjectId
+    in: query
+    description: Direct Project Id filter
+    required: false
+    type: integer
+    format: int64
+  projectEstimationIdParam:
+    name: estimationId
+    in: path
+    description: project estimation identifier
+    required: true
+    type: integer
+    format: int64
+  inviteIdParam:
+    name: inviteId
+    in: path
+    description: project member invite identifier
+    required: true
+    type: integer
+    format: int64
+definitions:
+  ErrorModel:
+    type: object
+    properties:
+      message:
+        type: string
+  ProjectBookMark:
+    title: Project bookmark
+    type: object
+    properties:
+      title:
+        type: string
+      address:
+        type: string
+  NewProject:
+    type: object
+    required:
+      - name
+      - description
+      - type
+    properties:
+      name:
+        type: string
+        description: project name (required)
+      description:
+        type: string
+        description: Project description
+      billingAccountId:
+        type: number
+        format: long
+        description: the customer billing account id
+      estimatedPrice:
+        type: number
+        format: float
+        description: The estimated price of the project
+      terms:
+        type: array
+        items:
+          type: number
+          format: integer
+      external:
+        type: object
+        description: 'READ-ONLY, OPTIONAL. Refernce to external task/issue.'
+        properties:
+          id:
+            type: string
+            description: Identifier for external reference
+          type:
+            type: string
+            description: external source type
+            enum:
+              - github
+              - jira
+              - asana
+              - other
+          data:
+            type: string
+            description: 300 Char length text blob for customer provided data
+      estimation:
+        type: array
+        items:
+          type: object
+          required:
+            - conditions
+            - price
+            - maxTime
+            - minTime
+            - buildingBlockKey
+          properties:
+            conditions:
+              type: string
+            price:
+              type: number
+              format: float
+            maxTime:
+              type: number
+              format: integer
+            minTime:
+              type: integer
+              format: integer
+            metadata:
+              type: object
+            buildingBlockKey:
+              type: string
+      type:
+        type: string
+        description: project type
+      bookmarks:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectBookMark'
+      challengeEligibility:
+        description: List of eligibility criteria (one entry per role)
+        type: array
+        items:
+          $ref: '#/definitions/ChallengeEligibility'
+      details:
+        $ref: '#/definitions/ProjectDetails'
+      utm:
+        description: READ-ONLY. Used for tracking
+        type: object
+        properties:
+          campaign:
+            type: string
+          medium:
+            type: string
+          source:
+            type: string
+      templateId:
+        description: the project template identifier
+        type: number
+        format: long
+  ChallengeEligibility:
+    description: Object describing who is eligible to work on this task
+    type: object
+    properties:
+      role:
+        type: string
+        enum:
+          - submitter
+          - reviewer
+          - copilot
+      users:
+        type: array
+        items:
+          type: integer
+          format: int64
+      groups:
+        type: array
+        items:
+          type: integer
+          format: int64
+
+  Project:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      directProjectId:
+        description: unique identifier in direct
+        type: integer
+        format: int64
+      billingAccountId:
+        type: integer
+        format: int64
+        description: The customer billing account id
+      utm:
+        description: READ-ONLY. Used for tracking
+        type: object
+        properties:
+          campaign:
+            type: string
+          medium:
+            type: string
+          source:
+            type: string
+      estimatedPrice:
+        type: number
+        format: float
+        description: The estimated price of the project
+      actualPrice:
+        type: number
+        format: float
+        description: The actual price of the project
+      terms:
+        type: array
+        items:
+          type: number
+          format: integer
+      name:
+        type: string
+        description: project name
+      description:
+        type: string
+        description: Project description
+      external:
+        type: object
+        description: 'READ-ONLY, OPTIONAL. Refernce to external task/issue.'
+        properties:
+          id:
+            type: string
+            description: Identifier for external reference
+          type:
+            type: string
+            description: external source type
+            enum:
+              - github
+              - jira
+              - asana
+              - other
+          data:
+            type: string
+            description: 300 Char length text blob for customer provided data
+      type:
+        type: string
+        description: project type
+      status:
+        type: string
+        description: current state of the task
+        enum:
+          - draft
+          - in_review
+          - reviewed
+          - active
+          - paused
+          - cancelled
+          - completed
+      cancelReason:
+        type: string
+        description: 'If a project is cancelled, define the reason of cancellation'
+      challengeEligibility:
+        description: List of eligibility criteria (one entry per role)
+        type: array
+        items:
+          $ref: '#/definitions/ChallengeEligibility'
+      bookmarks:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectBookMark'
+      members:
+        description: |
+          READ-ONLY. List of project members.
+          Use project member api to add/remove members
+        type: array
+        items:
+          $ref: '#/definitions/ProjectMember'
+      attachments:
+        description: |
+          READ-ONLY. List of project attachmens.
+          Use project attachment api to add/remove attachments
+        type: array
+        items:
+          $ref: '#/definitions/ProjectAttachment'
+      details:
+        $ref: '#/definitions/ProjectDetails'
+      templateId:
+        description: the project template identifier
+        type: number
+        format: long
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  ProjectDetails:
+    description: Project details
+    type: object
+    properties:
+      summary:
+        type: string
+        description: text summary of the project
+      TBD_usageDescription:
+        type: string
+        description: a description of how the app will be used
+      TBD_features:
+        type: object
+        properties:
+          id:
+            type: integer
+          title:
+            type: string
+          description:
+            type: string
+          isCustom:
+            type: boolean
+  ProjectUpgrade:
+    title: Project Upgrade object
+    type: object
+    required:
+      - targetVersion
+      - defaultProductTemplateId
+    properties:
+      targetVersion:
+        type: string
+        description: Version identifier
+      defaultProductTemplateId:
+        type: number
+        format: int64
+        description: >-
+          Default product template id, used when the associated project template
+          is not found, or there's no matching phase with the project's product
+          id
+      phaseName:
+        type: string
+        description: >-
+          This value will be used instead of the product template's name for the
+          created ProjectPhase
+  NewProjectMember:
+    title: Project Member object
+    type: object
+    required:
+      - userId
+      - role
+    properties:
+      userId:
+        type: number
+        format: int64
+        description: user identifier
+      isPrimary:
+        type: boolean
+        description: Flag to indicate this member is primary for specified role
+      role:
+        type: string
+        description: member role on specified project
+        enum:
+          - customer
+          - manager
+          - copilot
+  UpdateProjectMember:
+    title: Project Member object
+    type: object
+    required:
+      - role
+    properties:
+      isPrimary:
+        type: boolean
+        description: primary option
+      role:
+        type: string
+        description: member role on specified project
+        enum:
+          - customer
+          - manager
+          - copilot
+  NewProjectAttachment:
+    title: Project attachment request
+    type: object
+    required:
+      - path
+      - type
+      - title
+    properties:
+      path:
+        type: string
+        description: path where file is stored
+      type:
+        type: string
+        description: The attachment type, one of 'link' or 'file'
+        enum: 
+         - link
+         - file
+      tags:
+        type: array
+        description: The attachment tags
+        items:
+          type: string
+      s3Bucket:
+        type: string
+        description: The s3 bucket of attachment
+      contentType:
+        type: string
+        description: Uploaded file content type (optional for 'link')
+      title:
+        type: string
+        description: Name of the attachment
+      description:
+        type: string
+        description: Optional description for the attached file.
+      category:
+        type: string
+        description: Category of attachment
+      size:
+        type: number
+        format: float
+        description: The size of attachment
+      allowedUsers:
+        type: array
+        items:
+          type: integer
+          format: int64
+          description: Users allowed to access the attachment
+  UpdateProjectAttachment:
+    title: Project attachment request
+    type: object
+    properties:
+      tags:
+        type: array
+        description: The attachment tags
+        items:
+          type: string
+      title:
+        type: string
+        description: Name of the attachment
+      description:
+        type: string
+        description: Optional description for the attached file.
+      allowedUsers:
+        type: array
+        items:
+          type: integer
+          format: int64
+          description: Users allowed to access the attachment
+  ProjectAttachment:
+    title: Project attachment
+    type: object
+    properties:
+      id:
+        type: number
+        description: unique id for the attachment
+      projectId:
+        type: number
+        description: the projectId to which this attachment belongs
+      type:
+        type: string
+        description: The attachment type, one of 'file' or 'link'
+        enum:
+         - link
+         - file
+      tags:
+        type: array
+        description: The attachment tags array
+        items:
+         type: string
+      allowedUsers:
+        type: array
+        description: The array of ids of the users allowed to access this attachment
+        items:
+         type: number
+      path:
+        type: string
+        description: The attachment path
+      size:
+        type: number
+        format: float
+        description: The size of attachment
+      category:
+        type: string
+        description: The category of attachment
+      contentType:
+        type: string
+        description: Uploaded file content type
+      title:
+        type: string
+        description: Name of the attachment
+      description:
+        type: string
+        description: Optional description for the attached file.
+      url:
+        type: string
+        description: download link for the attachment of type file
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  ProjectMember:
+    title: Project Member object
+    type: object
+    properties:
+      id:
+        type: number
+        description: unique identifier for record
+      userId:
+        type: number
+        format: int64
+        description: user identifier
+      isPrimary:
+        type: boolean
+        description: Flag to indicate this member is primary for specified role
+      projectId:
+        type: number
+        format: int64
+        description: project identifier
+      role:
+        type: string
+        description: member role on specified project
+        enum:
+          - customer
+          - manager
+          - copilot
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  ProjectTemplateRequest:
+    title: Project template request object
+    type: object
+    required:
+      - name
+      - key
+      - category
+    properties:
+      name:
+        type: string
+        description: the project template name
+      key:
+        type: string
+        description: the project template key
+      category:
+        type: string
+        description: the project template category
+      subCategory:
+        type: string
+        description: the project template subCategory
+      metadata:
+        type: object
+        description: the project template metadata
+      scope:
+        type: object
+        description: the project template scope
+      phases:
+        type: object
+        description: the project template phases
+      form:
+        $ref: '#/definitions/VersionModelParam'
+      priceConfig:
+        $ref: '#/definitions/VersionModelParam'
+      planConfig:
+        $ref: '#/definitions/VersionModelParam'
+  ProjectTemplateUpgradeBody:
+    title: Project template
+    type: object
+    properties:
+      form:
+        $ref: '#/definitions/VersionModelParam'
+      priceConfig:
+        $ref: '#/definitions/VersionModelParam'
+      planConfig:
+        $ref: '#/definitions/VersionModelParam'
+  ProductTemplateUpgradeBody:
+    title: Product template
+    type: object
+    properties:
+      form:
+        $ref: '#/definitions/VersionModelParam'
+  VersionModelParam:
+    title: version model param
+    type: object
+    properties:
+      key:
+        type: string
+        description: the key for model
+      version:
+        type: number
+        description: the version for model
+  ProjectTemplate:
+    title: Project template object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/ProjectTemplateRequest'
+  ProductTemplateRequest:
+    title: Product template request object
+    type: object
+    required:
+      - name
+      - key
+      - category
+      - scope
+      - phases
+      - form
+      - priceConfig
+      - phaseConfig
+    properties:
+      name:
+        type: string
+        description: the product template name
+      productKey:
+        type: string
+        description: the product template key
+      category:
+        type: string
+        description: the product template product category
+      icon:
+        type: string
+        description: the product template icon
+      brief:
+        type: string
+        description: the product template brief
+      details:
+        type: string
+        description: the product template details
+      aliases:
+        type: object
+        description: the product template aliases
+      template:
+        type: object
+        description: the product template template
+      form:
+        $ref: '#/definitions/VersionModelParam'
+      isAddOn:
+        type: boolean
+        description: the flag that shows if the product template is an add on
+  ProductTemplate:
+    title: Product template object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+          - category
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+          category:
+            type: string
+            description: The product category of the product template
+      - $ref: '#/definitions/ProductTemplateRequest'
+  ProjectPhaseRequest:
+    title: Project phase request object
+    type: object
+    required:
+      - name
+      - status
+      - startDate
+      - endDate
+    properties:
+      name:
+        type: string
+        description: the project phase name
+      description:
+        type: string
+        description: the project phase short description
+      requirements:
+        type: string
+        description: the project phase requirements
+      status:
+        type: string
+        description: the project phase status
+      startDate:
+        type: string
+        format: date
+        description: the project phase start date
+      endDate:
+        type: string
+        format: date
+        description: the project phase end date
+      budget:
+        type: number
+        description: the project phase budget
+      progress:
+        type: number
+        description: the project phase progress
+      details:
+        type: object
+        description: the project phase details
+      order:
+        type: number
+        format: integer
+        description: the project phase order
+  ProjectPhase:
+    title: Project phase object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/ProjectPhaseRequest'
+  PhaseProductRequest:
+    title: Phase product request object
+    type: object
+    properties:
+      name:
+        type: string
+        description: the phase product name
+      directProjectId:
+        type: number
+        description: the phase product direct project id
+      billingAccountId:
+        type: number
+        description: the phase product billing account Id
+      templateId:
+        type: number
+        description: the phase product template id
+      type:
+        type: string
+        description: the phase product type
+      estimatedPrice:
+        type: number
+        description: the phase product estimated price
+      actualPrice:
+        type: number
+        description: the phase product actual price
+      details:
+        type: object
+        description: the phase product details
+  PhaseProduct:
+    title: Phase product object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/PhaseProductRequest'
+  ProductCategoryRequest:
+    title: Product category request object
+    type: object
+    required:
+      - displayName
+    properties:
+      displayName:
+        type: string
+        description: the product category display name
+  ProductCategoryCreateRequest:
+    title: Product category creation request object
+    type: object
+    allOf:
+      - type: object
+        required:
+          - key
+        properties:
+          key:
+            type: string
+            description: the product category key
+      - $ref: '#/definitions/ProductCategoryRequest'
+  ProductCategory:
+    title: Product category object
+    allOf:
+      - type: object
+        required:
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          key:
+            type: string
+            description: the product category key
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/ProductCategoryCreateRequest'
+  ProjectTypeRequest:
+    title: Project type request object
+    type: object
+    required:
+      - displayName
+    properties:
+      displayName:
+        type: string
+        description: the project type display name
+  ProjectTypeCreateRequest:
+    title: Project type creation request object
+    type: object
+    allOf:
+      - type: object
+        required:
+          - key
+        properties:
+          key:
+            type: string
+            description: the project type key
+      - $ref: '#/definitions/ProjectTypeRequest'
+  ProjectType:
+    title: Project type object
+    allOf:
+      - type: object
+        required:
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          key:
+            type: string
+            description: the project type key
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/ProjectTypeCreateRequest'
+  OrgConfigRequest:
+    title: Organization config request object
+    type: object
+    required:
+      - orgId
+      - configName
+    properties:
+      orgId:
+        type: string
+        description: the org id
+      configName:
+        type: string
+        description: the organization config name
+  OrgConfigCreateRequest:
+    title: Organization config creation request object
+    type: object
+    allOf:
+      - type: object
+        properties:
+          configValue:
+            type: string
+            description: the organization config id
+      - $ref: '#/definitions/OrgConfigRequest'
+  OrgConfig:
+    title: Organization config object
+    allOf:
+      - type: object
+        required:
+          - id
+          - orgId
+          - configName
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          orgId:
+            type: string
+            description: the org id
+          configName:
+            type: string
+            description: the config name
+          configValue:
+            type: string
+            description: the config value
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/OrgConfigCreateRequest'
+  TimelineRequest:
+    title: Timeline request object
+    type: object
+    required:
+      - name
+      - startDate
+      - reference
+      - referenceId
+    properties:
+      name:
+        type: string
+        description: the timeline name
+      description:
+        type: string
+        description: the timeline description
+      startDate:
+        type: string
+        format: date
+        description: the timeline start date
+      endDate:
+        type: string
+        format: date
+        description: the timeline end date
+      reference:
+        type: string
+        enum:
+          - project
+          - phase
+        description: the timeline reference
+      referenceId:
+        type: number
+        format: long
+        description: >-
+          the timeline reference id (project id or phase id, corresponding to
+          the `reference`)
+  Timeline:
+    title: Timeline object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/TimelineRequest'
+  MilestonePostRequest:
+    title: Milestone request object
+    type: object
+    required:
+      - name
+      - duration
+      - startDate
+      - status
+      - type
+      - order
+      - plannedText
+      - activeText
+      - completedText
+      - blockedText
+    properties:
+      name:
+        type: string
+        description: the milestone name
+      description:
+        type: string
+        description: the milestone description
+      duration:
+        type: number
+        format: integer
+        description: the milestone duration
+      startDate:
+        type: string
+        format: date
+        description: the milestone start date
+      endDate:
+        type: string
+        format: date
+        description: the milestone end date
+      completionDate:
+        type: string
+        format: date
+        description: the milestone completion date
+      status:
+        type: string
+        description: the milestone status
+      type:
+        type: string
+        description: the milestone type
+      details:
+        type: object
+        description: the milestone details
+      order:
+        type: number
+        format: integer
+        description: the milestone order
+      plannedText:
+        type: string
+        description: the milestone planned text
+      activeText:
+        type: string
+        description: the milestone active text
+      completedText:
+        type: string
+        description: the milestone completed text
+      blockedText:
+        type: string
+        description: the milestone blocked text
+  MilestonePatchRequest:
+    title: Milestone request object
+    type: object
+    required:
+      - name
+      - duration
+      - status
+      - type
+      - order
+      - plannedText
+      - activeText
+      - completedText
+      - blockedText
+    properties:
+      name:
+        type: string
+        description: the milestone name
+      description:
+        type: string
+        description: the milestone description
+      duration:
+        type: number
+        format: integer
+        description: the milestone duration
+      completionDate:
+        type: string
+        format: date
+        description: the milestone completion date
+      status:
+        type: string
+        description: the milestone status
+      type:
+        type: string
+        description: the milestone type
+      details:
+        type: object
+        description: the milestone details
+      order:
+        type: number
+        format: integer
+        description: the milestone order
+      plannedText:
+        type: string
+        description: the milestone planned text
+      activeText:
+        type: string
+        description: the milestone active text
+      completedText:
+        type: string
+        description: the milestone completed text
+      blockedText:
+        type: string
+        description: the milestone blocked text
+      statusComment:
+        type: string
+        description: the milestone status history comment
+  Milestone:
+    title: Milestone object
+    allOf:
+      - type: object
+        required:
+          - id
+          - statusHistory
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          statusHistory:
+            $ref: '#/definitions/StatusHistory'
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/MilestonePostRequest'
+  BulkMilestoneUpdateResponse:
+    title: Bulk milestone update response object
+    type: array
+    items:
+      $ref: '#/definitions/Milestone'
+      
+  MilestoneTemplateRequest:
+    title: Milestone template request object
+    type: object
+    required:
+      - name
+      - duration
+      - type
+      - order
+      - reference
+      - referenceId
+      - metadata
+    properties:
+      name:
+        type: string
+        description: the milestone template name
+      description:
+        type: string
+        description: the milestone template description
+      duration:
+        type: number
+        format: integer
+        description: the milestone template duration
+      type:
+        type: string
+        description: the milestone template type
+      order:
+        type: number
+        format: integer
+        description: the milestone template order
+      reference:
+        type: string
+        enum:
+          - productTemplate
+        description: the milestone template reference
+      refereneceId:
+        type: number
+        format: long
+        minimum: 1
+        description: the milestone template reference id
+      metadata:
+        type: object
+        description: the milestone template metadata
+  MilestoneCloneTemplateRequest:
+    title: Milestone clone template request object
+    type: object
+    required:
+      - sourceReference
+      - sourceReferenceId
+      - reference
+      - referenceId
+    properties:
+      sourceReference:
+        type: string
+        enum:
+          - productTemplate
+        description: the source reference to clone the milestone templates from
+      sourceReferenceId:
+        type: number
+        format: long
+        minimum: 1
+        description: the source reference id to clone the milestone templates from
+      reference:
+        type: string
+        enum:
+          - productTemplate
+        description: the target reference to clone the milestone templates to
+      refereneceId:
+        type: number
+        format: long
+        minimum: 1
+        description: the target reference id to clone the milestone templates to
+  MilestoneTemplate:
+    title: Milestone template object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/MilestoneTemplateRequest'
+  AllMetadataResponse:
+    title: All metadata response object
+    type: object
+    properties:
+      projectTemplates:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectTemplate'
+      productTemplates:
+        type: array
+        items:
+          $ref: '#/definitions/ProductTemplate'
+      milestoneTemplates:
+        type: array
+        items:
+          $ref: '#/definitions/MilestoneTemplate'
+      projectTypes:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectType'
+      productCategories:
+        type: array
+        items:
+          $ref: '#/definitions/ProductCategory'
+      buildingBlocks:
+                type: array
+                items:
+                  $ref: '#/definitions/BuildingBlock'
+  ProjectMemberInvite:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      projectId:
+        description: unique project identifier
+        type: integer
+        format: int64
+      userId:
+        type: integer
+        format: int64
+        description: The user Id
+      email:
+        type: string
+        description: The user email
+      role:
+        description: The user role in the project
+        type: string
+        enum:
+          - manager
+          - customer
+          - copilot
+      status:
+        description: The invite status
+        type: string
+        enum:
+          - pending
+          - accepted
+          - refused
+          - canceled
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  ProjectMemberInviteSuccessAndFailure:
+    type: object
+    properties:
+      success:
+        type: array
+        items:
+          $ref: '#/definitions/ProjectMemberInvite'
+      failed:
+        type: array
+        items:
+          type: object
+          properties:
+            email:
+              description: invitation user email(Optional)
+              type: string
+            handle:
+              description: invitation user handle(Optional)
+              type: string
+            message:
+              description: create invitation error message
+              type: string
+  ProjectMemberInviteListResult:
+    type: array
+    items:
+      $ref: '#/definitions/ProjectMemberInvite'
+  AddProjectMemberInvitesRequest:
+    title: Add project member invites request object
+    type: object
+    properties:
+      handles:
+        description: 'The user handle list, could not present with emails'
+        type: array
+        items:
+          type: string
+      emails:
+        type: array
+        items:
+          type: string
+        description: 'The user email list, could not present with handles'
+      role:
+        description: The target role in the project
+        type: string
+        enum:
+          - manager
+          - customer
+          - copilot
+  UpdateProjectMemberInviteRequest:
+    title: Update project member invite request object
+    type: object
+    properties:
+      status:
+        description: The invite status
+        type: string
+        enum:
+          - pending
+          - accepted
+          - refused
+          - canceled
+  Form:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      version:
+        description: version identifier
+        type: integer
+        format: int64
+      revision:
+        description: revision identifier
+        type: integer
+        format: int64
+      config:
+        description: config json
+        type: object
+      key:
+        description: key of form
+        format: string
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  NewForm:
+    type: object
+    properties:
+      config:
+        type: object
+  PriceConfig:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      version:
+        description: version identifier
+        type: integer
+        format: int64
+      revision:
+        description: revision identifier
+        type: integer
+        format: int64
+      config:
+        description: content json
+        type: object
+      key:
+        description: key
+        format: string
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  NewPriceConfig:
+    type: object
+    properties:
+      config:
+        description: config json
+        type: object
+  PlanConfig:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      version:
+        description: version identifier
+        type: integer
+        format: int64
+      revision:
+        description: revision identifier
+        type: integer
+        format: int64
+      config:
+        description: content json
+        type: object
+      key:
+        description: key
+        format: string
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  NewPlanConfig:
+    type: object
+    properties:
+      config:
+        description: config json
+        type: object
+  ProjectSetting:
+    title: Project setting object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/ProjectSettingRequest'
+  ProjectSettingRequest:
+    title: Project setting request object
+    type: object
+    required:
+      - key
+      - value
+      - valueType
+      - readPermission
+      - writePermission
+      - metadata
+    properties:
+      key:
+        type: string
+        description: the project setting key
+      value:
+        type: string
+        description: the project setting value
+      valueType:
+        type: string
+        description: the project setting value type
+      readPermission:
+        type: object
+        description: the project setting read Permission
+      writePermission:
+        type: object
+        description: the project setting write Permission
+      metadata:
+        type: object
+        description: the project setting metadata
+  WorkStream:
+    title: Work stream object
+    allOf:
+      - type: object
+        required:
+          - id
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          projectId:
+            type: number
+            format: int64
+            description: the project id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/WorkStreamRequest'
+  WorkStreamRequest:
+    title: Work stream request object
+    type: object
+    required:
+      - name
+      - status
+      - type
+    properties:
+      name:
+        type: string
+        description: the work stream name
+      status:
+        type: string
+        description: the work stream status
+      type:
+        type: string
+        description: the type
+  WorkManagementPermissionCreateRequest:
+    title: Work Management Permission request object
+    type: object
+    required:
+      - policy
+      - permission
+      - projectTemplateId
+    properties:
+      policy:
+        type: string
+        description: the policy
+      permission:
+        type: object
+        description: the permission
+      projectTemplateId:
+        type: number
+        format: int64
+        description: the template id
+  WorkManagementPermission:
+    title: Work Management Permission object
+    allOf:
+      - type: object
+        required:
+          - id
+          - policy
+          - permission
+          - projectTemplateId
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          policy:
+            type: string
+            description: the policy
+          permission:
+            type: object
+            description: the permission
+          projectTemplateId:
+            type: number
+            format: int64
+            description: the template id
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: '#/definitions/WorkManagementPermissionCreateRequest'
+  StatusHistory:
+    title: Status history object
+    type: object
+    required:
+      - id
+      - status
+      - reference
+      - referenceId
+      - comment
+    properties:
+      id:
+        type: string
+        description: the id
+      status:
+        type: string
+        description: the status
+      reference:
+        type: string
+        description: the referenced model
+      referenceId:
+        type: string
+        description: the referenced id
+      comment:
+        type: string
+        description: the comment
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true
+  BuildingBlock:
+    title: BuildingBlock object
+    type: object
+    required:
+      - id
+      - key
+      - config
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: the id
+      key:
+        type: string
+        description: building block key. Unique field.
+      config:
+        type: object
+        description: building block config
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true
+  ProjectEstimationItem:
+    title: ProjectEstimationItem object
+    type: object
+    required:
+      - id
+      - projectEstimationId
+      - price
+      - type
+      - markupUsedReference
+      - markupUsedReferenceId
+      - metadata
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: the id
+      projectEstimationId:
+        type: integer
+        format: int64
+        description: the ProjectEstimation id
+      price:
+        type: number
+        format: float
+        description: the price of this estimation item
+      type:
+        type: string
+        description: the type of this estimation
+      markupUsedReference:
+        type: string
+        description: the reference type of this estimation. Can be "buildingBlock" for example
+      markupUsedReferenceId:
+        type: integer
+        format: int64
+        description: the reference object id
+      metadata:
+        type: object
+        description: the metadata of this item
+      createdAt:
+        type: string
+        description: Datetime (GMT) when object was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this object
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when object was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this object
+        readOnly: true

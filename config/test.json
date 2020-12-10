@@ -1,0 +1,26 @@
+{
+    "AUTH_SECRET": "secret",
+    "MAX_REVISION_NUMBER": 2,
+    "logLevel": "debug",
+    "captureLogs": "false",
+    "logentriesToken": "",
+    "enableFileUpload": "false",
+    "elasticsearchConfig": {
+      "host": "http://localhost:9200",
+      "apiVersion": "6.8",
+      "indexName": "projects_test",
+      "docType": "doc",
+      "timelineIndexName": "timelines_test",
+      "timelineDocType": "doc",
+      "metadataIndexName": "metadata_test",
+      "metadataDocType": "doc"
+    },
+    "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
+    "dbConfig": {
+        "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",
+        "maxPoolSize": 50,
+        "minPoolSize": 4,
+        "idleTimeout": 1000
+    },
+    "whitelistedOriginsForUserIdAuth": "[\"\"]"
+}

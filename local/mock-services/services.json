@@ -1,0 +1,312 @@
+{
+    "members": [
+        {
+            "id": "magrathean",
+            "result": {
+                "success": true,
+                "status": 200,
+                "metadata": null,
+                "content": {
+                    "maxRating": {
+                        "rating": 1114,
+                        "track": "DATA_SCIENCE",
+                        "subTrack": "SRM"
+                    },
+                    "createdBy": "40011578",
+                    "updatedBy": "40011578",
+                    "userId": 40011578,
+                    "firstName": "Firstname",
+                    "lastName": "Lastname",
+                    "quote": "It is a mistake to think you can solve any major problems just with potatoes.",
+                    "description": null,
+                    "otherLangName": null,
+                    "handle": "magrathean",
+                    "handleLower": "magrathean",
+                    "status": "ACTIVE",
+                    "email": "email@email.com",
+                    "addresses": [
+                        {
+                            "streetAddr1": "100 Main Street",
+                            "streetAddr2": "",
+                            "city": "Chicago",
+                            "zip": "60601",
+                            "stateCode": "IL",
+                            "type": "HOME",
+                            "updatedAt": null,
+                            "createdAt": null,
+                            "createdBy": null,
+                            "updatedBy": null
+                        }
+                    ],
+                    "homeCountryCode": "USA",
+                    "competitionCountryCode": "USA",
+                    "photoURL": null,
+                    "tracks": [
+                        "DEVELOP"
+                    ],
+                    "updatedAt": "2015-12-02T14:00Z",
+                    "createdAt": "2014-04-10T10:55Z"
+                }
+            },
+            "version": "v3"
+        },
+        {
+            "id": "test_user1",
+            "result": {
+                "success": true,
+                "status": 200,
+                "metadata": null,
+                "content": {
+                    "maxRating": {
+                        "rating": 1114,
+                        "track": "DATA_SCIENCE",
+                        "subTrack": "SRM"
+                    },
+                    "createdBy": "40011578",
+                    "updatedBy": "40011578",
+                    "userId": 40011579,
+                    "firstName": "Firstname",
+                    "lastName": "Lastname",
+                    "quote": "It is a mistake to think you can solve any major problems just with potatoes.",
+                    "description": null,
+                    "otherLangName": null,
+                    "handle": "test_user1",
+                    "handleLower": "test_user1",
+                    "status": "ACTIVE",
+                    "email": "email_test1@email.com",
+                    "addresses": [
+                        {
+                            "streetAddr1": "100 Main Street",
+                            "streetAddr2": "",
+                            "city": "Chicago",
+                            "zip": "60601",
+                            "stateCode": "IL",
+                            "type": "HOME",
+                            "updatedAt": null,
+                            "createdAt": null,
+                            "createdBy": null,
+                            "updatedBy": null
+                        }
+                    ],
+                    "homeCountryCode": "USA",
+                    "competitionCountryCode": "USA",
+                    "photoURL": null,
+                    "tracks": [
+                        "DEVELOP"
+                    ],
+                    "updatedAt": "2015-12-02T14:00Z",
+                    "createdAt": "2014-04-10T10:55Z"
+                }
+            },
+            "version": "v3"
+        },
+        {
+            "id": "test_customer1",
+            "result": {
+                "success": true,
+                "status": 200,
+                "metadata": null,
+                "content": {
+                    "maxRating": {
+                        "rating": 1114,
+                        "track": "DATA_SCIENCE",
+                        "subTrack": "SRM"
+                    },
+                    "createdBy": "40011578",
+                    "updatedBy": "40011578",
+                    "userId": 40051331,
+                    "firstName": "Firstname",
+                    "lastName": "Lastname",
+                    "quote": "It is a mistake to think you can solve any major problems just with potatoes.",
+                    "description": null,
+                    "otherLangName": null,
+                    "handle": "test_customer1",
+                    "handleLower": "test_customer1",
+                    "status": "ACTIVE",
+                    "email": "test_customer1@email.com",
+                    "addresses": [
+                        {
+                            "streetAddr1": "100 Main Street",
+                            "streetAddr2": "",
+                            "city": "Chicago",
+                            "zip": "60601",
+                            "stateCode": "IL",
+                            "type": "HOME",
+                            "updatedAt": null,
+                            "createdAt": null,
+                            "createdBy": null,
+                            "updatedBy": null
+                        }
+                    ],
+                    "homeCountryCode": "USA",
+                    "competitionCountryCode": "USA",
+                    "photoURL": null,
+                    "tracks": [
+                        "DEVELOP"
+                    ],
+                    "updatedAt": "2015-12-02T14:00Z",
+                    "createdAt": "2014-04-10T10:55Z"
+                }
+            },
+            "version": "v3"
+        },
+        {
+            "id": "test_copilot1",
+            "result": {
+                "success": true,
+                "status": 200,
+                "metadata": null,
+                "content": {
+                    "maxRating": {
+                        "rating": 1114,
+                        "track": "DATA_SCIENCE",
+                        "subTrack": "SRM"
+                    },
+                    "createdBy": "40011578",
+                    "updatedBy": "40011578",
+                    "userId": 40051332,
+                    "firstName": "Firstname",
+                    "lastName": "Lastname",
+                    "quote": "It is a mistake to think you can solve any major problems just with potatoes.",
+                    "description": null,
+                    "otherLangName": null,
+                    "handle": "test_copilot1",
+                    "handleLower": "test_copilot1",
+                    "status": "ACTIVE",
+                    "email": "test_copilot1@email.com",
+                    "addresses": [
+                        {
+                            "streetAddr1": "100 Main Street",
+                            "streetAddr2": "",
+                            "city": "Chicago",
+                            "zip": "60601",
+                            "stateCode": "IL",
+                            "type": "HOME",
+                            "updatedAt": null,
+                            "createdAt": null,
+                            "createdBy": null,
+                            "updatedBy": null
+                        }
+                    ],
+                    "homeCountryCode": "USA",
+                    "competitionCountryCode": "USA",
+                    "photoURL": null,
+                    "tracks": [
+                        "DEVELOP"
+                    ],
+                    "updatedAt": "2015-12-02T14:00Z",
+                    "createdAt": "2014-04-10T10:55Z"
+                }
+            },
+            "version": "v3"
+        },
+        {
+            "id": "test_manager1",
+            "result": {
+                "success": true,
+                "status": 200,
+                "metadata": null,
+                "content": {
+                    "maxRating": {
+                        "rating": 1114,
+                        "track": "DATA_SCIENCE",
+                        "subTrack": "SRM"
+                    },
+                    "createdBy": "40011578",
+                    "updatedBy": "40011578",
+                    "userId": 40051333,
+                    "firstName": "Firstname",
+                    "lastName": "Lastname",
+                    "quote": "It is a mistake to think you can solve any major problems just with potatoes.",
+                    "description": null,
+                    "otherLangName": null,
+                    "handle": "test_manager1",
+                    "handleLower": "test_manager1",
+                    "status": "ACTIVE",
+                    "email": "test_manager1@email.com",
+                    "addresses": [
+                        {
+                            "streetAddr1": "100 Main Street",
+                            "streetAddr2": "",
+                            "city": "Chicago",
+                            "zip": "60601",
+                            "stateCode": "IL",
+                            "type": "HOME",
+                            "updatedAt": null,
+                            "createdAt": null,
+                            "createdBy": null,
+                            "updatedBy": null
+                        }
+                    ],
+                    "homeCountryCode": "USA",
+                    "competitionCountryCode": "USA",
+                    "photoURL": null,
+                    "tracks": [
+                        "DEVELOP"
+                    ],
+                    "updatedAt": "2015-12-02T14:00Z",
+                    "createdAt": "2014-04-10T10:55Z"
+                }
+            },
+            "version": "v3"
+        },
+        {
+            "id": "test_admin1",
+            "result": {
+                "success": true,
+                "status": 200,
+                "metadata": null,
+                "content": {
+                    "maxRating": {
+                        "rating": 1114,
+                        "track": "DATA_SCIENCE",
+                        "subTrack": "SRM"
+                    },
+                    "createdBy": "40011578",
+                    "updatedBy": "40011578",
+                    "userId": 40135978,
+                    "firstName": "Adminname",
+                    "lastName": "Adminlastname",
+                    "quote": "It is a mistake to think you can solve any major problems just with potatoes.",
+                    "description": null,
+                    "otherLangName": null,
+                    "handle": "test_admin1",
+                    "handleLower": "test_admin1",
+                    "status": "ACTIVE",
+                    "email": "pshah1@test.com",
+                    "addresses": [
+                        {
+                            "streetAddr1": "100 Main Street",
+                            "streetAddr2": "",
+                            "city": "Chicago",
+                            "zip": "60601",
+                            "stateCode": "IL",
+                            "type": "HOME",
+                            "updatedAt": null,
+                            "createdAt": null,
+                            "createdBy": null,
+                            "updatedBy": null
+                        }
+                    ],
+                    "homeCountryCode": "USA",
+                    "competitionCountryCode": "USA",
+                    "photoURL": null,
+                    "tracks": [
+                        "DEVELOP"
+                    ],
+                    "updatedAt": "2015-12-02T14:00Z",
+                    "createdAt": "2014-04-10T10:55Z"
+                }
+            },
+            "version": "v3"
+        }
+    ],
+    "roles": [
+        { "userId": "40051334", "roles": [ { "roleName": "Connect Manager" } ] },
+        { "userId": "40051332", "roles": [ { "roleName": "Connect Copilot" } ] },
+        { "userId": "40051333", "roles": [ { "roleName": "administrator" } ] },
+        { "userId": "40051336", "roles": [ { "roleName": "Connect Admin" }, { "roleName": "Connect Copilot" } ] },
+        { "userId": "40051331", "roles": [ ] },
+        { "userId": "40051335", "roles": [ ] }
+    ]
+}
