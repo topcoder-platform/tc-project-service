@@ -169,6 +169,4 @@ workflows:
   Performance-Testing:
     jobs:
       - Connect-Performance-Testing:
-          requires:
-            - test
             type: approval
