@@ -165,8 +165,7 @@ workflows:
           filters:
             branches:
               only: ['master']
-              
-  Performance-Testing-1:
-    jobs:
       - Connect-Performance-Testing:
-            type: approval
+           type: approval
+            requires:
+              - test
