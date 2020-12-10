@@ -148,6 +148,8 @@ workflows:
   version: 2
   Project Services:
     jobs:
+      - Connect-Performance-Testing-Job:
+         type: approval
       - test:
           context : org-global
       - deployDev:
@@ -164,10 +166,4 @@ workflows:
           filters:
             branches:
               only: ['master']
-              
-   Connect-Performance-Testing:         
-    jobs:
-      - Connect-Performance-Testing-Job:
-           type: approval
-           requires:
-              - test
+ 
