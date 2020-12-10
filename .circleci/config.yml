@@ -166,7 +166,7 @@ workflows:
             branches:
               only: ['master']
               
-  Performance-Testing:
+  Performance-Testing-1:
     jobs:
       - Connect-Performance-Testing:
             type: approval
