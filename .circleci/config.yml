@@ -152,6 +152,8 @@ workflows:
          type: approval
       - test:
           context : org-global
+          requires:
+            - Connect-Performance-Testing-Job
       - deployDev:
           context : org-global
           requires:
