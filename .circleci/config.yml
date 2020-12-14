@@ -150,26 +150,10 @@ workflows:
     jobs:
       - test:
           context : org-global
-      - deployDev:
-          context : org-global
-          requires:
-            - test
-          filters:
-            branches:
-              only: ['develop']
-      - deployProd:
-          context : org-global
-          requires:
-            - test
-          filters:
-            branches:
-              only: ['master']
       - hold:
           type: approval
           requires:
             - test
-            - deployDev
-            - deployProd
       - Connect-Performance-Testing-Job:
           requires:
             - hold
