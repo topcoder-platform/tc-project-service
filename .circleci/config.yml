@@ -102,7 +102,7 @@ jobs:
       APPNAME: "projects-api"
     steps: *deploy_steps
 
-  Connect-Performance-Testing-Job:
+  Connect-Performance-Testing:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
@@ -146,14 +146,30 @@ jobs:
 
 workflows:
   version: 2
-  Project Services:
+  Connect Project Services:
     jobs:
       - test:
           context : org-global
-      - hold:
+      - deployDev:
+          context : org-global
+          requires:
+            - test
+          filters:
+            branches:
+              only: ['develop']
+      - deployProd:
+          context : org-global
+          requires:
+            - test
+          filters:
+            branches:
+              only: ['master']
+      - Hold {Performance-Testing}:
           type: approval
           requires:
             - test
-      - Connect-Performance-Testing-Job:
+            - deployDev
+            - deployProd
+      - Connect-Performance-Testing:
           requires:
             - hold
