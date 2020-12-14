@@ -164,7 +164,7 @@ workflows:
           filters:
             branches:
               only: ['master']
-      - Hold {Performance-Testing}:
+      - hold:
           type: approval
           requires:
             - test
