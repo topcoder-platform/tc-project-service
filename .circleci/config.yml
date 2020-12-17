@@ -149,8 +149,6 @@ workflows:
     jobs:
       - Hold [Performance-Testing]:
           type: approval
-          requires:
-            - build
       - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
