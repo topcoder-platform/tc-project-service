@@ -143,7 +143,6 @@ jobs:
       - store_test_results:
           path: target/jmeter/test-results
 
-
 workflows:
   version: 2
   Connect Project Services:
