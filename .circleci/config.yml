@@ -169,7 +169,7 @@ workflows:
             - build
             - deployDev
             - deployProd
-      - Connect-Performance-Testing:
+       - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
             
