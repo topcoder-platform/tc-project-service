@@ -163,15 +163,12 @@ workflows:
           filters:
             branches:
               only: ['master']       
-       - Hold [Performance-Testing]:
+      - Hold [Performance-Testing]:
           type: approval
           requires:
             - build
             - deployDev
             - deployProd
-       - Connect-Performance-Testing:
+      - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
-            
-
- 
