@@ -152,14 +152,14 @@ workflows:
       - deployDev:
           context : org-global
           requires:
-            - test
+            - build
           filters:
             branches:
               only: ['develop']
       - deployProd:
           context : org-global
           requires:
-            - test
+            - build
           filters:
             branches:
               only: ['master']       
