@@ -262,6 +262,37 @@
           <div class="row border-top">
             <div class="col py-2">
               <div class="permission-title anchor-container">
+                <a href="#UPDATE_PROJECT_STATUS" name="UPDATE_PROJECT_STATUS" class="anchor"></a>Update Project Status
+              </div>
+              <div class="permission-variable"><small><code>UPDATE_PROJECT_STATUS</code></small></div>
+              <div class="text-black-50 small-text"></div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                    <span class="badge badge-primary" title="Allowed Project Role">manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">account_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">program_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">account_executive</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">solution_architect</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">project_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">copilot</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:projects</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:projects</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              <div class="permission-title anchor-container">
                 <a href="#MANAGE_PROJECT_DIRECT_PROJECT_ID" name="MANAGE_PROJECT_DIRECT_PROJECT_ID" class="anchor"></a>Manage Project property &quot;directProjectId&quot;
               </div>
               <div class="permission-variable"><small><code>MANAGE_PROJECT_DIRECT_PROJECT_ID</code></small></div>
@@ -523,31 +554,6 @@
           <div class="row border-top">
             <div class="col py-2">
               <div class="permission-title anchor-container">
-                <a href="#UPDATE_PROJECT_MEMBER_TO_COPILOT" name="UPDATE_PROJECT_MEMBER_TO_COPILOT" class="anchor"></a>Update Project Member (to copilot)
-              </div>
-              <div class="permission-variable"><small><code>UPDATE_PROJECT_MEMBER_TO_COPILOT</code></small></div>
-              <div class="text-black-50 small-text">Who can update project member role to &quot;copilot&quot;.</div>
-            </div>
-            <div class="col-9 py-2">
-              <div>
-              </div>
-
-              <div>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
-              </div>
-
-              <div>
-                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
-                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
-                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
-              </div>
-            </div>
-          </div>
-          <div class="row border-top">
-            <div class="col py-2">
-              <div class="permission-title anchor-container">
                 <a href="#DELETE_PROJECT_MEMBER_CUSTOMER" name="DELETE_PROJECT_MEMBER_CUSTOMER" class="anchor"></a>Delete Project Member (customer)
               </div>
               <div class="permission-variable"><small><code>DELETE_PROJECT_MEMBER_CUSTOMER</code></small></div>
@@ -573,10 +579,10 @@
           <div class="row border-top">
             <div class="col py-2">
               <div class="permission-title anchor-container">
-                <a href="#DELETE_PROJECT_MEMBER_NON_CUSTOMER" name="DELETE_PROJECT_MEMBER_NON_CUSTOMER" class="anchor"></a>Delete Project Member (non-customer)
+                <a href="#DELETE_PROJECT_MEMBER_TOPCODER" name="DELETE_PROJECT_MEMBER_TOPCODER" class="anchor"></a>Delete Project Member (topcoder)
               </div>
-              <div class="permission-variable"><small><code>DELETE_PROJECT_MEMBER_NON_CUSTOMER</code></small></div>
-              <div class="text-black-50 small-text">Who can delete project members with non &quot;customer&quot; role.</div>
+              <div class="permission-variable"><small><code>DELETE_PROJECT_MEMBER_TOPCODER</code></small></div>
+              <div class="text-black-50 small-text">Who can delete project members with some topcoder role like &quot;manager&quot; etc.</div>
             </div>
             <div class="col-9 py-2">
               <div>
@@ -591,6 +597,32 @@
               <div>
                     <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
                     <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-members</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-members</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_MEMBER_COPILOT" name="DELETE_PROJECT_MEMBER_COPILOT" class="anchor"></a>Delete Project Member (copilot)
+              </div>
+              <div class="permission-variable"><small><code>DELETE_PROJECT_MEMBER_COPILOT</code></small></div>
+              <div class="text-black-50 small-text">Who can delete project members with &quot;copilot&quot; role.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                  <span class="badge badge-primary" title="Allowed">Any Project Member</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
               </div>
 
               <div>
@@ -680,15 +712,6 @@
               <div>
                     <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
                     <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Manager</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Account Manager</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Business Development Representative</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Presales</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Account Executive</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Program Manager</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Solution Architect</span>
-                    <span class="badge badge-success" title="Allowed Topcoder Role">Project Manager</span>
               </div>
 
               <div>
@@ -701,10 +724,10 @@
           <div class="row border-top">
             <div class="col py-2">
               <div class="permission-title anchor-container">
-                <a href="#CREATE_PROJECT_INVITE_NON_CUSTOMER" name="CREATE_PROJECT_INVITE_NON_CUSTOMER" class="anchor"></a>Create Project Invite (non-customer)
+                <a href="#CREATE_PROJECT_INVITE_TOPCODER" name="CREATE_PROJECT_INVITE_TOPCODER" class="anchor"></a>Create Project Invite (topcoder)
               </div>
-              <div class="permission-variable"><small><code>CREATE_PROJECT_INVITE_NON_CUSTOMER</code></small></div>
-              <div class="text-black-50 small-text">Who can invite project members with non &quot;customer&quot; role.</div>
+              <div class="permission-variable"><small><code>CREATE_PROJECT_INVITE_TOPCODER</code></small></div>
+              <div class="text-black-50 small-text">Who can invite project members with topcoder role like &quot;manager&quot; etc.</div>
             </div>
             <div class="col-9 py-2">
               <div>
@@ -731,9 +754,9 @@
           <div class="row border-top">
             <div class="col py-2">
               <div class="permission-title anchor-container">
-                <a href="#CREATE_PROJECT_INVITE_COPILOT_DIRECTLY" name="CREATE_PROJECT_INVITE_COPILOT_DIRECTLY" class="anchor"></a>Create Project Invite (copilot)
+                <a href="#CREATE_PROJECT_INVITE_COPILOT" name="CREATE_PROJECT_INVITE_COPILOT" class="anchor"></a>Create Project Invite (copilot)
               </div>
-              <div class="permission-variable"><small><code>CREATE_PROJECT_INVITE_COPILOT_DIRECTLY</code></small></div>
+              <div class="permission-variable"><small><code>CREATE_PROJECT_INVITE_COPILOT</code></small></div>
               <div class="text-black-50 small-text">Who can invite user with &quot;copilot&quot; role directly without requesting.</div>
             </div>
             <div class="col-9 py-2">
@@ -876,10 +899,10 @@
           <div class="row border-top">
             <div class="col py-2">
               <div class="permission-title anchor-container">
-                <a href="#DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER" name="DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER" class="anchor"></a>Delete Project Invite (not own, non-customer)
+                <a href="#DELETE_PROJECT_INVITE_NOT_OWN_TOPCODER" name="DELETE_PROJECT_INVITE_NOT_OWN_TOPCODER" class="anchor"></a>Delete Project Invite (not own, topcoder)
               </div>
-              <div class="permission-variable"><small><code>DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER</code></small></div>
-              <div class="text-black-50 small-text">Who can delete project invites for other members with non &quot;customer&quot; role.</div>
+              <div class="permission-variable"><small><code>DELETE_PROJECT_INVITE_NOT_OWN_TOPCODER</code></small></div>
+              <div class="text-black-50 small-text">Who can delete project invites for other members with some topcoder role like &quot;manager&quot; etc.</div>
             </div>
             <div class="col-9 py-2">
               <div>
@@ -894,6 +917,37 @@
               <div>
                     <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
                     <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+              </div>
+
+              <div>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:connect_project</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">all:project-invites</span>
+                  <span class="badge badge-dark" title="Allowed Topcoder Role">write:project-invites</span>
+              </div>
+            </div>
+          </div>
+          <div class="row border-top">
+            <div class="col py-2">
+              <div class="permission-title anchor-container">
+                <a href="#DELETE_PROJECT_INVITE_NOT_OWN_COPILOT" name="DELETE_PROJECT_INVITE_NOT_OWN_COPILOT" class="anchor"></a>Delete Project Invite (not own, copilot)
+              </div>
+              <div class="permission-variable"><small><code>DELETE_PROJECT_INVITE_NOT_OWN_COPILOT</code></small></div>
+              <div class="text-black-50 small-text">Who can delete invites for other members with &quot;copilot&quot; role.</div>
+            </div>
+            <div class="col-9 py-2">
+              <div>
+                    <span class="badge badge-primary" title="Allowed Project Role">manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">account_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">program_manager</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">account_executive</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">solution_architect</span>
+                    <span class="badge badge-primary" title="Allowed Project Role">project_manager</span>
+              </div>
+
+              <div>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Admin</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">administrator</span>
+                    <span class="badge badge-success" title="Allowed Topcoder Role">Connect Copilot Manager</span>
               </div>
 
               <div>

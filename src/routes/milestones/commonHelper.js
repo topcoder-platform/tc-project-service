@@ -23,11 +23,6 @@ async function createMilestone(authUser, timeline, data, transaction) {
   // eslint-disable-next-line
   const userId = authUser.userId;
   const entity = Object.assign({}, data, { createdBy: userId, updatedBy: userId, timelineId: timeline.id });
-  if (entity.startDate < timeline.startDate) {
-    const apiErr = new Error('Milestone startDate must not be before the timeline startDate');
-    apiErr.status = 400;
-    throw apiErr;
-  }
   // Circumvent postgresql duplicate key error, see https://stackoverflow.com/questions/50834623/sequelizejs-error-duplicate-key-value-violates-unique-constraint-message-pkey
   await models.sequelize.query('SELECT setval(\'milestones_id_seq\', (SELECT MAX(id) FROM "milestones"))',
     { raw: true, transaction });
@@ -122,7 +117,6 @@ async function updateMilestone(authUser, timelineId, data, transaction, item) {
     && !moment(milestone.completionDate).isSame(entityToUpdate.completionDate);
   const isUpdatedActualStartDate = milestone.actualStartDate && entityToUpdate.actualStartDate
     && !moment(milestone.actualStartDate).isSame(entityToUpdate.actualStartDate);
-
 
   if (
     (isUpdatedCompletionDate || isUpdatedActualStartDate)

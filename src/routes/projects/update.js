@@ -7,7 +7,6 @@ import {
 import models from '../../models';
 import {
   PROJECT_STATUS,
-  PROJECT_MEMBER_ROLE,
   EVENT,
   RESOURCES,
   REGEX,
@@ -224,23 +223,14 @@ module.exports = [
           });
           return Promise.reject(err);
         }
-        // Only project manager (user with manager role assigned) or topcoder
-        // admin should be allowed to transition project status to 'active'.
-        const members = req.context.currentProjectMembers;
-        const validRoles = [
-          PROJECT_MEMBER_ROLE.MANAGER,
-          PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
-          PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
-          PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
-        ].map(x => x.toLowerCase());
-        const matchRole = role => _.indexOf(validRoles, role.toLowerCase()) >= 0;
-        if (updatedProps.status === PROJECT_STATUS.ACTIVE &&
-          !util.hasAdminRole(req) &&
-          _.isUndefined(_.find(members,
-            m => m.userId === req.authUser.userId && matchRole(m.role)))
+
+        // check if user has permissions to update project status
+        if (
+          updatedProps.status &&
+          updatedProps.status !== project.status &&
+          !util.hasPermissionByReq(PERMISSION.UPDATE_PROJECT_STATUS, req)
         ) {
-          const err = new Error('Only assigned topcoder-managers or topcoder admins should be allowed ' +
-            'to launch a project');
+          const err = new Error('You are not allowed to update project status.');
           err.status = 403;
           return Promise.reject(err);
         }

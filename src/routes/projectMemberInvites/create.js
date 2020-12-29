@@ -274,8 +274,14 @@ module.exports = [
     }
 
     if (
-      invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
-      !util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_NON_CUSTOMER, req)
+      ( // if cannot invite non-customer user
+        invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
+        !util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_TOPCODER, req)
+      ) && !(
+        // and if cannot invite copilot directly
+        invite.role === PROJECT_MEMBER_ROLE.COPILOT &&
+        util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_COPILOT, req)
+      )
     ) {
       const err = new Error(`You are not allowed to invite user as ${invite.role}.`);
       err.status = 403;
@@ -373,7 +379,7 @@ module.exports = [
                 role: invite.role,
                 // invite copilots directly if user has permissions
                 status: (invite.role !== PROJECT_MEMBER_ROLE.COPILOT ||
-                util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_COPILOT_DIRECTLY, req))
+                util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_INVITE_COPILOT, req))
                   ? INVITE_STATUS.PENDING
                   : INVITE_STATUS.REQUESTED,
                 createdBy: req.authUser.userId,

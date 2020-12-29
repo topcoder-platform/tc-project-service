@@ -44,8 +44,9 @@ module.exports = [
           error = 'You don\'t have permissions to cancel requested invites.';
         } else if (
           invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER
+          && invite.role !== PROJECT_MEMBER_ROLE.COPILOT
           && !ownInvite
-          && !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_NON_CUSTOMER, req)
+          && !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_TOPCODER, req)
         ) {
           error = 'You don\'t have permissions to cancel invites to Topcoder Team for other users.';
         } else if (
@@ -54,6 +55,12 @@ module.exports = [
           && !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_CUSTOMER, req)
         ) {
           error = 'You don\'t have permissions to cancel invites to Customer Team for other users.';
+        } else if (
+          invite.role === PROJECT_MEMBER_ROLE.COPILOT
+          && !ownInvite
+          && !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_INVITE_NOT_OWN_COPILOT, req)
+        ) {
+          error = 'You don\'t have permissions to cancel invites to Copilot Team for other users.';
         }
 
         if (error) {

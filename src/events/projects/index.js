@@ -5,6 +5,8 @@ import _ from 'lodash';
 import Joi from 'joi';
 import Promise from 'bluebird';
 import config from 'config';
+import axios from 'axios';
+import moment from 'moment';
 import util from '../../util';
 import models from '../../models';
 import { createPhaseTopic } from '../projectPhases';
@@ -13,6 +15,27 @@ import { PROJECT_STATUS, REGEX, TIMELINE_REFERENCES } from '../../constants';
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
+
+/**
+  * creates taas job
+  * @param {Object} data the job data
+  * @return {Object} the job created
+  */
+const createTaasJob = async (data) => {
+  const token = await util.getM2MToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+  const res = await axios
+    .post(config.taasJobApiUrl, data, { headers })
+    .catch((err) => {
+      const error = new Error();
+      error.message = _.get(err, 'response.data.message', error.message);
+      throw error;
+    });
+  return res.data;
+};
 
 /**
  * Payload for deprecated BUS events like `connect.notification.project.updated`.
@@ -163,6 +186,47 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
     );
     await Promise.all(topicPromises);
     app.logger.debug('Topics for phases are successfully created.');
+  }
+  // TODO: temporary disable this feature, until we release TaaS APP
+  if (false === true && project.type === 'talent-as-a-service') {
+    const specialists = _.get(project, 'details.taasDefinition.specialists');
+    if (!specialists || !specialists.length) {
+      app.logger.debug(`no specialists found in the project ${project.id}`);
+      return;
+    }
+    const targetSpecialists = _.filter(specialists, specialist => Number(specialist.people) > 0); // must be at least one people
+    await Promise.all(
+      _.map(
+        targetSpecialists,
+        (specialist) => {
+          const startDate = new Date();
+          const endDate = moment(startDate).add(Number(specialist.duration), 'M'); // the unit of duration is month
+          // make sure that skills would be unique in the list
+          const skills = _.uniq(
+            // use both, required and additional skills for jobs
+            specialist.skills.concat(specialist.additionalSkills)
+            // only include skills with `skillId` and ignore custom skills in jobs
+              .filter(skill => skill.skillId).map(skill => skill.skillId),
+          );
+          return createTaasJob({
+            projectId: project.id,
+            externalId: '0', // hardcode for now
+            description: specialist.roleTitle,
+            startDate,
+            endDate,
+            skills,
+            numPositions: Number(specialist.people),
+            resourceType: specialist.role,
+            rateType: 'hourly', // hardcode for now
+            workload: _.get(specialist, 'workLoad.title', '').toLowerCase(),
+          }).then((job) => {
+            app.logger.debug(`jobId: ${job.id} job created for roleTitle ${specialist.roleTitle}`);
+          }).catch((err) => {
+            app.logger.error(`Unable to create job for ${specialist.roleTitle}: ${err.message}`);
+          });
+        },
+      ),
+    );
   }
 }
 

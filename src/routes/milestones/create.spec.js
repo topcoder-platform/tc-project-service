@@ -344,21 +344,6 @@ describe('CREATE milestone', () => {
         .expect(400, done);
     });
 
-    it('should return 400 if startDate is before the timeline startDate', (done) => {
-      const invalidBody = _.assign({}, body, {
-        startDate: '2018-05-01T00:00:00.000Z',
-      });
-
-      request(server)
-        .post('/v5/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(400, done);
-    });
-
     it('should return 400 if invalid timelineId param', (done) => {
       request(server)
         .post('/v5/timelines/0/milestones')

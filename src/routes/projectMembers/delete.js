@@ -31,12 +31,31 @@ module.exports = [
             return Promise.reject(err);
           }
 
+          const isOwnMember = member.userId === req.authUser.userId;
+
           if (
-            member.userId !== req.authUser.userId &&
-          member.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
-          !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_MEMBER_NON_CUSTOMER, req)
+            !isOwnMember &&
+            member.role !== PROJECT_MEMBER_ROLE.CUSTOMER &&
+            member.role !== PROJECT_MEMBER_ROLE.COPILOT &&
+            !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_MEMBER_TOPCODER, req)
           ) {
-            const err = new Error('You don\'t have permissions to delete other members with non-customer role.');
+            const err = new Error('You don\'t have permissions to delete other members from Topcoder Team.');
+            err.status = 403;
+            return Promise.reject(err);
+          } else if (
+            !isOwnMember &&
+            member.role === PROJECT_MEMBER_ROLE.CUSTOMER &&
+            !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_MEMBER_CUSTOMER, req)
+          ) {
+            const err = new Error('You don\'t have permissions to delete other members with "customer" role.');
+            err.status = 403;
+            return Promise.reject(err);
+          } else if (
+            !isOwnMember &&
+            member.role === PROJECT_MEMBER_ROLE.COPILOT &&
+            !util.hasPermissionByReq(PERMISSION.DELETE_PROJECT_MEMBER_COPILOT, req)
+          ) {
+            const err = new Error('You don\'t have permissions to delete other members with "copilot" role.');
             err.status = 403;
             return Promise.reject(err);
           }
