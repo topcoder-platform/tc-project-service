@@ -50,7 +50,7 @@ async function deleteMilestone(authUser, timelineId, id, transaction, item) {
   }
   await milestone.update({ deletedBy: authUser.userId }, { transaction });
   await milestone.destroy({ transaction });
-  return { id };
+  return { id, timelineId };
 }
 
 /**
