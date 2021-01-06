@@ -148,28 +148,6 @@ describe('Project', () => {
         });
     });
 
-    it('should return 403 if invalid user will update a project', (done) => {
-      request(server)
-        .patch(`/v5/projects/${project1.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          status: 'active',
-        })
-        .expect('Content-Type', /json/)
-        .expect(403)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            res.body.message.should.equal('Only assigned topcoder-managers or topcoder admins' +
-              ' should be allowed to launch a project');
-            done();
-          }
-        });
-    });
-
     it('should return 200 if topcoder manager user will update a project', (done) => {
       request(server)
         .patch(`/v5/projects/${project1.id}`)
@@ -490,43 +468,6 @@ describe('Project', () => {
                   history.projectId.should.equal(project1.id);
                   done();
                 });
-              }
-            });
-        });
-    });
-
-    it('should return 403, copilot is not allowed to transition project out of cancel status', (done) => {
-      models.Project.update({
-        status: PROJECT_STATUS.CANCELLED,
-      }, {
-        where: {
-          id: project1.id,
-        },
-      })
-        .then(() => {
-          const mbody = {
-            name: 'updatedProject name',
-            status: PROJECT_STATUS.ACTIVE,
-
-          };
-          request(server)
-            .patch(`/v5/projects/${project1.id}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.copilot}`,
-            })
-            .send(mbody)
-            .expect('Content-Type', /json/)
-            .expect(403)
-            .end((err, res) => {
-              if (err) {
-                done(err);
-              } else {
-                res
-                  .body
-                  .message
-                  .should
-                  .equal('Only assigned topcoder-managers or topcoder admins should be allowed to launch a project');
-                done();
               }
             });
         });

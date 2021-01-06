@@ -195,6 +195,19 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
+  UPDATE_PROJECT_STATUS: {
+    meta: {
+      title: 'Update Project Status',
+      group: 'Project',
+    },
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
   MANAGE_PROJECT_DIRECT_PROJECT_ID: {
     meta: {
       title: 'Manage Project property "directProjectId"',
