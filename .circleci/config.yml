@@ -148,22 +148,17 @@ workflows:
           context : org-global
       - deployDev:
           context : org-global
-          requires:
-            - test
           filters:
             branches:
               only: ['develop', 'connect-performance-testing']
       - deployProd:
           context : org-global
-          requires:
-            - test
           filters:
             branches:
               only: ['master']       
       - Hold [Performance-Testing]:
           type: approval
           requires:
-            - test
             - deployDev
             - deployProd
       - Connect-Performance-Testing:
