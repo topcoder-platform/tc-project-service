@@ -148,6 +148,8 @@ workflows:
           context : org-global
       - deployDev:
           context : org-global
+          requires:
+            - test
           filters:
             branches:
               only: ['develop', 'connect-performance-testing']
