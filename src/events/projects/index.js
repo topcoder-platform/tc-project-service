@@ -187,8 +187,7 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
     await Promise.all(topicPromises);
     app.logger.debug('Topics for phases are successfully created.');
   }
-  // TODO: temporary disable this feature, until we release TaaS APP
-  if (false === true && project.type === 'talent-as-a-service') {
+  if (project.type === 'talent-as-a-service') {
     const specialists = _.get(project, 'details.taasDefinition.specialists');
     if (!specialists || !specialists.length) {
       app.logger.debug(`no specialists found in the project ${project.id}`);
