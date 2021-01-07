@@ -175,7 +175,6 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
   if (result.error) {
     throw new Error(result.error);
   }
-
   const project = payload;
 
   if (project.phases && project.phases.length > 0) {
@@ -187,46 +186,46 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
     await Promise.all(topicPromises);
     app.logger.debug('Topics for phases are successfully created.');
   }
-  if (project.type === 'talent-as-a-service') {
-    const jobs = _.get(project, 'details.taasDefinition.jobs');
-    if (!jobs || !jobs.length) {
-      app.logger.debug(`no specialists found in the project ${project.id}`);
-      return;
+  try {
+    if (project.type === 'talent-as-a-service') {
+      const jobs = _.get(project, 'details.taasDefinition.jobs');
+      if (!jobs || !jobs.length) {
+        app.logger.debug(`no jobs found in the project id: ${project.id}`);
+        return;
+      }
+      app.logger.debug(`${jobs.length} jobs found in the project id: ${project.id}`);
+      await Promise.all(
+        _.map(
+          jobs,
+          (job) => {
+            const startDate = new Date();
+            const endDate = moment(startDate).add(Number(job.duration), 'M'); // the unit of duration is month
+            // make sure that skills would be unique in the list and only include ones with 'skillId' (actually they all suppose to be with skillId)
+            const skills = _.chain(job.skills).map('skillId').uniq().compact()
+              .value();
+            return createTaasJob({
+              projectId: project.id,
+              externalId: '0', // hardcode for now
+              title: job.title,
+              description: job.description,
+              startDate,
+              endDate,
+              skills,
+              numPositions: Number(job.people),
+              resourceType: _.get(job, 'role.value', ''),
+              rateType: 'hourly', // hardcode for now
+              workload: _.get(job, 'workLoad.title', '').toLowerCase(),
+            }).then((createdJob) => {
+              app.logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
+            }).catch((err) => {
+              app.logger.error(`Unable to create job with title "${job.title}": ${err.message}`);
+            });
+          },
+        ),
+      );
     }
-    const targetJobs = _.filter(jobs, job => Number(job.people) > 0); // must be at least one people
-    await Promise.all(
-      _.map(
-        targetJobs,
-        (job) => {
-          const startDate = new Date();
-          const endDate = moment(startDate).add(Number(job.duration), 'M'); // the unit of duration is month
-          // make sure that skills would be unique in the list
-          const skills = _.uniq(
-            // use both, required and additional skills for jobs
-            job.skills.concat(job.additionalSkills)
-            // only include skills with `skillId` and ignore custom skills in jobs
-              .filter(skill => skill.skillId).map(skill => skill.skillId),
-          );
-          return createTaasJob({
-            projectId: project.id,
-            externalId: '0', // hardcode for now
-            title: job.title,
-            description: job.description,
-            startDate,
-            endDate,
-            skills,
-            numPositions: Number(job.people),
-            resourceType: _.get(job, 'role.value', ''),
-            rateType: 'hourly', // hardcode for now
-            workload: _.get(job, 'workLoad.title', '').toLowerCase(),
-          }).then((createdJob) => {
-            app.logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
-          }).catch((err) => {
-            app.logger.error(`Unable to create job for ${job.title}: ${err.message}`);
-          });
-        },
-      ),
-    );
+  } catch (error) {
+    app.logger.error(`Error while creating TaaS jobs: ${error}`);
   }
 }
 
