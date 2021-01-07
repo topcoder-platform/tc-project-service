@@ -188,40 +188,41 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
     app.logger.debug('Topics for phases are successfully created.');
   }
   if (project.type === 'talent-as-a-service') {
-    const specialists = _.get(project, 'details.taasDefinition.specialists');
-    if (!specialists || !specialists.length) {
+    const jobs = _.get(project, 'details.taasDefinition.jobs');
+    if (!jobs || !jobs.length) {
       app.logger.debug(`no specialists found in the project ${project.id}`);
       return;
     }
-    const targetSpecialists = _.filter(specialists, specialist => Number(specialist.people) > 0); // must be at least one people
+    const targetJobs = _.filter(jobs, job => Number(job.people) > 0); // must be at least one people
     await Promise.all(
       _.map(
-        targetSpecialists,
-        (specialist) => {
+        targetJobs,
+        (job) => {
           const startDate = new Date();
-          const endDate = moment(startDate).add(Number(specialist.duration), 'M'); // the unit of duration is month
+          const endDate = moment(startDate).add(Number(job.duration), 'M'); // the unit of duration is month
           // make sure that skills would be unique in the list
           const skills = _.uniq(
             // use both, required and additional skills for jobs
-            specialist.skills.concat(specialist.additionalSkills)
+            job.skills.concat(job.additionalSkills)
             // only include skills with `skillId` and ignore custom skills in jobs
               .filter(skill => skill.skillId).map(skill => skill.skillId),
           );
           return createTaasJob({
             projectId: project.id,
             externalId: '0', // hardcode for now
-            description: specialist.roleTitle,
+            title: job.title,
+            description: job.description,
             startDate,
             endDate,
             skills,
-            numPositions: Number(specialist.people),
-            resourceType: specialist.role,
+            numPositions: Number(job.people),
+            resourceType: _.get(job, 'role.value', ''),
             rateType: 'hourly', // hardcode for now
-            workload: _.get(specialist, 'workLoad.title', '').toLowerCase(),
-          }).then((job) => {
-            app.logger.debug(`jobId: ${job.id} job created for roleTitle ${specialist.roleTitle}`);
+            workload: _.get(job, 'workLoad.title', '').toLowerCase(),
+          }).then((createdJob) => {
+            app.logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
           }).catch((err) => {
-            app.logger.error(`Unable to create job for ${specialist.roleTitle}: ${err.message}`);
+            app.logger.error(`Unable to create job for ${job.title}: ${err.message}`);
           });
         },
       ),
