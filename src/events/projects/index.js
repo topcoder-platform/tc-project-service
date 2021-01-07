@@ -188,7 +188,7 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
   }
   try {
     if (project.type === 'talent-as-a-service') {
-      const jobs = _.get(project, 'details.taasDefinition.jobs');
+      const jobs = _.get(project, 'details.taasDefinition.taasJobs');
       if (!jobs || !jobs.length) {
         app.logger.debug(`no jobs found in the project id: ${project.id}`);
         return;
