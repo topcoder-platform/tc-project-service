@@ -1,0 +1,9 @@
+path
+/v5/projects/?fields=id,name,description,members,invites,status,type,actualPrice,estimatedPrice,createdAt,updatedAt,createdBy,updatedBy,details,lastActivityAt,lastActivityUserId,version,templateId&sort=lastActivityAt+desc&perPage=20&page=1
+/v5/projects/?fields=id,name,description,members,invites,status,type,actualPrice,estimatedPrice,createdAt,updatedAt,createdBy,updatedBy,details,lastActivityAt,lastActivityUserId,version,templateId&sort=lastActivityAt+desc&perPage=20&page=1&status=in_review
+/v5/projects/?fields=id,name,description,members,invites,status,type,actualPrice,estimatedPrice,createdAt,updatedAt,createdBy,updatedBy,details,lastActivityAt,lastActivityUserId,version,templateId&sort=lastActivityAt+desc&perPage=20&page=1&status=active
+/v5/projects/?fields=id,name,description,members,invites,status,type,actualPrice,estimatedPrice,createdAt,updatedAt,createdBy,updatedBy,details,lastActivityAt,lastActivityUserId,version,templateId&sort=lastActivityAt+desc&perPage=20&page=1&status=reviewed4
+/v5/projects/?fields=id,name,description,members,invites,status,type,actualPrice,estimatedPrice,createdAt,updatedAt,createdBy,updatedBy,details,lastActivityAt,lastActivityUserId,version,templateId&sort=lastActivityAt+desc&perPage=20&page=1&status=completed
+/v5/projects/?fields=id,name,description,members,invites,status,type,actualPrice,estimatedPrice,createdAt,updatedAt,createdBy,updatedBy,details,lastActivityAt,lastActivityUserId,version,templateId&sort=lastActivityAt+desc&perPage=20&page=1&status=cancelled
+/v5/projects/?fields=id,name,description,members,invites,status,type,actualPrice,estimatedPrice,createdAt,updatedAt,createdBy,updatedBy,details,lastActivityAt,lastActivityUserId,version,templateId&sort=lastActivityAt+desc&perPage=20&page=1&status=paused
+/v5/projects/metadata/orgConfig?orgId=20000001,20000014,d6bf6bb6-457c-461c-a4d6-0a6b1a87fde9,f325869a-ab0d-47b1-af28-4e117709ca71

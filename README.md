@@ -357,6 +357,10 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJhZG1pbmlzdHJhdG9yIl0sImlzcyI
 ```
 It's been signed with the secret 'secret'. This secret should match your entry in config/local.js. You can generate your own token using https://jwt.io
 
+## Performance Testing
+
+- [Performance Testing Readme](README.md)
+
 ## Documentation
 
 - [Projects Service Architecture](./docs/guides/architercture/architecture.md)
