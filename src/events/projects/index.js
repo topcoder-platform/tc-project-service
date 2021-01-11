@@ -213,7 +213,7 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
               skills,
               numPositions: Number(job.people),
               resourceType: _.get(job, 'role.value', ''),
-              rateType: 'hourly', // hardcode for now
+              rateType: 'weekly', // hardcode for now
               workload: _.get(job, 'workLoad.title', '').toLowerCase(),
             }).then((createdJob) => {
               app.logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
