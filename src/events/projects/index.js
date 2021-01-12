@@ -6,7 +6,6 @@ import Joi from 'joi';
 import Promise from 'bluebird';
 import config from 'config';
 import axios from 'axios';
-import moment from 'moment';
 import util from '../../util';
 import models from '../../models';
 import { createPhaseTopic } from '../projectPhases';
