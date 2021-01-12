@@ -198,18 +198,13 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
         _.map(
           jobs,
           (job) => {
-            const startDate = new Date();
-            const endDate = moment(startDate).add(Number(job.duration), 'M'); // the unit of duration is month
             // make sure that skills would be unique in the list and only include ones with 'skillId' (actually they all suppose to be with skillId)
             const skills = _.chain(job.skills).map('skillId').uniq().compact()
               .value();
             return createTaasJob({
               projectId: project.id,
-              externalId: '0', // hardcode for now
               title: job.title,
               description: job.description,
-              startDate,
-              endDate,
               skills,
               numPositions: Number(job.people),
               resourceType: _.get(job, 'role.value', ''),
