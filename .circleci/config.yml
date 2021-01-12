@@ -155,6 +155,8 @@ workflows:
               only: ['develop', 'connect-performance-testing']
       - deployProd:
           context : org-global
+          requires:
+            - test
           filters:
             branches:
               only: ['master']       
