@@ -148,7 +148,7 @@ workflows:
           context : org-global
       - deployDev:
           context : org-global
-           requires:
+          requires:
             - UnitTests
           filters:
             branches:
