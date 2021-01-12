@@ -40,7 +40,7 @@ deploy_steps: &deploy_steps
         ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
 
 jobs:
-  test:
+  UnitTests:
     docker:
       - image: circleci/node:12.16.1
       - image: circleci/postgres:9.6.2-alpine
@@ -144,13 +144,19 @@ workflows:
   version: 2
   Connect Project Services:
     jobs:
+      - UnitTests:
+          context : org-global
       - deployDev:
           context : org-global
+          requires:
+            - UnitTests
           filters:
             branches:
               only: ['develop', 'connect-performance-testing']
       - deployProd:
           context : org-global
+          requires:
+            - UnitTests
           filters:
             branches:
               only: ['master']       
