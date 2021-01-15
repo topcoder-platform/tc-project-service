@@ -1,0 +1,170 @@
+version: 2
+python_env: &python_env
+  docker:
+    - image: circleci/python:2.7-stretch-browsers
+
+install_awscli: &install_awscli
+  name: "Install awscli"
+  command: |
+    sudo pip install awscli --upgrade
+install_deploysuite: &install_deploysuite
+  name: Installation of install_deploysuite.
+  command: |
+    git clone --branch v1.4.1 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+    cp ./../buildscript/master_deploy.sh .
+    cp ./../buildscript/buildenv.sh .
+    cp ./../buildscript/awsconfiguration.sh .
+
+# Instructions of deployment
+deploy_steps: &deploy_steps
+  - checkout
+  - attach_workspace:
+      at: ./workspace
+  - run: *install_awscli
+  - run: *install_deploysuite
+  - setup_remote_docker
+  - run: docker build -t ${APPNAME}:latest .
+  - deploy:
+      name: "Running Masterscript -  deploy tc-project-service "
+      command: |
+        ./awsconfiguration.sh $DEPLOY_ENV
+        source awsenvconf
+        ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-deployvar
+        source buildenvvar
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
+
+         echo "======= Running Masterscript - deploy projects-api-consumers ==========="
+        if [ -e ${LOGICAL_ENV}-${APPNAME}-appvar.json ]; then  sudo rm -vf ${LOGICAL_ENV}-${APPNAME}-appvar.json; fi
+        ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-consumers-deployvar
+        source buildenvvar
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
+
+jobs:
+  UnitTests:
+    docker:
+      - image: circleci/node:12.16.1
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+        - POSTGRES_USER: circle_test
+        - POSTGRES_DB: circle_test
+      - image: elasticsearch:2.3
+    environment:
+      DEPLOY_ENV: "DEV"
+      LOGICAL_ENV: "dev"
+      APPNAME: "projects-api"
+    steps:
+      - checkout
+      - run:
+          name: "Install dependeency"
+          command: |
+              sudo apt update
+              sudo apt install curl
+              sudo apt install python-pip
+      - run: *install_awscli
+      - run: *install_deploysuite
+      - setup_remote_docker
+      - restore_cache:
+          key: test-node-modules-{{ checksum "package.json" }}
+      - run: npm install
+      - save_cache:
+          key: test-node-modules-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+      - run: npm run lint
+      - run:
+          name: "Running Masterscript -  deploy tc-project-service "
+          command: |
+            ./awsconfiguration.sh $DEPLOY_ENV
+            source awsenvconf
+            ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-testvar
+            source buildenvvar
+            npm run test
+            rm -f buildenvvar
+      - run: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  deployProd:
+    <<: *python_env
+    environment:
+      DEPLOY_ENV: "PROD"
+      LOGICAL_ENV: "prod"
+      APPNAME: "projects-api"
+    steps: *deploy_steps
+
+  deployDev:
+    <<: *python_env
+    environment:
+      DEPLOY_ENV: "DEV"
+      LOGICAL_ENV: "dev"
+      APPNAME: "projects-api"
+    steps: *deploy_steps
+
+  Connect-Performance-Testing:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      MAVEN_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: mvn dependency:go-offline
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
+      - run: mvn verify
+
+      - store_artifacts:
+          path: target/jmeter/reports
+
+workflows:
+  version: 2
+  Connect Project Services:
+    jobs:
+      - UnitTests:
+          context : org-global
+      - deployDev:
+          context : org-global
+          requires:
+            - UnitTests
+          filters:
+            branches:
+              only: ['develop', 'connect-performance-testing']
+      - deployProd:
+          context : org-global
+          requires:
+            - UnitTests
+          filters:
+            branches:
+              only: ['master']       
+      - Hold [Performance-Testing]:
+          type: approval
+          requires:
+            - deployDev
+            - deployProd
+      - Connect-Performance-Testing:
+          requires:
+            - Hold [Performance-Testing]
