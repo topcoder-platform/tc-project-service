@@ -4940,6 +4940,10 @@ definitions:
         type: array
         items:
           type: string
+      groups:
+        type: array
+        items:
+          type: string
       external:
         type: object
         description: 'READ-ONLY, OPTIONAL. Refernce to external task/issue.'
@@ -5067,6 +5071,10 @@ definitions:
         format: float
         description: The actual price of the project
       terms:
+        type: array
+        items:
+          type: string
+      groups:
         type: array
         items:
           type: string

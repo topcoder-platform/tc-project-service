@@ -322,6 +322,9 @@ MAPPINGS[ES_PROJECT_INDEX] = {
     terms: {
       type: 'string',
     },
+    groups: {
+      type: 'string',
+    },
     type: {
       type: 'string',
       index: 'not_analyzed',

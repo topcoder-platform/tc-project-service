@@ -47,6 +47,7 @@ const updateProjectValdiations = {
     estimatedPrice: Joi.number().precision(2).positive().allow(null),
     actualPrice: Joi.number().precision(2).positive(),
     terms: Joi.array().items(Joi.string()),
+    groups: Joi.array().items(Joi.string()),
     external: Joi.object().keys({
       id: Joi.string(),
       type: Joi.any().valid('github', 'jira', 'asana', 'other'),

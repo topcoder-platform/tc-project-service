@@ -20,6 +20,11 @@ module.exports = function defineProject(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: [],
     },
+    groups: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
+    },
     type: {
       type: DataTypes.STRING,
       allowNull: false,

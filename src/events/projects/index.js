@@ -103,6 +103,7 @@ const projectPayloadSchema = Joi.object().keys({
   createdAt: Joi.date().required(),
   updatedAt: Joi.date().required(),
   terms: Joi.array().items(Joi.string()).optional(),
+  groups: Joi.array().items(Joi.string()).optional(),
   name: Joi.string().required(),
   description: Joi.string().allow(null).allow('').optional(),
   type: Joi.string().max(45).required(),
