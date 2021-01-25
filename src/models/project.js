@@ -16,7 +16,12 @@ module.exports = function defineProject(sequelize, DataTypes) {
     estimatedPrice: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
     actualPrice: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
     terms: {
-      type: DataTypes.ARRAY(DataTypes.INTEGER),
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
+    },
+    groups: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
       defaultValue: [],
     },
