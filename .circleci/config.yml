@@ -152,7 +152,7 @@ workflows:
             - UnitTests
           filters:
             branches:
-              only: ['develop']
+              only: ['develop', 'connect-performance-testing']
       - deployProd:
           context : org-global
           requires:
