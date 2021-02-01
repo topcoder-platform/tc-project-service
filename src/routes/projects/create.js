@@ -45,7 +45,8 @@ const createProjectValidations = {
     })).optional().allow(null),
     estimatedPrice: Joi.number().precision(2).positive().optional()
       .allow(null),
-    terms: Joi.array().items(Joi.number().positive()).optional(),
+    terms: Joi.array().items(Joi.string()).optional(),
+    groups: Joi.array().items(Joi.string()).optional(),
     external: Joi.object().keys({
       id: Joi.string(),
       type: Joi.any().valid('github', 'jira', 'asana', 'other'),

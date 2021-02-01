@@ -4939,8 +4939,11 @@ definitions:
       terms:
         type: array
         items:
-          type: number
-          format: integer
+          type: string
+      groups:
+        type: array
+        items:
+          type: string
       external:
         type: object
         description: 'READ-ONLY, OPTIONAL. Refernce to external task/issue.'
@@ -5070,8 +5073,11 @@ definitions:
       terms:
         type: array
         items:
-          type: number
-          format: integer
+          type: string
+      groups:
+        type: array
+        items:
+          type: string
       name:
         type: string
         description: project name
@@ -5254,7 +5260,7 @@ definitions:
       type:
         type: string
         description: The attachment type, one of 'link' or 'file'
-        enum: 
+        enum:
          - link
          - file
       tags:
@@ -6133,7 +6139,7 @@ definitions:
     type: array
     items:
       $ref: '#/definitions/Milestone'
-      
+
   MilestoneTemplateRequest:
     title: Milestone template request object
     type: object

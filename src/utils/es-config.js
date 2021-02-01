@@ -320,7 +320,10 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       index: 'not_analyzed',
     },
     terms: {
-      type: 'integer',
+      type: 'string',
+    },
+    groups: {
+      type: 'string',
     },
     type: {
       type: 'string',

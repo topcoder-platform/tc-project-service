@@ -983,7 +983,7 @@ describe('Project', () => {
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
           .send({
-            terms: [1, 2, 3],
+            terms: ['1', '2', '3'],
           })
           .expect(200)
           .end((err) => {
@@ -996,7 +996,7 @@ describe('Project', () => {
                 createEventSpy.calledWith(BUS_API_EVENT.PROJECT_UPDATED, sinon.match({
                   resource: 'project',
                   id: project1.id,
-                  terms: [1, 2, 3],
+                  terms: ['1', '2', '3'],
                   updatedBy: testUtil.userIds.admin,
                 })).should.be.true;
 
