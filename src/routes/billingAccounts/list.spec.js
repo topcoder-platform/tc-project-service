@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-expressions */
-// import chai from 'chai';
+import chai from 'chai';
 import request from 'supertest';
 import sinon from 'sinon';
 
@@ -8,7 +8,24 @@ import server from '../../app';
 import testUtil from '../../tests/util';
 import SalesforceService from '../../services/salesforceService';
 
-// const should = chai.should();
+chai.should();
+
+// demo data which might be returned by the `SalesforceService.query`
+const billingAccountsData = [
+  {
+    sfBillingAccountId: 123,
+    tcBillingAccountId: 123123,
+    name: 'Billing Account 1',
+    startDate: '2021-02-10T18:51:27Z',
+    endDate: '2021-03-10T18:51:27Z',
+  }, {
+    sfBillingAccountId: 456,
+    tcBillingAccountId: 456456,
+    name: 'Billing Account 2',
+    startDate: '2011-02-10T18:51:27Z',
+    endDate: '2011-03-10T18:51:27Z',
+  },
+];
 
 describe('Project Billing Accounts list', () => {
   let project1;
@@ -54,10 +71,7 @@ describe('Project Billing Accounts list', () => {
             accessToken: 'mock',
             instanceUrl: 'mock_url',
           }));
-          salesforceQuery = sinon.stub(SalesforceService, 'query', () => Promise.resolve([{
-            accessToken: 'mock',
-            instanceUrl: 'mock_url',
-          }]));
+          salesforceQuery = sinon.stub(SalesforceService, 'query', () => Promise.resolve(billingAccountsData));
           done();
         });
       });
@@ -80,17 +94,48 @@ describe('Project Billing Accounts list', () => {
         .expect(403, done);
     });
 
-    it('should return 403 for a regular user who is not a member of the project', (done) => {
+    it('should return 403 for a customer user who is a member of the project', (done) => {
       request(server)
         .get(`/v5/projects/${project1.id}/billingAccounts`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
+          Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send()
         .expect(403, done);
     });
 
-    it('should return all attachments to admin', (done) => {
+    it('should return 403 for a topcoder user who is not a member of the project', (done) => {
+      request(server)
+        .get(`/v5/projects/${project1.id}/billingAccounts`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilotManager}`,
+        })
+        .send()
+        .expect(403, done);
+    });
+
+    it('should return all billing accounts for a topcoder user who is a member of the project', (done) => {
+      request(server)
+        .get(`/v5/projects/${project1.id}/billingAccounts`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send()
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            resJson.should.have.length(2);
+            resJson.should.include(billingAccountsData[0]);
+            resJson.should.include(billingAccountsData[1]);
+            done();
+          }
+        });
+    });
+
+    it('should return all billing accounts to admin', (done) => {
       request(server)
         .get(`/v5/projects/${project1.id}/billingAccounts`)
         .set({
@@ -104,13 +149,15 @@ describe('Project Billing Accounts list', () => {
           } else {
             const resJson = res.body;
             resJson.should.have.length(2);
-            // TODO verify BA fields
+            resJson.should.have.length(2);
+            resJson.should.include(billingAccountsData[0]);
+            resJson.should.include(billingAccountsData[1]);
             done();
           }
         });
     });
 
-    xit('should return all attachments using M2M token with "read:user-billing-accounts" scope', (done) => {
+    it('should return all billing accounts using M2M token with "read:user-billing-accounts" scope', (done) => {
       request(server)
         .get(`/v5/projects/${project1.id}/billingAccounts`)
         .set({
@@ -124,7 +171,9 @@ describe('Project Billing Accounts list', () => {
           } else {
             const resJson = res.body;
             resJson.should.have.length(2);
-            // TODO verify BA fields
+            resJson.should.have.length(2);
+            resJson.should.include(billingAccountsData[0]);
+            resJson.should.include(billingAccountsData[1]);
             done();
           }
         });

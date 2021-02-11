@@ -74,4 +74,4 @@ class SalesforceService {
   }
 }
 
-export default new SalesforceService();
+export default SalesforceService;

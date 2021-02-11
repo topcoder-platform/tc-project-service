@@ -96,16 +96,15 @@ const SCOPES_PROJECTS_WRITE = [
  */
 const SCOPES_PROJECTS_READ_AVL_BILLING_ACCOUNTS = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
-  M2M_SCOPES.READ_BILLING_ACCOUNTS,
-  M2M_SCOPES.PROJECTS.ALL,
+  M2M_SCOPES.READ_USER_BILLING_ACCOUNTS,
 ];
 
 /**
  * M2M scopes to "write" billingAccountId property
  */
-const SCOPES_PROJECTS_WRITE_BILLING_ACCOUNTS = [
+const SCOPES_PROJECTS_WRITE_PROJECTS_BILLING_ACCOUNTS = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
-  M2M_SCOPES.PROJECTS.WRITE_BILLING_ACCOUNTS,
+  M2M_SCOPES.PROJECTS.WRITE_PROJECTS_BILLING_ACCOUNTS,
 ];
 
 /**
@@ -240,7 +239,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       USER_ROLE.MANAGER,
       USER_ROLE.TOPCODER_ADMIN,
     ],
-    scopes: SCOPES_PROJECTS_WRITE_BILLING_ACCOUNTS,
+    scopes: SCOPES_PROJECTS_WRITE_PROJECTS_BILLING_ACCOUNTS,
   },
 
   DELETE_PROJECT: {
@@ -270,7 +269,11 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Billing Accounts',
       description: 'Who can view the Billing Accounts available for the project',
     },
-    topcoderRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
+    topcoderRoles: TOPCODER_ROLES_ADMINS,
     scopes: SCOPES_PROJECTS_READ_AVL_BILLING_ACCOUNTS,
   },
 
