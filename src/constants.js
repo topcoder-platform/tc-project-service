@@ -274,7 +274,8 @@ export const M2M_SCOPES = {
     ALL: 'all:projects',
     READ: 'read:projects',
     WRITE: 'write:projects',
-    WRITE_BILLING_ACCOUNTS: 'write:projects-billing-accounts',
+    READ_USER_BILLING_ACCOUNTS: 'read:user-billing-accounts',
+    WRITE_PROJECTS_BILLING_ACCOUNTS: 'write:projects-billing-accounts',
   },
   PROJECT_MEMBERS: {
     ALL: 'all:project-members',

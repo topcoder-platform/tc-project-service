@@ -76,5 +76,11 @@
     "ALLOWED_USERS": "[]"
   },
   "DEFAULT_M2M_USERID": -101,
-  "taasJobApiUrl": "https://api.topcoder.com/v5/jobs"
+  "taasJobApiUrl": "https://api.topcoder.com/v5/jobs",
+  "salesforce": {
+    "CLIENT_KEY": "",
+    "CLIENT_AUDIENCE": "",
+    "SUBJECT": "",
+    "CLIENT_ID": ""
+  }
 }
