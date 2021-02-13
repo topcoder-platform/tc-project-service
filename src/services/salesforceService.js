@@ -65,7 +65,7 @@ class SalesforceService {
       }
       const billingAccounts = _.get(res, 'data.records', []).map(o => ({
         sfBillingAccountId: _.get(o, 'Topcoder_Billing_Account__r.Id'),
-        tcBillingAccountId: util.parseIntStrinctly(
+        tcBillingAccountId: util.parseIntStrictly(
           _.get(o, 'Topcoder_Billing_Account__r.TopCoder_Billing_Account_Id__c'),
           10,
           null, // fallback to null if cannot parse
