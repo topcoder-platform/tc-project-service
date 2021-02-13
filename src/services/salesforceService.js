@@ -4,6 +4,7 @@
 import _ from 'lodash';
 import config from 'config';
 import jwt from 'jsonwebtoken';
+import util from '../util';
 
 const axios = require('axios');
 
@@ -64,7 +65,11 @@ class SalesforceService {
       }
       const billingAccounts = _.get(res, 'data.records', []).map(o => ({
         sfBillingAccountId: _.get(o, 'Topcoder_Billing_Account__r.Id'),
-        tcBillingAccountId: _.get(o, 'Topcoder_Billing_Account__r.TopCoder_Billing_Account_Id__c'),
+        tcBillingAccountId: util.parseIntStrinctly(
+          _.get(o, 'Topcoder_Billing_Account__r.TopCoder_Billing_Account_Id__c'),
+          10,
+          null, // fallback to null if cannot parse
+        ),
         name: _.get(o, 'Topcoder_Billing_Account__r.Billing_Account_Name__c'),
         startDate: _.get(o, 'Topcoder_Billing_Account__r.Start_Date__c'),
         endDate: _.get(o, 'Topcoder_Billing_Account__r.End_Date__c'),

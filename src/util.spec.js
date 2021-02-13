@@ -1,12 +1,38 @@
 /**
  * Tests for util.js
  */
-import chai from 'chai';
+import chai, { expect } from 'chai';
 import util from './util';
 
 chai.should();
 
 describe('Util method', () => {
+  describe('parseIntStrictly', () => {
+    it('should parse a good integer value sucessfully', () => {
+      util.parseIntStrictly('1234567890', 10, null).should.equal(1234567890);
+    });
+
+    it('should return fallback value if the initial value is a float number', () => {
+      expect(util.parseIntStrictly('1.1', 10, null)).be.equal(null);
+    });
+
+    it('should return fallback value if string can be parsed partially only', () => {
+      expect(util.parseIntStrictly('123XXX', 10, null)).be.equal(null);
+    });
+
+    it('should return fallback value if the initial value is `null`', () => {
+      util.parseIntStrictly(null, 10, 0).should.equal(0);
+    });
+
+    it('should return fallback value if the initial value is `undefined`', () => {
+      expect(util.parseIntStrictly(undefined, 10, null)).be.equal(null);
+    });
+
+    it('should return fallback value if the initial value is `""` (emtpy string)', () => {
+      expect(util.parseIntStrictly('', 10, null)).be.equal(null);
+    });
+  });
+
   describe('maskEmail', () => {
     it('should return the original value if the email is non-string', () => {
       chai.should().not.exist(util.maskEmail(null));

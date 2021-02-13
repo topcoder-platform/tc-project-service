@@ -13,13 +13,13 @@ chai.should();
 // demo data which might be returned by the `SalesforceService.query`
 const billingAccountsData = [
   {
-    sfBillingAccountId: 123,
+    sfBillingAccountId: '123',
     tcBillingAccountId: 123123,
     name: 'Billing Account 1',
     startDate: '2021-02-10T18:51:27Z',
     endDate: '2021-03-10T18:51:27Z',
   }, {
-    sfBillingAccountId: 456,
+    sfBillingAccountId: '456',
     tcBillingAccountId: 456456,
     name: 'Billing Account 2',
     startDate: '2011-02-10T18:51:27Z',
