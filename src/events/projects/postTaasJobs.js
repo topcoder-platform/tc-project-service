@@ -9,14 +9,14 @@ import axios from 'axios';
 /**
  * Create taas job.
  *
- * @param {String} authToken the authorization token
+ * @param {String} authHeader the authorization header
  * @param {Object} data the job data
  * @return {Object} the job created
  */
-async function createTaasJob(authToken, data) {
+async function createTaasJob(authHeader, data) {
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: authToken,
+    Authorization: authHeader,
   };
   const res = await axios
     .post(config.taasJobApiUrl, data, { headers })
@@ -54,7 +54,7 @@ async function createTaasJobsFromProject(req, project, logger) {
           projectId: project.id,
           title: job.title,
           description: job.description,
-          duration: job.duration,
+          duration: Number(job.duration),
           skills,
           numPositions: Number(job.people),
           resourceType: _.get(job, 'role.value', ''),
