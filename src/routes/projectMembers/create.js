@@ -80,6 +80,13 @@ module.exports = [
         newMember = await util.addUserToProject(req, member, transaction);
       });
 
+      try {
+        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        [newMember] = await util.getObjectsWithMemberDetails([newMember], fields, req);
+      } catch (err) {
+        req.log.error('Cannot get user details for member.');
+        req.log.debug('Error during getting user details for member.', err);
+      }
       return res.status(201).json(newMember);
     } catch (err) {
       return next(err);

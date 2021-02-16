@@ -926,6 +926,55 @@
 					"response": []
 				},
 				{
+					"name": "Create project member with no payload and return member details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"memberId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/members?fields=id,userId,role,isPrimary,deletedAt,createdAt,updatedAt,deletedBy,createdBy,updatedBy,handle,photoURL,workingHourStart,workingHourEnd,timeZone,email",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"members"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "id,userId,role,isPrimary,deletedAt,createdAt,updatedAt,deletedBy,createdBy,updatedBy,handle,photoURL,workingHourStart,workingHourEnd,timeZone,email"
+								}
+							]
+						},
+						"description": "If the request payload is valid, than project customer should be added. This should sync with the direct project is project is associated with direct project."
+					},
+					"response": []
+				},
+				{
 					"name": "Update project member",
 					"request": {
 						"method": "PATCH",
