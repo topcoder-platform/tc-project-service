@@ -15,6 +15,7 @@ import {
 import { createEvent } from '../services/busApi';
 import models from '../models';
 import util from '../util';
+import createTaasJobsFromProject from '../events/projects/postTaasJobs';
 
 /**
  * Map of project status and event name sent to bus api
@@ -56,6 +57,14 @@ module.exports = (app, logger) => {
    */
   app.on(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, ({ req, project }) => {
     logger.debug('receive PROJECT_DRAFT_CREATED event');
+
+    // create taas jobs from project of type `talent-as-a-service`
+    if (project.type === 'talent-as-a-service') {
+      createTaasJobsFromProject(req, project, logger)
+        .catch((error) => {
+          logger.error(`Error while creating TaaS jobs: ${error}`);
+        });
+    }
 
     // send event to bus api
     createEvent(BUS_API_EVENT.PROJECT_CREATED, _.assign(project, {

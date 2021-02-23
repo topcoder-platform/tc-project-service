@@ -1473,6 +1473,34 @@ const projectServiceUtils = {
     });
   },
 
+  /**
+   * Parse integer value inside string or return fallback value.
+   * Unlike original parseInt, this method parses the whole string
+   * and fails if there are non-integer characters inside the string.
+   *
+   * @param {String} str           number to parse
+   * @param {Number} radix       radix of the number to parse
+   * @param {Any}    fallbackValue value to return if we cannot parse successfully
+   *
+   * @returns {Number} parsed number
+   */
+  parseIntStrictly: (str, radix, fallbackValue) => {
+    const int = parseInt(str, radix);
+
+    if (_.isNaN(int)) {
+      return fallbackValue;
+    }
+
+    // if we parsed only the part of value and it's not the same as intial value
+    // example: "12x" => 12 which is not the same as initial value "12x", which means
+    // we cannot parse the full value sucessfully and treat it like we cannot parse at all
+    if (int.toString() !== str) {
+      return fallbackValue;
+    }
+
+    return int;
+  },
+
 };
 
 _.assignIn(util, projectServiceUtils);

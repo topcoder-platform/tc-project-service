@@ -20,6 +20,10 @@ module.exports = () => {
   Authorizer.setPolicy('project.edit', generalPermission(PERMISSION.UPDATE_PROJECT));
   Authorizer.setPolicy('project.delete', generalPermission(PERMISSION.DELETE_PROJECT));
 
+  Authorizer.setPolicy('projectBillingAccounts.view', generalPermission([
+    PERMISSION.READ_AVL_PROJECT_BILLING_ACCOUNTS,
+  ]));
+
   Authorizer.setPolicy('projectMember.create', generalPermission([
     PERMISSION.CREATE_PROJECT_MEMBER_OWN,
     PERMISSION.CREATE_PROJECT_MEMBER_NOT_OWN,
