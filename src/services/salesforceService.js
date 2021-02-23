@@ -70,7 +70,7 @@ class SalesforceService {
           10,
           null, // fallback to null if cannot parse
         ),
-        name: _.get(o, 'Topcoder_Billing_Account__r.Billing_Account_Name__c'),
+        name: _.get(o, 'Topcoder_Billing_Account__r.Billing_Account_name__c'),
         startDate: _.get(o, 'Topcoder_Billing_Account__r.Start_Date__c'),
         endDate: _.get(o, 'Topcoder_Billing_Account__r.End_Date__c'),
       }));
