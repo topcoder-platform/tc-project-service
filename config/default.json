@@ -82,5 +82,6 @@
     "CLIENT_AUDIENCE": "",
     "SUBJECT": "",
     "CLIENT_ID": ""
-  }
+  },
+  "sfdcBillingAccountNameField": "Billing_Account_Name__c"
 }
