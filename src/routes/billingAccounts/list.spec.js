@@ -71,6 +71,7 @@ describe('Project Billing Accounts list', () => {
             accessToken: 'mock',
             instanceUrl: 'mock_url',
           }));
+          // eslint-disable-next-line
           salesforceQuery = sinon.stub(SalesforceService, 'queryUserBillingAccounts', () => Promise.resolve(billingAccountsData));
           done();
         });
