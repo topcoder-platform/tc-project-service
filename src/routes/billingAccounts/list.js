@@ -26,7 +26,7 @@ module.exports = [
     try {
       const { accessToken, instanceUrl } = await SalesforceService.authenticate();
       // eslint-disable-next-line
-      const sql = `SELECT  Topcoder_Billing_Account__r.id, Topcoder_Billing_Account__r.TopCoder_Billing_Account_Id__c, Topcoder_Billing_Account__r.Billing_Account_Name__c, Topcoder_Billing_Account__r.Start_Date__c, Topcoder_Billing_Account__r.End_Date__c from Topcoder_Billing_Account_Resource__c tbar where UserID__c='${userId}'`;
+      const sql = `SELECT  Topcoder_Billing_Account__r.id, Topcoder_Billing_Account__r.TopCoder_Billing_Account_Id__c, Topcoder_Billing_Account__r.Billing_Account_Name__c, Topcoder_Billing_Account__r.Start_Date__c, Topcoder_Billing_Account__r.End_Date__c from Topcoder_Billing_Account_Resource__c tbar where Topcoder_Billing_Account__r.Active__c=true AND UserID__c='${userId}'`;
       // and Topcoder_Billing_Account__r.TC_Connect_Project_ID__c='${projectId}'
       req.log.debug(sql);
       const billingAccounts = await SalesforceService.queryUserBillingAccounts(sql, accessToken, instanceUrl, req.log);
