@@ -54,7 +54,7 @@ class SalesforceService {
    * @param {Object} logger logger to be used for logging
    * @returns {{totalSize: Number, done: Boolean, records: Array}} the result
    */
-  static query(sql, accessToken, instanceUrl, logger) {
+  static queryUserBillingAccounts(sql, accessToken, instanceUrl, logger) {
     return axios({
       url: `${instanceUrl}/services/data/v37.0/query?q=${sql}`,
       method: 'get',
@@ -75,6 +75,31 @@ class SalesforceService {
         endDate: _.get(o, 'Topcoder_Billing_Account__r.End_Date__c'),
       }));
       return billingAccounts;
+    });
+  }
+
+  /**
+   * Run the query statement
+   * @param {String} sql the Saleforce sql statement
+   * @param {String} accessToken the access token
+   * @param {String} instanceUrl the salesforce instance url
+   * @param {Object} logger logger to be used for logging
+   * @returns {{totalSize: Number, done: Boolean, records: Array}} the result
+   */
+  static queryBillingAccount(sql, accessToken, instanceUrl, logger) {
+    return axios({
+      url: `${instanceUrl}/services/data/v37.0/query?q=${sql}`,
+      method: 'get',
+      headers: { authorization: `Bearer ${accessToken}` },
+    }).then((res) => {
+      if (logger) {
+        logger.debug(_.get(res, 'data.records', []));
+      }
+      const billingAccounts = _.get(res, 'data.records', []).map(o => ({
+        tcBillingAccountId: _.get(o, 'TopCoder_Billing_Account_Id__c'),
+        markup: _.get(o, 'Mark_Up__c'),
+      }));
+      return billingAccounts.length > 0 ? billingAccounts[0] : {};
     });
   }
 }

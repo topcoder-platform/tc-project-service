@@ -29,7 +29,7 @@ module.exports = [
       const sql = `SELECT  Topcoder_Billing_Account__r.id, Topcoder_Billing_Account__r.TopCoder_Billing_Account_Id__c, Topcoder_Billing_Account__r.Billing_Account_Name__c, Topcoder_Billing_Account__r.Start_Date__c, Topcoder_Billing_Account__r.End_Date__c from Topcoder_Billing_Account_Resource__c tbar where UserID__c='${userId}'`;
       // and Topcoder_Billing_Account__r.TC_Connect_Project_ID__c='${projectId}'
       req.log.debug(sql);
-      const billingAccounts = await SalesforceService.query(sql, accessToken, instanceUrl, req.log);
+      const billingAccounts = await SalesforceService.queryUserBillingAccounts(sql, accessToken, instanceUrl, req.log);
       res.json(billingAccounts);
     } catch (error) {
       req.log.error(error);
