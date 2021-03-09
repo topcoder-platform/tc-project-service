@@ -29,6 +29,11 @@ module.exports = [
         attributes: ['id', 'billingAccountId'],
         raw: true,
       });
+      if (!project) {
+        const err = new Error(`Project with id "${projectId}" not found`);
+        err.status = 404;
+        throw err;
+      }
       const billingAccountId = project.billingAccountId;
       if (!billingAccountId) {
         const err = new Error('Billing Account not found');
