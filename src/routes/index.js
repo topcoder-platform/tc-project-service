@@ -121,6 +121,9 @@ router.route('/v5/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)
   .patch(require('./scopeChangeRequests/update'));
 // .delete(require('./scopeChangeRequests/delete'));
 
+router.route('/v5/projects/:projectId(\\d+)/billingAccounts')
+  .get(require('./billingAccounts/list'));
+
 router.route('/v5/projects/:projectId(\\d+)/members')
   .get(require('./projectMembers/list'))
   .post(require('./projectMembers/create'));
