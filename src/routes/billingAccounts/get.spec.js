@@ -13,7 +13,7 @@ chai.should();
 // demo data which might be returned by the `SalesforceService.query`
 const billingAccountData = {
   tcBillingAccountId: 123123,
-  markup: '12',
+  markup: 50,
 };
 
 describe('Project Billing Accounts list', () => {
