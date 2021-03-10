@@ -12,11 +12,8 @@ chai.should();
 
 // demo data which might be returned by the `SalesforceService.query`
 const billingAccountData = {
-  sfBillingAccountId: '123',
   tcBillingAccountId: 123123,
-  name: 'Billing Account 1',
-  startDate: '2021-02-10T18:51:27Z',
-  endDate: '2021-03-10T18:51:27Z',
+  markup: '12',
 };
 
 describe('Project Billing Accounts list', () => {

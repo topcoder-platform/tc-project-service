@@ -96,7 +96,11 @@ class SalesforceService {
         logger.debug(_.get(res, 'data.records', []));
       }
       const billingAccounts = _.get(res, 'data.records', []).map(o => ({
-        tcBillingAccountId: _.get(o, 'TopCoder_Billing_Account_Id__c'),
+        tcBillingAccountId: util.parseIntStrictly(
+          _.get(o, 'TopCoder_Billing_Account_Id__c'),
+          10,
+          null, // fallback to null if cannot parse
+        ),
         markup: _.get(o, 'Mark_Up__c'),
       }));
       return billingAccounts.length > 0 ? billingAccounts[0] : {};
