@@ -123,6 +123,8 @@ router.route('/v5/projects/:projectId(\\d+)/scopeChangeRequests/:requestId(\\d+)
 
 router.route('/v5/projects/:projectId(\\d+)/billingAccounts')
   .get(require('./billingAccounts/list'));
+router.route('/v5/projects/:projectId(\\d+)/billingAccount')
+  .get(require('./billingAccounts/get'));
 
 router.route('/v5/projects/:projectId(\\d+)/members')
   .get(require('./projectMembers/list'))

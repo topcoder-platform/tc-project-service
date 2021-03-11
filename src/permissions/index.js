@@ -24,6 +24,10 @@ module.exports = () => {
     PERMISSION.READ_AVL_PROJECT_BILLING_ACCOUNTS,
   ]));
 
+  Authorizer.setPolicy('projectBillingAccount.view', generalPermission([
+    PERMISSION.READ_PROJECT_BILLING_ACCOUNT_DETAILS,
+  ]));
+
   Authorizer.setPolicy('projectMember.create', generalPermission([
     PERMISSION.CREATE_PROJECT_MEMBER_OWN,
     PERMISSION.CREATE_PROJECT_MEMBER_NOT_OWN,
