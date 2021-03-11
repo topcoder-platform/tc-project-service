@@ -41,7 +41,7 @@ const updateProjectValdiations = {
     id: Joi.number().valid(Joi.ref('$params.id')),
     name: Joi.string(),
     description: Joi.string().allow(null).allow('').optional(),
-    billingAccountId: Joi.number().positive(),
+    billingAccountId: Joi.number().positive().allow(null),
     directProjectId: Joi.number().positive().allow(null),
     status: Joi.any().valid(_.values(PROJECT_STATUS)),
     estimatedPrice: Joi.number().precision(2).positive().allow(null),

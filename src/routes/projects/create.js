@@ -29,7 +29,7 @@ const createProjectValidations = {
   body: Joi.object().keys({
     name: Joi.string().required(),
     description: Joi.string().allow(null).allow('').optional(),
-    billingAccountId: Joi.number().positive(),
+    billingAccountId: Joi.number().positive().allow(null),
     utm: Joi.object().keys({
       source: Joi.string().allow(null),
       medium: Joi.string().allow(null),
