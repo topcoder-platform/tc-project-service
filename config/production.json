@@ -1,5 +1,6 @@
 {
   "authDomain": "topcoder.com",
   "connectProjectsUrl": "https://connect.topcoder.com/projects/",
-  "sfdcBillingAccountNameField": "Billing_Account_name__c"
+  "sfdcBillingAccountNameField": "Billing_Account_name__c",
+  "sfdcBillingAccountMarkupField": "Mark_up__c"
 }
