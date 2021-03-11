@@ -96,7 +96,14 @@ const SCOPES_PROJECTS_WRITE = [
  */
 const SCOPES_PROJECTS_READ_AVL_BILLING_ACCOUNTS = [
   M2M_SCOPES.CONNECT_PROJECT_ADMIN,
-  M2M_SCOPES.READ_USER_BILLING_ACCOUNTS,
+  M2M_SCOPES.PROJECTS.READ_USER_BILLING_ACCOUNTS,
+];
+
+/**
+ * M2M scopes to "read" available Billing Accounts for the project
+ */
+const SCOPES_PROJECTS_READ_BILLING_ACCOUNT_DETAILS = [
+  M2M_SCOPES.PROJECTS.READ_PROJECT_BILLING_ACCOUNT_DETAILS,
 ];
 
 /**
@@ -275,6 +282,18 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     ],
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     scopes: SCOPES_PROJECTS_READ_AVL_BILLING_ACCOUNTS,
+  },
+
+  /*
+   * Project Invite
+   */
+  READ_PROJECT_BILLING_ACCOUNT_DETAILS: {
+    meta: {
+      title: 'Read details of billing accounts - only allowed to m2m calls',
+      group: 'Project Billing Accounts',
+      description: 'Who can view the details of the Billing Account attached to the project',
+    },
+    scopes: SCOPES_PROJECTS_READ_BILLING_ACCOUNT_DETAILS,
   },
 
   /*
