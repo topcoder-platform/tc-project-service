@@ -4,7 +4,7 @@ parameters:
         default: true
         type: boolean
     run_performancetesting:
-        default: true
+        default: false
         type: boolean
 
 python_env: &python_env
@@ -38,12 +38,6 @@ deploy_steps: &deploy_steps
         ./awsconfiguration.sh $DEPLOY_ENV
         source awsenvconf
         ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-deployvar
-        source buildenvvar
-        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
-
-         echo "======= Running Masterscript - deploy projects-api-consumers ==========="
-        if [ -e ${LOGICAL_ENV}-${APPNAME}-appvar.json ]; then  sudo rm -vf ${LOGICAL_ENV}-${APPNAME}-appvar.json; fi
-        ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-consumers-deployvar
         source buildenvvar
         ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
         #testing code changes
