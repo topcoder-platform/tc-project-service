@@ -42,7 +42,7 @@ module.exports = [
       }
       const { accessToken, instanceUrl } = await SalesforceService.authenticate();
       // eslint-disable-next-line
-      const sql = `SELECT  TopCoder_Billing_Account_Id__c, Mark_Up__c from Topcoder_Billing_Account__c tba where TopCoder_Billing_Account_Id__c='${billingAccountId}'`;
+      const sql = `SELECT  TopCoder_Billing_Account_Id__c, Mark_Up__c, Active__c from Topcoder_Billing_Account__c tba where TopCoder_Billing_Account_Id__c='${billingAccountId}'`;
       req.log.debug(sql);
       const billingAccount = await SalesforceService.queryBillingAccount(sql, accessToken, instanceUrl, req.log);
       res.json(billingAccount);
