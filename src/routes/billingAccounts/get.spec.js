@@ -8,7 +8,7 @@ import server from '../../app';
 import testUtil from '../../tests/util';
 import SalesforceService from '../../services/salesforceService';
 
-chai.should();
+const should = chai.should();
 
 // demo data which might be returned by the `SalesforceService.query`
 const billingAccountData = {
@@ -169,7 +169,7 @@ describe('Project Billing Accounts list', () => {
             } else {
               const resJson = res.body;
               resJson.tcBillingAccountId.should.be.eql(billingAccountData.tcBillingAccountId);
-              resJson.markup.should.not.exist;
+              should.not.exist(resJson.markup);
               done();
             }
           });
