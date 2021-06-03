@@ -293,6 +293,13 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Billing Accounts',
       description: 'Who can view the details of the Billing Account attached to the project',
     },
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
+    topcoderRoles: [
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
     scopes: SCOPES_PROJECTS_READ_BILLING_ACCOUNT_DETAILS,
   },
 

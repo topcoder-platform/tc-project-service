@@ -8,7 +8,7 @@ import server from '../../app';
 import testUtil from '../../tests/util';
 import SalesforceService from '../../services/salesforceService';
 
-chai.should();
+const should = chai.should();
 
 // demo data which might be returned by the `SalesforceService.query`
 const billingAccountData = {
@@ -114,16 +114,6 @@ describe('Project Billing Accounts list', () => {
         .expect(403, done);
     });
 
-    it('should return 403 for admin', (done) => {
-      request(server)
-        .get(`/v5/projects/${project1.id}/billingAccount`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send()
-        .expect(403, done);
-    });
-
     it('should return 404 if the project is not found', (done) => {
       request(server)
         .get('/v5/projects/11223344/billingAccount')
@@ -159,6 +149,27 @@ describe('Project Billing Accounts list', () => {
             } else {
               const resJson = res.body;
               resJson.should.deep.equal(billingAccountData);
+              done();
+            }
+          });
+      });
+
+    it('should return billing account details using user token but without markup field',
+      (done) => {
+        request(server)
+          .get(`/v5/projects/${project1.id}/billingAccount`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send()
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              resJson.tcBillingAccountId.should.be.eql(billingAccountData.tcBillingAccountId);
+              should.not.exist(resJson.markup);
               done();
             }
           });

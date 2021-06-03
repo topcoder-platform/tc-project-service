@@ -102,6 +102,7 @@ class SalesforceService {
           null, // fallback to null if cannot parse
         ),
         markup: _.get(o, config.get('sfdcBillingAccountMarkupField')),
+        active: _.get(o, config.get('sfdcBillingAccountActiveField')),
       }));
       return billingAccounts.length > 0 ? billingAccounts[0] : {};
     });
