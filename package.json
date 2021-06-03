@@ -60,7 +60,7 @@
     "express-request-id": "^1.1.0",
     "express-sanitizer": "^1.0.2",
     "express-validation": "^1.0.3",
-    "handlebars": "^4.5.3",
+    "handlebars": "^4.7.7",
     "http-aws-es": "^4.0.0",
     "joi": "^8.0.5",
     "jsondiffpatch": "^0.4.1",
