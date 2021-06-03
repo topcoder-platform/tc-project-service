@@ -152,7 +152,7 @@ workflows:
             - UnitTests
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing', 'feature/get-markup-from-billing-account']
+              only: ['develop', 'connect-performance-testing', 'feature/shapeup_billing_accounts_protections']
       - deployProd:
           context : org-global
           requires:
