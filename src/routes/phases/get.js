@@ -5,7 +5,15 @@ import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
-
+const populateMemberDetails = async (phase, logger, id) => {
+  if (phase.members && phase.members.length > 0) {
+    const details = await util.getMemberDetailsByUserIds(_.map(phase.members, 'userId'), logger, id);
+    _.forEach(phase.members, (member) => {
+      _.assign(member, _.find(details, detail => detail.userId === member.userId));
+    });
+  }
+  return phase;
+};
 module.exports = [
   permissions('project.view'),
   (req, res, next) => {
@@ -39,7 +47,10 @@ module.exports = [
           return models.ProjectPhase
             .findOne({
               where: { id: phaseId, projectId },
-              raw: true,
+              include: [{
+                model: models.ProjectPhaseMember,
+                as: 'members',
+              }],
             })
             .then((phase) => {
               if (!phase) {
@@ -49,12 +60,15 @@ module.exports = [
                 err.status = 404;
                 throw err;
               }
-              res.json(phase);
+              return populateMemberDetails(phase.toJSON(), req.log, req.id)
+                .then(result => res.json(result));
             })
             .catch(err => next(err));
         }
         req.log.debug('phase found in ES');
-        return res.json(data[0].inner_hits.phases.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        // eslint-disable-next-line no-underscore-dangle
+        return populateMemberDetails(data[0].inner_hits.phases.hits.hits[0]._source, req.log, req.id)
+          .then(phase => res.json(phase));
       })
       .catch(next);
   },

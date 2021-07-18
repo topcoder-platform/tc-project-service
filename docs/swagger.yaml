@@ -620,6 +620,7 @@ paths:
             startDate asc
           in: query
           type: string
+        - $ref: '#/parameters/memberOnlyQueryParam'
       responses:
         '200':
           description: A list of project phases
@@ -1704,6 +1705,122 @@ paths:
             $ref: '#/definitions/ErrorModel'
         '404':
           description: If project is not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/phases/{phaseId}/members':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+    get:
+      tags:
+        - phase members
+      description: >-
+        Retrieve phase members by id. All users who can see project members can access
+        this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '200':
+          description: phase members
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PhaseMember'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      tags:
+        - phase members
+      security:
+        - Bearer: []
+      description: >-
+        Update phase members. Only admin roles can access this
+        endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPhaseMember'
+      responses:
+        '200':
+          description: Successfully updated phase members.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PhaseMember'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/projects/{projectId}/phases/{phaseId}/members/{userId}':
+    parameters:
+      - $ref: '#/parameters/projectIdParam'
+      - $ref: '#/parameters/phaseIdParam'
+      - $ref: '#/parameters/userIdParam'
+    delete:
+      tags:
+        - phase members
+      description: >-
+        Remove an existing phase member. Only admin roles can
+        access this endpoint.
+      security:
+        - Bearer: []
+      responses:
+        '204':
+          description: Phase member successfully removed
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '404':
+          description: Not found
           schema:
             $ref: '#/definitions/ErrorModel'
         '500':
@@ -4693,6 +4810,14 @@ parameters:
     type: integer
     format: int64
     minimum: 1
+  userIdParam:
+    name: userId
+    in: path
+    description: project phase user id param
+    required: true
+    type: integer
+    format: int64
+    minimum: 1
   workStreamIdParam:
     name: workStreamId
     in: path
@@ -5789,6 +5914,28 @@ definitions:
             description: READ-ONLY. User that last updated this object
             readOnly: true
       - $ref: '#/definitions/ProductCategoryCreateRequest'
+  PhaseMember:
+    title: Phase member object
+    type: object
+    required:
+      - phaseId
+      - userId
+    properties:
+      phaseId:
+        type: integer
+        format: int64
+        description: references to project phase id
+      userId:
+        type: integer
+        format: int64
+        description: references to member's userId
+  NewPhaseMember:
+    title: New Phase members to Update
+    type: array
+    items:
+      type: integer
+      format: int64
+      description: "The user id."
   ProjectTypeRequest:
     title: Project type request object
     type: object
