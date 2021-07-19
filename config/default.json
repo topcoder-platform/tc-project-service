@@ -27,9 +27,9 @@
     "metadataDocType": "doc",
     "metadataDocDefaultId": 1
   },
-  "connectProjectUrl":"",
+  "connectProjectUrl": "",
   "dbConfig": {
-    "masterUrl": "",
+    "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb",
     "maxPoolSize": 50,
     "minPoolSize": 4,
     "idleTimeout": 1000
@@ -48,11 +48,11 @@
   "maxPhaseProductCount": 1,
   "TOKEN_CACHE_TIME": "86000",
   "whitelistedOriginsForUserIdAuth": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
-  "EMAIL_INVITE_FROM_NAME":"Topcoder",
-  "EMAIL_INVITE_FROM_EMAIL":"noreply@connect.topcoder.com",
+  "EMAIL_INVITE_FROM_NAME": "Topcoder",
+  "EMAIL_INVITE_FROM_EMAIL": "noreply@connect.topcoder.com",
   "inviteEmailSubject": "You are invited to Topcoder",
   "inviteEmailSectionTitle": "Project Invitation",
-  "connectUrl":"https://connect.topcoder-dev.com",
+  "connectUrl": "https://connect.topcoder-dev.com",
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
   "MAX_REVISION_NUMBER": 100,
   "UNIQUE_GMAIL_VALIDATION": false,

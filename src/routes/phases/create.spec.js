@@ -293,7 +293,6 @@ describe('Project Phases', () => {
             done(err);
           } else {
             const resJson = res.body;
-            console.log(resJson);
             validatePhase(resJson, body);
             resJson.products.should.have.length(1);
 
