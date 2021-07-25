@@ -88,6 +88,8 @@ describe('Delete phase member', () => {
               models.ProjectPhaseMember.create({
                 phaseId,
                 userId: copilotUser.userId,
+                createdBy: 1,
+                updatedBy: 1,
               }).then((phaseMember) => {
                 _.assign(phase, { members: [phaseMember.toJSON()] });
                 // Index to ES
@@ -112,7 +114,7 @@ describe('Delete phase member', () => {
   after((done) => {
     testUtil.clearDb(done);
   });
-  describe('DELETE /projects/{projectId}/phases/{phaseId}/members/{memberId}', () => {
+  describe('DELETE /projects/{projectId}/phases/{phaseId}/members/{userId}', () => {
     it('should return 403 for anonymous user', (done) => {
       request(server)
         .delete(`/v5/projects/${id}/phases/${phaseId}/members/${copilotUser.userId}`)
