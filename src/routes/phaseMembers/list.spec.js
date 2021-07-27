@@ -20,7 +20,6 @@ describe('List phase members', () => {
   let id;
   let project;
   let phaseId;
-  let memberId;
   const copilotUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.copilot).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.copilot).userId,
@@ -57,8 +56,7 @@ describe('List phase members', () => {
             isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-          }).then((member) => {
-            memberId = member.id;
+          }).then(() => {
             models.ProjectPhase.create({
               name: 'test project phase',
               projectId: id,
@@ -77,8 +75,9 @@ describe('List phase members', () => {
               phaseId = phase.id;
               models.ProjectPhaseMember.create({
                 phaseId,
-                memberId,
                 userId: copilotUser.userId,
+                createdBy: 1,
+                updatedBy: 1,
               }).then((phaseMember) => {
                 _.assign(phase, { members: [phaseMember.toJSON()] });
                 // Index to ES
@@ -151,7 +150,6 @@ describe('List phase members', () => {
           should.exist(resJson);
           resJson.should.have.length(1);
           resJson[0].userId.should.be.eql(copilotUser.userId);
-          resJson[0].memberId.should.be.eql(1);
           resJson[0].phaseId.should.be.eql(phaseId);
           done();
         });

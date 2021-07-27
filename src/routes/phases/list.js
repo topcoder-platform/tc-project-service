@@ -59,7 +59,7 @@ module.exports = [
         let phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
 
         if (memberOnly && !isAdmin) {
-          phases = _.filter(phases, phase => _.includes(_.map(_.get(phase, 'members'), 'userId')), req.authUser.userId);
+          phases = _.filter(phases, phase => _.includes(_.map(_.get(phase, 'members'), 'userId'), req.authUser.userId));
         }
         // Sort
         phases = _.orderBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
@@ -110,7 +110,7 @@ module.exports = [
               phases = _.map(phases, phase => phase.toJSON());
               if (memberOnly && !isAdmin) {
                 phases = _.filter(phases, phase =>
-                  _.includes(_.map(_.get(phase, 'members'), 'userId')), req.authUser.userId);
+                  _.includes(_.map(_.get(phase, 'members'), 'userId'), req.authUser.userId));
               }
               // Sort
               phases = _.orderBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);

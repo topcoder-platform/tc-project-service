@@ -25,7 +25,7 @@ describe('projectUpdatedKafkaHandler', () => {
     initiatorUserId: 2,
   };
 
-  const mockedApp = {};
+  const mockedApp = { logger: console, models };
 
   it('should throw validation exception when payload is empty', async () => {
     await expect(projectUpdatedKafkaHandler(mockedApp, topic, {})).to.be.rejectedWith(Error);

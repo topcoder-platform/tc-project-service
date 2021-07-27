@@ -91,6 +91,8 @@ describe('Update phase members', () => {
               models.ProjectPhaseMember.create({
                 phaseId,
                 userId: copilotUser.userId,
+                createdBy: 1,
+                updatedBy: 1,
               }).then((phaseMember) => {
                 _.assign(phase, { members: [phaseMember.toJSON()] });
                 // Index to ES
@@ -119,7 +121,7 @@ describe('Update phase members', () => {
     it('should return 403 for anonymous user', (done) => {
       request(server)
         .post(`/v5/projects/${id}/phases/${phaseId}/members`)
-        .send({ memberIds: [copilotUser.userId, memberUser.userId] })
+        .send({ userIds: [copilotUser.userId, memberUser.userId] })
         .expect(403, done);
     });
 
@@ -129,7 +131,7 @@ describe('Update phase members', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ memberIds: [copilotUser.userId, memberUser.userId] })
+        .send({ userIds: [copilotUser.userId, memberUser.userId] })
         .expect(403, done);
     });
 
@@ -139,7 +141,7 @@ describe('Update phase members', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send({ memberIds: [copilotUser.userId, memberUser.userId] })
+        .send({ userIds: [copilotUser.userId, memberUser.userId] })
         .expect(200)
         .end((err, res) => {
           const resJson = res.body;
@@ -155,7 +157,7 @@ describe('Update phase members', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ memberIds: [] })
+        .send({ userIds: [] })
         .expect(200)
         .end((err, res) => {
           const resJson = res.body;
@@ -171,7 +173,7 @@ describe('Update phase members', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ memberIds: [copilotUser.userId, memberUser.userId] })
+        .send({ userIds: [copilotUser.userId, memberUser.userId] })
         .expect(403, done);
     });
   });

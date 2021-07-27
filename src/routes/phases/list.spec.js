@@ -89,8 +89,9 @@ describe('Project Phases', () => {
             const phase = ph.toJSON();
             models.ProjectPhaseMember.create({
               phaseId: phase.id,
-              memberId: 1,
               userId: copilotUser.userId,
+              createdBy: 1,
+              updatedBy: 1,
             }).then((phaseMember) => {
               _.assign(phase, { members: [phaseMember.toJSON()] });
               // Index to ES
