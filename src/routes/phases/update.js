@@ -7,6 +7,7 @@ import models from '../../models';
 import util from '../../util';
 import { EVENT, RESOURCES, ROUTES } from '../../constants';
 
+import updatePhaseMemberService from '../phaseMembers/updateService';
 
 const permissions = tcMiddleware.permissions;
 
@@ -24,16 +25,8 @@ const updateProjectPhaseValidation = {
     progress: Joi.number().min(0).optional(),
     details: Joi.any().optional(),
     order: Joi.number().integer().optional(),
+    members: Joi.array().items(Joi.number().integer()).optional(),
   }).required(),
-};
-const populateMemberDetails = async (phase, req) => {
-  const members = _.map(phase.members, member => _.pick(member, 'userId'));
-  try {
-    const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
-    return _.assign(phase, { members: detailedMembers });
-  } catch (err) {
-    return _.assign(phase, { members });
-  }
 };
 
 module.exports = [
@@ -88,35 +81,45 @@ module.exports = [
           err.status = 400;
           reject(err);
         } else {
-          _.extend(existing, updatedProps);
+          _.extend(existing, _.omit(updatedProps, 'members'));
           existing.save().then(accept).catch(reject);
         }
       }
     }))
       .then((updatedPhase) => {
-        updated = updatedPhase;
+        updated = updatedPhase.get({ plain: true });
+      })
+      .then(() => {
+        if (_.isNil(updatedProps.members)) {
+          return Promise.resolve();
+        }
+
+        return updatePhaseMemberService(req.authUser, projectId, phaseId, updatedProps.members)
+          .then(members => _.assign(updated, { members }));
       }),
     )
       .then(() => {
         req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
-
-        const updatedValue = updated.get({ plain: true });
 
         //  emit event
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
           RESOURCES.PHASE,
-          updatedValue,
+          updated,
           previousValue,
           ROUTES.PHASES.UPDATE);
+        if (updated.members) {
+          return util.populatePhasesWithMemberDetails(updated, req)
+            .then(result => res.json(result));
+        }
         return models.ProjectPhase.findOne({
           where: { id: phaseId, projectId },
           include: [{
             model: models.ProjectPhaseMember,
             as: 'members',
           }],
-        }).then(phaseWithMembers => populateMemberDetails(phaseWithMembers.toJSON(), req)
+        }).then(phaseWithMembers => util.populatePhasesWithMemberDetails(phaseWithMembers.toJSON(), req)
           .then(result => res.json(result)));
       })
       .catch(err => next(err));

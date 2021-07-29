@@ -130,7 +130,7 @@ describe('Delete phase member', () => {
         .expect(403, done);
     });
 
-    it('should return 200 for connect admin', (done) => {
+    it('should return 204 for connect admin', (done) => {
       request(server)
         .delete(`/v5/projects/${id}/phases/${phaseId}/members/${copilotUser.userId}`)
         .set({

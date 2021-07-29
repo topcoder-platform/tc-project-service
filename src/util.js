@@ -792,6 +792,38 @@ const projectServiceUtils = {
   },
 
   /**
+   * Add member details to Project Phase objects
+   *
+   * @param {Array|Object} phases Array of phase object or single phase object
+   * @param {Object} req The request object
+   *
+   * @return {Array|Object} Phase(s) with member details
+   */
+  populatePhasesWithMemberDetails: async (phases, req) => {
+    if (_.isArray(phases)) {
+      let members = _.reduce(phases, (acc, phase) =>
+        _.concat(acc, _.map(phase.members, member => _.pick(member, 'userId'))), []);
+      members = _.uniqBy(members, 'userId');
+      try {
+        const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
+        return _.map(phases, phase =>
+          _.assign(phase, { members: _.intersectionBy(detailedMembers, phase.members, 'userId') }));
+      } catch (err) {
+        return _.map(phases, phase =>
+          _.assign(phase, { members: _.map(phase.members, member => _.pick(member, 'userId')) }));
+      }
+    } else {
+      const members = _.map(phases.members, member => _.pick(member, 'userId'));
+      try {
+        const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
+        return _.assign(phases, { members: detailedMembers });
+      } catch (err) {
+        return _.assign(phases, { members });
+      }
+    }
+  },
+
+  /**
    * Retrieve member details from userIds
    */
   getUserRoles: Promise.coroutine(function* (userId, logger, requestId) { // eslint-disable-line func-names

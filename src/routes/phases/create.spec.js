@@ -369,6 +369,44 @@ describe('Project Phases', () => {
       });
     });
 
+    it('should return 201 with member details if payload has members property', (done) => {
+      const bodyWithMembers = _.cloneDeep(body);
+      _.assign(bodyWithMembers, { members: [copilotUser.userId] });
+      request(server)
+        .post(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithMembers)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            validatePhase(resJson, bodyWithMembers);
+            resJson.members.should.have.length(1);
+            resJson.members[0].userId.should.eql(copilotUser.userId);
+            done();
+          }
+        });
+    });
+
+    it('should return 400 if members property includes userId who is not a member of project', (done) => {
+      const bodyWithMembers = _.cloneDeep(body);
+      _.assign(bodyWithMembers, { members: [999] });
+      request(server)
+        .post(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithMembers)
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end(done);
+    });
+
     describe('Bus api', () => {
       let createEventSpy;
       const sandbox = sinon.sandbox.create();
