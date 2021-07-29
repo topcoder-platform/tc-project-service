@@ -26,7 +26,15 @@ const updateProjectPhaseValidation = {
     order: Joi.number().integer().optional(),
   }).required(),
 };
-
+const populateMemberDetails = async (phase, req) => {
+  const members = _.map(phase.members, member => _.pick(member, 'userId'));
+  try {
+    const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
+    return _.assign(phase, { members: detailedMembers });
+  } catch (err) {
+    return _.assign(phase, { members });
+  }
+};
 
 module.exports = [
   // validate request payload
@@ -102,8 +110,14 @@ module.exports = [
           updatedValue,
           previousValue,
           ROUTES.PHASES.UPDATE);
-
-        res.json(updated);
+        return models.ProjectPhase.findOne({
+          where: { id: phaseId, projectId },
+          include: [{
+            model: models.ProjectPhaseMember,
+            as: 'members',
+          }],
+        }).then(phaseWithMembers => populateMemberDetails(phaseWithMembers.toJSON(), req)
+          .then(result => res.json(result)));
       })
       .catch(err => next(err));
   },
