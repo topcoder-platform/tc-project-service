@@ -16,7 +16,8 @@ const should = chai.should();
 const expect = chai.expect;
 
 describe('Project create', () => {
-  before((done) => {
+  before(function beforeHook(done) {
+    this.timeout(20000);
     testUtil.clearDb()
       .then(() => testUtil.clearES())
       .then(() => models.ProjectType.bulkCreate([
@@ -76,8 +77,16 @@ describe('Project create', () => {
           updatedBy: 4,
         },
       ]))
-      .then(() => models.ProjectTemplate.bulkCreate([
-        {
+      .then(() => {
+        const exceededProducts = [];
+        for (let i = 1; i <= _.parseInt(config.get('maxPhaseProductCount')) + 1; i += 1) {
+          exceededProducts.push({
+            id: i,
+            name: `product ${i}`,
+            productKey: `visual_design_prod${i}`,
+          });
+        }
+        return models.ProjectTemplate.bulkCreate([{
           id: 1,
           name: 'template 1',
           key: 'key 1',
@@ -91,18 +100,7 @@ describe('Project create', () => {
             phase1: {
               name: 'phase 1',
               duration: 5,
-              products: [
-                {
-                  id: 21,
-                  name: 'product 1',
-                  productKey: 'visual_design_prod1',
-                },
-                {
-                  id: 22,
-                  name: 'product 2',
-                  productKey: 'visual_design_prod2',
-                },
-              ],
+              products: exceededProducts,
             },
           },
           createdBy: 1,
@@ -206,8 +204,8 @@ describe('Project create', () => {
           },
           createdBy: 1,
           updatedBy: 2,
-        },
-      ]))
+        }]);
+      })
       .then(() => models.BuildingBlock.bulkCreate([
         {
           id: 1,
