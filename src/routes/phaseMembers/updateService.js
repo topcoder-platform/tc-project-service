@@ -7,13 +7,19 @@ import models from '../../models';
  * @param {String} projectId the project id
  * @param {String} phaseId the phase id
  * @param {Array<Number>} newPhaseMembers the array of userIds
+ * @param {Object} _transaction the sequelize transaction (optional)
  * @returns {Array<Number>} the array of updated phase member objects
  */
-async function update(currentUser, projectId, phaseId, newPhaseMembers) {
+async function update(currentUser, projectId, phaseId, newPhaseMembers, _transaction) {
   const createdBy = _.parseInt(currentUser.userId);
   const updatedBy = _.parseInt(currentUser.userId);
   const newMembers = _.uniq(newPhaseMembers);
-  const transaction = await models.sequelize.transaction();
+  let transaction;
+  if (_.isUndefined(_transaction)) {
+    transaction = await models.sequelize.transaction();
+  } else {
+    transaction = _transaction;
+  }
   try {
     const projectMembers = _.map(await models.ProjectMember.getActiveProjectMembers(projectId), 'userId');
     const notProjectMembers = _.difference(newMembers, projectMembers);
@@ -35,10 +41,14 @@ async function update(currentUser, projectId, phaseId, newPhaseMembers) {
       const result = await models.ProjectPhaseMember.bulkCreate(createData, { transaction });
       phaseMembers.push(..._.map(result, item => item.toJSON()));
     }
-    await transaction.commit();
+    if (_.isUndefined(_transaction)) {
+      await transaction.commit();
+    }
     return phaseMembers;
   } catch (err) {
-    await transaction.rollback();
+    if (_.isUndefined(_transaction)) {
+      await transaction.rollback();
+    }
     throw err;
   }
 }

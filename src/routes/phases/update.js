@@ -45,7 +45,7 @@ module.exports = [
     let previousValue;
     let updated;
 
-    models.sequelize.transaction(() => models.ProjectPhase.findOne({
+    models.sequelize.transaction(transaction => models.ProjectPhase.findOne({
       where: {
         id: phaseId,
         projectId,
@@ -82,7 +82,7 @@ module.exports = [
           reject(err);
         } else {
           _.extend(existing, _.omit(updatedProps, 'members'));
-          existing.save().then(accept).catch(reject);
+          existing.save({ transaction }).then(accept).catch(reject);
         }
       }
     }))
@@ -94,7 +94,7 @@ module.exports = [
           return Promise.resolve();
         }
 
-        return updatePhaseMemberService(req.authUser, projectId, phaseId, updatedProps.members)
+        return updatePhaseMemberService(req.authUser, projectId, phaseId, updatedProps.members, transaction)
           .then(members => _.assign(updated, { members }));
       }),
     )

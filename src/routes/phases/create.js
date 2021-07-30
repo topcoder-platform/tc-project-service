@@ -47,7 +47,7 @@ module.exports = [
     });
 
     let newProjectPhase = null;
-    models.sequelize.transaction(() => {
+    models.sequelize.transaction((transaction) => {
       req.log.debug('Create Phase - Starting transaction');
       return models.Project.findOne({
         where: { id: projectId, deletedAt: { $eq: null } },
@@ -64,7 +64,7 @@ module.exports = [
             throw err;
           }
           return models.ProjectPhase
-            .create(_.omit(data, 'members'))
+            .create(_.omit(data, 'members'), { transaction })
             .then((_newProjectPhase) => {
               newProjectPhase = _.cloneDeep(_newProjectPhase);
               req.log.debug('new project phase created (id# %d, name: %s)',
@@ -88,7 +88,6 @@ module.exports = [
                 err.status = 400;
                 throw err;
               }
-
               // Create the phase product
               return models.PhaseProduct.create({
                 name: productTemplate.name,
@@ -98,7 +97,7 @@ module.exports = [
                 phaseId: newProjectPhase.id,
                 createdBy: req.authUser.userId,
                 updatedBy: req.authUser.userId,
-              })
+              }, { transaction })
                 .then((phaseProduct) => {
                   newProjectPhase.products = [
                     _.omit(phaseProduct.toJSON(), ['deletedAt', 'deletedBy']),
@@ -112,7 +111,7 @@ module.exports = [
             return Promise.resolve();
           }
 
-          return updatePhaseMemberService(req.authUser, projectId, newProjectPhase.id, data.members)
+          return updatePhaseMemberService(req.authUser, projectId, newProjectPhase.id, data.members, transaction)
             .then(members => _.assign(newProjectPhase, { members }));
         });
     })
