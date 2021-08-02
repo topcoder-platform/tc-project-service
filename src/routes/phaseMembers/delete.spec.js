@@ -148,13 +148,26 @@ describe('Delete phase member', () => {
         .expect(204, done);
     });
 
-    it('should return 403 for copilot', (done) => {
+    it('should return 204 for copilot which is member of project', (done) => {
       request(server)
         .delete(`/v5/projects/${id}/phases/${phaseId}/members/${copilotUser.userId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .expect(403, done);
+        .expect(204, done);
+    });
+
+    it('should return 403 for copilot which is not member of project', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, id },
+      }).then(() => {
+        request(server)
+          .delete(`/v5/projects/${id}/phases/${phaseId}/members/${copilotUser.userId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .expect(403, done);
+      });
     });
   });
 });

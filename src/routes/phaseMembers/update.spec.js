@@ -167,14 +167,28 @@ describe('Update phase members', () => {
         });
     });
 
-    it('should return 403 for copilot', (done) => {
+    it('should return 200 for copilot which is member of project', (done) => {
       request(server)
         .post(`/v5/projects/${id}/phases/${phaseId}/members`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({ userIds: [copilotUser.userId, memberUser.userId] })
-        .expect(403, done);
+        .expect(200, done);
+    });
+
+    it('should return 403 for copilot which is not member of project', (done) => {
+      models.ProjectMember.destroy({
+        where: { userId: testUtil.userIds.copilot, id },
+      }).then(() => {
+        request(server)
+          .post(`/v5/projects/${id}/phases/${phaseId}/members`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({ userIds: [copilotUser.userId, memberUser.userId] })
+          .expect(403, done);
+      });
     });
   });
 });
