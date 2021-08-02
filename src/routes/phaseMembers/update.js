@@ -5,6 +5,7 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { EVENT, RESOURCES, ROUTES } from '../../constants';
+import updateService from './updateService';
 
 /**
  * API to update a project phase members.
@@ -28,10 +29,7 @@ module.exports = [
   async (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
-    const createdBy = _.parseInt(req.authUser.userId);
-    const updatedBy = _.parseInt(req.authUser.userId);
     const newPhaseMembers = req.body.userIds;
-    const transaction = await models.sequelize.transaction();
     try {
       // chekc if project and phase exist
       const phase = await models.ProjectPhase.findOne({
@@ -48,31 +46,12 @@ module.exports = [
         err.status = 404;
         throw (err);
       }
-      const projectMembers = _.map(await models.ProjectMember.getActiveProjectMembers(projectId), 'userId');
-      const notProjectMembers = _.difference(newPhaseMembers, projectMembers);
-      if (notProjectMembers.length > 0) {
-        const err = new Error(`Members with id: ${notProjectMembers} are not members of project ${projectId}`);
-        err.status = 404;
-        throw (err);
-      }
       const phaseMembers = await models.ProjectPhaseMember.getPhaseMembers(phaseId);
-      const existentPhaseMembers = _.map(phaseMembers, 'userId');
-      let updatedPhaseMembers = _.cloneDeep(phaseMembers);
-      const updatedPhase = _.cloneDeep(phase);
-      const membersToAdd = _.difference(newPhaseMembers, existentPhaseMembers);
-      const membersToRemove = _.differenceBy(existentPhaseMembers, newPhaseMembers);
-      if (membersToRemove.length > 0) {
-        await models.ProjectPhaseMember.destroy({ where: { phaseId, userId: membersToRemove }, transaction });
-        updatedPhaseMembers = _.filter(updatedPhaseMembers, row => !_.includes(membersToRemove, row.userId));
-      }
-      if (membersToAdd.length > 0) {
-        const createData = _.map(membersToAdd, userId => ({ phaseId, userId, createdBy, updatedBy }));
-        const result = await models.ProjectPhaseMember.bulkCreate(createData, { transaction });
-        updatedPhaseMembers.push(..._.map(result, item => item.toJSON()));
-      }
+      const updatedPhaseMembers = await updateService(req.authUser, projectId, phaseId, newPhaseMembers);
       req.log.debug('updated phase members', JSON.stringify(newPhaseMembers, null, 2));
+      const updatedPhase = _.cloneDeep(phase);
       //  emit event
-      if (membersToRemove.length > 0 || membersToAdd.length > 0) {
+      if (_.intersectionBy(phaseMembers, updatedPhaseMembers, 'id').length !== updatedPhaseMembers.length) {
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
@@ -81,10 +60,8 @@ module.exports = [
           _.assign(phase, { members: phaseMembers }),
           ROUTES.PHASES.UPDATE);
       }
-      await transaction.commit();
       res.json(updatedPhaseMembers);
     } catch (err) {
-      await transaction.rollback();
       next(err);
     }
   },

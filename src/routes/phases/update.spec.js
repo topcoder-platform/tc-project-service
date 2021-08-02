@@ -284,6 +284,74 @@ describe('Project Phases', () => {
       });
     });
 
+    it('should return 200 with member details after updating members', (done) => {
+      const bodyWithMembers = _.cloneDeep(updateBody);
+      _.assign(bodyWithMembers, { members: [copilotUser.userId] });
+      request(server)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithMembers)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            validatePhase(resJson, bodyWithMembers);
+            resJson.members.should.have.length(1);
+            resJson.members[0].userId.should.eql(copilotUser.userId);
+            done();
+          }
+        });
+    });
+
+    it('should return 200 with existent member details vith valid payload without members', (done) => {
+      models.ProjectPhaseMember.create({
+        id: 1,
+        userId: copilotUser.userId,
+        phaseId,
+        createdBy: 1,
+        updatedBy: 1,
+      }).then(() => {
+        request(server)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(updateBody)
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              validatePhase(resJson, updateBody);
+              resJson.members.should.have.length(1);
+              resJson.members[0].userId.should.eql(copilotUser.userId);
+              done();
+            }
+          });
+      });
+    });
+
+    it('should return 400 if members property includes userId who is not a member of project', (done) => {
+      const bodyWithMembers = _.cloneDeep(updateBody);
+      _.assign(bodyWithMembers, { members: [999] });
+      request(server)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(bodyWithMembers)
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end(done);
+    });
+
     it('should return 403 if requested by manager which is not a member', (done) => {
       request(server)
         .patch(`/v5/projects/${projectId}/phases/${phaseId}`)

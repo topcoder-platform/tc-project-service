@@ -6,6 +6,8 @@ import models from '../../models';
 import util from '../../util';
 import { EVENT, RESOURCES } from '../../constants';
 
+import updatePhaseMemberService from '../phaseMembers/updateService';
+
 const permissions = require('tc-core-library-js').middleware.permissions;
 
 
@@ -24,6 +26,7 @@ const addProjectPhaseValidations = {
     details: Joi.any().optional(),
     order: Joi.number().integer().optional(),
     productTemplateId: Joi.number().integer().positive().optional(),
+    members: Joi.array().items(Joi.number().integer()).optional(),
   }).required(),
 };
 
@@ -44,7 +47,7 @@ module.exports = [
     });
 
     let newProjectPhase = null;
-    models.sequelize.transaction(() => {
+    models.sequelize.transaction((transaction) => {
       req.log.debug('Create Phase - Starting transaction');
       return models.Project.findOne({
         where: { id: projectId, deletedAt: { $eq: null } },
@@ -61,7 +64,7 @@ module.exports = [
             throw err;
           }
           return models.ProjectPhase
-            .create(data)
+            .create(_.omit(data, 'members'), { transaction })
             .then((_newProjectPhase) => {
               newProjectPhase = _.cloneDeep(_newProjectPhase);
               req.log.debug('new project phase created (id# %d, name: %s)',
@@ -85,7 +88,6 @@ module.exports = [
                 err.status = 400;
                 throw err;
               }
-
               // Create the phase product
               return models.PhaseProduct.create({
                 name: productTemplate.name,
@@ -95,13 +97,22 @@ module.exports = [
                 phaseId: newProjectPhase.id,
                 createdBy: req.authUser.userId,
                 updatedBy: req.authUser.userId,
-              })
+              }, { transaction })
                 .then((phaseProduct) => {
                   newProjectPhase.products = [
                     _.omit(phaseProduct.toJSON(), ['deletedAt', 'deletedBy']),
                   ];
                 });
             });
+        })
+        // create phase members if `members` is defined
+        .then(() => {
+          if (_.isNil(data.members) || _.isEmpty(data.members)) {
+            return Promise.resolve();
+          }
+
+          return updatePhaseMemberService(req.authUser, projectId, newProjectPhase.id, data.members, transaction)
+            .then(members => _.assign(newProjectPhase, { members }));
         });
     })
       .then(() => {
@@ -110,10 +121,13 @@ module.exports = [
           EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
           RESOURCES.PHASE,
           newProjectPhase);
-
-        res.status(201).json(newProjectPhase);
+        return util.populatePhasesWithMemberDetails(newProjectPhase, req)
+          .then(phase => res.status(201).json(phase));
       })
       .catch((err) => {
+        if (err.message) {
+          _.assign(err, { details: err.message });
+        }
         util.handleError('Error creating project phase', err, req, next);
       });
   },

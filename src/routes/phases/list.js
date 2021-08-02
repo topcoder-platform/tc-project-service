@@ -15,19 +15,6 @@ const PHASE_ATTRIBUTES = _.keys(models.ProjectPhase.rawAttributes);
 
 const permissions = tcMiddleware.permissions;
 
-const populateMemberDetails = async (phases, req) => {
-  let members = _.reduce(phases, (acc, phase) =>
-    _.concat(acc, _.map(phase.members, member => _.pick(member, 'userId'))), []);
-  members = _.uniqBy(members, 'userId');
-  try {
-    const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
-    return _.map(phases, phase =>
-      _.assign(phase, { members: _.intersectionBy(detailedMembers, phase.members, 'userId') }));
-  } catch (err) {
-    return _.map(phases, phase =>
-      _.assign(phase, { members: _.map(phase.members, member => _.pick(member, 'userId')) }));
-  }
-};
 module.exports = [
   permissions('project.view'),
   (req, res, next) => {
@@ -71,7 +58,10 @@ module.exports = [
         }
 
         phases = _.map(phases, phase => _.pick(phase, fields));
-        return populateMemberDetails(phases, req)
+        if (_.indexOf(fields, 'members') < 0) {
+          return res.json(phases);
+        }
+        return util.populatePhasesWithMemberDetails(phases, req)
           .then(result => res.json(result));
       })
       .catch((err) => {
@@ -122,7 +112,10 @@ module.exports = [
               }
               phases = _.map(phases, phase => _.pick(phase, fields));
               // Write to response
-              return populateMemberDetails(phases, req)
+              if (_.indexOf(fields, 'members') < 0) {
+                return res.json(phases);
+              }
+              return util.populatePhasesWithMemberDetails(phases, req)
                 .then(result => res.json(result));
             });
         }

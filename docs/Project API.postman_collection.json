@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3eba12ae-a066-4d5a-bdd5-3121377e476b",
+		"_postman_id": "4c51e04b-42d3-4c9f-bf08-af02f51f7756",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -4578,6 +4578,208 @@
 			"name": "Project Phase",
 			"item": [
 				{
+					"name": "Before Start",
+					"item": [
+						{
+							"name": "Create project type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectTypeId\", response.key);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/metadata/projectTypes",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"metadata",
+										"projectTypes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects"
+									]
+								},
+								"description": "Valid request body. Project should be created successfully."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-1\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40158994\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-2\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40153800\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Create Phase",
 					"event": [
 						{
@@ -4700,6 +4902,52 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t},\n\t\"order\": 1,\n\t\"productTemplateId\": {{productTemplateId}}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Phase with members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t},\n    \"members\": [{{phaseMemberId-1}},{{phaseMemberId-2}}]\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases",
@@ -4992,6 +5240,39 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"inactive\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n\t\"order\": 1\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Phase with members",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"inactive\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n    \"members\": [{{phaseMemberId-1}},{{phaseMemberId-2}}]\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
