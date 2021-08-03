@@ -634,6 +634,18 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
   },
 
   /*
+   * Project Phase Approval
+   */
+  CREATE_PROJECT_PHASE_APPROVE: {
+    meta: {
+      title: 'Create Project Phase Approval',
+      group: 'Project Phase Approval',
+      description: 'Who can create project phase approval',
+    },
+    projectRoles: [PROJECT_MEMBER_ROLE.CUSTOMER],
+  },
+
+  /*
    * DEPRECATED - THIS PERMISSION RULE HAS TO BE REMOVED
    *
    * Permissions defined by logic: **WHO** can do actions with such a permission.

@@ -102,6 +102,9 @@ module.exports = () => {
   Authorizer.setPolicy('phaseMember.delete', copilotAndAbove);
   Authorizer.setPolicy('phaseMember.view', generalPermission(PERMISSION.READ_PROJECT_MEMBER));
 
+  Authorizer.setPolicy('phaseApproval.create', generalPermission(PERMISSION.CREATE_PROJECT_PHASE_APPROVE));
+  Authorizer.setPolicy('phaseApproval.view', projectView);
+
   Authorizer.setPolicy('milestoneTemplate.clone', projectAdmin);
   Authorizer.setPolicy('milestoneTemplate.create', projectAdmin);
   Authorizer.setPolicy('milestoneTemplate.edit', projectAdmin);

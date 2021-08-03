@@ -38,7 +38,7 @@ async function update(currentUser, projectId, phaseId, newPhaseMembers, _transac
     }
     if (membersToAdd.length > 0) {
       const createData = _.map(membersToAdd, userId => ({ phaseId, userId, createdBy, updatedBy }));
-      const result = await models.ProjectPhaseMember.bulkCreate(createData, { transaction });
+      const result = await models.ProjectPhaseMember.bulkCreate(createData, { individualHooks: true, transaction });
       phaseMembers.push(..._.map(result, item => item.toJSON()));
     }
     if (_.isUndefined(_transaction)) {

@@ -42,6 +42,10 @@ module.exports = [
               include: [{
                 model: models.ProjectPhaseMember,
                 as: 'members',
+              },
+              {
+                model: models.ProjectPhaseApproval,
+                as: 'approvals',
               }],
             })
             .then((phase) => {
