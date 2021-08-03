@@ -15,9 +15,9 @@ const createPhaseApprovalValidations = {
   body: Joi.object().keys({
     decision: Joi.string().valid('approve', 'reject').required(),
     comment: Joi.string().trim().max(255).required(),
-    startDate: Joi.date().required(),
-    endDate: Joi.date().min(Joi.ref('startDate')).optional(),
-    expectedEndDate: Joi.date().min(Joi.ref('startDate')).required(),
+    startDate: Joi.date().default(Date()),
+    endDate: Joi.date().min(Joi.ref('startDate')).default(Date()),
+    expectedEndDate: Joi.date().min(Joi.ref('startDate')).default(Date()),
   }),
   params: {
     projectId: Joi.number().integer().positive().required(),
