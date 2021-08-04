@@ -12,7 +12,7 @@ CREATE TABLE "project_phase_approval" (
     "id" int8 NOT NULL DEFAULT nextval('project_phase_approval_id_seq'::regclass),
     "phaseId" int8 NOT NULL,
     "decision" "enum_project_phase_approval_decision" NOT NULL,
-    "comment" varchar NOT NULL,
+    "comment" varchar,
     "startDate" timestamptz NOT NULL,
     "endDate" timestamptz,
     "expectedEndDate" timestamptz NOT NULL,

@@ -44,7 +44,7 @@ module.exports = [
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_PRODUCT_REMOVED,
           RESOURCES.PHASE_PRODUCT,
-          _.pick(deleted.toJSON(), 'id'));
+          _.pick(deleted.toJSON(), ['id', 'projectId']));
 
         res.status(204).json({});
       })

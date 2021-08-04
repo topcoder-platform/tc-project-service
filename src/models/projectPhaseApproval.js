@@ -3,7 +3,7 @@ module.exports = function defineProjectPhaseApproval(sequelize, DataTypes) {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     phaseId: { type: DataTypes.BIGINT, allowNull: false },
     decision: { type: DataTypes.ENUM, values: ['approve', 'reject'], allowNull: false },
-    comment: { type: DataTypes.STRING, allowNull: false },
+    comment: { type: DataTypes.STRING, allowNull: true },
     startDate: { type: DataTypes.DATE, allowNull: false },
     endDate: { type: DataTypes.DATE, allowNull: true },
     expectedEndDate: { type: DataTypes.DATE, allowNull: false },

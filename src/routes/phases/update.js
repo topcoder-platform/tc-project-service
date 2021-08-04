@@ -5,7 +5,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, ROUTES } from '../../constants';
+import { EVENT, RESOURCES, ROUTES, PROJECT_PHASE_STATUS } from '../../constants';
 
 import updatePhaseMemberService from '../phaseMembers/updateService';
 
@@ -16,7 +16,7 @@ const updateProjectPhaseValidation = {
     name: Joi.string().optional(),
     description: Joi.string().optional(),
     requirements: Joi.string().optional(),
-    status: Joi.string().optional(),
+    status: Joi.string().valid(..._.values(PROJECT_PHASE_STATUS)).optional(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),
     duration: Joi.number().min(0).optional(),
