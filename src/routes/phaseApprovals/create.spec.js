@@ -71,7 +71,7 @@ describe('Create phase approvals', () => {
             models.ProjectPhase.create({
               name: 'test project phase',
               projectId,
-              status: 'active',
+              status: 'in_review',
               startDate: '2018-05-15T00:00:00Z',
               endDate: '2018-05-15T12:00:00Z',
               budget: 20.0,
@@ -168,6 +168,13 @@ describe('Create phase approvals', () => {
         });
     });
 
+    it('should update phase status to "reviewed" after approve', (done) => {
+      models.ProjectPhase.findOne({ id: phaseId }).then((phase) => {
+        phase.dataValues.status.should.be.eql('reviewed');
+        done();
+      });
+    });
+
     it('should return 400 when decision field is missing', (done) => {
       request(server)
         .post(`/v5/projects/${projectId}/phases/${phaseId}/approvals`)
@@ -179,21 +186,6 @@ describe('Create phase approvals', () => {
         .end((err, res) => {
           const resJson = res.body;
           validateError(resJson, 'validation error: "decision" is required');
-          done();
-        });
-    });
-
-    it('should return 400 when comment field is missing', (done) => {
-      request(server)
-        .post(`/v5/projects/${projectId}/phases/${phaseId}/approvals`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send(_.omit(requestBody, 'comment'))
-        .expect(400)
-        .end((err, res) => {
-          const resJson = res.body;
-          validateError(resJson, 'validation error: "comment" is required');
           done();
         });
     });
@@ -272,6 +264,21 @@ describe('Create phase approvals', () => {
           const resJson = res.body;
           resJson.message.should.be.a('string').and.satisfy(message =>
             message.startsWith('validation error: "endDate" must be larger than or equal to'));
+          done();
+        });
+    });
+
+    it('should return 400 when phase status is not in_review', (done) => {
+      request(server)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/approvals`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(requestBody)
+        .expect(400)
+        .end((err, res) => {
+          const resJson = res.body;
+          validateError(resJson, `Phase with id ${phaseId} must be in_review status to make approval`);
           done();
         });
     });

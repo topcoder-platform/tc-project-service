@@ -35,7 +35,7 @@ const updateBody = {
   name: 'test project phase xxx',
   description: 'test project phase description xxx',
   requirements: 'test project phase requirements xxx',
-  status: 'inactive',
+  status: 'in_review',
   startDate: '2018-05-11T00:00:00Z',
   endDate: '2018-05-12T12:00:00Z',
   budget: 123456.789,

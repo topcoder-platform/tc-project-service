@@ -4,7 +4,7 @@ import Joi from 'joi';
 
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES } from '../../constants';
+import { EVENT, RESOURCES, PROJECT_PHASE_STATUS } from '../../constants';
 
 import updatePhaseMemberService from '../phaseMembers/updateService';
 
@@ -16,7 +16,7 @@ const addProjectPhaseValidations = {
     name: Joi.string().required(),
     description: Joi.string().optional(),
     requirements: Joi.string().optional(),
-    status: Joi.string().required(),
+    status: Joi.string().valid(..._.values(PROJECT_PHASE_STATUS)).required(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),
     duration: Joi.number().min(0).optional(),
