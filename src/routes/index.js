@@ -190,6 +190,10 @@ router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/members')
 router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/members/:userId(\\d+)')
   .delete(require('./phaseMembers/delete'));
 
+router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/approvals')
+  .get(require('./phaseApprovals/list'))
+  .post(require('./phaseApprovals/create'));
+
 router.route('/v5/projects/metadata/productCategories')
   .post(require('./productCategories/create'));
 

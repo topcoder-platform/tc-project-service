@@ -31,7 +31,7 @@ module.exports = [
     const phaseId = _.parseInt(req.params.phaseId);
     const newPhaseMembers = req.body.userIds;
     try {
-      // chekc if project and phase exist
+      // check if project and phase exist
       const phase = await models.ProjectPhase.findOne({
         where: {
           id: phaseId,

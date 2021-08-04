@@ -52,7 +52,7 @@ module.exports = [
         // Sort
         phases = _.orderBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
 
-        fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products', 'members']);
+        fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products', 'members', 'approvals']);
         if (_.indexOf(fields, 'id') < 0) {
           fields.push('id');
         }
@@ -85,6 +85,12 @@ module.exports = [
               as: 'members',
             });
           }
+          if (_.indexOf(fields, 'approvals') >= 0) {
+            include.include.push({
+              model: models.ProjectPhaseApproval,
+              as: 'approvals',
+            });
+          }
           // Load the phases
           return models.Project.findByPk(projectId, {
             include: [include],
@@ -106,7 +112,7 @@ module.exports = [
               // Sort
               phases = _.orderBy(phases, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
               _.remove(PHASE_ATTRIBUTES, attribute => _.includes(['deletedAt', 'deletedBy'], attribute));
-              fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products', 'members']);
+              fields = _.intersection(fields, [...PHASE_ATTRIBUTES, 'products', 'members', 'approvals']);
               if (_.indexOf(fields, 'id') < 0) {
                 fields.push('id');
               }

@@ -27,11 +27,9 @@ describe('List phase members', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-  before(function beforeHook(done) {
-    this.timeout(20000);
+  before((done) => {
     // mocks
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',
@@ -49,7 +47,6 @@ describe('List phase members', () => {
           project = p.toJSON();
           // create members
           models.ProjectMember.create({
-            id: 1,
             userId: copilotUser.userId,
             projectId: id,
             role: 'copilot',

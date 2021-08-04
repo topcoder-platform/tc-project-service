@@ -34,11 +34,9 @@ describe('Update phase members', () => {
     lastName: 'lName',
     email: 'some@abc.com',
   };
-  before(function beforeHook(done) {
-    this.timeout(20000);
+  before((done) => {
     // mocks
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',
@@ -56,7 +54,6 @@ describe('Update phase members', () => {
           project = p.toJSON();
           // create members
           models.ProjectMember.bulkCreate([{
-            id: 1,
             userId: copilotUser.userId,
             projectId: id,
             role: 'copilot',
@@ -64,7 +61,6 @@ describe('Update phase members', () => {
             createdBy: 1,
             updatedBy: 1,
           }, {
-            id: 2,
             userId: memberUser.userId,
             projectId: id,
             role: 'customer',
@@ -179,7 +175,7 @@ describe('Update phase members', () => {
 
     it('should return 403 for copilot which is not member of project', (done) => {
       models.ProjectMember.destroy({
-        where: { userId: testUtil.userIds.copilot, id },
+        where: { userId: testUtil.userIds.copilot, projectId: id },
       }).then(() => {
         request(server)
           .post(`/v5/projects/${id}/phases/${phaseId}/members`)
