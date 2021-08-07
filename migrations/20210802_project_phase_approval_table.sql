@@ -6,7 +6,7 @@ CREATE SEQUENCE project_phase_approval_id_seq
     CACHE 1;
 
 DROP TYPE IF EXISTS "enum_project_phase_approval_decision";
-CREATE TYPE "enum_project_phase_approval_decision" AS ENUM ('approve, reject');
+CREATE TYPE "enum_project_phase_approval_decision" AS ENUM ('approve', 'reject');
 
 CREATE TABLE "project_phase_approval" (
     "id" int8 NOT NULL DEFAULT nextval('project_phase_approval_id_seq'::regclass),
