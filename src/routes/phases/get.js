@@ -39,7 +39,14 @@ module.exports = [
           return models.ProjectPhase
             .findOne({
               where: { id: phaseId, projectId },
-              raw: true,
+              include: [{
+                model: models.ProjectPhaseMember,
+                as: 'members',
+              },
+              {
+                model: models.ProjectPhaseApproval,
+                as: 'approvals',
+              }],
             })
             .then((phase) => {
               if (!phase) {
@@ -49,12 +56,15 @@ module.exports = [
                 err.status = 404;
                 throw err;
               }
-              res.json(phase);
+              return util.populatePhasesWithMemberDetails(phase.toJSON(), req)
+                .then(result => res.json(result));
             })
             .catch(err => next(err));
         }
         req.log.debug('phase found in ES');
-        return res.json(data[0].inner_hits.phases.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        // eslint-disable-next-line no-underscore-dangle
+        return util.populatePhasesWithMemberDetails(data[0].inner_hits.phases.hits.hits[0]._source, req)
+          .then(phase => res.json(phase));
       })
       .catch(next);
   },

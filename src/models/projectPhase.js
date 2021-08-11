@@ -42,6 +42,8 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
 
   ProjectPhase.associate = (models) => {
     ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
+    ProjectPhase.hasMany(models.ProjectPhaseMember, { as: 'members', foreignKey: 'phaseId' });
+    ProjectPhase.hasMany(models.ProjectPhaseApproval, { as: 'approvals', foreignKey: 'phaseId' });
     ProjectPhase.belongsToMany(models.WorkStream, { through: models.PhaseWorkStream, foreignKey: 'phaseId' });
   };
 

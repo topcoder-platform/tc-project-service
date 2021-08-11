@@ -183,6 +183,17 @@ router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/products/:prod
   .patch(require('./phaseProducts/update'))
   .delete(require('./phaseProducts/delete'));
 
+router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/members')
+  .get(require('./phaseMembers/list'))
+  .post(require('./phaseMembers/update'));
+
+router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/members/:userId(\\d+)')
+  .delete(require('./phaseMembers/delete'));
+
+router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)/approvals')
+  .get(require('./phaseApprovals/list'))
+  .post(require('./phaseApprovals/create'));
+
 router.route('/v5/projects/metadata/productCategories')
   .post(require('./productCategories/create'));
 

@@ -56,7 +56,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
     const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
     // console.log(doc._source, 'Received project from ES');// eslint-disable-line no-underscore-dangle
     const merged = _.merge(doc._source, project.get({ plain: true })); // eslint-disable-line no-underscore-dangle
-    console.log(merged, 'Merged project');
+    app.logger.debug(merged, 'Merged project');
     // update the merged document
     await eClient.update({
       index: ES_PROJECT_INDEX,
@@ -66,7 +66,7 @@ async function projectUpdatedKafkaHandler(app, topic, payload) {
         doc: merged,
       },
     });
-    console.log(`Succesfully updated project document in ES (projectId: ${previousValue.id})`);
+    app.logger.debug(`Succesfully updated project document in ES (projectId: ${previousValue.id})`);
   } catch (error) {
     throw Error(`failed to updated project document in elasitcsearch index (projectId: ${previousValue.id})` +
       `. Details: '${error}'.`);
