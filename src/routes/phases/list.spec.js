@@ -46,7 +46,7 @@ describe('Project Phases', () => {
     email: 'some@abc.com',
   };
   before(function beforeHook(done) {
-    this.timeout(10000);
+    this.timeout(20000);
     // mocks
     testUtil.clearDb()
       .then(() => testUtil.clearES())
@@ -85,18 +85,27 @@ describe('Project Phases', () => {
           }]).then(() => {
             _.assign(body, { projectId });
             return models.ProjectPhase.create(body);
-          }).then((phase) => {
-            // Index to ES
-            // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
-            project.lastActivityAt = 1;
-            project.phases = [phase];
-            return eClient.index({
-              index: ES_PROJECT_INDEX,
-              type: ES_PROJECT_TYPE,
-              id: projectId,
-              body: project,
-            }).then(() => {
-              done();
+          }).then((ph) => {
+            const phase = ph.toJSON();
+            models.ProjectPhaseMember.create({
+              phaseId: phase.id,
+              userId: copilotUser.userId,
+              createdBy: 1,
+              updatedBy: 1,
+            }).then((phaseMember) => {
+              _.assign(phase, { members: [phaseMember.toJSON()] });
+              // Index to ES
+              // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+              project.lastActivityAt = 1;
+              project.phases = [phase];
+              return eClient.index({
+                index: ES_PROJECT_INDEX,
+                type: ES_PROJECT_TYPE,
+                id: projectId,
+                body: project,
+              }).then(() => {
+                done();
+              });
             });
           });
         });
@@ -167,6 +176,48 @@ describe('Project Phases', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
+            done();
+          }
+        });
+    });
+
+    it('should return 1 phase when user have project permission (copilot) with memberOnly', (done) => {
+      request(server)
+        .get(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .query({ memberOnly: true })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            done();
+          }
+        });
+    });
+
+    it('should return 0 phase when user have project permission (customer) with memberOnly', (done) => {
+      request(server)
+        .get(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .query({ memberOnly: true })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(0);
             done();
           }
         });

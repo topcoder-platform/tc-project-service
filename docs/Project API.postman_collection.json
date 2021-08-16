@@ -1,17 +1,15 @@
 {
 	"info": {
-		"_postman_id": "c69ab4dd-8c6a-48c9-ba48-c6663b1a0c81",
+		"_postman_id": "52f34e21-5b0b-4eb0-99fa-cbd1ac7f215a",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Project Attachments",
-			"description": null,
 			"item": [
 				{
 					"name": "bookmarks",
-					"description": null,
 					"item": [
 						{
 							"name": " Create project without bookmarks",
@@ -117,10 +115,6 @@
 										"value": "application/json"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}",
 									"host": [
@@ -237,10 +231,6 @@
 										"value": "Bearer {{jwt-token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/projects",
 									"host": [
@@ -253,8 +243,7 @@
 							},
 							"response": []
 						}
-					],
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "Upload file attachment",
@@ -262,7 +251,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6547ada6-53f5-4e2d-bda0-f0ec5bfbe38f",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -310,7 +298,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6547ada6-53f5-4e2d-bda0-f0ec5bfbe38f",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -508,10 +495,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/attachments",
 							"host": [
@@ -599,7 +582,6 @@
 		},
 		{
 			"name": "Project With TemplateId issue",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project with templateId (not existed)",
@@ -637,7 +619,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ed52d7f8-829b-40ec-8583-7e8dbcc6741c",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -680,7 +661,6 @@
 		},
 		{
 			"name": "Project Members",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project member with no payload",
@@ -754,7 +734,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "82218ddf-4bd4-485f-bcd4-1d653c674680",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -835,7 +814,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba7b3265-aaba-4cca-8a53-819c9e96cfae",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -883,7 +861,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "87ab173c-8a4b-4d12-bfe7-ebcd272289f1",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -1085,10 +1062,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/members",
 							"host": [
@@ -1114,10 +1087,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/members?role=customer",
 							"host": [
@@ -1153,10 +1122,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
 							"host": [
@@ -1174,7 +1139,7 @@
 					"response": []
 				},
 				{
-					"name": "Delete project member Copy",
+					"name": "Delete project member",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1244,7 +1209,6 @@
 		},
 		{
 			"name": "Project Members Invites",
-			"description": null,
 			"item": [
 				{
 					"name": "List project member invite",
@@ -1327,7 +1291,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "320b75fe-958d-44ee-b2d2-1716b7b3e207",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -1382,7 +1345,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3835313a-bb42-487a-b17e-4d687535d7e5",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -1483,10 +1445,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId}}",
 							"host": [
@@ -1661,7 +1619,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "522949a9-3d94-4103-92b2-976af332f203",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -1671,7 +1628,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "df2755ee-59a5-4d8d-a6ad-6416b697c894",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -1682,7 +1638,6 @@
 		},
 		{
 			"name": "Projects",
-			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create project without payload",
@@ -1752,7 +1707,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5d951b47-5aac-4af6-a24b-ef6c998b913e",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -1833,10 +1787,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}",
 							"host": [
@@ -1861,10 +1811,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}?fields=id,name,description,members.id,members.projectId",
 							"host": [
@@ -1895,10 +1841,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects",
 							"host": [
@@ -1922,10 +1864,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects?perPage=1&page=1",
 							"host": [
@@ -1959,10 +1897,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects?type=generic",
 							"host": [
@@ -1992,10 +1926,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects?id=1&id=2",
 							"host": [
@@ -2029,10 +1959,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects?sort=type asc",
 							"host": [
@@ -2062,10 +1988,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects?fields=id,name,description",
 							"host": [
@@ -2095,10 +2017,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects",
 							"host": [
@@ -2648,11 +2566,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Requests for all things projects."
 		},
 		{
 			"name": "Workstream",
-			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create workstream without payload",
@@ -2693,7 +2611,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "15506f7a-77d3-46cb-9b37-41015ffbfdbc",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -2778,10 +2695,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}",
 							"host": [
@@ -2808,10 +2721,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams",
 							"host": [
@@ -2891,11 +2800,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Requests for all things projects."
 		},
 		{
 			"name": "Work",
-			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create work without payload",
@@ -2938,7 +2847,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "34d06fac-76f6-47b8-9b70-6e9c558e2bf1",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -3062,10 +2970,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}",
 							"host": [
@@ -3094,10 +2998,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works",
 							"host": [
@@ -3125,10 +3025,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works?sort=startDate desc",
 							"host": [
@@ -3162,10 +3058,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works?fields=status,name,budget",
 							"host": [
@@ -3291,11 +3183,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Requests for all things projects."
 		},
 		{
 			"name": "Work Item",
-			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create work item without payload",
@@ -3431,10 +3323,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems/{{itemId}}",
 							"host": [
@@ -3465,10 +3353,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/workstreams/{{workStreamId}}/works/{{workId}}/workitems",
 							"host": [
@@ -3560,11 +3444,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Requests for all things projects."
 		},
 		{
 			"name": "Work Management Permission",
-			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create work management permission without payload",
@@ -3605,7 +3489,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "305f3d68-6e9f-4c4d-b031-7487986a93e2",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -3653,7 +3536,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "305f3d68-6e9f-4c4d-b031-7487986a93e2",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -3738,10 +3620,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission/{{workManagementPermissionId}}",
 							"host": [
@@ -3768,10 +3646,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission",
 							"host": [
@@ -3797,10 +3671,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=template",
 							"host": [
@@ -3832,10 +3702,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=invalid%3D2%26projectTemplateId%3D1",
 							"host": [
@@ -3867,10 +3733,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/workManagementPermission?filter=projectTemplateId%3D1",
 							"host": [
@@ -3956,11 +3818,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Requests for all things projects."
 		},
 		{
 			"name": "Permissions",
-			"description": null,
 			"item": [
 				{
 					"name": "Get permissions - 404",
@@ -3972,10 +3834,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/9999/permissions",
 							"host": [
@@ -4069,10 +3927,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/permissions",
 							"host": [
@@ -4098,10 +3952,6 @@
 								"value": "Bearer {{jwt-token-manager-40051334}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/permissions",
 							"host": [
@@ -4122,7 +3972,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "5197d1ec-429c-4a6f-9e9c-3ec3cd6f292a",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -4132,7 +3981,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "cc0cbbf1-54d1-481f-b8fa-a6dc4c80e993",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -4143,7 +3991,6 @@
 		},
 		{
 			"name": "WorkManagementForTemplate",
-			"description": "Requests for all things projects.",
 			"item": [
 				{
 					"name": "Create workstream with valid values",
@@ -4477,11 +4324,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Requests for all things projects."
 		},
 		{
 			"name": "EventHandling and Integration with Direct Project API",
-			"description": null,
 			"item": [
 				{
 					"name": "mock direct projects",
@@ -4497,10 +4344,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "https://api.topcoder-dev.com/v3/direct/projects",
 							"protocol": "https",
@@ -4714,7 +4557,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "ef96ac6a-0fc0-4a64-a4fe-5390e17afe67",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -4724,7 +4566,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "12f9d794-0872-4058-aafa-77b89e72025b",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -4735,15 +4576,215 @@
 		},
 		{
 			"name": "Project Phase",
-			"description": null,
 			"item": [
+				{
+					"name": "Before Start",
+					"item": [
+						{
+							"name": "Create project type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectTypeId\", response.key);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/metadata/projectTypes",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"metadata",
+										"projectTypes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects"
+									]
+								},
+								"description": "Valid request body. Project should be created successfully."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-1\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40158994\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-2\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40153800\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						}
+					]
+				},
 				{
 					"name": "Create Phase",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "7050133a-b934-4faf-8101-d2e80b5c0710",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -4790,7 +4831,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2f771afe-7b4e-4260-b04d-324e880eb61b",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -4837,7 +4877,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8415ad98-b3f6-4330-88b6-e1830da2e4f9",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -4879,6 +4918,52 @@
 					"response": []
 				},
 				{
+					"name": "Create Phase with members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t},\n    \"members\": [{{phaseMemberId-1}},{{phaseMemberId-2}}]\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "List Phase",
 					"request": {
 						"method": "GET",
@@ -4892,10 +4977,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases",
 							"host": [
@@ -4924,10 +5005,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases?fields=status,name,budget",
 							"host": [
@@ -4949,6 +5026,74 @@
 					"response": []
 				},
 				{
+					"name": "List Phase with members field",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?fields=status,name,budget,members,products",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "status,name,budget,members,products"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase with approvals field",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?fields=status,name,budget,members,products,approvals",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "status,name,budget,members,products,approvals"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "List Phase with sort",
 					"request": {
 						"method": "GET",
@@ -4962,10 +5107,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=status desc",
 							"host": [
@@ -5000,10 +5141,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=order desc",
 							"host": [
@@ -5025,6 +5162,40 @@
 					"response": []
 				},
 				{
+					"name": "List Phase with memberOnly",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?memberOnly=true",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							],
+							"query": [
+								{
+									"key": "memberOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get Phase",
 					"request": {
 						"method": "GET",
@@ -5038,10 +5209,6 @@
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
 							"host": [
@@ -5073,7 +5240,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"inactive\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t}\n}"
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t}\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
@@ -5106,7 +5273,40 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"inactive\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n\t\"order\": 1\n}"
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n\t\"order\": 1\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Phase with members",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n    \"members\": [{{phaseMemberId-1}},{{phaseMemberId-2}}]\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
@@ -5160,7 +5360,6 @@
 		},
 		{
 			"name": "Phase Products",
-			"description": null,
 			"item": [
 				{
 					"name": "Create Phase Product",
@@ -5168,7 +5367,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "77f089b3-cbe6-4fb4-b54f-2a52d138a050",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -5193,7 +5391,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"test phase product\",\n\t\"type\": \"type 1\",\n\t\"estimatedPrice\": 10\n}"
+							"raw": "{\n\t\"name\": \"test phase product\",\n\t\"type\": \"type 1\",\n\t\"estimatedPrice\": 10,\n    \"templateId\": 2,\n    \"actualPrice\": \"10\"\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products",
@@ -5221,10 +5419,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products",
 							"host": [
@@ -5251,10 +5445,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
 							"host": [
@@ -5341,8 +5531,773 @@
 			]
 		},
 		{
+			"name": "Phase Members",
+			"item": [
+				{
+					"name": "Before Start",
+					"item": [
+						{
+							"name": "Create project type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectTypeId\", response.key);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/metadata/projectTypes",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"metadata",
+										"projectTypes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects"
+									]
+								},
+								"description": "Valid request body. Project should be created successfully."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-1\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40158994\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-2\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40153800\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Phase",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/phases",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"phases"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Update Phase Members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"userIds\": [{{phaseMemberId-1}},{{phaseMemberId-2}}]\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase Members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Phase Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/members/{{phaseMemberId-2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"members",
+								"{{phaseMemberId-2}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase Approvals",
+			"item": [
+				{
+					"name": "Before Start",
+					"item": [
+						{
+							"name": "Create project type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectTypeId\", response.key);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/metadata/projectTypes",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"metadata",
+										"projectTypes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects"
+									]
+								},
+								"description": "Valid request body. Project should be created successfully."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project customer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"88774634\",\n    \"role\": \"customer\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Phase",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/phases",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"phases"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Create Phase Approval - approve",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-topcoder-user-88774634}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"decision\": \"approve\",\n    \"comment\": \"good\",\n    \"startDate\": \"2021-08-02\",\n    \"endDate\": \"2021-08-03\",\n    \"expectedEndDate\": \"2021-08-03\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/approvals",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"approvals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Phase",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"status\": \"in_review\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Phase Approval - approve Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-topcoder-user-88774634}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"decision\": \"reject\",\n    \"comment\": \"bad\",\n    \"startDate\": \"2021-08-03\",\n    \"endDate\": \"2021-08-04\",\n    \"expectedEndDate\": \"2021-08-05\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/approvals",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"approvals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase Approvals",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/approvals",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"approvals"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Project Templates",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project template",
@@ -5350,7 +6305,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2f79c07b-8076-4715-abf7-1d6903df444f",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -5397,7 +6351,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "4c442ea3-0834-4a30-8044-a4e94fd4ea2d",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -5444,7 +6397,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7d0ae3ca-fe2d-40eb-b5c8-9b03955babec",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -5563,10 +6515,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates",
 							"host": [
@@ -5595,10 +6543,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates/{{projectTemplateId}}",
 							"host": [
@@ -5852,7 +6796,6 @@
 		},
 		{
 			"name": "Product Templates",
-			"description": null,
 			"item": [
 				{
 					"name": "Create product template",
@@ -5860,7 +6803,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "b5aaf185-6026-4b58-b9b8-56616109cd5a",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -5907,7 +6849,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d5a2af2e-97d2-415c-a533-1d52dd4003c7",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -6026,10 +6967,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productTemplates",
 							"host": [
@@ -6058,10 +6995,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productTemplates/{{productTemplateId}}",
 							"host": [
@@ -6255,7 +7188,6 @@
 		},
 		{
 			"name": "Project Type",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project type",
@@ -6263,7 +7195,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "fbc45946-a3f2-433a-8ec5-0af82b69d2bd",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -6318,10 +7249,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTypes",
 							"host": [
@@ -6350,10 +7277,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTypes/{{projectTypeId}}",
 							"host": [
@@ -6439,7 +7362,6 @@
 		},
 		{
 			"name": "Org Config",
-			"description": null,
 			"item": [
 				{
 					"name": "Create org config",
@@ -6447,7 +7369,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "fbc45946-a3f2-433a-8ec5-0af82b69d2bd",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -6505,10 +7426,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/orgConfig",
 							"host": [
@@ -6537,10 +7454,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/orgConfig?orgId={{orgStrId}}",
 							"host": [
@@ -6576,10 +7489,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/orgConfig?orgId={{orgStrId}}&configName={{orgConfigName}}",
 							"host": [
@@ -6676,7 +7585,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "2e274cc9-22e6-4dd2-9eee-c4f1fd98253d",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -6686,7 +7594,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "9d171dbf-2a50-4483-b172-ce240ac09413",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -6697,7 +7604,6 @@
 		},
 		{
 			"name": "Product Category",
-			"description": null,
 			"item": [
 				{
 					"name": "Create product category",
@@ -6705,7 +7611,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "06156797-ceb2-4f8c-9448-5c453adb7b7a",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -6760,10 +7665,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productCategories",
 							"host": [
@@ -6792,10 +7693,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productCategories/{{productCategoryId}}",
 							"host": [
@@ -6892,7 +7789,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "f0092ef5-e624-4c25-87b2-b6a9e4c81ec8",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -6902,7 +7798,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "9183c429-a5e0-4bf9-96a2-89f4d66e9b0d",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -6913,7 +7808,6 @@
 		},
 		{
 			"name": "Project upgrade",
-			"description": "Request to migrate projects.",
 			"item": [
 				{
 					"name": "Migrate project",
@@ -7043,11 +7937,11 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "Request to migrate projects."
 		},
 		{
 			"name": "Timeline",
-			"description": null,
 			"item": [
 				{
 					"name": "Create timeline",
@@ -7055,7 +7949,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "c066e7d4-537f-406e-a768-ec4bf73a2634",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -7100,7 +7993,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ee729ed9-0072-4821-9141-3615ff66f728",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -7189,10 +8081,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines?reference=project&referenceId={{projectId}}",
 							"host": [
@@ -7229,10 +8117,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
@@ -7260,10 +8144,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}",
 							"host": [
@@ -7405,7 +8285,6 @@
 		},
 		{
 			"name": "Milestone",
-			"description": null,
 			"item": [
 				{
 					"name": "Create milestone",
@@ -7413,7 +8292,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8fd1d5e9-8e6e-4cd7-9010-b855308be069",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -7501,10 +8379,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones",
 							"host": [
@@ -7533,10 +8407,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones?sort=order desc",
 							"host": [
@@ -7571,10 +8441,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/{{timelineId}}/milestones/{{milestoneId}}",
 							"host": [
@@ -7596,7 +8462,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8fd1d5e9-8e6e-4cd7-9010-b855308be069",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -7971,7 +8836,6 @@
 		},
 		{
 			"name": "Milestone Template",
-			"description": null,
 			"item": [
 				{
 					"name": "Create milestone template",
@@ -7979,7 +8843,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3dbf8b29-2498-4b05-93de-14d809ccc285",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -8197,10 +9060,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates",
 							"host": [
@@ -8229,10 +9088,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?reference=productTemplate&referenceId={{productTemplateId}}",
 							"host": [
@@ -8271,10 +9126,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates?reference=productTemplate&referenceId={{productTemplateId}}&sort=order desc",
 							"host": [
@@ -8317,10 +9168,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/timelines/metadata/milestoneTemplates/{{milestoneTemplateId}}",
 							"host": [
@@ -8571,7 +9418,6 @@
 		},
 		{
 			"name": "Metadata",
-			"description": null,
 			"item": [
 				{
 					"name": "Get all metadata",
@@ -8594,10 +9440,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata",
 							"host": [
@@ -8626,10 +9468,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata?includeAllReferred=true",
 							"host": [
@@ -8653,7 +9491,6 @@
 		},
 		{
 			"name": "Form Version",
-			"description": null,
 			"item": [
 				{
 					"name": "List forms",
@@ -8670,10 +9507,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions",
 							"host": [
@@ -8705,10 +9538,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions/{{formVersion}}",
 							"host": [
@@ -8741,10 +9570,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}",
 							"host": [
@@ -8766,7 +9591,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "94f6be66-34cc-40c8-80c2-b27dd93ed527",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -8908,7 +9732,6 @@
 		},
 		{
 			"name": "Form Revision",
-			"description": null,
 			"item": [
 				{
 					"name": "List all revision for version",
@@ -8925,10 +9748,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions/{{formVersion}}/revisions",
 							"host": [
@@ -8962,10 +9781,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/form/{{formKey}}/versions/{{formVersion}}/revisions/{{formRevision}}",
 							"host": [
@@ -8991,7 +9806,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "dbe5ec9f-022c-4ec5-b58c-d19c15430b61",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -9137,7 +9951,6 @@
 		},
 		{
 			"name": "Price Config Version",
-			"description": null,
 			"item": [
 				{
 					"name": "List price configs",
@@ -9154,10 +9967,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/dev/versions",
 							"host": [
@@ -9189,10 +9998,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/{{priceKey}}/versions/{{priceVersion}}",
 							"host": [
@@ -9225,10 +10030,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/{{priceKey}}",
 							"host": [
@@ -9250,7 +10051,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "e440c87c-49ff-4443-b9bf-b44d4e9a480f",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -9393,7 +10193,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "59182724-4332-4d76-90ea-f7520a7b1be9",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -9403,7 +10202,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "abc13dca-e8a4-4995-970f-00e5889a5f2d",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -9414,7 +10212,6 @@
 		},
 		{
 			"name": "Price Config Revision",
-			"description": null,
 			"item": [
 				{
 					"name": "List all revision for version",
@@ -9431,10 +10228,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/dev/versions/3/revisions",
 							"host": [
@@ -9468,10 +10261,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/priceConfig/{{priceKey}}/versions/{{priceVersion}}/revisions/{{priceRevision}}",
 							"host": [
@@ -9497,7 +10286,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d53ed608-b21c-4d6f-bb68-c2beda1d631d",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -9643,7 +10431,6 @@
 		},
 		{
 			"name": "Plan Config Version",
-			"description": null,
 			"item": [
 				{
 					"name": "List plan configs",
@@ -9660,10 +10447,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/dev/versions",
 							"host": [
@@ -9695,10 +10478,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}/versions/{{planVersion}}",
 							"host": [
@@ -9731,10 +10510,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}",
 							"host": [
@@ -9756,7 +10531,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "97bc350a-0c4f-46a6-a315-a62b203b3ad2",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -9898,7 +10672,6 @@
 		},
 		{
 			"name": "Plan Config Revision",
-			"description": null,
 			"item": [
 				{
 					"name": "List all revision for version",
@@ -9915,10 +10688,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}/versions/{{planVersion}}/revisions",
 							"host": [
@@ -9952,10 +10721,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/planConfig/{{planKey}}/versions/{{planVersion}}/revisions/{{planRevision}}",
 							"host": [
@@ -9981,7 +10746,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a5373f1f-4beb-46f9-8538-10c938c204ba",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -10127,11 +10891,9 @@
 		},
 		{
 			"name": "Project Reports",
-			"description": null,
 			"item": [
 				{
 					"name": "summary",
-					"description": null,
 					"item": [
 						{
 							"name": "get report by admin",
@@ -10144,10 +10906,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary",
 									"host": [
@@ -10179,10 +10937,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary",
 									"host": [
@@ -10214,10 +10968,6 @@
 										"value": "Bearer {{jwt-token-admin-40051333}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/projects/123456/reports?reportName=summary",
 									"host": [
@@ -10249,10 +10999,6 @@
 										"value": "Bearer {{jwt-token-admin-40051333}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=summary123",
 									"host": [
@@ -10273,12 +11019,10 @@
 							},
 							"response": []
 						}
-					],
-					"_postman_isSubFolder": true
+					]
 				},
 				{
 					"name": "projectBudget",
-					"description": null,
 					"item": [
 						{
 							"name": "get report by admin",
@@ -10291,10 +11035,6 @@
 										"value": "Bearer {{jwt-token-admin-40051333}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api-url}}/projects/{{projectId}}/reports?reportName=projectBudget",
 									"host": [
@@ -10315,14 +11055,12 @@
 							},
 							"response": []
 						}
-					],
-					"_postman_isSubFolder": true
+					]
 				}
 			]
 		},
 		{
 			"name": "Project Setting",
-			"description": null,
 			"item": [
 				{
 					"name": "Create project setting - double",
@@ -10330,7 +11068,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -10377,7 +11114,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf3aa19f-517c-4103-9250-82d7847e7477",
 								"exec": [
 									""
 								],
@@ -10421,7 +11157,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
 								"exec": [
 									""
 								],
@@ -10465,7 +11200,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
 								"exec": [
 									""
 								],
@@ -10541,7 +11275,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
 								"exec": [
 									""
 								],
@@ -10713,7 +11446,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7350de08-5111-44f8-8a4c-3d0c48bcd8d4",
 								"exec": [
 									""
 								],
@@ -10765,10 +11497,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/settings",
 							"host": [
@@ -10797,10 +11525,6 @@
 								"value": "Bearer {{jwt-token-copilot-40051332}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/settings",
 							"host": [
@@ -10829,10 +11553,6 @@
 								"value": "Bearer {{jwt-token-manager-40051334}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/settings",
 							"host": [
