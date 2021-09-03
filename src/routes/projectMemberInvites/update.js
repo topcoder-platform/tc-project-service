@@ -40,7 +40,8 @@ module.exports = [
     const currentUserId = req.authUser.userId;
 
     // get invite by id and project id
-    return models.ProjectMemberInvite.getPendingOrRequestedProjectInviteById(projectId, inviteId)
+    return models.sequelize.transaction(() => models.ProjectMemberInvite
+      .getPendingOrRequestedProjectInviteById(projectId, inviteId)
       .then((invite) => {
         // if invite doesn't exist, return 404
         if (!invite) {
@@ -81,6 +82,12 @@ module.exports = [
           .update({
             status: newStatus,
           })
+          .then(updatedInvite => util.updateTopObjectPropertyFromES(updatedInvite.projectId, (source) => {
+            const message = updatedInvite.toJSON();
+            const invites = _.isArray(source.invites) ? source.invites : [];
+            _.remove(invites, { id: message.id });
+            return _.assign(source, { invites });
+          }).then(() => updatedInvite))
           .then((updatedInvite) => {
             // emit the event
             util.sendResourceToKafkaBus(
@@ -126,6 +133,6 @@ module.exports = [
             return res.json(util.postProcessInvites('$.email', updatedInvite, req));
           });
       })
-      .catch(next);
+      .catch(next));
   },
 ];

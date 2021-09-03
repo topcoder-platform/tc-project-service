@@ -50,6 +50,11 @@ module.exports = [
         return Promise.resolve();
       })
       .then(() => {
+        const message = attachment.get({ plain: true });
+        return util.updateTopObjectPropertyFromES(message.projectId,
+          util.generateDeleteDocFunction(message.id, 'attachments'));
+      })
+      .then(() => {
         // fire event
         const pattachment = attachment.get({ plain: true });
         // emit the event

@@ -42,7 +42,7 @@ module.exports = [
       updatedBy: req.authUser.userId,
     });
 
-    return models.ProjectType.findOne({
+    return models.sequelize.transaction(() => models.ProjectType.findOne({
       where: {
         key: req.params.key,
       },
@@ -57,7 +57,9 @@ module.exports = [
         }
 
         return projectType.update(entityToUpdate);
-      })
+      }).then(projectType => util.updateMetadataFromES(req.log,
+        util.generateUpdateDocFunction(projectType.get({ plain: true }), 'projectTypes', 'key'))
+        .then(() => projectType)))
       .then((projectType) => {
         util.sendResourceToKafkaBus(
           req,

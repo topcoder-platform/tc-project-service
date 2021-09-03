@@ -75,7 +75,7 @@ module.exports = [
 
     if (data.type === ATTACHMENT_TYPES.LINK) {
       // We create the record in the db and return (i.e. no need to handle transferring file between S3 buckets)
-      Promise.resolve(models.ProjectAttachment.create({
+      Promise.resolve(models.sequelize.transaction(() => models.ProjectAttachment.create({
         projectId,
         allowedUsers,
         createdBy: req.authUser.userId,
@@ -89,6 +89,10 @@ module.exports = [
         type: data.type,
         tags: data.tags,
       })).then((_link) => {
+        const link = _link.get({ plain: true });
+        return util.updateTopObjectPropertyFromES(link.projectId,
+          util.generateCreateDocFunction(link, 'attachments')).then(() => _link);
+      }).then((_link) => {
         const link = _link.get({ plain: true });
         req.log.debug('New Link Attachment record: ', link);
 
@@ -107,14 +111,14 @@ module.exports = [
           const rerr = error;
           rerr.status = rerr.status || 500;
           next(rerr);
-        });
+        }));
     } else {
     // don't actually transfer file in development mode if file uploading is disabled, so we can test this endpoint
       const fileTransferPromise = (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true')
         ? util.s3FileTransfer(req, sourceBucket, sourceKey, destBucket, destKey)
         : Promise.resolve();
 
-      fileTransferPromise.then(() => {
+      models.sequelize.transaction(() => fileTransferPromise.then(() => {
         // file copied to final destination, create DB record
         req.log.debug('creating db file record');
         return models.ProjectAttachment.create({
@@ -144,6 +148,13 @@ module.exports = [
           });
         }
         return Promise.resolve();
+      }).then((resp) => {
+        if ((process.env.NODE_ENV === 'development' && config.get('enableFileUpload') === 'false') ||
+        (resp.status === 200 && resp.data.result.status === 200)) {
+          return util.updateTopObjectPropertyFromES(newAttachment.projectId,
+            util.generateCreateDocFunction(newAttachment, 'attachments')).then(() => resp);
+        }
+        return resp;
       }).then((resp) => {
         if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
           req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data));
@@ -186,7 +197,7 @@ module.exports = [
           const rerr = error;
           rerr.status = rerr.status || 500;
           next(rerr);
-        });
+        }));
     }
   },
 ];

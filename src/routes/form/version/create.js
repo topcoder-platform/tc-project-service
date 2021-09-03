@@ -55,7 +55,9 @@ module.exports = [
         config: req.body.config,
       });
       return models.Form.create(entity);
-    }).then((createdEntity) => {
+    }).then(createdEntity => util.updateMetadataFromES(req.log,
+      util.generateCreateDocFunction(createdEntity.toJSON(), 'forms'))
+      .then(() => createdEntity)).then((createdEntity) => {
       util.sendResourceToKafkaBus(req,
         EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
         RESOURCES.FORM_VERSION,

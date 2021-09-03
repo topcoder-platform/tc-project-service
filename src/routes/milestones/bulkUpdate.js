@@ -3,6 +3,7 @@
  */
 import Promise from 'bluebird';
 import _ from 'lodash';
+import config from 'config';
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -93,6 +94,43 @@ module.exports = [
       toDelete, item => deleteMilestone(req.authUser, timelineId, item.id, transaction, item));
     const updated = await Promise.mapSeries(
       toUpdate, ([item, data]) => updateMilestone(req.authUser, timelineId, data, transaction, item));
+
+    // handle ES Update
+    await util.updateTopObjectPropertyFromES(timelineId, async (source) => {
+      // handle add milestone
+      let milestones = _.isArray(source.milestones) ? source.milestones : [];
+
+      const existingMilestoneIndex = _.findIndex(milestones, p => p.id === created.id); // if milestone does not exists already
+      if (existingMilestoneIndex === -1) {
+        // Increase the order of the other milestones in the same timeline,
+        // which have `order` >= this milestone order
+        _.each(milestones, (milestone) => {
+          if (!_.isNil(milestone.order) && !_.isNil(created.order) && milestone.order >= created.order) {
+            // eslint-disable-next-line no-param-reassign
+            milestone.order += 1;
+          }
+        });
+
+        milestones.push(created);
+      } else { // if milestone already exists, ideally we should never land here, but code handles the buggy indexing
+        // replaces the old inconsistent index where previously milestone was not removed from the index but deleted
+        // from the database
+        milestones.splice(existingMilestoneIndex, 1, created);
+      }
+
+      // handle delete milestone
+      milestones = _.filter(source.milestones, single => single.id !== deleted.id);
+
+      // handle update milestone
+      milestones = _.map(milestones, (single) => {
+        const singleUpdated = _.find(updated, ['updated.id', single.id]);
+        if (singleUpdated) {
+          return _.assign(single, singleUpdated.updated);
+        }
+        return single;
+      });
+      return _.assign(source, { milestones });
+    }, config.get('elasticsearchConfig.timelineIndexName'));
     return { created, deleted, updated };
   })
     .then(async ({ created, deleted, updated }) => {

@@ -43,13 +43,16 @@ module.exports = [
       });
     }).then(priceConfig =>
       priceConfig.destroy(),
-    ).then((priceConfig) => {
-      util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
-        RESOURCES.PRICE_CONFIG_REVISION,
-        _.pick(priceConfig.toJSON(), 'id'));
-      res.status(204).end();
-    })
+    ).then(entity => util.updateMetadataFromES(req.log,
+      util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'priceConfigs'))
+      .then(() => entity))
+      .then((priceConfig) => {
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
+          RESOURCES.PRICE_CONFIG_REVISION,
+          _.pick(priceConfig.toJSON(), 'id'));
+        res.status(204).end();
+      })
       .catch(next));
   },
 ];

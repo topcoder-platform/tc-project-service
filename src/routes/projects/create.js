@@ -487,6 +487,22 @@ module.exports = [
           }).then(() => req.log.debug('project history created for project %d', newProject.id))
             .catch(() => req.log.error('project history failed for project %d', newProject.id));
           return Promise.resolve();
+        })
+        .then(() => {
+          const message = _.assign(_.omit(newProject.get({ plain: true }), ['deletedAt', 'utm']), {
+            attachments: projectAttachments,
+            phases: newPhases,
+            estimations: projectEstimations,
+            refCode: _.get(newProject, 'details.utm.code'),
+            projectUrl: `${config.get('connectProjectsUrl')}${newProject.id}`,
+          });
+          return util.getElasticSearchClient().create({
+            index: config.get('elasticsearchConfig.indexName'),
+            type: config.get('elasticsearchConfig.docType'),
+            id: message.id,
+            body: message,
+            refresh: 'wait_for',
+          });
         });
     })
       .then(() => {

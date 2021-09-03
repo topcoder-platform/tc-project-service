@@ -55,7 +55,9 @@ module.exports = [
       const apiErr = new Error(`PriceConfig not exists for key ${req.params.key} version ${req.params.version}`);
       apiErr.status = 404;
       return Promise.reject(apiErr);
-    }).then((createdEntity) => {
+    }).then(createdEntity => util.updateMetadataFromES(req.log,
+      util.generateCreateDocFunction(createdEntity.toJSON(), 'priceConfigs'))
+      .then(() => createdEntity)).then((createdEntity) => {
       util.sendResourceToKafkaBus(req,
         EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
         RESOURCES.PRICE_CONFIG_REVISION,

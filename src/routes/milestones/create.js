@@ -3,6 +3,8 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
+import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
@@ -50,7 +52,30 @@ module.exports = [
   validateTimeline.validateTimelineIdParam,
   permissions('milestone.create'),
   (req, res, next) =>
-    models.sequelize.transaction(t => createMilestone(req.authUser, req.timeline, req.body, t))
+    models.sequelize.transaction(t => createMilestone(req.authUser, req.timeline, req.body, t)
+      .then(result => util.updateTopObjectPropertyFromES(result.timelineId, (source) => {
+        const message = result;
+        const milestones = _.isArray(source.milestones) ? source.milestones : [];
+
+        const existingMilestoneIndex = _.findIndex(milestones, p => p.id === message.id); // if milestone does not exists already
+        if (existingMilestoneIndex === -1) {
+          // Increase the order of the other milestones in the same timeline,
+          // which have `order` >= this milestone order
+          _.each(milestones, (milestone) => {
+            if (!_.isNil(milestone.order) && !_.isNil(message.order) && milestone.order >= message.order) {
+              // eslint-disable-next-line no-param-reassign
+              milestone.order += 1;
+            }
+          });
+
+          milestones.push(message);
+        } else { // if milestone already exists, ideally we should never land here, but code handles the buggy indexing
+          // replaces the old inconsistent index where previously milestone was not removed from the index but deleted
+          // from the database
+          milestones.splice(existingMilestoneIndex, 1, message);
+        }
+        return _.assign(source, { milestones });
+      }, config.get('elasticsearchConfig.timelineIndexName')).then(() => result)))
       .then((result) => {
         util.sendResourceToKafkaBus(
           req,

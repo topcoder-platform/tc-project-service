@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
@@ -58,7 +59,9 @@ module.exports = [
         req.authUser,
         req.params.timelineId,
         Object.assign({}, req.body, { id: req.params.milestoneId }),
-        t))
+        t).then(({ updated, original }) => util.updateTopObjectPropertyFromES(updated.timelineId,
+        util.generateUpdateDocFunction(updated, 'milestones'),
+        config.get('elasticsearchConfig.timelineIndexName')).then(() => ({ updated, original }))))
       .then(({ updated, original }) => {
         util.sendResourceToKafkaBus(
           req,

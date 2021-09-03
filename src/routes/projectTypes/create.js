@@ -41,7 +41,7 @@ module.exports = [
     });
 
     // Check if duplicated key
-    return models.ProjectType.findByPk(req.body.key, { paranoid: false })
+    return models.sequelize.transaction(() => models.ProjectType.findByPk(req.body.key, { paranoid: false })
       .then((existing) => {
         if (existing) {
           const apiErr = new Error(`Project type already exists (may be deleted) for key ${req.body.key}`);
@@ -51,7 +51,9 @@ module.exports = [
 
         // Create
         return models.ProjectType.create(entity);
-      }).then((createdEntity) => {
+      }).then(createdEntity => util.updateMetadataFromES(req.log,
+        util.generateCreateDocFunction(createdEntity.toJSON(), 'projectTypes', 'key')).then(() => createdEntity)))
+      .then((createdEntity) => {
         // emit event
         util.sendResourceToKafkaBus(
           req,

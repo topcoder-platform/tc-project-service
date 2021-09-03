@@ -72,7 +72,9 @@ module.exports = [
           updatedBy: req.authUser.userId,
         });
 
-        return models.ProjectTemplate.create(entity)
+        return models.sequelize.transaction(() => models.ProjectTemplate.create(entity)
+          .then(createdEntity => util.updateMetadataFromES(req.log,
+            util.generateCreateDocFunction(createdEntity.toJSON(), 'projectTemplates')).then(() => createdEntity)))
           .then((createdEntity) => {
             // emit event
             util.sendResourceToKafkaBus(

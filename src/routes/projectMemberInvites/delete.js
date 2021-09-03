@@ -20,7 +20,8 @@ module.exports = [
     const currentUserId = req.authUser.userId;
 
     // get invite by id and project id
-    return models.ProjectMemberInvite.getPendingOrRequestedProjectInviteById(projectId, inviteId)
+    return models.sequelize.transaction(() => models.ProjectMemberInvite
+      .getPendingOrRequestedProjectInviteById(projectId, inviteId)
       .then((invite) => {
         // if invite doesn't exist, return 404
         if (!invite) {
@@ -73,7 +74,12 @@ module.exports = [
         return invite
           .update({
             status: INVITE_STATUS.CANCELED,
-          })
+          }).then(updatedInvite => util.updateTopObjectPropertyFromES(updatedInvite.projectId, (source) => {
+            const message = updatedInvite.toJSON();
+            const invites = _.isArray(source.invites) ? source.invites : [];
+            _.remove(invites, { id: message.id });
+            return _.assign(source, { invites });
+          }).then(() => updatedInvite))
           .then((updatedInvite) => {
             // emit the event
             util.sendResourceToKafkaBus(
@@ -85,6 +91,6 @@ module.exports = [
             res.status(204).end();
           });
       })
-      .catch(next);
+      .catch(next));
   },
 ];

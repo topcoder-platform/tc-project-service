@@ -97,7 +97,19 @@ module.exports = [
           newPhaseProduct = newPhaseProduct.get({ plain: true });
           newPhaseProduct = _.omit(newPhaseProduct, ['deletedAt', 'utm']);
         });
-    }))
+    })
+      .then(() => util.updateTopObjectPropertyFromES(newPhaseProduct.projectId, (source) => {
+        const phases = _.isArray(source.phases) ? source.phases : [];
+
+        _.each(phases, (phase) => {
+          if (phase.id === newPhaseProduct.phaseId) {
+            // eslint-disable-next-line no-param-reassign
+            phase.products = _.isArray(phase.products) ? phase.products : [];
+            phase.products.push(newPhaseProduct);
+          }
+        });
+        return _.assign(source, { phases });
+      })))
       .then(() => {
         // emit the event
         util.sendResourceToKafkaBus(

@@ -53,7 +53,9 @@ module.exports = [
         config: req.body.config,
       });
       return models.PlanConfig.create(entity);
-    }).then((createdEntity) => {
+    }).then(createdEntity => util.updateMetadataFromES(req.log,
+      util.generateCreateDocFunction(createdEntity.toJSON(), 'planConfigs'))
+      .then(() => createdEntity)).then((createdEntity) => {
       util.sendResourceToKafkaBus(req,
         EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
         RESOURCES.PLAN_CONFIG_VERSION,

@@ -43,7 +43,7 @@ module.exports = [
       updatedBy: req.authUser.userId,
     });
 
-    return models.ProductCategory.findOne({
+    return models.sequelize.transaction(() => models.ProductCategory.findOne({
       where: {
         key: req.params.key,
       },
@@ -58,7 +58,9 @@ module.exports = [
         }
 
         return productCategory.update(entityToUpdate);
-      })
+      }).then(productCategory => util.updateMetadataFromES(req.log,
+        util.generateUpdateDocFunction(productCategory.get({ plain: true }), 'productCategories', 'key'))
+        .then(() => productCategory)))
       .then((productCategory) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,

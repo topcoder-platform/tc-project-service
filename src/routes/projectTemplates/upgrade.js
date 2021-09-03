@@ -108,6 +108,7 @@ module.exports = [
       };
 
       const newPt = await pt.update(updateInfo);
+      await util.updateMetadataFromES(req.log, util.generateUpdateDocFunction(updateInfo, 'projectTemplates'));
 
       // emit event
       util.sendResourceToKafkaBus(

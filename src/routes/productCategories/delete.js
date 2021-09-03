@@ -32,7 +32,10 @@ module.exports = [
           // Update the deletedBy, then delete
           return entity.update({ deletedBy: req.authUser.userId });
         })
-        .then(entity => entity.destroy()))
+        .then(entity => entity.destroy())
+        .then(entity => util.updateMetadataFromES(req.log,
+          util.generateDeleteDocFunction(_.pick(entity.toJSON(), 'key'), 'productCategories', 'key'))
+          .then(() => entity)))
       .then((entity) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,

@@ -58,7 +58,7 @@ module.exports = [
           updatedBy: req.authUser.userId,
         });
 
-        return models.ProductTemplate.findOne({
+        return models.sequelize.transaction(() => models.ProductTemplate.findOne({
           where: {
             deletedAt: { $eq: null },
             id: req.params.templateId,
@@ -79,7 +79,9 @@ module.exports = [
             }
 
             return productTemplate.update(entityToUpdate);
-          })
+          }).then(productTemplate => util.updateMetadataFromES(req.log,
+            util.generateUpdateDocFunction(productTemplate.get({ plain: true }), 'productTemplates'))
+            .then(() => productTemplate)))
           .then((productTemplate) => {
             // emit event
             util.sendResourceToKafkaBus(req,

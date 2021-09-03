@@ -34,7 +34,9 @@ module.exports = [
         }
         return existing.update({ deletedBy: req.authUser.userId }, { transaction });
       })
-        .then(entity => entity.destroy({ transaction })))
+        .then(entity => entity.destroy({ transaction }))
+        .then(entity => util.updateTopObjectPropertyFromES(_.get(entity.toJSON(), 'projectId'),
+          util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'phases')).then(() => entity)))
       .then((deleted) => {
         req.log.debug('deleted project phase', JSON.stringify(deleted, null, 2));
 

@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
@@ -28,7 +29,10 @@ module.exports = [
   (req, res, next) =>
     models
       .sequelize
-      .transaction(t => deleteMilestone(req.authUser, req.params.timelineId, req.params.milestoneId, t))
+      .transaction(t => deleteMilestone(req.authUser, req.params.timelineId, req.params.milestoneId, t)
+        .then(deleted => util.updateTopObjectPropertyFromES(deleted.timelineId,
+          util.generateDeleteDocFunction(deleted.id, 'milestones'), config.get('elasticsearchConfig.timelineIndexName'))
+          .then(() => deleted)))
       .then((deleted) => {
         util.sendResourceToKafkaBus(
           req,

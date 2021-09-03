@@ -42,6 +42,8 @@ module.exports = [
         deletedBy: req.authUser.userId,
       });
     }).then(form => form.destroy())
+      .then(form => util.updateMetadataFromES(req.log,
+        util.generateDeleteDocFunction(_.get(form.toJSON(), 'id'), 'forms')).then(() => form))
       .then((form) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,

@@ -59,6 +59,11 @@ module.exports = [
         order: [['deletedAt', 'DESC']],
         limit: deleted,
       }))
+      .then(planConfigs => util.updateMetadataFromES(req.log, (source) => {
+        const ids = _.map(planConfigs, f => _.get(f.toJSON, 'id'));
+        const remains = _.filter(source.planConfigs, single => !_.includes(ids, single.id));
+        return _.assign(source, { planConfigs: remains });
+      }).then(() => planConfigs))
       .then((planConfigs) => {
         _.map(planConfigs, planConfig => util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,

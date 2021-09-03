@@ -38,7 +38,8 @@ module.exports = [
     });
 
     // Check if duplicated key
-    return models.OrgConfig.findOne({ where: { orgId: req.body.orgId, configName: req.body.configName } })
+    return models.sequelize.transaction(() => models.OrgConfig.findOne({ where: { orgId: req.body.orgId,
+      configName: req.body.configName } })
       .then((existing) => {
         if (existing) {
           const apiErr = new Error(`Organization config exists for orgId ${req.body.orgId}
@@ -49,7 +50,9 @@ module.exports = [
 
         // Create
         return models.OrgConfig.create(entity);
-      }).then((createdEntity) => {
+      }).then(createdEntity => util.updateMetadataFromES(req.log,
+        util.generateCreateDocFunction(createdEntity.toJSON(), 'orgConfigs')).then(() => createdEntity)))
+      .then((createdEntity) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
           RESOURCES.ORG_CONFIG,

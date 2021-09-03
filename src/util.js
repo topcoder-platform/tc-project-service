@@ -921,7 +921,22 @@ const projectServiceUtils = {
             }
 
             return Promise.resolve();
-          }).then(() => {
+          }).then(() => util.updateTopObjectPropertyFromES(newMember.projectId, (source) => {
+            const arr = _.isArray(source.members) ? source.members : [];
+            const existingMemberIndex = _.findIndex(arr, p => p.id === newMember.id); // if member does not exists already
+            let mb = _.extend({}, newMember);
+            return util.getMemberDetailsByUserIds([member.userId]).catch(() => []).then((membersDetails) => {
+              if (membersDetails && membersDetails[0]) {
+                mb = _.merge(member, _.pick(membersDetails[0], 'handle', 'firstName', 'lastName', 'email'));
+              }
+              if (existingMemberIndex === -1) {
+                arr.push(mb);
+              } else {
+                arr[existingMemberIndex] = mb;
+              }
+              return _.assign(source, { members: arr });
+            });
+          })).then(() => {
             // emit the event
             util.sendResourceToKafkaBus(
               req,
@@ -1531,6 +1546,127 @@ const projectServiceUtils = {
     }
 
     return int;
+  },
+
+  /**
+   * Update project metadata from es
+   * @param {Object} logger application logger
+   * @param {Function} metadataHandler update doc handler
+   * @return {Promise} updated doc es
+  */
+  updateMetadataFromES: async (logger, metadataHandler) => {
+    const client = util.getElasticSearchClient();
+    let doc;
+    try {
+      doc = await client.get({
+        index: config.get('elasticsearchConfig.metadataIndexName'),
+        type: config.get('elasticsearchConfig.metadataDocType'),
+        id: config.get('elasticsearchConfig.metadataDocDefaultId'),
+      });
+    } catch (e) {
+      logger.info('No metadata found. Creating the metadata.');
+    }
+    if (!doc) {
+      await client.create({
+        index: config.get('elasticsearchConfig.metadataIndexName'),
+        type: config.get('elasticsearchConfig.metadataDocType'),
+        id: config.get('elasticsearchConfig.metadataDocDefaultId'),
+        body: {
+          id: config.get('elasticsearchConfig.metadataDocDefaultId'),
+        },
+      });
+
+      doc = await client.get({
+        index: config.get('elasticsearchConfig.metadataIndexName'),
+        type: config.get('elasticsearchConfig.metadataDocType'),
+        id: config.get('elasticsearchConfig.metadataDocDefaultId'),
+      });
+    }
+    const updatedDoc = await metadataHandler(doc._source); // eslint-disable-line no-underscore-dangle
+    return client.update({
+      index: config.get('elasticsearchConfig.metadataIndexName'),
+      type: config.get('elasticsearchConfig.metadataDocType'),
+      id: config.get('elasticsearchConfig.metadataDocDefaultId'),
+      body: { doc: updatedDoc },
+    });
+  },
+
+  /**
+   * Update top object property from es
+   * @param {Number} projectId project id
+   * @param {Function} metadataHandler update doc handler
+   * @param {String} index es index default value `config.get('elasticsearchConfig.indexName')`
+   * @return {Promise} updated doc es
+  */
+  updateTopObjectPropertyFromES: async (projectId, metadataHandler,
+    index = config.get('elasticsearchConfig.indexName')) => {
+    let type = config.get('elasticsearchConfig.docType');
+    if (index === config.get('elasticsearchConfig.timelineIndexName')) {
+      type = config.get('elasticsearchConfig.timelineDocType');
+    }
+    const client = util.getElasticSearchClient();
+    const doc = await client.get({
+      index,
+      type,
+      id: projectId,
+    });
+    const updatedDoc = await metadataHandler(doc._source); // eslint-disable-line no-underscore-dangle
+    return client.update({
+      index,
+      type,
+      id: projectId,
+      body: { doc: updatedDoc },
+    });
+  },
+
+  /**
+   * Generate create doc function
+   * @param {Object} message message object
+   * @param {String} propertyName property name
+   * @param {String} keyName key name default value 'id'
+   * @return {Function} creating function
+  */
+  generateCreateDocFunction: (message, propertyName, keyName = 'id') => (source) => {
+    const arr = _.isArray(source[propertyName]) ? source[propertyName] : [];
+
+    const index = _.findIndex(arr, p => p[keyName] === message[keyName]); // if org config does not exists already
+    if (index === -1) {
+      arr.push(message);
+    } else { // if org config already exists, ideally we should never land here, but code handles the buggy indexing
+      // replaces the old inconsistent index where previously org config was not removed from the index but deleted
+      // from the database
+      arr.splice(index, 1, message);
+    }
+    return _.assign(source, { [propertyName]: arr });
+  },
+
+  /**
+   * Generate delete doc function
+   * @param {String} id object id
+   * @param {String} propertyName property name
+   * @param {String} keyName key name default value 'id'
+   * @return {Function} deleting function
+  */
+  generateDeleteDocFunction: (id, propertyName, keyName = 'id') => (source) => {
+    const arr = _.filter(source[propertyName], p => p[keyName] !== id);
+    return _.assign(source, { [propertyName]: arr });
+  },
+
+  /**
+   * Generate update doc function
+   * @param {Object} message message object
+   * @param {String} propertyName property name
+   * @param {String} keyName key name default value 'id'
+   * @return {Function} updating function
+  */
+  generateUpdateDocFunction: (message, propertyName, keyName = 'id') => (source) => {
+    const arr = _.map(source[propertyName], (single) => {
+      if (single[keyName] === message[keyName]) {
+        return _.assign(single, message);
+      }
+      return single;
+    });
+    return _.assign(source, { [propertyName]: arr });
   },
 
 };

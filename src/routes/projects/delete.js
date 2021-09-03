@@ -1,8 +1,10 @@
 
 import _ from 'lodash';
+import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import { EVENT, RESOURCES } from '../../constants';
 import models from '../../models';
+import util from '../../util';
 
 /**
  * API to delete a project member.
@@ -27,7 +29,13 @@ module.exports = [
           // Update the deletedBy, then delete
           return entity.update({ deletedBy: req.authUser.userId });
         })
-        .then(project => project.destroy({ cascade: true })))
+        .then(project => project.destroy({ cascade: true }))
+        .then(project => util.getElasticSearchClient().delete({
+          index: config.get('elasticsearchConfig.indexName'),
+          type: config.get('elasticsearchConfig.docType'),
+          id: _.get(project.toJSON(), 'id'),
+          refresh: 'wait_for',
+        }).then(() => project)))
       .then((project) => {
         // emit event
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED,

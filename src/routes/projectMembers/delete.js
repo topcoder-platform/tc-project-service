@@ -97,7 +97,10 @@ module.exports = [
             // nothing to do
             accept(member);
           }
-        }))).then((member) => {
+        }))
+        .then(entity => util.updateTopObjectPropertyFromES(_.get(entity.get({ plain: true }), 'projectId'),
+          util.generateDeleteDocFunction(_.get(entity.get({ plain: true }), 'id'),
+            'members')).then(() => entity))).then((member) => {
       // only return the response after transaction is committed
       const pmember = member.get({ plain: true });
       req.log.debug(pmember);

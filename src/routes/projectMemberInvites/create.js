@@ -386,8 +386,27 @@ module.exports = [
                 updatedBy: req.authUser.userId,
               };
               req.log.debug('Creating invites');
-              return models.Sequelize.Promise.all(buildCreateInvitePromises(
+              return models.sequelize.transaction(() => models.Sequelize.Promise.all(buildCreateInvitePromises(
                 req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
+                .then((values) => {
+                  const client = util.getElasticSearchClient();
+                  return client.get({
+                    index: config.get('elasticsearchConfig.indexName'),
+                    type: config.get('elasticsearchConfig.docType'),
+                    id: projectId,
+                  }).then((doc) => {
+                    const source = doc._source; // eslint-disable-line no-underscore-dangle
+                    const esInvites = _.isArray(source.invites) ? source.invites : [];
+                    esInvites.push(..._.map(values, v => v.toJSON()));
+                    return client.update({
+                      index: config.get('elasticsearchConfig.indexName'),
+                      type: config.get('elasticsearchConfig.docType'),
+                      id: projectId,
+                      body: { doc: _.assign(source, { invites: esInvites }) },
+                    });
+                  })
+                    .then(() => values);
+                }))
                 .then((values) => {
                   values.forEach((v) => {
                     // emit the event

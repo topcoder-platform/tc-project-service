@@ -96,7 +96,9 @@ module.exports = [
 
         return updatePhaseMemberService(req.authUser, projectId, phaseId, updatedProps.members, transaction)
           .then(members => _.assign(updated, { members }));
-      }),
+      })
+      .then(() => util.updateTopObjectPropertyFromES(updated.projectId,
+        util.generateUpdateDocFunction(updated, 'phases'))),
     )
       .then(() => {
         req.log.debug('updated project phase', JSON.stringify(updated, null, 2));

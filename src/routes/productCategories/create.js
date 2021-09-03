@@ -40,7 +40,7 @@ module.exports = [
     });
 
     // Check if duplicated key
-    return models.ProductCategory.findByPk(req.body.key, { paranoid: false })
+    return models.sequelize.transaction(() => models.ProductCategory.findByPk(req.body.key, { paranoid: false })
       .then((existing) => {
         if (existing) {
           const apiErr = new Error(`Product category already exists (may be deleted) for key ${req.body.key}`);
@@ -50,7 +50,9 @@ module.exports = [
 
         // Create
         return models.ProductCategory.create(entity);
-      }).then((createdEntity) => {
+      }).then(createdEntity => util.updateMetadataFromES(req.log,
+        util.generateCreateDocFunction(createdEntity.toJSON(), 'productCategories', 'key')).then(() => createdEntity)))
+      .then((createdEntity) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
           RESOURCES.PRODUCT_CATEGORY,

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "52f34e21-5b0b-4eb0-99fa-cbd1ac7f215a",
+		"_postman_id": "bc62eb0d-68f1-4239-92c6-b039f227c325",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -829,7 +829,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{jwt-token}}"
+								"value": "Bearer {{jwt-token-manager-40051334}}"
 							},
 							{
 								"key": "Content-Type",
@@ -967,7 +967,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"role\": \"copilot\",\n\t\"isPrimary\": true\n}"
+							"raw": "{\n\t\"role\": \"manager\",\n\t\"isPrimary\": true\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/members/{{memberId}}",
@@ -1487,7 +1487,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId}}",
+							"raw": "{{api-url}}/projects/{{projectId}}/invites/{{inviteId2}}",
 							"host": [
 								"{{api-url}}"
 							],
@@ -1495,7 +1495,7 @@
 								"projects",
 								"{{projectId}}",
 								"invites",
-								"{{inviteId}}"
+								"{{inviteId2}}"
 							]
 						},
 						"description": "Update a project's member."
@@ -6375,7 +6375,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    }\r\n  }"
+							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new key\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    }\r\n  }"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates",
@@ -6709,7 +6709,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"form\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    }\r\n  }"
+							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"new key\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"form\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n        \"key\": \"dev\",\r\n        \"version\": 1\r\n    }\r\n  }"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates/{{projectTemplateId}}",
@@ -7026,7 +7026,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"category\":\"key1\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":{\r\n      \"alias1\":\"scope 1\",\r\n      \"alias2\": [\"a\"]\r\n    },\r\n    \"template\":{\r\n      \"template1\":\"template 1\",\r\n      \"template2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }"
+							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"productKey\":\"new productKey\",\r\n    \"category\":\"{{productCategoryId}}\",\r\n    \"icon\":\"http://example.com/icon-new.ico\",\r\n    \"brief\": \"new brief\",\r\n    \"details\": \"new details\",\r\n    \"aliases\":[\"scope 1\",\r\n      [\"a\"]\r\n    ],\r\n    \"template\":{\r\n      \"template1\":\"template 1\",\r\n      \"template2\": {\r\n    \t\"another\": \"another\"\r\n      }\r\n    }\r\n  }"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/productTemplates/{{productTemplateId}}",
@@ -7549,6 +7549,23 @@
 				},
 				{
 					"name": "Update org config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    console.log(pm.response.json())",
+									"    pm.environment.set(\"orgStrId\", pm.response.json().orgId);",
+									"    pm.environment.set(\"orgConfigName\", pm.response.json().configName);",
+									"    pm.environment.set(\"orgId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [

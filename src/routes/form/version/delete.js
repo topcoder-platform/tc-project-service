@@ -58,6 +58,11 @@ module.exports = [
         order: [['deletedAt', 'DESC']],
         limit: deleted,
       }))
+      .then(forms => util.updateMetadataFromES(req.log, (source) => {
+        const formIds = _.map(forms, f => _.get(f.toJSON(), 'id'));
+        const remains = _.filter(source.forms, single => !_.includes(formIds, single.id));
+        return _.assign(source, { forms: remains });
+      }).then(() => forms))
       .then((forms) => {
         _.map(forms, form => util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,

@@ -43,13 +43,15 @@ module.exports = [
       });
     }).then(planConfig =>
       planConfig.destroy(),
-    ).then((planConfig) => {
-      util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
-        RESOURCES.PLAN_CONFIG_REVISION,
-        _.pick(planConfig.toJSON(), 'id'));
-      res.status(204).end();
-    })
+    ).then(entity => util.updateMetadataFromES(req.log,
+      util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'planConfigs')).then(() => entity))
+      .then((planConfig) => {
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
+          RESOURCES.PLAN_CONFIG_REVISION,
+          _.pick(planConfig.toJSON(), 'id'));
+        res.status(204).end();
+      })
       .catch(next));
   },
 ];

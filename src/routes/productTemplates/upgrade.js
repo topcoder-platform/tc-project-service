@@ -62,6 +62,7 @@ module.exports = [
         };
 
         const newProductTemplate = await productTemplate.update(updatePayload);
+        await util.updateMetadataFromES(req.log, util.generateUpdateDocFunction(updatePayload, 'productTemplates'));
 
         // emit event
         util.sendResourceToKafkaBus(req,

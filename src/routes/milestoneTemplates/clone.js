@@ -61,7 +61,20 @@ module.exports = [
               result = clonedMilestoneTemplates;
               return result;
             });
-        }),
+        }).then(otherUpdated => util.updateMetadataFromES(req.log, (source) => {
+          const arr = _.isArray(source.milestoneTemplates) ? source.milestoneTemplates : [];
+          _.each(result, (message) => {
+            const index = _.findIndex(arr, p => p.id === message.id); // if org config does not exists already
+            if (index === -1) {
+              arr.push(message);
+            } else { // if org config already exists, ideally we should never land here, but code handles the buggy indexing
+              // replaces the old inconsistent index where previously org config was not removed from the index but deleted
+              // from the database
+              arr.splice(index, 1, message);
+            }
+          });
+          return _.assign(source, { milestoneTemplates: arr });
+        }).then(() => otherUpdated)),
     )
       .then(() => {
         // emit the event

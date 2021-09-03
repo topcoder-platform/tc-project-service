@@ -65,6 +65,9 @@ module.exports = [
         };
         return models.PriceConfig.create(entity);
       })
+      .then(createdEntity => util.updateMetadataFromES(req.log,
+        util.generateCreateDocFunction(createdEntity.toJSON(), 'priceConfigs'))
+        .then(() => createdEntity))
       .then((createdEntity) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,

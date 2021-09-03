@@ -65,6 +65,10 @@ module.exports = [
       _.extend(existing, updatedProps);
       return existing.save().then(accept).catch(reject);
     })).then((updated) => {
+      const message = updated.toJSON();
+      return util.updateTopObjectPropertyFromES(message.projectId,
+        util.generateUpdateDocFunction(message, 'attachments')).then(() => updated);
+    }).then((updated) => {
       req.log.debug('updated project attachment', JSON.stringify(updated, null, 2));
       res.json(updated);
 
@@ -74,6 +78,7 @@ module.exports = [
         EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED,
         RESOURCES.ATTACHMENT,
         updated.toJSON());
-    }).catch(err => next(err)));
+    })
+      .catch(err => next(err)));
   },
 ];

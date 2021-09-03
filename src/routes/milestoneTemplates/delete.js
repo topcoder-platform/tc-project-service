@@ -24,7 +24,9 @@ module.exports = [
   (req, res, next) => models.sequelize.transaction(() =>
   // soft delete the record
     req.milestoneTemplate.update({ deletedBy: req.authUser.userId })
-      .then(entity => entity.destroy()),
+      .then(entity => entity.destroy())
+      .then(entity => util.updateMetadataFromES(req.log,
+        util.generateDeleteDocFunction(req.params.milestoneTemplateId, 'milestoneTemplates')).then(() => entity)),
   )
     .then(() => {
       // emit the event
