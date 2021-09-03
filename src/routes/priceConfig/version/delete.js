@@ -22,6 +22,7 @@ module.exports = [
   validate(schema),
   permissions('priceConfig.create'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.PriceConfig.findAll(
       {
         where: {
@@ -50,6 +51,10 @@ module.exports = [
           version: req.params.version,
         },
       }))
+      .then((deleted) => {
+        result = deleted.toJSON();
+        return deleted;
+      })
       .then(deleted => models.PriceConfig.findAll({
         where: {
           key: req.params.key,
@@ -71,6 +76,11 @@ module.exports = [
           _.pick(priceConfig.toJSON(), 'id')));
         res.status(204).end();
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'priceConfig.version.delete', req.log);
+        }
+        next(err);
+      }));
   },
 ];

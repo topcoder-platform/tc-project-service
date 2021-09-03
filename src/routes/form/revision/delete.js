@@ -24,6 +24,7 @@ module.exports = [
   validate(schema),
   permissions('form.delete'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.Form.findOne(
       {
         where: {
@@ -45,12 +46,18 @@ module.exports = [
       .then(form => util.updateMetadataFromES(req.log,
         util.generateDeleteDocFunction(_.get(form.toJSON(), 'id'), 'forms')).then(() => form))
       .then((form) => {
+        result = form.toJSON();
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
           RESOURCES.FORM_REVISION,
           _.pick(form.toJSON(), 'id'));
         res.status(204).end();
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'form.revision.delete', req.log);
+        }
+        next(err);
+      }));
   },
 ];

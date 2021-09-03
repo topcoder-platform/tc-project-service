@@ -16,7 +16,7 @@ const schema = {
     milestoneTemplateId: Joi.number().integer().positive().required(),
   },
 };
-
+let result;
 module.exports = [
   validate(schema),
   validateMilestoneTemplate.validateIdParam,
@@ -25,6 +25,10 @@ module.exports = [
   // soft delete the record
     req.milestoneTemplate.update({ deletedBy: req.authUser.userId })
       .then(entity => entity.destroy())
+      .then((entity) => {
+        result = entity.toJSON();
+        return entity;
+      })
       .then(entity => util.updateMetadataFromES(req.log,
         util.generateDeleteDocFunction(req.params.milestoneTemplateId, 'milestoneTemplates')).then(() => entity)),
   )
@@ -38,5 +42,10 @@ module.exports = [
 
       res.status(204).end();
     })
-    .catch(next),
+    .catch((err) => {
+      if (result) {
+        util.publishError(result, 'milestone.delete', req.log);
+      }
+      next(err);
+    }),
 ];

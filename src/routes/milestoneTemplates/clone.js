@@ -87,6 +87,11 @@ module.exports = [
         // Write to response
         res.status(201).json(result);
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'milestoneTemplate.clone', req.log);
+        }
+        next(err);
+      });
   },
 ];

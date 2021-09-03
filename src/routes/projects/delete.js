@@ -17,6 +17,7 @@ module.exports = [
   permissions('project.delete'),
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
+    let result;
 
     models.sequelize.transaction(() =>
       models.Project.findByPk(req.params.projectId)
@@ -30,6 +31,10 @@ module.exports = [
           return entity.update({ deletedBy: req.authUser.userId });
         })
         .then(project => project.destroy({ cascade: true }))
+        .then((project) => {
+          result = project.toJSON();
+          return project;
+        })
         .then(project => util.getElasticSearchClient().delete({
           index: config.get('elasticsearchConfig.indexName'),
           type: config.get('elasticsearchConfig.docType'),
@@ -43,6 +48,11 @@ module.exports = [
           });
         res.status(204).json({});
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'project.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

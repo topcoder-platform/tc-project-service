@@ -31,6 +31,7 @@ module.exports = [
   validate(schema),
   permissions('planConfig.create'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.PlanConfig.findAll({
       where: {
         key: req.params.key,
@@ -53,16 +54,25 @@ module.exports = [
         config: req.body.config,
       });
       return models.PlanConfig.create(entity);
+    }).then((createdEntity) => {
+      result = createdEntity.toJSON();
+      return createdEntity;
     }).then(createdEntity => util.updateMetadataFromES(req.log,
       util.generateCreateDocFunction(createdEntity.toJSON(), 'planConfigs'))
-      .then(() => createdEntity)).then((createdEntity) => {
-      util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
-        RESOURCES.PLAN_CONFIG_VERSION,
-        createdEntity.toJSON());
-      // Omit deletedAt, deletedBy
-      res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
-    })
-      .catch(next));
+      .then(() => createdEntity))
+      .then((createdEntity) => {
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
+          RESOURCES.PLAN_CONFIG_VERSION,
+          createdEntity.toJSON());
+        // Omit deletedAt, deletedBy
+        res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
+      })
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'planConfig.version.create', req.log);
+        }
+        next(err);
+      }));
   },
 ];

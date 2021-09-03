@@ -49,7 +49,7 @@ const schema = {
     contextRequest: true,
   },
 };
-
+let payload;
 module.exports = [
   validate(schema),
   validateTimeline.validateTimelineIdParam,
@@ -95,6 +95,7 @@ module.exports = [
     const updated = await Promise.mapSeries(
       toUpdate, ([item, data]) => updateMilestone(req.authUser, timelineId, data, transaction, item));
 
+    payload = { created, deleted, updated };
     // handle ES Update
     await util.updateTopObjectPropertyFromES(timelineId, async (source) => {
       // handle add milestone
@@ -157,5 +158,10 @@ module.exports = [
 
       res.json(milestones);
     })
-    .catch(next),
+    .catch((err) => {
+      if (payload) {
+        util.publishError(payload, 'milestone.bulkUpdate', req.log);
+      }
+      next(err);
+    }),
 ];

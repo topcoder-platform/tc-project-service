@@ -42,6 +42,7 @@ module.exports = [
     const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
+    let result;
 
     return models.sequelize.transaction(() => models.ProductCategory.findOne({
       where: {
@@ -58,7 +59,12 @@ module.exports = [
         }
 
         return productCategory.update(entityToUpdate);
-      }).then(productCategory => util.updateMetadataFromES(req.log,
+      })
+      .then((productCategory) => {
+        result = productCategory.get({ plain: true });
+        return productCategory;
+      })
+      .then(productCategory => util.updateMetadataFromES(req.log,
         util.generateUpdateDocFunction(productCategory.get({ plain: true }), 'productCategories', 'key'))
         .then(() => productCategory)))
       .then((productCategory) => {
@@ -70,6 +76,11 @@ module.exports = [
         res.json(productCategory);
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'productCategory.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

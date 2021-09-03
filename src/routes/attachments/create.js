@@ -72,6 +72,7 @@ module.exports = [
     const sourceKey = data.path;
     const destBucket = config.get('attachmentsS3Bucket');
     const destKey = path;
+    let result;
 
     if (data.type === ATTACHMENT_TYPES.LINK) {
       // We create the record in the db and return (i.e. no need to handle transferring file between S3 buckets)
@@ -94,6 +95,7 @@ module.exports = [
           util.generateCreateDocFunction(link, 'attachments')).then(() => _link);
       }).then((_link) => {
         const link = _link.get({ plain: true });
+        result = link;
         req.log.debug('New Link Attachment record: ', link);
 
         // emit the Kafka event
@@ -107,6 +109,9 @@ module.exports = [
         return Promise.resolve();
       })
         .catch((error) => {
+          if (result) {
+            util.publishError(result, 'attachment.create', req.log);
+          }
           req.log.error('Error adding link attachment', error);
           const rerr = error;
           rerr.status = rerr.status || 500;
@@ -137,6 +142,7 @@ module.exports = [
         });
       }).then((_newAttachment) => {
         newAttachment = _newAttachment.get({ plain: true });
+        result = newAttachment;
         req.log.debug('New Attachment record: ', newAttachment);
         if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
           // retrieve download url for the response
@@ -193,6 +199,9 @@ module.exports = [
         return Promise.resolve();
       })
         .catch((error) => {
+          if (result) {
+            util.publishError(result, 'attachment.create', req.log);
+          }
           req.log.error('Error adding file attachment', error);
           const rerr = error;
           rerr.status = rerr.status || 500;

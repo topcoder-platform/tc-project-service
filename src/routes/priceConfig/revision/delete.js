@@ -24,6 +24,7 @@ module.exports = [
   validate(schema),
   permissions('priceConfig.delete'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.PriceConfig.findOne(
       {
         where: {
@@ -43,9 +44,13 @@ module.exports = [
       });
     }).then(priceConfig =>
       priceConfig.destroy(),
-    ).then(entity => util.updateMetadataFromES(req.log,
-      util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'priceConfigs'))
-      .then(() => entity))
+    ).then((entity) => {
+      result = entity;
+      return entity;
+    })
+      .then(entity => util.updateMetadataFromES(req.log,
+        util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'priceConfigs'))
+        .then(() => entity))
       .then((priceConfig) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
@@ -53,6 +58,11 @@ module.exports = [
           _.pick(priceConfig.toJSON(), 'id'));
         res.status(204).end();
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'priceConfig.revision.delete', req.log);
+        }
+        next(err);
+      }));
   },
 ];

@@ -41,6 +41,7 @@ module.exports = [
     const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
+    let result;
 
     return models.sequelize.transaction(() => models.ProjectType.findOne({
       where: {
@@ -57,7 +58,12 @@ module.exports = [
         }
 
         return projectType.update(entityToUpdate);
-      }).then(projectType => util.updateMetadataFromES(req.log,
+      })
+      .then((projectType) => {
+        result = projectType.get({ plain: true });
+        return projectType;
+      })
+      .then(projectType => util.updateMetadataFromES(req.log,
         util.generateUpdateDocFunction(projectType.get({ plain: true }), 'projectTypes', 'key'))
         .then(() => projectType)))
       .then((projectType) => {
@@ -71,6 +77,11 @@ module.exports = [
         res.json(projectType);
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectType.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

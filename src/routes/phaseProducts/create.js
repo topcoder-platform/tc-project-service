@@ -120,6 +120,11 @@ module.exports = [
 
         res.status(201).json(newPhaseProduct);
       })
-      .catch((err) => { next(err); });
+      .catch((err) => {
+        if (newPhaseProduct) {
+          util.publishError(newPhaseProduct, 'phaseProduct.create', req.log);
+        }
+        next(err);
+      });
   },
 ];

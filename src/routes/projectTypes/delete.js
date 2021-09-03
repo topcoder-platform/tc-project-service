@@ -17,6 +17,7 @@ const schema = {
   },
 };
 
+let result;
 module.exports = [
   validate(schema),
   permissions('projectType.delete'),
@@ -33,6 +34,10 @@ module.exports = [
           return entity.update({ deletedBy: req.authUser.userId });
         })
         .then(entity => entity.destroy())
+        .then((entity) => {
+          result = entity.toJSON();
+          return entity;
+        })
         .then(entity => util.updateMetadataFromES(req.log,
           util.generateDeleteDocFunction(_.pick(entity.toJSON(), 'key'), 'projectTypes', 'key')).then(() => entity)))
       .then((entity) => {
@@ -43,5 +48,10 @@ module.exports = [
           _.pick(entity.toJSON(), 'key'));
         res.status(204).end();
       })
-      .catch(next),
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectType.delete', req.log);
+        }
+        next(err);
+      }),
 ];

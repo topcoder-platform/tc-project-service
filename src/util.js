@@ -20,6 +20,7 @@ import jp from 'jsonpath';
 import Promise from 'bluebird';
 import coreLib from 'tc-core-library-js';
 import models from './models';
+import { createEvent } from './services/busApi';
 
 import {
   ADMIN_ROLES,
@@ -31,6 +32,7 @@ import {
   RESOURCES,
   USER_ROLE,
   INVITE_STATUS,
+  BUS_API_EVENT,
 } from './constants';
 import { PERMISSION, DEFAULT_PROJECT_ROLE } from './permissions/constants';
 
@@ -1669,6 +1671,19 @@ const projectServiceUtils = {
     return _.assign(source, { [propertyName]: arr });
   },
 
+  /**
+   * Send error event to Kafka
+   * @param {Object} payload the payload
+   * @param {String} action for which operation error occurred
+   * @param {Object} logger object
+   * @return {Promise} the send result promise
+  */
+  publishError: (payload, action, logger) => {
+    _.set(payload, 'apiAction', action);
+    logger.debug(`Publish error to Kafka topic ${BUS_API_EVENT.PROJECT_ERROR_TOPIC},
+     ${JSON.stringify(payload, null, 2)}`);
+    createEvent(BUS_API_EVENT.PROJECT_ERROR_TOPIC, payload, logger);
+  },
 };
 
 _.assignIn(util, projectServiceUtils);

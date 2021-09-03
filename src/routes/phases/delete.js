@@ -15,6 +15,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
+    let result;
 
     models.sequelize.transaction(transaction =>
       // soft delete the record
@@ -35,6 +36,7 @@ module.exports = [
         return existing.update({ deletedBy: req.authUser.userId }, { transaction });
       })
         .then(entity => entity.destroy({ transaction }))
+        .then((entity) => { result = entity.toJSON(); return entity; })
         .then(entity => util.updateTopObjectPropertyFromES(_.get(entity.toJSON(), 'projectId'),
           util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'phases')).then(() => entity)))
       .then((deleted) => {
@@ -49,6 +51,11 @@ module.exports = [
         );
 
         res.status(204).json({});
-      }).catch(err => next(err));
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'phase.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

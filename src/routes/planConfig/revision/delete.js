@@ -24,6 +24,7 @@ module.exports = [
   validate(schema),
   permissions('planConfig.delete'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.PlanConfig.findOne(
       {
         where: {
@@ -43,8 +44,12 @@ module.exports = [
       });
     }).then(planConfig =>
       planConfig.destroy(),
-    ).then(entity => util.updateMetadataFromES(req.log,
-      util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'planConfigs')).then(() => entity))
+    ).then((planConfig) => {
+      result = planConfig.toJSON();
+      return planConfig;
+    })
+      .then(entity => util.updateMetadataFromES(req.log,
+        util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'planConfigs')).then(() => entity))
       .then((planConfig) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
@@ -52,6 +57,11 @@ module.exports = [
           _.pick(planConfig.toJSON(), 'id'));
         res.status(204).end();
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'planConfig.revision.delete', req.log);
+        }
+        next(err);
+      }));
   },
 ];

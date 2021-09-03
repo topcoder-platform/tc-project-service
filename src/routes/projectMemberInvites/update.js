@@ -38,6 +38,7 @@ module.exports = [
     const inviteId = _.parseInt(req.params.inviteId);
     const currentUserEmail = req.authUser.email ? req.authUser.email.toLowerCase() : req.authUser.email;
     const currentUserId = req.authUser.userId;
+    let result;
 
     // get invite by id and project id
     return models.sequelize.transaction(() => models.ProjectMemberInvite
@@ -81,6 +82,10 @@ module.exports = [
         return invite
           .update({
             status: newStatus,
+          })
+          .then((updatedInvite) => {
+            result = updatedInvite.toJSON();
+            return updatedInvite;
           })
           .then(updatedInvite => util.updateTopObjectPropertyFromES(updatedInvite.projectId, (source) => {
             const message = updatedInvite.toJSON();
@@ -133,6 +138,11 @@ module.exports = [
             return res.json(util.postProcessInvites('$.email', updatedInvite, req));
           });
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectMemberInvite.update', req.log);
+        }
+        next(err);
+      }));
   },
 ];

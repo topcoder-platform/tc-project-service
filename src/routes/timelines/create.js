@@ -109,7 +109,6 @@ module.exports = [
           }
           return Promise.resolve();
         }).then(() => {
-          // todo
           util.getElasticSearchClient().create({
             index: config.get('elasticsearchConfig.timelineIndexName'),
             type: config.get('elasticsearchConfig.timelineDocType'),
@@ -118,7 +117,12 @@ module.exports = [
             refresh: 'wait_for',
           });
         })
-        .catch(next);
+        .catch((err) => {
+          if (result) {
+            util.publishError(result, 'timeline.create', req.log);
+          }
+          next(err);
+        });
     })
       .then(() => {
         // emit the event

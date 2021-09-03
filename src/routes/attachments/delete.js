@@ -65,6 +65,11 @@ module.exports = [
           pattachment);
         res.status(204).json({});
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (attachment) {
+          util.publishError(attachment.get({ plain: true }), 'attachment.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

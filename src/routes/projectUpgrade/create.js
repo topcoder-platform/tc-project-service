@@ -4,6 +4,7 @@
  * API to upgrade projects
  */
 import _ from 'lodash';
+import config from 'config';
 import moment from 'moment';
 import validate from 'express-validation';
 import Joi from 'joi';
@@ -187,6 +188,20 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
     req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phaseJSON });
   });
 
+  // Update project from es
+  const message = _.assign(project.toJSON(), {
+    refCode: _.get(project, 'details.utm.code'),
+    projectUrl: `${config.get('connectProjectsUrl')}${project.id}`,
+  });
+  await util.getElasticSearchClient().update({
+    index: config.get('elasticsearchConfig.indexName'),
+    type: config.get('elasticsearchConfig.docType'),
+    id: message.id,
+    body: {
+      doc: message,
+    },
+    refresh: 'wait_for',
+  });
   // Send events to buses (Project)
   req.log.debug('updated project', project);
 
@@ -218,6 +233,7 @@ module.exports = [
   validate(schema),
   permissions('project.admin'),
   async (req, res, next) => {
+    let result;
     try {
       const projectId = Number(req.params.projectId);
       const targetVersion = req.body.targetVersion;
@@ -235,8 +251,12 @@ module.exports = [
       }
       // we have a valid project to be migrated
       await handler(req, project, req.body.defaultProductTemplateId, req.body.phaseName);
+      result = project.toJSON();
       res.status(200).json({ message: 'Project successfully migrated' });
     } catch (err) {
+      if (result) {
+        util.publishError(result, 'projectUpgrade.create', req.log);
+      }
       next(err);
     }
   },

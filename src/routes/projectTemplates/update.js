@@ -63,6 +63,7 @@ module.exports = [
   (req, res, next) => {
     const param = req.body;
     const { form, priceConfig, planConfig } = param;
+    let result;
 
     return Promise.all([
       util.checkModel(form, 'Form', models.Form, 'project template'),
@@ -101,7 +102,12 @@ module.exports = [
             entityToUpdate.phases = _.omitBy(entityToUpdate.phases, _.isNull);
 
             return projectTemplate.update(entityToUpdate);
-          }).then(projectTemplate => util.updateMetadataFromES(req.log,
+          })
+          .then((projectTemplate) => {
+            result = projectTemplate.get({ plain: true });
+            return projectTemplate;
+          })
+          .then(projectTemplate => util.updateMetadataFromES(req.log,
             util.generateUpdateDocFunction(projectTemplate.get({ plain: true }), 'projectTemplates'))
             .then(() => projectTemplate)))
           .then((projectTemplate) => {
@@ -114,6 +120,11 @@ module.exports = [
 
             res.json(projectTemplate);
           });
-      }).catch(next);
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectTemplate.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

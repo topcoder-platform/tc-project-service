@@ -25,6 +25,7 @@ module.exports = [
   validate(createProjectMemberValidations),
   permissions('projectMember.create'),
   async (req, res, next) => {
+    let result;
     try {
       // by default, we would add the current user as a member
       let addUserId = req.authUser.userId;
@@ -78,6 +79,7 @@ module.exports = [
       await models.sequelize.transaction(async (transaction) => {
         // Kafka event is emitted inside `addUserToProject`
         newMember = await util.addUserToProject(req, member, transaction);
+        result = newMember;
       });
 
       try {
@@ -89,6 +91,9 @@ module.exports = [
       }
       return res.status(201).json(newMember);
     } catch (err) {
+      if (result) {
+        util.publishError(result, 'projectMember.create', req.log);
+      }
       return next(err);
     }
   },

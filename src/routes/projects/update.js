@@ -298,6 +298,11 @@ module.exports = [
         project.attachments = attachments;
         res.json(project);
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (project) {
+          util.publishError(project, 'project.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

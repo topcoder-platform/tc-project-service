@@ -258,6 +258,7 @@ module.exports = [
     const invite = req.body;
     // let us request user fields during creating, probably this should be move to GET by ID endpoint instead
     const fields = req.query.fields ? req.query.fields.split(',') : null;
+    let result;
 
     try {
       util.validateFields(fields, ALLOWED_FIELDS);
@@ -389,6 +390,7 @@ module.exports = [
               return models.sequelize.transaction(() => models.Sequelize.Promise.all(buildCreateInvitePromises(
                 req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
                 .then((values) => {
+                  result = _.map(values, v => v.toJSON());
                   const client = util.getElasticSearchClient();
                   return client.get({
                     index: config.get('elasticsearchConfig.indexName'),
@@ -443,6 +445,11 @@ module.exports = [
               res.status(201).json(response);
             }
           });
-      }).catch(err => next(err));
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectMemberInvite.create', req.log);
+        }
+        next(err);
+      });
   },
 ];

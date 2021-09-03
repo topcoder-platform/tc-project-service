@@ -146,6 +146,9 @@ module.exports = [
           .then(phase => res.status(201).json(phase));
       })
       .catch((err) => {
+        if (newProjectPhase) {
+          util.publishError(newProjectPhase, 'phase.create', req.log);
+        }
         if (err.message) {
           _.assign(err, { details: err.message });
         }

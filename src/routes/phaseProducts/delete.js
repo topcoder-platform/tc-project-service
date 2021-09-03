@@ -16,7 +16,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
     const productId = _.parseInt(req.params.productId);
-
+    let result;
     models.sequelize.transaction(transaction =>
       // soft delete the record
       models.PhaseProduct.findOne({
@@ -37,6 +37,10 @@ module.exports = [
         return existing.update({ deletedBy: req.authUser.userId }, { transaction });
       })
         .then(entity => entity.destroy({ transaction }))
+        .then((deleted) => {
+          result = deleted.toJSON();
+          return deleted;
+        })
         .then(deleted => util.updateTopObjectPropertyFromES(deleted.toJSON().id, (source) => {
           const message = _.pick(deleted.toJSON(), ['id', 'projectId', 'phaseId']);
           const phases = _.map(source.phases, (phase) => {
@@ -59,6 +63,11 @@ module.exports = [
 
         res.status(204).json({});
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'phaseProduct.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

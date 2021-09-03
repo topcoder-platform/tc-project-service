@@ -45,7 +45,7 @@ const schema = {
     deletedBy: Joi.any().strip(),
   }).required(),
 };
-
+let payload;
 module.exports = [
   validate(schema),
   // Validate and get projectId from the timelineId param,
@@ -59,7 +59,10 @@ module.exports = [
         req.authUser,
         req.params.timelineId,
         Object.assign({}, req.body, { id: req.params.milestoneId }),
-        t).then(({ updated, original }) => util.updateTopObjectPropertyFromES(updated.timelineId,
+        t).then((result) => {
+        payload = result.updated;
+        return result;
+      }).then(({ updated, original }) => util.updateTopObjectPropertyFromES(updated.timelineId,
         util.generateUpdateDocFunction(updated, 'milestones'),
         config.get('elasticsearchConfig.timelineIndexName')).then(() => ({ updated, original }))))
       .then(({ updated, original }) => {
@@ -72,5 +75,10 @@ module.exports = [
         );
         res.json(updated);
       })
-      .catch(next),
+      .catch((err) => {
+        if (payload) {
+          util.publishError(payload, 'milestone.update', req.log);
+        }
+        next(err);
+      }),
 ];

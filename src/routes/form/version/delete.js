@@ -22,6 +22,7 @@ module.exports = [
   validate(schema),
   permissions('form.create'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.Form.findAll(
       {
         where: {
@@ -61,6 +62,7 @@ module.exports = [
       .then(forms => util.updateMetadataFromES(req.log, (source) => {
         const formIds = _.map(forms, f => _.get(f.toJSON(), 'id'));
         const remains = _.filter(source.forms, single => !_.includes(formIds, single.id));
+        result = remains;
         return _.assign(source, { forms: remains });
       }).then(() => forms))
       .then((forms) => {
@@ -70,6 +72,11 @@ module.exports = [
           _.pick(form.toJSON(), 'id')));
         res.status(204).end();
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'form.version.delete', req.log);
+        }
+        next(err);
+      }));
   },
 ];

@@ -120,6 +120,11 @@ module.exports = [
         res.json(updated);
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (updated) {
+          util.publishError(updated, 'timeline.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

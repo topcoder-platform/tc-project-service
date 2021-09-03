@@ -45,6 +45,7 @@ const schema = {
   }).required(),
 };
 
+let payload;
 module.exports = [
   validate(schema),
   // Validate and get projectId from the timelineId param, and set to request params
@@ -55,6 +56,7 @@ module.exports = [
     models.sequelize.transaction(t => createMilestone(req.authUser, req.timeline, req.body, t)
       .then(result => util.updateTopObjectPropertyFromES(result.timelineId, (source) => {
         const message = result;
+        payload = result;
         const milestones = _.isArray(source.milestones) ? source.milestones : [];
 
         const existingMilestoneIndex = _.findIndex(milestones, p => p.id === message.id); // if milestone does not exists already
@@ -84,5 +86,10 @@ module.exports = [
           result);
         res.status(201).json(result);
       })
-      .catch(next),
+      .catch((err) => {
+        if (payload) {
+          util.publishError(payload, 'milestone.create', req.log);
+        }
+        next(err);
+      }),
 ];

@@ -36,6 +36,7 @@ module.exports = [
   validate(schema),
   permissions('form.create'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.Form.findAll({
       where: {
         key: req.params.key,
@@ -67,6 +68,7 @@ module.exports = [
       }).then(createdEntity => util.updateMetadataFromES(req.log,
         util.generateCreateDocFunction(createdEntity.toJSON(), 'forms')).then(() => createdEntity))
       .then((createdEntity) => {
+        result = createdEntity.toJSON();
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
           RESOURCES.FORM_VERSION,
@@ -74,6 +76,11 @@ module.exports = [
         // Omit deletedAt, deletedBy
         res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'form.version.update', req.log);
+        }
+        next(err);
+      }));
   },
 ];

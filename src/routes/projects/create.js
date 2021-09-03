@@ -526,6 +526,9 @@ module.exports = [
         res.status(201).json(newProject);
       })
       .catch((err) => {
+        if (newProject) {
+          util.publishError(newProject, 'project.create', req.log);
+        }
         req.log.error(err.message);
         util.handleError('Error creating project', err, req, next);
       });

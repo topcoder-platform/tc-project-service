@@ -39,6 +39,7 @@ module.exports = [
     updatedProps.updatedBy = req.authUser.userId;
 
     let previousValue;
+    let result;
 
     models.sequelize.transaction(() => models.PhaseProduct.findOne({
       where: {
@@ -58,6 +59,7 @@ module.exports = [
         previousValue = _.clone(existing.get({ plain: true }));
 
         _.extend(existing, updatedProps);
+        result = existing;
         existing.save().then(accept).catch(reject);
       }
     }))
@@ -93,6 +95,11 @@ module.exports = [
           ROUTES.PHASE_PRODUCTS.UPDATE);
 
         res.json(updated);
-      }).catch(err => next(err));
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'phaseProduct.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

@@ -124,6 +124,11 @@ module.exports = [
         }).then(phaseWithMembers => util.populatePhasesWithMemberDetails(phaseWithMembers.toJSON(), req)
           .then(result => res.json(result)));
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (updated) {
+          util.publishError(updated, 'phase.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

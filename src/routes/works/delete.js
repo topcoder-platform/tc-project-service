@@ -24,6 +24,7 @@ module.exports = [
   permissions('work.delete'),
   (req, res, next) => {
     const projectId = req.params.projectId;
+    let result;
     models.sequelize.transaction(() =>
       models.PhaseWorkStream.findOne({
         where: {
@@ -57,7 +58,13 @@ module.exports = [
           // Update the deletedBy, then delete
           return entity.update({ deletedBy: req.authUser.userId });
         })
-        .then(entity => entity.destroy()))
+        .then(entity => entity.destroy())
+        .then((entity) => {
+          result = entity.toJSON();
+          return entity;
+        })
+        .then(entity => util.updateTopObjectPropertyFromES(_.get(entity.toJSON(), 'projectId'),
+          util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'phases')).then(() => entity)))
       .then((deleted) => {
         req.log.debug('deleted work', JSON.stringify(deleted, null, 2));
 
@@ -69,6 +76,11 @@ module.exports = [
           _.pick(deleted.toJSON(), 'id'));
 
         res.status(204).json({});
-      }).catch(err => next(err));
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'work.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

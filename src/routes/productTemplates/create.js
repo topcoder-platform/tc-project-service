@@ -56,8 +56,13 @@ module.exports = [
           createdBy: req.authUser.userId,
           updatedBy: req.authUser.userId,
         });
+        let result;
 
         return models.sequelize.transaction(() => models.ProductTemplate.create(entity)
+          .then((createdEntity) => {
+            result = createdEntity.toJSON();
+            return createdEntity;
+          })
           .then(createdEntity => util.updateMetadataFromES(req.log,
             util.generateCreateDocFunction(createdEntity.toJSON(), 'productTemplates')).then(() => createdEntity)))
           .then((createdEntity) => {
@@ -69,7 +74,12 @@ module.exports = [
             // Omit deletedAt, deletedBy
             res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
           })
-          .catch(next);
+          .catch((err) => {
+            if (result) {
+              util.publishError(result, 'productTemplate.create', req.log);
+            }
+            next(err);
+          });
       })
       .catch(next);
   },

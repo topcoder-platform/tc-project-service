@@ -230,6 +230,11 @@ module.exports = [
 
         res.json(updated);
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (updated) {
+          util.publishError(updated, 'work.update', req.log);
+        }
+        next(err);
+      });
   },
 ];
