@@ -182,7 +182,7 @@ export const BUS_API_EVENT = {
   PROJECT_METADATA_UPDATE: 'project.action.update',
   PROJECT_METADATA_DELETE: 'project.action.delete',
 
-  PROJECT_ERROR_TOPIC: 'project..action.error',
+  PROJECT_ERROR_TOPIC: 'project.action.error',
 };
 
 export const CONNECT_NOTIFICATION_EVENT = {
