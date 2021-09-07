@@ -57,8 +57,9 @@ module.exports = [
         const entityToUpdate = _.assign(req.body, {
           updatedBy: req.authUser.userId,
         });
+        let result;
 
-        return models.ProductTemplate.findOne({
+        return models.sequelize.transaction(() => models.ProductTemplate.findOne({
           where: {
             deletedAt: { $eq: null },
             id: req.params.templateId,
@@ -81,6 +82,13 @@ module.exports = [
             return productTemplate.update(entityToUpdate);
           })
           .then((productTemplate) => {
+            result = productTemplate.get({ plain: true });
+            return productTemplate;
+          })
+          .then(productTemplate => util.updateMetadataFromES(req.log,
+            util.generateUpdateDocFunction(productTemplate.get({ plain: true }), 'productTemplates'))
+            .then(() => productTemplate)))
+          .then((productTemplate) => {
             // emit event
             util.sendResourceToKafkaBus(req,
               EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
@@ -90,7 +98,12 @@ module.exports = [
             res.json(productTemplate);
             return Promise.resolve();
           })
-          .catch(next);
+          .catch((err) => {
+            if (result) {
+              util.publishError(result, 'productTemplate.update', req.log);
+            }
+            next(err);
+          });
       })
       .catch(next);
   },

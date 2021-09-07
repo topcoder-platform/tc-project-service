@@ -30,6 +30,8 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
     const newPhaseMembers = req.body.userIds;
+    let transaction;
+    let result;
     try {
       // check if project and phase exist
       const phase = await models.ProjectPhase.findOne({
@@ -47,21 +49,32 @@ module.exports = [
         throw (err);
       }
       const phaseMembers = await models.ProjectPhaseMember.getPhaseMembers(phaseId);
-      const updatedPhaseMembers = await updateService(req.authUser, projectId, phaseId, newPhaseMembers);
+      transaction = await models.sequelize.transaction();
+      const updatedPhaseMembers = await updateService(req.authUser, projectId, phaseId, newPhaseMembers, transaction);
       req.log.debug('updated phase members', JSON.stringify(newPhaseMembers, null, 2));
-      const updatedPhase = _.cloneDeep(phase);
+      const updatedPhase = _.assign(_.cloneDeep(phase), { members: updatedPhaseMembers });
+      result = updatedPhase;
       //  emit event
       if (_.intersectionBy(phaseMembers, updatedPhaseMembers, 'id').length !== updatedPhaseMembers.length) {
+        await util.updateTopObjectPropertyFromES(updatedPhase.projectId,
+          util.generateUpdateDocFunction(updatedPhase, 'phases'));
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
           RESOURCES.PHASE,
-          _.assign(updatedPhase, { members: updatedPhaseMembers }),
+          updatedPhase,
           _.assign(phase, { members: phaseMembers }),
           ROUTES.PHASES.UPDATE);
       }
+      await transaction.commit();
       res.json(updatedPhaseMembers);
     } catch (err) {
+      if (result) {
+        util.publishError(result, 'phaseMember.update', req.log);
+      }
+      if (transaction) {
+        await transaction.rollback();
+      }
       next(err);
     }
   },

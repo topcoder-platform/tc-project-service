@@ -33,6 +33,7 @@ module.exports = [
   permissions('projectTemplate.upgrade'),
   validate(schema),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.ProjectTemplate.findOne({
       where: {
         id: req.params.templateId,
@@ -106,8 +107,10 @@ module.exports = [
         planConfig: newPlanConfig,
         updatedBy: req.authUser.userId,
       };
+      result = updateInfo;
 
       const newPt = await pt.update(updateInfo);
+      await util.updateMetadataFromES(req.log, util.generateUpdateDocFunction(updateInfo, 'projectTemplates'));
 
       // emit event
       util.sendResourceToKafkaBus(
@@ -118,6 +121,11 @@ module.exports = [
 
       res.status(201).json(_.omit(newPt.toJSON(), 'deletedAt', 'deletedBy'));
     })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectTemplate.upgrade', req.log);
+        }
+        next(err);
+      }));
   },
 ];

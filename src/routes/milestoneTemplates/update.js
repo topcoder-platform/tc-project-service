@@ -120,7 +120,17 @@ module.exports = [
             });
           }
           return Promise.resolve();
-        }),
+        }).then(otherUpdated => util.updateMetadataFromES(req.log, (source) => {
+          const others = _.map(otherUpdated, ou => ou.toJSON());
+          const milestoneTemplates = _.map(source.milestoneTemplates, (single) => {
+            const message = _.find([updated, ...others], ['id', single.id]);
+            if (message) {
+              return _.assign(single, message);
+            }
+            return single;
+          });
+          return _.assign(source, { milestoneTemplates });
+        }).then(() => otherUpdated)),
     )
       .then((otherUpdated) => {
         // emit the event
@@ -144,6 +154,11 @@ module.exports = [
         res.json(updated);
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (updated) {
+          util.publishError(updated, 'milestone.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

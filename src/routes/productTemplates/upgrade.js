@@ -24,6 +24,7 @@ module.exports = [
   validate(schema),
   permissions('productTemplate.upgrade'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(
       () => models.ProductTemplate.findOne({
         where: {
@@ -62,6 +63,8 @@ module.exports = [
         };
 
         const newProductTemplate = await productTemplate.update(updatePayload);
+        result = newProductTemplate.toJSON();
+        await util.updateMetadataFromES(req.log, util.generateUpdateDocFunction(updatePayload, 'productTemplates'));
 
         // emit event
         util.sendResourceToKafkaBus(req,
@@ -70,6 +73,11 @@ module.exports = [
           updatePayload);
 
         return res.status(201).json(_.omit(newProductTemplate.toJSON(), 'deletedAt', 'deletedBy'));
-      }).catch(next));
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'productTemplate.upgrade', req.log);
+        }
+        next(err);
+      }));
   },
 ];

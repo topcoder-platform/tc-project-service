@@ -113,7 +113,28 @@ module.exports = [
 
           return updatePhaseMemberService(req.authUser, projectId, newProjectPhase.id, data.members, transaction)
             .then(members => _.assign(newProjectPhase, { members }));
-        });
+        })
+        .then(() => util.updateTopObjectPropertyFromES(newProjectPhase.projectId, (source) => {
+          const message = newProjectPhase;
+          const phases = _.isArray(source.phases) ? source.phases : [];
+          const existingPhaseIndex = _.findIndex(phases, p => p.id === message.id); // if phase does not exists already
+          if (existingPhaseIndex === -1) {
+            // Increase the order of the other phases in the same project,
+            // which have `order` >= this phase order
+            _.each(phases, (_phase) => {
+              if (!_.isNil(_phase.order) && !_.isNil(message.order) && _phase.order >= message.order) {
+                // eslint-disable-next-line no-param-reassign
+                _phase.order += 1;
+              }
+            });
+            phases.push(message);
+          } else { // if phase already exists, ideally we should never land here, but code handles the buggy indexing
+            // replaces the old inconsistent index where previously phase was not removed from the index but deleted
+            // from the database
+            phases.splice(existingPhaseIndex, 1, message);
+          }
+          return _.assign(source, { phases });
+        }));
     })
       .then(() => {
         util.sendResourceToKafkaBus(
@@ -125,6 +146,9 @@ module.exports = [
           .then(phase => res.status(201).json(phase));
       })
       .catch((err) => {
+        if (newProjectPhase) {
+          util.publishError(newProjectPhase, 'phase.create', req.log);
+        }
         if (err.message) {
           _.assign(err, { details: err.message });
         }

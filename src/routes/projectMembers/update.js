@@ -135,6 +135,9 @@ module.exports = [
             return projectMember;
           })
       ))
+      .then(memberWithDetails => util.updateTopObjectPropertyFromES(projectMember.projectId,
+        util.generateUpdateDocFunction(projectMember, 'members'))
+        .then(() => memberWithDetails))
       .then((memberWithDetails) => {
         util.sendResourceToKafkaBus(
           req,
@@ -145,6 +148,11 @@ module.exports = [
         req.log.debug('updated project member', projectMember);
         res.json(memberWithDetails || projectMember);
       })
-      .catch(err => next(err)));
+      .catch((err) => {
+        if (projectMember) {
+          util.publishError(projectMember, 'projectMember.update', req.log);
+        }
+        next(err);
+      }));
   },
 ];

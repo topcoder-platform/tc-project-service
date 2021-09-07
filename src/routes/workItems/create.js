@@ -116,7 +116,19 @@ module.exports = [
             newPhaseProduct = newPhaseProduct.get({ plain: true });
             newPhaseProduct = _.omit(newPhaseProduct, ['deletedAt', 'utm']);
           });
-      }))
+      })
+      .then(() => util.updateTopObjectPropertyFromES(newPhaseProduct.projectId, (source) => {
+        const phases = _.isArray(source.phases) ? source.phases : [];
+
+        _.each(phases, (phase) => {
+          if (phase.id === newPhaseProduct.phaseId) {
+            // eslint-disable-next-line no-param-reassign
+            phase.products = _.isArray(phase.products) ? phase.products : [];
+            phase.products.push(newPhaseProduct);
+          }
+        });
+        return _.assign(source, { phases });
+      })))
       .then(() => {
         req.log.debug('Sending event to Kafka bus for phase product %d', newPhaseProduct.id);
         // emit the event
@@ -128,6 +140,11 @@ module.exports = [
 
         res.status(201).json(newPhaseProduct);
       })
-      .catch((err) => { next(err); });
+      .catch((err) => {
+        if (newPhaseProduct) {
+          util.publishError(newPhaseProduct, 'workItem.create', req.log);
+        }
+        next(err);
+      });
   },
 ];

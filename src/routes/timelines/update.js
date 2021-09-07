@@ -3,9 +3,11 @@
  */
 import validate from 'express-validation';
 import _ from 'lodash';
+import config from 'config';
 import moment from 'moment';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import models from '../../models';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
 import { EVENT, RESOURCES, TIMELINE_REFERENCES } from '../../constants';
@@ -50,7 +52,7 @@ module.exports = [
     let updated;
 
     // Update
-    return timeline.update(entityToUpdate)
+    return models.sequelize.transaction(() => timeline.update(entityToUpdate)
       .then((updatedTimeline) => {
         // Omit deletedAt, deletedBy
         updated = _.omit(updatedTimeline.toJSON(), ['deletedAt', 'deletedBy']);
@@ -94,7 +96,17 @@ module.exports = [
         }
 
         return Promise.resolve();
-      })
+      }).then(() => {
+        util.getElasticSearchClient().update({
+          index: config.get('elasticsearchConfig.timelineIndexName'),
+          type: config.get('elasticsearchConfig.timelineDocType'),
+          id: updated.id,
+          body: {
+            doc: updated,
+          },
+          refresh: 'wait_for',
+        });
+      }))
       .then(() => {
         // emit the event
         util.sendResourceToKafkaBus(
@@ -108,6 +120,11 @@ module.exports = [
         res.json(updated);
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (updated) {
+          util.publishError(updated, 'timeline.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

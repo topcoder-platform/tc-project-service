@@ -75,10 +75,10 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
    npm run services:up
    ```
 
-   Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
+   Wait until all containers are fully started. As a good indicator, wait until `tc-notifications-processor` successfully started by viewing its logs:
 
    ```bash
-   npm run services:logs -- -f project-processor-es
+   npm run services:logs -- -f tc-notifications-processor
    ```
 
    <details><summary>Click to see a good logs example</summary>
@@ -87,16 +87,19 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
       - first it would be waiting for `kafka-client` to create all the required topics and exit, you would see:
 
          ```
-         project-processor-es_1        | Waiting for kafka-client to exit....
+         tc-notifications-processor_1  | Waiting for kafka-client to exit....
          ```
 
-      - after that, `project-processor-es` would be started itself. Make sure it successfully connected to Kafka, you should see 3 lines with text `Subscribed to project.action.`:
+      - after that, `tc-notifications-processor` would be started itself. Make sure it successfully connected to Kafka, you should see many lines with text `Subscribed to connect.notification.`:
 
       ```
-      project-processor-es_1        | 2020-02-19T03:18:46.523Z DEBUG no-kafka-client Subscribed to project.action.update:0 offset 0 leader kafka:9093
-      project-processor-es_1        | 2020-02-19T03:18:46.524Z DEBUG no-kafka-client Subscribed to project.action.delete:0 offset 0 leader kafka:9093
-      project-processor-es_1        | 2020-02-19T03:18:46.528Z DEBUG no-kafka-client Subscribed to project.action.create:0 offset 0 leader kafka:9093
-      ```
+      tc-notifications-processor_1  | 2021-08-29T03:06:14.760Z DEBUG no-kafka-client Subscribed to connect.notification.project.phase.update.scope:0 offset 0 leader kafka:9093
+      tc-notifications-processor_1  | 2021-08-29T03:06:14.766Z DEBUG no-kafka-client Subscribed to connect.notification.project.product.update.spec:0 offset 0 leader kafka:9093
+      tc-notifications-processor_1  | 2021-08-29T03:06:14.772Z DEBUG no-kafka-client Subscribed to connect.notification.project.timeline.milestone.transition.active:0 offset 0 leader kafka:9093
+      tc-notifications-processor_1  | 2021-08-29T03:06:14.778Z DEBUG no-kafka-client Subscribed to connect.notification.project.timeline.milestone.transition.completed:0 offset 0 leader kafka:9093
+      tc-notifications-processor_1  | 2021-08-29T03:06:14.782Z DEBUG no-kafka-client Subscribed to connect.notification.project.timeline.milestone.waiting.customer:0 offset 0 leader kafka:9093
+      tc-notifications-processor_1  | 2021-08-29T03:06:14.785Z DEBUG no-kafka-client Subscribed to connect.notification.project.timeline.adjusted:0 offset 0 leader kafka:9093
+            ```
    </details>
 
    <br>
@@ -113,7 +116,6 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
       | Zookeeper | zookeeper | 2181  |
       | Kafka | kafka | 9092  |
       | [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) | tc-bus-api | 8002  |
-      | [project-processor-es](https://github.com/topcoder-platform/project-processor-es) | project-processor-es | 5000  |
       | [tc-notifications-api](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-api | 4000  |
       | [tc-notifications-processor](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-processor | 4001  |
 
@@ -264,8 +266,8 @@ To retrieve data from DEV env we have to provide a valid user token (`CONNECT_US
 
 This command for importing data uses API to create demo data. Which has a few pecularities:
 - data in DB would be for sure created
-- data in ElasticSearch Index (ES) would be only created if services [project-processor-es](https://github.com/topcoder-platform/project-processor-es) and [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) are also started locally. If you don't start them, then imported data wouldn't be indexed in ES, and would be only added to DB. You may start them locally separately, or better use `local/full/docker-compose.yml` as described [next section](#local-deployment-with-other-topcoder-services) which would start them automatically.
-   - **NOTE** During data importing a lot of records has to be indexed in ES, so you have to wait about 5-10 minutes after `npm run import-from-api` is finished until imported data is indexed in ES. You may watch logs of `project-processor-es` to see if its done or no.
+- data in ElasticSearch Index (ES) would be for sure created.
+   - **NOTE** During data importing a lot of records has to be indexed in ES, so you have to wait about 5-10 minutes after `npm run import-from-api` is finished until imported data is indexed in ES.
 
 ## Run via Docker
 

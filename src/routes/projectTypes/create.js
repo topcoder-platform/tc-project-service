@@ -39,9 +39,10 @@ module.exports = [
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
     });
+    let result;
 
     // Check if duplicated key
-    return models.ProjectType.findByPk(req.body.key, { paranoid: false })
+    return models.sequelize.transaction(() => models.ProjectType.findByPk(req.body.key, { paranoid: false })
       .then((existing) => {
         if (existing) {
           const apiErr = new Error(`Project type already exists (may be deleted) for key ${req.body.key}`);
@@ -51,7 +52,14 @@ module.exports = [
 
         // Create
         return models.ProjectType.create(entity);
-      }).then((createdEntity) => {
+      })
+      .then((createdEntity) => {
+        result = createdEntity.toJSON();
+        return createdEntity;
+      })
+      .then(createdEntity => util.updateMetadataFromES(req.log,
+        util.generateCreateDocFunction(createdEntity.toJSON(), 'projectTypes', 'key')).then(() => createdEntity)))
+      .then((createdEntity) => {
         // emit event
         util.sendResourceToKafkaBus(
           req,
@@ -61,6 +69,11 @@ module.exports = [
         // Omit deletedAt, deletedBy
         res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectType.create', req.log);
+        }
+        next(err);
+      });
   },
 ];

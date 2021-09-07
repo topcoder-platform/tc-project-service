@@ -36,8 +36,8 @@ module.exports = [
     const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
-
-    return models.OrgConfig.findOne({
+    let result;
+    return models.sequelize.transaction(() => models.OrgConfig.findOne({
       where: {
         id: req.params.id,
       },
@@ -54,6 +54,12 @@ module.exports = [
         return orgConfig.update(entityToUpdate);
       })
       .then((orgConfig) => {
+        result = orgConfig.get({ plain: true });
+        return orgConfig;
+      })
+      .then(orgConfig => util.updateMetadataFromES(req.log,
+        util.generateUpdateDocFunction(orgConfig.get({ plain: true }), 'orgConfigs')).then(() => orgConfig)))
+      .then((orgConfig) => {
         util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
           RESOURCES.ORG_CONFIG,
@@ -62,6 +68,11 @@ module.exports = [
         res.json(orgConfig);
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'orgConfig.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

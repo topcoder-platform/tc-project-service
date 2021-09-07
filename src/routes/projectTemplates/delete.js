@@ -21,6 +21,7 @@ module.exports = [
   validate(schema),
   permissions('projectTemplate.delete'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() =>
       models.ProjectTemplate.findByPk(req.params.templateId)
         .then((entity) => {
@@ -32,7 +33,13 @@ module.exports = [
           // Update the deletedBy, then delete
           return entity.update({ deletedBy: req.authUser.userId });
         })
-        .then(entity => entity.destroy()))
+        .then(entity => entity.destroy())
+        .then((entity) => {
+          result = entity.toJSON();
+          return entity;
+        })
+        .then(entity => util.updateMetadataFromES(req.log,
+          util.generateDeleteDocFunction(_.get(entity.toJSON(), 'id'), 'projectTemplates')).then(() => entity)))
       .then((entity) => {
         // emit event
         util.sendResourceToKafkaBus(
@@ -44,6 +51,11 @@ module.exports = [
 
         res.status(204).end();
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectTemplate.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

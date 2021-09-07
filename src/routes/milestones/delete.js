@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
@@ -18,7 +19,7 @@ const schema = {
     milestoneId: Joi.number().integer().positive().required(),
   },
 };
-
+let payload;
 module.exports = [
   validate(schema),
   // Validate and get projectId from the timelineId param, and set to request params for
@@ -28,7 +29,14 @@ module.exports = [
   (req, res, next) =>
     models
       .sequelize
-      .transaction(t => deleteMilestone(req.authUser, req.params.timelineId, req.params.milestoneId, t))
+      .transaction(t => deleteMilestone(req.authUser, req.params.timelineId, req.params.milestoneId, t)
+        .then((deleted) => {
+          payload = deleted;
+          return deleted;
+        })
+        .then(deleted => util.updateTopObjectPropertyFromES(deleted.timelineId,
+          util.generateDeleteDocFunction(deleted.id, 'milestones'), config.get('elasticsearchConfig.timelineIndexName'))
+          .then(() => deleted)))
       .then((deleted) => {
         util.sendResourceToKafkaBus(
           req,
@@ -37,5 +45,10 @@ module.exports = [
           deleted);
         res.status(204).end();
       })
-      .catch(next),
+      .catch((err) => {
+        if (payload) {
+          util.publishError(payload, 'milestone.delete', req.log);
+        }
+        next(err);
+      }),
 ];

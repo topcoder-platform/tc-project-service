@@ -258,6 +258,7 @@ module.exports = [
     const invite = req.body;
     // let us request user fields during creating, probably this should be move to GET by ID endpoint instead
     const fields = req.query.fields ? req.query.fields.split(',') : null;
+    let result;
 
     try {
       util.validateFields(fields, ALLOWED_FIELDS);
@@ -386,8 +387,28 @@ module.exports = [
                 updatedBy: req.authUser.userId,
               };
               req.log.debug('Creating invites');
-              return models.Sequelize.Promise.all(buildCreateInvitePromises(
+              return models.sequelize.transaction(() => models.Sequelize.Promise.all(buildCreateInvitePromises(
                 req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
+                .then((values) => {
+                  result = _.map(values, v => v.toJSON());
+                  const client = util.getElasticSearchClient();
+                  return client.get({
+                    index: config.get('elasticsearchConfig.indexName'),
+                    type: config.get('elasticsearchConfig.docType'),
+                    id: projectId,
+                  }).then((doc) => {
+                    const source = doc._source; // eslint-disable-line no-underscore-dangle
+                    const esInvites = _.isArray(source.invites) ? source.invites : [];
+                    esInvites.push(..._.map(values, v => v.toJSON()));
+                    return client.update({
+                      index: config.get('elasticsearchConfig.indexName'),
+                      type: config.get('elasticsearchConfig.docType'),
+                      id: projectId,
+                      body: { doc: _.assign(source, { invites: esInvites }) },
+                    });
+                  })
+                    .then(() => values);
+                }))
                 .then((values) => {
                   values.forEach((v) => {
                     // emit the event
@@ -424,6 +445,11 @@ module.exports = [
               res.status(201).json(response);
             }
           });
-      }).catch(err => next(err));
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectMemberInvite.create', req.log);
+        }
+        next(err);
+      });
   },
 ];

@@ -41,8 +41,9 @@ module.exports = [
     const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
+    let result;
 
-    return models.ProjectType.findOne({
+    return models.sequelize.transaction(() => models.ProjectType.findOne({
       where: {
         key: req.params.key,
       },
@@ -59,6 +60,13 @@ module.exports = [
         return projectType.update(entityToUpdate);
       })
       .then((projectType) => {
+        result = projectType.get({ plain: true });
+        return projectType;
+      })
+      .then(projectType => util.updateMetadataFromES(req.log,
+        util.generateUpdateDocFunction(projectType.get({ plain: true }), 'projectTypes', 'key'))
+        .then(() => projectType)))
+      .then((projectType) => {
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
@@ -69,6 +77,11 @@ module.exports = [
         res.json(projectType);
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectType.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

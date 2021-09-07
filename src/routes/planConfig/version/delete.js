@@ -22,6 +22,7 @@ module.exports = [
   validate(schema),
   permissions('planConfig.create'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.PlanConfig.findAll(
       {
         where: {
@@ -50,6 +51,10 @@ module.exports = [
           version: req.params.version,
         },
       }))
+      .then((deleted) => {
+        result = deleted.toJSON();
+        return deleted;
+      })
       .then(deleted => models.PlanConfig.findAll({
         where: {
           key: req.params.key,
@@ -59,6 +64,11 @@ module.exports = [
         order: [['deletedAt', 'DESC']],
         limit: deleted,
       }))
+      .then(planConfigs => util.updateMetadataFromES(req.log, (source) => {
+        const ids = _.map(planConfigs, f => _.get(f.toJSON, 'id'));
+        const remains = _.filter(source.planConfigs, single => !_.includes(ids, single.id));
+        return _.assign(source, { planConfigs: remains });
+      }).then(() => planConfigs))
       .then((planConfigs) => {
         _.map(planConfigs, planConfig => util.sendResourceToKafkaBus(req,
           EVENT.ROUTING_KEY.PROJECT_METADATA_DELETE,
@@ -66,6 +76,11 @@ module.exports = [
           _.pick(planConfig.toJSON(), 'id')));
         res.status(204).end();
       })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'planConfig.version.delete', req.log);
+        }
+        next(err);
+      }));
   },
 ];

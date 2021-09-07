@@ -18,6 +18,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
+    let result;
 
     models.sequelize.transaction(() =>
       // soft delete the record
@@ -65,6 +66,7 @@ module.exports = [
         .then(member => member.save())
       // if primary co-pilot is removed promote the next co-pilot to primary #43
         .then(member => new Promise((accept, reject) => {
+          result = member.get({ plain: true });
           if (member.role === PROJECT_MEMBER_ROLE.COPILOT && member.isPrimary) {
             // find the next copilot
             models.ProjectMember.findAll({
@@ -97,7 +99,10 @@ module.exports = [
             // nothing to do
             accept(member);
           }
-        }))).then((member) => {
+        }))
+        .then(entity => util.updateTopObjectPropertyFromES(_.get(entity.get({ plain: true }), 'projectId'),
+          util.generateDeleteDocFunction(_.get(entity.get({ plain: true }), 'id'),
+            'members')).then(() => entity))).then((member) => {
       // only return the response after transaction is committed
       const pmember = member.get({ plain: true });
       req.log.debug(pmember);
@@ -109,6 +114,11 @@ module.exports = [
         RESOURCES.PROJECT_MEMBER,
         pmember);
       res.status(204).json({});
-    }).catch(err => next(err));
+    }).catch((err) => {
+      if (result) {
+        util.publishError(result, 'projectMember.delete', req.log);
+      }
+      next(err);
+    });
   },
 ];

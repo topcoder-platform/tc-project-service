@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
@@ -26,7 +27,7 @@ module.exports = [
   permissions('timeline.delete'),
   (req, res, next) => {
     const timeline = req.timeline;
-
+    let result;
     return models.sequelize.transaction(() =>
       // Update the deletedBy, then delete
       timeline.update({ deletedBy: req.authUser.userId })
@@ -34,6 +35,10 @@ module.exports = [
         // Cascade delete the milestones
         .then(() => models.Milestone.update({ deletedBy: req.authUser.userId }, { where: { timelineId: timeline.id } }))
         .then(() => models.Milestone.destroy({ where: { timelineId: timeline.id } }))
+        .then((itemsDeleted) => {
+          result = itemsDeleted.toJSON();
+          return itemsDeleted;
+        })
         .then(itemsDeleted => models.Milestone.findAll({
           where: {
             timelineId: timeline.id,
@@ -42,7 +47,13 @@ module.exports = [
           paranoid: false,
           order: [['deletedAt', 'DESC']],
           limit: itemsDeleted,
-        })),
+        }))
+        .then(milestones => util.getElasticSearchClient().delete({
+          index: config.get('elasticsearchConfig.timelineIndexName'),
+          type: config.get('elasticsearchConfig.timelineDocType'),
+          id: req.params.timelineId,
+          refresh: 'wait_for',
+        }).then(() => milestones)),
     )
       .then((milestones) => {
         // emit the event
@@ -62,6 +73,11 @@ module.exports = [
         res.status(204).end();
         return Promise.resolve();
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'timeline.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

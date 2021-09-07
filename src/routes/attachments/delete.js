@@ -50,6 +50,11 @@ module.exports = [
         return Promise.resolve();
       })
       .then(() => {
+        const message = attachment.get({ plain: true });
+        return util.updateTopObjectPropertyFromES(message.projectId,
+          util.generateDeleteDocFunction(message.id, 'attachments'));
+      })
+      .then(() => {
         // fire event
         const pattachment = attachment.get({ plain: true });
         // emit the event
@@ -60,6 +65,11 @@ module.exports = [
           pattachment);
         res.status(204).json({});
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (attachment) {
+          util.publishError(attachment.get({ plain: true }), 'attachment.delete', req.log);
+        }
+        next(err);
+      });
   },
 ];

@@ -63,6 +63,7 @@ module.exports = [
   (req, res, next) => {
     const param = req.body;
     const { form, priceConfig, planConfig } = param;
+    let result;
 
     return Promise.all([
       util.checkModel(form, 'Form', models.Form, 'project template'),
@@ -74,7 +75,7 @@ module.exports = [
           updatedBy: req.authUser.userId,
         });
 
-        return models.ProjectTemplate.findOne({
+        return models.sequelize.transaction(() => models.ProjectTemplate.findOne({
           where: {
             deletedAt: { $eq: null },
             id: req.params.templateId,
@@ -103,6 +104,13 @@ module.exports = [
             return projectTemplate.update(entityToUpdate);
           })
           .then((projectTemplate) => {
+            result = projectTemplate.get({ plain: true });
+            return projectTemplate;
+          })
+          .then(projectTemplate => util.updateMetadataFromES(req.log,
+            util.generateUpdateDocFunction(projectTemplate.get({ plain: true }), 'projectTemplates'))
+            .then(() => projectTemplate)))
+          .then((projectTemplate) => {
             util.sendResourceToKafkaBus(
               req,
               EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
@@ -112,6 +120,11 @@ module.exports = [
 
             res.json(projectTemplate);
           });
-      }).catch(next);
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectTemplate.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

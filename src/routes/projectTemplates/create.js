@@ -60,6 +60,7 @@ module.exports = [
   (req, res, next) => {
     const param = req.body;
     const { form, priceConfig, planConfig } = param;
+    let result;
 
     return Promise.all([
       util.checkModel(form, 'Form', models.Form, 'project template'),
@@ -72,7 +73,13 @@ module.exports = [
           updatedBy: req.authUser.userId,
         });
 
-        return models.ProjectTemplate.create(entity)
+        return models.sequelize.transaction(() => models.ProjectTemplate.create(entity)
+          .then((createdEntity) => {
+            result = createdEntity.toJSON();
+            return createdEntity;
+          })
+          .then(createdEntity => util.updateMetadataFromES(req.log,
+            util.generateCreateDocFunction(createdEntity.toJSON(), 'projectTemplates')).then(() => createdEntity)))
           .then((createdEntity) => {
             // emit event
             util.sendResourceToKafkaBus(
@@ -84,6 +91,11 @@ module.exports = [
             // Omit deletedAt, deletedBy
             res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
           });
-      }).catch(next);
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'projectTemplate.create', req.log);
+        }
+        next(err);
+      });
   },
 ];

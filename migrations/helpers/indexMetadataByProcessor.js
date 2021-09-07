@@ -1,16 +1,6 @@
 /* eslint-disable no-console */
 /**
- * Sync metadata models from DB to ES using "project-processor-es".
- *
- * The main purpose of this script is to use during development to validate that all metadata can be
- * correctly indexed using "project-processor-es".
- *
- * Advantage: It sync DB data to ES using "project-processor-es" as if were adding them using API.
- *            So the result of this process is closer to what we would get if we added these objects
- *            using API.
- *
- * Disadvantage: We don't know when the syncing process is done and if there are any errors or no.
- *               To get this information we have to watch the log of "project-processor-es".
+ * Create metadata models events
  */
 import _ from 'lodash';
 import models from '../../src/models';
@@ -54,7 +44,7 @@ const modelConfigs = {
     indexProperty: 'priceConfigs',
     resource: RESOURCES.PRICE_CONFIG_REVISION,
   },
-  // This model is not yet supported by "project-processor-es"
+  // This model is not yet supported
   // BuildingBlock: {
   //   indexProperty: 'buildingBlocks',
   //   resource: RESOURCES.

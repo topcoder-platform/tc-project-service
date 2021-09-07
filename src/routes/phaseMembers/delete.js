@@ -28,6 +28,7 @@ module.exports = [
     const phaseId = _.parseInt(req.params.phaseId);
     const userId = _.parseInt(req.params.userId);
     let transaction;
+    let result;
     try {
       // check if project and phase exist
       const phase = await models.ProjectPhase.findOne({
@@ -59,18 +60,25 @@ module.exports = [
         });
         await phaseMember.update({ deletedBy: req.authUser.userId }, { transaction });
         await phaseMember.destroy({ transaction });
-        const updatedPhase = _.cloneDeep(phase);
+        const updatedPhase = _.assign(_.cloneDeep(phase),
+          { members: _.filter(phaseMembers, member => member.userId !== userId) });
+        result = updatedPhase;
+        await util.updateTopObjectPropertyFromES(updatedPhase.projectId,
+          util.generateUpdateDocFunction(updatedPhase, 'phases'));
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,
           RESOURCES.PHASE,
-          _.assign(updatedPhase, { members: _.filter(phaseMembers, member => member.userId !== userId) }),
+          updatedPhase,
           _.assign(phase, { members: phaseMembers }),
           ROUTES.PHASES.UPDATE);
         await transaction.commit();
       }
       res.status(204).end();
     } catch (err) {
+      if (result) {
+        util.publishError(result, 'phaseMember.delete', req.log);
+      }
       if (transaction) {
         await transaction.rollback();
       }

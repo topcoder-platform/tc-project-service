@@ -1,6 +1,7 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import config from 'config';
 import {
   middleware as tcMiddleware,
 } from 'tc-core-library-js';
@@ -260,7 +261,22 @@ module.exports = [
         } else {
           accept();
         }
-      })))
+      }))
+      .then(() => {
+        const message = _.assign(_.omit(project.get({ plain: true }), ['deletedAt']), {
+          refCode: _.get(project, 'details.utm.code'),
+          projectUrl: `${config.get('connectProjectsUrl')}${project.id}`,
+        });
+        return util.getElasticSearchClient().update({
+          index: config.get('elasticsearchConfig.indexName'),
+          type: config.get('elasticsearchConfig.docType'),
+          id: message.id,
+          body: {
+            doc: message,
+          },
+          refresh: 'wait_for',
+        });
+      }))
       .then(() => { // transaction has been committed
         project = project.get({ plain: true });
         project = _.omit(project, ['deletedAt']);
@@ -282,6 +298,11 @@ module.exports = [
         project.attachments = attachments;
         res.json(project);
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (project) {
+          util.publishError(project, 'project.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

@@ -79,7 +79,26 @@ module.exports = [
             });
           }
           return Promise.resolve();
-        }),
+        }).then(otherUpdated => util.updateMetadataFromES(req.log, (source) => {
+          let milestoneTemplates = _.isArray(source.milestoneTemplates) ? source.milestoneTemplates : [];
+          const existingMilestoneTemplateIndex = _.findIndex(milestoneTemplates, p => p.id === result.id); // if milestone template does not exists already
+          if (existingMilestoneTemplateIndex === -1) {
+            milestoneTemplates.push(result);
+          } else { // if milestone template already exists, ideally we should never land here, but code handles the buggy indexing
+            // replaces the old inconsistent index where previously milestone template was not removed from the index but deleted
+            // from the database
+            milestoneTemplates.splice(existingMilestoneTemplateIndex, 1, result);
+          }
+          const others = _.map(otherUpdated, ou => _.pick(ou.toJSON(), 'id', 'order', 'updatedBy', 'updatedAt'));
+          milestoneTemplates = _.map(milestoneTemplates, (single) => {
+            const message = _.find(others, ['id', single.id]);
+            if (message) {
+              return _.assign(single, message);
+            }
+            return single;
+          });
+          return _.assign(source, { milestoneTemplates });
+        }).then(() => otherUpdated)),
     )
       .then((otherUpdated) => {
       // emit the event
@@ -101,6 +120,11 @@ module.exports = [
         // Write to response
         res.status(201).json(result);
       })
-      .catch(next);
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'milestoneTemplate.create', req.log);
+        }
+        next(err);
+      });
   },
 ];

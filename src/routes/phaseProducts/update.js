@@ -39,6 +39,7 @@ module.exports = [
     updatedProps.updatedBy = req.authUser.userId;
 
     let previousValue;
+    let result;
 
     models.sequelize.transaction(() => models.PhaseProduct.findOne({
       where: {
@@ -58,9 +59,27 @@ module.exports = [
         previousValue = _.clone(existing.get({ plain: true }));
 
         _.extend(existing, updatedProps);
+        result = existing;
         existing.save().then(accept).catch(reject);
       }
-    })))
+    }))
+      .then(updated => util.updateTopObjectPropertyFromES(_.get(updated.get({ plain: true }),
+        'projectId'), (source) => {
+        const message = updated.get({ plain: true });
+        const phases = _.map(source.phases, (phase) => {
+          if (phase.id === message.phaseId) {
+            // eslint-disable-next-line no-param-reassign
+            phase.products = _.map(phase.products, (product) => {
+              if (product.id === message.id) {
+                return _.assign(product, message);
+              }
+              return product;
+            });
+          }
+          return phase;
+        });
+        return _.assign(source, { phases });
+      }).then(() => updated)))
       .then((updated) => {
         req.log.debug('updated phase product', JSON.stringify(updated, null, 2));
 
@@ -76,6 +95,11 @@ module.exports = [
           ROUTES.PHASE_PRODUCTS.UPDATE);
 
         res.json(updated);
-      }).catch(err => next(err));
+      }).catch((err) => {
+        if (result) {
+          util.publishError(result, 'phaseProduct.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

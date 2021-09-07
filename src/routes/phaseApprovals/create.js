@@ -37,6 +37,7 @@ module.exports = [
     const updatedBy = _.parseInt(req.authUser.userId);
     _.assign(approvalData, { phaseId, createdBy, updatedBy });
     let transaction;
+    let result;
     try {
       // check if project and phase exist
       const phase = await models.ProjectPhase.findOne({
@@ -67,9 +68,12 @@ module.exports = [
       const phaseApproval = created.toJSON();
       req.log.debug('created phase approval', JSON.stringify(phaseApproval, null, 2));
       const updatedPhase = _.cloneDeep(phase.toJSON());
+      result = phase.toJSON();
       const approvals = _.isArray(updatedPhase.approvals) ? updatedPhase.approvals : [];
       approvals.push(phaseApproval);
       _.assign(updatedPhase, { approvals });
+      await util.updateTopObjectPropertyFromES(phase.toJSON().projectId,
+        util.generateUpdateDocFunction(phase.toJSON(), 'phases'));
       //  emit event
       util.sendResourceToKafkaBus(
         req,
@@ -81,6 +85,9 @@ module.exports = [
       await transaction.commit();
       res.json(phaseApproval);
     } catch (err) {
+      if (result) {
+        util.publishError(result, 'phaseApproval.create', req.log);
+      }
       if (!_.isUndefined(transaction)) {
         await transaction.rollback();
       }

@@ -37,6 +37,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const attachmentId = _.parseInt(req.params.id);
     let previousValue;
+    let result;
     updatedProps.updatedBy = req.authUser.userId;
     models.sequelize.transaction(() => models.ProjectAttachment.findOne({
       where: {
@@ -65,6 +66,11 @@ module.exports = [
       _.extend(existing, updatedProps);
       return existing.save().then(accept).catch(reject);
     })).then((updated) => {
+      const message = updated.toJSON();
+      result = message;
+      return util.updateTopObjectPropertyFromES(message.projectId,
+        util.generateUpdateDocFunction(message, 'attachments')).then(() => updated);
+    }).then((updated) => {
       req.log.debug('updated project attachment', JSON.stringify(updated, null, 2));
       res.json(updated);
 
@@ -74,6 +80,12 @@ module.exports = [
         EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_UPDATED,
         RESOURCES.ATTACHMENT,
         updated.toJSON());
-    }).catch(err => next(err)));
+    })
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'attachment.update', req.log);
+        }
+        next(err);
+      }));
   },
 ];

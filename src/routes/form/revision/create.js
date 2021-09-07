@@ -32,6 +32,7 @@ module.exports = [
   validate(schema),
   permissions('form.create'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.Form.findOne({
       where: {
         key: req.params.key,
@@ -55,7 +56,10 @@ module.exports = [
       const apiErr = new Error(`Form not exists for key ${req.params.key} version ${req.params.version}`);
       apiErr.status = 404;
       return Promise.reject(apiErr);
-    }).then((createdEntity) => {
+    }).then(createdEntity => util.updateMetadataFromES(req.log,
+      util.generateCreateDocFunction(createdEntity.toJSON(), 'forms'))
+      .then(() => createdEntity)).then((createdEntity) => {
+      result = createdEntity.toJSON();
       util.sendResourceToKafkaBus(req,
         EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
         RESOURCES.FORM_REVISION,
@@ -63,6 +67,11 @@ module.exports = [
       // Omit deletedAt, deletedBy
       res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
     })
-      .catch(next));
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'form.revision.create', req.log);
+        }
+        next(err);
+      }));
   },
 ];

@@ -33,6 +33,7 @@ module.exports = [
   validate(schema),
   permissions('priceConfig.create'),
   (req, res, next) => {
+    let result;
     models.sequelize.transaction(() => models.PriceConfig.findAll({
       where: {
         key: req.params.key,
@@ -56,13 +57,24 @@ module.exports = [
       });
       return models.PriceConfig.create(entity);
     }).then((createdEntity) => {
-      util.sendResourceToKafkaBus(req,
-        EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
-        RESOURCES.PRICE_CONFIG_VERSION,
-        createdEntity.toJSON());
-      // Omit deletedAt, deletedBy
-      res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
-    })
-      .catch(next));
+      result = createdEntity.toJSON();
+      return createdEntity;
+    }).then(createdEntity => util.updateMetadataFromES(req.log,
+      util.generateCreateDocFunction(createdEntity.toJSON(), 'priceConfigs'))
+      .then(() => createdEntity))
+      .then((createdEntity) => {
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_CREATE,
+          RESOURCES.PRICE_CONFIG_VERSION,
+          createdEntity.toJSON());
+        // Omit deletedAt, deletedBy
+        res.status(201).json(_.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy'));
+      })
+      .catch((err) => {
+        if (result) {
+          util.publishError(result, 'priceConfig.version.create', req.log);
+        }
+        next(err);
+      }));
   },
 ];

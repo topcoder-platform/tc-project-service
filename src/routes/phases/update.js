@@ -96,7 +96,9 @@ module.exports = [
 
         return updatePhaseMemberService(req.authUser, projectId, phaseId, updatedProps.members, transaction)
           .then(members => _.assign(updated, { members }));
-      }),
+      })
+      .then(() => util.updateTopObjectPropertyFromES(updated.projectId,
+        util.generateUpdateDocFunction(updated, 'phases'))),
     )
       .then(() => {
         req.log.debug('updated project phase', JSON.stringify(updated, null, 2));
@@ -122,6 +124,11 @@ module.exports = [
         }).then(phaseWithMembers => util.populatePhasesWithMemberDetails(phaseWithMembers.toJSON(), req)
           .then(result => res.json(result)));
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (updated) {
+          util.publishError(updated, 'phase.update', req.log);
+        }
+        next(err);
+      });
   },
 ];

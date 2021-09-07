@@ -3,6 +3,7 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
@@ -44,7 +45,7 @@ const schema = {
     deletedBy: Joi.any().strip(),
   }).required(),
 };
-
+let payload;
 module.exports = [
   validate(schema),
   // Validate and get projectId from the timelineId param,
@@ -58,7 +59,12 @@ module.exports = [
         req.authUser,
         req.params.timelineId,
         Object.assign({}, req.body, { id: req.params.milestoneId }),
-        t))
+        t).then((result) => {
+        payload = result.updated;
+        return result;
+      }).then(({ updated, original }) => util.updateTopObjectPropertyFromES(updated.timelineId,
+        util.generateUpdateDocFunction(updated, 'milestones'),
+        config.get('elasticsearchConfig.timelineIndexName')).then(() => ({ updated, original }))))
       .then(({ updated, original }) => {
         util.sendResourceToKafkaBus(
           req,
@@ -69,5 +75,10 @@ module.exports = [
         );
         res.json(updated);
       })
-      .catch(next),
+      .catch((err) => {
+        if (payload) {
+          util.publishError(payload, 'milestone.update', req.log);
+        }
+        next(err);
+      }),
 ];
