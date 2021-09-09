@@ -193,15 +193,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
     refCode: _.get(project, 'details.utm.code'),
     projectUrl: `${config.get('connectProjectsUrl')}${project.id}`,
   });
-  await util.getElasticSearchClient().update({
-    index: config.get('elasticsearchConfig.indexName'),
-    type: config.get('elasticsearchConfig.docType'),
-    id: message.id,
-    body: {
-      doc: message,
-    },
-    refresh: 'wait_for',
-  });
+  await util.updateEsData('project', 'update', message.id, message);
   // Send events to buses (Project)
   req.log.debug('updated project', project);
 

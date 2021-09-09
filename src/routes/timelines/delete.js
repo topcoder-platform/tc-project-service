@@ -3,7 +3,6 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
-import config from 'config';
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
@@ -36,7 +35,7 @@ module.exports = [
         .then(() => models.Milestone.update({ deletedBy: req.authUser.userId }, { where: { timelineId: timeline.id } }))
         .then(() => models.Milestone.destroy({ where: { timelineId: timeline.id } }))
         .then((itemsDeleted) => {
-          result = itemsDeleted.toJSON();
+          result = itemsDeleted;
           return itemsDeleted;
         })
         .then(itemsDeleted => models.Milestone.findAll({
@@ -48,12 +47,8 @@ module.exports = [
           order: [['deletedAt', 'DESC']],
           limit: itemsDeleted,
         }))
-        .then(milestones => util.getElasticSearchClient().delete({
-          index: config.get('elasticsearchConfig.timelineIndexName'),
-          type: config.get('elasticsearchConfig.timelineDocType'),
-          id: req.params.timelineId,
-          refresh: 'wait_for',
-        }).then(() => milestones)),
+        .then(milestones => util.updateEsData('timeline', 'delete', req.params.timelineId)
+          .then(() => milestones)),
     )
       .then((milestones) => {
         // emit the event

@@ -267,15 +267,7 @@ module.exports = [
           refCode: _.get(project, 'details.utm.code'),
           projectUrl: `${config.get('connectProjectsUrl')}${project.id}`,
         });
-        return util.getElasticSearchClient().update({
-          index: config.get('elasticsearchConfig.indexName'),
-          type: config.get('elasticsearchConfig.docType'),
-          id: message.id,
-          body: {
-            doc: message,
-          },
-          refresh: 'wait_for',
-        });
+        return util.updateEsData('project', 'update', message.id, message);
       }))
       .then(() => { // transaction has been committed
         project = project.get({ plain: true });

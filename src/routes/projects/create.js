@@ -496,13 +496,7 @@ module.exports = [
             refCode: _.get(newProject, 'details.utm.code'),
             projectUrl: `${config.get('connectProjectsUrl')}${newProject.id}`,
           });
-          return util.getElasticSearchClient().create({
-            index: config.get('elasticsearchConfig.indexName'),
-            type: config.get('elasticsearchConfig.docType'),
-            id: message.id,
-            body: message,
-            refresh: 'wait_for',
-          });
+          return util.updateEsData('project', 'create', message.id, message);
         });
     })
       .then(() => {

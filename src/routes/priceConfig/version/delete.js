@@ -52,7 +52,7 @@ module.exports = [
         },
       }))
       .then((deleted) => {
-        result = deleted.toJSON();
+        result = deleted;
         return deleted;
       })
       .then(deleted => models.PriceConfig.findAll({

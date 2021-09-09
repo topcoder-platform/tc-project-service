@@ -1,6 +1,5 @@
 
 import _ from 'lodash';
-import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import { EVENT, RESOURCES } from '../../constants';
 import models from '../../models';
@@ -35,12 +34,7 @@ module.exports = [
           result = project.toJSON();
           return project;
         })
-        .then(project => util.getElasticSearchClient().delete({
-          index: config.get('elasticsearchConfig.indexName'),
-          type: config.get('elasticsearchConfig.docType'),
-          id: _.get(project.toJSON(), 'id'),
-          refresh: 'wait_for',
-        }).then(() => project)))
+        .then(project => util.updateEsData('project', 'delete', _.get(project.toJSON(), 'id')).then(() => project)))
       .then((project) => {
         // emit event
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_DELETED,

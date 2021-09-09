@@ -1684,6 +1684,65 @@ const projectServiceUtils = {
      ${JSON.stringify(payload, null, 2)}`);
     createEvent(BUS_API_EVENT.PROJECT_ERROR_TOPIC, payload, logger);
   },
+
+  /**
+   * Update es data
+   * @param {String} resource the resource name
+   * @param {String} op the operation
+   * @param {String} id the id
+   * @param {Object} body the body
+   * @returns {Promise} the update result promise
+   */
+  updateEsData: async (resource, op, id, body) => {
+    let index = config.get('elasticsearchConfig.indexName');
+    let type = config.get('elasticsearchConfig.docType');
+    if (resource === 'timeline') {
+      index = config.get('elasticsearchConfig.timelineIndexName');
+      type = config.get('elasticsearchConfig.timelineDocType');
+    }
+    const client = util.getElasticSearchClient();
+    if (op === 'create') {
+      return client.create({
+        index,
+        type,
+        id,
+        body,
+        refresh: 'wait_for',
+      });
+    } else if (op === 'update') {
+      return client.update({
+        index,
+        type,
+        id,
+        body: {
+          doc: body,
+        },
+        refresh: 'wait_for',
+      });
+    } else if (op === 'delete') {
+      return client.delete({
+        index,
+        type,
+        id,
+        refresh: 'wait_for',
+      });
+    }
+    return null;
+  },
+
+  /**
+   * Get project from es
+   * @param {String} projectId the project id
+   * @returns {Promise} the project
+   */
+  getProjectFromEs: async (projectId) => {
+    const client = util.getElasticSearchClient();
+    return client.get({
+      index: config.get('elasticsearchConfig.indexName'),
+      type: config.get('elasticsearchConfig.docType'),
+      id: projectId,
+    });
+  },
 };
 
 _.assignIn(util, projectServiceUtils);

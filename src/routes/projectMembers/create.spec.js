@@ -62,6 +62,11 @@ describe('Project Members create', () => {
     let sandbox;
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
+      sandbox.stub(util, 'getMemberDetailsByUserIds', () => Promise.resolve([{
+        userId: 40051333,
+        firstName: 'Admin',
+        lastName: 'User',
+      }]));
     });
     afterEach(() => {
       sandbox.restore();

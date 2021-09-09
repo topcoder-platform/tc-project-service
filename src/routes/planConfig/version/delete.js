@@ -52,7 +52,7 @@ module.exports = [
         },
       }))
       .then((deleted) => {
-        result = deleted.toJSON();
+        result = deleted;
         return deleted;
       })
       .then(deleted => models.PlanConfig.findAll({
@@ -65,7 +65,7 @@ module.exports = [
         limit: deleted,
       }))
       .then(planConfigs => util.updateMetadataFromES(req.log, (source) => {
-        const ids = _.map(planConfigs, f => _.get(f.toJSON, 'id'));
+        const ids = _.map(planConfigs, f => _.get(f.toJSON(), 'id'));
         const remains = _.filter(source.planConfigs, single => !_.includes(ids, single.id));
         return _.assign(source, { planConfigs: remains });
       }).then(() => planConfigs))

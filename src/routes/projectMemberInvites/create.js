@@ -391,21 +391,11 @@ module.exports = [
                 req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
                 .then((values) => {
                   result = _.map(values, v => v.toJSON());
-                  const client = util.getElasticSearchClient();
-                  return client.get({
-                    index: config.get('elasticsearchConfig.indexName'),
-                    type: config.get('elasticsearchConfig.docType'),
-                    id: projectId,
-                  }).then((doc) => {
+                  return util.getProjectFromEs(projectId).then((doc) => {
                     const source = doc._source; // eslint-disable-line no-underscore-dangle
                     const esInvites = _.isArray(source.invites) ? source.invites : [];
                     esInvites.push(..._.map(values, v => v.toJSON()));
-                    return client.update({
-                      index: config.get('elasticsearchConfig.indexName'),
-                      type: config.get('elasticsearchConfig.docType'),
-                      id: projectId,
-                      body: { doc: _.assign(source, { invites: esInvites }) },
-                    });
+                    return util.updateEsData('project', 'update', projectId, _.assign(source, { invites: esInvites }));
                   })
                     .then(() => values);
                 }))

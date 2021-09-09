@@ -3,7 +3,6 @@
  */
 import validate from 'express-validation';
 import _ from 'lodash';
-import config from 'config';
 import Joi from 'joi';
 import moment from 'moment';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -108,15 +107,7 @@ module.exports = [
             });
           }
           return Promise.resolve();
-        }).then(() => {
-          util.getElasticSearchClient().create({
-            index: config.get('elasticsearchConfig.timelineIndexName'),
-            type: config.get('elasticsearchConfig.timelineDocType'),
-            id: result.id,
-            body: result,
-            refresh: 'wait_for',
-          });
-        })
+        }).then(() => util.updateEsData('timeline', 'create', result.id, result))
         .catch((err) => {
           if (result) {
             util.publishError(result, 'timeline.create', req.log);

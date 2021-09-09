@@ -3,7 +3,6 @@
  */
 import validate from 'express-validation';
 import _ from 'lodash';
-import config from 'config';
 import moment from 'moment';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -97,15 +96,7 @@ module.exports = [
 
         return Promise.resolve();
       }).then(() => {
-        util.getElasticSearchClient().update({
-          index: config.get('elasticsearchConfig.timelineIndexName'),
-          type: config.get('elasticsearchConfig.timelineDocType'),
-          id: updated.id,
-          body: {
-            doc: updated,
-          },
-          refresh: 'wait_for',
-        });
+        util.updateEsData('timeline', 'update', updated.id, updated);
       }))
       .then(() => {
         // emit the event
