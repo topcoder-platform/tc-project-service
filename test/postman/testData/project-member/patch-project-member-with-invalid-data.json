@@ -1,0 +1,75 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_MEMBER_1}}",
+    "input": {
+    },
+    "httpCode": 400,
+    "message": "validation error: \"role\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_MEMBER_1}}",
+    "input": {
+      "role": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be one of [customer, manager, account_manager, copilot, observer, program_manager, account_executive, solution_architect, project_manager]"
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_MEMBER_1}}",
+    "input": {
+      "role": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be one of [customer, manager, account_manager, copilot, observer, program_manager, account_executive, solution_architect, project_manager]"
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_MEMBER_1}}",
+    "input": {
+      "role": "copilot"
+    },
+    "httpCode": 401,
+    "message": "User doesn't have required Topcoder roles to have project role \"copilot\"."
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_MEMBER_1}}",
+    "input": {
+      "role": "customer",
+      "isPrimary": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"isPrimary\" must be a boolean"
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_MEMBER_1}}",
+    "input": {
+      "role": "customer",
+      "aa": "cc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"aa\" is not allowed"
+  },
+  {
+    "project_id": "1",
+    "id": "99999",
+    "input": {
+      "role": "customer"
+    },
+    "httpCode": 404,
+    "message": "project member not found for project id 1 and member id 99999"
+  },
+  {
+    "project_id": "99999",
+    "id": "1",
+    "input": {
+      "role": "customer"
+    },
+    "httpCode": 404,
+    "message": "project member not found for project id 99999 and member id 1"
+  }
+]

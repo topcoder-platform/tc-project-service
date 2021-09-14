@@ -1,0 +1,14 @@
+[
+  {
+    "project_id": "9999999",
+    "id": "{{PROJECT_ATTACHMENT_6}}",
+    "httpCode": 404,
+    "message": "Record not found"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "99999",
+    "httpCode": 404,
+    "message": "Record not found"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields-1",
+      "type": "postman test type 1",
+      "status": "active"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields-1",
+      "type": "postman test type 1",
+      "status": "active",
+      "projectId": "{{PROJECT_1}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_1",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields-2",
+      "type": "postman test type 2",
+      "status": "draft"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields-2",
+      "type": "postman test type 2",
+      "status": "draft",
+      "projectId": "{{PROJECT_1}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_2",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields-3",
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields-3",
+      "type": "postman test type 3",
+      "status": "reviewed",
+      "projectId": "{{PROJECT_1}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_3",
+    "httpCode": 201
+  }
+]

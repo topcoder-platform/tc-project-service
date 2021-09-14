@@ -1,0 +1,14 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "params": "role=",
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be one of [manager, account_manager, copilot, customer, observer]"
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "params": "role=aa",
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be one of [manager, account_manager, copilot, customer, observer]"
+  }
+]

@@ -1,0 +1,87 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link"
+    },
+    "expected": {
+      "allowedUsers": null,
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "size": null,
+      "category": null,
+      "description": null,
+      "contentType": null,
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "tags": null,
+      "deletedAt": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_ATTACHMENT_1",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-full-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "description": "description 2",
+      "category": "category 2",
+      "size": 199,
+      "tags": ["specification", "design preview", "billing information"],
+      "allowedUsers": [1, 3, 7]
+    },
+    "expected": {
+      "allowedUsers": [
+        1,
+        3,
+        7
+      ],
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-full-fields",
+      "size": 199,
+      "category": "category 2",
+      "description": "description 2",
+      "contentType": null,
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "tags": [
+        "specification",
+        "design preview",
+        "billing information"
+      ],
+      "deletedAt": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_ATTACHMENT_2",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-with-tags",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "tags": ["specification"]
+    },
+    "expected": {
+      "allowedUsers": null,
+      "title": "POSTMANE2E-Project-Attachment-by-admin-with-tags",
+      "size": null,
+      "category": null,
+      "description": null,
+      "contentType": null,
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "tags": [
+        "specification"
+      ],
+      "deletedAt": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_ATTACHMENT_3",
+    "httpCode": 201
+  }
+]

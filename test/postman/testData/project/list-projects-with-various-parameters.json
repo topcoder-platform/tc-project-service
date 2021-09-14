@@ -1,0 +1,95 @@
+[
+  {
+    "params": "fields=id,name,description",
+    "expectedFields": [
+      "id",
+      "name",
+      "description"
+    ]
+  },
+  {
+    "params": "fields=id,name,description&page=1&perPage=10",
+    "expectedFields": [
+      "id",
+      "name",
+      "description"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&sort=type asc",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&id={{PROJECT_1}}",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&status=in_review",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&type={{PROJECT_TYPE_1}}",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&memberOnly=false",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&keyword=POSTMANE2E",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&name=POSTMANE2E",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&code=testcode",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&customer=Customer",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&manager=Manager",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  },
+  {
+    "params": "fields=id,type&page=1&perPage=10&directProjectId=11",
+    "expectedFields": [
+      "id",
+      "type"
+    ]
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "name": "POSTMANE2E-new title 1 updated"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 1 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "name": "POSTMANE2E-new title 2 updated",
+      "type": "new type updated"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 2 updated",
+      "type": "new type updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "templateId": 6
+    },
+    "expected": {
+      "templateId": 6
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "name": "POSTMANE2E-new title 4 updated",
+      "directProjectId": 5
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 4 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "name": "POSTMANE2E-new title 5 updated",
+      "billingAccountId": 6
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 5 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "estimatedPrice": 1999
+    },
+    "expected": {
+      "estimatedPrice": 1999
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "actualPrice": 777
+    },
+    "expected": {
+      "actualPrice": 777
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_9}}",
+    "input": {
+      "details": "closed"
+    },
+    "expected": {
+      "details": "closed"
+    },
+    "httpCode": 200
+  }
+]

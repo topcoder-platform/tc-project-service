@@ -1,0 +1,222 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"title\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": 123,
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"title\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"title\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "type": "link"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"path\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": 123,
+      "type": "link"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"path\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "",
+      "type": "link"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"path\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is not allowed to be empty,\"type\" must be one of [file, link]"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be one of [file, link]"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "description": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"description\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "category": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"category\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "size": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"size\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "tags": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"tags\" must be an array"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "tags": [123]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "allowedUsers": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"allowedUsers\" must be an array"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "link",
+      "allowedUsers": ["abc"]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "file",
+      "s3Bucket": "s3-bucket"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"contentType\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "file",
+      "s3Bucket": "s3-bucket",
+      "contentType": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"contentType\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "file",
+      "contentType": "images/png"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"s3Bucket\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "title": "POSTMANE2E-Project-Attachment-by-admin-only-required-fields",
+      "path": "https://connect.topcoder-dev.com/projects/8600/assets.zip",
+      "type": "file",
+      "s3Bucket": "",
+      "contentType": "images/png"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"s3Bucket\" is not allowed to be empty"
+  }
+]

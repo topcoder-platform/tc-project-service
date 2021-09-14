@@ -1,0 +1,154 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-new title 1 updated"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 1 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-new title 2 updated",
+      "description": "new description updated"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 2 updated",
+      "description": "new description updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-new title 3 updated",
+      "requirements": "requirements updated"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 3 updated",
+      "requirements": "requirements updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-new title 4 updated",
+      "status": "pending"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 4 updated",
+      "status": "pending"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-new title 5 updated",
+      "startDate": "2020-05-27T09:31:37.651Z"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 5 updated",
+      "startDate": "2020-05-27T09:31:37.651Z"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "endDate": "2020-05-29T09:31:37.651Z"
+    },
+    "expected": {
+      "endDate": "2020-05-29T09:31:37.651Z"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "duration": 7
+    },
+    "expected": {
+      "duration": 7
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "budget": 6
+    },
+    "expected": {
+      "budget": 6
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "spentBudget": 9
+    },
+    "expected": {
+      "spentBudget": 9
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "progress": 77
+    },
+    "expected": {
+      "progress": 77
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "details": ["check check"]
+    },
+    "expected": {
+      "details": ["check check"]
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "order": 4
+    },
+    "expected": {
+      "order": 4
+    },
+    "httpCode": 200
+  }
+]

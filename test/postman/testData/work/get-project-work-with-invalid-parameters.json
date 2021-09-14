@@ -1,0 +1,16 @@
+[
+  {
+    "project_id": "99999",
+    "workstream_id": "1",
+    "id": "1",
+    "httpCode": 404,
+    "message": "work not found for work stream id 1, project id 99999 and work id 1"
+  },
+  {
+    "project_id": "1",
+    "workstream_id": "1",
+    "id": "99999",
+    "httpCode": 404,
+    "message": "work not found for work stream id 1, project id 1 and work id 99999"
+  }
+]

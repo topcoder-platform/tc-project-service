@@ -1,0 +1,46 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_17}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_7}}",
+    "expected": {
+      "id": "{{PROJECT_PHASE_PRODUCT_7}}",
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-only-required-fields3",
+      "projectId": "{{PROJECT_3}}",
+      "directProjectId": null,
+      "billingAccountId": null,
+      "templateId": 0,
+      "type": "postman test type 1",
+      "estimatedPrice": 0,
+      "actualPrice": 0,
+      "details": {},
+      "deletedAt": null,
+      "deletedBy": null,
+      "phaseId": "{{PROJECT_PHASE_17}}"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_18}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_8}}",
+    "expected": {
+      "id": "{{PROJECT_PHASE_PRODUCT_8}}",
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-only-full-fields3",
+      "projectId": "{{PROJECT_3}}",
+      "directProjectId": null,
+      "billingAccountId": null,
+      "templateId": 9,
+      "type": "postman test type 2",
+      "estimatedPrice": 100,
+      "actualPrice": 88,
+      "details": {
+        "taks 1": "git clone"
+      },
+      "deletedAt": null,
+      "deletedBy": null,
+      "phaseId": "{{PROJECT_PHASE_18}}"
+    },
+    "httpCode": 200
+  }
+]

@@ -1,0 +1,143 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "name": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "name": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "type": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "type": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "templateId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"templateId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "directProjectId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"directProjectId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "directProjectId": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"directProjectId\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "billingAccountId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "billingAccountId": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "estimatedPrice": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "estimatedPrice": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "actualPrice": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"actualPrice\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_12}}",
+    "id": "{{PROJECT_PHASE_PRODUCT_2}}",
+    "input": {
+      "actualPrice": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"actualPrice\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "1",
+    "phase_id": "1",
+    "id": "1",
+    "input": {
+      "actualPrice": 1000
+    },
+    "httpCode": 404,
+    "message": "No active phase product found for project id"
+  }
+]

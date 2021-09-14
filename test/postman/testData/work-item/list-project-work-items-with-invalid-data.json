@@ -1,0 +1,23 @@
+[
+  {
+    "project_id": 99999,
+    "workstream_id": 1,
+    "phase_id": 1,
+    "httpCode": 404,
+    "message": "No active phase product found for project id 99999, work stream id 1 and phase id 1"
+  },
+  {
+    "project_id": 1,
+    "workstream_id": 99999,
+    "phase_id": 1,
+    "httpCode": 404,
+    "message": "No active phase product found for project id 1, work stream id 99999 and phase id 1"
+  },
+  {
+    "project_id": 1,
+    "workstream_id": 1,
+    "phase_id": 99999,
+    "httpCode": 404,
+    "message": "No active phase product found for project id 1, work stream id 1 and phase id 99999"
+  }
+]

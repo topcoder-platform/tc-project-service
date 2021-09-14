@@ -1,0 +1,42 @@
+[
+  {
+    "project_id": "{{PROJECT_8}}",
+    "id": "{{PROJECT_MEMBER_7}}",
+    "params": "",
+    "input": {
+      "role": "customer"
+    },
+    "expected": {
+      "role": "customer"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_8}}",
+    "id": "{{PROJECT_MEMBER_7}}",
+    "params": "",
+    "input": {
+      "role": "copilot",
+      "isPrimary": true
+    },
+    "expected": {
+      "isPrimary": true,
+      "role": "copilot"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_8}}",
+    "id": "{{PROJECT_MEMBER_7}}",
+    "params": "fields=userId,role",
+    "input": {
+      "role": "copilot",
+      "isPrimary": true
+    },
+    "expected": {
+      "role": "copilot"
+    },
+    "expectedFields": ["userId", "role"],
+    "httpCode": 200
+  }
+]

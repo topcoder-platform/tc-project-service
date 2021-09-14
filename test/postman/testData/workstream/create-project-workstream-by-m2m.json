@@ -1,0 +1,98 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-1",
+      "type": "postman test type 1",
+      "status": "active"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-1",
+      "type": "postman test type 1",
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_4",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-2",
+      "type": "postman test type 2",
+      "status": "draft"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-2",
+      "type": "postman test type 2",
+      "status": "draft",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_5",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-3",
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-3",
+      "type": "postman test type 3",
+      "status": "reviewed",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_6",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-4",
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-4",
+      "type": "postman test type 3",
+      "status": "reviewed",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_7",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-5",
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-5",
+      "type": "postman test type 3",
+      "status": "reviewed",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_8",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-6",
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Workstream-by-m2m-only-required-fields-6",
+      "type": "postman test type 3",
+      "status": "reviewed",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_WORKSTREAM_9",
+    "httpCode": 201
+  }
+]

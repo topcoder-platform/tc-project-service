@@ -1,0 +1,49 @@
+[
+  {
+    "id": "{{PROJECT_4}}",
+    "params": "",
+    "expected": {
+      "actualPrice": null,
+      "description": null,
+      "billingAccountId": null,
+      "challengeEligibility": [],
+      "type": "POSTMANE2E-key-by-admin-1",
+      "templateId": 7,
+      "deletedBy": null,
+      "bookmarks": [],
+      "terms": [],
+      "estimatedPrice": null,
+      "details": {
+        "products": [
+          "frontend_dev"
+        ]
+      },
+      "directProjectId": null,
+      "cancelReason": null,
+      "groups": [],
+      "version": "v2",
+      "external": null,
+      "name": "POSTMANE2E-project-by-copilot-only-required-fields",
+      "status": "in_review"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "params": "fields=type,name",
+    "expected": {
+      "name": "POSTMANE2E-project-by-copilot-only-required-fields",
+      "type": "POSTMANE2E-key-by-admin-1"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "params": "fields=type,name,some_not_existed_field",
+    "expected": {
+      "name": "POSTMANE2E-project-by-copilot-only-required-fields",
+      "type": "POSTMANE2E-key-by-admin-1"
+    },
+    "httpCode": 200
+  }
+]

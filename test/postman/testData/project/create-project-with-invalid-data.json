@@ -1,0 +1,654 @@
+[
+  {
+    "input": {
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is required,\"type\" is required"
+  },
+  {
+    "input": {
+      "type": "{{PROJECT_TYPE_2}}"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is required"
+  },
+  {
+    "input": {
+      "name": "",
+      "type": "{{PROJECT_TYPE_2}}"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is required"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "billingAccountId": "aaa"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "billingAccountId": -100
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a positive number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "utm": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"utm\" must be an object"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "utm": {"ab": "cd"}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"ab\" is not allowed"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "bookmarks": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"bookmarks\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "bookmarks": ["bookmark 1"]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be an object"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "bookmarks": [{"bookmark": "test"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"bookmark\" is not allowed"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "bookmarks": [
+        {
+          "title": "google updated",
+          "address": "address"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"address\" with value \"address\" fails to match the required pattern"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimatedPrice": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimatedPrice": 0
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a positive number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "terms": "123"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"terms\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "terms": [111]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "groups": "123"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"groups\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "groups": [111]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "external": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"external\" must be an object"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "external": {"aaa": "1"}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"aaa\" is not allowed"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "external": {"type": "invalid_type"}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be one of [github, jira, asana, other]"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"challengeEligibility\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": ["abc"]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be an object"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": [{"abc": "invalid_key"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"abc\" is not allowed"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": [
+        {
+          "role": "invalid_role"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be one of [submitter, reviewer, copilot]"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": [{"users": "users"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"users\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": [{"users": [-123]}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a positive number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": [{"groups": "users"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"groups\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "challengeEligibility": [{"groups": [-123]}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a positive number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "templateId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"templateId\" must be a number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "templateId": 0
+    },
+    "httpCode": 400,
+    "message": "validation error: \"templateId\" must be a positive number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "version": 1.0
+    },
+    "httpCode": 400,
+    "message": "validation error: \"version\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": "123"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimation\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": [{"conditions": "123"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"price\" is required,\"minTime\" is required,\"maxTime\" is required,\"buildingBlockKey\" is required"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": [
+        {
+          "conditions": "condition 1",
+          "price": "abc",
+          "maxTime": 30,
+          "minTime": 10,
+          "metadata": {},
+          "buildingBlockKey": "key 1"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"price\" must be a number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": [
+        {
+          "conditions": 123,
+          "price": 100,
+          "maxTime": 30,
+          "minTime": 10,
+          "metadata": {},
+          "buildingBlockKey": "key 1"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"conditions\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": [
+        {
+          "conditions": "condition 1",
+          "price": 100,
+          "maxTime": "a",
+          "minTime": 10,
+          "metadata": {},
+          "buildingBlockKey": "key 1"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"maxTime\" must be a number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": [
+        {
+          "conditions": "condition 1",
+          "price": 100,
+          "maxTime": 30,
+          "minTime": "b",
+          "metadata": {},
+          "buildingBlockKey": "key 1"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"minTime\" must be a number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": [
+        {
+          "conditions": "condition 1",
+          "price": 100,
+          "maxTime": 30,
+          "minTime": 10,
+          "metadata": {},
+          "buildingBlockKey": 123
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"buildingBlockKey\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "estimation": [
+        {
+          "conditions": "condition 1",
+          "price": 100,
+          "maxTime": 30,
+          "minTime": 10,
+          "metadata": 111,
+          "buildingBlockKey": "key 1"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"metadata\" must be an object"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"attachments\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "abc": "some_invalid_key"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"category\" is required,\"path\" is required,\"type\" is required,\"size\" is required,\"title\" is required,\"abc\" is not allowed"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "",
+          "path": "",
+          "type": "",
+          "size": "",
+          "title": "",
+          "tags": "",
+          "description": "",
+          "contentType": ""
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"category\" is not allowed to be empty,\"path\" is not allowed to be empty,\"type\" is not allowed to be empty,\"contentType\" is not allowed to be empty,\"tags\" must be an array,\"size\" must be a number,\"title\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "category 1",
+          "path": "abc path",
+          "type": "pdf",
+          "size": 100,
+          "title": "a valid title",
+          "tags": [123],
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": 123,
+          "path": "abc path",
+          "type": "pdf",
+          "size": 100,
+          "title": "a valid title",
+          "tags": [],
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"category\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": 123,
+          "type": "pdf",
+          "size": 100,
+          "title": "a valid title",
+          "tags": [],
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"path\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": "abc path",
+          "type": 123,
+          "size": 100,
+          "title": "a valid title",
+          "tags": [],
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": "abc path",
+          "type": "type",
+          "size": "aaa",
+          "title": "a valid title",
+          "tags": [],
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"size\" must be a number"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": "abc path",
+          "type": "pdf",
+          "size": 100,
+          "title": 123,
+          "tags": [],
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"title\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": "abc path",
+          "type": "pdf",
+          "size": 100,
+          "title": "a valid title",
+          "tags": {},
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"tags\" must be an array"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": "abc path",
+          "type": "pdf",
+          "size": 100,
+          "title": "a valid title",
+          "tags": [],
+          "description": 123,
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"description\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": "abc path",
+          "type": "pdf",
+          "size": 100,
+          "title": "a valid title",
+          "tags": [],
+          "description": "a valid description",
+          "contentType": 123
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"contentType\" must be a string"
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-valid-name",
+      "type": "{{PROJECT_TYPE_2}}",
+      "attachments": [
+        {
+          "category": "valid category name",
+          "path": "abc path",
+          "type": "pdf",
+          "size": 100,
+          "title": "a valid title",
+          "tags": [123],
+          "description": "a valid description",
+          "contentType": "aab"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a string"
+  }
+]

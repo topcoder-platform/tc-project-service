@@ -1,0 +1,191 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "name": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "name": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "description": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"description\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "description": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"description\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "requirements": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"requirements\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "requirements": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"requirements\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "status": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "status": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "startDate": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"startDate\" must be a number of milliseconds or valid date string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "endDate": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"endDate\" must be a number of milliseconds or valid date string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "duration": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"duration\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "duration": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"duration\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "budget": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"budget\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "budget": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"budget\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "spentBudget": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"spentBudget\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "spentBudget": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"spentBudget\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "progress": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"progress\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "progress": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"progress\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_PHASE_1}}",
+    "input": {
+      "order": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"order\" must be a number"
+  },
+  {
+    "project_id": "9999999",
+    "id": "1",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-updated"
+    },
+    "httpCode": 404,
+    "message": "No active project phase found for project id 9999999 and phase id 1"
+  },
+  {
+    "project_id": "1",
+    "id": "99999",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-updated"
+    },
+    "httpCode": 404,
+    "message": "No active project phase found for project id 1 and phase id 99999"
+  }
+]

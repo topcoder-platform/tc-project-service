@@ -1,0 +1,311 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"key\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": 123,
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"key\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"key\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"value\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": 123,
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"value\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"value\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "1000",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"valueType\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "1000",
+      "valueType": 123,
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"valueType\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "1000",
+      "valueType": "abc",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"valueType\" must be one of [int, double, string, percentage]"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"readPermission\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"readPermission\" must be an object"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "1000",
+      "valueType": "double",
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"writePermission\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": "abc",
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"writePermission\" must be an object"
+  },
+  {
+    "project_id": "{{PROJECT_10}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-11",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "httpCode": 400,
+    "message": "Project Setting already exists for project id"
+  },
+  {
+    "project_id": "99999",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-valid-fields-11",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+      },
+      "readPermission": {
+      }
+    },
+    "httpCode": 404,
+    "message": "Project not found for id 99999"
+  }
+]

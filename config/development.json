@@ -2,7 +2,6 @@
   "pubsubQueueName": "dev.project.service",
   "pubsubExchangeName": "dev.projects",
   "attachmentsS3Bucket": "topcoder-dev-media",
-  "connectProjectsUrl": "https://connect.topcoder-dev.com/projects/",
   "fileServiceEndpoint": "https://api.topcoder-dev.com/v3/files/",
   "connectProjectsUrl": "https://connect.topcoder-dev.com/projects/",
   "memberServiceEndpoint": "https://api.topcoder-dev.com/v3/members",

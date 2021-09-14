@@ -1,0 +1,7 @@
+[
+  {
+    "id": "some_key_not_exist",
+    "httpCode": 404,
+    "message": "Project type not found for key some_key_not_exist"
+  }
+]

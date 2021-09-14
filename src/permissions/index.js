@@ -185,4 +185,7 @@ module.exports = () => {
 
   // Project Reporting
   Authorizer.setPolicy('projectReporting.view', projectView);
+
+  // Postman tests cleanup
+  Authorizer.setPolicy('project.cleanup', projectAdmin);
 };

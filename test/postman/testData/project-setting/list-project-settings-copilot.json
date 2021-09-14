@@ -1,0 +1,19 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "expectedFields": [
+      "id",
+      "key",
+      "value",
+      "valueType",
+      "projectId",
+      "metadata",
+      "readPermission",
+      "writePermission",
+      "createdAt",
+      "updatedAt",
+      "createdBy",
+      "updatedBy"
+    ]
+  }
+]

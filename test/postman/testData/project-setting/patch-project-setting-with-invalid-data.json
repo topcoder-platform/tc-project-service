@@ -1,0 +1,67 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_SETTING_2}}",
+    "input": {
+      "value": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"value\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "value": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"value\" is not allowed to be empty"
+  },
+
+
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "valueType": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"valueType\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "valueType": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"valueType\" must be one of [int, double, string, percentage]"
+  },
+  {
+
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "readPermission": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"readPermission\" must be an object"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "writePermission": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"writePermission\" must be an object"
+  },
+  {
+    "project_id": "99999",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+    },
+    "httpCode": 404,
+    "message": "Project setting not found for id"
+  }
+]

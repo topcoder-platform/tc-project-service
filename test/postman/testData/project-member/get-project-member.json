@@ -1,0 +1,15 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_MEMBER_6}}",
+    "expected": {
+      "id": "{{PROJECT_MEMBER_6}}",
+      "role": "customer",
+      "isPrimary": false,
+      "deletedAt": null,
+      "deletedBy": null,
+      "projectId": "{{PROJECT_4}}"
+    },
+    "httpCode": 200
+  }
+]

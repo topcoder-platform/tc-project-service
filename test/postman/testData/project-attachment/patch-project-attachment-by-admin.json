@@ -1,0 +1,84 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_ATTACHMENT_4}}",
+    "input": {
+      "title": "POSTMANE2E-new title 1 updated"
+    },
+    "expected": {
+      "title": "POSTMANE2E-new title 1 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_ATTACHMENT_4}}",
+    "input": {
+      "title": "POSTMANE2E-new title 2 updated",
+      "description": "new description updated"
+    },
+    "expected": {
+      "title": "POSTMANE2E-new title 2 updated",
+      "description": "new description updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_ATTACHMENT_4}}",
+    "input": {
+      "title": "POSTMANE2E-new title 3 updated",
+      "path": "https://drive.google.com/drive/u/0/folders/11VhFLyewxW7AsKBRm6sd8_6vHkuS9Hul"
+    },
+    "expected": {
+      "title": "POSTMANE2E-new title 3 updated",
+      "path": "https://drive.google.com/drive/u/0/folders/11VhFLyewxW7AsKBRm6sd8_6vHkuS9Hul"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_ATTACHMENT_4}}",
+    "input": {
+      "title": "POSTMANE2E-new title 4 updated",
+      "tags": ["specification", "design preview", "billing information"]
+    },
+    "expected": {
+      "title": "POSTMANE2E-new title 4 updated",
+      "tags": ["specification", "design preview", "billing information"]
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_ATTACHMENT_4}}",
+    "input": {
+      "title": "POSTMANE2E-new title 5 updated",
+      "allowedUsers": [1, 3, 7]
+    },
+    "expected": {
+      "title": "POSTMANE2E-new title 5 updated",
+      "allowedUsers": [1, 3, 7]
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_ATTACHMENT_4}}",
+    "input": {
+      "title": "POSTMANE2E-new title 1 updated 2",
+      "description": "new description updated 2",
+      "path": "https://drive.google.com/drive/u/0/folders/11VhFLyewxW7AsK",
+      "tags": ["specification", "design preview"],
+      "allowedUsers": [1, 7]
+    },
+    "expected": {
+      "title": "POSTMANE2E-new title 1 updated 2",
+      "description": "new description updated 2",
+      "path": "https://drive.google.com/drive/u/0/folders/11VhFLyewxW7AsK",
+      "tags": ["specification", "design preview"],
+      "allowedUsers": [1, 7]
+    },
+    "httpCode": 200
+  }
+]

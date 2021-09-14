@@ -1,0 +1,48 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_4}}",
+    "expected": {
+      "id": "{{PROJECT_WORK_ITEM_4}}",
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-2",
+      "projectId": "{{PROJECT_3}}",
+      "directProjectId": null,
+      "billingAccountId": null,
+      "templateId": 0,
+      "type": "postman test type 3",
+      "estimatedPrice": 77,
+      "actualPrice": 0,
+      "details": {},
+      "deletedAt": null,
+      "deletedBy": null,
+      "phaseId": "{{PROJECT_WORK_4}}"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "id": "{{PROJECT_WORK_ITEM_2}}",
+    "expected": {
+      "id": "{{PROJECT_WORK_ITEM_2}}",
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-full-fields",
+      "projectId": "{{PROJECT_3}}",
+      "directProjectId": null,
+      "billingAccountId": null,
+      "templateId": 9,
+      "type": "postman test type 2",
+      "estimatedPrice": 100,
+      "actualPrice": 88,
+      "details": {
+        "taks 1": "git clone"
+      },
+      "deletedAt": null,
+      "deletedBy": null,
+      "phaseId": "{{PROJECT_WORK_4}}"
+    },
+    "httpCode": 200
+  }
+]

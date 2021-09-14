@@ -1,0 +1,50 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "userId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"userId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "userId": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"userId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "role": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "role": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be one of [customer, manager, copilot]"
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "input": {
+      "role": "manager"
+    },
+    "httpCode": 400,
+    "message": "User already registered for role: customer"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "role": "copilot"
+    },
+    "httpCode": 401,
+    "message": "User doesn't have required roles to be added to the project as \"copilot\"."
+  }
+]

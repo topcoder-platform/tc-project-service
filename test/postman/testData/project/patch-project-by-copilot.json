@@ -1,0 +1,190 @@
+[
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "name": "POSTMANE2E-project-by-admin updated"
+    },
+    "expected": {
+      "name": "POSTMANE2E-project-by-admin updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "description": "Hello I am a test project 2 updated"
+    },
+    "expected": {
+      "description": "Hello I am a test project 2 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "type": "{{PROJECT_TYPE_2}}"
+    },
+    "expected": {
+      "type": "POSTMANE2E-key-by-admin-2"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "billingAccountId": 1111
+    },
+    "expected": {
+      "billingAccountId": 1111
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "estimatedPrice": 500
+    },
+    "expected": {
+      "estimatedPrice": "500.00"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "terms": [
+        "term1 updated"
+      ]
+    },
+    "expected": {
+      "terms": [
+        "term1 updated"
+      ]
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "groups": [
+        "group1 updated",
+        "group2 updated"
+      ]
+    },
+    "expected": {
+      "groups": [
+        "group1 updated",
+        "group2 updated"
+      ]
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "external": {
+        "id": "12345",
+        "type": "jira",
+        "data": "external updated"
+      }
+    },
+    "expected": {
+      "external": {
+        "id": "12345",
+        "type": "jira",
+        "data": "external updated"
+      }
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "bookmarks": [
+        {
+          "title": "google updated",
+          "address": "http://www.google.updated.com"
+        }
+      ]
+    },
+    "expected": {
+      "bookmarks": [
+        {
+          "title": "google updated",
+          "address": "http://www.google.updated.com"
+        }
+      ]
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "challengeEligibility": [
+        {
+          "role": "reviewer",
+          "users": [
+            1,
+            3
+          ],
+          "groups": [
+            4
+          ]
+        }
+      ]
+    },
+    "expected": {
+      "challengeEligibility": [
+        {
+          "role": "reviewer",
+          "users": [
+            1,
+            3
+          ],
+          "groups": [
+            4
+          ]
+        }
+      ]
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "details": {
+        "summary": "this is a detailed summary 1 updated",
+        "TBD_usageDescription": "TBD usage description 1 updated",
+        "TBD_features": {
+          "id": 11,
+          "title": "TBD feture title 1 updated",
+          "description": "TBD feture title description 1 updated",
+          "isCustom": false
+        }
+      }
+    },
+    "expected": {
+      "details": {
+        "summary": "this is a detailed summary 1 updated",
+        "TBD_usageDescription": "TBD usage description 1 updated",
+        "TBD_features": {
+          "id": 11,
+          "title": "TBD feture title 1 updated",
+          "description": "TBD feture title description 1 updated",
+          "isCustom": false
+        }
+      }
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "actualPrice": 500
+    },
+    "expected": {
+      "actualPrice": "500.00"
+    },
+    "httpCode": 200
+  }
+]

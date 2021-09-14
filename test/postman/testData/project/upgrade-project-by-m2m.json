@@ -1,0 +1,14 @@
+[
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": "v3",
+      "defaultProductTemplateId": 9,
+      "phaseName": "test phase name"
+    },
+    "expected": {
+      "message": "Project successfully migrated"
+    },
+    "httpCode": 200
+  }
+]

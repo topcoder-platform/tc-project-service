@@ -1,0 +1,49 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "input": {
+      "role": "customer"
+    },
+    "expected": {
+      "isPrimary": false,
+      "projectId": "{{PROJECT_4}}",
+      "role": "customer",
+      "deletedAt": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_MEMBER_1",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_2}}",
+    "input": {
+      "userId": "{{USER_ID}}",
+      "role": "customer"
+    },
+    "expected": {
+      "isPrimary": false,
+      "projectId": "{{PROJECT_2}}",
+      "role": "customer",
+      "deletedAt": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_MEMBER_2",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_2}}",
+    "input": {
+      "userId": "{{COPILOT_ID}}",
+      "role": "copilot"
+    },
+    "expected": {
+      "isPrimary": false,
+      "projectId": "{{PROJECT_2}}",
+      "role": "copilot",
+      "deletedAt": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_MEMBER_3",
+    "httpCode": 201
+  }
+]

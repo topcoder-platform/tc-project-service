@@ -1,0 +1,70 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_14}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-only-required-fields2",
+      "type": "postman test type 1"
+    },
+    "expected": {
+      "templateId": 0,
+      "estimatedPrice": 0,
+      "actualPrice": 0,
+      "details": {},
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-only-required-fields2",
+      "type": "postman test type 1",
+      "projectId": "{{PROJECT_3}}",
+      "phaseId": "{{PROJECT_PHASE_14}}",
+      "directProjectId": null,
+      "billingAccountId": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_PHASE_PRODUCT_4",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_15}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-only-full-fields2",
+      "type": "postman test type 2",
+      "templateId": 9,
+      "directProjectId": 9,
+      "billingAccountId": 2,
+      "estimatedPrice": 100,
+      "actualPrice": 88,
+      "details": {"taks 1": "git clone"}
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-only-full-fields2",
+      "type": "postman test type 2",
+      "templateId": 9,
+      "estimatedPrice": 100,
+      "actualPrice": 88,
+      "details": {
+        "taks 1": "git clone"
+      },
+      "projectId": "{{PROJECT_3}}",
+      "phaseId": "{{PROJECT_PHASE_15}}",
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_PHASE_PRODUCT_5",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_16}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-optional-fields-12",
+      "type": "postman test type 3",
+      "estimatedPrice": 1200
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Phase-Product-by-admin-optional-fields-12",
+      "type": "postman test type 3",
+      "estimatedPrice": 1200
+    },
+    "idLabel": "PROJECT_PHASE_PRODUCT_6",
+    "httpCode": 201
+  }
+]

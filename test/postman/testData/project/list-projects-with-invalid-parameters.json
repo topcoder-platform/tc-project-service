@@ -1,0 +1,22 @@
+[
+  {
+    "params": "page=-1&perPage=10",
+    "httpCode": 400,
+    "message": "[search_parse_exception] from is set to [-20] and is expected to be higher or equal to 0"
+  },
+  {
+    "params": "page=1&perPage=-10",
+    "httpCode": 400,
+    "message": "[search_parse_exception] size is set to [-10] and is expected to be higher or equal to 0"
+  },
+  {
+    "params": "directProjectId=abc",
+    "httpCode": 400,
+    "message": "[number_format_exception] For input string: \"abc\""
+  },
+  {
+    "params": "id=abc",
+    "httpCode": 400,
+    "message": "[number_format_exception] For input string: \"abc\""
+  }
+]

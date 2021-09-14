@@ -1,0 +1,186 @@
+[
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-only-required-fields",
+      "type": "{{PROJECT_TYPE_1}}"
+    },
+    "expected": {
+      "terms": [],
+      "groups": [],
+      "name": "POSTMANE2E-project-by-admin-only-required-fields",
+      "description": null,
+      "type": "POSTMANE2E-key-by-admin-1",
+      "challengeEligibility": [],
+      "bookmarks": [],
+      "external": null,
+      "directProjectId": null,
+      "billingAccountId": null,
+      "estimatedPrice": null,
+      "actualPrice": null,
+      "details": null,
+      "cancelReason": null,
+      "templateId": null,
+      "deletedBy": null,
+      "phases": []
+    },
+    "idLabel": "PROJECT_1",
+    "httpCode": 201
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-with-full-fields",
+      "description": "Hello I am a test project 2",
+      "type": "{{PROJECT_TYPE_1}}",
+      "billingAccountId": 1,
+      "estimatedPrice": 300,
+      "terms": [
+        "term1",
+        "term2"
+      ],
+      "groups": [
+        "group1",
+        "group2"
+      ],
+      "external": {
+        "id": "393928",
+        "type": "github",
+        "data": "external for github"
+      },
+      "estimation": [
+        {
+          "conditions": "condition 1",
+          "price": 100,
+          "maxTime": 30,
+          "minTime": 10,
+          "metadata": {},
+          "buildingBlockKey": "key 1"
+        }
+      ],
+      "bookmarks": [
+        {
+          "title": "google",
+          "address": "http://www.google.com"
+        }
+      ],
+      "challengeEligibility": [
+        {
+          "role": "submitter",
+          "users": [
+            1,
+            2,
+            3
+          ],
+          "groups": [
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "details": {
+        "summary": "this is a detailed summary 1",
+        "TBD_usageDescription": "TBD usage description 1",
+        "TBD_features": {
+          "id": 0,
+          "title": "TBD feture title 1",
+          "description": "TBD feture title description 1",
+          "isCustom": true
+        }
+      },
+      "utm": {
+        "campaign": "campaign 1",
+        "medium": "medium 1",
+        "source": "source 1"
+      }
+    },
+    "expected": {
+      "name": "POSTMANE2E-project-by-admin-with-full-fields",
+      "description": "Hello I am a test project 2",
+      "type": "POSTMANE2E-key-by-admin-1",
+      "billingAccountId": 1,
+      "estimatedPrice": "300.00",
+      "terms": [
+        "term1",
+        "term2"
+      ],
+      "groups": [
+        "group1",
+        "group2"
+      ],
+      "external": {
+        "id": "393928",
+        "type": "github",
+        "data": "external for github"
+      },
+      "bookmarks": [
+        {
+          "title": "google",
+          "address": "http://www.google.com"
+        }
+      ],
+      "challengeEligibility": [
+        {
+          "role": "submitter",
+          "users": [
+            1,
+            2,
+            3
+          ],
+          "groups": [
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "details": {
+        "summary": "this is a detailed summary 1",
+        "TBD_usageDescription": "TBD usage description 1",
+        "TBD_features": {
+          "id": 0,
+          "title": "TBD feture title 1",
+          "description": "TBD feture title description 1",
+          "isCustom": true
+        }
+      },
+      "directProjectId": null,
+      "actualPrice": null,
+      "cancelReason": null,
+      "templateId": null,
+      "deletedBy": null,
+      "phases": []
+    },
+    "idLabel": "PROJECT_2",
+    "httpCode": 201
+  },
+  {
+    "input": {
+      "name": "POSTMANE2E-project-by-admin-with-description",
+      "description": "Hello I am a test project 3",
+      "type": "{{PROJECT_TYPE_1}}",
+      "templateId": 7,
+      "version": "v2",
+      "details": {
+        "products": ["frontend_dev"]
+      }
+    },
+    "expected": {
+      "terms": [],
+      "groups": [],
+      "name": "POSTMANE2E-project-by-admin-with-description",
+      "description": "Hello I am a test project 3",
+      "type": "POSTMANE2E-key-by-admin-1",
+      "challengeEligibility": [],
+      "bookmarks": [],
+      "external": null,
+      "directProjectId": null,
+      "billingAccountId": null,
+      "estimatedPrice": null,
+      "actualPrice": null,
+      "cancelReason": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_3",
+    "httpCode": 201
+  }
+]

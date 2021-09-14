@@ -1,0 +1,260 @@
+[
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "name": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "type": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is not allowed to be empty"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "type": "not_existed_type"
+    },
+    "httpCode": 400,
+    "message": "Project type not found for key not_existed_type"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "billingAccountId": "aaa"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a number"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "billingAccountId": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a positive number"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "estimatedPrice": "aaa"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a number"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "estimatedPrice": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a positive number"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "terms": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"terms\" must be an array"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "terms": [123]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "groups": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"groups\" must be an array"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "groups": [123]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "external": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"external\" must be an object"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "external": {
+        "abc": "ab"
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"abc\" is not allowed"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "external": {
+        "id": "12345",
+        "type": "cc",
+        "data": "external updated"
+      }
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be one of [github, jira, asana, other]"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "bookmarks": "aa"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"bookmarks\" must be an array"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "bookmarks": [123]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be an object"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "bookmarks": [
+        {
+          "aaa": "google updated"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"aaa\" is not allowed"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "bookmarks": [
+        {
+          "title": "google updated",
+          "address": "address"
+        }
+      ]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"address\" with value \"address\" fails to match the required pattern: "
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"challengeEligibility\" must be an array"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": ["abc"]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be an object"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": [{"abc": "invalid_key"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"abc\" is not allowed"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": [
+        {
+          "role": "invalid_role"
+        }]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"role\" must be one of [submitter, reviewer, copilot]"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": [{"users": "users"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"users\" must be an array"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": [{"users": [-123]}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a positive number"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": [{"groups": "users"}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"groups\" must be an array"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "challengeEligibility": [{"groups": [-123]}]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"0\" must be a positive number"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "templateId": "abc"
+    },
+    "httpCode": 500,
+    "message": "invalid input syntax for type bigint: \"abc\""
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "version": 1.0
+    },
+    "httpCode": 400,
+    "message": "validation error: \"version\" is not allowed"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "estimation": []
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimation\" is not allowed"
+  },
+  {
+    "id": "{{PROJECT_5}}",
+    "input": {
+      "attachments": []
+    },
+    "httpCode": 400,
+    "message": "validation error: \"attachments\" is not allowed"
+  }
+]

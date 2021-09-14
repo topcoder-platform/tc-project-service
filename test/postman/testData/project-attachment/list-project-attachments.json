@@ -1,0 +1,24 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "expectedFields": [
+      "updatedBy",
+      "description",
+      "title",
+      "type",
+      "deletedBy",
+      "tags",
+      "createdAt",
+      "path",
+      "deletedAt",
+      "size",
+      "createdBy",
+      "id",
+      "allowedUsers",
+      "category",
+      "projectId",
+      "contentType",
+      "updatedAt"
+    ]
+  }
+]

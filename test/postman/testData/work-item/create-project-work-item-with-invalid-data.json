@@ -1,0 +1,198 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "type": "active"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": 123,
+      "type": "active"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "",
+      "type": "active"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "templateId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"templateId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "templateId": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"templateId\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "directProjectId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"directProjectId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "directProjectId": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"directProjectId\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "billingAccountId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "billingAccountId": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"billingAccountId\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "estimatedPrice": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "estimatedPrice": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"estimatedPrice\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "actualPrice": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"actualPrice\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "actualPrice": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"actualPrice\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "active",
+      "cc": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"cc\" is not allowed"
+  }
+]

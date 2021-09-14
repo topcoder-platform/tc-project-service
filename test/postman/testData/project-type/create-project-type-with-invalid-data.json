@@ -1,0 +1,218 @@
+[
+  {
+    "input": {
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"key\" is required"
+  },
+  {
+    "input": {
+      "key": "",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"key\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"displayName\" is required"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"displayName\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"icon\" is required"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"icon\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"question\" is required"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"question\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"info\" is required"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"info\" is not allowed to be empty"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"aliases\" is required"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": 123,
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "validation error: \"aliases\" must be an array"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"]
+    },
+    "httpCode": 400,
+    "message": "validation error: \"metadata\" is required"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"metadata\" must be an object"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-by-admin-1",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "httpCode": 400,
+    "message": "Project type already exists (may be deleted) for key POSTMANE2E-key-by-admin-1"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {},
+      "disabled": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"disabled\" must be a boolean"
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-valid",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {},
+      "hidden": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"hidden\" must be a boolean"
+  }
+]

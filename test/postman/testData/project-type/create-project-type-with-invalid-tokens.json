@@ -1,0 +1,27 @@
+[
+  {
+    "jwtToken": "Bearer invalid",
+    "httpCode": 403,
+    "message": "Invalid Token."
+  },
+  {
+    "jwtToken": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJUb3Bjb2RlciBVc2VyIiwiQ29ubmVjdCBTdXBwb3J0IiwiYWRtaW5pc3RyYXRvciIsInRlc3RSb2xlIiwiYWFhIiwidG9ueV90ZXN0XzEiLCJDb25uZWN0IE1hbmFnZXIiLCJDb25uZWN0IEFkbWluIiwiY29waWxvdCIsIkNvbm5lY3QgQ29waWxvdCBNYW5hZ2VyIl0sImlzcyI6Imh0dHBzOi8vYXBpLnRvcGNvZGVyLWRldi5jb20iLCJoYW5kbGUiOiJUb255SiIsImV4cCI6MTU1MTA2MzIxMSwidXNlcklkIjoiODU0Nzg5OSIsImlhdCI6MTU1MTA1MzIxMSwiZW1haWwiOiJ0amVmdHMrZml4QHRvcGNvZGVyLmNvbSIsImp0aSI6ImY5NGQxZTI2LTNkMGUtNDZjYS04MTE1LTg3NTQ1NDRhMDhmMSJ9.97-pjuSGGqDAqK2FG2yi_3nmzB7ZMXQwtG0bi8_PlKk",
+    "httpCode": 403,
+    "message": "Failed to authenticate token."
+  },
+  {
+    "jwtToken": "",
+    "httpCode": 403,
+    "message": "No token provided."
+  },
+  {
+    "jwtToken": "Bearer {{user_token}}",
+    "httpCode": 403,
+    "message": "You do not have permissions to perform this action"
+  },
+  {
+    "jwtToken": "Bearer {{copilot_token}}",
+    "httpCode": 403,
+    "message": "You do not have permissions to perform this action"
+  }
+]

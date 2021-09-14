@@ -1,0 +1,86 @@
+[
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "displayName": "new displayName 1 updated"
+    },
+    "expected": {
+      "displayName": "new displayName 1 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "icon": "http://example.com/icon2.ico.updated"
+    },
+    "expected": {
+      "icon": "http://example.com/icon2.ico.updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "question": "question 3 updated"
+    },
+    "expected": {
+      "question": "question 3 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "info": "info 3 updated"
+    },
+    "expected": {
+      "info": "info 3 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "aliases": ["key-31-updated"]
+    },
+    "expected": {
+      "aliases": ["key-31-updated"]
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "metadata": {"meta": "updated"}
+    },
+    "expected": {
+      "metadata": {"meta": "updated"}
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "hidden": true,
+      "disabled": true
+    },
+    "expected": {
+      "hidden": true,
+      "disabled": true
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "hidden": false,
+      "disabled": false
+    },
+    "expected": {
+      "hidden": false,
+      "disabled": false
+    },
+    "httpCode": 200
+  }
+]

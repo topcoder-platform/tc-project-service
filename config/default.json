@@ -76,6 +76,8 @@
     "ALLOWED_USERS": "[]"
   },
   "DEFAULT_M2M_USERID": -101,
+  "WAIT_TIME": 2000,
+  "AUTOMATED_TESTING_REPORTERS_FORMAT": ["cli", "html"],
   "taasJobApiUrl": "https://api.topcoder.com/v5/jobs",
   "salesforce": {
     "CLIENT_KEY": "",

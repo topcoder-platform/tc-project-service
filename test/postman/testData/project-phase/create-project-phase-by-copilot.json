@@ -1,0 +1,236 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields",
+      "status": "active"
+    },
+    "expected": {
+      "budget": 0,
+      "spentBudget": 0,
+      "progress": 0,
+      "details": {},
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields",
+      "status": "active",
+      "projectId": "{{PROJECT_3}}",
+      "description": null,
+      "requirements": null,
+      "startDate": null,
+      "endDate": null,
+      "duration": null,
+      "order": null
+    },
+    "idLabel": "PROJECT_PHASE_4",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-full-fields",
+      "status": "active",
+      "description": "description 1",
+      "requirements": "requirements 1",
+      "startDate": "2018-05-15T00:00:00",
+      "endDate": "2018-05-16T00:00:00",
+      "duration": 4,
+      "budget": 20,
+      "spentBudget": 12,
+      "progress": 33,
+      "details": {
+        "aDetails": "a details"
+      },
+      "order": 1,
+      "productTemplateId": 2
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-full-fields",
+      "status": "active",
+      "description": "description 1",
+      "requirements": "requirements 1",
+      "startDate": "2018-05-14T16:00:00.000Z",
+      "endDate": "2018-05-15T16:00:00.000Z",
+      "duration": 4,
+      "budget": 20,
+      "spentBudget": 12,
+      "progress": 33,
+      "details": {
+        "aDetails": "a details"
+      },
+      "order": 1,
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_5",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-with-description",
+      "status": "active",
+      "description": "description 2"
+    },
+    "expected": {
+      "budget": 0,
+      "spentBudget": 0,
+      "progress": 0,
+      "details": {},
+      "name": "POSTMANE2E-Project-Phase-by-copilot-with-description",
+      "status": "active",
+      "description": "description 2",
+      "projectId": "{{PROJECT_3}}",
+      "requirements": null,
+      "startDate": null,
+      "endDate": null,
+      "duration": null,
+      "order": null
+    },
+    "idLabel": "PROJECT_PHASE_6",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-with-pgoress",
+      "status": "active",
+      "progress": 66
+    },
+    "expected": {
+      "progress": 66,
+      "name": "POSTMANE2E-Project-Phase-by-copilot-with-pgoress",
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_7",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test1",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_11",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test2",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_12",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test3",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_13",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test14",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_14",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test15",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_15",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test16",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_16",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test17",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_17",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test18",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_18",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test19",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_19",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields-test20",
+      "status": "active"
+    },
+    "expected": {
+      "status": "active",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "idLabel": "PROJECT_PHASE_20",
+    "httpCode": 201
+  }
+]

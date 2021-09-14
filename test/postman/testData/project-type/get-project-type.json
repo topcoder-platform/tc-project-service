@@ -1,0 +1,45 @@
+[
+  {
+    "id": "{{PROJECT_TYPE_1}}",
+    "expected": {
+      "key": "POSTMANE2E-key-by-admin-1",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {},
+      "disabled": false,
+      "hidden": false
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "expected": {
+      "key": "POSTMANE2E-key-by-admin-2",
+      "displayName": "new displayName 2",
+      "icon": "http://example.com/icon2.ico",
+      "question": "question 22",
+      "info": "info 22",
+      "aliases": ["key-21", "key_22"],
+      "metadata": {"test_meta": "test_meta_data"},
+      "disabled": false
+    },
+    "httpCode": 200
+  },
+  {
+    "id": "{{PROJECT_TYPE_3}}",
+    "expected": {
+      "key": "POSTMANE2E-key-by-admin-3",
+      "displayName": "new displayName 3",
+      "icon": "http://example.com/icon3.ico",
+      "question": "question 3",
+      "info": "info 3",
+      "aliases": ["key-31", "key_32"],
+      "metadata": {},
+      "hidden": false
+    },
+    "httpCode": 200
+  }
+]

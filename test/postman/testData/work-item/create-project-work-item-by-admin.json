@@ -1,0 +1,177 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "postman test type 1"
+    },
+    "expected": {
+      "templateId": 0,
+      "estimatedPrice": 0,
+      "actualPrice": 0,
+      "details": {},
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-required-fields",
+      "type": "postman test type 1",
+      "projectId": "{{PROJECT_3}}",
+      "phaseId": "{{PROJECT_WORK_4}}",
+      "directProjectId": null,
+      "billingAccountId": null,
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_WORK_ITEM_1",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-full-fields",
+      "type": "postman test type 2",
+      "templateId": 9,
+      "directProjectId": 9,
+      "billingAccountId": 2,
+      "estimatedPrice": 100,
+      "actualPrice": 88,
+      "details": {"taks 1": "git clone"}
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-only-full-fields",
+      "type": "postman test type 2",
+      "templateId": 9,
+      "estimatedPrice": 100,
+      "actualPrice": 88,
+      "details": {
+        "taks 1": "git clone"
+      },
+      "projectId": "{{PROJECT_3}}",
+      "phaseId": "{{PROJECT_WORK_4}}",
+      "deletedBy": null
+    },
+    "idLabel": "PROJECT_WORK_ITEM_2",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-1",
+      "type": "postman test type 3",
+      "estimatedPrice": 1200
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-1",
+      "type": "postman test type 3",
+      "estimatedPrice": 1200
+    },
+    "idLabel": "PROJECT_WORK_ITEM_3",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-2",
+      "type": "postman test type 3",
+      "estimatedPrice": 77
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-2",
+      "type": "postman test type 3",
+      "estimatedPrice": 77
+    },
+    "idLabel": "PROJECT_WORK_ITEM_4",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-3",
+      "type": "postman test type 3",
+      "details": {
+        "taks B": "email notification"
+      }
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-3",
+      "type": "postman test type 3",
+      "details": {
+        "taks B": "email notification"
+      }
+    },
+    "idLabel": "PROJECT_WORK_ITEM_5",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-4",
+      "type": "postman test type 3",
+      "billingAccountId": 2
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-4",
+      "type": "postman test type 3"
+    },
+    "idLabel": "PROJECT_WORK_ITEM_6",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-5",
+      "type": "postman test type 3",
+      "directProjectId": 3
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-5",
+      "type": "postman test type 3"
+    },
+    "idLabel": "PROJECT_WORK_ITEM_7",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-6",
+      "type": "postman test type 3",
+      "actualPrice": 99
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-6",
+      "type": "postman test type 3",
+      "actualPrice": 99
+    },
+    "idLabel": "PROJECT_WORK_ITEM_8",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-7",
+      "type": "postman test type 3",
+      "templateId": 9
+    },
+    "expected": {
+      "name": "POSTMANE2E-Project-WorkItem-by-admin-optional-fields-7",
+      "type": "postman test type 3",
+      "templateId": 9
+    },
+    "idLabel": "PROJECT_WORK_ITEM_9",
+    "httpCode": 201
+  }
+]

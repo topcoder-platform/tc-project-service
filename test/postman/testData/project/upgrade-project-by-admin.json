@@ -1,0 +1,13 @@
+[
+  {
+    "id": "{{PROJECT_3}}",
+    "input": {
+      "targetVersion": "v3",
+      "defaultProductTemplateId": 9
+    },
+    "expected": {
+      "message": "Project successfully migrated"
+    },
+    "httpCode": 200
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "expected": {
+      "id": "{{PROJECT_WORK_4}}",
+      "name": "POSTMANE2E-Project-Work-by-admin-only-required-fields-2",
+      "description": null,
+      "requirements": null,
+      "status": "active",
+      "startDate": null,
+      "endDate": null,
+      "duration": null,
+      "budget": 0,
+      "spentBudget": 0,
+      "progress": 0,
+      "details": {},
+      "order": null,
+      "projectId": "{{PROJECT_3}}"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_5}}",
+    "expected": {
+      "id": "{{PROJECT_WORK_5}}",
+      "name": "POSTMANE2E-Project-Work-by-admin-only-required-fields-3",
+      "description": null,
+      "requirements": null,
+      "status": "active",
+      "startDate": null,
+      "endDate": null,
+      "duration": null,
+      "budget": 0,
+      "spentBudget": 0,
+      "progress": 0,
+      "details": {},
+      "order": null,
+      "projectId": "{{PROJECT_3}}"
+    },
+    "httpCode": 200
+  }
+]

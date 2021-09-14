@@ -1,0 +1,33 @@
+[
+  {
+    "expectedFields": [
+      "actualPrice",
+      "description",
+      "billingAccountId",
+      "lastActivityAt",
+      "challengeEligibility",
+      "type",
+      "templateId",
+      "deletedBy",
+      "bookmarks",
+      "createdAt",
+      "lastActivityUserId",
+      "terms",
+      "estimatedPrice",
+      "members",
+      "details",
+      "id",
+      "directProjectId",
+      "cancelReason",
+      "phases",
+      "updatedAt",
+      "updatedBy",
+      "groups",
+      "version",
+      "external",
+      "createdBy",
+      "name",
+      "status"
+    ]
+  }
+]

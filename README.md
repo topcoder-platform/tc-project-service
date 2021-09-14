@@ -310,6 +310,8 @@ This command for importing data uses API to create demo data. Which has a few pe
 | `npm run babel-node-script -- <path/to/script>` | Helper command which is used by other commands to run node scripts using `babel-node` and `dotenv` so variables from `.env` file are automatically applied. |
 | `npm run generate:doc:permissions` | Generate [permissions.html](docs/permissions.html) which later can be viewed by [link](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html). |
 | `npm run generate:doc:permissions:dev` | Generate [permissions.html](docs/permissions.html) on any changes (useful during development). |
+| `npm run test:newman` | Run the Postman E2E tests. |
+| `npm run test:newman:clear` | Clear the testing data which is brought by the Postman E2E tests. |
 
 ## Kafka commands
 
@@ -360,6 +362,54 @@ It's been signed with the secret 'secret'. This secret should match your entry i
 ## Performance Testing
 
 - [Performance Testing Readme](README.md)
+
+## Postman E2E Testing
+
+### Start the app server before runnning the e2e tests.
+Follow the [### Steps to run locally](https://github.com/topcoder-platform/tc-project-service#steps-to-run-locally).   
+In step 2 `Local config` of that section, you need to add the following environment variable:
+```bash
+AUTOMATED_TESTING_NAME_PREFIX=POSTMANE2E-
+```
+This is because the new clean up route uses this prefix to clear the postman testing data.   
+As the template API is not in scope of part 1 challenge. We need some testing data which contains the template for usage. Thus we need to run `npm run local:init`. Simple follow the steps from [### Steps to run locally](https://github.com/topcoder-platform/tc-project-service#steps-to-run-locally).
+
+### Run the Postman E2E tests.
+Set the environment variables of below before running the tests.
+- AUTH0_URL: Auth0 URL, used to get TC M2M token
+- AUTH0_CLIENT_ID: Auth0 client id, used to get TC M2M token
+- AUTH0_CLIENT_SECRET: Auth0 client secret, used to get TC M2M token
+- AUTH0_AUDIENCE: Auth0 audience, used to get TC M2M token
+- AUTH_V2_URL: The auth v2 url
+- AUTH_V2_CLIENT_ID: The auth v2 client id
+- AUTH_V3_URL: The auth v3 url
+- ADMIN_CREDENTIALS_USERNAME: The user's username with admin role
+- ADMIN_CREDENTIALS_PASSWORD: The user's password with admin role
+- MANAGER_CREDENTIALS_USERNAME: The user's username with manager role
+- MANAGER_CREDENTIALS_PASSWORD: The user's password with manager role
+- COPILOT_CREDENTIALS_USERNAME: The user's username with copilot role
+- COPILOT_CREDENTIALS_PASSWORD: The user's password with copilot role
+- USER_CREDENTIALS_USERNAME: The user's username with user role
+- USER_CREDENTIALS_PASSWORD: The user's password with user role
+- AUTOMATED_TESTING_SITE_PREFIX: The URL for the API server. e.g. http://localhost:8001/v5
+- POSTMAN_UPLOADED_FILES_PATH: The upload file path for uploading file to S3
+- POSTMAN_S3_BUCKET: The S3 bucket used for testing
+- ADMIN_ID: The ID of the above admin user
+- USER_ID: The ID of the above normal user
+- COPILOT_ID: The ID of the above copilot user
+- WAIT_TIME: The wait time in miliseconds for each test
+Note, you can use `https://api.topcoder-dev.com/v3/members/some_handle` to get the user id.
+```bash
+npm run test:newman
+```
+
+To clear the testing data from postman e2e tests.
+
+```bash
+npm run test:newman:clear
+```
+### Verification
+Check [Verification.md](./Verification.md).
 
 ## Documentation
 

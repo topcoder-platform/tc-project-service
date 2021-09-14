@@ -1,0 +1,193 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "status": "active"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": 123,
+      "status": "active"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "",
+      "status": "active"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "description": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"description\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "requirements": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"requirements\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "duration": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"duration\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "duration": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"duration\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "budget": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"budget\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "budget": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"budget\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "spentBudget": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"spentBudget\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "spentBudget": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"spentBudget\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "progress": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"progress\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "progress": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"progress\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "productTemplateId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"productTemplateId\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "productTemplateId": 0
+    },
+    "httpCode": 400,
+    "message": "validation error: \"productTemplateId\" must be a positive number"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active",
+      "order": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"order\" must be a number"
+  },
+  {
+    "project_id": "99999",
+    "input": {
+      "name": "POSTMANE2E-Project-Phase-by-admin-only-required-fields",
+      "status": "active"
+    },
+    "httpCode": 404,
+    "message": "Error creating project phase"
+  }
+]

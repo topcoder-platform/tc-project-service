@@ -1,0 +1,13 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "id": "{{PROJECT_WORKSTREAM_6}}",
+    "expected": {
+      "id": "{{PROJECT_WORKSTREAM_6}}",
+      "type": "postman test type 3",
+      "status": "reviewed",
+      "projectId": "{{PROJECT_3}}"
+    },
+    "httpCode": 200
+  }
+]

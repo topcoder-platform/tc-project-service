@@ -1,0 +1,192 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "name": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "description": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"description\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "description": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"description\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "requirements": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"requirements\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "requirements": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"requirements\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "status": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "status": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "startDate": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"startDate\" must be a number of milliseconds or valid date string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "endDate": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"endDate\" must be a number of milliseconds or valid date string"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "duration": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"duration\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "duration": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"duration\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "budget": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"budget\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "budget": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"budget\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "spentBudget": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"spentBudget\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "spentBudget": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"spentBudget\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "progress": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"progress\" must be a number"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "progress": -1
+    },
+    "httpCode": 400,
+    "message": "validation error: \"progress\" must be larger than or equal to 0"
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "id": "{{PROJECT_WORK_4}}",
+    "input": {
+      "order": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"order\" must be a number"
+  }
+]

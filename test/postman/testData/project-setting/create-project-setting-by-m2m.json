@@ -1,0 +1,232 @@
+[
+  {
+    "project_id": "{{PROJECT_10}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-11",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager"]
+      }
+    },
+    "expected": {
+      "metadata": {},
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-11",
+      "value": "1000",
+      "valueType": "double",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": [
+            "account_manager"
+          ],
+          "topcoderRoles": [
+            "administrator",
+            "Connect Admin"
+          ]
+        },
+        "denyRule": {
+          "topcoderRoles": [
+            "Connect Copilot Manager"
+          ]
+        }
+      },
+      "readPermission": {
+        "projectRoles": [
+          "manager"
+        ],
+        "topcoderRoles": [
+          "administrator",
+          "Connect Admin",
+          "Connect Account Manager"
+        ]
+      },
+      "projectId": "{{PROJECT_10}}"
+    },
+    "idLabel": "PROJECT_SETTING_4",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_10}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-full-fields-11",
+      "value": "1277",
+      "valueType": "int",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager", "testing_manager"],
+          "topcoderRoles": ["administrator", "Connect Admin"]
+        },
+        "denyRule": {
+          "projectRoles": ["deleted_user"],
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["administrator", "Connect Admin", "Connect Account Manager", "Copilot"]
+      },
+      "projectId": 1,
+      "metadata": {"meta_info": "check it"}
+    },
+    "expected": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-full-fields-11",
+      "value": "1277",
+      "valueType": "int",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": [
+            "account_manager",
+            "testing_manager"
+          ],
+          "topcoderRoles": [
+            "administrator",
+            "Connect Admin"
+          ]
+        },
+        "denyRule": {
+          "projectRoles": [
+            "deleted_user"
+          ],
+          "topcoderRoles": [
+            "Connect Copilot Manager"
+          ]
+        }
+      },
+      "readPermission": {
+        "projectRoles": [
+          "manager"
+        ],
+        "topcoderRoles": [
+          "administrator",
+          "Connect Admin",
+          "Connect Account Manager",
+          "Copilot"
+        ]
+      },
+      "projectId": "{{PROJECT_10}}",
+      "metadata": {
+        "meta_info": "check it"
+      }
+    },
+    "idLabel": "PROJECT_SETTING_5",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_10}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-13",
+      "value": "33",
+      "valueType": "percentage",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["user"]
+      }
+    },
+    "expected": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-13",
+      "value": "33",
+      "valueType": "percentage"
+    },
+    "idLabel": "PROJECT_SETTING_6",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_10}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-17",
+      "value": "33",
+      "valueType": "percentage",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["user"]
+      }
+    },
+    "expected": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-17",
+      "value": "33",
+      "valueType": "percentage"
+    },
+    "idLabel": "PROJECT_SETTING_7",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_10}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-18",
+      "value": "33",
+      "valueType": "percentage",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"]
+        },
+        "denyRule": {
+          "topcoderRoles": ["Connect Copilot Manager"]
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["user"]
+      }
+    },
+    "expected": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-18",
+      "value": "33",
+      "valueType": "percentage"
+    },
+    "idLabel": "PROJECT_SETTING_8",
+    "httpCode": 201
+  },
+  {
+    "project_id": "{{PROJECT_10}}",
+    "input": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-19",
+      "value": "33",
+      "valueType": "percentage",
+      "writePermission": {
+        "allowRule": {
+          "projectRoles": ["account_manager"],
+          "topcoderRoles": ["administrator"]
+        },
+        "denyRule": {
+        }
+      },
+      "readPermission": {
+        "projectRoles": ["manager"],
+        "topcoderRoles": ["user"]
+      }
+    },
+    "expected": {
+      "key": "POSTMANE2E-Project-Setting-by-copilot-only-required-fields-19",
+      "value": "33",
+      "valueType": "percentage"
+    },
+    "idLabel": "PROJECT_SETTING_9",
+    "httpCode": 201
+  }
+]

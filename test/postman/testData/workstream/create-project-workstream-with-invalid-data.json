@@ -1,0 +1,99 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": 123,
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "",
+      "type": "postman test type 3",
+      "status": "reviewed"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields",
+      "status": "reviewed"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields",
+      "type": 123,
+      "status": "reviewed"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields",
+      "type": "",
+      "status": "reviewed"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields-3",
+      "type": "postman test type 3"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" is required"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields",
+      "type": "postman test type 3",
+      "status": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields",
+      "type": "postman test type 3",
+      "status": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" must be one of [draft, reviewed, active, completed, paused]"
+  },
+  {
+    "project_id": "99999",
+    "input": {
+      "name": "POSTMANE2E-Project-Workstream-by-admin-only-required-fields",
+      "type": "postman test type 3",
+      "status": "active"
+    },
+    "httpCode": 404,
+    "message": "active project not found for project id 99999"
+  }
+]

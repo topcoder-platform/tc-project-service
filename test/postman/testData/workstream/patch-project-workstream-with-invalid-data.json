@@ -1,0 +1,56 @@
+[
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_WORKSTREAM_1}}",
+    "input": {
+      "name": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_WORKSTREAM_1}}",
+    "input": {
+      "name": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"name\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_WORKSTREAM_1}}",
+    "input": {
+      "type": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_WORKSTREAM_1}}",
+    "input": {
+      "type": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"type\" is not allowed to be empty"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_WORKSTREAM_1}}",
+    "input": {
+      "status": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" must be a string"
+  },
+  {
+    "project_id": "{{PROJECT_1}}",
+    "id": "{{PROJECT_WORKSTREAM_1}}",
+    "input": {
+      "status": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"status\" must be one of [draft, reviewed, active, completed, paused]"
+  }
+]

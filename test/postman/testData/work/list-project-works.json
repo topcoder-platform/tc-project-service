@@ -1,0 +1,54 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "expectedFields": [
+      "id",
+      "name",
+      "description",
+      "requirements",
+      "status",
+      "startDate",
+      "endDate",
+      "duration",
+      "budget",
+      "spentBudget",
+      "progress",
+      "details",
+      "order",
+      "deletedAt",
+      "createdAt",
+      "updatedAt",
+      "deletedBy",
+      "createdBy",
+      "updatedBy",
+      "projectId"
+    ]
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "params": "fields=id,name",
+    "expectedFields": [
+      "id",
+      "name"
+    ],
+    "limitedFields": [
+      "id",
+      "name"
+    ]
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "params": "fields=id,name&sort=startDate asc",
+    "expectedFields": [
+      "id",
+      "name"
+    ],
+    "limitedFields": [
+      "id",
+      "name"
+    ]
+  }
+]

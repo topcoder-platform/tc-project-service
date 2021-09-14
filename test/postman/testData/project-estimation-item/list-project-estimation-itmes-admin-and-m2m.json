@@ -1,0 +1,19 @@
+[
+  {
+    "project_id": "{{PROJECT_10}}",
+    "estimation_id": "3",
+    "expectedFields": [
+      "id",
+      "projectEstimationId",
+      "price",
+      "type",
+      "markupUsedReference",
+      "markupUsedReferenceId",
+      "metadata",
+      "createdAt",
+      "updatedAt",
+      "createdBy",
+      "updatedBy"
+    ]
+  }
+]

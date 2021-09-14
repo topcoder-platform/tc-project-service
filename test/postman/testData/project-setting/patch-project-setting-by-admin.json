@@ -1,0 +1,64 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "value": "3000"
+    },
+    "expected": {
+      "value": "3000"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "valueType": "string"
+    },
+    "expected": {
+      "valueType": "string"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "metadata": {
+        "message": "updated"
+      }
+    },
+    "expected": {
+      "metadata": {
+        "message": "updated"
+      }
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "id": "{{PROJECT_SETTING_1}}",
+    "input": {
+      "readPermission": {
+        "projectRoles": [
+          "user"
+        ],
+        "topcoderRoles": [
+          "registered user"
+        ]
+      }
+    },
+    "expected": {
+      "readPermission": {
+        "projectRoles": [
+          "user"
+        ],
+        "topcoderRoles": [
+          "registered user"
+        ]
+      }
+    },
+    "httpCode": 200
+  }
+]

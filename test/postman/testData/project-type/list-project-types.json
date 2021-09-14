@@ -1,0 +1,21 @@
+[
+  {
+    "expectedFields": [
+      "metadata",
+      "aliases",
+      "question",
+      "hidden",
+      "displayName",
+      "icon",
+      "key",
+      "info",
+      "createdAt",
+      "updatedAt",
+      "deletedBy",
+      "deletedAt",
+      "createdBy",
+      "updatedBy",
+      "disabled"
+    ]
+  }
+]

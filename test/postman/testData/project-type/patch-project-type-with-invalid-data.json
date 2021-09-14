@@ -1,0 +1,82 @@
+[
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "displayName": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"displayName\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "displayName": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"displayName\" is not allowed to be empty"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "icon": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"icon\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "icon": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"icon\" is not allowed to be empty"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "question": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"question\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "question": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"question\" is not allowed to be empty"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "info": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"info\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "info": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"info\" is not allowed to be empty"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "aliases": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"aliases\" must be an array"
+  },
+  {
+    "id": "{{PROJECT_TYPE_2}}",
+    "input": {
+      "metadata": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"metadata\" must be an object"
+  }
+]

@@ -53,6 +53,9 @@ switch (process.env.NODE_ENV.toLowerCase()) {
   case 'qa':
     appName += '-qa';
     break;
+  case 'test':
+    appName += '-test';
+    break;
   case 'production':
   default:
     appName += '-prod';

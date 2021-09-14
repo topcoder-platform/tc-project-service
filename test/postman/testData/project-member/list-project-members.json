@@ -1,0 +1,37 @@
+[
+  {
+    "project_id": "{{PROJECT_4}}",
+    "params": "role=customer",
+    "expectedFields": [
+      "id",
+      "userId",
+      "role",
+      "isPrimary",
+      "deletedAt",
+      "createdAt",
+      "updatedAt",
+      "deletedBy",
+      "createdBy",
+      "updatedBy",
+      "projectId"
+    ],
+    "role": "manager"
+  },
+  {
+    "project_id": "{{PROJECT_4}}",
+    "params": "",
+    "expectedFields": [
+      "id",
+      "userId",
+      "role",
+      "isPrimary",
+      "deletedAt",
+      "createdAt",
+      "updatedAt",
+      "deletedBy",
+      "createdBy",
+      "updatedBy",
+      "projectId"
+    ]
+  }
+]

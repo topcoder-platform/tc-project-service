@@ -1,0 +1,26 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "workstream_id": "{{PROJECT_WORKSTREAM_6}}",
+    "phase_id": "{{PROJECT_WORK_4}}",
+    "expectedFields": [
+      "id",
+      "name",
+      "projectId",
+      "directProjectId",
+      "billingAccountId",
+      "templateId",
+      "type",
+      "estimatedPrice",
+      "actualPrice",
+      "details",
+      "deletedAt",
+      "createdAt",
+      "updatedAt",
+      "deletedBy",
+      "createdBy",
+      "updatedBy",
+      "phaseId"
+    ]
+  }
+]

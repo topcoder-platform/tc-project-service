@@ -1,0 +1,15 @@
+[
+  {
+    "expectedFields": [
+      "productTemplates",
+      "forms",
+      "projectTemplates",
+      "planConfigs",
+      "priceConfigs",
+      "projectTypes",
+      "productCategories",
+      "milestoneTemplates",
+      "buildingBlocks"
+    ]
+  }
+]

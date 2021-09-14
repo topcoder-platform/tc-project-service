@@ -1,0 +1,16 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "expectedFields": [
+      "id",
+      "name",
+      "type",
+      "status",
+      "createdAt",
+      "updatedAt",
+      "createdBy",
+      "updatedBy",
+      "projectId"
+    ]
+  }
+]

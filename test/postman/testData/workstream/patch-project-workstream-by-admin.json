@@ -1,0 +1,50 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "id": "{{PROJECT_WORKSTREAM_4}}",
+    "input": {
+      "name": "POSTMANE2E-new title 1 updated"
+    },
+    "expected": {
+      "name": "POSTMANE2E-new title 1 updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "id": "{{PROJECT_WORKSTREAM_4}}",
+    "input": {
+      "type": "new type updated"
+    },
+    "expected": {
+      "type": "new type updated"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "id": "{{PROJECT_WORKSTREAM_4}}",
+    "input": {
+      "status": "paused"
+    },
+    "expected": {
+      "status": "paused"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "id": "{{PROJECT_WORKSTREAM_4}}",
+    "input": {
+      "name": "POSTMANE2E-WORKSTREAM 1 updated",
+      "type": "new type 2 updated",
+      "status": "draft"
+    },
+    "expected": {
+      "name": "POSTMANE2E-WORKSTREAM 1 updated",
+      "type": "new type 2 updated",
+      "status": "draft"
+    },
+    "httpCode": 200
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "input": {
+      "key": "POSTMANE2E-key-by-copilot-1",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {}
+    },
+    "expected": {
+      "key": "POSTMANE2E-key-by-copilot-1",
+      "displayName": "new displayName 1",
+      "icon": "http://example.com/icon1.ico",
+      "question": "question 1",
+      "info": "info 1",
+      "aliases": ["key-1", "key_2"],
+      "metadata": {},
+      "disabled": false,
+      "hidden": false
+    },
+    "idLabel": "PROJECT_TYPE_4",
+    "httpCode": 201
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-by-copilot-2",
+      "displayName": "new displayName 2",
+      "icon": "http://example.com/icon2.ico",
+      "question": "question 22",
+      "info": "info 22",
+      "aliases": ["key-21", "key_22"],
+      "metadata": {"test_meta": "test_meta_data"},
+      "disabled": false
+    },
+    "expected": {
+      "key": "POSTMANE2E-key-by-copilot-2",
+      "displayName": "new displayName 2",
+      "icon": "http://example.com/icon2.ico",
+      "question": "question 22",
+      "info": "info 22",
+      "aliases": ["key-21", "key_22"],
+      "metadata": {"test_meta": "test_meta_data"},
+      "disabled": false
+    },
+    "idLabel": "PROJECT_TYPE_5",
+    "httpCode": 201
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-by-copilot-3",
+      "displayName": "new displayName 3",
+      "icon": "http://example.com/icon3.ico",
+      "question": "question 3",
+      "info": "info 3",
+      "aliases": ["key-31", "key_32"],
+      "metadata": {},
+      "hidden": false
+    },
+    "expected": {
+      "key": "POSTMANE2E-key-by-copilot-3",
+      "displayName": "new displayName 3",
+      "icon": "http://example.com/icon3.ico",
+      "question": "question 3",
+      "info": "info 3",
+      "aliases": ["key-31", "key_32"],
+      "metadata": {},
+      "hidden": false
+    },
+    "idLabel": "PROJECT_TYPE_6",
+    "httpCode": 201
+  },
+  {
+    "input": {
+      "key": "POSTMANE2E-key-by-copilot-4",
+      "displayName": "new displayName 4",
+      "icon": "http://example.com/icon4.ico",
+      "question": "question 4",
+      "info": "info 4",
+      "aliases": ["key-31", "key_32"],
+      "metadata": {},
+      "hidden": false
+    },
+    "expected": {
+      "key": "POSTMANE2E-key-by-copilot-4",
+      "displayName": "new displayName 4",
+      "icon": "http://example.com/icon4.ico",
+      "question": "question 4",
+      "info": "info 4",
+      "aliases": ["key-31", "key_32"],
+      "metadata": {},
+      "hidden": false
+    },
+    "idLabel": "PROJECT_TYPE_7",
+    "httpCode": 201
+  }
+]

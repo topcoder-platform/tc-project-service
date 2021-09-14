@@ -1,0 +1,74 @@
+[
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "defaultProductTemplateId": 9
+    },
+    "httpCode": 400,
+    "message": "validation error: \"targetVersion\" is required"
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": 123,
+      "defaultProductTemplateId": 9
+    },
+    "httpCode": 400,
+    "message": "validation error: \"targetVersion\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": "v2",
+      "defaultProductTemplateId": 9
+    },
+    "httpCode": 400,
+    "message": "validation error: \"targetVersion\" must be one of [v3]"
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": "v3"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"defaultProductTemplateId\" is required"
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": "v3",
+      "defaultProductTemplateId": "abc"
+    },
+    "httpCode": 400,
+    "message": "validation error: \"defaultProductTemplateId\" must be a number"
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": "v3",
+      "defaultProductTemplateId": 9,
+      "phaseName": 123
+    },
+    "httpCode": 400,
+    "message": "validation error: \"phaseName\" must be a string"
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": "v3",
+      "defaultProductTemplateId": 9,
+      "phaseName": ""
+    },
+    "httpCode": 400,
+    "message": "validation error: \"phaseName\" is not allowed to be empty"
+  },
+  {
+    "id": "{{PROJECT_4}}",
+    "input": {
+      "targetVersion": "v3",
+      "defaultProductTemplateId": 9
+    },
+    "httpCode": 400,
+    "message": "current project version v3 is not supported to be upgraded to v3"
+  }
+]

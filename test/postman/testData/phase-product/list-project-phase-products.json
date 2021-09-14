@@ -1,0 +1,25 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "phase_id": "{{PROJECT_PHASE_11}}",
+    "expectedFields": [
+      "id",
+      "name",
+      "projectId",
+      "directProjectId",
+      "billingAccountId",
+      "templateId",
+      "type",
+      "estimatedPrice",
+      "actualPrice",
+      "details",
+      "deletedAt",
+      "createdAt",
+      "updatedAt",
+      "deletedBy",
+      "createdBy",
+      "updatedBy",
+      "phaseId"
+    ]
+  }
+]

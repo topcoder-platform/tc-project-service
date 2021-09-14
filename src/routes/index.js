@@ -370,6 +370,10 @@ router.route('/v5/projects/:projectId(\\d+)/settings')
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
   .get(require('./projectEstimationItems/list'));
 
+// Project Cleanup for the Postman Tests
+router.route('/v5/projects/internal/jobs/clean')
+  .post(require('./cleanup/cleanup'));
+
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   // DO NOT REMOVE next arg.. even though eslint

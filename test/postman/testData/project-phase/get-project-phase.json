@@ -1,0 +1,46 @@
+[
+  {
+    "project_id": "{{PROJECT_3}}",
+    "id": "{{PROJECT_PHASE_4}}",
+    "expected": {
+      "id": "{{PROJECT_PHASE_4}}",
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-required-fields",
+      "description": null,
+      "requirements": null,
+      "status": "active",
+      "startDate": null,
+      "endDate": null,
+      "duration": null,
+      "budget": 0,
+      "spentBudget": 0,
+      "progress": 0,
+      "details": {},
+      "order": null,
+      "deletedAt": null,
+      "deletedBy": null,
+      "projectId": "{{PROJECT_3}}"
+    },
+    "httpCode": 200
+  },
+  {
+    "project_id": "{{PROJECT_3}}",
+    "id": "{{PROJECT_PHASE_5}}",
+    "expected": {
+      "requirements": "requirements 1",
+      "spentBudget": 12,
+      "description": "description 1",
+      "duration": 4,
+      "name": "POSTMANE2E-Project-Phase-by-copilot-only-full-fields",
+      "progress": 33,
+      "details": {
+        "aDetails": "a details"
+      },
+      "id": "{{PROJECT_PHASE_5}}",
+      "projectId": "{{PROJECT_3}}",
+      "budget": 20,
+      "order": 1,
+      "status": "active"
+    },
+    "httpCode": 200
+  }
+]
