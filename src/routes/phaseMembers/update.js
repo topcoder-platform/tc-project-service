@@ -51,7 +51,7 @@ module.exports = [
       req.log.debug('updated phase members', JSON.stringify(newPhaseMembers, null, 2));
       const updatedPhase = _.cloneDeep(phase);
       //  emit event
-      if (_.intersectionBy(phaseMembers, updatedPhaseMembers, 'id').length !== updatedPhaseMembers.length) {
+      if (!_.isEqual(_.sortBy(phaseMembers, 'id'), _.sortBy(updatedPhaseMembers, 'id'))) {
         util.sendResourceToKafkaBus(
           req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_UPDATED,

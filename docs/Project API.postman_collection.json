@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "52f34e21-5b0b-4eb0-99fa-cbd1ac7f215a",
+		"_postman_id": "6418ac6e-a797-4e30-b4d3-a1dd0cdead22",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -4834,7 +4834,7 @@
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"    pm.environment.set(\"phaseId-2\", pm.response.json().id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4880,7 +4880,7 @@
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"    pm.environment.set(\"phaseId-3\", pm.response.json().id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4901,7 +4901,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t},\n\t\"order\": 1,\n\t\"productTemplateId\": {{productTemplateId}}\n}"
+							"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t},\n\t\"order\": 1,\n\t\"productTemplateId\": 2\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases",
@@ -4926,7 +4926,7 @@
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
-									"    pm.environment.set(\"phaseId\", pm.response.json().id);",
+									"    pm.environment.set(\"phaseId-4\", pm.response.json().id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -5351,6 +5351,38 @@
 								"{{projectId}}",
 								"phases",
 								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Delete Phase",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phaseIds\": [\r\n        {{phaseId-2}},\r\n        {{phaseId-3}},\r\n        {{phaseId-4}}\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
 							]
 						}
 					},

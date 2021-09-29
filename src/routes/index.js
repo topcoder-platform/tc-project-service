@@ -167,7 +167,8 @@ router.route('/v5/projects/metadata/productTemplates/:templateId(\\d+)')
 
 router.route('/v5/projects/:projectId(\\d+)/phases')
   .get(require('./phases/list'))
-  .post(require('./phases/create'));
+  .post(require('./phases/create'))
+  .delete(require('./phases/bulkDelete'));
 
 router.route('/v5/projects/:projectId(\\d+)/phases/:phaseId(\\d+)')
   .get(require('./phases/get'))
