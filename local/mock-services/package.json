@@ -8,7 +8,7 @@
   },
   "author": "TCSCODER",
   "dependencies": {
-    "json-server": "^0.9.6",
+    "json-server": "^0.16.3",
     "jsprim": "^1.4.0",
     "lodash": "^4.17.4",
     "winston": "2.3.1"
