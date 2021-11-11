@@ -1,4 +1,4 @@
-FROM node:12.16.1
+FROM node:12.22.6
 LABEL version="1.2"
 LABEL description="Projects microservice"
 RUN sed -i '/jessie-updates/d' /etc/apt/sources.list
