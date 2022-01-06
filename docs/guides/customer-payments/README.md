@@ -10,6 +10,11 @@ Then in any Topcoder's API we could retrieve payments associated with any entity
 
 See [references](#references) to learn more details about the implementation.
 
+## Deployment Guide
+
+- When deploying Customer Payments API on the server we have to set `STRIPE_SECRET_KEY` with a Stripe's secret key.
+- When implementing client side, we would have to use Public Stripe Key as shown in the [React Demo App](react-stripe-js).
+
 ## Quick Demo
 
 The easier way to check it out is to run React Demo App which demonstrate how to use Customer Payments API:
