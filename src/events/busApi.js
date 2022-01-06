@@ -1085,4 +1085,22 @@ module.exports = (app, logger) => {
 
     createEvent(BUS_API_EVENT.PROJECT_MEMBER_INVITE_REMOVED, resource, logger);
   });
+
+  /**
+   * CUSTOMER_PAYMENT_CREATED
+   */
+  app.on(EVENT.ROUTING_KEY.CUSTOMER_PAYMENT_CREATED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive CUSTOMER_PAYMENT_CREATED event');
+
+    createEvent(BUS_API_EVENT.CUSTOMER_PAYMENT_CREATE, resource, logger);
+  });
+
+  /**
+   * CUSTOMER_PAYMENT_UPDATED
+   */
+  app.on(EVENT.ROUTING_KEY.CUSTOMER_PAYMENT_UPDATED, ({ req, resource }) => { // eslint-disable-line no-unused-vars
+    logger.debug('receive CUSTOMER_PAYMENT_UPDATED event');
+
+    createEvent(BUS_API_EVENT.CUSTOMER_PAYMENT_UPDATE, resource, logger);
+  });
 };

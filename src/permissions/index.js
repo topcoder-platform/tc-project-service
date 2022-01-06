@@ -8,6 +8,7 @@ const connectManagerOrAdmin = require('./connectManagerOrAdmin.ops');
 const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
 const projectSettingEdit = require('./projectSetting.edit');
+const customerPaymentConfirm = require('./customerPayment.confirm');
 
 const generalPermission = require('./generalPermission');
 const { PERMISSION } = require('./constants');
@@ -192,4 +193,10 @@ module.exports = () => {
 
   // Project Reporting
   Authorizer.setPolicy('projectReporting.view', projectView);
+
+  // Customer payment permission
+  Authorizer.setPolicy('customerPayment.create', generalPermission(PERMISSION.CREATE_CUSTOMER_PAYMENT));
+  Authorizer.setPolicy('customerPayment.view', generalPermission(PERMISSION.VIEW_CUSTOMER_PAYMENT));
+  Authorizer.setPolicy('customerPayment.edit', generalPermission(PERMISSION.UPDATE_CUSTOMER_PAYMENT));
+  Authorizer.setPolicy('customerPayment.confirm', customerPaymentConfirm);
 };
