@@ -24,7 +24,7 @@ The easier way to check it out is to run React Demo App which demonstrate how to
 To run the React Demo App:
 
 1. Run Project Service API
-2. Copy folder [](react-stripe-js) OUTSIDE of `tc-project-service` folder, and then run inside `react-stripe-js`:
+2. Copy folder [react-stripe-js](./react-stripe-js) OUTSIDE of `tc-project-service` folder, and then run inside `react-stripe-js`:
 
    ```sh
    # install dependencies
