@@ -144,6 +144,16 @@ const SCOPES_PROJECT_INVITES_WRITE = [
   M2M_SCOPES.PROJECT_INVITES.WRITE,
 ];
 
+const SCOPES_CUSTOMER_PAYMENT_WRITE = [
+  M2M_SCOPES.CUSTOMER_PAYMENT.ALL,
+  M2M_SCOPES.CUSTOMER_PAYMENT.WRITE,
+];
+
+const SCOPES_CUSTOMER_PAYMENT_READ = [
+  M2M_SCOPES.CUSTOMER_PAYMENT.ALL,
+  M2M_SCOPES.CUSTOMER_PAYMENT.READ,
+];
+
 /**
  * The full list of possible permission rules in Project Service
  */
@@ -659,6 +669,36 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
     ],
+  },
+
+  CREATE_CUSTOMER_PAYMENT: {
+    meta: {
+      title: 'Create Customer Payment',
+      group: 'Customer Payment',
+      description: 'Who can create customer payment',
+    },
+    topcoderRoles: ALL,
+    scopes: SCOPES_CUSTOMER_PAYMENT_WRITE,
+  },
+
+  VIEW_CUSTOMER_PAYMENT: {
+    meta: {
+      title: 'View Customer Payments',
+      group: 'Customer Payment',
+      description: 'Who can view customer payments',
+    },
+    topcoderRoles: [USER_ROLE.TOPCODER_ADMIN],
+    scopes: SCOPES_CUSTOMER_PAYMENT_READ,
+  },
+
+  UPDATE_CUSTOMER_PAYMENT: {
+    meta: {
+      title: 'Update Customer Payment',
+      group: 'Customer Payment',
+      description: 'Who can update customer payment',
+    },
+    topcoderRoles: [USER_ROLE.TOPCODER_ADMIN],
+    scopes: SCOPES_CUSTOMER_PAYMENT_WRITE,
   },
 };
 

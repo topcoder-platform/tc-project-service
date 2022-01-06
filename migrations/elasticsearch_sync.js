@@ -19,9 +19,10 @@ import { INDEX_TO_DOC_TYPE } from '../src/utils/es-config';
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
+const ES_CUSTOMER_PAYMENT_INDEX = config.get('elasticsearchConfig.customerPaymentIndexName');
 
 // all indexes supported by this script
-const supportedIndexes = [ES_PROJECT_INDEX, ES_TIMELINE_INDEX, ES_METADATA_INDEX];
+const supportedIndexes = [ES_PROJECT_INDEX, ES_TIMELINE_INDEX, ES_METADATA_INDEX, ES_CUSTOMER_PAYMENT_INDEX];
 
 /**
  * Sync elasticsearch indices.

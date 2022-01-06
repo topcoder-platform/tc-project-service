@@ -28,7 +28,7 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/(projects|timelines|orgConfig)(?!\\/health).*`), (req, res, next) => (
+  RegExp(`\\/${apiVersion}\\/(projects|timelines|orgConfig|customer-payments)(?!\\/health).*`), (req, res, next) => (
     // JWT authentication
     jwtAuth(config)(req, res, next)
   ),
@@ -381,6 +381,22 @@ router.route('/v5/projects/:projectId(\\d+)/settings')
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
   .get(require('./projectEstimationItems/list'));
+
+// Customer Payments
+router.route('/v5/customer-payments')
+  .get(require('./customerPayment/list'))
+  .post(require('./customerPayment/create'));
+router.route('/v5/customer-payments/:id(\\d+)')
+  .get(require('./customerPayment/get'))
+  .patch(require('./customerPayment/update'));
+router.route('/v5/customer-payments/:id(\\d+)/confirm')
+  .patch(require('./customerPayment/confirm'));
+router.route('/v5/customer-payments/:id(\\d+)/charge')
+  .patch(require('./customerPayment/charge'));
+router.route('/v5/customer-payments/:id(\\d+)/cancel')
+  .patch(require('./customerPayment/cancel'));
+router.route('/v5/customer-payments/:id(\\d+)/refund')
+  .patch(require('./customerPayment/refund'));
 
 // register error handler
 router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
