@@ -4873,6 +4873,340 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 
+  /customer-payments:
+    get:
+      tags:
+        - customer payment
+      operationId: findCustomerPayments
+      security:
+        - Bearer: []
+      description: Retrieve customerPayments
+      parameters:
+        - $ref: "#/parameters/pageParam"
+        - $ref: "#/parameters/perPageParam"
+        - name: reference
+          required: false
+          type: string
+          in: query
+          description: the reference filter
+        - name: referenceId
+          required: false
+          type: string
+          in: query
+          description: the reference id filter
+        - name: status
+          required: false
+          type: string
+          enum:
+            - canceled
+            - processing
+            - requires_action
+            - requires_capture
+            - requires_confirmation
+            - requires_payment_method
+            - succeeded
+            - refunded
+            - refund_failed
+            - refund_pending
+          in: query
+          description: the customer payment status filter
+        - name: createdBy
+          required: false
+          type: integer
+          format: int64
+          in: query
+          description: customer payment createdBy filter
+        - name: sort
+          required: false
+          description: >
+            sort customerPayments by amount, currency, status, createdAt, createdBy, updatedAt, updatedBy. Default
+            is createdAt asc
+          in: query
+          type: string
+      responses:
+        "200":
+          description: A list of customerPayments
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CustomerPayment"
+          headers:
+            X-Next-Page:
+              type: integer
+              description: The index of the next page
+            X-Page:
+              type: integer
+              description: The index of the current page (starting at 1)
+            X-Per-Page:
+              type: integer
+              description: The number of items to list per page
+            X-Prev-Page:
+              type: integer
+              description: The index of the previous page
+            X-Total:
+              type: integer
+              description: The total number of items
+            X-Total-Pages:
+              type: integer
+              description: The total number of pages
+            Link:
+              type: string
+              description: Pagination link header.
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+    post:
+      tags:
+        - customer payment
+      operationId: addCustomerPayment
+      security:
+        - Bearer: []
+      description: >-
+        Create a customerPayment. All users can access this endpoint.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/CustomerPaymentRequest"
+      responses:
+        "200":
+          description: Returns the newly created customerPayment
+          schema:
+            $ref: "#/definitions/CustomerPayment"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/customer-payments/{id}":
+    get:
+      tags:
+        - customer payment
+      description: >-
+        Retrieve customerPayment by id
+      security:
+        - Bearer: []
+      responses:
+        "200":
+          description: a customerPayment
+          schema:
+            $ref: "#/definitions/CustomerPayment"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+      parameters:
+        - $ref: "#/parameters/customerPaymentIdParam"
+      operationId: getCustomerPayment
+    patch:
+      tags:
+        - customer payment
+      operationId: updateCustomerPayment
+      security:
+        - Bearer: []
+      description: >-
+        Update a customer payment
+      parameters:
+        - $ref: "#/parameters/customerPaymentIdParam"
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/UpdateCustomerPayment"
+      responses:
+        "200":
+          description: A updated customerPayment
+          schema:
+            $ref: "#/definitions/CustomerPayment"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+  "/customer-payments/{id}/confirm":
+    parameters:
+      - $ref: "#/parameters/customerPaymentIdParam"
+    patch:
+      tags:
+        - customer payment
+      operationId: confirmCustomerPayment
+      security:
+        - Bearer: []
+      description: >-
+        Confirm a customer payment
+      responses:
+        "200":
+          description: A updated customerPayment
+          schema:
+            $ref: "#/definitions/CustomerPayment"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/customer-payments/{id}/charge":
+    parameters:
+      - $ref: "#/parameters/customerPaymentIdParam"
+    patch:
+      tags:
+        - customer payment
+      operationId: chargeCustomerPayment
+      security:
+        - Bearer: []
+      description: >-
+        Charge a customer payment
+      responses:
+        "200":
+          description: A updated customerPayment
+          schema:
+            $ref: "#/definitions/CustomerPayment"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/customer-payments/{id}/cancel":
+    parameters:
+      - $ref: "#/parameters/customerPaymentIdParam"
+    patch:
+      tags:
+        - customer payment
+      operationId: cancelCustomerPayment
+      security:
+        - Bearer: []
+      description: >-
+        Cancel a customer payment
+      responses:
+        "200":
+          description: A updated customerPayment
+          schema:
+            $ref: "#/definitions/CustomerPayment"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/customer-payments/{id}/refund":
+    parameters:
+      - $ref: "#/parameters/customerPaymentIdParam"
+    patch:
+      tags:
+        - customer payment
+      operationId: refundCustomerPayment
+      security:
+        - Bearer: []
+      description: >-
+        Refund a customer payment
+      responses:
+        "200":
+          description: A updated customerPayment
+          schema:
+            $ref: "#/definitions/CustomerPayment"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: Forbidden
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+
 parameters:
   projectIdParam:
     name: projectId
@@ -4978,6 +5312,13 @@ parameters:
     name: id
     in: path
     description: work management permission id
+    required: true
+    type: integer
+    format: int64
+  customerPaymentIdParam:
+    name: id
+    in: path
+    description: customer payment id
     required: true
     type: integer
     format: int64
@@ -7191,3 +7532,90 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this object
         readOnly: true
+  CustomerPaymentRequest:
+    title: CustomerPayment request object
+    type: object
+    required:
+      - amount
+      - paymentMethodId
+    properties:
+      amount:
+        type: integer
+        description: the customer payment amount
+      paymentMethodId:
+        type: string
+        description: the payment method id
+      currency:
+        type: string
+        description: the customer payment currency
+      reference:
+        type: string
+        description: the customer payment reference
+      referenceId:
+        type: string
+        description: >-
+          the customer payment reference id (corresponding to
+          the `reference`)
+  UpdateCustomerPayment:
+    type: object
+    properties:
+      reference:
+        type: string
+        description: the customer payment reference
+      referenctId:
+        type: string
+        description: >-
+          the customer payment reference id (corresponding to
+          the `reference`)
+  CustomerPayment:
+    title: CustomerPayment object
+    allOf:
+      - type: object
+        required:
+          - id
+          - status
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+        properties:
+          id:
+            type: number
+            format: int64
+            description: the id
+          clientSecret:
+            type: string
+            description: it's for client to auth confirm
+          status:
+            type: string
+            enum:
+              - canceled
+              - processing
+              - requires_action
+              - requires_capture
+              - requires_confirmation
+              - requires_payment_method
+              - succeeded
+              - refunded
+              - refund_failed
+              - refund_pending
+            description: the customer payment status
+          createdAt:
+            type: string
+            description: Datetime (GMT) when object was created
+            readOnly: true
+          createdBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User who created this object
+            readOnly: true
+          updatedAt:
+            type: string
+            description: READ-ONLY. Datetime (GMT) when object was updated
+            readOnly: true
+          updatedBy:
+            type: integer
+            format: int64
+            description: READ-ONLY. User that last updated this object
+            readOnly: true
+      - $ref: "#/definitions/CustomerPaymentRequest"

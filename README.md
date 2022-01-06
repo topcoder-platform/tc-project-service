@@ -367,3 +367,4 @@ It's been signed with the secret 'secret'. This secret should match your entry i
 - [Permissions Guide](https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/guides/permissions-guide/permissions-guide.md) - what kind of permissions we have, how they work and how to use them.
 - [Permissions](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html) - the list of all permissions in Project Service.
 - [Swagger API Definition](http://editor.swagger.io/?url=https://raw.githubusercontent.com/topcoder-platform/tc-project-service/develop/docs/swagger.yaml) - click to open it via Online Swagger Editor.
+- [Customer Payments](./docs/guides/customer-payments/README.md) - Customer Payments API details.

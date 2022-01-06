@@ -13,7 +13,9 @@
       "timelineIndexName": "timelines_test",
       "timelineDocType": "doc",
       "metadataIndexName": "metadata_test",
-      "metadataDocType": "doc"
+      "metadataDocType": "doc",
+      "customerPaymentIndexName": "customer_payments_test",
+    "customerPaymentDocType": "doc"
     },
     "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
     "dbConfig": {

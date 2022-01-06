@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6418ac6e-a797-4e30-b4d3-a1dd0cdead22",
+		"_postman_id": "e80dcb5f-34f8-4b52-83cb-ce96082f9c31",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -11792,6 +11792,398 @@
 								"{{projectId}}",
 								"settings",
 								"{{settingId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customer Payment",
+			"item": [
+				{
+					"name": "Capture and refund",
+					"item": [
+						{
+							"name": "charge customer payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"captureAndRefundId\", pm.response.json().id);",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/customer-payments/:id/charge",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"customer-payments",
+										":id",
+										"charge"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "8"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "refund customer payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/customer-payments/{{captureAndRefundId}}/refund",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"customer-payments",
+										"{{captureAndRefundId}}",
+										"refund"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Confirm and capture",
+					"item": [
+						{
+							"name": "confirm customer payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"confirmAndCaptureId\", pm.response.json().id);",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/customer-payments/:id/confirm",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"customer-payments",
+										":id",
+										"confirm"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "charge customer payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/customer-payments/{{confirmAndCaptureId}}/charge",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"customer-payments",
+										"{{confirmAndCaptureId}}",
+										"charge"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Cancel",
+					"item": [
+						{
+							"name": "cancel customer payment",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token-admin-40051333}}"
+									}
+								],
+								"url": {
+									"raw": "{{api-url}}/customer-payments/:id/cancel",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"customer-payments",
+										":id",
+										"cancel"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "9"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "List customer payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.environment.set(\"customerPaymentId\", pm.response.json()[0].id);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/customer-payments",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"customer-payments"
+							],
+							"query": [
+								{
+									"key": "reference",
+									"value": "project",
+									"disabled": true
+								},
+								{
+									"key": "referenceId",
+									"value": "1234567",
+									"disabled": true
+								},
+								{
+									"key": "perPage",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "amount desc",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get customer payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/customer-payments/{{customerPaymentId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"customer-payments",
+								"{{customerPaymentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update customer payment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-admin-40051333}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reference\": \"project\",\n    \"referenceId\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/customer-payments/{{customerPaymentId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"customer-payments",
+								"{{customerPaymentId}}"
 							]
 						}
 					},
