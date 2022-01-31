@@ -80,12 +80,21 @@ async function sendCustomerPaymentMessage(event, customerPayment, req) {
  * @param {string} reference the payment method id
  * @param {string} referenceId the payment method id
  * @param {string} receiptEmail the receipt email
+ * @param {string} description the receipt description
  * @param {string} userId the payment method id
  * @param {object} req the request
  * @returns {Promise} the customer payment
  */
 export async function createCustomerPayment(
-  amount, currency, paymentMethodId, reference, referenceId, receiptEmail, userId, req,
+  amount,
+  currency,
+  paymentMethodId,
+  reference,
+  referenceId,
+  receiptEmail,
+  description,
+  userId,
+  req,
 ) {
   const intentBody = {
     amount,
@@ -97,6 +106,9 @@ export async function createCustomerPayment(
   };
   if (receiptEmail) {
     intentBody.receipt_email = receiptEmail;
+  }
+  if (description) {
+    intentBody.description = description;
   }
   const intent = await convertStripError(() => stripe.paymentIntents.create(intentBody));
   const customerPayment = await models.CustomerPayment.create({

@@ -13,6 +13,7 @@ const permissions = tcMiddleware.permissions;
 const schema = {
   body: Joi.object().keys({
     receiptEmail: Joi.string().email(),
+    description: Joi.string(),
     amount: Joi.number().integer().min(1).required(),
     currency: Joi.string().valid(_.values(CUSTOMER_PAYMENT_CURRENCY)).default(CUSTOMER_PAYMENT_CURRENCY.USD),
     paymentMethodId: Joi.string().required(),
@@ -25,7 +26,15 @@ module.exports = [
   validate(schema),
   permissions('customerPayment.create'),
   (req, res, next) => {
-    const { amount, currency, reference, referenceId, paymentMethodId, receiptEmail } = req.body;
+    const {
+      amount,
+      currency,
+      reference,
+      referenceId,
+      paymentMethodId,
+      receiptEmail,
+      description,
+    } = req.body;
     createCustomerPayment(
       amount,
       currency,
@@ -33,6 +42,7 @@ module.exports = [
       reference,
       referenceId,
       receiptEmail,
+      description,
       req.authUser.userId,
       req,
     )
