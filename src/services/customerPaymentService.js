@@ -97,7 +97,7 @@ export async function createCustomerPayment(
   req,
 ) {
   const intentBody = {
-    amount,
+    amount: amount * 100, // Stripe uses the smallest unit (cents)
     currency: _.lowerCase(currency),
     payment_method: paymentMethodId,
     capture_method: STRIPE_CONSTANT.CAPTURE_METHOD,
