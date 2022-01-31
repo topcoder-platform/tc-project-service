@@ -87,15 +87,18 @@ async function sendCustomerPaymentMessage(event, customerPayment, req) {
 export async function createCustomerPayment(
   amount, currency, paymentMethodId, reference, referenceId, receiptEmail, userId, req,
 ) {
-  const intent = await convertStripError(() => stripe.paymentIntents.create({
+  const intentBody = {
     amount,
     currency: _.lowerCase(currency),
     payment_method: paymentMethodId,
     capture_method: STRIPE_CONSTANT.CAPTURE_METHOD,
     confirmation_method: STRIPE_CONSTANT.CONFIRMATION_METHOD,
     confirm: true,
-    ...(receiptEmail ? { receipt_email: receiptEmail } : {}),
-  }));
+  };
+  if (receiptEmail) {
+    intentBody.receipt_email = receiptEmail;
+  }
+  const intent = await convertStripError(() => stripe.paymentIntents.create(intentBody));
   const customerPayment = await models.CustomerPayment.create({
     reference,
     referenceId,
