@@ -26,7 +26,16 @@ module.exports = [
   permissions('customerPayment.create'),
   (req, res, next) => {
     const { amount, currency, reference, referenceId, paymentMethodId, receiptEmail } = req.body;
-    createCustomerPayment(amount, currency, paymentMethodId, reference, referenceId, receiptEmail, req.authUser.userId, req)
+    createCustomerPayment(
+      amount,
+      currency,
+      paymentMethodId,
+      reference,
+      referenceId,
+      receiptEmail,
+      req.authUser.userId,
+      req,
+    )
       .then((result) => {
         // Write to the response
         res.status(201).json(result);
