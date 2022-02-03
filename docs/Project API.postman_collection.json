@@ -1,6 +1,7 @@
 {
 	"info": {
 		"_postman_id": "e80dcb5f-34f8-4b52-83cb-ce96082f9c31",
+		"_postman_id": "6418ac6e-a797-4e30-b4d3-a1dd0cdead22",
 		"name": "Project API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -5829,6 +5830,1012 @@
 								],
 								"type": "text/javascript"
 							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=order desc",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "order desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase with memberOnly",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases?memberOnly=true",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							],
+							"query": [
+								{
+									"key": "memberOnly",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase Members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/members",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Phase Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/members/{{phaseMemberId-2}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"members",
+								"{{phaseMemberId-2}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase Approvals",
+			"item": [
+				{
+					"name": "Before Start",
+					"item": [
+						{
+							"name": "Create project type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectTypeId\", response.key);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/metadata/projectTypes",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"metadata",
+										"projectTypes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects"
+									]
+								},
+								"description": "Valid request body. Project should be created successfully."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project customer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"88774634\",\n    \"role\": \"customer\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Phase",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/phases",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"phases"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Create Phase Approval - approve",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Phase",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t}\n}"
+
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Phase with order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token-topcoder-user-88774634}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n\t\"order\": 1\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+
+					"name": "Update Phase with members",
+					"request": {
+						"method": "PATCH",
+
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n    \"members\": [{{phaseMemberId-1}},{{phaseMemberId-2}}]\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+
+								"{{phaseId}}"
+
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Phase",
+
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+
+					"name": "Bulk Delete Phase",
+
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phaseIds\": [\r\n        {{phaseId-2}},\r\n        {{phaseId-3}},\r\n        {{phaseId-4}}\r\n    ]\r\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase Products",
+			"item": [
+				{
+					"name": "Create Phase Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.environment.set(\"phaseProductId\", pm.response.json().id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test phase product\",\n\t\"type\": \"type 1\",\n\t\"estimatedPrice\": 10,\n    \"templateId\": 2,\n    \"actualPrice\": \"10\"\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Phase Products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Phase Product",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"products",
+								"{{phaseProductId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Phase Product",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test phase product xxx\",\n\t\"type\": \"type 2\",\n\t\"templateId\": 10,\n\t\"estimatedPrice\": 1.234567,\n\t\"actualPrice\": 2.34567,\n\t\"details\": {\n\t\t\"message\": \"this is a JSON type. You can use any json\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"products",
+								"{{phaseProductId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Phase Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt-token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}/products/{{phaseProductId}}",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"{{projectId}}",
+								"phases",
+								"{{phaseId}}",
+								"products",
+								"{{phaseProductId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Phase Members",
+			"item": [
+				{
+					"name": "Before Start",
+					"item": [
+						{
+							"name": "Create project type",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectTypeId\", response.key);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"key\": \"new key\",\r\n        \"displayName\": \"new displayName\",\r\n        \"icon\": \"http://example.com/icon4.ico\",\r\n    \t\"question\": \"question 4\",\r\n    \t\"info\": \"info 4\",\r\n    \t\"aliases\": [\"key-41\", \"key_42\"],\r\n    \t\"metadata\": {}\r\n  }"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/metadata/projectTypes",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"metadata",
+										"projectTypes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create project",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"projectId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project\",\n\t\"description\": \"Hello I am a test project\",\n\t\"type\": \"{{projectTypeId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects"
+									]
+								},
+								"description": "Valid request body. Project should be created successfully."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-1\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40158994\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create project member - 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseMemberId-2\", response.userId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"40153800\",\n    \"role\": \"copilot\"\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/members",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"members"
+									]
+								},
+								"description": "If the request payload is valid, than project member should be created."
+							},
+							"response": []
+						},
+						{
+							"name": "Create Phase",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    if(pm.response.status === \"Created\") {",
+											"        const response = pm.response.json()",
+											"        pm.environment.set(\"phaseId\", response.id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt-token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"test project phase\",\n\t\"status\": \"active\",\n\t\"startDate\": \"2018-05-15T00:00:00\",\n\t\"endDate\": \"2018-05-16T00:00:00\",\n\t\"budget\": 20,\n\t\"details\": {\n\t\t\"aDetails\": \"a details\"\n\t}\n}"
+								},
+								"url": {
+									"raw": "{{api-url}}/projects/{{projectId}}/phases",
+									"host": [
+										"{{api-url}}"
+									],
+									"path": [
+										"projects",
+										"{{projectId}}",
+										"phases"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Update Phase Members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -6359,6 +7366,7 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }"
@@ -6405,6 +7413,7 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
+
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    }\r\n  }"
@@ -6519,6 +7528,7 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    }\r\n  }"
 						},
+
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates",
 							"host": [
