@@ -25,7 +25,9 @@
     "timelineDocType": "doc",
     "metadataIndexName": "metadata",
     "metadataDocType": "doc",
-    "metadataDocDefaultId": 1
+    "metadataDocDefaultId": 1,
+    "customerPaymentIndexName": "customer_payments",
+    "customerPaymentDocType": "doc"
   },
   "connectProjectUrl": "",
   "dbConfig": {
@@ -83,5 +85,6 @@
     "SUBJECT": "",
     "CLIENT_ID": ""
   },
+  "STRIPE_SECRET_KEY": "",
   "sfdcBillingAccountNameField": "Billing_Account_Name__c"
 }

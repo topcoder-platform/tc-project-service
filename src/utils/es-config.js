@@ -6,6 +6,8 @@ const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
 const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
+const ES_CUSTOMER_PAYMENT_INDEX = config.get('elasticsearchConfig.customerPaymentIndexName');
+const ES_CUSTOMER_PAYMENT_TYPE = config.get('elasticsearchConfig.customerPaymentDocType');
 
 // form config can be present inside 3 models, so we reuse it
 const formConfig = {
@@ -384,6 +386,53 @@ MAPPINGS[ES_TIMELINE_INDEX] = {
 };
 
 /**
+ * 'customerPayment' index mapping
+ */
+MAPPINGS[ES_CUSTOMER_PAYMENT_INDEX] = {
+  _all: { enabled: false },
+  properties: {
+    id: {
+      type: 'long',
+    },
+    reference: {
+      type: 'string',
+    },
+    referenceId: {
+      type: 'string',
+    },
+    amount: {
+      type: 'long',
+    },
+    currency: {
+      type: 'string',
+    },
+    paymentIntentId: {
+      type: 'string',
+    },
+    clientSecret: {
+      type: 'string',
+    },
+    status: {
+      type: 'string',
+    },
+    createdAt: {
+      type: 'date',
+      format: 'strict_date_optional_time||epoch_millis',
+    },
+    createdBy: {
+      type: 'integer',
+    },
+    updatedAt: {
+      type: 'date',
+      format: 'strict_date_optional_time||epoch_millis',
+    },
+    updatedBy: {
+      type: 'integer',
+    },
+  },
+};
+
+/**
  * 'metadata' index mapping
  */
 MAPPINGS[ES_METADATA_INDEX] = {
@@ -720,6 +769,7 @@ const INDEX_TO_DOC_TYPE = {};
 INDEX_TO_DOC_TYPE[ES_PROJECT_INDEX] = ES_PROJECT_TYPE;
 INDEX_TO_DOC_TYPE[ES_TIMELINE_INDEX] = ES_TIMELINE_TYPE;
 INDEX_TO_DOC_TYPE[ES_METADATA_INDEX] = ES_METADATA_TYPE;
+INDEX_TO_DOC_TYPE[ES_CUSTOMER_PAYMENT_INDEX] = ES_CUSTOMER_PAYMENT_TYPE;
 
 module.exports = {
   MAPPINGS,

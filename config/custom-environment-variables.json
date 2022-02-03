@@ -15,7 +15,9 @@
     "timelineDocType": "TIMELINES_ES_DOC_TYPE",
     "metadataIndexName": "METADATA_ES_INDEX_NAME",
     "metadataDocType": "METADATA_ES_DOC_TYPE",
-    "metadataDocDefaultId": "METADATA_ES_DOC_DEFAULT_ID"
+    "metadataDocDefaultId": "METADATA_ES_DOC_DEFAULT_ID",
+    "customerPaymentIndexName": "CUSTOMER_PAYMENTS_ES_INDEX_NAME",
+    "customerPaymentDocType": "CUSTOMER_PAYMENT_ES_DOC_TYPE"
   },
   "pubsubQueueName": "PUBSUB_QUEUE_NAME",
   "pubsubExchangeName": "PUBSUB_EXCHANGE_NAME",
@@ -76,5 +78,6 @@
     "CLIENT_KEY": "SALESFORCE_CLIENT_KEY",
     "SUBJECT": "SALESFORCE_SUBJECT",
     "CLIENT_ID": "SALESFORCE_CLIENT_ID"
-  }
+  },
+  "STRIPE_SECRET_KEY": "STRIPE_SECRET_KEY"
 }
