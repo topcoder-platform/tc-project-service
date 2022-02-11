@@ -163,8 +163,7 @@ workflows:
       - Hold [Performance-Testing]:
           type: approval
           requires:
-            - deployDev
-            - deployProd
+            - UnitTests
       - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
