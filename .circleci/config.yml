@@ -146,6 +146,9 @@ workflows:
     jobs:
       - UnitTests:
           context : org-global
+          filters:
+            branches:
+              only: ['develop']
       - deployDev:
           context : org-global
           requires:
@@ -162,8 +165,6 @@ workflows:
               only: ['master']       
       - Hold [Performance-Testing]:
           type: approval
-          requires:
-            - UnitTests
       - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
