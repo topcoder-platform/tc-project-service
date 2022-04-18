@@ -925,7 +925,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
         </RandomController>
         <hashTree>
           <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
-            <intProp name="calcMode">0</intProp>
+            <intProp name="calcMode">1</intProp>
             <doubleProp>
               <name>throughput</name>
               <value>300.0</value>
@@ -974,7 +974,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="false">
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
             <hashTree/>
@@ -1021,7 +1021,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="false">
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
             <hashTree/>
@@ -1103,7 +1103,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">10</stringProp>
+        <stringProp name="ThreadGroup.num_threads">20</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">300</stringProp>
@@ -1116,7 +1116,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
         </RandomController>
         <hashTree>
           <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
-            <intProp name="calcMode">0</intProp>
+            <intProp name="calcMode">1</intProp>
             <doubleProp>
               <name>throughput</name>
               <value>600.0</value>
@@ -1165,7 +1165,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="false">
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
             <hashTree/>
@@ -1212,7 +1212,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="false">
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
             <hashTree/>
@@ -1294,7 +1294,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">10</stringProp>
+        <stringProp name="ThreadGroup.num_threads">30</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">300</stringProp>
@@ -1307,7 +1307,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
         </RandomController>
         <hashTree>
           <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
-            <intProp name="calcMode">0</intProp>
+            <intProp name="calcMode">1</intProp>
             <doubleProp>
               <name>throughput</name>
               <value>900.0</value>
@@ -1356,7 +1356,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="false">
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
             <hashTree/>
@@ -1403,7 +1403,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="false">
               <stringProp name="DurationAssertion.duration">3000</stringProp>
             </DurationAssertion>
             <hashTree/>
