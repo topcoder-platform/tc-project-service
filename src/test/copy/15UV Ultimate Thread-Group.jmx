@@ -1315,7 +1315,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
             </doubleProp>
           </ConstantThroughputTimer>
           <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Access Tabs" enabled="false">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Access Tabs" enabled="true">
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
               <collectionProp name="Arguments.arguments"/>
             </elementProp>
@@ -1361,7 +1361,7 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
             </DurationAssertion>
             <hashTree/>
           </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Access Projects" enabled="false">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Access Projects" enabled="true">
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
               <collectionProp name="Arguments.arguments"/>
             </elementProp>
@@ -1399,51 +1399,6 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">Authorization</stringProp>
                   <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1rWTNNamsxTWpNeU5Ua3dRalkzTmtKR00wRkZPRVl3TmtJd1FqRXlNVUk0TUVFNE9UQkZOZyJ9.eyJodHRwczovL3RvcGNvZGVyLmNvbS91c2VySWQiOiI0MTAwMjE3NCIsImh0dHBzOi8vdG9wY29kZXIuY29tL2hhbmRsZSI6IlRDQ29ubkNvcGlsb3QiLCJodHRwczovL3RvcGNvZGVyLmNvbS9yb2xlcyI6WyJDb25uZWN0IENvcGlsb3QiLCJUb3Bjb2RlciBVc2VyIiwiY29waWxvdCJdLCJodHRwczovL3RvcGNvZGVyLmNvbS91c2VyX2lkIjoiYXV0aDB8NDEwMDIxNzQiLCJodHRwczovL3RvcGNvZGVyLmNvbS90Y3NzbyI6IjQxMDAyMTc0fGU2MzAyYTQ3NGQ1MThkMjc1YzEyNGVhMTRmYzRiYTc3ODlkODcxNGVmOWFhNmRlNDEyOGVkMzFlM2YyNjYxMSIsImh0dHBzOi8vdG9wY29kZXIuY29tL2FjdGl2ZSI6dHJ1ZSwiaHR0cHM6Ly90b3Bjb2Rlci5jb20vYmxvY2tJUCI6ZmFsc2UsIm5pY2tuYW1lIjoiVENDb25uQ29waWxvdCIsIm5hbWUiOiJ0b3Bjb2RlcmNvbm5lY3QrQ29waWxvdEBnbWFpbC5jb20iLCJwaWN0dXJlIjoiaHR0cHM6Ly9zLmdyYXZhdGFyLmNvbS9hdmF0YXIvYTRlOWI3MjhlMjU5ODVkNjZjYzEyNmUzNzM5N2RkMmY_cz00ODAmcj1wZyZkPWh0dHBzJTNBJTJGJTJGY2RuLmF1dGgwLmNvbSUyRmF2YXRhcnMlMkZ0by5wbmciLCJ1cGRhdGVkX2F0IjoiMjAyMC0xMC0yM1QwODozNjo0MS40ODBaIiwiZW1haWwiOiJ0b3Bjb2RlcmNvbm5lY3QrQ29waWxvdEBnbWFpbC5jb20iLCJpc3MiOiJodHRwczovL2F1dGgudG9wY29kZXIuY29tLyIsInN1YiI6ImF1dGgwfDQxMDAyMTc0IiwiYXVkIjoiVVc3Qmhzbm1BUWgwaXRsNTZnMWpVUGlzQk85R29vd0QiLCJpYXQiOjE2NTAyNTY1MTgsImV4cCI6MTY1MDM0MjkxOCwibm9uY2UiOiJiVE53TjJKNldqZGxWakJ2UmtONGMxbHdkbmMxVVdSU0xqTTFVVEYxV2xwaVlrWnNSV1ZSVFY5MlpnPT0ifQ.a7z5Bwwd3qO3JxeaAtyVe39HmOM-RxW7iPpeVh9jWxtwGiQvNBJpKZAAx9QV_jvKJn9aCyPaB1htDGJJoGCwnGdu804P-FjBXLlU0zYRjeTge_xAJLeXAXtBpbsqVW3Dl8iEtgWmZxS6Cxt8v4d77lzWZMBmX6_LAR3BNf9iATJng97UWGUaX-1uJNHqYkBIJBPuJW7CuxRaKZY-o1YWmhAhTxUrzMcR3xkhXqqHPDvMro-GOHABbDH-AzuyoP8SC1JuZKvxCLjL_5Z4mF9h2fKzagaNaTmusvhG46OeNlUPF0lrHM2fvCo70qTcYDkA6A7h9yOAgoDG5wArAwA1mw</stringProp>
-                </elementProp>
-              </collectionProp>
-            </HeaderManager>
-            <hashTree/>
-            <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="false">
-              <stringProp name="DurationAssertion.duration">3000</stringProp>
-            </DurationAssertion>
-            <hashTree/>
-          </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Create Milestone" enabled="true">
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
-            <stringProp name="HTTPSampler.domain">api.topcoder.com</stringProp>
-            <stringProp name="HTTPSampler.port"></stringProp>
-            <stringProp name="HTTPSampler.protocol">https</stringProp>
-            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/v5/projects/32232</stringProp>
-            <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
-            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
-            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
-            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
-            <stringProp name="HTTPSampler.response_timeout"></stringProp>
-          </HTTPSamplerProxy>
-          <hashTree>
-            <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
-              <stringProp name="filename">projects.csv</stringProp>
-              <stringProp name="fileEncoding"></stringProp>
-              <stringProp name="variableNames"></stringProp>
-              <boolProp name="ignoreFirstLine">false</boolProp>
-              <stringProp name="delimiter">,</stringProp>
-              <boolProp name="quotedData">false</boolProp>
-              <boolProp name="recycle">true</boolProp>
-              <boolProp name="stopThread">false</boolProp>
-              <stringProp name="shareMode">shareMode.all</stringProp>
-            </CSVDataSet>
-            <hashTree/>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-              <collectionProp name="HeaderManager.headers">
-                <elementProp name="" elementType="Header">
-                  <stringProp name="Header.name">Authorization</stringProp>
-                  <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1rWTNNamsxTWpNeU5Ua3dRalkzTmtKR00wRkZPRVl3TmtJd1FqRXlNVUk0TUVFNE9UQkZOZyJ9.eyJodHRwczovL3RvcGNvZGVyLmNvbS91c2VySWQiOiI0MTAwMjE3NCIsImh0dHBzOi8vdG9wY29kZXIuY29tL2hhbmRsZSI6IlRDQ29ubkNvcGlsb3QiLCJodHRwczovL3RvcGNvZGVyLmNvbS9yb2xlcyI6WyJDb25uZWN0IENvcGlsb3QiLCJUb3Bjb2RlciBVc2VyIiwiY29waWxvdCJdLCJodHRwczovL3RvcGNvZGVyLmNvbS91c2VyX2lkIjoiYXV0aDB8NDEwMDIxNzQiLCJodHRwczovL3RvcGNvZGVyLmNvbS90Y3NzbyI6IjQxMDAyMTc0fGU2MzAyYTQ3NGQ1MThkMjc1YzEyNGVhMTRmYzRiYTc3ODlkODcxNGVmOWFhNmRlNDEyOGVkMzFlM2YyNjYxMSIsImh0dHBzOi8vdG9wY29kZXIuY29tL2FjdGl2ZSI6dHJ1ZSwiaHR0cHM6Ly90b3Bjb2Rlci5jb20vYmxvY2tJUCI6ZmFsc2UsIm5pY2tuYW1lIjoiVENDb25uQ29waWxvdCIsIm5hbWUiOiJ0b3Bjb2RlcmNvbm5lY3QrQ29waWxvdEBnbWFpbC5jb20iLCJwaWN0dXJlIjoiaHR0cHM6Ly9zLmdyYXZhdGFyLmNvbS9hdmF0YXIvYTRlOWI3MjhlMjU5ODVkNjZjYzEyNmUzNzM5N2RkMmY_cz00ODAmcj1wZyZkPWh0dHBzJTNBJTJGJTJGY2RuLmF1dGgwLmNvbSUyRmF2YXRhcnMlMkZ0by5wbmciLCJ1cGRhdGVkX2F0IjoiMjAyMC0xMC0yM1QwODozNjo0MS40ODBaIiwiZW1haWwiOiJ0b3Bjb2RlcmNvbm5lY3QrQ29waWxvdEBnbWFpbC5jb20iLCJpc3MiOiJodHRwczovL2F1dGgudG9wY29kZXIuY29tLyIsInN1YiI6ImF1dGgwfDQxMDAyMTc0IiwiYXVkIjoiVVc3Qmhzbm1BUWgwaXRsNTZnMWpVUGlzQk85R29vd0QiLCJpYXQiOjE2NTA3MTI5NTksImV4cCI6MTY1MDc5OTM1OSwibm9uY2UiOiJZa0V4VW1aMFRYZHlXVXhzZmpaUFVTMHdXbWd6YkRoc1NqTm1NamxaV1VOcE1rdG9kM05tU1haa2FnPT0ifQ.lzLU10ck7HAJxP0KgCxJlur1BQTYpv_ehIMTJ2M4b5e5-t-7airEO336Wn-lVhWoS6Z139cUmqO8uBlecx6zeJuYMWcsseHweicM1jGoyBynjGe9n6mI-vtS9S1lxxQDkVtLrw5oKY_rKqnFAhmvDo-Gr7ICGpZWd7EDz73GEJFElYEvuGcrS5l1qdLU2QGxg2PsiXxJSds2Vvdt5ESU7NOXI_OkNUL9RGsuHoi1JWh59xdjtAr3FZajUonY_0-aN0_3qrVfNvpo6gpOKpZK0xS0X6NZmMN5w1k5k2ZAOW_gCgMZlbZZvjv2dlUiXld5Qm4GUG3A2zcqSueVhQzXrw</stringProp>
                 </elementProp>
               </collectionProp>
             </HeaderManager>
