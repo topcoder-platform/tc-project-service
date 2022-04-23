@@ -1415,12 +1415,29 @@ start up time/ramp-up time = Shutdown time/ramp-down time of the previous record
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.value">{&#xd;
-	&quot;status&quot;:&quot;active&quot;,&#xd;
-	&quot;name&quot;:&quot;1&quot;,&#xd;
-	&quot;description&quot;:&quot;Rate Limit&quot;,&#xd;
-	&quot;productTemplateId&quot;:67,&#xd;
-	&quot;startDate&quot;:&quot;2022-04-23&quot;,&#xd;
-	&quot;endDate&quot;:&quot;2022-04-26&quot;&#xd;
+    &quot;name&quot;: &quot;Rate Limit&quot;,&#xd;
+    &quot;description&quot;: &quot;Rate Limit description 1&quot;,&#xd;
+    &quot;duration&quot;: 4,&#xd;
+    &quot;startDate&quot;: &quot;2018-05-29T00:00:00.000Z&quot;,&#xd;
+    &quot;endDate&quot;: &quot;2018-05-30T00:00:00.000Z&quot;,&#xd;
+    &quot;completionDate&quot;: &quot;2018-05-31T00:00:00.000Z&quot;,&#xd;
+    &quot;status&quot;: &quot;draft&quot;,&#xd;
+    &quot;type&quot;: &quot;type3&quot;,&#xd;
+    &quot;details&quot;: {&#xd;
+        &quot;detail1&quot;: {&#xd;
+            &quot;subDetail1C&quot;: 3&#xd;
+        },&#xd;
+        &quot;detail2&quot;: [&#xd;
+            2,&#xd;
+            3,&#xd;
+            4&#xd;
+        ]&#xd;
+    },&#xd;
+    &quot;order&quot;: 1,&#xd;
+    &quot;plannedText&quot;: &quot;plannedText 3&quot;,&#xd;
+    &quot;activeText&quot;: &quot;activeText 3&quot;,&#xd;
+    &quot;completedText&quot;: &quot;completedText 3&quot;,&#xd;
+    &quot;blockedText&quot;: &quot;blockedText 3&quot;&#xd;
 }</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
