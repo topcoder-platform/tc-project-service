@@ -102,7 +102,7 @@ class SalesforceService {
           null, // fallback to null if cannot parse
         ),
         markup: _.get(o, config.get('sfdcBillingAccountMarkupField')),
-        active: _.get(o, config.get('sfdcBillingAccountActiveField')),        
+        active: _.get(o, config.get('sfdcBillingAccountActiveField')),
         startDate: _.get(o, 'Topcoder_Billing_Account__r.Start_Date__c'),
         endDate: _.get(o, 'Topcoder_Billing_Account__r.End_Date__c'),
       }));
