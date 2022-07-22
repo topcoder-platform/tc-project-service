@@ -103,8 +103,8 @@ class SalesforceService {
         ),
         markup: _.get(o, config.get('sfdcBillingAccountMarkupField')),
         active: _.get(o, config.get('sfdcBillingAccountActiveField')),
-        startDate: _.get(o, 'Topcoder_Billing_Account__r.Start_Date__c'),
-        endDate: _.get(o, 'Topcoder_Billing_Account__r.End_Date__c'),
+        startDate: _.get(o, 'Start_Date__c'),
+        endDate: _.get(o, 'End_Date__c'),
       }));
       return billingAccounts.length > 0 ? billingAccounts[0] : {};
     });
