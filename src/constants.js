@@ -142,6 +142,7 @@ export const BUS_API_EVENT = {
   PROJECT_CREATED: 'project.action.create',
   PROJECT_UPDATED: 'project.action.update',
   PROJECT_DELETED: 'project.action.delete',
+  PROJECT_BILLING_ACCOUNT_UPDATED: 'project.action.billingAccount.update',
 
   PROJECT_MEMBER_ADDED: 'project.action.create',
   PROJECT_MEMBER_REMOVED: 'project.action.delete',
