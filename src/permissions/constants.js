@@ -708,6 +708,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
  */
 export const PROJECT_TO_TOPCODER_ROLES_MATRIX = {
   [PROJECT_MEMBER_ROLE.CUSTOMER]: _.values(USER_ROLE),
+  [PROJECT_MEMBER_ROLE.OBSERVER]: _.values(USER_ROLE),
   [PROJECT_MEMBER_ROLE.MANAGER]: [
     USER_ROLE.TOPCODER_ADMIN,
     USER_ROLE.CONNECT_ADMIN,
