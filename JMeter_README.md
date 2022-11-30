@@ -150,4 +150,6 @@ We are using this parameter to implement a random wait time in betweent the requ
 
 After running the job using the circleci user can view the report by clicking on the Job: `Connect-Performance-Testing` > Artifacts > `target/jmeter/reports/15UV Ultimate Thread-Group/index.html`
 
-eg: https://2728-60865675-gh.circle-artifacts.com/0/target/jmeter/reports/15UV%20Ultimate%20Thread-Group/index.html
+eg: 
+- https://app.circleci.com/pipelines/github/topcoder-platform/tc-project-service/334/workflows/a342bf25-464b-41b9-8ead-146a4c496d65/jobs/2924
+- https://2924-60865675-gh.circle-artifacts.com/0/target/jmeter/reports/15UV%20Ultimate%20Thread-Group/index.html
