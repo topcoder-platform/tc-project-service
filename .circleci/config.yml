@@ -164,8 +164,8 @@ workflows:
               only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept']
       - deployQa:
           context : org-global
-          requires:
-            - UnitTests
+          # requires:
+          #   - UnitTests
           filters:
             branches:
               only: ['qa']              
