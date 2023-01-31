@@ -103,6 +103,14 @@ jobs:
       APPNAME: "projects-api"
     steps: *deploy_steps
 
+  deployQa:
+    <<: *python_env
+    environment:
+      DEPLOY_ENV: "QA"
+      LOGICAL_ENV: "qa"
+      APPNAME: "projects-api"
+    steps: *deploy_steps
+
   Connect-Performance-Testing:
     docker:
       # specify the version you desire here
@@ -154,6 +162,13 @@ workflows:
           filters:
             branches:
               only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept']
+      - deployQa:
+          context : org-global
+          requires:
+            - UnitTests
+          filters:
+            branches:
+              only: ['qa']              
       - deployProd:
           context : org-global
           requires:
@@ -166,6 +181,7 @@ workflows:
           requires:
             - deployDev
             - deployProd
+            - deployQa
       - Connect-Performance-Testing:
           requires:
             - Hold [Performance-Testing]
