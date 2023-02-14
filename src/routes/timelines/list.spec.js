@@ -12,7 +12,6 @@ import testUtil from '../../tests/util';
 import util from '../../util';
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
-const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
@@ -97,122 +96,130 @@ const milestones = [
   },
 ];
 
-
 describe('LIST timelines', () => {
   before(function beforeHook(done) {
     this.timeout(10000);
-    testUtil.clearDb()
-      .then(() => {
-        models.Project.bulkCreate([
+    testUtil.clearDb().then(() => {
+      models.Project.bulkCreate([
+        {
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        },
+        {
+          type: 'generic',
+          billingAccountId: 2,
+          name: 'test2',
+          description: 'test project2',
+          status: 'draft',
+          details: {},
+          createdBy: 2,
+          updatedBy: 2,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+          deletedAt: '2018-05-15T00:00:00Z',
+        },
+      ]).then(() => {
+        // Create member
+        models.ProjectMember.bulkCreate([
           {
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+            userId: 40051332,
+            projectId: 1,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
           },
           {
-            type: 'generic',
-            billingAccountId: 2,
-            name: 'test2',
-            description: 'test project2',
-            status: 'draft',
-            details: {},
-            createdBy: 2,
-            updatedBy: 2,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-            deletedAt: '2018-05-15T00:00:00Z',
+            userId: 40051331,
+            projectId: 1,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
           },
         ])
-          .then(() => {
-            // Create member
-            models.ProjectMember.bulkCreate([
+          .then(() =>
+            // Create phase
+            models.ProjectPhase.bulkCreate([
               {
-                userId: 40051332,
                 projectId: 1,
-                role: 'copilot',
-                isPrimary: true,
+                name: 'test project phase 1',
+                status: 'active',
+                startDate: '2018-05-15T00:00:00Z',
+                endDate: '2018-05-15T12:00:00Z',
+                budget: 20.0,
+                progress: 1.23456,
+                details: {
+                  message: 'This can be any json 2',
+                },
                 createdBy: 1,
                 updatedBy: 1,
               },
               {
-                userId: 40051331,
-                projectId: 1,
-                role: 'customer',
-                isPrimary: true,
-                createdBy: 1,
-                updatedBy: 1,
+                projectId: 2,
+                name: 'test project phase 2',
+                status: 'active',
+                startDate: '2018-05-16T00:00:00Z',
+                endDate: '2018-05-16T12:00:00Z',
+                budget: 21.0,
+                progress: 1.234567,
+                details: {
+                  message: 'This can be any json 2',
+                },
+                createdBy: 2,
+                updatedBy: 2,
               },
-            ]).then(() =>
-              // Create phase
-              models.ProjectPhase.bulkCreate([
-                {
-                  projectId: 1,
-                  name: 'test project phase 1',
-                  status: 'active',
-                  startDate: '2018-05-15T00:00:00Z',
-                  endDate: '2018-05-15T12:00:00Z',
-                  budget: 20.0,
-                  progress: 1.23456,
-                  details: {
-                    message: 'This can be any json 2',
-                  },
-                  createdBy: 1,
-                  updatedBy: 1,
-                },
-                {
-                  projectId: 2,
-                  name: 'test project phase 2',
-                  status: 'active',
-                  startDate: '2018-05-16T00:00:00Z',
-                  endDate: '2018-05-16T12:00:00Z',
-                  budget: 21.0,
-                  progress: 1.234567,
-                  details: {
-                    message: 'This can be any json 2',
-                  },
-                  createdBy: 2,
-                  updatedBy: 2,
-                },
-              ]))
-              .then(() =>
-                // Create timelines
-                models.Timeline.bulkCreate(timelines, { returning: true })
-                  .then(createdTimelines => (
-                    // create milestones after timelines
-                    models.Milestone.bulkCreate(milestones))
-                    .then(createdMilestones => [createdTimelines, createdMilestones]),
-                  ),
-              ).then(([createdTimelines, createdMilestones]) =>
-                // Index to ES
-                Promise.all(_.map(createdTimelines, (createdTimeline) => {
-                  const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
-                  timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
-                  if (timelineJson.id === 1) {
-                    timelineJson.milestones = _.map(
-                      createdMilestones,
-                      cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'),
-                    );
-                  }
+            ]),
+          )
+          .then(() =>
+            // Create timelines
+            models.Timeline.bulkCreate(timelines, { returning: true }).then(
+              (createdTimelines) =>
+                models.Milestone.bulkCreate(
+                  // create milestones after timelines
+                  milestones,
+                ).then((createdMilestones) => [
+                  createdTimelines,
+                  createdMilestones,
+                ]),
+            ),
+          )
+          .then(([createdTimelines, createdMilestones]) =>
+            // Index to ES
+            Promise.all(
+              _.map(createdTimelines, (createdTimeline) => {
+                const timelineJson = _.omit(
+                  createdTimeline.toJSON(),
+                  'deletedAt',
+                  'deletedBy',
+                );
+                timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
+                if (timelineJson.id === 1) {
+                  timelineJson.milestones = _.map(createdMilestones, (cm) =>
+                    _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'),
+                  );
+                }
 
-                  return eClient.index({
-                    index: ES_TIMELINE_INDEX,
-                    type: ES_TIMELINE_TYPE,
-                    id: timelineJson.id,
-                    body: timelineJson,
-                  });
-                }))
-                  .then(() => {
-                    done();
-                  }));
-          });
+                return eClient.index({
+                  index: ES_TIMELINE_INDEX,
+                  id: timelineJson.id,
+                  body: timelineJson,
+                });
+              }),
+            ).then(() => {
+              done();
+            }),
+          );
       });
+    });
   });
 
   after((done) => {
@@ -221,9 +228,7 @@ describe('LIST timelines', () => {
 
   describe('GET /timelines', () => {
     it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get('/v5/timelines')
-        .expect(403, done);
+      request(server).get('/v5/timelines').expect(403, done);
     });
 
     it('should return 400 for invalid filter key', (done) => {
@@ -268,7 +273,7 @@ describe('LIST timelines', () => {
 
           let resJson = res.body;
           resJson.should.have.length(1);
-          resJson = _.sortBy(resJson, o => o.id);
+          resJson = _.sortBy(resJson, (o) => o.id);
           resJson[0].id.should.be.eql(1);
           resJson[0].name.should.be.eql(timeline.name);
           resJson[0].description.should.be.eql(timeline.description);

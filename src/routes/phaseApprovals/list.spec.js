@@ -13,7 +13,6 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
 describe('List phase approvals', () => {
@@ -30,87 +29,94 @@ describe('List phase approvals', () => {
     should.exist(resJson);
     resJson.decision.should.be.eql(expectedApproval.decision);
     resJson.comment.should.be.eql(expectedApproval.comment);
-    resJson.startDate.should.be.a('string').and.satisfy(date =>
-      date.startsWith(expectedApproval.startDate));
-    resJson.endDate.should.be.a('string').and.satisfy(date =>
-      date.startsWith(expectedApproval.endDate));
-    resJson.expectedEndDate.should.be.a('string').and.satisfy(date =>
-      date.startsWith(expectedApproval.expectedEndDate));
+    resJson.startDate.should.be
+      .a('string')
+      .and.satisfy((date) => date.startsWith(expectedApproval.startDate));
+    resJson.endDate.should.be
+      .a('string')
+      .and.satisfy((date) => date.startsWith(expectedApproval.endDate));
+    resJson.expectedEndDate.should.be
+      .a('string')
+      .and.satisfy((date) => date.startsWith(expectedApproval.expectedEndDate));
   };
   before((done) => {
     // mocks
-    testUtil.clearDb()
-      .then(() => {
-        models.Project.create({
-          type: 'generic',
-          billingAccountId: 1,
-          name: 'test1',
-          description: 'test project1',
-          status: 'draft',
-          details: {},
-          createdBy: 1,
-          updatedBy: 1,
-          lastActivityAt: 1,
-          lastActivityUserId: '1',
-        }).then((p) => {
-          const project = p.toJSON();
-          projectId = project.id;
-          // create members
-          models.ProjectMember.bulkCreate([{
+    testUtil.clearDb().then(() => {
+      models.Project.create({
+        type: 'generic',
+        billingAccountId: 1,
+        name: 'test1',
+        description: 'test project1',
+        status: 'draft',
+        details: {},
+        createdBy: 1,
+        updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
+      }).then((p) => {
+        const project = p.toJSON();
+        projectId = project.id;
+        // create members
+        models.ProjectMember.bulkCreate([
+          {
             userId: testUtil.userIds.member,
             projectId,
             role: 'customer',
             isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-          }, {
+          },
+          {
             userId: testUtil.userIds.copilot,
             projectId,
             role: 'copilot',
             isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-          }]).then(() => {
-            models.ProjectPhase.create({
-              name: 'test project phase',
-              projectId,
-              status: 'active',
-              startDate: '2018-05-15T00:00:00Z',
-              endDate: '2018-05-15T12:00:00Z',
-              budget: 20.0,
-              progress: 1.23456,
-              details: {
-                message: 'This can be any json',
-              },
-              createdBy: 1,
-              updatedBy: 1,
-            }).then((ph) => {
-              const phase = ph.toJSON();
-              phaseId = phase.id;
-              models.ProjectPhaseApproval.create(
-                _.assign(approvalObject, {
-                  phaseId,
-                  createdBy: 1,
-                  updatedBy: 1,
-                })).then((pa) => {
-                _.assign(phase, { approvals: [pa.toJSON()] });
-                // Index to ES
-                // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
-                project.lastActivityAt = 1;
-                project.phases = [phase];
-                return eClient.index({
+          },
+        ]).then(() => {
+          models.ProjectPhase.create({
+            name: 'test project phase',
+            projectId,
+            status: 'active',
+            startDate: '2018-05-15T00:00:00Z',
+            endDate: '2018-05-15T12:00:00Z',
+            budget: 20.0,
+            progress: 1.23456,
+            details: {
+              message: 'This can be any json',
+            },
+            createdBy: 1,
+            updatedBy: 1,
+          }).then((ph) => {
+            const phase = ph.toJSON();
+            phaseId = phase.id;
+            models.ProjectPhaseApproval.create(
+              _.assign(approvalObject, {
+                phaseId,
+                createdBy: 1,
+                updatedBy: 1,
+              }),
+            ).then((pa) => {
+              _.assign(phase, { approvals: [pa.toJSON()] });
+              // Index to ES
+              // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+              project.lastActivityAt = 1;
+              project.phases = [phase];
+              return eClient
+                .index({
                   index: ES_PROJECT_INDEX,
-                  type: ES_PROJECT_TYPE,
                   id: project.id,
                   body: project,
-                }).then(() => {
+                })
+                .then(() => {
                   done();
                 });
-              });
             });
           });
         });
       });
+    });
   });
 
   after((done) => {

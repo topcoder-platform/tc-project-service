@@ -11,7 +11,6 @@ import { ATTACHMENT_TYPES } from '../../constants';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
@@ -67,14 +66,12 @@ const data = [
       },
     ],
     phases: [
-
       {
         id: 45,
         name: 'test phases',
         spentBudget: 0,
         products: [
           {
-
             phaseId: 45,
             id: 3,
             name: 'tet product',
@@ -115,7 +112,8 @@ describe('GET Project', () => {
   let project1;
   let project2;
   before((done) => {
-    testUtil.clearDb()
+    testUtil
+      .clearDb()
       .then(() => testUtil.clearES())
       .then(() => {
         const p1 = models.Project.create({
@@ -181,12 +179,14 @@ describe('GET Project', () => {
           });
         });
         return Promise.all([p1, p2])
-          .then(() => eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: data[0].id,
-            body: data[0],
-          })).then(() => {
+          .then(() =>
+            eClient.index({
+              index: ES_PROJECT_INDEX,
+              id: data[0].id,
+              body: data[0],
+            }),
+          )
+          .then(() => {
             testUtil.wait(done);
             // done();
           });
@@ -194,20 +194,18 @@ describe('GET Project', () => {
   });
 
   after((done) => {
-    testUtil.clearDb()
+    testUtil
+      .clearDb()
       .then(() => testUtil.clearES())
       .then(done);
   });
 
   describe('GET /projects/{id}', () => {
     it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get(`/v5/projects/${project2.id}`)
-        .expect(403)
-        .end(done);
+      request(server).get(`/v5/projects/${project2.id}`).expect(403).end(done);
     });
 
-    it('should return 404 if requested project doesn\'t exist', (done) => {
+    it("should return 404 if requested project doesn't exist", (done) => {
       request(server)
         .get('/v5/projects/14343323')
         .set({
@@ -229,7 +227,9 @@ describe('GET Project', () => {
 
     it('should return the project when registerd member attempts to access the project', (done) => {
       request(server)
-        .get(`/v5/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`)
+        .get(
+          `/v5/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`,
+        )
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -253,7 +253,9 @@ describe('GET Project', () => {
 
     it('should return the project using M2M token with "read:projects" scope', (done) => {
       request(server)
-        .get(`/v5/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`)
+        .get(
+          `/v5/projects/${project1.id}/?fields=id%2Cname%2Cstatus%2Cmembers.role%2Cmembers.id%2Cmembers.userId`,
+        )
         .set({
           Authorization: `Bearer ${testUtil.m2m['read:projects']}`,
         })
@@ -315,23 +317,45 @@ describe('GET Project', () => {
 
             resJson.attachments.should.have.lengthOf(2);
             resJson.attachments[0].id.should.eql(data[0].attachments[0].id);
-            resJson.attachments[0].title.should.eql(data[0].attachments[0].title);
-            resJson.attachments[0].projectId.should.eql(data[0].attachments[0].projectId);
-            resJson.attachments[0].description.should.eql(data[0].attachments[0].description);
+            resJson.attachments[0].title.should.eql(
+              data[0].attachments[0].title,
+            );
+            resJson.attachments[0].projectId.should.eql(
+              data[0].attachments[0].projectId,
+            );
+            resJson.attachments[0].description.should.eql(
+              data[0].attachments[0].description,
+            );
             resJson.attachments[0].path.should.eql(data[0].attachments[0].path);
             resJson.attachments[0].tags.should.eql(data[0].attachments[0].tags);
-            resJson.attachments[0].contentType.should.eql(data[0].attachments[0].contentType);
-            resJson.attachments[0].createdBy.should.eql(data[0].attachments[0].createdBy);
-            resJson.attachments[0].updatedBy.should.eql(data[0].attachments[0].updatedBy);
+            resJson.attachments[0].contentType.should.eql(
+              data[0].attachments[0].contentType,
+            );
+            resJson.attachments[0].createdBy.should.eql(
+              data[0].attachments[0].createdBy,
+            );
+            resJson.attachments[0].updatedBy.should.eql(
+              data[0].attachments[0].updatedBy,
+            );
 
             resJson.attachments[1].id.should.eql(data[0].attachments[1].id);
-            resJson.attachments[1].title.should.eql(data[0].attachments[1].title);
-            resJson.attachments[1].projectId.should.eql(data[0].attachments[1].projectId);
-            resJson.attachments[1].description.should.eql(data[0].attachments[1].description);
+            resJson.attachments[1].title.should.eql(
+              data[0].attachments[1].title,
+            );
+            resJson.attachments[1].projectId.should.eql(
+              data[0].attachments[1].projectId,
+            );
+            resJson.attachments[1].description.should.eql(
+              data[0].attachments[1].description,
+            );
             resJson.attachments[1].path.should.eql(data[0].attachments[1].path);
             resJson.attachments[1].tags.should.eql(data[0].attachments[1].tags);
-            resJson.attachments[1].createdBy.should.eql(data[0].attachments[1].createdBy);
-            resJson.attachments[1].updatedBy.should.eql(data[0].attachments[1].updatedBy);
+            resJson.attachments[1].createdBy.should.eql(
+              data[0].attachments[1].createdBy,
+            );
+            resJson.attachments[1].updatedBy.should.eql(
+              data[0].attachments[1].updatedBy,
+            );
 
             done();
           }
@@ -422,7 +446,9 @@ describe('GET Project', () => {
 
       it('should not return "email" for project members even if it\'s listed in "fields" query param (to non-admin users)', (done) => {
         request(server)
-          .get(`/v5/projects/${project1.id}?fields=members.email,members.handle`)
+          .get(
+            `/v5/projects/${project1.id}?fields=members.email,members.handle`,
+          )
           .set({
             Authorization: `Bearer ${testUtil.jwts.member}`,
           })
@@ -440,7 +466,6 @@ describe('GET Project', () => {
             }
           });
       });
-
 
       it('should not return "cancelReason" if it is not listed in "fields" query param ', (done) => {
         request(server)
@@ -487,7 +512,9 @@ describe('GET Project', () => {
 
       it('should return "email" for project members if it\'s listed in "fields" query param (to admin users)', (done) => {
         request(server)
-          .get(`/v5/projects/${project1.id}?fields=description,members.id,members.email`)
+          .get(
+            `/v5/projects/${project1.id}?fields=description,members.id,members.email`,
+          )
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })

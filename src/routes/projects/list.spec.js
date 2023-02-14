@@ -11,7 +11,6 @@ import { ATTACHMENT_TYPES } from '../../constants';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
@@ -73,14 +72,12 @@ const data = [
       },
     ],
     phases: [
-
       {
         id: 45,
         name: 'test phases',
         spentBudget: 0,
         products: [
           {
-
             phaseId: 45,
             id: 3,
             name: 'tet product',
@@ -173,18 +170,19 @@ const data = [
     updatedBy: 1,
     lastActivityAt: 3,
     lastActivityUserId: '1',
-    members: [{
-      id: 5,
-      userId: 40051334,
-      projectId: 2,
-      role: 'manager',
-      firstName: 'first',
-      lastName: 'last',
-      handle: 'MANAGER_HANDLE',
-      isPrimary: true,
-      createdBy: 1,
-      updatedBy: 1,
-    },
+    members: [
+      {
+        id: 5,
+        userId: 40051334,
+        projectId: 2,
+        role: 'manager',
+        firstName: 'first',
+        lastName: 'last',
+        handle: 'MANAGER_HANDLE',
+        isPrimary: true,
+        createdBy: 1,
+        updatedBy: 1,
+      },
     ],
   },
 ];
@@ -195,7 +193,8 @@ describe('LIST Project', () => {
   let project3;
   before(function inner(done) {
     this.timeout(10000);
-    testUtil.clearDb()
+    testUtil
+      .clearDb()
       .then(() => testUtil.clearES())
       .then(() => {
         const p1 = models.Project.create({
@@ -298,38 +297,37 @@ describe('LIST Project', () => {
           });
         });
 
-        return Promise.all([p1, p2, p3]).then(() => {
-          data[0].id = project1.id;
-          data[1].id = project2.id;
-          data[2].id = project3.id;
-          const esp1 = eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project1.id,
-            body: data[0],
-            refresh: 'wait_for',
-          });
+        return Promise.all([p1, p2, p3])
+          .then(() => {
+            data[0].id = project1.id;
+            data[1].id = project2.id;
+            data[2].id = project3.id;
+            const esp1 = eClient.index({
+              index: ES_PROJECT_INDEX,
+              id: project1.id,
+              body: data[0],
+              refresh: 'wait_for',
+            });
 
-          const esp2 = eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project2.id,
-            body: data[1],
-            refresh: 'wait_for',
-          });
+            const esp2 = eClient.index({
+              index: ES_PROJECT_INDEX,
+              id: project2.id,
+              body: data[1],
+              refresh: 'wait_for',
+            });
 
-          const esp3 = eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project3.id,
-            body: data[2],
-            refresh: 'wait_for',
+            const esp3 = eClient.index({
+              index: ES_PROJECT_INDEX,
+              id: project3.id,
+              body: data[2],
+              refresh: 'wait_for',
+            });
+            return Promise.all([esp1, esp2, esp3]);
+          })
+          .then(() => {
+            testUtil.wait(done);
+            // done();
           });
-          return Promise.all([esp1, esp2, esp3]);
-        }).then(() => {
-          testUtil.wait(done);
-          // done();
-        });
       });
   });
 
@@ -339,9 +337,7 @@ describe('LIST Project', () => {
 
   describe('GET All /projects/', () => {
     it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get('/v5/projects/')
-        .expect(403, done);
+      request(server).get('/v5/projects/').expect(403, done);
     });
 
     it('should return 200 and no projects if user does not have access', (done) => {
@@ -492,56 +488,11 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return the project for administrator with field description, billingAccountId and attachments',
-      (done) => {
-        request(server)
-          .get('/v5/projects/?fields=description,billingAccountId,attachments&sort=id asc')
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .end((err, res) => {
-            if (err) {
-              done(err);
-            } else {
-              const resJson = res.body;
-              should.exist(resJson);
-              resJson.should.have.lengthOf(3);
-              const project = _.find(resJson, { id: project1.id });
-              project.should.have.property('attachments');
-              project.attachments.should.have.lengthOf(2);
-              project.attachments[0].should.have.property('id');
-              project.attachments[0].should.have.property('projectId');
-              project.attachments[0].should.have.property('title');
-              project.attachments[0].should.have.property('description');
-              project.attachments[0].should.have.property('path');
-              project.attachments[0].should.have.property('type');
-              project.attachments[0].should.have.property('tags');
-              project.attachments[0].should.have.property('contentType');
-              project.attachments[0].should.have.property('createdBy');
-              project.attachments[0].should.have.property('updatedBy');
-
-              project.attachments[1].should.have.property('id');
-              project.attachments[1].should.have.property('projectId');
-              project.attachments[1].should.have.property('title');
-              project.attachments[1].should.have.property('description');
-              project.attachments[1].should.have.property('path');
-              project.attachments[1].should.have.property('type');
-              project.attachments[1].should.have.property('tags');
-              project.attachments[1].should.have.property('createdBy');
-              project.attachments[1].should.have.property('updatedBy');
-
-              project.should.have.property('description');
-              project.should.have.property('billingAccountId');
-              done();
-            }
-          });
-      });
-
-    it('should return the project for administrator with field description and billingAccountId', (done) => {
+    it('should return the project for administrator with field description, billingAccountId and attachments', (done) => {
       request(server)
-        .get('/v5/projects/?fields=description,billingAccountId,attachments&sort=id asc')
+        .get(
+          '/v5/projects/?fields=description,billingAccountId,attachments&sort=id asc',
+        )
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -554,7 +505,55 @@ describe('LIST Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
-            const project = _.find(resJson, p => p.id === project1.id);
+            const project = _.find(resJson, { id: project1.id });
+            project.should.have.property('attachments');
+            project.attachments.should.have.lengthOf(2);
+            project.attachments[0].should.have.property('id');
+            project.attachments[0].should.have.property('projectId');
+            project.attachments[0].should.have.property('title');
+            project.attachments[0].should.have.property('description');
+            project.attachments[0].should.have.property('path');
+            project.attachments[0].should.have.property('type');
+            project.attachments[0].should.have.property('tags');
+            project.attachments[0].should.have.property('contentType');
+            project.attachments[0].should.have.property('createdBy');
+            project.attachments[0].should.have.property('updatedBy');
+
+            project.attachments[1].should.have.property('id');
+            project.attachments[1].should.have.property('projectId');
+            project.attachments[1].should.have.property('title');
+            project.attachments[1].should.have.property('description');
+            project.attachments[1].should.have.property('path');
+            project.attachments[1].should.have.property('type');
+            project.attachments[1].should.have.property('tags');
+            project.attachments[1].should.have.property('createdBy');
+            project.attachments[1].should.have.property('updatedBy');
+
+            project.should.have.property('description');
+            project.should.have.property('billingAccountId');
+            done();
+          }
+        });
+    });
+
+    it('should return the project for administrator with field description and billingAccountId', (done) => {
+      request(server)
+        .get(
+          '/v5/projects/?fields=description,billingAccountId,attachments&sort=id asc',
+        )
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            const project = _.find(resJson, (p) => p.id === project1.id);
             project.should.have.property('attachments');
             project.should.have.property('description');
             project.should.have.property('billingAccountId');
@@ -578,7 +577,7 @@ describe('LIST Project', () => {
             const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(3);
-            const project = _.find(resJson, p => p.id === project1.id);
+            const project = _.find(resJson, (p) => p.id === project1.id);
             project.should.have.property('id');
             project.should.have.property('type');
             project.should.have.property('billingAccountId');
@@ -719,7 +718,7 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return project that match when filtering by name\'s substring', (done) => {
+    it("should return project that match when filtering by name's substring", (done) => {
       request(server)
         .get('/v5/projects/?name=*st1')
         .set({
@@ -762,7 +761,7 @@ describe('LIST Project', () => {
         });
     });
 
-    it('should return all projects that match when filtering by details code\'s substring', (done) => {
+    it("should return all projects that match when filtering by details code's substring", (done) => {
       request(server)
         .get('/v5/projects/?code=*de1')
         .set({
@@ -800,7 +799,10 @@ describe('LIST Project', () => {
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
-            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members.should.have.deep.property(
+              '[0].role',
+              'customer',
+            );
             resJson[0].members[0].userId.should.equal(40051331);
             done();
           }
@@ -846,7 +848,10 @@ describe('LIST Project', () => {
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
-            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members.should.have.deep.property(
+              '[0].role',
+              'customer',
+            );
             resJson[0].members[0].userId.should.equal(40051331);
             done();
           }
@@ -869,7 +874,10 @@ describe('LIST Project', () => {
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
-            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members.should.have.deep.property(
+              '[0].role',
+              'customer',
+            );
             resJson[0].members[0].userId.should.equal(40051331);
             done();
           }
@@ -892,7 +900,10 @@ describe('LIST Project', () => {
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             resJson[0].name.should.equal('test1');
-            resJson[0].members.should.have.deep.property('[0].role', 'customer');
+            resJson[0].members.should.have.deep.property(
+              '[0].role',
+              'customer',
+            );
             resJson[0].members[0].userId.should.equal(40051331);
             done();
           }
@@ -1227,7 +1238,6 @@ describe('LIST Project', () => {
           });
       });
 
-
       it('should not return "email" for project members even if it\'s listed in "fields" query param (to non-admin users)', (done) => {
         request(server)
           .get('/v5/projects/?fields=members.email,members.id')
@@ -1248,7 +1258,6 @@ describe('LIST Project', () => {
             }
           });
       });
-
 
       it('should not return "cancelReason" if it is not listed in "fields" query param ', (done) => {
         request(server)
@@ -1287,14 +1296,13 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              const project = _.find(resJson, p => p.id === project1.id);
-              const member = _.find(project.members, m => m.id === 1);
+              const project = _.find(resJson, (p) => p.id === project1.id);
+              const member = _.find(project.members, (m) => m.id === 1);
               member.should.not.have.property('email');
               done();
             }
           });
       });
-
 
       it('should return "email" for project members if it\'s listed in "fields" query param (to admin users)', (done) => {
         request(server)
@@ -1310,8 +1318,8 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              const project = _.find(resJson, p => p.id === project1.id);
-              const member = _.find(project.members, m => m.id === 1);
+              const project = _.find(resJson, (p) => p.id === project1.id);
+              const member = _.find(project.members, (m) => m.id === 1);
               member.should.have.property('email');
               member.email.should.be.eq('test@test.com');
               done();
@@ -1354,7 +1362,7 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              const project = _.find(resJson, p => p.id === project1.id);
+              const project = _.find(resJson, (p) => p.id === project1.id);
               project.invites[0].should.have.property('userId');
               _.keys(project.invites[0]).length.should.be.eq(1);
               done();
@@ -1376,7 +1384,7 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              const project = _.find(resJson, p => p.id === project1.id);
+              const project = _.find(resJson, (p) => p.id === project1.id);
               project.members[0].should.have.property('role');
               _.keys(project.members[0]).length.should.be.eq(1);
               done();
@@ -1398,7 +1406,7 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              const project = _.find(resJson, p => p.id === project1.id);
+              const project = _.find(resJson, (p) => p.id === project1.id);
               project.attachments[0].should.have.property('title');
               _.keys(project.attachments[0]).length.should.be.eq(1);
               done();
@@ -1420,7 +1428,7 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              const project = _.find(resJson, p => p.id === project1.id);
+              const project = _.find(resJson, (p) => p.id === project1.id);
               project.phases[0].should.have.property('name');
               _.keys(project.phases[0]).length.should.be.eq(1);
               done();
@@ -1442,7 +1450,7 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              const project = _.find(resJson, p => p.id === project1.id);
+              const project = _.find(resJson, (p) => p.id === project1.id);
               project.phases[0].products[0].should.have.property('name');
               _.keys(project.phases[0].products[0]).length.should.be.eq(1);
               done();

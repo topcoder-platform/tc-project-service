@@ -7,8 +7,9 @@ import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 
-const ES_CUSTOMER_PAYMENT_INDEX = config.get('elasticsearchConfig.customerPaymentIndexName');
-const ES_CUSTOMER_PAYMENT_TYPE = config.get('elasticsearchConfig.customerPaymentDocType');
+const ES_CUSTOMER_PAYMENT_INDEX = config.get(
+  'elasticsearchConfig.customerPaymentIndexName',
+);
 
 /**
  * Retrieve customerPayments from elastic search.
@@ -21,17 +22,18 @@ function retrieveCustomerPayments(criteria) {
     const es = util.getElasticSearchClient();
     es.search({
       index: ES_CUSTOMER_PAYMENT_INDEX,
-      type: ES_CUSTOMER_PAYMENT_TYPE,
       size: criteria.size,
       from: criteria.from,
       sort: criteria.sort,
       body: {
         query: { bool: { must: criteria.esTerms } },
       },
-    }).then((docs) => {
-      const rows = _.map(docs.hits.hits, '_source');
-      accept({ rows, count: docs.hits.total });
-    }).catch(reject);
+    })
+      .then((docs) => {
+        const rows = _.map(docs.hits.hits, '_source');
+        accept({ rows, count: docs.hits.total });
+      })
+      .catch(reject);
   });
 }
 
@@ -43,30 +45,51 @@ module.exports = [
     // handle filters
     const filters = _.omit(req.query, 'sort', 'perPage', 'page');
 
-    let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt';
+    let sort = req.query.sort
+      ? decodeURIComponent(req.query.sort)
+      : 'createdAt';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
 
-    const supportedFilters = ['reference', 'referenceId', 'createdBy', 'status'];
-    const sortableProps = [
-      'amount asc', 'amount desc',
-      'currency asc', 'currency desc',
-      'status asc', 'status desc',
-      'createdAt asc', 'createdAt desc',
-      'createdBy asc', 'createdBy desc',
-      'updatedAt asc', 'updatedAt desc',
-      'updatedBy asc', 'updatedBy desc',
+    const supportedFilters = [
+      'reference',
+      'referenceId',
+      'createdBy',
+      'status',
     ];
-    if (!util.isValidFilter(filters, supportedFilters) ||
-      (sort && _.indexOf(sortableProps, sort) < 0)) {
+    const sortableProps = [
+      'amount asc',
+      'amount desc',
+      'currency asc',
+      'currency desc',
+      'status asc',
+      'status desc',
+      'createdAt asc',
+      'createdAt desc',
+      'createdBy asc',
+      'createdBy desc',
+      'updatedAt asc',
+      'updatedAt desc',
+      'updatedBy asc',
+      'updatedBy desc',
+    ];
+    if (
+      !util.isValidFilter(filters, supportedFilters) ||
+      (sort && _.indexOf(sortableProps, sort) < 0)
+    ) {
       return util.handleError('Invalid filters or sort', null, req, next);
     }
 
     // Build the elastic search query
-    const pageSize = Math.min(req.query.perPage || config.pageSize, config.pageSize);
+    const pageSize = Math.min(
+      req.query.perPage || config.pageSize,
+      config.pageSize,
+    );
     const page = req.query.page || 1;
-    const esTerms = _.map(filters, (filter, key) => ({ term: { [key]: filter } }));
+    const esTerms = _.map(filters, (filter, key) => ({
+      term: { [key]: filter },
+    }));
     const criteria = {
       esTerms,
       size: pageSize,
@@ -89,12 +112,22 @@ module.exports = [
             order: [sort.split(' ')],
             raw: true,
           };
-          return models.CustomerPayment.findAndCountAll(queryCondition)
-            .then(dbResult => util.setPaginationHeaders(req, res, _.extend(dbResult, { page, pageSize })));
+          return models.CustomerPayment.findAndCountAll(queryCondition).then(
+            (dbResult) =>
+              util.setPaginationHeaders(
+                req,
+                res,
+                _.extend(dbResult, { page, pageSize }),
+              ),
+          );
         }
         req.log.debug('Fetch customerPayment found from ES');
-        return util.setPaginationHeaders(req, res, _.extend(result, { page, pageSize }));
+        return util.setPaginationHeaders(
+          req,
+          res,
+          _.extend(result, { page, pageSize }),
+        );
       })
-      .catch(err => next(err));
+      .catch((err) => next(err));
   },
 ];

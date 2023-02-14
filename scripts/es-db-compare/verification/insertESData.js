@@ -7,11 +7,8 @@ import util from '../../../src/util';
 
 const es = util.getElasticSearchClient();
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
-const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
-const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 
 const projectsFromES = require('./Project.es.dump.json');
 const metadataFromES = require('./Metadata.es.dump.json');
@@ -26,7 +23,6 @@ async function main() {
   for (const data of projectsFromES) {
     await es.index({
       index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
       id: data.id,
       body: data,
       refresh: 'wait_for',
@@ -37,7 +33,6 @@ async function main() {
     console.log('inserting metadata...');
     await es.index({
       index: ES_METADATA_INDEX,
-      type: ES_METADATA_TYPE,
       body: metadata,
       refresh: 'wait_for',
     });
@@ -46,7 +41,6 @@ async function main() {
   for (const timeline of timelinesFromES) {
     await es.index({
       index: ES_TIMELINE_INDEX,
-      type: ES_TIMELINE_TYPE,
       body: timeline,
       refresh: 'wait_for',
     });
@@ -54,9 +48,11 @@ async function main() {
   }
 }
 
-main().then(() => {
-  console.log('done!');
-}).catch((err) => {
-  console.error(`Error ${err.name} occurs. Operation failed`);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    console.log('done!');
+  })
+  .catch((err) => {
+    console.error(`Error ${err.name} occurs. Operation failed`);
+    process.exit(1);
+  });

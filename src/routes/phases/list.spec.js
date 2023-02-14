@@ -9,7 +9,6 @@ import testUtil from '../../tests/util';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
@@ -48,7 +47,8 @@ describe('Project Phases', () => {
   before(function beforeHook(done) {
     this.timeout(20000);
     // mocks
-    testUtil.clearDb()
+    testUtil
+      .clearDb()
       .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
@@ -66,48 +66,54 @@ describe('Project Phases', () => {
           projectId = p.id;
           project = p.toJSON();
           // create members
-          models.ProjectMember.bulkCreate([{
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 2,
-            userId: memberUser.userId,
-            projectId,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1,
-          }]).then(() => {
-            _.assign(body, { projectId });
-            return models.ProjectPhase.create(body);
-          }).then((ph) => {
-            const phase = ph.toJSON();
-            models.ProjectPhaseMember.create({
-              phaseId: phase.id,
+          models.ProjectMember.bulkCreate([
+            {
+              id: 1,
               userId: copilotUser.userId,
+              projectId,
+              role: 'copilot',
+              isPrimary: false,
               createdBy: 1,
               updatedBy: 1,
-            }).then((phaseMember) => {
-              _.assign(phase, { members: [phaseMember.toJSON()] });
-              // Index to ES
-              // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
-              project.lastActivityAt = 1;
-              project.phases = [phase];
-              return eClient.index({
-                index: ES_PROJECT_INDEX,
-                type: ES_PROJECT_TYPE,
-                id: projectId,
-                body: project,
-              }).then(() => {
-                done();
+            },
+            {
+              id: 2,
+              userId: memberUser.userId,
+              projectId,
+              role: 'customer',
+              isPrimary: true,
+              createdBy: 1,
+              updatedBy: 1,
+            },
+          ])
+            .then(() => {
+              _.assign(body, { projectId });
+              return models.ProjectPhase.create(body);
+            })
+            .then((ph) => {
+              const phase = ph.toJSON();
+              models.ProjectPhaseMember.create({
+                phaseId: phase.id,
+                userId: copilotUser.userId,
+                createdBy: 1,
+                updatedBy: 1,
+              }).then((phaseMember) => {
+                _.assign(phase, { members: [phaseMember.toJSON()] });
+                // Index to ES
+                // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+                project.lastActivityAt = 1;
+                project.phases = [phase];
+                return eClient
+                  .index({
+                    index: ES_PROJECT_INDEX,
+                    id: projectId,
+                    body: project,
+                  })
+                  .then(() => {
+                    done();
+                  });
               });
             });
-          });
         });
       });
   });

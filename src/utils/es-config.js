@@ -1,13 +1,11 @@
 import config from 'config';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
-const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
-const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
-const ES_CUSTOMER_PAYMENT_INDEX = config.get('elasticsearchConfig.customerPaymentIndexName');
-const ES_CUSTOMER_PAYMENT_TYPE = config.get('elasticsearchConfig.customerPaymentDocType');
+const ES_CUSTOMER_PAYMENT_INDEX = config.get(
+  'elasticsearchConfig.customerPaymentIndexName',
+);
 
 // form config can be present inside 3 models, so we reuse it
 const formConfig = {
@@ -45,7 +43,6 @@ const MAPPINGS = {};
  * 'project' index mapping
  */
 MAPPINGS[ES_PROJECT_INDEX] = {
-  _all: { enabled: false },
   properties: {
     actualPrice: {
       type: 'double',
@@ -369,7 +366,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
  * 'timeline' index mapping
  */
 MAPPINGS[ES_TIMELINE_INDEX] = {
-  _all: { enabled: false },
   properties: {
     milestones: {
       type: 'nested',
@@ -389,7 +385,6 @@ MAPPINGS[ES_TIMELINE_INDEX] = {
  * 'customerPayment' index mapping
  */
 MAPPINGS[ES_CUSTOMER_PAYMENT_INDEX] = {
-  _all: { enabled: false },
   properties: {
     id: {
       type: 'long',
@@ -436,7 +431,6 @@ MAPPINGS[ES_CUSTOMER_PAYMENT_INDEX] = {
  * 'metadata' index mapping
  */
 MAPPINGS[ES_METADATA_INDEX] = {
-  _all: { enabled: false },
   properties: {
     projectTemplates: {
       type: 'nested',
@@ -764,14 +758,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
   },
 };
 
-// mapping between indexes and their docTypes
-const INDEX_TO_DOC_TYPE = {};
-INDEX_TO_DOC_TYPE[ES_PROJECT_INDEX] = ES_PROJECT_TYPE;
-INDEX_TO_DOC_TYPE[ES_TIMELINE_INDEX] = ES_TIMELINE_TYPE;
-INDEX_TO_DOC_TYPE[ES_METADATA_INDEX] = ES_METADATA_TYPE;
-INDEX_TO_DOC_TYPE[ES_CUSTOMER_PAYMENT_INDEX] = ES_CUSTOMER_PAYMENT_TYPE;
-
 module.exports = {
   MAPPINGS,
-  INDEX_TO_DOC_TYPE,
 };

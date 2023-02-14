@@ -7,7 +7,6 @@ import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import esUtils from '../../utils/es';
-import { INDEX_TO_DOC_TYPE } from '../../utils/es-config';
 
 const permissions = tcMiddleware.permissions;
 
@@ -25,19 +24,11 @@ module.exports = [
         throw apiErr;
       }
 
-      const docType = _.get(req, 'body.param.docType', INDEX_TO_DOC_TYPE[indexName]);
-      if (!docType) {
-        const apiErr = new Error('Cannot find "docType" for the index.');
-        apiErr.status = 500;
-        throw apiErr;
-      }
-
       logger.debug('indexName', indexName);
-      logger.debug('docType', docType);
-
 
       const esClient = util.getElasticSearchClient();
-      esClient.indices.create(esUtils.buildCreateIndexRequest(indexName, docType))
+      esClient.indices
+        .create(esUtils.buildCreateIndexRequest(indexName))
         .then(() => {
           res.status(200).json({ message: 'Index successfully created.' });
         })

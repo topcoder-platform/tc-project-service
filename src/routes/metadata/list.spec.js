@@ -15,7 +15,6 @@ const should = chai.should();
 const expect = chai.expect;
 
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
-const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
 const eClient = util.getElasticSearchClient();
 
 const projectTemplates = [
@@ -79,7 +78,9 @@ const projectTypes = [
     question: 'question 1',
     info: 'info 1',
     aliases: ['key-1', 'key_1'],
-    metadata: { 'slack-notification-mappings': { color: '#96d957', label: 'Full App' } },
+    metadata: {
+      'slack-notification-mappings': { color: '#96d957', label: 'Full App' },
+    },
     createdBy: 1,
     updatedBy: 1,
   },
@@ -120,21 +121,25 @@ const forms = [
   {
     key: 'productKey 1',
     config: {
-      sections: [{
-        id: 'appDefinition',
-        title: 'Sample Project',
-        required: true,
-        description: 'Please answer a few basic questions',
-        subSections: [{
-          id: 'projectName',
+      sections: [
+        {
+          id: 'appDefinition',
+          title: 'Sample Project',
           required: true,
-          validationError: 'Please provide a name for your project',
-          fieldName: 'name',
-          description: '',
-          title: 'Project Name',
-          type: 'project-name',
-        }],
-      }],
+          description: 'Please answer a few basic questions',
+          subSections: [
+            {
+              id: 'projectName',
+              required: true,
+              validationError: 'Please provide a name for your project',
+              fieldName: 'name',
+              description: '',
+              title: 'Project Name',
+              type: 'project-name',
+            },
+          ],
+        },
+      ],
     },
     version: 2,
     revision: 1,
@@ -213,34 +218,37 @@ const buildingBlocks = [
 ];
 
 const getObjToIndex = (items) => {
-  const toIndex = _(items).map((item) => {
-    const json = _.omit(item.toJSON(), 'deletedAt', 'deletedBy');
+  const toIndex = _(items)
+    .map((item) => {
+      const json = _.omit(item.toJSON(), 'deletedAt', 'deletedBy');
 
-    // setup ES markers. check these for equality with "from ES" to confirm that these records well pulled from ES
-    if (json.description !== undefined) {
-      json.description = 'from ES';
-    } else if (json.info != null) {
-      json.info = 'from ES';
-    } else if (json.details != null) {
-      json.details = 'from ES';
-    } else if (json.config != null) {
-      if (json.config.sections != null) {
-        json.config.sections[0].description = 'from ES';
-      } else if (json.hello != null) {
-        json.hello = 'from ES';
+      // setup ES markers. check these for equality with "from ES" to confirm that these records well pulled from ES
+      if (json.description !== undefined) {
+        json.description = 'from ES';
+      } else if (json.info != null) {
+        json.info = 'from ES';
+      } else if (json.details != null) {
+        json.details = 'from ES';
+      } else if (json.config != null) {
+        if (json.config.sections != null) {
+          json.config.sections[0].description = 'from ES';
+        } else if (json.hello != null) {
+          json.hello = 'from ES';
+        }
       }
-    }
-    // end of ES markers
+      // end of ES markers
 
-    return json;
-  }).value();
+      return json;
+    })
+    .value();
 
   return toIndex;
 };
 
 describe('GET all metadata from DB', () => {
   before((done) => {
-    testUtil.clearES()
+    testUtil
+      .clearES()
       .then(() => testUtil.clearDb())
       .then(() => models.ProjectTemplate.bulkCreate(projectTemplates))
       .then(() => models.ProductTemplate.bulkCreate(productTemplates))
@@ -260,9 +268,7 @@ describe('GET all metadata from DB', () => {
 
   describe('GET /projects/metadata', () => {
     it('should return 403 if user is not authenticated', (done) => {
-      request(server)
-        .get('/v5/projects/metadata')
-        .expect(403, done);
+      request(server).get('/v5/projects/metadata').expect(403, done);
     });
 
     it('should return 200 for admin', (done) => {
@@ -382,43 +388,81 @@ describe('GET all metadata from ES', () => {
   before((done) => {
     const esData = {};
 
-    testUtil.clearES()
+    testUtil
+      .clearES()
       .then(() => testUtil.clearDb())
-      .then(() => models.ProjectTemplate.bulkCreate(projectTemplates, { returning: true }))
-      .then((created) => { esData.projectTemplates = getObjToIndex(created); })
-      .then(() => models.ProductTemplate.bulkCreate(productTemplates, { returning: true }))
-      .then((created) => { esData.productTemplates = getObjToIndex(created); })
-      .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates, { returning: true }))
-      .then((created) => { esData.milestoneTemplates = getObjToIndex(created); })
-      .then(() => models.ProjectType.bulkCreate(projectTypes, { returning: true }))
-      .then((created) => { esData.projectTypes = getObjToIndex(created); })
-      .then(() => models.ProductCategory.bulkCreate(productCategories, { returning: true }))
-      .then((created) => { esData.productCategories = getObjToIndex(created); })
+      .then(() =>
+        models.ProjectTemplate.bulkCreate(projectTemplates, {
+          returning: true,
+        }),
+      )
+      .then((created) => {
+        esData.projectTemplates = getObjToIndex(created);
+      })
+      .then(() =>
+        models.ProductTemplate.bulkCreate(productTemplates, {
+          returning: true,
+        }),
+      )
+      .then((created) => {
+        esData.productTemplates = getObjToIndex(created);
+      })
+      .then(() =>
+        models.MilestoneTemplate.bulkCreate(milestoneTemplates, {
+          returning: true,
+        }),
+      )
+      .then((created) => {
+        esData.milestoneTemplates = getObjToIndex(created);
+      })
+      .then(() =>
+        models.ProjectType.bulkCreate(projectTypes, { returning: true }),
+      )
+      .then((created) => {
+        esData.projectTypes = getObjToIndex(created);
+      })
+      .then(() =>
+        models.ProductCategory.bulkCreate(productCategories, {
+          returning: true,
+        }),
+      )
+      .then((created) => {
+        esData.productCategories = getObjToIndex(created);
+      })
       .then(() => models.Form.bulkCreate(forms, { returning: true }))
       .then((created) => {
-      // only index form with key `productKey 1`
-        const v2Form = _(created).filter(c => c.key === 'productKey 1');
+        // only index form with key `productKey 1`
+        const v2Form = _(created).filter((c) => c.key === 'productKey 1');
         esData.forms = getObjToIndex(v2Form);
       })
-      .then(() => models.PriceConfig.bulkCreate(priceConfigs, { returning: true }))
+      .then(() =>
+        models.PriceConfig.bulkCreate(priceConfigs, { returning: true }),
+      )
       .then((created) => {
-      // only index latest versions
-        const v2PriceConfigs = _(created).filter(c => c.version === 2);
+        // only index latest versions
+        const v2PriceConfigs = _(created).filter((c) => c.version === 2);
         esData.priceConfigs = getObjToIndex(v2PriceConfigs);
       })
-      .then(() => models.PlanConfig.bulkCreate(planConfigs, { returning: true }))
+      .then(() =>
+        models.PlanConfig.bulkCreate(planConfigs, { returning: true }),
+      )
       .then((created) => {
-      // only index latest versions
-        const v2PlanConfigs = _(created).filter(c => c.version === 2);
+        // only index latest versions
+        const v2PlanConfigs = _(created).filter((c) => c.version === 2);
         esData.planConfigs = getObjToIndex(v2PlanConfigs);
       })
-      .then(() => models.BuildingBlock.bulkCreate(buildingBlocks, { returning: true }))
-      .then((created) => { esData.buildingBlocks = getObjToIndex(created); })
-      .then(() => eClient.index({
-        index: ES_METADATA_INDEX,
-        type: ES_METADATA_TYPE,
-        body: esData,
-      }))
+      .then(() =>
+        models.BuildingBlock.bulkCreate(buildingBlocks, { returning: true }),
+      )
+      .then((created) => {
+        esData.buildingBlocks = getObjToIndex(created);
+      })
+      .then(() =>
+        eClient.index({
+          index: ES_METADATA_INDEX,
+          body: esData,
+        }),
+      )
       .then(() => done());
   });
 

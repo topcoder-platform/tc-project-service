@@ -112,7 +112,6 @@ async function indexDataToES(logger) {
     projectIdStart: 1,
     projectIdEnd: Number.MAX_SAFE_INTEGER,
     indexName: null,
-    docType: null,
     fields: null,
     id: 0,
   };

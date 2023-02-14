@@ -11,8 +11,9 @@ import util from '../../util';
 
 const permissions = tcMiddleware.permissions;
 
-const ES_CUSTOMER_PAYMENT_INDEX = config.get('elasticsearchConfig.customerPaymentIndexName');
-const ES_CUSTOMER_PAYMENT_TYPE = config.get('elasticsearchConfig.customerPaymentDocType');
+const ES_CUSTOMER_PAYMENT_INDEX = config.get(
+  'elasticsearchConfig.customerPaymentIndexName',
+);
 
 const eClient = util.getElasticSearchClient();
 
@@ -27,10 +28,8 @@ module.exports = [
   // checking by the permissions middleware
   permissions('customerPayment.view'),
   (req, res, next) => {
-    eClient.get({ index: ES_CUSTOMER_PAYMENT_INDEX,
-      type: ES_CUSTOMER_PAYMENT_TYPE,
-      id: req.params.id,
-    })
+    eClient
+      .get({ index: ES_CUSTOMER_PAYMENT_INDEX, id: req.params.id })
       .then((doc) => {
         req.log.debug('customerPayment found in ES');
         return res.json(doc._source); // eslint-disable-line no-underscore-dangle
@@ -41,7 +40,9 @@ module.exports = [
           return models.CustomerPayment.findOne({
             where: { id: req.params.id },
             raw: true,
-          }).then(customerPayment => res.json(_.omit(customerPayment, 'deletedAt', 'deletedBy')));
+          }).then((customerPayment) =>
+            res.json(_.omit(customerPayment, 'deletedAt', 'deletedBy')),
+          );
         }
         return next(err);
       });

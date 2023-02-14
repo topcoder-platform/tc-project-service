@@ -13,7 +13,6 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
 describe('Update phase members', () => {
@@ -36,78 +35,81 @@ describe('Update phase members', () => {
   };
   before((done) => {
     // mocks
-    testUtil.clearDb()
-      .then(() => {
-        models.Project.create({
-          type: 'generic',
-          billingAccountId: 1,
-          name: 'test1',
-          description: 'test project1',
-          status: 'draft',
-          details: {},
-          createdBy: 1,
-          updatedBy: 1,
-          lastActivityAt: 1,
-          lastActivityUserId: '1',
-        }).then((p) => {
-          id = p.id;
-          project = p.toJSON();
-          // create members
-          models.ProjectMember.bulkCreate([{
+    testUtil.clearDb().then(() => {
+      models.Project.create({
+        type: 'generic',
+        billingAccountId: 1,
+        name: 'test1',
+        description: 'test project1',
+        status: 'draft',
+        details: {},
+        createdBy: 1,
+        updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
+      }).then((p) => {
+        id = p.id;
+        project = p.toJSON();
+        // create members
+        models.ProjectMember.bulkCreate([
+          {
             userId: copilotUser.userId,
             projectId: id,
             role: 'copilot',
             isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-          }, {
+          },
+          {
             userId: memberUser.userId,
             projectId: id,
             role: 'customer',
             isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-          }]).then(() => {
-            models.ProjectPhase.create({
-              name: 'test project phase',
-              projectId: id,
-              status: 'active',
-              startDate: '2018-05-15T00:00:00Z',
-              endDate: '2018-05-15T12:00:00Z',
-              budget: 20.0,
-              progress: 1.23456,
-              details: {
-                message: 'This can be any json',
-              },
+          },
+        ]).then(() => {
+          models.ProjectPhase.create({
+            name: 'test project phase',
+            projectId: id,
+            status: 'active',
+            startDate: '2018-05-15T00:00:00Z',
+            endDate: '2018-05-15T12:00:00Z',
+            budget: 20.0,
+            progress: 1.23456,
+            details: {
+              message: 'This can be any json',
+            },
+            createdBy: 1,
+            updatedBy: 1,
+          }).then((ph) => {
+            const phase = ph.toJSON();
+            phaseId = phase.id;
+            models.ProjectPhaseMember.create({
+              phaseId,
+              userId: copilotUser.userId,
               createdBy: 1,
               updatedBy: 1,
-            }).then((ph) => {
-              const phase = ph.toJSON();
-              phaseId = phase.id;
-              models.ProjectPhaseMember.create({
-                phaseId,
-                userId: copilotUser.userId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((phaseMember) => {
-                _.assign(phase, { members: [phaseMember.toJSON()] });
-                // Index to ES
-                // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
-                project.lastActivityAt = 1;
-                project.phases = [phase];
-                return eClient.index({
+            }).then((phaseMember) => {
+              _.assign(phase, { members: [phaseMember.toJSON()] });
+              // Index to ES
+              // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+              project.lastActivityAt = 1;
+              project.phases = [phase];
+              return eClient
+                .index({
                   index: ES_PROJECT_INDEX,
-                  type: ES_PROJECT_TYPE,
                   id,
                   body: project,
-                }).then(() => {
+                })
+                .then(() => {
                   done();
                 });
-              });
             });
           });
         });
       });
+    });
   });
 
   after((done) => {

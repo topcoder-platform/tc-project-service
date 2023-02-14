@@ -1,4 +1,3 @@
-
 import _ from 'lodash';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
@@ -16,10 +15,16 @@ import util from '../../util';
 
 // var permissions = require('tc-core-library-js').middleware.permissions
 const permissions = tcMiddleware.permissions;
-const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes), 'utm', 'deletedAt');
-const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes), 'deletedAt');
+const PROJECT_ATTRIBUTES = _.without(
+  _.keys(models.Project.rawAttributes),
+  'utm',
+  'deletedAt',
+);
+const PROJECT_MEMBER_ATTRIBUTES = _.without(
+  _.keys(models.ProjectMember.rawAttributes),
+  'deletedAt',
+);
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 module.exports = [
   permissions('project.admin'),
@@ -33,11 +38,9 @@ module.exports = [
     const projectIdStart = Number(req.body.projectIdStart);
     const projectIdEnd = Number(req.body.projectIdEnd);
     const indexName = _.get(req, 'body.indexName', ES_PROJECT_INDEX);
-    const docType = _.get(req, 'body.docType', ES_PROJECT_TYPE);
     logger.debug('projectIdStart', projectIdStart);
     logger.debug('projectIdEnd', projectIdEnd);
     logger.debug('indexName', indexName);
-    logger.debug('docType', docType);
     let fields = req.query.fields;
     fields = fields ? fields.split(',') : [];
     // parse the fields string to determine what fields are to be returned
@@ -47,7 +50,12 @@ module.exports = [
     });
 
     const eClient = util.getElasticSearchClient();
-    return models.Project.findProjectRange(models, projectIdStart, projectIdEnd, fields)
+    return models.Project.findProjectRange(
+      models,
+      projectIdStart,
+      projectIdEnd,
+      fields,
+    )
       .then((_projects) => {
         const projects = _projects.map((_project) => {
           const project = _project;
@@ -60,18 +68,22 @@ module.exports = [
         Promise.all(projects).then((projectResponses) => {
           projectResponses.map((p) => {
             if (p) {
-              body.push({ delete: { _index: indexName, _type: docType, _id: p.id } });
+              body.push({ delete: { _index: indexName, _id: p.id } });
             }
             // dummy return
             return p;
           });
 
           // bulk delete
-          eClient.bulk({
-            body,
-          })
+          eClient
+            .bulk({
+              body,
+            })
             .then((result) => {
-              logger.debug(`project index deleted successfully (projectId: ${projectIdStart}-${projectIdEnd})`, result);
+              logger.debug(
+                `project index deleted successfully (projectId: ${projectIdStart}-${projectIdEnd})`,
+                result,
+              );
             })
             .catch((error) => {
               logger.error(
@@ -79,9 +91,11 @@ module.exports = [
                 error,
               );
             });
-          res.status(200).json({ message: 'Delete index request successfully submitted' });
+          res
+            .status(200)
+            .json({ message: 'Delete index request successfully submitted' });
         });
       })
-      .catch(err => next(err));
+      .catch((err) => next(err));
   },
 ];

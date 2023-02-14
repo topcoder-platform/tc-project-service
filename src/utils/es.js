@@ -9,8 +9,9 @@ import models from '../models';
 import { MAPPINGS } from './es-config';
 
 const ES_METADATA_INDEX = config.get('elasticsearchConfig.metadataIndexName');
-const ES_METADATA_TYPE = config.get('elasticsearchConfig.metadataDocType');
-const ES_METADATA_DEFAULT_ID = config.get('elasticsearchConfig.metadataDocDefaultId');
+const ES_METADATA_DEFAULT_ID = config.get(
+  'elasticsearchConfig.metadataDocDefaultId',
+);
 
 const eClient = util.getElasticSearchClient();
 
@@ -70,7 +71,6 @@ async function indexMetadata() {
 
   return eClient.index({
     index: ES_METADATA_INDEX,
-    type: ES_METADATA_TYPE,
     id: ES_METADATA_DEFAULT_ID,
     body,
     refresh: 'wait_for',
@@ -81,11 +81,10 @@ async function indexMetadata() {
  * Build the request for creating index
  *
  * @param {String} indexName the index name
- * @param {String} docType   docType for index
  *
  * @return {Object} create index request
  */
-function buildCreateIndexRequest(indexName, docType) {
+function buildCreateIndexRequest(indexName) {
   const indexMapping = MAPPINGS[indexName];
 
   if (!indexMapping) {
@@ -94,12 +93,12 @@ function buildCreateIndexRequest(indexName, docType) {
 
   const indexCreateRequest = {
     index: indexName,
-    updateAllTypes: true,
     body: {
       mappings: {},
     },
   };
-  indexCreateRequest.body.mappings[docType] = indexMapping;
+
+  indexCreateRequest.body.mappings = indexMapping;
 
   return indexCreateRequest;
 }
@@ -113,8 +112,8 @@ const PROJECT_MEMBER_ATTRIBUTES = _.without(
   _.keys(models.ProjectMember.rawAttributes),
   'deletedAt',
 );
+
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 /**
  * prepare project for indexing
@@ -142,16 +141,17 @@ async function prepareProject(
   logger.debug('phases', project.phases);
   if (project.phases) {
     // removs the delete audit fields from the index data
-    project.phases = project.phases.map(phase =>
+    // eslint-disable-next-line arrow-parens
+    project.phases = project.phases.map((phase) =>
       _.omit(phase, ['deletedAt', 'deletedBy']),
     );
   }
-  const currentProjectMembers = await models.ProjectMember.getActiveProjectMembers(
-    project.id,
-  );
+  const currentProjectMembers =
+    await models.ProjectMember.getActiveProjectMembers(project.id);
   logger.debug('currentProjectMembers : ', currentProjectMembers);
   // check context for project members
-  project.members = _.map(currentProjectMembers, m =>
+  // eslint-disable-next-line arrow-parens
+  project.members = _.map(currentProjectMembers, (m) =>
     _.pick(m, fields.project_members),
   );
   logger.debug('project.members => ', project.members);
@@ -191,7 +191,7 @@ async function prepareProject(
  * Index projects to ES by range of ids
  *
  * @param {object} projectIndexingParameters object contains these properties
- * logger,projectIdStart, projectIdEnd, indexName, docType, fields, id
+ * logger,projectIdStart, projectIdEnd, indexName, fields, id
  * @param {function} beforeBulkIndexingCallback   function to be called when data is ready for peforming ES indexing
  *
  * @return {Promise}              Returns a promise
@@ -205,11 +205,11 @@ async function indexProjectsRange(
   const projectIdStart = projectIndexingParameters.projectIdStart;
   const projectIdEnd = projectIndexingParameters.projectIdEnd;
   const indexName = projectIndexingParameters.indexName || ES_PROJECT_INDEX;
-  const docType = projectIndexingParameters.docType || ES_PROJECT_TYPE;
+
   logger.debug('projectIdStart', projectIdStart);
   logger.debug('projectIdEnd', projectIdEnd);
   logger.debug('indexName', indexName);
-  logger.debug('docType', docType);
+
   let fields = projectIndexingParameters.fields;
   fields = fields ? fields.split(',') : [];
   // parse the fields string to determine what fields are to be returned
@@ -248,7 +248,7 @@ async function indexProjectsRange(
   projectResponses.map((p) => {
     if (p) {
       body.push({
-        index: { _index: indexName, _type: docType, _id: p.id },
+        index: { _index: indexName, _id: p.id },
       });
       body.push(p);
     }

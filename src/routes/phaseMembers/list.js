@@ -7,7 +7,6 @@ import models from '../../models';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 /**
  * API to list a project phase members.
@@ -30,16 +29,23 @@ module.exports = [
     const phaseId = _.parseInt(req.params.phaseId);
     try {
       const esClient = util.getElasticSearchClient();
-      const project = await esClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: projectId });
+      const project = await esClient.get({
+        index: ES_PROJECT_INDEX,
+        id: projectId,
+      });
       // eslint-disable-next-line no-underscore-dangle
-      const phases = _.isArray(project._source.phases) ? project._source.phases : []; // eslint-disable-line no-underscore-dangle
+      const phases = _.isArray(project._source.phases)
+        ? project._source.phases
+        : []; // eslint-disable-line no-underscore-dangle
       const phase = _.find(phases, ['id', phaseId]);
       const phaseMembers = phase.members || [];
       res.json(phaseMembers);
       return;
     } catch (err) {
-      req.log.debug('No active project phase found in ES for project id ' +
-      `${projectId} and phase id ${phaseId}`);
+      req.log.debug(
+        'No active project phase found in ES for project id ' +
+          `${projectId} and phase id ${phaseId}`,
+      );
     }
     try {
       req.log.debug('Fall back to DB');
@@ -52,12 +58,16 @@ module.exports = [
         raw: true,
       });
       if (!phase) {
-        const err = new Error('No active project phase found for project id ' +
-              `${projectId} and phase id ${phaseId}`);
+        const err = new Error(
+          'No active project phase found for project id ' +
+            `${projectId} and phase id ${phaseId}`,
+        );
         err.status = 404;
-        throw (err);
+        throw err;
       }
-      const phaseMembers = await models.ProjectPhaseMember.getPhaseMembers(phaseId);
+      const phaseMembers = await models.ProjectPhaseMember.getPhaseMembers(
+        phaseId,
+      );
       res.json(phaseMembers);
     } catch (err) {
       next(err);

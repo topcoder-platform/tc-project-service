@@ -7,7 +7,6 @@ import models from '../../models';
 import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 /**
  * API to list a project phase approvals.
@@ -30,19 +29,21 @@ module.exports = [
     const phaseId = _.parseInt(req.params.phaseId);
     try {
       const esClient = util.getElasticSearchClient();
-      const project = await esClient.search({ index: ES_PROJECT_INDEX,
-        type: ES_PROJECT_TYPE,
+      const { body: project } = await esClient.search({
+        index: ES_PROJECT_INDEX,
         body: {
           query: {
             bool: {
               must: [
                 { term: { id: projectId } },
-                { nested: {
-                  path: 'phases',
-                  query: {
-                    term: { 'phases.id': phaseId },
+                {
+                  nested: {
+                    path: 'phases',
+                    query: {
+                      term: { 'phases.id': phaseId },
+                    },
                   },
-                } },
+                },
               ],
             },
           },
@@ -52,13 +53,18 @@ module.exports = [
         throw new Error();
       }
       // eslint-disable-next-line no-underscore-dangle
-      const phase = _.find(project.hits.hits[0]._source.phases, ['id', phaseId]);
+      const phase = _.find(project.hits.hits[0]._source.phases, [
+        'id',
+        phaseId,
+      ]);
       const approvals = phase.approvals || [];
       res.json(approvals);
       return;
     } catch (err) {
-      req.log.debug('No active project phase found in ES for project id ' +
-      `${projectId} and phase id ${phaseId}`);
+      req.log.debug(
+        'No active project phase found in ES for project id ' +
+          `${projectId} and phase id ${phaseId}`,
+      );
     }
     try {
       req.log.debug('Fall back to DB');
@@ -67,15 +73,19 @@ module.exports = [
           id: phaseId,
           projectId,
         },
-        include: [{
-          model: models.ProjectPhaseApproval,
-          as: 'approvals',
-        }],
+        include: [
+          {
+            model: models.ProjectPhaseApproval,
+            as: 'approvals',
+          },
+        ],
       });
       if (!phase) {
-        const err = new Error(`No active project phase found for project id ${projectId} and phase id ${phaseId}`);
+        const err = new Error(
+          `No active project phase found for project id ${projectId} and phase id ${phaseId}`,
+        );
         err.status = 404;
-        throw (err);
+        throw err;
       }
       const approvals = phase.toJSON().approvals;
       res.json(approvals);

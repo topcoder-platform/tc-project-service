@@ -13,7 +13,6 @@ import testUtil from '../../tests/util';
 const should = chai.should();
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 const eClient = util.getElasticSearchClient();
 
 describe('Create phase approvals', () => {
@@ -30,12 +29,15 @@ describe('Create phase approvals', () => {
     should.exist(resJson);
     resJson.decision.should.be.eql(expectedApproval.decision);
     resJson.comment.should.be.eql(expectedApproval.comment);
-    resJson.startDate.should.be.a('string').and.satisfy(date =>
-      date.startsWith(expectedApproval.startDate));
-    resJson.endDate.should.be.a('string').and.satisfy(date =>
-      date.startsWith(expectedApproval.endDate));
-    resJson.expectedEndDate.should.be.a('string').and.satisfy(date =>
-      date.startsWith(expectedApproval.expectedEndDate));
+    resJson.startDate.should.be
+      .a('string')
+      .and.satisfy((date) => date.startsWith(expectedApproval.startDate));
+    resJson.endDate.should.be
+      .a('string')
+      .and.satisfy((date) => date.startsWith(expectedApproval.endDate));
+    resJson.expectedEndDate.should.be
+      .a('string')
+      .and.satisfy((date) => date.startsWith(expectedApproval.expectedEndDate));
   };
   const validateError = (resJson, expectedMessage) => {
     should.exist(resJson);
@@ -43,63 +45,63 @@ describe('Create phase approvals', () => {
   };
   before((done) => {
     // mocks
-    testUtil.clearDb()
-      .then(() => {
-        models.Project.create({
-          type: 'generic',
-          billingAccountId: 1,
-          name: 'test1',
-          description: 'test project1',
-          status: 'draft',
-          details: {},
+    testUtil.clearDb().then(() => {
+      models.Project.create({
+        type: 'generic',
+        billingAccountId: 1,
+        name: 'test1',
+        description: 'test project1',
+        status: 'draft',
+        details: {},
+        createdBy: 1,
+        updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
+      }).then((p) => {
+        const project = p.toJSON();
+        projectId = project.id;
+        // create members
+        models.ProjectMember.create({
+          userId: testUtil.userIds.member,
+          projectId,
+          role: 'customer',
+          isPrimary: true,
           createdBy: 1,
           updatedBy: 1,
-          lastActivityAt: 1,
-          lastActivityUserId: '1',
-        }).then((p) => {
-          const project = p.toJSON();
-          projectId = project.id;
-          // create members
-          models.ProjectMember.create({
-            userId: testUtil.userIds.member,
+        }).then(() => {
+          models.ProjectPhase.create({
+            name: 'test project phase',
             projectId,
-            role: 'customer',
-            isPrimary: true,
+            status: 'in_review',
+            startDate: '2018-05-15T00:00:00Z',
+            endDate: '2018-05-15T12:00:00Z',
+            budget: 20.0,
+            progress: 1.23456,
+            details: {
+              message: 'This can be any json',
+            },
             createdBy: 1,
             updatedBy: 1,
-          }).then(() => {
-            models.ProjectPhase.create({
-              name: 'test project phase',
-              projectId,
-              status: 'in_review',
-              startDate: '2018-05-15T00:00:00Z',
-              endDate: '2018-05-15T12:00:00Z',
-              budget: 20.0,
-              progress: 1.23456,
-              details: {
-                message: 'This can be any json',
-              },
-              createdBy: 1,
-              updatedBy: 1,
-            }).then((ph) => {
-              const phase = ph.toJSON();
-              phaseId = phase.id;
-              // Index to ES
-              // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
-              project.lastActivityAt = 1;
-              project.phases = [phase];
-              return eClient.index({
+          }).then((ph) => {
+            const phase = ph.toJSON();
+            phaseId = phase.id;
+            // Index to ES
+            // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+            project.lastActivityAt = 1;
+            project.phases = [phase];
+            return eClient
+              .index({
                 index: ES_PROJECT_INDEX,
-                type: ES_PROJECT_TYPE,
                 id: project.id,
                 body: project,
-              }).then(() => {
+              })
+              .then(() => {
                 done();
               });
-            });
           });
         });
       });
+    });
   });
 
   after((done) => {
@@ -200,9 +202,12 @@ describe('Create phase approvals', () => {
         .expect(400)
         .end((err, res) => {
           const resJson = res.body;
-          validateError(resJson, 'validation error: "startDate" is required,' +
-          '"endDate" references "startDate" which is not a date,' +
-          '"expectedEndDate" references "startDate" which is not a date');
+          validateError(
+            resJson,
+            'validation error: "startDate" is required,' +
+              '"endDate" references "startDate" which is not a date,' +
+              '"expectedEndDate" references "startDate" which is not a date',
+          );
           done();
         });
     });
@@ -217,7 +222,10 @@ describe('Create phase approvals', () => {
         .expect(400)
         .end((err, res) => {
           const resJson = res.body;
-          validateError(resJson, 'validation error: "expectedEndDate" is required');
+          validateError(
+            resJson,
+            'validation error: "expectedEndDate" is required',
+          );
           done();
         });
     });
@@ -232,7 +240,10 @@ describe('Create phase approvals', () => {
         .expect(400)
         .end((err, res) => {
           const resJson = res.body;
-          validateError(resJson, 'validation error: "decision" must be one of [approve, reject]');
+          validateError(
+            resJson,
+            'validation error: "decision" must be one of [approve, reject]',
+          );
           done();
         });
     });
@@ -247,7 +258,10 @@ describe('Create phase approvals', () => {
         .expect(400)
         .end((err, res) => {
           const resJson = res.body;
-          validateError(resJson, 'validation error: "comment" is not allowed to be empty');
+          validateError(
+            resJson,
+            'validation error: "comment" is not allowed to be empty',
+          );
           done();
         });
     });
@@ -262,8 +276,13 @@ describe('Create phase approvals', () => {
         .expect(400)
         .end((err, res) => {
           const resJson = res.body;
-          resJson.message.should.be.a('string').and.satisfy(message =>
-            message.startsWith('validation error: "endDate" must be larger than or equal to'));
+          resJson.message.should.be
+            .a('string')
+            .and.satisfy((message) =>
+              message.startsWith(
+                'validation error: "endDate" must be larger than or equal to',
+              ),
+            );
           done();
         });
     });
@@ -278,7 +297,10 @@ describe('Create phase approvals', () => {
         .expect(400)
         .end((err, res) => {
           const resJson = res.body;
-          validateError(resJson, `Phase with id ${phaseId} must be in_review status to make approval`);
+          validateError(
+            resJson,
+            `Phase with id ${phaseId} must be in_review status to make approval`,
+          );
           done();
         });
     });

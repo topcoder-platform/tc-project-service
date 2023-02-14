@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2016 TopCoder Inc., All Rights Reserved.
  */
@@ -8,31 +7,31 @@
  * @version 1.0
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import _ from 'lodash';
-import querystring from 'querystring';
-import config from 'config';
-import urlencode from 'urlencode';
-import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
-import jp from 'jsonpath';
 import Promise from 'bluebird';
+import config from 'config';
+import * as fs from 'fs';
+import jp from 'jsonpath';
+import _ from 'lodash';
+import * as path from 'path';
+import querystring from 'querystring';
 import coreLib from 'tc-core-library-js';
+import urlencode from 'urlencode';
 import models from './models';
+const { Client: ESClient } = require('@opensearch-project/opensearch');
 
 import {
   ADMIN_ROLES,
-  M2M_SCOPES,
-  EVENT,
-  PROJECT_MEMBER_ROLE,
-  VALUE_TYPE,
   ESTIMATION_TYPE,
+  EVENT,
+  INVITE_STATUS,
+  M2M_SCOPES,
+  PROJECT_MEMBER_ROLE,
   RESOURCES,
   USER_ROLE,
-  INVITE_STATUS,
+  VALUE_TYPE,
 } from './constants';
-import { PERMISSION, DEFAULT_PROJECT_ROLE } from './permissions/constants';
+import { DEFAULT_PROJECT_ROLE, PERMISSION } from './permissions/constants';
 
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
@@ -116,35 +115,46 @@ const projectServiceUtils = {
    */
   calculateProjectEstimationItems: (req, projectId) =>
     // delete ALL existent ProjectEstimationItems for the project
-    models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
-      includeAllProjectEstimatinoItemsForInternalUsage: true,
-    })
+    models.ProjectEstimationItem.deleteAllForProject(
+      models,
+      projectId,
+      req.authUser,
+      {
+        includeAllProjectEstimatinoItemsForInternalUsage: true,
+      },
+    )
 
       // retrieve ProjectSettings and ProjectEstimations
-      .then(() => Promise.all([
-        models.ProjectSetting.findAll({
-          includeAllProjectSettingsForInternalUsage: true,
-          where: {
-            projectId,
-            key: _.map(_.values(ESTIMATION_TYPE), type => `markup_${type}`),
-          },
-          raw: true,
-        }),
-        models.ProjectEstimation.findAll({
-          where: { projectId: req.params.projectId },
-          raw: true,
-        }),
-      ]))
+      .then(() =>
+        Promise.all([
+          models.ProjectSetting.findAll({
+            includeAllProjectSettingsForInternalUsage: true,
+            where: {
+              projectId,
+              key: _.map(_.values(ESTIMATION_TYPE), (type) => `markup_${type}`),
+            },
+            raw: true,
+          }),
+          models.ProjectEstimation.findAll({
+            where: { projectId: req.params.projectId },
+            raw: true,
+          }),
+        ]),
+      )
 
       // create ProjectEstimationItems
       .then(([settings, estimations]) => {
         if (!settings || settings.length === 0) {
-          req.log.debug('No project settings for prices found, therefore no estimation items are created');
+          req.log.debug(
+            'No project settings for prices found, therefore no estimation items are created',
+          );
           return [];
         }
 
         if (!estimations || estimations.length === 0) {
-          req.log.debug('No price estimations found, therefore no estimation items are created');
+          req.log.debug(
+            'No price estimations found, therefore no estimation items are created',
+          );
           return [];
         }
 
@@ -153,7 +163,11 @@ const projectServiceUtils = {
           _.each(settings, (setting) => {
             estimationItems.push({
               projectEstimationId: estimation.id,
-              price: util.calculateEstimationItemPrice(setting.valueType, setting.value, estimation.price),
+              price: util.calculateEstimationItemPrice(
+                setting.valueType,
+                setting.value,
+                estimation.price,
+              ),
               type: setting.key.replace(/^markup_/, ''),
               markupUsedReference: 'projectSetting',
               markupUsedReferenceId: setting.id,
@@ -175,11 +189,12 @@ const projectServiceUtils = {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0)
+        return true;
       return false;
     }
     let roles = _.get(req, 'authUser.roles', []);
-    roles = roles.map(s => s.toLowerCase());
+    roles = roles.map((s) => s.toLowerCase());
     return _.indexOf(roles, role.toLowerCase()) >= 0;
   },
   /**
@@ -192,12 +207,18 @@ const projectServiceUtils = {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0)
+        return true;
       return false;
     }
     let authRoles = _.get(req, 'authUser.roles', []);
-    authRoles = authRoles.map(s => s.toLowerCase());
-    return _.intersection(authRoles, roles.map(r => r.toLowerCase())).length > 0;
+    authRoles = authRoles.map((s) => s.toLowerCase());
+    return (
+      _.intersection(
+        authRoles,
+        roles.map((r) => r.toLowerCase()),
+      ).length > 0
+    );
   },
   /**
    * Helper funtion to find intersection (case insensitive) between two arrays
@@ -206,8 +227,13 @@ const projectServiceUtils = {
    * @return {boolean}      true/false
    */
   hasIntersection: (array1, array2) => {
-    const lowercased = array1.map(s => s.toLowerCase());
-    return _.intersection(lowercased, array2.map(r => r.toLowerCase())).length > 0;
+    const lowercased = array1.map((s) => s.toLowerCase());
+    return (
+      _.intersection(
+        lowercased,
+        array2.map((r) => r.toLowerCase()),
+      ).length > 0
+    );
   },
   /**
    * Helper funtion to verify if user has admin roles
@@ -218,12 +244,18 @@ const projectServiceUtils = {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0)
+        return true;
       return false;
     }
     let roles = _.get(req, 'authUser.roles', []);
-    roles = roles.map(s => s.toLowerCase());
-    return _.intersection(roles, ADMIN_ROLES.map(r => r.toLowerCase())).length > 0;
+    roles = roles.map((s) => s.toLowerCase());
+    return (
+      _.intersection(
+        roles,
+        ADMIN_ROLES.map((r) => r.toLowerCase()),
+      ).length > 0
+    );
   },
 
   /**
@@ -239,8 +271,13 @@ const projectServiceUtils = {
       fields.projects = _.intersection(queryFields, allowedFields.projects);
 
       const parseSubFields = (name, strName) => {
-        fields[name] = _.filter(queryFields, f => f.indexOf(`${strName}.`) === 0);
-        fields[name] = _.map(fields[name], f => f.substring(strName.length + 1));
+        fields[name] = _.filter(
+          queryFields,
+          (f) => f.indexOf(`${strName}.`) === 0,
+        );
+        fields[name] = _.map(fields[name], (f) =>
+          f.substring(strName.length + 1),
+        );
         fields[name] = _.intersection(fields[name], allowedFields[name]);
         if (fields[name].length === 0 && _.indexOf(queryFields, strName) > -1) {
           fields[name] = allowedFields[name];
@@ -334,14 +371,20 @@ const projectServiceUtils = {
       };
 
       await s3.copyObject(copyParam).promise();
-      req.log.debug(`s3FileTransfer: copyObject successfully: ${sourceBucket}/${sourceKey}`);
+      req.log.debug(
+        `s3FileTransfer: copyObject successfully: ${sourceBucket}/${sourceKey}`,
+      );
       // we don't want deleteObject to block the request as it's not critical operation
       (async () => {
         try {
           await s3.deleteObject(sourceParam).promise();
-          req.log.debug(`s3FileTransfer: deleteObject successfully: ${sourceBucket}/${sourceKey}`);
+          req.log.debug(
+            `s3FileTransfer: deleteObject successfully: ${sourceBucket}/${sourceKey}`,
+          );
         } catch (e) {
-          req.log.error(`s3FileTransfer: deleteObject failed: ${sourceBucket}/${sourceKey} : ${e.message}`);
+          req.log.error(
+            `s3FileTransfer: deleteObject failed: ${sourceBucket}/${sourceKey} : ${e.message}`,
+          );
         }
       })();
       return { success: true };
@@ -350,7 +393,6 @@ const projectServiceUtils = {
       throw e;
     }
   },
-
 
   /**
    * retrieve download urls for all attachments
@@ -366,14 +408,19 @@ const projectServiceUtils = {
     if (fileServiceUrl.substr(-1) !== '/') fileServiceUrl += '/';
     // get presigned Url
     const httpClient = util.getHttpClient(req);
-    httpClient.defaults.headers.common.Authorization = req.headers.authorization;
-    return httpClient.post(`${fileServiceUrl}downloadurl`, {
-      param: {
-        filePath,
-      },
-    })
+    httpClient.defaults.headers.common.Authorization =
+      req.headers.authorization;
+    return httpClient
+      .post(`${fileServiceUrl}downloadurl`, {
+        param: {
+          filePath,
+        },
+      })
       .then((resp) => {
-        req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
+        req.log.debug(
+          'Retreiving Presigned Url resp: ',
+          JSON.stringify(resp.data, null, 2),
+        );
         if (resp.status !== 200 || resp.data.result.status !== 200) {
           return Promise.reject(new Error('Unable to fetch pre-signed url'));
         }
@@ -384,25 +431,29 @@ const projectServiceUtils = {
     let attachments = [];
     let attachmentsPromise;
     if (util.hasAdminRole(req)) {
-      attachmentsPromise = models.ProjectAttachment.getActiveProjectAttachments(projectId);
+      attachmentsPromise =
+        models.ProjectAttachment.getActiveProjectAttachments(projectId);
     } else {
-      attachmentsPromise = models.ProjectAttachment.getAttachmentsForUser(projectId, req.authUser.userId);
+      attachmentsPromise = models.ProjectAttachment.getAttachmentsForUser(
+        projectId,
+        req.authUser.userId,
+      );
     }
-    return attachmentsPromise
-      .then((_attachments) => {
-        // if attachments were requested
-        if (_attachments) {
-          attachments = _attachments;
-        }
-        return attachments;
-      });
+    return attachmentsPromise.then((_attachments) => {
+      // if attachments were requested
+      if (_attachments) {
+        attachments = _attachments;
+      }
+      return attachments;
+    });
   },
 
   /**
    * Get machine to machine token.
    * @returns {Promise} promise which resolves to the m2m token
    */
-  getM2MToken: () => m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET),
+  getM2MToken: () =>
+    m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET),
 
   /**
    * Fetches the topcoder user details using the given JWT token.
@@ -414,20 +465,28 @@ const projectServiceUtils = {
    * @return {Promise}              promise which resolves to the user's information
    */
   getTopcoderUser: (userId, jwtToken, logger) => {
-    const httpClient = util.getHttpClient({ id: `userService_${userId}`, log: logger });
+    const httpClient = util.getHttpClient({
+      id: `userService_${userId}`,
+      log: logger,
+    });
     httpClient.defaults.timeout = 3000;
     httpClient.defaults.headers.common.Accept = 'application/json';
     httpClient.defaults.headers.common['Content-Type'] = 'application/json';
     httpClient.defaults.headers.common.Authorization = `Bearer ${jwtToken}`;
-    return httpClient.get(`${config.identityServiceEndpoint}users`, {
-      params: {
-        filter: `id=${userId}`,
-      },
-    })
+    return httpClient
+      .get(`${config.identityServiceEndpoint}users`, {
+        params: {
+          filter: `id=${userId}`,
+        },
+      })
       .then((response) => {
-        if (response.data && response.data.result
-        && response.data.result.status === 200 && response.data.result.content
-        && response.data.result.content.length === 1) {
+        if (
+          response.data &&
+          response.data.result &&
+          response.data.result.status === 200 &&
+          response.data.result.content &&
+          response.data.result.content.length === 1
+        ) {
           return response.data.result.content[0];
         }
         return null;
@@ -435,37 +494,55 @@ const projectServiceUtils = {
   },
 
   /**
-   * Return the initialized elastic search client
-   * @return {Object}           the elasticsearch client instance
+   * Get ES Client
+   * @return {Object} Elasticsearch Client Instance
    */
   getElasticSearchClient: () => {
-    if (esClient) return esClient;
+    if (esClient) {
+      return esClient;
+    }
     const esHost = config.get('elasticsearchConfig.host');
-    if (/.*amazonaws.*/.test(esHost)) {
-      esClient = elasticsearch.Client({
-        apiVersion: config.get('elasticsearchConfig.apiVersion'),
-        hosts: esHost,
-        connectionClass: require('http-aws-es'), // eslint-disable-line global-require
-        // amazonES: {
-        //   region: 'us-east-1',
-        //   credentials: new AWS.EnvironmentCredentials('AWS'),
-        // },
-      });
-    } else {
-      esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
-    }
-    // during unit tests, we need to refresh the indices
-    // before making get/search requests to make sure all ES data can be visible.
-    if (process.env.NODE_ENV === 'test') {
-      esClient.originalSearch = esClient.search;
-      esClient.search = (params, cb) => esClient.indices.refresh({ index: '' })
-        .then(() => esClient.originalSearch(params, cb)); // refresh index before reply
-      esClient.originalGet = esClient.get;
-      esClient.get = (params, cb) => esClient.indices.refresh({ index: '' })
-        .then(() => esClient.originalGet(params, cb)); // refresh index before reply
-    }
+    esClient = new ESClient({
+      node: esHost,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
     return esClient;
   },
+
+  // /**
+  //  * Return the initialized elastic search client
+  //  * @return {Object}           the elasticsearch client instance
+  //  */
+  // getElasticSearchClient: () => {
+  //   if (esClient) return esClient;
+  //   const esHost = config.get('elasticsearchConfig.host');
+  //   if (/.*amazonaws.*/.test(esHost)) {
+  //     esClient = elasticsearch.Client({
+  //       apiVersion: config.get('elasticsearchConfig.apiVersion'),
+  //       hosts: esHost,
+  //       connectionClass: require('http-aws-es'), // eslint-disable-line global-require
+  //       // amazonES: {
+  //       //   region: 'us-east-1',
+  //       //   credentials: new AWS.EnvironmentCredentials('AWS'),
+  //       // },
+  //     });
+  //   } else {
+  //     esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
+  //   }
+  //   // during unit tests, we need to refresh the indices
+  //   // before making get/search requests to make sure all ES data can be visible.
+  //   if (process.env.NODE_ENV === 'test') {
+  //     esClient.originalSearch = esClient.search;
+  //     esClient.search = (params, cb) => esClient.indices.refresh({ index: '' })
+  //       .then(() => esClient.originalSearch(params, cb)); // refresh index before reply
+  //     esClient.originalGet = esClient.get;
+  //     esClient.get = (params, cb) => esClient.indices.refresh({ index: '' })
+  //       .then(() => esClient.originalGet(params, cb)); // refresh index before reply
+  //   }
+  //   return esClient;
+  // },
 
   /**
    * Return the searched resource from elastic search
@@ -474,34 +551,38 @@ const projectServiceUtils = {
    * @param index    index to search from
    * @return {Object}           the searched resource
    */
-  fetchFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+  fetchFromES: Promise.coroutine(function* (resource, query, index) {
+    // eslint-disable-line func-names
     let INDEX = config.get('elasticsearchConfig.metadataIndexName');
-    let TYPE = config.get('elasticsearchConfig.metadataDocType');
+
     if (index === 'timeline') {
       INDEX = config.get('elasticsearchConfig.timelineIndexName');
-      TYPE = config.get('elasticsearchConfig.timelineDocType');
     } else if (index === 'project') {
       INDEX = config.get('elasticsearchConfig.indexName');
-      TYPE = config.get('elasticsearchConfig.docType');
     }
 
-    const data = query ? (yield esClient.search({ index: INDEX, type: TYPE, body: query })) :
-      (yield esClient.search({ index: INDEX, type: TYPE }));
+    const { body: data } = query
+      ? yield esClient.search({ index: INDEX, body: query })
+      : yield esClient.search({ index: INDEX });
+
     if (data.hits.hits.length > 0 && data.hits.hits[0].inner_hits) {
       return data.hits.hits[0].inner_hits;
     }
 
-    return data.hits.hits.length > 0 ? data.hits.hits[0]._source : { // eslint-disable-line no-underscore-dangle
-      productTemplates: [],
-      forms: [],
-      projectTemplates: [],
-      planConfigs: [],
-      priceConfigs: [],
-      projectTypes: [],
-      productCategories: [],
-      orgConfigs: [],
-      milestoneTemplates: [],
-    };
+    return data.hits.hits.length > 0
+      ? data.hits.hits[0]._source
+      : {
+          // eslint-disable-line no-underscore-dangle
+          productTemplates: [],
+          forms: [],
+          projectTemplates: [],
+          planConfigs: [],
+          priceConfigs: [],
+          projectTypes: [],
+          productCategories: [],
+          orgConfigs: [],
+          milestoneTemplates: [],
+        };
   }),
 
   /**
@@ -511,29 +592,31 @@ const projectServiceUtils = {
    * @param index    index to search from
    * @return {Array}           the searched resource
    */
-  fetchByIdFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+  fetchByIdFromES: Promise.coroutine(function* (resource, query, index) {
+    // eslint-disable-line func-names
     let INDEX = config.get('elasticsearchConfig.indexName');
-    let TYPE = config.get('elasticsearchConfig.docType');
     if (index === 'timeline') {
       INDEX = config.get('elasticsearchConfig.timelineIndexName');
-      TYPE = config.get('elasticsearchConfig.timelineDocType');
     } else if (index === 'metadata') {
       INDEX = config.get('elasticsearchConfig.metadataIndexName');
-      TYPE = config.get('elasticsearchConfig.metadataDocType');
     }
 
     return (yield esClient.search({
       index: INDEX,
-      type: TYPE,
       _source: false,
       body: query,
-    })).hits.hits;
+    })).body.hits.hits;
   }),
 
   /**
    * Retrieve member traits from user handle
    */
-  getMemberTraitsByHandle: Promise.coroutine(function* (handle, logger, requestId) { // eslint-disable-line func-names
+  getMemberTraitsByHandle: Promise.coroutine(function* (
+    handle,
+    logger,
+    requestId,
+  ) {
+    // eslint-disable-line func-names
     try {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
@@ -541,13 +624,15 @@ const projectServiceUtils = {
         logger.trace(handle);
       }
 
-      return httpClient.get(`${config.memberServiceEndpoint}/${handle}/traits`, {
-        params: {},
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }).then(res => _.get(res, 'data.result.content', null));
+      return httpClient
+        .get(`${config.memberServiceEndpoint}/${handle}/traits`, {
+          params: {},
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => _.get(res, 'data.result.content', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -556,23 +641,32 @@ const projectServiceUtils = {
   /**
    * Retrieve member details from userIds
    */
-  getMemberDetailsByUserIds: Promise.coroutine(function* (userIds, logger, requestId) { // eslint-disable-line func-names
+  getMemberDetailsByUserIds: Promise.coroutine(function* (
+    userIds,
+    logger,
+    requestId,
+  ) {
+    // eslint-disable-line func-names
     try {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       if (logger) {
         logger.trace(userIds);
       }
-      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
-        params: {
-          query: `${_.map(userIds, id => `userId:${id}`).join(urlencode(' OR ', 'utf8'))}`,
-          fields: 'userId,handle,firstName,lastName,email',
-        },
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }).then(res => _.get(res, 'data.result.content', null));
+      return httpClient
+        .get(`${config.memberServiceEndpoint}/_search`, {
+          params: {
+            query: `${_.map(userIds, (id) => `userId:${id}`).join(
+              urlencode(' OR ', 'utf8'),
+            )}`,
+            fields: 'userId,handle,firstName,lastName,email',
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => _.get(res, 'data.result.content', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -581,7 +675,12 @@ const projectServiceUtils = {
   /**
    * Retrieve member details from user handles
    */
-  getMemberDetailsByHandles: Promise.coroutine(function* (handles, logger, requestId) { // eslint-disable-line func-names
+  getMemberDetailsByHandles: Promise.coroutine(function* (
+    handles,
+    logger,
+    requestId,
+  ) {
+    // eslint-disable-line func-names
     if (_.isNil(handles) || (_.isArray(handles) && handles.length <= 0)) {
       return Promise.resolve([]);
     }
@@ -591,17 +690,19 @@ const projectServiceUtils = {
       if (logger) {
         logger.trace(handles);
       }
-      const handleArr = _.map(handles, h => `handleLower:${h.toLowerCase()}`);
-      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
-        params: {
-          query: `${handleArr.join(urlencode(' OR ', 'utf8'))}`,
-          fields: 'userId,handle,firstName,lastName,email',
-        },
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }).then(res => _.get(res, 'data.result.content', null));
+      const handleArr = _.map(handles, (h) => `handleLower:${h.toLowerCase()}`);
+      return httpClient
+        .get(`${config.memberServiceEndpoint}/_search`, {
+          params: {
+            query: `${handleArr.join(urlencode(' OR ', 'utf8'))}`,
+            fields: 'userId,handle,firstName,lastName,email',
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => _.get(res, 'data.result.content', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -633,7 +734,9 @@ const projectServiceUtils = {
 
       const index = mailParts[1].lastIndexOf('.');
       if (index !== -1) {
-        mailParts[1] = `${addMask(mailParts[1].slice(0, index))}.${mailParts[1].slice(index + 1)}`;
+        mailParts[1] = `${addMask(
+          mailParts[1].slice(0, index),
+        )}.${mailParts[1].slice(index + 1)}`;
       }
 
       return mailParts.join('@');
@@ -657,7 +760,10 @@ const projectServiceUtils = {
     // clone data to avoid mutations
     const dataClone = _.cloneDeep(data);
 
-    const isAdmin = util.hasPermissionByReq({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req);
+    const isAdmin = util.hasPermissionByReq(
+      { topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] },
+      req,
+    );
     const currentUserId = req.authUser.userId;
     const currentUserEmail = req.authUser.email;
 
@@ -673,26 +779,22 @@ const projectServiceUtils = {
       }
 
       if (invite.email) {
-        const canSeeEmail = (
+        const canSeeEmail =
           isAdmin || // admin
           invite.createdBy === currentUserId || // user who created invite
-          (invite.userId !== null && invite.userId === currentUserId) || // user who is invited by `handle`
-          ( // user who is invited by `email` (invite doesn't have `userId`)
-            invite.userId === null &&
+          (invite.userId !== null && invite.userId === currentUserId) || // user who is invited by `handle` // user who is invited by `email` (invite doesn't have `userId`)
+          (invite.userId === null &&
             invite.email &&
             currentUserEmail &&
-            invite.email.toLowerCase() === currentUserEmail.toLowerCase()
-          )
-        );
+            invite.email.toLowerCase() === currentUserEmail.toLowerCase());
         // mask email if user cannot see it
         _.assign(invite, {
           email: canSeeEmail ? invite.email : util.maskEmail(invite.email),
         });
 
-        const canGetUserId = (
+        const canGetUserId =
           isAdmin || // admin
-          invite.userId === currentUserId // user who is invited
-        );
+          invite.userId === currentUserId; // user who is invited
         if (invite.userId && !canGetUserId) {
           _.assign(invite, {
             userId: null,
@@ -729,64 +831,114 @@ const projectServiceUtils = {
     if (!fields || _.isEmpty(fields) || _.isEmpty(members)) {
       return members;
     }
-    const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
+    const memberTraitFields = [
+      'photoURL',
+      'workingHourStart',
+      'workingHourEnd',
+      'timeZone',
+    ];
     let memberDetailFields = ['handle'];
 
     // Only Topcoder admins can get emails, first and last name for users
-    memberDetailFields = util.addUserDetailsFieldsIfAllowed(memberDetailFields, req);
+    memberDetailFields = util.addUserDetailsFieldsIfAllowed(
+      memberDetailFields,
+      req,
+    );
 
     let allMemberDetails = [];
-    if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
+    if (
+      _.intersection(fields, _.union(memberDetailFields, memberTraitFields))
+        .length > 0
+    ) {
       const userIds = _.reject(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
-      allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+      allMemberDetails = await util.getMemberDetailsByUserIds(
+        userIds,
+        req.log,
+        req.id,
+      );
 
       if (_.intersection(fields, memberTraitFields).length > 0) {
-        const promises = _.map(
-          allMemberDetails,
-          member => util.getMemberTraitsByHandle(member.handle, req.log, req.id).catch((err) => {
-            req.log.error(`Cannot get traits for user (userId:${member.userId}, handle: ${member.handle}).`);
-            req.log.debug(`Error getting traits for user (userId:${member.userId}, handle: ${member.handle}).`, err);
-          }),
+        const promises = _.map(allMemberDetails, (member) =>
+          util
+            .getMemberTraitsByHandle(member.handle, req.log, req.id)
+            .catch((err) => {
+              req.log.error(
+                `Cannot get traits for user (userId:${member.userId}, handle: ${member.handle}).`,
+              );
+              req.log.debug(
+                `Error getting traits for user (userId:${member.userId}, handle: ${member.handle}).`,
+                err,
+              );
+            }),
         );
         const traits = await Promise.all(promises);
         _.each(traits, (memberTraits) => {
           // if we didn't manage to get traits for the user, skip it
           if (!memberTraits) return;
 
-          const basicInfo = _.find(memberTraits, trait => trait.traitId === 'basic_info');
-          const connectInfo = _.find(memberTraits, trait => trait.traitId === 'connect_info');
+          const basicInfo = _.find(
+            memberTraits,
+            (trait) => trait.traitId === 'basic_info',
+          );
+          const connectInfo = _.find(
+            memberTraits,
+            (trait) => trait.traitId === 'connect_info',
+          );
           const memberIndex = _.findIndex(
             allMemberDetails,
-            member => member.userId === _.get(basicInfo, 'traits.data[0].userId'),
+            (member) =>
+              member.userId === _.get(basicInfo, 'traits.data[0].userId'),
           );
           const basicDetails = {
             photoURL: _.get(basicInfo, 'traits.data[0].photoURL'),
           };
           const connectDetails = _.pick(
             _.get(connectInfo, 'traits.data.0'),
-            'workingHourStart', 'workingHourEnd', 'timeZone',
+            'workingHourStart',
+            'workingHourEnd',
+            'timeZone',
           );
           allMemberDetails.splice(
-            memberIndex, 1,
-            _.assign({}, allMemberDetails[memberIndex], basicDetails, connectDetails),
+            memberIndex,
+            1,
+            _.assign(
+              {},
+              allMemberDetails[memberIndex],
+              basicDetails,
+              connectDetails,
+            ),
           );
         });
       }
     }
 
     // set default null value for all valid fields
-    const memberDefaults = _.reduce(fields, (acc, field) => {
-      const isValidField = _.includes(_.union(memberDetailFields, memberTraitFields), field);
-      if (isValidField) {
-        acc[field] = null;
-      }
-      return acc;
-    }, {});
+    const memberDefaults = _.reduce(
+      fields,
+      (acc, field) => {
+        const isValidField = _.includes(
+          _.union(memberDetailFields, memberTraitFields),
+          field,
+        );
+        if (isValidField) {
+          acc[field] = null;
+        }
+        return acc;
+      },
+      {},
+    );
 
     // pick valid fields from fetched member details
     return _.map(members, (member) => {
-      let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
-      memberDetails = _.assign({}, member, _.pick(memberDetails, _.union(memberDetailFields, memberTraitFields)));
+      let memberDetails = _.find(
+        allMemberDetails,
+        ({ userId }) => userId === member.userId,
+      );
+      memberDetails = _.assign(
+        {},
+        member,
+        _.pick(memberDetails, _.union(memberDetailFields, memberTraitFields)),
+      );
       return _(memberDetails).pick(fields).defaults(memberDefaults).value();
     });
   },
@@ -801,21 +953,44 @@ const projectServiceUtils = {
    */
   populatePhasesWithMemberDetails: async (phases, req) => {
     if (_.isArray(phases)) {
-      let members = _.reduce(phases, (acc, phase) =>
-        _.concat(acc, _.map(phase.members, member => _.pick(member, 'userId'))), []);
+      let members = _.reduce(
+        phases,
+        (acc, phase) =>
+          _.concat(
+            acc,
+            _.map(phase.members, (member) => _.pick(member, 'userId')),
+          ),
+        [],
+      );
       members = _.uniqBy(members, 'userId');
       try {
-        const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
-        return _.map(phases, phase =>
-          _.assign(phase, { members: _.intersectionBy(detailedMembers, phase.members, 'userId') }));
+        const detailedMembers = await util.getObjectsWithMemberDetails(
+          members,
+          ['userId', 'handle', 'photoURL'],
+          req,
+        );
+        return _.map(phases, (phase) =>
+          _.assign(phase, {
+            members: _.intersectionBy(detailedMembers, phase.members, 'userId'),
+          }),
+        );
       } catch (err) {
-        return _.map(phases, phase =>
-          _.assign(phase, { members: _.map(phase.members, member => _.pick(member, 'userId')) }));
+        return _.map(phases, (phase) =>
+          _.assign(phase, {
+            members: _.map(phase.members, (member) => _.pick(member, 'userId')),
+          }),
+        );
       }
     } else {
-      const members = _.map(phases.members, member => _.pick(member, 'userId'));
+      const members = _.map(phases.members, (member) =>
+        _.pick(member, 'userId'),
+      );
       try {
-        const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
+        const detailedMembers = await util.getObjectsWithMemberDetails(
+          members,
+          ['userId', 'handle', 'photoURL'],
+          req,
+        );
         return _.assign(phases, { members: detailedMembers });
       } catch (err) {
         return _.assign(phases, { members });
@@ -826,59 +1001,81 @@ const projectServiceUtils = {
   /**
    * Retrieve member details from userIds
    */
-  getUserRoles: Promise.coroutine(function* (userId, logger, requestId) { // eslint-disable-line func-names
+  getUserRoles: Promise.coroutine(function* (userId, logger, requestId) {
+    // eslint-disable-line func-names
     try {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
-      return httpClient.get(`${config.identityServiceEndpoint}roles`, {
-        params: {
-          filter: `subjectID=${userId}`,
-        },
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }).then(res => _.get(res, 'data.result.content', [])
-        .map(r => r.roleName));
+      return httpClient
+        .get(`${config.identityServiceEndpoint}roles`, {
+          params: {
+            filter: `subjectID=${userId}`,
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) =>
+          _.get(res, 'data.result.content', []).map((r) => r.roleName),
+        );
     } catch (err) {
       return Promise.reject(err);
     }
   }),
 
   /**
-  * Merge two JSON objects. For array fields, the target will be replaced by source.
-  * @param {Object} targetObj the target object
-  * @param {Object} sourceObj the source object
-  * @param {Object} mergeExceptions list of keys which should be exempted from merge
-  * @returns {Object} the merged object
-  */
+   * Merge two JSON objects. For array fields, the target will be replaced by source.
+   * @param {Object} targetObj the target object
+   * @param {Object} sourceObj the source object
+   * @param {Object} mergeExceptions list of keys which should be exempted from merge
+   * @returns {Object} the merged object
+   */
   mergeJsonObjects: (targetObj, sourceObj, mergeExceptions) =>
     // eslint-disable-next-line consistent-return
     _.mergeWith({}, targetObj, sourceObj, (target, source, key) => {
       // Overwrite the array or merge exception keys
-      if (_.isArray(source) || (mergeExceptions && mergeExceptions.indexOf(key) !== -1)) {
+      if (
+        _.isArray(source) ||
+        (mergeExceptions && mergeExceptions.indexOf(key) !== -1)
+      ) {
         return source;
       }
     }),
 
   /**
-     * Send resource to kafka bus
-     * @param  {object} req  Request object
-     * @param  {String} key  the event key
-     * @param  {String} name  the resource name
-     * @param  {object} resource  the resource
-     * @param  {object} [originalResource] original resource in case resource was updated
-     * @param  {String} [route] route which called the event (for phases and works)
-     * @param  {Boolean}[skipNotification] if true, than event is not send to Notification Service
-    */
-    sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource, originalResource, route, skipNotification) {    // eslint-disable-line
-    req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
+   * Send resource to kafka bus
+   * @param  {object} req  Request object
+   * @param  {String} key  the event key
+   * @param  {String} name  the resource name
+   * @param  {object} resource  the resource
+   * @param  {object} [originalResource] original resource in case resource was updated
+   * @param  {String} [route] route which called the event (for phases and works)
+   * @param  {Boolean}[skipNotification] if true, than event is not send to Notification Service
+   */
+  sendResourceToKafkaBus: Promise.coroutine(function* (
+    req,
+    key,
+    name,
+    resource,
+    originalResource,
+    route,
+    skipNotification,
+  ) {
+    // eslint-disable-line
+    req.log.debug(
+      'Sending event to Kafka bus for resource %s %s',
+      name,
+      resource.id || resource.key,
+    );
 
     // emit event
     req.app.emit(key, {
       req,
       resource: _.assign({ resource: name }, resource),
-      originalResource: originalResource ? _.assign({ resource: name }, originalResource) : undefined,
+      originalResource: originalResource
+        ? _.assign({ resource: name }, originalResource)
+        : undefined,
       route,
       skipNotification,
     });
@@ -889,14 +1086,17 @@ const projectServiceUtils = {
    * @param  {object} req  Request object that should contain project info and user info
    * @param  {object} member  the member to be added to project
    * @param  {sequalize.Transaction} transaction
-  */
-  addUserToProject: Promise.coroutine(function* (req, member, transaction) {    // eslint-disable-line
+   */
+  addUserToProject: Promise.coroutine(function* (req, member, transaction) {
+    // eslint-disable-line
     const members = req.context.currentProjectMembers;
 
     // check if member is already registered
-    const existingMember = _.find(members, m => m.userId === member.userId);
+    const existingMember = _.find(members, (m) => m.userId === member.userId);
     if (existingMember) {
-      const err = new Error(`User already registered for role: ${existingMember.role}`);
+      const err = new Error(
+        `User already registered for role: ${existingMember.role}`,
+      );
       err.status = 400;
       return Promise.reject(err);
     }
@@ -910,24 +1110,33 @@ const projectServiceUtils = {
         newMember = _newMember.get({ plain: true });
 
         // we have to remove all pending invites for the member if any, as we can add a member directly without invite
-        return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(member.projectId, null, newMember.userId)
+        return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(
+          member.projectId,
+          null,
+          newMember.userId,
+        )
           .then((invite) => {
             if (invite) {
-              return invite.update({
-                status: INVITE_STATUS.CANCELED,
-              }, {
-                transaction,
-              });
+              return invite.update(
+                {
+                  status: INVITE_STATUS.CANCELED,
+                },
+                {
+                  transaction,
+                },
+              );
             }
 
             return Promise.resolve();
-          }).then(() => {
+          })
+          .then(() => {
             // emit the event
             util.sendResourceToKafkaBus(
               req,
               EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
               RESOURCES.PROJECT_MEMBER,
-              newMember);
+              newMember,
+            );
 
             return newMember;
           });
@@ -946,17 +1155,19 @@ const projectServiceUtils = {
    * @return {Promise} promise
    */
   lookupUserEmails: (req, userEmails, isPattern = false) => {
-    req.log.debug(`identityServiceEndpoint: ${config.get('identityServiceEndpoint')}`);
-    let filter = _.map(userEmails, i => `email=${i}`).join(' OR ');
+    req.log.debug(
+      `identityServiceEndpoint: ${config.get('identityServiceEndpoint')}`,
+    );
+    let filter = _.map(userEmails, (i) => `email=${i}`).join(' OR ');
     if (isPattern) {
       filter += '&like=true';
     }
     req.log.trace('filter for users api call', filter);
-    return util.getM2MToken()
-      .then((token) => {
-        req.log.debug(`Bearer ${token}`);
-        const httpClient = util.getHttpClient({ id: req.id, log: req.log });
-        return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
+    return util.getM2MToken().then((token) => {
+      req.log.debug(`Bearer ${token}`);
+      const httpClient = util.getHttpClient({ id: req.id, log: req.log });
+      return httpClient
+        .get(`${config.get('identityServiceEndpoint')}users`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: 'application/json',
@@ -969,13 +1180,15 @@ const projectServiceUtils = {
           // set longer timeout as default 3000 could be not enough for identity service response
           timeout: 15000,
         })
-          .then((response) => {
-            const data = _.get(response, 'data.result.content', null);
-            if (!data) { throw new Error('Response does not have result.content'); }
-            req.log.debug('UserHandle response', data);
-            return data;
-          });
-      });
+        .then((response) => {
+          const data = _.get(response, 'data.result.content', null);
+          if (!data) {
+            throw new Error('Response does not have result.content');
+          }
+          req.log.debug('UserHandle response', data);
+          return data;
+        });
+    });
   },
 
   /**
@@ -986,8 +1199,15 @@ const projectServiceUtils = {
    * @param {Boolean} isPattern  flag to indicate that pattern matching is required or not
    * @return {Promise} promise
    */
-  lookupMultipleUserEmails(req, userEmails, maximumRequests, isPattern = false) {
-    req.log.debug(`identityServiceEndpoint: ${config.get('identityServiceEndpoint')}`);
+  lookupMultipleUserEmails(
+    req,
+    userEmails,
+    maximumRequests,
+    isPattern = false,
+  ) {
+    req.log.debug(
+      `identityServiceEndpoint: ${config.get('identityServiceEndpoint')}`,
+    );
 
     const httpClient = util.getHttpClient({ id: req.id, log: req.log });
     // request generator function
@@ -996,23 +1216,25 @@ const projectServiceUtils = {
       if (isPattern) {
         filter += '&like=true';
       }
-      return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        params: {
-          fields: 'handle,id,email',
-          filter,
-        },
-        // set longer timeout as default 3000 could be not enough for identity service response
-        timeout: 15000,
-      }).catch(() => {
-        // in case of any error happens during getting user by email
-        // we treat such users as not found and don't return error
-        // as per discussion in issue #334
-      });
+      return httpClient
+        .get(`${config.get('identityServiceEndpoint')}users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          params: {
+            fields: 'handle,id,email',
+            filter,
+          },
+          // set longer timeout as default 3000 could be not enough for identity service response
+          timeout: 15000,
+        })
+        .catch(() => {
+          // in case of any error happens during getting user by email
+          // we treat such users as not found and don't return error
+          // as per discussion in issue #334
+        });
     };
     // send batch of requests, one batch at one time
     const sendBatch = (options) => {
@@ -1022,26 +1244,25 @@ const projectServiceUtils = {
       const batch = options.batch || 0;
       const start = batch * maximumRequests;
       const end = (batch + 1) * maximumRequests;
-      const requests = emails.slice(start, end).map(userEmail =>
-        generateRequest({ token, email: userEmail }));
-      return Promise.all(requests)
-        .then((responses) => {
-          const data = responses.reduce((contents, response) => {
-            const content = _.get(response, 'data.result.content', []);
-            return _.concat(contents, content);
-          }, users);
-          req.log.debug(`UserHandle response batch-${batch}`, data);
-          if (end < emails.length) {
-            return sendBatch({ token, users: data, emails, batch: batch + 1 });
-          }
-          return data;
-        });
-    };
-    return util.getM2MToken()
-      .then((m2mToken) => {
-        req.log.debug(`Bearer ${m2mToken}`);
-        return sendBatch({ token: m2mToken, emails: userEmails });
+      const requests = emails
+        .slice(start, end)
+        .map((userEmail) => generateRequest({ token, email: userEmail }));
+      return Promise.all(requests).then((responses) => {
+        const data = responses.reduce((contents, response) => {
+          const content = _.get(response, 'data.result.content', []);
+          return _.concat(contents, content);
+        }, users);
+        req.log.debug(`UserHandle response batch-${batch}`, data);
+        if (end < emails.length) {
+          return sendBatch({ token, users: data, emails, batch: batch + 1 });
+        }
+        return data;
       });
+    };
+    return util.getM2MToken().then((m2mToken) => {
+      req.log.debug(`Bearer ${m2mToken}`);
+      return sendBatch({ token: m2mToken, emails: userEmails });
+    });
   },
 
   /**
@@ -1049,25 +1270,30 @@ const projectServiceUtils = {
    * @param {Array}  members        project members
    * @return {Array} tpcoder project members
    */
-  getTopcoderProjectMembers: members => _(members).filter(m => m.role !== PROJECT_MEMBER_ROLE.CUSTOMER),
+  getTopcoderProjectMembers: (members) =>
+    _(members).filter((m) => m.role !== PROJECT_MEMBER_ROLE.CUSTOMER),
 
   /**
    * Check if project is for SSO users
    * @param {Object}  project        project
    * @return {Boolean} is SSO project
    */
-  isSSO: project => ssoRefCodes.indexOf(_.get(project, 'details.utm.code')) > -1,
+  isSSO: (project) =>
+    ssoRefCodes.indexOf(_.get(project, 'details.utm.code')) > -1,
 
   /**
-  * Set paginated header and respond with data
-  * @param {Object} req HTTP request
-  * @param {Object} res HTTP response
-  * @param {Object} data Data for which pagination need to be applied
-  * @return {Array} data rows to be returned
-  */
+   * Set paginated header and respond with data
+   * @param {Object} req HTTP request
+   * @param {Object} res HTTP response
+   * @param {Object} data Data for which pagination need to be applied
+   * @return {Array} data rows to be returned
+   */
   setPaginationHeaders: (req, res, data) => {
     const totalPages = Math.ceil(data.count / data.pageSize);
-    let fullUrl = `${req.protocol}://${req.get('host')}${req.url.replace(`&page=${data.page}`, '')}`;
+    let fullUrl = `${req.protocol}://${req.get('host')}${req.url.replace(
+      `&page=${data.page}`,
+      '',
+    )}`;
     // URL formatting to add pagination parameters accordingly
     if (fullUrl.indexOf('?') === -1) {
       fullUrl += '?';
@@ -1076,7 +1302,8 @@ const projectServiceUtils = {
     }
 
     // Pagination follows github style
-    if (data.count > 0) { // Set Pagination headers only if there is data to paginate
+    if (data.count > 0) {
+      // Set Pagination headers only if there is data to paginate
       let link = ''; // Content for Link header
 
       // Set first and last page in Link header
@@ -1085,7 +1312,7 @@ const projectServiceUtils = {
 
       // Set Prev-Page only if it's not first page and within page limits
       if (data.page > 1 && data.page <= totalPages) {
-        const prevPage = (data.page - 1);
+        const prevPage = data.page - 1;
         res.set({
           'X-Prev-Page': prevPage,
         });
@@ -1094,17 +1321,19 @@ const projectServiceUtils = {
 
       // Set Next-Page only if it's not Last page and within page limits
       if (data.page < totalPages) {
-        const nextPage = (_.parseInt(data.page) + 1);
+        const nextPage = _.parseInt(data.page) + 1;
         res.set({
-          'X-Next-Page': (_.parseInt(data.page) + 1),
+          'X-Next-Page': _.parseInt(data.page) + 1,
         });
         link += `, <${fullUrl}page=${nextPage}>; rel="next"`;
       }
 
       // Allow browsers access pagination data in headers
-      let accessControlExposeHeaders = res.get('Access-Control-Expose-Headers') || '';
+      let accessControlExposeHeaders =
+        res.get('Access-Control-Expose-Headers') || '';
       accessControlExposeHeaders += accessControlExposeHeaders ? ', ' : '';
-      accessControlExposeHeaders += 'X-Page, X-Per-Page, X-Total, X-Total-Pages';
+      accessControlExposeHeaders +=
+        'X-Page, X-Per-Page, X-Total, X-Total-Pages';
 
       res.set({
         'Access-Control-Expose-Headers': accessControlExposeHeaders,
@@ -1136,34 +1365,40 @@ const projectServiceUtils = {
     let errorMessage = '';
 
     if (!_.isNil(version) && !_.isNil(key)) {
-      errorMessage = `${modelName} with key ${key} and version ${version}`
-        + ` referred in the ${referredEntityName} is not found`;
-      return (model.findOne({
-        where: {
-          key,
-          version,
-        },
-      })).then((record) => {
-        if (_.isNil(record)) {
-          const apiErr = new Error(errorMessage);
-          apiErr.status = 400;
-          throw apiErr;
-        }
-      });
+      errorMessage =
+        `${modelName} with key ${key} and version ${version}` +
+        ` referred in the ${referredEntityName} is not found`;
+      return model
+        .findOne({
+          where: {
+            key,
+            version,
+          },
+        })
+        .then((record) => {
+          if (_.isNil(record)) {
+            const apiErr = new Error(errorMessage);
+            apiErr.status = 400;
+            throw apiErr;
+          }
+        });
     } else if (_.isNil(version) && !_.isNil(key)) {
-      errorMessage = `${modelName} with key ${key}`
-        + ` referred in ${referredEntityName} is not found`;
-      return (model.findOne({
-        where: {
-          key,
-        },
-      })).then((record) => {
-        if (_.isNil(record)) {
-          const apiErr = new Error(errorMessage);
-          apiErr.status = 400;
-          throw apiErr;
-        }
-      });
+      errorMessage =
+        `${modelName} with key ${key}` +
+        ` referred in ${referredEntityName} is not found`;
+      return model
+        .findOne({
+          where: {
+            key,
+          },
+        })
+        .then((record) => {
+          if (_.isNil(record)) {
+            const apiErr = new Error(errorMessage);
+            apiErr.status = 400;
+            throw apiErr;
+          }
+        });
     }
 
     return Promise.resolve(null);
@@ -1204,24 +1439,28 @@ const projectServiceUtils = {
 
     // check Project Roles
     if (permissionRule.projectRoles && projectMembers) {
-      const userId = !_.isNumber(user.userId) ? parseInt(user.userId, 10) : user.userId;
+      const userId = !_.isNumber(user.userId)
+        ? parseInt(user.userId, 10)
+        : user.userId;
       const member = _.find(projectMembers, { userId });
 
       // check if user has one of allowed Project roles
       if (permissionRule.projectRoles.length > 0) {
         // as we support `projectRoles` as strings and as objects like:
         // { role: "...", isPrimary: true } we have normalize them to a common shape
-        const normalizedProjectRoles = permissionRule.projectRoles.map(rule => (
-          _.isString(rule) ? { role: rule } : rule
-        ));
+        const normalizedProjectRoles = permissionRule.projectRoles.map((rule) =>
+          _.isString(rule) ? { role: rule } : rule,
+        );
 
-        hasProjectRole = member && _.some(normalizedProjectRoles, rule => (
-          // checks that common properties are equal
-          _.isMatch(member, rule)
-        ));
+        hasProjectRole =
+          member &&
+          _.some(normalizedProjectRoles, (rule) =>
+            // checks that common properties are equal
+            _.isMatch(member, rule),
+          );
 
-      // `projectRoles === true` means that we check if user is a member of the project
-      // with any role
+        // `projectRoles === true` means that we check if user is a member of the project
+        // with any role
       } else if (permissionRule.projectRoles === true) {
         hasProjectRole = !!member;
       }
@@ -1231,14 +1470,15 @@ const projectServiceUtils = {
     if (permissionRule.topcoderRoles) {
       // check if user has one of allowed Topcoder roles
       if (permissionRule.topcoderRoles.length > 0) {
-        hasTopcoderRole = _.intersection(
-          _.get(user, 'roles', []).map(role => role.toLowerCase()),
-          permissionRule.topcoderRoles.map(role => role.toLowerCase()),
-        ).length > 0;
+        hasTopcoderRole =
+          _.intersection(
+            _.get(user, 'roles', []).map((role) => role.toLowerCase()),
+            permissionRule.topcoderRoles.map((role) => role.toLowerCase()),
+          ).length > 0;
 
-      // `topcoderRoles === true` means that we check if user is has any Topcoder role
-      // basically this equals to logged-in user, as all the Topcoder users
-      // have at least one role `Topcoder User`
+        // `topcoderRoles === true` means that we check if user is has any Topcoder role
+        // basically this equals to logged-in user, as all the Topcoder users
+        // have at least one role `Topcoder User`
       } else if (permissionRule.topcoderRoles === true) {
         hasTopcoderRole = _.get(user, 'roles', []).length > 0;
       }
@@ -1246,10 +1486,9 @@ const projectServiceUtils = {
 
     // check M2M scopes
     if (permissionRule.scopes) {
-      hasScope = _.intersection(
-        _.get(user, 'scopes', []),
-        permissionRule.scopes,
-      ).length > 0;
+      hasScope =
+        _.intersection(_.get(user, 'scopes', []), permissionRule.scopes)
+          .length > 0;
     }
 
     return hasProjectRole || hasTopcoderRole || hasScope;
@@ -1326,7 +1565,11 @@ const projectServiceUtils = {
       throw new Error('Method "hasPermissionByReq" requires "req" argument.');
     }
 
-    return util.hasPermission(permission, _.get(req, 'authUser'), _.get(req, 'context.currentProjectMembers'));
+    return util.hasPermission(
+      permission,
+      _.get(req, 'authUser'),
+      _.get(req, 'context.currentProjectMembers'),
+    );
   },
 
   /**
@@ -1344,8 +1587,10 @@ const projectServiceUtils = {
     const allowRule = permission.allowRule ? permission.allowRule : permission;
     const denyRule = permission.denyRule ? permission.denyRule : null;
 
-    const allowRuleRequiresProjectMembers = _.get(allowRule, 'projectRoles.length') > 0;
-    const denyRuleRequiresProjectMembers = _.get(denyRule, 'projectRoles.length') > 0;
+    const allowRuleRequiresProjectMembers =
+      _.get(allowRule, 'projectRoles.length') > 0;
+    const denyRuleRequiresProjectMembers =
+      _.get(denyRule, 'projectRoles.length') > 0;
 
     return allowRuleRequiresProjectMembers || denyRuleRequiresProjectMembers;
   },
@@ -1396,11 +1641,10 @@ const projectServiceUtils = {
    *
    * @returns {Promise<Boolean>}     true, if has permission
    */
-  hasPermissionForProject: (permission, user, projectId) => (
-    models.ProjectMember.getActiveProjectMembers(projectId).then(projectMembers =>
-      util.hasPermission(permission, user, projectMembers),
-    )
-  ),
+  hasPermissionForProject: (permission, user, projectId) =>
+    models.ProjectMember.getActiveProjectMembers(projectId).then(
+      (projectMembers) => util.hasPermission(permission, user, projectMembers),
+    ),
 
   /**
    * Checks if the Project Setting represents price estimation setting
@@ -1453,7 +1697,9 @@ const projectServiceUtils = {
     const disallowedFields = _.difference(fields, allowedFields);
 
     if (disallowedFields.length > 0) {
-      const disallowedFieldsString = disallowedFields.map(field => `"${field}"`).join(', ');
+      const disallowedFieldsString = disallowedFields
+        .map((field) => `"${field}"`)
+        .join(', ');
 
       throw new Error(`values ${disallowedFieldsString} are not allowed`);
     }
@@ -1476,17 +1722,19 @@ const projectServiceUtils = {
       try {
         fs.mkdirSync(curDir);
       } catch (err) {
-        if (err.code === 'EEXIST') { // curDir already exists!
+        if (err.code === 'EEXIST') {
+          // curDir already exists!
           return curDir;
         }
 
         // To avoid `EISDIR` error on Mac and `EACCES`-->`ENOENT` and `EPERM` on Windows.
-        if (err.code === 'ENOENT') { // Throw the original parentDir error on curDir `ENOENT` failure.
+        if (err.code === 'ENOENT') {
+          // Throw the original parentDir error on curDir `ENOENT` failure.
           throw new Error(`EACCES: permission denied, mkdir '${parentDir}'`);
         }
 
         const caughtErr = ['EACCES', 'EPERM', 'EISDIR'].indexOf(err.code) > -1;
-        if ((!caughtErr) || (caughtErr && curDir === path.resolve(targetDir))) {
+        if (!caughtErr || (caughtErr && curDir === path.resolve(targetDir))) {
           throw err; // Throw if it's just the last created dir.
         }
       }
@@ -1532,7 +1780,6 @@ const projectServiceUtils = {
 
     return int;
   },
-
 };
 
 _.assignIn(util, projectServiceUtils);

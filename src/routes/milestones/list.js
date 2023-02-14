@@ -12,7 +12,6 @@ import validateTimeline from '../../middlewares/validateTimeline';
 const permissions = tcMiddleware.permissions;
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
-const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
 
 const schema = {
   params: {
@@ -32,9 +31,7 @@ module.exports = [
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
-    const sortableProps = [
-      'order asc', 'order desc',
-    ];
+    const sortableProps = ['order asc', 'order desc'];
     if (sort && _.indexOf(sortableProps, sort) < 0) {
       const apiErr = new Error('Invalid sort criteria');
       apiErr.status = 400;
@@ -43,18 +40,25 @@ module.exports = [
     const sortColumnAndOrder = sort.split(' ');
 
     // Get timeline from ES
-    return util.getElasticSearchClient().get({
-      index: ES_TIMELINE_INDEX,
-      type: ES_TIMELINE_TYPE,
-      id: req.params.timelineId,
-    })
+    return util
+      .getElasticSearchClient()
+      .get({
+        index: ES_TIMELINE_INDEX,
+        id: req.params.timelineId,
+      })
       .then((doc) => {
         req.log.debug('milestone found in ES');
         // Get the milestones
-        let milestones = _.isArray(doc._source.milestones) ? doc._source.milestones : []; // eslint-disable-line no-underscore-dangle
+        let milestones = _.isArray(doc._source.milestones)
+          ? doc._source.milestones
+          : []; // eslint-disable-line no-underscore-dangle
 
         // Sort
-        milestones = _.orderBy(milestones, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
+        milestones = _.orderBy(
+          milestones,
+          [sortColumnAndOrder[0]],
+          [sortColumnAndOrder[1]],
+        );
 
         // Write to response
         res.json(milestones);
@@ -63,11 +67,14 @@ module.exports = [
         if (err.status === 404) {
           req.log.debug('No milestone found in ES');
           // Load the milestones
-          return req.timeline.getMilestones()
-            .then(milestones =>
-              // Write to response
-              res.json(_.map(milestones, milestone => _.omit(milestone.toJSON(), ['deletedAt', 'deletedBy']))),
-            );
+          return req.timeline.getMilestones().then((milestones) =>
+            // Write to response
+            res.json(
+              _.map(milestones, (milestone) =>
+                _.omit(milestone.toJSON(), ['deletedAt', 'deletedBy']),
+              ),
+            ),
+          );
         }
         return next(err);
       });
