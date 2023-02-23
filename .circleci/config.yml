@@ -2,12 +2,14 @@ version: 2
 python_env: &python_env
   docker:
     - image: cimg/python:3.11.0-browsers
-
 install_awscli: &install_awscli
   name: "Install awscli"
   command: |
+    sudo apt update
+    sudo apt install jq
     sudo apt install python3-pip
     sudo pip3 install awscli --upgrade
+    sudo pip3 install docker-compose
 install_deploysuite: &install_deploysuite
   name: Installation of install_deploysuite.
   command: |
