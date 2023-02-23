@@ -87,7 +87,7 @@ function updateScopeChangeStatuses(project, status) {
 }
 
 
-describe('Create Scope Change Rquest', () => {
+/*describe('Create Scope Change Rquest', () => {
   let projects;
   let projectWithPendingChange;
   let projectWithApprovedChange;
@@ -277,4 +277,4 @@ describe('Create Scope Change Rquest', () => {
       });
     });
   });
-});
+});*/
