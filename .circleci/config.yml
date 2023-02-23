@@ -1,16 +1,17 @@
 version: 2
 python_env: &python_env
   docker:
-    - image: circleci/python:2.7-stretch-browsers
+    - image: cimg/python:3.11.0-browsers
 
 install_awscli: &install_awscli
   name: "Install awscli"
   command: |
-    sudo pip install awscli --upgrade
+    sudo apt install python3-pip
+    sudo pip3 install awscli --upgrade
 install_deploysuite: &install_deploysuite
   name: Installation of install_deploysuite.
   command: |
-    git clone --branch v1.4.1 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+    git clone --branch v1.4.14 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
     cp ./../buildscript/master_deploy.sh .
     cp ./../buildscript/buildenv.sh .
     cp ./../buildscript/awsconfiguration.sh .

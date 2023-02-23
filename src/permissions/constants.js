@@ -216,7 +216,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'There are additional limitations on editing some parts of the project.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
@@ -365,7 +368,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can update project members with "customer" role.',
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -387,7 +393,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can delete project members with "customer" role.',
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -412,7 +421,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
     ],
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -436,7 +448,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can view invites of other users.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECT_INVITES_READ,
   },
 
@@ -447,7 +462,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can invite project members with "customer" role.',
     },
     topcoderRoles: TOPCODER_ROLES_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
 
@@ -576,7 +594,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Attachment',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
@@ -608,7 +629,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can edit attachment they created.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
@@ -629,7 +653,10 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can delete attachment they created.',
     },
     topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
-    projectRoles: ALL,
+    projectRoles: [
+      ...PROJECT_ROLES_MANAGEMENT,
+      PROJECT_MEMBER_ROLE.COPILOT,
+    ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
