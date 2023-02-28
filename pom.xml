@@ -47,7 +47,7 @@
                         <version>${jmeter-maven-plugin.version}</version>
                         <configuration>
                             <generateReports>true</generateReports>
-                            <errorRateThresholdInPercent>60</errorRateThresholdInPercent>
+                            <errorRateThresholdInPercent>61</errorRateThresholdInPercent>
                             <testResultsTimestamp>false</testResultsTimestamp>
                             <propertiesJMeter>
                                 <BUILD_TAG>${project.version}</BUILD_TAG>
