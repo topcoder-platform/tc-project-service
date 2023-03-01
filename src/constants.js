@@ -34,7 +34,6 @@ export const PROJECT_MEMBER_ROLE = {
 
 export const PROJECT_MEMBER_MANAGER_ROLES = [
   PROJECT_MEMBER_ROLE.MANAGER,
-  PROJECT_MEMBER_ROLE.OBSERVER,
   PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
   PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
   PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
@@ -142,6 +141,7 @@ export const BUS_API_EVENT = {
   PROJECT_CREATED: 'project.action.create',
   PROJECT_UPDATED: 'project.action.update',
   PROJECT_DELETED: 'project.action.delete',
+  PROJECT_BILLING_ACCOUNT_UPDATED: 'project.action.billingAccount.update',
 
   PROJECT_MEMBER_ADDED: 'project.action.create',
   PROJECT_MEMBER_REMOVED: 'project.action.delete',

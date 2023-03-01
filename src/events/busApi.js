@@ -96,6 +96,18 @@ module.exports = (app, logger) => {
       projectUrl: connectProjectUrl(updated.id),
     }), logger);
 
+    if (!_.isEqual(original.billingAccountId, updated.billingAccountId)) {
+      logger.debug('project billing account is updated');
+      createEvent(BUS_API_EVENT.PROJECT_BILLING_ACCOUNT_UPDATED, {
+        projectId: updated.id,
+        projectName: updated.name,
+        directProjectId: updated.directProjectId,
+        status: updated.status,
+        oldBillingAccountId: original.billingAccountId,
+        newBillingAccountId: updated.billingAccountId,
+      }, logger);
+    }
+
     /*
       Send event for Notification Service
      */
