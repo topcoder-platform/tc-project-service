@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 python_env: &python_env
   docker:
     - image: cimg/python:3.11.0-browsers
