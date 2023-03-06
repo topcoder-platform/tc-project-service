@@ -29,7 +29,7 @@ function retrieveCustomerPayments(criteria) {
         query: { bool: { must: criteria.esTerms } },
       },
     })
-      .then((docs) => {
+      .then(({ body: docs }) => {
         const rows = _.map(docs.hits.hits, '_source');
         accept({ rows, count: docs.hits.total });
       })

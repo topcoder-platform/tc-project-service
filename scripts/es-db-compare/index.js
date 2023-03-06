@@ -143,7 +143,7 @@ async function getProductTimelinesFromES() {
       },
     },
   };
-  return es.search(searchCriteria).then((docs) => {
+  return es.search(searchCriteria).then(({ body: docs }) => {
     const rows = lodash.map(docs.hits.hits, (single) => single._source); // eslint-disable-line no-underscore-dangle
     return rows;
   });
@@ -156,7 +156,7 @@ async function getProductTimelinesFromES() {
  */
 async function getProjectsFromES() {
   const searchCriteria = getESSearchCriteriaForProject();
-  const projects = await es.search(searchCriteria).then((docs) => {
+  const projects = await es.search(searchCriteria).then(({ body: docs }) => {
     const rows = lodash.map(docs.hits.hits, (single) => single._source); // eslint-disable-line no-underscore-dangle
     return rows;
   });
@@ -182,7 +182,7 @@ async function getMetadataFromES() {
   const searchCriteria = {
     index: ES_METADATA_INDEX,
   };
-  return es.search(searchCriteria).then((docs) => {
+  return es.search(searchCriteria).then(({ body: docs }) => {
     const rows = lodash.map(docs.hits.hits, (single) => single._source); // eslint-disable-line no-underscore-dangle
     if (!rows.length) {
       return lodash.reduce(

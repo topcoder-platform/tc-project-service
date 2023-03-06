@@ -674,7 +674,7 @@ const retrieveProjects = (req, criteria, sort, ffields) => {
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria)
-      .then((docs) => {
+      .then(({ body: docs }) => {
         const rows = _.map(docs.hits.hits, (single) => single._source); // eslint-disable-line no-underscore-dangle
         if (rows) {
           if (

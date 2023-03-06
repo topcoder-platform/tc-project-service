@@ -29,7 +29,7 @@ function retrieveTimelines(esTerms) {
         query: { bool: { must: esTerms } },
       },
     })
-      .then((docs) => {
+      .then(({ body: docs }) => {
         const rows = _.map(docs.hits.hits, (single) =>
           _.omit(single._source, ['projectId']),
         ); // eslint-disable-line no-underscore-dangle
