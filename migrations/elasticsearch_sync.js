@@ -51,7 +51,11 @@ async function sync(indexName) {
     const indexToSync = element;
 
     console.log(`Deleting "${indexToSync}" index...`);
-    await esClient.indices.delete({ index: indexToSync }); // eslint-disable-line no-await-in-loop
+    try {
+      await esClient.indices.delete({ index: indexToSync }); // eslint-disable-line no-await-in-loop
+    } catch (err) {
+      console.log(err);
+    }
     console.log(`Creating "${indexToSync}" index...`);
     // eslint-disable-next-line no-await-in-loop
     await esClient.indices.create(esUtils.buildCreateIndexRequest(indexToSync)); // eslint-disable-line no-await-in-loop
