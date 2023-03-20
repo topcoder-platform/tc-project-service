@@ -52,11 +52,9 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       properties: {
         category: {
           type: 'text',
-          index: 'not_analyzed',
         },
         contentType: {
           type: 'text',
-          index: 'not_analyzed',
         },
         createdAt: {
           type: 'date',
@@ -123,7 +121,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         },
         role: {
           type: 'text',
-          index: 'not_analyzed',
         },
         users: {
           type: 'long',
@@ -216,11 +213,9 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         },
         id: {
           type: 'text',
-          index: 'not_analyzed',
         },
         type: {
           type: 'text',
-          index: 'not_analyzed',
         },
       },
     },
@@ -239,7 +234,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         },
         email: {
           type: 'text',
-          index: 'not_analyzed',
         },
         firstName: {
           type: 'text',
@@ -261,7 +255,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         },
         role: {
           type: 'text',
-          index: 'not_analyzed',
         },
         updatedAt: {
           type: 'date',
@@ -287,14 +280,12 @@ MAPPINGS[ES_PROJECT_INDEX] = {
         },
         email: {
           type: 'keyword',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',
         },
         role: {
           type: 'keyword',
-          index: 'not_analyzed',
         },
         updatedAt: {
           type: 'date',
@@ -316,7 +307,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
     },
     status: {
       type: 'keyword',
-      index: 'not_analyzed',
     },
     terms: {
       type: 'keyword',
@@ -326,7 +316,6 @@ MAPPINGS[ES_PROJECT_INDEX] = {
     },
     type: {
       type: 'keyword',
-      index: 'not_analyzed',
     },
     updatedAt: {
       type: 'date',
@@ -444,11 +433,9 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         key: {
           type: 'keyword',
-          index: 'not_analyzed',
         },
         category: {
           type: 'keyword',
-          index: 'not_analyzed',
         },
         name: {
           type: 'text',
@@ -490,7 +477,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         key: {
           type: 'keyword',
-          index: 'not_analyzed',
         },
         config: formConfig,
         version: {
@@ -524,7 +510,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         key: {
           type: 'text',
-          index: 'not_analyzed',
         },
         version: {
           type: 'integer',
@@ -557,7 +542,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         key: {
           type: 'text',
-          index: 'not_analyzed',
         },
         version: {
           type: 'integer',
@@ -590,11 +574,9 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         orgId: {
           type: 'text',
-          index: 'not_analyzed',
         },
         configName: {
           type: 'text',
-          index: 'not_analyzed',
         },
         configValue: {
           type: 'text',
@@ -628,14 +610,12 @@ MAPPINGS[ES_METADATA_INDEX] = {
         template: formConfig,
         productKey: {
           type: 'text',
-          index: 'not_analyzed',
         },
         category: {
           type: 'text',
         },
         subCategory: {
           type: 'text',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',
@@ -665,7 +645,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         key: {
           type: 'text',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',
@@ -695,7 +674,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         key: {
           type: 'text',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',
@@ -722,7 +700,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         key: {
           type: 'text',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',
@@ -745,7 +722,6 @@ MAPPINGS[ES_METADATA_INDEX] = {
         },
         reference: {
           type: 'text',
-          index: 'not_analyzed',
         },
         id: {
           type: 'long',
