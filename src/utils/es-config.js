@@ -24,7 +24,7 @@ const formConfig = {
                   type: 'nested',
                   properties: {
                     value: {
-                      type: 'string',
+                      type: 'text',
                     },
                   },
                 },
@@ -51,11 +51,11 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       type: 'nested',
       properties: {
         category: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         contentType: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         createdAt: {
@@ -66,16 +66,16 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'integer',
         },
         description: {
-          type: 'string',
+          type: 'text',
         },
         path: {
-          type: 'string',
+          type: 'text',
         },
         type: {
-          type: 'string',
+          type: 'text',
         },
         tags: {
-          type: 'string',
+          type: 'text',
         },
         id: {
           type: 'long',
@@ -87,7 +87,7 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'double',
         },
         title: {
-          type: 'string',
+          type: 'text',
         },
         updatedAt: {
           type: 'date',
@@ -105,15 +105,15 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       type: 'nested',
       properties: {
         address: {
-          type: 'string',
+          type: 'text',
         },
         title: {
-          type: 'string',
+          type: 'text',
         },
       },
     },
     cancelReason: {
-      type: 'string',
+      type: 'text',
     },
     challengeEligibility: {
       type: 'nested',
@@ -122,7 +122,7 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'long',
         },
         role: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         users: {
@@ -138,7 +138,7 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       type: 'integer',
     },
     description: {
-      type: 'string',
+      type: 'text',
     },
     details: {
       type: 'nested',
@@ -147,7 +147,7 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'nested',
           properties: {
             description: {
-              type: 'string',
+              type: 'text',
             },
             id: {
               type: 'integer',
@@ -156,29 +156,29 @@ MAPPINGS[ES_PROJECT_INDEX] = {
               type: 'boolean',
             },
             title: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
         TBD_usageDescription: {
-          type: 'string',
+          type: 'text',
         },
         appDefinition: {
           properties: {
             goal: {
               properties: {
                 value: {
-                  type: 'string',
+                  type: 'text',
                 },
               },
             },
             primaryTarget: {
-              type: 'string',
+              type: 'text',
             },
             users: {
               properties: {
                 value: {
-                  type: 'string',
+                  type: 'text',
                 },
               },
             },
@@ -188,16 +188,16 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'boolean',
         },
         products: {
-          type: 'string',
+          type: 'text',
         },
         summary: {
-          type: 'string',
+          type: 'text',
         },
         utm: {
           type: 'nested',
           properties: {
             code: {
-              type: 'string',
+              type: 'text',
             },
           },
         },
@@ -212,14 +212,14 @@ MAPPINGS[ES_PROJECT_INDEX] = {
     external: {
       properties: {
         data: {
-          type: 'string',
+          type: 'text',
         },
         id: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         type: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
       },
@@ -238,14 +238,14 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'integer',
         },
         email: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         firstName: {
-          type: 'string',
+          type: 'text',
         },
         handle: {
-          type: 'string',
+          type: 'text',
         },
         id: {
           type: 'long',
@@ -254,13 +254,13 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'boolean',
         },
         lastName: {
-          type: 'string',
+          type: 'text',
         },
         projectId: {
           type: 'long',
         },
         role: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         updatedAt: {
@@ -286,14 +286,14 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'integer',
         },
         email: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         id: {
           type: 'long',
         },
         role: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         updatedAt: {
@@ -312,20 +312,20 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       },
     },
     name: {
-      type: 'string',
+      type: 'text',
     },
     status: {
-      type: 'string',
+      type: 'text',
       index: 'not_analyzed',
     },
     terms: {
-      type: 'string',
+      type: 'text',
     },
     groups: {
-      type: 'string',
+      type: 'text',
     },
     type: {
-      type: 'string',
+      type: 'text',
       index: 'not_analyzed',
     },
     updatedAt: {
@@ -340,18 +340,18 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       format: 'strict_date_optional_time||epoch_millis',
     },
     lastActivityUserId: {
-      type: 'string',
+      type: 'text',
     },
     utm: {
       properties: {
         campaign: {
-          type: 'string',
+          type: 'text',
         },
         medium: {
-          type: 'string',
+          type: 'text',
         },
         source: {
-          type: 'string',
+          type: 'text',
         },
       },
     },
@@ -390,25 +390,25 @@ MAPPINGS[ES_CUSTOMER_PAYMENT_INDEX] = {
       type: 'long',
     },
     reference: {
-      type: 'string',
+      type: 'text',
     },
     referenceId: {
-      type: 'string',
+      type: 'text',
     },
     amount: {
       type: 'long',
     },
     currency: {
-      type: 'string',
+      type: 'text',
     },
     paymentIntentId: {
-      type: 'string',
+      type: 'text',
     },
     clientSecret: {
-      type: 'string',
+      type: 'text',
     },
     status: {
-      type: 'string',
+      type: 'text',
     },
     createdAt: {
       type: 'date',
@@ -443,15 +443,15 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         key: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         category: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         name: {
-          type: 'string',
+          type: 'text',
         },
         id: {
           type: 'long',
@@ -489,7 +489,7 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         key: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         config: formConfig,
@@ -523,7 +523,7 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         key: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         version: {
@@ -556,7 +556,7 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         key: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         version: {
@@ -589,15 +589,15 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         orgId: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         configName: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         configValue: {
-          type: 'string',
+          type: 'text',
         },
         id: {
           type: 'long',
@@ -623,18 +623,18 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         name: {
-          type: 'string',
+          type: 'text',
         },
         template: formConfig,
         productKey: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         category: {
-          type: 'string',
+          type: 'text',
         },
         subCategory: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         id: {
@@ -661,10 +661,10 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         displayName: {
-          type: 'string',
+          type: 'text',
         },
         key: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         id: {
@@ -691,10 +691,10 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         displayName: {
-          type: 'string',
+          type: 'text',
         },
         key: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         id: {
@@ -721,7 +721,7 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         key: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         id: {
@@ -744,7 +744,7 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'long',
         },
         reference: {
-          type: 'string',
+          type: 'text',
           index: 'not_analyzed',
         },
         id: {
