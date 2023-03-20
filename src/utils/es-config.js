@@ -286,14 +286,14 @@ MAPPINGS[ES_PROJECT_INDEX] = {
           type: 'integer',
         },
         email: {
-          type: 'text',
+          type: 'keyword',
           index: 'not_analyzed',
         },
         id: {
           type: 'long',
         },
         role: {
-          type: 'text',
+          type: 'keyword',
           index: 'not_analyzed',
         },
         updatedAt: {
@@ -315,17 +315,17 @@ MAPPINGS[ES_PROJECT_INDEX] = {
       type: 'text',
     },
     status: {
-      type: 'text',
+      type: 'keyword',
       index: 'not_analyzed',
     },
     terms: {
-      type: 'text',
+      type: 'keyword',
     },
     groups: {
-      type: 'text',
+      type: 'keyword',
     },
     type: {
-      type: 'text',
+      type: 'keyword',
       index: 'not_analyzed',
     },
     updatedAt: {
@@ -345,13 +345,13 @@ MAPPINGS[ES_PROJECT_INDEX] = {
     utm: {
       properties: {
         campaign: {
-          type: 'text',
+          type: 'keyword',
         },
         medium: {
-          type: 'text',
+          type: 'keyword',
         },
         source: {
-          type: 'text',
+          type: 'keyword',
         },
       },
     },
@@ -393,7 +393,7 @@ MAPPINGS[ES_CUSTOMER_PAYMENT_INDEX] = {
       type: 'text',
     },
     referenceId: {
-      type: 'text',
+      type: 'keyword',
     },
     amount: {
       type: 'long',
@@ -443,11 +443,11 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         key: {
-          type: 'text',
+          type: 'keyword',
           index: 'not_analyzed',
         },
         category: {
-          type: 'text',
+          type: 'keyword',
           index: 'not_analyzed',
         },
         name: {
@@ -489,7 +489,7 @@ MAPPINGS[ES_METADATA_INDEX] = {
           type: 'integer',
         },
         key: {
-          type: 'text',
+          type: 'keyword',
           index: 'not_analyzed',
         },
         config: formConfig,
