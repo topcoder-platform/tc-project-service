@@ -597,6 +597,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
+      PROJECT_MEMBER_ROLE.CUSTOMER,
     ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
@@ -632,6 +633,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
+      PROJECT_MEMBER_ROLE.CUSTOMER,
     ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
@@ -656,6 +658,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
+      PROJECT_MEMBER_ROLE.CUSTOMER,
     ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
