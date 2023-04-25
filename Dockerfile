@@ -5,7 +5,6 @@ RUN apt update
 RUN apt install -y \
     gnupg curl wget netbase procps git \
     apt-transport-https ca-certificates openssh-client \
-    yarn \
     python3-pip
 RUN apt install -y \
     yarn \
