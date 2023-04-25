@@ -5,7 +5,7 @@ python_env: &python_env
 install_awscli: &install_awscli
   name: "Install awscli"
   command: |
-    sudo apt update
+    sudo apt --allow-releaseinfo-change-suite update
     sudo apt install jq
     sudo apt install python3-pip
     sudo pip3 install awscli --upgrade
