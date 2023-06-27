@@ -418,14 +418,15 @@ module.exports = [
       // keep the raw '&&' string in conditions string in estimation
       const isEstimationCondition =
         (this.path.length === 3) && (this.path[0] === 'estimation') && (this.key === 'conditions');
-      //if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
+      // if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
       if (this.isLeaf && typeof x === 'string' && !isEstimationCondition) {
-        // Define a custom sanitization function that excludes '&', '<', and '>'
         const customSanitize = (str) => {
-          // Replace '&', '<', and '>' with their HTML entity equivalents
-          return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          // Exclude sanitization for the '&' character
+          if (str.includes('&')) {
+            return str;
+          }
+          return req.sanitize(str);
         };
-    
         this.update(customSanitize(x));
       }
     });

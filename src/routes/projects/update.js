@@ -190,14 +190,15 @@ module.exports = [
     // prune any fields that cannot be updated directly
     updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
     traverse(updatedProps).forEach(function (x) { // eslint-disable-line func-names
-      //if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+      // if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
       if (x && this.isLeaf && typeof x === 'string') {
-        // Define a custom sanitization function that excludes '&', '<', and '>'
         const customSanitize = (str) => {
-          // Replace '&', '<', and '>' with their HTML entity equivalents
-          return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          // Exclude sanitization for the '&' character
+          if (str.includes('&')) {
+            return str;
+          }
+          return req.sanitize(str);
         };
-    
         this.update(customSanitize(x));
       }
     });
