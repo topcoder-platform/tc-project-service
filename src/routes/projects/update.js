@@ -15,6 +15,7 @@ import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
+const xss = require('xss');
 
 /**
  * API to handle updating a project.
@@ -192,14 +193,11 @@ module.exports = [
     traverse(updatedProps).forEach(function (x) { // eslint-disable-line func-names
       // if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
       if (x && this.isLeaf && typeof x === 'string') {
-        const customSanitize = (str) => {
-          // Exclude sanitization for the '&' character
-          if (str.includes('&')) {
-            return str;
-          }
-          return req.sanitize(str);
+        const sanitizerOptions = {
+          whiteList: { '&': [] }, // Whitelist the '&' character
         };
-        this.update(customSanitize(x));
+        const sanitizedData = xss(x, sanitizerOptions);
+        this.update(sanitizedData);
       }
     });
     let previousValue;

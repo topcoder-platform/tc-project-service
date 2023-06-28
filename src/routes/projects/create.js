@@ -14,6 +14,7 @@ import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
+const xss = require('xss');
 
 /**
  * API to handle creating a new project.
@@ -420,14 +421,11 @@ module.exports = [
         (this.path.length === 3) && (this.path[0] === 'estimation') && (this.key === 'conditions');
       // if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
       if (this.isLeaf && typeof x === 'string' && !isEstimationCondition) {
-        const customSanitize = (str) => {
-          // Exclude sanitization for the '&' character
-          if (str.includes('&')) {
-            return str;
-          }
-          return req.sanitize(str);
+        const sanitizerOptions = {
+          whiteList: { '&': [] }, // Whitelist the '&' character
         };
-        this.update(customSanitize(x));
+        const sanitizedData = xss(x, sanitizerOptions);
+        this.update(sanitizedData);
       }
     });
     // override values
