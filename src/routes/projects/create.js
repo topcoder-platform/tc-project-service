@@ -421,10 +421,7 @@ module.exports = [
         (this.path.length === 3) && (this.path[0] === 'estimation') && (this.key === 'conditions');
       // if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
       if (this.isLeaf && typeof x === 'string' && !isEstimationCondition) {
-        const sanitizerOptions = {
-          whiteList: { '&': [] }, // Whitelist the '&' character
-        };
-        const sanitizedData = xss(x, sanitizerOptions);
+        const sanitizedData = xss(x);
         this.update(sanitizedData);
       }
     });

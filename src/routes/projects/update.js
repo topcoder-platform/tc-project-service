@@ -193,10 +193,7 @@ module.exports = [
     traverse(updatedProps).forEach(function (x) { // eslint-disable-line func-names
       // if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
       if (x && this.isLeaf && typeof x === 'string') {
-        const sanitizerOptions = {
-          whiteList: { '&': [] }, // Whitelist the '&' character
-        };
-        const sanitizedData = xss(x, sanitizerOptions);
+        const sanitizedData = xss(x);
         this.update(sanitizedData);
       }
     });
