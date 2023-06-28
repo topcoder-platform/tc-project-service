@@ -15,6 +15,7 @@ import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
+const xss = require('xss');
 
 /**
  * API to handle updating a project.
@@ -190,7 +191,11 @@ module.exports = [
     // prune any fields that cannot be updated directly
     updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
     traverse(updatedProps).forEach(function (x) { // eslint-disable-line func-names
-      if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+      // if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+      if (x && this.isLeaf && typeof x === 'string') {
+        const sanitizedData = xss(x);
+        this.update(sanitizedData);
+      }
     });
     let previousValue;
     models.sequelize.transaction(() => models.Project.findOne({

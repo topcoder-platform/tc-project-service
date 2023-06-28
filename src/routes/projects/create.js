@@ -14,6 +14,7 @@ import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
+const xss = require('xss');
 
 /**
  * API to handle creating a new project.
@@ -418,7 +419,11 @@ module.exports = [
       // keep the raw '&&' string in conditions string in estimation
       const isEstimationCondition =
         (this.path.length === 3) && (this.path[0] === 'estimation') && (this.key === 'conditions');
-      if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
+      // if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
+      if (this.isLeaf && typeof x === 'string' && !isEstimationCondition) {
+        const sanitizedData = xss(x);
+        this.update(sanitizedData);
+      }
     });
     // override values
     _.assign(project, {
