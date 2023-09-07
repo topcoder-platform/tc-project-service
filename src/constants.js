@@ -139,6 +139,8 @@ export const EVENT = {
 };
 
 export const BUS_API_EVENT = {
+  AV_SCAN_REQUEST: 'avscan.action.scan',
+
   PROJECT_CREATED: 'project.action.create',
   PROJECT_UPDATED: 'project.action.update',
   PROJECT_DELETED: 'project.action.delete',
@@ -151,6 +153,7 @@ export const BUS_API_EVENT = {
   PROJECT_ATTACHMENT_ADDED: 'project.action.create',
   PROJECT_ATTACHMENT_REMOVED: 'project.action.delete',
   PROJECT_ATTACHMENT_UPDATED: 'project.action.update',
+  PROJECT_ATTACHMENT_SCAN_RESULT: 'avscan.projects.assets.result',
 
   // When phase is added/updated/deleted from the project,
   // When product is added/deleted from a phase
