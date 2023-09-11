@@ -20,7 +20,7 @@ import { milestoneUpdatedKafkaHandler } from './milestones';
 import {
   attachmentScanResultKafkaHandler,
   attachmentCreatedKafkaHandler,
-} from './attachments'
+} from './attachments';
 
 const kafkaHandlers = {
   /**
