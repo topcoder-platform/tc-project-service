@@ -1,9 +1,7 @@
 /**
  * Event handlers for attachment create, and av scan result
  */
-import _ from 'lodash';
 import Joi from 'joi';
-import Promise from 'bluebird';
 import config from 'config';
 import util from '../../util';
 import { BUS_API_EVENT } from '../../constants';
@@ -36,12 +34,12 @@ async function attachmentScanResultKafkaHandler(app, topic, payload) {
   if (payload.isInfected) {
     // move to quarantine
     const destBucket = config.get('attachmentsQuarantineS3Bucket');
-    util.s3FileTransfer({ log: app.logger }, sourceBucket, payload.path, destBucket, payload.path)
+    util.s3FileTransfer({ log: app.logger }, sourceBucket, payload.path, destBucket, payload.path);
     app.logger.debug(`Attachment ${payload.fileName} is infected, moving to quarantine`);
   } else {
     // move to clean
     const destBucket = config.get('attachmentsS3Bucket');
-    util.s3FileTransfer({ log: app.logger }, sourceBucket, payload.path, destBucket, payload.path)
+    util.s3FileTransfer({ log: app.logger }, sourceBucket, payload.path, destBucket, payload.path);
   }
 }
 
@@ -79,7 +77,7 @@ async function attachmentCreatedKafkaHandler(app, topic, payload) {
     BUS_API_EVENT.AV_SCAN_REQUEST,
     avScanPayload,
     app.logger,
-  )
+  );
 }
 
 module.exports = {
