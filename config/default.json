@@ -14,6 +14,8 @@
   "directProjectServiceEndpoint": "",
   "directProjectServiceTimeout": 5000,
   "attachmentsS3Bucket": "topcoder-prod-media",
+  "attachmentsDMZS3Bucket": "topcoder-prod-media-dmz",
+  "attachmentsQuarantineS3Bucket": "topcoder-prod-media-quarantine",
   "projectAttachmentPathPrefix": "projects",
   "projectAttachmentPathSuffix": "attachments",
   "elasticsearchConfig": {
