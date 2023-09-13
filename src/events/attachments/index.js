@@ -66,8 +66,9 @@ async function attachmentCreatedKafkaHandler(app, topic, payload) {
   if (result.error) {
     throw new Error(result.error);
   }
+  const awsS3Url = `https://${config.get('attachmentsDMZS3Bucket')}.s3.amazonaws.com/${payload.path}`;
   const avScanPayload = {
-    url: payload.path,
+    url: awsS3Url,
     fileName: payload.path.split('/').pop(),
     moveFile: false,
     callbackOption: 'kafka',
