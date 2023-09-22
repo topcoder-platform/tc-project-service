@@ -2,6 +2,8 @@ FROM node:12.16.1
 LABEL version="1.2"
 LABEL description="Projects microservice"
 RUN sed -i '/jessie-updates/d' /etc/apt/sources.list
+RUN sed -i 's/security.debian/archive.debian/' /etc/apt/sources.list
+RUN sed -i 's/deb.debian/archive.debian/' /etc/apt/sources.list
 
 RUN apt-get update && \
     apt-get upgrade -y
