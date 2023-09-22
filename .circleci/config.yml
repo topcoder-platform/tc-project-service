@@ -59,6 +59,9 @@ jobs:
       - run:
           name: "Install dependeency"
           command: |
+              sudo sed -i '/stretch-updates/d' /etc/apt/sources.list
+              sudo sed -i 's/security.debian/archive.debian/' /etc/apt/sources.list
+              sudo sed -i 's/deb.debian/archive.debian/' /etc/apt/sources.list
               sudo apt update
               sudo apt install curl
               sudo apt install python-pip
