@@ -17,10 +17,6 @@ import {
 } from './projectPhases';
 import { timelineAdjustedKafkaHandler } from './timelines';
 import { milestoneUpdatedKafkaHandler } from './milestones';
-import {
-  attachmentScanResultKafkaHandler,
-  attachmentCreatedKafkaHandler,
-} from './attachments';
 
 const kafkaHandlers = {
   /**
@@ -41,9 +37,6 @@ const kafkaHandlers = {
   // Events coming from timeline/milestones (considering it as a separate module/service in future)
   [CONNECT_NOTIFICATION_EVENT.MILESTONE_TRANSITION_COMPLETED]: milestoneUpdatedKafkaHandler,
   [CONNECT_NOTIFICATION_EVENT.TIMELINE_ADJUSTED]: timelineAdjustedKafkaHandler,
-
-  // Events coming from attachments
-  [BUS_API_EVENT.PROJECT_ATTACHMENT_SCAN_RESULT]: attachmentScanResultKafkaHandler,
 };
 
 /**
@@ -102,10 +95,6 @@ registerKafkaHandler(
   RESOURCES.PHASE,
   projectPhaseRemovedKafkaHandler,
 );
-registerKafkaHandler(
-  BUS_API_EVENT.PROJECT_ATTACHMENT_ADDED,
-  RESOURCES.ATTACHMENT,
-  attachmentCreatedKafkaHandler,
-);
+
 
 export default kafkaHandlers;
