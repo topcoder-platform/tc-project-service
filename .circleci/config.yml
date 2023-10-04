@@ -154,7 +154,7 @@ workflows:
             - UnitTests
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept','feature/PLAT-2614']
+              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept']
       - deployProd:
           context : org-global
           requires:
