@@ -13,6 +13,7 @@ import * as path from 'path';
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
+import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';
@@ -565,6 +566,35 @@ const projectServiceUtils = {
       return httpClient.get(`${config.memberServiceEndpoint}`, {
         params: {
           userIds: `[${userIds.join(',')}]`,
+          fields: 'userId,handle,firstName,lastName,email',
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then(res => _.get(res, 'data', null));
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
+
+  /**
+   * Retrieve member details from user handles
+   */
+  getMemberDetailsByHandles: Promise.coroutine(function* (handles, logger, requestId) { // eslint-disable-line func-names
+    if (_.isNil(handles) || (_.isArray(handles) && handles.length <= 0)) {
+      return Promise.resolve([]);
+    }
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      if (logger) {
+        logger.trace(handles);
+      }
+      const handleArr = _.map(handles, h => `"${h}"`);
+      return httpClient.get(`${config.memberServiceEndpoint}`, {
+        params: {
+          handles: `[${handleArr.join(',')}]`,
           fields: 'userId,handle,firstName,lastName,email',
         },
         headers: {
