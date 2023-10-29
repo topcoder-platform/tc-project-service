@@ -30,56 +30,57 @@ module.exports = function defineProjectPhase(sequelize, DataTypes) {
     createdAt: 'createdAt',
     deletedAt: 'deletedAt',
     indexes: [],
-    classMethods: {
-      getActiveProjectPhases(projectId) {
-        return this.findAll({
-          where: {
-            deletedAt: { $eq: null },
-            projectId,
-          },
-          raw: true,
-        });
-      },
-      associate: (models) => {
-        ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
-        ProjectPhase.belongsToMany(models.WorkStream, { through: models.PhaseWorkStream, foreignKey: 'phaseId' });
-      },
-      /**
-       * Search project phases
-       * @param {Object} parameters the parameters
-       *          - sortField: the field that will be references when sorting
-       *          - sortType: ASC or DESC
-       *          - fields: the fields to retrieved
-       *          - projectId: the id of project
-       * @param {Object} log the request log
-       * @return {Object} the result rows and count
-       */
-      async search(parameters = {}, log) {
-        // ordering
-        const orderBy = [];
-        if (_.has(parameters, 'sortField') && _.has(parameters, 'sortType')) {
-          orderBy.push([parameters.sortField, parameters.sortType]);
-        }
-        // find options
-        const options = {
-          where: {
-            projectId: parameters.projectId,
-          },
-          order: orderBy,
-          logging: (str) => { log.debug(str); },
-        };
-        // select fields
-        if (_.has(parameters, 'fields')) {
-          _.set(options, 'attributes', parameters.fields.filter(e => e !== 'products'));
-          if (parameters.fields.includes('products')) {
-            _.set(options, 'include', [{ model: this.sequelize.models.PhaseProduct, as: 'products' }]);
-          }
-        }
-
-        return this.findAll(options).then(phases => ({ rows: phases, count: phases.length }));
-      },
-    },
   });
+
+  ProjectPhase.getActiveProjectPhases = projectId => ProjectPhase.findAll({
+    where: {
+      deletedAt: { $eq: null },
+      projectId,
+    },
+    raw: true,
+  });
+
+  ProjectPhase.associate = (models) => {
+    ProjectPhase.hasMany(models.PhaseProduct, { as: 'products', foreignKey: 'phaseId' });
+    ProjectPhase.hasMany(models.ProjectPhaseMember, { as: 'members', foreignKey: 'phaseId' });
+    ProjectPhase.hasMany(models.ProjectPhaseApproval, { as: 'approvals', foreignKey: 'phaseId' });
+    ProjectPhase.belongsToMany(models.WorkStream, { through: models.PhaseWorkStream, foreignKey: 'phaseId' });
+  };
+
+  /**
+   * Search project phases
+   * @param {Object} parameters the parameters
+   *          - sortField: the field that will be references when sorting
+   *          - sortType: ASC or DESC
+   *          - fields: the fields to retrieved
+   *          - projectId: the id of project
+   * @param {Object} log the request log
+   * @return {Object} the result rows and count
+   */
+  ProjectPhase.search = async (parameters = {}, log) => {
+    // ordering
+    const orderBy = [];
+    if (_.has(parameters, 'sortField') && _.has(parameters, 'sortType')) {
+      orderBy.push([parameters.sortField, parameters.sortType]);
+    }
+    // find options
+    const options = {
+      where: {
+        projectId: parameters.projectId,
+      },
+      order: orderBy,
+      logging: (str) => { log.debug(str); },
+    };
+    // select fields
+    if (_.has(parameters, 'fields')) {
+      _.set(options, 'attributes', parameters.fields.filter(e => e !== 'products'));
+      if (parameters.fields.includes('products')) {
+        _.set(options, 'include', [{ model: this.sequelize.models.PhaseProduct, as: 'products' }]);
+      }
+    }
+
+    return ProjectPhase.findAll(options).then(phases => ({ rows: phases, count: phases.length }));
+  };
 
   return ProjectPhase;
 };

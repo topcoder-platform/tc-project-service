@@ -37,7 +37,7 @@ module.exports = [
     ];
     if (sort && _.indexOf(sortableProps, sort) < 0) {
       const apiErr = new Error('Invalid sort criteria');
-      apiErr.status = 422;
+      apiErr.status = 400;
       return next(apiErr);
     }
     const sortColumnAndOrder = sort.split(' ');
@@ -49,12 +49,7 @@ module.exports = [
       id: req.params.timelineId,
     })
       .then((doc) => {
-        if (!doc) {
-          const err = new Error(`Timeline not found for timeline id ${req.params.timelineId}`);
-          err.status = 404;
-          throw err;
-        }
-
+        req.log.debug('milestone found in ES');
         // Get the milestones
         let milestones = _.isArray(doc._source.milestones) ? doc._source.milestones : []; // eslint-disable-line no-underscore-dangle
 
@@ -62,8 +57,19 @@ module.exports = [
         milestones = _.orderBy(milestones, [sortColumnAndOrder[0]], [sortColumnAndOrder[1]]);
 
         // Write to response
-        res.json(util.wrapResponse(req.id, milestones, milestones.length));
+        res.json(milestones);
       })
-      .catch(err => next(err));
+      .catch((err) => {
+        if (err.status === 404) {
+          req.log.debug('No milestone found in ES');
+          // Load the milestones
+          return req.timeline.getMilestones()
+            .then(milestones =>
+              // Write to response
+              res.json(_.map(milestones, milestone => _.omit(milestone.toJSON(), ['deletedAt', 'deletedBy']))),
+            );
+        }
+        return next(err);
+      });
   },
 ];

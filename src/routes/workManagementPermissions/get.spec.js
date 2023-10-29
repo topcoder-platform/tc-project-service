@@ -43,29 +43,31 @@ describe('GET work management permission', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((t) => {
-          permission = _.assign({}, permission, { projectTemplateId: t.id });
-          models.WorkManagementPermission.create(permission)
-          .then((p) => {
-            permissionId = p.id;
-          })
-          .then(() => done());
-        });
+          .then((t) => {
+            permission = _.assign({}, permission, { projectTemplateId: t.id });
+            models.WorkManagementPermission.create(permission)
+              .then((p) => {
+                permissionId = p.id;
+              })
+              .then(() => done());
+          });
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/metadata/workManagementPermission/{permissionId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -74,7 +76,7 @@ describe('GET work management permission', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -83,7 +85,7 @@ describe('GET work management permission', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -92,7 +94,7 @@ describe('GET work management permission', () => {
 
     it('should return 403 for non-member', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -101,7 +103,7 @@ describe('GET work management permission', () => {
 
     it('should return 404 for non-existed permission', (done) => {
       request(server)
-        .get('/v4/projects/metadata/workManagementPermission/1234')
+        .get('/v5/projects/metadata/workManagementPermission/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -112,7 +114,7 @@ describe('GET work management permission', () => {
       models.WorkManagementPermission.destroy({ where: { id: permissionId } })
         .then(() => {
           request(server)
-            .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+            .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -122,13 +124,13 @@ describe('GET work management permission', () => {
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projects/metadata/workManagementPermission/${permissionId}`)
+        .get(`/v5/projects/metadata/workManagementPermission/${permissionId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.id.should.be.eql(permissionId);
           resJson.policy.should.be.eql(permission.policy);
           resJson.permission.should.be.eql(permission.permission);

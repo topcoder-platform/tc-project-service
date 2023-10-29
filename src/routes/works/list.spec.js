@@ -59,35 +59,35 @@ describe('LIST works', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-        .then(() => {
-          models.ProjectTemplate.create({
-            name: 'template 2',
-            key: 'key 2',
-            category: 'category 2',
-            icon: 'http://example.com/icon1.ico',
-            question: 'question 2',
-            info: 'info 2',
-            aliases: ['key-2', 'key_2'],
-            scope: {},
-            phases: {},
-            createdBy: 1,
-            updatedBy: 2,
-          })
-            .then((template) => {
-              // Create projects
-              models.Project.create({
-                type: 'generic',
-                billingAccountId: 1,
-                name: 'test1',
-                description: 'test project1',
-                status: 'draft',
-                templateId: template.id,
-                details: {},
-                createdBy: 1,
-                updatedBy: 1,
-                lastActivityAt: 1,
-                lastActivityUserId: '1',
-              })
+      .then(() => {
+        models.ProjectTemplate.create({
+          name: 'template 2',
+          key: 'key 2',
+          category: 'category 2',
+          icon: 'http://example.com/icon1.ico',
+          question: 'question 2',
+          info: 'info 2',
+          aliases: ['key-2', 'key_2'],
+          scope: {},
+          phases: {},
+          createdBy: 1,
+          updatedBy: 2,
+        })
+          .then((template) => {
+            // Create projects
+            models.Project.create({
+              type: 'generic',
+              billingAccountId: 1,
+              name: 'test1',
+              description: 'test project1',
+              status: 'draft',
+              templateId: template.id,
+              details: {},
+              createdBy: 1,
+              updatedBy: 1,
+              lastActivityAt: 1,
+              lastActivityUserId: '1',
+            })
               .then((project) => {
                 projectId = project.id;
                 models.WorkStream.create({
@@ -118,16 +118,18 @@ describe('LIST works', () => {
                     });
                 });
               });
-            });
-        });
+          });
+      });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/{projectId}/workstreams/{workStreamId}/works', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -135,7 +137,7 @@ describe('LIST works', () => {
         .end((err, res) => {
           const phase = phases[0];
 
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].name.should.be.eql(phase.name);
           resJson[0].status.should.be.eql(phase.status);
@@ -154,13 +156,13 @@ describe('LIST works', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -169,7 +171,7 @@ describe('LIST works', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -178,7 +180,7 @@ describe('LIST works', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -188,7 +190,7 @@ describe('LIST works', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -198,13 +200,13 @@ describe('LIST works', () => {
 
     it('should return with populated workItems if fields=workItems is used', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works?fields=workItems`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works?fields=workItems`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].should.have.property('workItems');
           resJson[0].workItems.should.be.a('array');

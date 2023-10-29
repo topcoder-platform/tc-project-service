@@ -3,18 +3,12 @@
  * Current functionality just updates the elasticsearch indexes.
  */
 
-import config from 'config';
+import Joi from 'joi';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import util from '../../util';
 import { TIMELINE_REFERENCES } from '../../constants';
 
 import messageService from '../../services/messageService';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
-
-const eClient = util.getElasticSearchClient();
 
 /**
  * Build topics data based on route parameter.
@@ -50,50 +44,6 @@ const buildTopicsData = (logger, phase, route) => {
 };
 
 /**
- * Indexes the project phase in the elastic search.
- *
- * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} phase     event payload
- * @returns {undefined}
- */
-const indexProjectPhase = Promise.coroutine(function* (logger, phase) { // eslint-disable-line func-names
-  try {
-    // const phase = JSON.parse(msg.content.toString());
-    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: phase.projectId });
-    const phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
-    const existingPhaseIndex = _.findIndex(phases, p => p.id === phase.id);
-    // if phase does not exists already
-    if (existingPhaseIndex === -1) {
-      // Increase the order of the other phases in the same project,
-      // which have `order` >= this phase order
-      _.each(phases, (_phase) => {
-        if (!_.isNil(_phase.order) && !_.isNil(phase.order) && _phase.order >= phase.order) {
-          _phase.order += 1; // eslint-disable-line no-param-reassign
-        }
-      });
-
-      phases.push(_.omit(phase, ['deletedAt', 'deletedBy']));
-    } else { // if phase already exists, ideally we should never land here, but code handles the buggy indexing
-      // replaces the old inconsistent index where previously phase was not removed from the index but deleted
-      // from the database
-      phases.splice(existingPhaseIndex, 1, phase);
-    }
-    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
-    yield eClient.update({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: phase.projectId,
-      body: { doc: merged },
-    });
-    logger.debug('project phase added to project document successfully');
-  } catch (error) {
-    logger.error('Error handling indexing the project phase', error);
-    // throw the error back to nack the bus
-    throw error;
-  }
-});
-
-/**
  * Creates topics in message api
  *
  * @param  {Object} logger  logger to log along with trace id
@@ -112,58 +62,6 @@ const createTopics = Promise.coroutine(function* (logger, phase, route) { // esl
     logger.error(`Error in creating topic for ${route}`, error);
     // don't throw the error back to nack the bus, because we don't want to get multiple topics per phase
     // we can create topic for a phase manually, if somehow it fails
-  }
-});
-
-/**
- * Handler for project phase creation event
- * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} msg     event payload
- * @param  {Object} channel channel to ack, nack
- * @returns {undefined}
- */
-const projectPhaseAddedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
-  const data = JSON.parse(msg.content.toString());
-  const phase = _.get(data, 'added', {});
-  const route = _.get(data, 'route', 'PHASE');
-  try {
-    logger.debug('calling indexProjectPhase', phase);
-    yield indexProjectPhase(logger, phase, channel);
-    logger.debug('calling createPhaseTopic', phase);
-    yield createTopics(logger, phase, route);
-    channel.ack(msg);
-  } catch (error) {
-    logger.error('Error handling project.phase.added event', error);
-    // if the message has been redelivered dont attempt to reprocess it
-    channel.nack(msg, false, !msg.fields.redelivered);
-  }
-});
-
-/**
- * Indexes the project phase in the elastic search.
- *
- * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} data     event payload
- * @returns {undefined}
- */
-const updateIndexProjectPhase = Promise.coroutine(function* (logger, data) { // eslint-disable-line func-names
-  try {
-    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: data.original.projectId });
-    const phases = _.map(data.allPhases, single => _.omit(single, ['deletedAt', 'deletedBy']));
-    const merged = _.assign(doc._source, { phases }); // eslint-disable-line no-underscore-dangle
-    yield eClient.update({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: data.original.projectId,
-      body: {
-        doc: merged,
-      },
-    });
-    logger.debug('project phase updated to project document successfully');
-  } catch (error) {
-    logger.error('Error handling indexing the project phase', error);
-    // throw the error back to nack the bus
-    throw error;
   }
 });
 
@@ -214,59 +112,6 @@ const updateTopics = Promise.coroutine(function* (logger, phase, route) { // esl
 });
 
 /**
- * Handler for project phase updated event
- * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} msg     event payload
- * @param  {Object} channel channel to ack, nack
- * @returns {undefined}
- */
-const projectPhaseUpdatedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
-  try {
-    const data = JSON.parse(msg.content.toString());
-    const route = _.get(data, 'route', 'PHASE');
-    logger.debug('calling updateIndexProjectPhase', data);
-    yield updateIndexProjectPhase(logger, data, channel);
-    logger.debug('calling updateTopics', data.updated);
-    yield updateTopics(logger, data.updated, route);
-    channel.ack(msg);
-  } catch (error) {
-    logger.error('Error handling project.phase.updated event', error);
-    // if the message has been redelivered dont attempt to reprocess it
-    channel.nack(msg, false, !msg.fields.redelivered);
-  }
-});
-
-/**
- * Removes the project phase from the elastic search.
- *
- * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} msg     event payload
- * @returns {undefined}
- */
-const removePhaseFromIndex = Promise.coroutine(function* (logger, msg) { // eslint-disable-line func-names
-  try {
-    const data = JSON.parse(msg.content.toString());
-    const phase = _.get(data, 'deleted', {});
-    const doc = yield eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: phase.projectId });
-    const phases = _.filter(doc._source.phases, single => single.id !== phase.id); // eslint-disable-line no-underscore-dangle
-    const merged = _.assign(doc._source, { phases });       // eslint-disable-line no-underscore-dangle
-    yield eClient.update({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: phase.projectId,
-      body: {
-        doc: merged,
-      },
-    });
-    logger.debug('project phase removed from project document successfully');
-  } catch (error) {
-    logger.error('Error in removing project phase from index', error);
-    // throw the error back to nack the bus
-    throw error;
-  }
-});
-
-/**
  * Removes one topic from the message api.
  *
  * @param  {Object} logger logger to log along with trace id
@@ -308,32 +153,92 @@ const removeTopics = Promise.coroutine(function* (logger, phase, route) { // esl
 });
 
 /**
- * Handler for project phase deleted event
- * @param  {Object} logger  logger to log along with trace id
- * @param  {Object} msg     event payload
- * @param  {Object} channel channel to ack, nack
- * @returns {undefined}
+ * Payload for new unified BUS events like `project.action.created` with `resource=phase`
  */
-const projectPhaseRemovedHandler = Promise.coroutine(function* (logger, msg, channel) { // eslint-disable-line func-names
-  try {
-    yield removePhaseFromIndex(logger, msg, channel);
-    const data = JSON.parse(msg.content.toString());
-    const phase = _.get(data, 'deleted', {});
-    const route = _.get(data, 'route');
-    logger.debug('calling removeTopics');
-    yield removeTopics(logger, phase, route);
-    channel.ack(msg);
-  } catch (error) {
-    logger.error('Error fetching project document from elasticsearch', error);
-    // if the message has been redelivered dont attempt to reprocess it
-    channel.nack(msg, false, !msg.fields.redelivered);
-  }
-});
+const phasePayloadScheme = Joi.object().keys({
+  id: Joi.number().integer().positive().required(),
+  projectId: Joi.number().integer().positive().required(),
+  name: Joi.string().required(),
+  status: Joi.string().required(),
+  startDate: Joi.date().optional(),
+  endDate: Joi.date().optional(),
+  duration: Joi.number().min(0).optional().allow(null),
+  budget: Joi.number().min(0).optional(),
+  spentBudget: Joi.number().min(0).optional(),
+  progress: Joi.number().min(0).optional(),
+  details: Joi.any().optional(),
+  order: Joi.number().integer().optional().allow(null),
+}).unknown(true).required();
 
+/**
+ * Phase Created BUS API event handler.
+ * - create phase's Topic
+ * - throws exceptions in case of error
+ *
+ * @param   {Object}  app       Application object
+ * @param   {String}  topic     Kafka topic
+ * @param   {Object}  payload   Message payload
+ * @return  {Promise} Promise
+ */
+async function projectPhaseAddedKafkaHandler(app, topic, payload) {
+  // Validate payload
+  const result = Joi.validate(payload, phasePayloadScheme);
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  const phase = payload;
+  app.logger.debug('calling createPhaseTopic', phase);
+  await createTopics(app.logger, phase, TIMELINE_REFERENCES.PHASE);
+}
+
+/**
+ * Phase Updated BUS API event handler.
+ * - updates phase's Topic
+ * - throws exceptions in case of error
+ *
+ * @param   {Object}  app       Application object
+ * @param   {String}  topic     Kafka topic
+ * @param   {Object}  payload   Message payload
+ * @return  {Promise} Promise
+ */
+async function projectPhaseUpdatedKafkaHandler(app, topic, payload) {
+  // Validate payload
+  const result = Joi.validate(payload, phasePayloadScheme);
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  const phase = payload;
+  app.logger.debug('calling updateTopics', phase);
+  await updateTopics(app.logger, phase, TIMELINE_REFERENCES.PHASE);
+}
+
+/**
+ * Phase Deleted BUS API event handler.
+ * - removes phase's Topic
+ * - throws exceptions in case of error
+ *
+ * @param   {Object}  app       Application object
+ * @param   {String}  topic     Kafka topic
+ * @param   {Object}  payload   Message payload
+ * @return  {Promise} Promise
+ */
+async function projectPhaseRemovedKafkaHandler(app, topic, payload) {
+  // Validate payload
+  const result = Joi.validate(payload, phasePayloadScheme);
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  const phase = payload;
+  app.logger.debug('calling removeTopics', phase);
+  await removeTopics(app.logger, phase, TIMELINE_REFERENCES.PHASE);
+}
 
 module.exports = {
-  projectPhaseAddedHandler,
-  projectPhaseRemovedHandler,
-  projectPhaseUpdatedHandler,
   createPhaseTopic: createTopics,
+  projectPhaseAddedKafkaHandler,
+  projectPhaseUpdatedKafkaHandler,
+  projectPhaseRemovedKafkaHandler,
 };

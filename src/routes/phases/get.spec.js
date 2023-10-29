@@ -42,46 +42,47 @@ describe('Project Phases', () => {
   before((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => testUtil.clearES())
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
-              createdBy: 1,
-              updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
-              projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              _.assign(body, { projectId });
-              models.ProjectPhase.create(body).then((phase) => {
-                phaseId = phase.id;
-                done();
-              });
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            _.assign(body, { projectId });
+            models.ProjectPhase.create(body).then((phase) => {
+              phaseId = phase.id;
+              done();
             });
           });
         });
+      });
   });
 
   after((done) => {
@@ -91,7 +92,7 @@ describe('Project Phases', () => {
   describe('GET /projects/{projectId}/phases/{phaseId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -101,7 +102,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/999/phases/${phaseId}`)
+        .get(`/v5/projects/999/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -111,7 +112,7 @@ describe('Project Phases', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/999`)
+        .get(`/v5/projects/${projectId}/phases/999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -121,7 +122,7 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -131,7 +132,7 @@ describe('Project Phases', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql('test project phase');
             resJson.status.should.be.eql('active');
@@ -145,7 +146,7 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -155,7 +156,7 @@ describe('Project Phases', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql('test project phase');
             resJson.status.should.be.eql('active');

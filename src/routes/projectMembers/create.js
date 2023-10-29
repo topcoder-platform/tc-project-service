@@ -3,8 +3,8 @@ import Joi from 'joi';
 import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
-import { INVITE_STATUS, MANAGER_ROLES, PROJECT_MEMBER_ROLE, USER_ROLE } from '../../constants';
 import models from '../../models';
+import { PROJECT_TO_TOPCODER_ROLES_MATRIX, PERMISSION } from '../../permissions/constants';
 
 /**
  * API to add a project member.
@@ -14,158 +14,82 @@ import models from '../../models';
 const permissions = tcMiddleware.permissions;
 
 const createProjectMemberValidations = {
-  body: {
-    param: Joi.object()
-      .keys({
-        role: Joi.any()
-          .valid(
-            PROJECT_MEMBER_ROLE.MANAGER,
-            PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER,
-            PROJECT_MEMBER_ROLE.COPILOT,
-            PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
-            PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
-            PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
-            PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE,
-        ),
-      }),
-  },
+  body: Joi.object().keys({
+    userId: Joi.number().optional(),
+    role: Joi.string().valid(_.keys(PROJECT_TO_TOPCODER_ROLES_MATRIX)),
+  }),
 };
 
 module.exports = [
   // handles request validations
   validate(createProjectMemberValidations),
-  permissions('project.addMember'),
-  (req, res, next) => {
-    let targetRole;
-    if (_.get(req, 'body.param.role')) {
-      targetRole = _.get(req, 'body.param.role');
+  permissions('projectMember.create'),
+  async (req, res, next) => {
+    try {
+      // by default, we would add the current user as a member
+      let addUserId = req.authUser.userId;
+      let addUser = req.authUser;
 
-      if (PROJECT_MEMBER_ROLE.MANAGER === targetRole &&
-        !util.hasRoles(req, [USER_ROLE.MANAGER])) {
-        const err = new Error(`Only manager is able to join as ${targetRole}`);
-        err.status = 401;
-        return next(err);
+      // if `userId` is provided in the request body then we should add this user as a member
+      if (_.get(req, 'body.userId') && _.get(req, 'body.userId') !== req.authUser.userId) {
+        addUserId = _.get(req, 'body.userId');
+
+        // check if current user has permissions to add other users
+        if (!util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_MEMBER_NOT_OWN, req)) {
+          const err = new Error('You don\'t have permissions to add other users as a project member.');
+          err.status = 403;
+          throw err;
+        }
+
+        // if we are adding another user, we have to get that user roles for checking permissions
+        try {
+          const addUserRoles = await util.getUserRoles(addUserId, req.log, req.id);
+          addUser = {
+            roles: addUserRoles,
+          };
+        } catch (e) {
+          throw new Error(`Cannot get user roles: "${e.message}".`);
+        }
       }
 
-      if (PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT === targetRole &&
-          !util.hasRoles(req, [USER_ROLE.SOLUTION_ARCHITECT])) {
-        const err = new Error(`Only solution architect is able to join as ${targetRole}`);
-        err.status = 401;
-        return next(err);
+      const targetRole = _.get(req, 'body.role', util.getDefaultProjectRole(addUser));
+
+      if (!targetRole) {
+        throw new Error('Cannot automatically detect role for a new member.');
       }
 
-      if (PROJECT_MEMBER_ROLE.PROJECT_MANAGER === targetRole &&
-          !util.hasRoles(req, [USER_ROLE.PROJECT_MANAGER])) {
-        const err = new Error(`Only project manager is able to join as ${targetRole}`);
+      if (!util.matchPermissionRule({ topcoderRoles: PROJECT_TO_TOPCODER_ROLES_MATRIX[targetRole] }, addUser)) {
+        const err = new Error(`User doesn't have required roles to be added to the project as "${targetRole}".`);
         err.status = 401;
-        return next(err);
+        throw err;
       }
 
-      if (PROJECT_MEMBER_ROLE.PROGRAM_MANAGER === targetRole &&
-          !util.hasRoles(req, [USER_ROLE.PROGRAM_MANAGER])) {
-        const err = new Error(`Only program manager is able to join as ${targetRole}`);
-        err.status = 401;
-        return next(err);
-      }
+      const projectId = req.params.projectId;
 
-      if (PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE === targetRole &&
-          !util.hasRoles(req, [USER_ROLE.ACCOUNT_EXECUTIVE])) {
-        const err = new Error(`Only account executive is able to join as ${targetRole}`);
-        err.status = 401;
-        return next(err);
-      }
+      const member = {
+        projectId,
+        role: targetRole,
+        userId: addUserId,
+        createdBy: req.authUser.userId,
+        updatedBy: req.authUser.userId,
+      };
 
-      if (PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER === targetRole &&
-        !util.hasRoles(req, [
-          USER_ROLE.MANAGER,
-          USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
-          USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
-          USER_ROLE.PRESALES,
-          USER_ROLE.ACCOUNT_EXECUTIVE,
-          USER_ROLE.PROGRAM_MANAGER,
-          USER_ROLE.SOLUTION_ARCHITECT,
-          USER_ROLE.PROJECT_MANAGER,
-        ])) {
-        const err = new Error(
-            // eslint-disable-next-line max-len
-            `Only manager, account manager, business development representative, account executive, program manager, project manager, solution architect, or presales are able to join as ${targetRole}`,
-        );
-        err.status = 401;
-        return next(err);
-      }
+      let newMember;
+      await models.sequelize.transaction(async (transaction) => {
+        // Kafka event is emitted inside `addUserToProject`
+        newMember = await util.addUserToProject(req, member, transaction);
+      });
 
-      if (targetRole === PROJECT_MEMBER_ROLE.COPILOT && !util.hasRoles(req, [USER_ROLE.COPILOT])) {
-        const err = new Error(`Only copilot is able to join as ${targetRole}`);
-        err.status = 401;
-        return next(err);
+      try {
+        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        [newMember] = await util.getObjectsWithMemberDetails([newMember], fields, req);
+      } catch (err) {
+        req.log.error('Cannot get user details for member.');
+        req.log.debug('Error during getting user details for member.', err);
       }
-    } else if (util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.CONNECT_ADMIN])) {
-      targetRole = PROJECT_MEMBER_ROLE.MANAGER;
-    } else if (util.hasRoles(req, [
-      USER_ROLE.TOPCODER_ACCOUNT_MANAGER,
-      USER_ROLE.BUSINESS_DEVELOPMENT_REPRESENTATIVE,
-      USER_ROLE.PRESALES,
-    ])) {
-      targetRole = PROJECT_MEMBER_ROLE.ACCOUNT_MANAGER;
-    } else if (util.hasRoles(req, [USER_ROLE.COPILOT, USER_ROLE.CONNECT_ADMIN])) {
-      targetRole = PROJECT_MEMBER_ROLE.COPILOT;
-    } else if (util.hasRoles(req, [USER_ROLE.ACCOUNT_EXECUTIVE])) {
-      targetRole = PROJECT_MEMBER_ROLE.ACCOUNT_EXECUTIVE;
-    } else if (util.hasRoles(req, [USER_ROLE.PROGRAM_MANAGER])) {
-      targetRole = PROJECT_MEMBER_ROLE.PROGRAM_MANAGER;
-    } else if (util.hasRoles(req, [USER_ROLE.SOLUTION_ARCHITECT])) {
-      targetRole = PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT;
-    } else if (util.hasRoles(req, [USER_ROLE.PROJECT_MANAGER])) {
-      targetRole = PROJECT_MEMBER_ROLE.PROJECT_MANAGER;
-    } else {
-      const err = new Error('Only copilot or manager is able to call this endpoint');
-      err.status = 401;
+      return res.status(201).json(newMember);
+    } catch (err) {
       return next(err);
     }
-
-    const projectId = _.parseInt(req.params.projectId);
-
-    const member = {
-      projectId,
-      role: targetRole,
-      userId: req.authUser.userId,
-      createdBy: req.authUser.userId,
-      updatedBy: req.authUser.userId,
-    };
-
-    let promise = Promise.resolve();
-    if (member.role === PROJECT_MEMBER_ROLE.MANAGER) {
-      promise = util.getUserRoles(member.userId, req.log, req.id);
-    }
-
-    req.log.debug('creating member', member);
-    return promise.then((memberRoles) => {
-      req.log.debug(memberRoles);
-      if (member.role === PROJECT_MEMBER_ROLE.MANAGER
-        && (!memberRoles || !util.hasIntersection(MANAGER_ROLES, memberRoles))) {
-        const err = new Error('This user can\'t be added as a Manager to the project');
-        err.status = 400;
-        return next(err);
-      }
-
-      return util.addUserToProject(req, member)
-        .then((newMember) => {
-          let invite;
-          return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(projectId, null, newMember.userId)
-            .then((_invite) => {
-              invite = _invite;
-              if (!invite) {
-                return res.status(201)
-                  .json(util.wrapResponse(req.id, newMember, 1, 201));
-              }
-              return invite.update({
-                status: INVITE_STATUS.ACCEPTED,
-              })
-                .then(() => res.status(201)
-                  .json(util.wrapResponse(req.id, newMember, 1, 201)));
-            });
-        });
-    })
-      .catch(err => next(err));
   },
 ];

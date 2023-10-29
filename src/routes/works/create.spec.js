@@ -7,26 +7,17 @@ import _ from 'lodash';
 import chai from 'chai';
 import sinon from 'sinon';
 import request from 'supertest';
-import config from 'config';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import messageService from '../../services/messageService';
-import RabbitMQService from '../../services/rabbitmq';
-import mockRabbitMQ from '../../tests/mockRabbitMQ';
-import { BUS_API_EVENT } from '../../constants';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+import { BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT, RESOURCES } from '../../constants';
 
 const should = chai.should();
 
 const validatePhase = (resJson, expectedPhase) => {
   should.exist(resJson);
   resJson.name.should.be.eql(expectedPhase.name);
-  resJson.description.should.be.eql(expectedPhase.description);
-  resJson.requirements.should.be.eql(expectedPhase.requirements);
   resJson.status.should.be.eql(expectedPhase.status);
   resJson.budget.should.be.eql(expectedPhase.budget);
   resJson.progress.should.be.eql(expectedPhase.progress);
@@ -64,7 +55,7 @@ describe('CREATE work', () => {
     lastActivityAt: 1,
     lastActivityUserId: '1',
   };
-
+  let productTemplateId;
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {
@@ -81,94 +72,127 @@ describe('CREATE work', () => {
           createdBy: 1,
           updatedBy: 2,
         })
-        .then((template) => {
-          models.WorkManagementPermission.create({
-            policy: 'work.create',
-            permission: {
-              allowRule: {
-                projectRoles: ['customer', 'copilot'],
-                topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+          .then((template) => {
+            models.WorkManagementPermission.create({
+              policy: 'work.create',
+              permission: {
+                allowRule: {
+                  projectRoles: ['customer', 'copilot'],
+                  topcoderRoles: ['Connect Manager', 'Connect Admin', 'administrator'],
+                },
+                denyRule: { projectRoles: ['copilot'] },
               },
-              denyRule: { projectRoles: ['copilot'] },
-            },
-            projectTemplateId: template.id,
-            details: {},
-            createdBy: 1,
-            updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          })
-          .then(() => {
-            // Create projects
-            models.Project.create(_.assign(project, { templateId: template.id }))
-            .then((_project) => {
-              projectId = _project.id;
-              projectName = _project.name;
-              models.WorkStream.create({
-                name: 'Work Stream',
-                type: 'generic',
-                status: 'active',
-                projectId,
-                createdBy: 1,
-                updatedBy: 1,
-              }).then((entity) => {
-                workStreamId = entity.id;
-                // create members
-                models.ProjectMember.bulkCreate([{
-                  id: 1,
-                  userId: copilotUser.userId,
-                  projectId,
-                  role: 'copilot',
-                  isPrimary: false,
-                  createdBy: 1,
-                  updatedBy: 1,
-                }, {
-                  id: 2,
-                  userId: memberUser.userId,
-                  projectId,
-                  role: 'customer',
-                  isPrimary: true,
-                  createdBy: 1,
-                  updatedBy: 1,
-                }]).then(() => done());
+              projectTemplateId: template.id,
+              details: {},
+              createdBy: 1,
+              updatedBy: 1,
+              lastActivityAt: 1,
+              lastActivityUserId: '1',
+            })
+              .then(() => {
+                // Create projects
+                models.Project.create(_.assign(project, { templateId: template.id }))
+                  .then((_project) => {
+                    projectId = _project.id;
+                    projectName = _project.name;
+                    models.WorkStream.create({
+                      name: 'Work Stream',
+                      type: 'generic',
+                      status: 'active',
+                      projectId,
+                      createdBy: 1,
+                      updatedBy: 1,
+                    }).then((entity) => {
+                      workStreamId = entity.id;
+                      // create members
+                      models.ProjectMember.bulkCreate([{
+                        id: 1,
+                        userId: copilotUser.userId,
+                        projectId,
+                        role: 'copilot',
+                        isPrimary: false,
+                        createdBy: 1,
+                        updatedBy: 1,
+                      }, {
+                        id: 2,
+                        userId: memberUser.userId,
+                        projectId,
+                        role: 'customer',
+                        isPrimary: true,
+                        createdBy: 1,
+                        updatedBy: 1,
+                      }])
+                        .then(() =>
+                          models.ProductTemplate.create({
+                            name: 'name 1',
+                            productKey: 'productKey 1',
+                            category: 'generic',
+                            subCategory: 'generic',
+                            icon: 'http://example.com/icon1.ico',
+                            brief: 'brief 1',
+                            details: 'details 1',
+                            aliases: ['product key 1', 'product_key_1'],
+                            template: {
+                              template1: {
+                                name: 'template 1',
+                                details: {
+                                  anyDetails: 'any details 1',
+                                },
+                                others: ['others 11', 'others 12'],
+                              },
+                              template2: {
+                                name: 'template 2',
+                                details: {
+                                  anyDetails: 'any details 2',
+                                },
+                                others: ['others 21', 'others 22'],
+                              },
+                            },
+                            createdBy: 1,
+                            updatedBy: 2,
+                          }).then((productTemplate) => {
+                            productTemplateId = productTemplate.id;
+                            done();
+                          }),
+                        );
+                    });
+                  });
               });
-            });
           });
-        });
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('PATCH /projects/{projectId}/workstreams/{workStreamId}/works', () => {
     const body = {
-      param: {
-        name: 'test project phase',
-        description: 'test project phase description',
-        requirements: 'test project phase requirements',
-        status: 'active',
-        startDate: '2018-05-15T00:00:00Z',
-        endDate: '2018-05-15T12:00:00Z',
-        budget: 20.0,
-        progress: 1.23456,
-        spentBudget: 10.0,
-        duration: 10,
-        details: {
-          message: 'This can be any json',
-        },
+      name: 'test project phase',
+      description: 'test project phase description',
+      requirements: 'test project phase requirements',
+      status: 'active',
+      startDate: '2018-05-15T00:00:00Z',
+      endDate: '2018-05-15T12:00:00Z',
+      budget: 20.0,
+      progress: 1.23456,
+      spentBudget: 10.0,
+      duration: 10,
+      details: {
+        message: 'This can be any json',
       },
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
@@ -178,7 +202,7 @@ describe('CREATE work', () => {
 
     it('should return 404 for non-existed work stream', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/1234/works`)
+        .post(`/v5/projects/${projectId}/workstreams/1234/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -190,7 +214,7 @@ describe('CREATE work', () => {
       models.WorkStream.destroy({ where: { id: workStreamId } })
         .then(() => {
           request(server)
-            .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+            .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
@@ -199,92 +223,92 @@ describe('CREATE work', () => {
         });
     });
 
-    it('should return 422 when name not provided', (done) => {
+    it('should return 400 when name not provided', (done) => {
       const reqBody = _.cloneDeep(body);
-      delete reqBody.param.name;
+      delete reqBody.name;
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when status not provided', (done) => {
+    it('should return 400 when status not provided', (done) => {
       const reqBody = _.cloneDeep(body);
-      delete reqBody.param.status;
+      delete reqBody.status;
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when startDate > endDate', (done) => {
+    it('should return 400 when startDate > endDate', (done) => {
       const reqBody = _.cloneDeep(body);
-      reqBody.param.startDate = '2018-05-16T12:00:00';
+      reqBody.startDate = '2018-05-16T12:00:00';
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when budget is negative', (done) => {
+    it('should return 400 when budget is negative', (done) => {
       const reqBody = _.cloneDeep(body);
-      reqBody.param.budget = -20;
+      reqBody.budget = -20;
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when progress is negative', (done) => {
+    it('should return 400 when progress is negative', (done) => {
       const reqBody = _.cloneDeep(body);
-      reqBody.param.progress = -20;
+      reqBody.progress = -20;
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for member', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send(body)
+        .send(_.assign({ productTemplateId }, body))
         .expect(201, done);
     });
 
-    it('should return 200 for connect admin', (done) => {
+    it('should return 201 for connect admin', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
+        .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send(body)
-        .expect(200)
+        .send(_.assign({ productTemplateId }, body))
+        .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
-          validatePhase(resJson, body.param);
+          const resJson = res.body;
+          validatePhase(resJson, body);
           done();
         });
     });
@@ -306,116 +330,44 @@ describe('CREATE work', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when work added', (done) => {
+      it('should send correct BUS API messages when work added', (done) => {
         request(server)
-        .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send(body)
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
-                projectId,
-                projectName,
-                projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
-                userId: 40051331,
-                initiatorUserId: 40051331,
-              })).should.be.true;
-              done();
-            });
-          }
-        });
-      });
-    });
+          .post(`/v5/projects/${projectId}/workstreams/${workStreamId}/works`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(2);
 
-    describe('RabbitMQ Message topic', () => {
-      let createMessageSpy;
-      let publishSpy;
-      let sandbox;
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                  resource: RESOURCES.PHASE,
+                  name: body.name,
+                  status: body.status,
+                  budget: body.budget,
+                  progress: body.progress,
+                  projectId,
+                })).should.be.true;
 
-      before(async (done) => {
-        // Wait for 500ms in order to wait for createEvent calls from previous tests to complete
-        testUtil.wait(done);
-      });
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                  projectId,
+                  projectName,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${projectId}`,
+                  userId: 40051331,
+                  initiatorUserId: 40051331,
+                })).should.be.true;
 
-      beforeEach(async (done) => {
-        sandbox = sinon.sandbox.create();
-        server.services.pubsub = new RabbitMQService(server.logger);
-
-        // initialize RabbitMQ
-        server.services.pubsub.init(
-          config.get('rabbitmqURL'),
-          config.get('pubsubExchangeName'),
-          config.get('pubsubQueueName'),
-        );
-
-        // add project to ES index
-        await server.services.es.index({
-          index: ES_PROJECT_INDEX,
-          type: ES_PROJECT_TYPE,
-          id: projectId,
-          body: {
-            doc: project,
-          },
-        });
-
-        testUtil.wait(() => {
-          publishSpy = sandbox.spy(server.services.pubsub, 'publish');
-          createMessageSpy = sandbox.spy(messageService, 'createTopic');
-          done();
-        });
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
-      after(() => {
-        mockRabbitMQ(server);
-      });
-
-      it('should send message topic when work added', (done) => {
-        const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-          post: () => Promise.resolve({
-            status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: {},
-              },
-            },
-          }),
-        });
-        sandbox.stub(messageService, 'getClient', () => mockHttpClient);
-        request(server)
-            .post(`/v4/projects/${projectId}/workstreams/${workStreamId}/works`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
-            })
-            .send(body)
-            .expect(201)
-            .end((err) => {
-              if (err) {
-                done(err);
-              } else {
-                testUtil.wait(() => {
-                  publishSpy.calledOnce.should.be.true;
-                  publishSpy.calledWith('project.phase.added').should.be.true;
-                  createMessageSpy.calledTwice.should.be.true;
-                  done();
-                });
-              }
-            });
+                done();
+              });
+            }
+          });
       });
     });
   });

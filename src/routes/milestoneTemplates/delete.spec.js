@@ -26,7 +26,7 @@ const expectAfterDelete = (id, err, next) => {
           chai.assert.isNotNull(res.deletedBy);
 
           request(server)
-            .get(`/v4/timelines/metadata/milestoneTemplates/${id}`)
+            .get(`/v5/timelines/metadata/milestoneTemplates/${id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -122,22 +122,26 @@ const milestoneTemplates = [
 ];
 
 describe('DELETE milestone template', () => {
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProductTemplate.bulkCreate(productTemplates))
+      .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
+  },
   );
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /timelines/metadata/milestoneTemplates/{milestoneTemplateId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/1')
+        .delete('/v5/timelines/metadata/milestoneTemplates/1')
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/1')
+        .delete('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -146,7 +150,7 @@ describe('DELETE milestone template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/1')
+        .delete('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -155,7 +159,7 @@ describe('DELETE milestone template', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/1')
+        .delete('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -164,7 +168,7 @@ describe('DELETE milestone template', () => {
 
     it('should return 404 for non-existed milestone template', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/444')
+        .delete('/v5/timelines/metadata/milestoneTemplates/444')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -173,25 +177,25 @@ describe('DELETE milestone template', () => {
 
     it('should return 404 for deleted milestone template', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/2')
+        .delete('/v5/timelines/metadata/milestoneTemplates/2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(404, done);
     });
 
-    it('should return 422 for invalid milestoneTemplateId param', (done) => {
+    it('should return 400 for invalid milestoneTemplateId param', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/0')
+        .delete('/v5/timelines/metadata/milestoneTemplates/0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 204, for admin, if template was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/1')
+        .delete('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -201,7 +205,7 @@ describe('DELETE milestone template', () => {
 
     it('should return 204, for connect admin, if template was successfully removed', (done) => {
       request(server)
-        .delete('/v4/timelines/metadata/milestoneTemplates/1')
+        .delete('/v5/timelines/metadata/milestoneTemplates/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

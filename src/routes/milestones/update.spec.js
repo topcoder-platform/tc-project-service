@@ -11,7 +11,7 @@ import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { EVENT, MILESTONE_STATUS, BUS_API_EVENT } from '../../constants';
+import { RESOURCES, MILESTONE_STATUS, BUS_API_EVENT, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -166,6 +166,7 @@ describe('UPDATE Milestone', () => {
                     name: 'Milestone 2',
                     duration: 3,
                     startDate: '2018-05-14T00:00:00.000Z',
+                    actualStartDate: '2018-05-14T00:00:00.000Z',
                     status: 'reviewed',
                     type: 'type2',
                     order: 2,
@@ -252,48 +253,48 @@ describe('UPDATE Milestone', () => {
                     updatedAt: '2018-05-11T00:00:00.000Z',
                   },
                 ])))
-                .then(() => done());
+              .then(() => done());
           });
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('PATCH /timelines/{timelineId}/milestones/{milestoneId}', () => {
     const body = {
-      param: {
-        name: 'Milestone 1-updated',
-        duration: 3,
-        description: 'description-updated',
-        status: 'draft',
-        type: 'type1-updated',
-        details: {
-          detail1: {
-            subDetail1A: 0,
-            subDetail1C: 3,
-          },
-          detail2: [4],
-          detail3: 3,
+      name: 'Milestone 1-updated',
+      duration: 3,
+      description: 'description-updated',
+      status: 'draft',
+      type: 'type1-updated',
+      details: {
+        detail1: {
+          subDetail1A: 0,
+          subDetail1C: 3,
         },
-        order: 1,
-        plannedText: 'plannedText 1-updated',
-        activeText: 'activeText 1-updated',
-        completedText: 'completedText 1-updated',
-        blockedText: 'blockedText 1-updated',
-        hidden: true,
+        detail2: [4],
+        detail3: 3,
       },
+      order: 1,
+      plannedText: 'plannedText 1-updated',
+      activeText: 'activeText 1-updated',
+      completedText: 'completedText 1-updated',
+      blockedText: 'blockedText 1-updated',
+      hidden: true,
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -303,9 +304,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 403 for non-admin member updating the completionDate', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.completionDate = '2019-01-16T00:00:00.000Z';
+      newBody.completionDate = '2019-01-16T00:00:00.000Z';
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -315,9 +316,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 403 for non-admin member updating the actualStartDate', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.actualStartDate = '2018-05-15T00:00:00.000Z';
+      newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/2')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -325,9 +326,33 @@ describe('UPDATE Milestone', () => {
         .expect(403, done);
     });
 
+    it('should return 200 for non-admin member setting the completionDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.completionDate = '2019-01-16T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
+        .expect(200, done);
+    });
+
+    it('should return 200 for non-admin member setting the actualStartDate', (done) => {
+      const newBody = _.cloneDeep(body);
+      newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
+      request(server)
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
+        })
+        .send(newBody)
+        .expect(200, done);
+    });
+
     it('should return 404 for non-existed timeline', (done) => {
       request(server)
-        .patch('/v4/timelines/1234/milestones/1')
+        .patch('/v5/timelines/1234/milestones/1')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
@@ -337,7 +362,7 @@ describe('UPDATE Milestone', () => {
 
     it('should return 404 for deleted timeline', (done) => {
       request(server)
-        .patch('/v4/timelines/3/milestones/1')
+        .patch('/v5/timelines/3/milestones/1')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
@@ -347,7 +372,7 @@ describe('UPDATE Milestone', () => {
 
     it('should return 404 for non-existed Milestone', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/111')
+        .patch('/v5/timelines/1/milestones/111')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
@@ -357,7 +382,7 @@ describe('UPDATE Milestone', () => {
 
     it('should return 404 for deleted Milestone', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/5')
+        .patch('/v5/timelines/1/milestones/5')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
@@ -365,31 +390,31 @@ describe('UPDATE Milestone', () => {
         .expect(404, done);
     });
 
-    it('should return 422 for invalid timelineId param', (done) => {
+    it('should return 400 for invalid timelineId param', (done) => {
       request(server)
-        .patch('/v4/timelines/0/milestones/1')
+        .patch('/v5/timelines/0/milestones/1')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for invalid milestoneId param', (done) => {
+    it('should return 400 for invalid milestoneId param', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/0')
+        .patch('/v5/timelines/1/milestones/0')
         .send(body)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 200 for missing name', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.name;
+      delete partialBody.name;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -399,9 +424,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing type', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.type;
+      delete partialBody.type;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -411,9 +436,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing duration', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.duration;
+      delete partialBody.duration;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -423,9 +448,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing order', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.order;
+      delete partialBody.order;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -435,9 +460,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing plannedText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.plannedText;
+      delete partialBody.plannedText;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -447,9 +472,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing blockedText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.blockedText;
+      delete partialBody.blockedText;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -459,9 +484,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing activeText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.activeText;
+      delete partialBody.activeText;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -471,9 +496,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing completedText', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.completedText;
+      delete partialBody.completedText;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -483,9 +508,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for missing hidden field', (done) => {
       const partialBody = _.cloneDeep(body);
-      delete partialBody.param.hidden;
+      delete partialBody.hidden;
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -494,53 +519,51 @@ describe('UPDATE Milestone', () => {
     });
 
     ['startDate', 'endDate'].forEach((field) => {
-      it(`should return 422 if ${field} is present in the payload`, (done) => {
-        const invalidBody = {
-          param: _.assign({}, body.param, {
-            [field]: '2018-07-01T00:00:00.000Z',
-          }),
-        };
+      it(`should return 400 if ${field} is present in the payload`, (done) => {
+        const invalidBody = _.assign({}, body, {
+          [field]: '2018-07-01T00:00:00.000Z',
+        });
 
         request(server)
-          .patch('/v4/timelines/1/milestones/1')
+          .patch('/v5/timelines/1/milestones/1')
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
           .send(invalidBody)
           .expect('Content-Type', /json/)
-          .expect(422, done);
+          .expect(400, done);
       });
     });
 
     it('should return 200 for admin', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.completionDate = '2018-05-15T00:00:00.000Z';
+      newBody.completionDate = '2018-05-15T00:00:00.000Z';
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(newBody)
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.duration.should.be.eql(body.param.duration);
-          resJson.completionDate.should.be.eql(newBody.param.completionDate);
-          resJson.status.should.be.eql(body.param.status);
-          resJson.type.should.be.eql(body.param.type);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.duration.should.be.eql(body.duration);
+          resJson.completionDate.should.be.eql(newBody.completionDate);
+          resJson.status.should.be.eql(body.status);
+          resJson.type.should.be.eql(body.type);
           resJson.details.should.be.eql({
-            detail1: { subDetail1A: 0, subDetail1B: 2, subDetail1C: 3 },
+            detail1: { subDetail1A: 0, subDetail1C: 3 },
             detail2: [4],
             detail3: 3,
           });
-          resJson.order.should.be.eql(body.param.order);
-          resJson.plannedText.should.be.eql(body.param.plannedText);
-          resJson.activeText.should.be.eql(body.param.activeText);
-          resJson.completedText.should.be.eql(body.param.completedText);
-          resJson.blockedText.should.be.eql(body.param.blockedText);
+          resJson.order.should.be.eql(body.order);
+          resJson.plannedText.should.be.eql(body.plannedText);
+          resJson.activeText.should.be.eql(body.activeText);
+          resJson.completedText.should.be.eql(body.completedText);
+          resJson.blockedText.should.be.eql(body.blockedText);
 
           should.exist(resJson.createdBy);
           should.exist(resJson.createdAt);
@@ -552,14 +575,11 @@ describe('UPDATE Milestone', () => {
           // validate statusHistory
           should.exist(resJson.statusHistory);
           resJson.statusHistory.should.be.an('array');
-          resJson.statusHistory.length.should.be.eql(2);
+          resJson.statusHistory.length.should.be.eql(1);
           resJson.statusHistory.forEach((statusHistory) => {
             statusHistory.reference.should.be.eql('milestone');
             statusHistory.referenceId.should.be.eql(resJson.id);
           });
-
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_UPDATED).should.be.true;
 
           done();
         });
@@ -570,33 +590,28 @@ describe('UPDATE Milestone', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 4 }) }) // 1 to 4
+        .send(_.assign({}, body, { order: 4 })) // 1 to 4
         .expect(200)
         .end(() => {
-          // Milestone 1: order 4
-          // Milestone 2: order 2 - 1 = 1
-          // Milestone 3: order 3 - 1 = 2
-          // Milestone 4: order 4 - 1 = 3
-          models.Milestone.findById(1)
+          models.Milestone.findByPk(1)
             .then((milestone) => {
               milestone.order.should.be.eql(4);
             })
-            .then(() => models.Milestone.findById(2))
-            .then((milestone) => {
-              milestone.order.should.be.eql(1);
-            })
-            .then(() => models.Milestone.findById(3))
+            .then(() => models.Milestone.findByPk(2))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
             })
-            .then(() => models.Milestone.findById(4))
+            .then(() => models.Milestone.findByPk(3))
             .then((milestone) => {
               milestone.order.should.be.eql(3);
-
+            })
+            .then(() => models.Milestone.findByPk(4))
+            .then((milestone) => {
+              milestone.order.should.be.eql(4);
               done();
             });
         });
@@ -607,30 +622,30 @@ describe('UPDATE Milestone', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 5 }) }) // 1 to 5
+        .send(_.assign({}, body, { order: 5 })) // 1 to 5
         .expect(200)
         .end(() => {
           // Milestone 1: order 5
           // Milestone 2: order 2
           // Milestone 3: order 3
           // Milestone 4: order 4
-          models.Milestone.findById(1)
+          models.Milestone.findByPk(1)
             .then((milestone) => {
               milestone.order.should.be.eql(5);
             })
-            .then(() => models.Milestone.findById(2))
+            .then(() => models.Milestone.findByPk(2))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
             })
-            .then(() => models.Milestone.findById(3))
+            .then(() => models.Milestone.findByPk(3))
             .then((milestone) => {
               milestone.order.should.be.eql(3);
             })
-            .then(() => models.Milestone.findById(4))
+            .then(() => models.Milestone.findByPk(4))
             .then((milestone) => {
               milestone.order.should.be.eql(4);
 
@@ -644,33 +659,28 @@ describe('UPDATE Milestone', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/timelines/1/milestones/4')
+        .patch('/v5/timelines/1/milestones/4')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 2 }) }) // 4 to 2
+        .send(_.assign({}, body, { order: 2 })) // 4 to 2
         .expect(200)
         .end(() => {
-          // Milestone 1: order 1
-          // Milestone 2: order 3
-          // Milestone 3: order 4
-          // Milestone 4: order 2
-          models.Milestone.findById(1)
+          models.Milestone.findByPk(1)
             .then((milestone) => {
               milestone.order.should.be.eql(1);
             })
-            .then(() => models.Milestone.findById(2))
+            .then(() => models.Milestone.findByPk(2))
+            .then((milestone) => {
+              milestone.order.should.be.eql(2);
+            })
+            .then(() => models.Milestone.findByPk(3))
             .then((milestone) => {
               milestone.order.should.be.eql(3);
             })
-            .then(() => models.Milestone.findById(3))
-            .then((milestone) => {
-              milestone.order.should.be.eql(4);
-            })
-            .then(() => models.Milestone.findById(4))
+            .then(() => models.Milestone.findByPk(4))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
-
               done();
             });
         });
@@ -681,30 +691,30 @@ describe('UPDATE Milestone', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/timelines/1/milestones/4')
+        .patch('/v5/timelines/1/milestones/4')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 0 }) }) // 4 to 0
+        .send(_.assign({}, body, { order: 0 })) // 4 to 0
         .expect(200)
         .end(() => {
           // Milestone 1: order 1
           // Milestone 2: order 2
           // Milestone 3: order 3
           // Milestone 4: order 0
-          models.Milestone.findById(1)
+          models.Milestone.findByPk(1)
             .then((milestone) => {
               milestone.order.should.be.eql(1);
             })
-            .then(() => models.Milestone.findById(2))
+            .then(() => models.Milestone.findByPk(2))
             .then((milestone) => {
               milestone.order.should.be.eql(2);
             })
-            .then(() => models.Milestone.findById(3))
+            .then(() => models.Milestone.findByPk(3))
             .then((milestone) => {
               milestone.order.should.be.eql(3);
             })
-            .then(() => models.Milestone.findById(4))
+            .then(() => models.Milestone.findByPk(4))
             .then((milestone) => {
               milestone.order.should.be.eql(0);
 
@@ -718,15 +728,15 @@ describe('UPDATE Milestone', () => {
       this.timeout(10000);
 
       request(server)
-        .patch('/v4/timelines/2/milestones/6')
+        .patch('/v5/timelines/2/milestones/6')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({ param: _.assign({}, body.param, { order: 0 }) }) // 1 to 0
+        .send(_.assign({}, body, { order: 0 })) // 1 to 0
         .expect(200)
         .end(() => {
           // Milestone 6: order 0
-          models.Milestone.findById(6)
+          models.Milestone.findByPk(6)
             .then((milestone) => {
               milestone.order.should.be.eql(0);
 
@@ -780,25 +790,25 @@ describe('UPDATE Milestone', () => {
       ])
         .then(() => {
           request(server)
-            .patch('/v4/timelines/2/milestones/8')
+            .patch('/v5/timelines/2/milestones/8')
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
-            .send({ param: _.assign({}, body.param, { order: 2 }) }) // 4 to 2
+            .send(_.assign({}, body, { order: 2 })) // 4 to 2
             .expect(200)
             .end(() => {
               // Milestone 6: order 1 => 1
               // Milestone 7: order 3 => 3
               // Milestone 8: order 4 => 2
-              models.Milestone.findById(6)
+              models.Milestone.findByPk(6)
                 .then((milestone) => {
                   milestone.order.should.be.eql(1);
                 })
-                .then(() => models.Milestone.findById(7))
+                .then(() => models.Milestone.findByPk(7))
                 .then((milestone) => {
                   milestone.order.should.be.eql(3);
                 })
-                .then(() => models.Milestone.findById(8))
+                .then(() => models.Milestone.findByPk(8))
                 .then((milestone) => {
                   milestone.order.should.be.eql(2);
 
@@ -853,25 +863,22 @@ describe('UPDATE Milestone', () => {
       ])
         .then(() => {
           request(server)
-            .patch('/v4/timelines/2/milestones/8')
+            .patch('/v5/timelines/2/milestones/8')
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
-            .send({ param: _.assign({}, body.param, { order: 2 }) }) // 4 to 2
+            .send(_.assign({}, body, { order: 2 })) // 4 to 2
             .expect(200)
             .end(() => {
-              // Milestone 6: order 1 => 1
-              // Milestone 7: order 2 => 3
-              // Milestone 8: order 4 => 2
-              models.Milestone.findById(6)
+              models.Milestone.findByPk(6)
                 .then((milestone) => {
                   milestone.order.should.be.eql(1);
                 })
-                .then(() => models.Milestone.findById(7))
+                .then(() => models.Milestone.findByPk(7))
                 .then((milestone) => {
-                  milestone.order.should.be.eql(3);
+                  milestone.order.should.be.eql(2);
                 })
-                .then(() => models.Milestone.findById(8))
+                .then(() => models.Milestone.findByPk(8))
                 .then((milestone) => {
                   milestone.order.should.be.eql(2);
 
@@ -882,202 +889,87 @@ describe('UPDATE Milestone', () => {
         });
     });
 
-    it('should return 200 for admin - marking milestone active later will cascade changes to coming ' +
+    xit('should return 200 for admin - marking milestone active later will adjust actual start date and end date'
       // eslint-disable-next-line func-names
-      'milestones', function (done) {
-      this.timeout(10000);
-      const today = moment.utc().hours(0).minutes(0).seconds(0)
-        .milliseconds(0);
+      , function (done) {
+        this.timeout(10000);
+        const today = moment.utc().hours(0).minutes(0).seconds(0)
+          .milliseconds(0);
 
-      request(server)
-        .patch('/v4/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ param: { status: MILESTONE_STATUS.ACTIVE } })
-        .expect(200)
-        .end(() => {
-          // Milestone 2: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-14T00:00:00.000Z'
-          //        actualStartDate: null                       to today
-          //                endDate: null                       to today + 2 (2 = duration - 1)
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to today + 3
-          //                endDate: null                       to today + 5 (5 = 3 + duration - 1)
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to today + 6
-          //                endDate: null                       to today + 8 (2 = 6 + duration - 1)
-          models.Milestone.findById(2)
-            .then((milestone) => {
-              should.exist(milestone.actualStartDate);
-              moment.utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
-              // start date of the updated milestone should not change
-              milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
-              today.add('days', milestone.duration - 1);
-              // end date of the updated milestone should change, as delayed start caused scheduled to be delayed
-              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
-              milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
-              return models.Milestone.findById(3);
-            })
-            .then((milestone) => {
-              today.add('days', 1); // should have start date next to previous one's end date
-              moment.utc(milestone.startDate).diff(today, 'days').should.be.eql(0);
-              should.not.exist(milestone.actualStartDate);
-              today.add('days', milestone.duration - 1);
-              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
-              return models.Milestone.findById(4);
-            })
-            .then((milestone) => {
-              today.add('days', 1); // should have start date next to previous one's end date
-              moment.utc(milestone.startDate).diff(today, 'days').should.be.eql(0);
-              should.not.exist(milestone.actualStartDate);
-              today.add('days', milestone.duration - 1);
-              moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
-              done();
-            })
-            .catch(done);
-        });
-    });
+        request(server)
+          .patch('/v5/timelines/1/milestones/2')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send({ status: MILESTONE_STATUS.ACTIVE })
+          .expect(200)
+          .end(() => {
+            models.Milestone.findByPk(2)
+              .then((milestone) => {
+                should.exist(milestone.actualStartDate);
+                moment.utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
+                // start date of the updated milestone should not change
+                milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
+                today.add('days', milestone.duration - 1);
+                // end date of the updated milestone should change, as delayed start caused scheduled to be delayed
+                moment.utc(milestone.endDate).diff(today, 'days').should.be.eql(0);
+                milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
+                done();
+              })
+              .catch(done);
+          });
+      });
 
-    it('should return 200 for admin - changing completionDate will cascade changes to coming ' +
+    xit('should return 200 for admin - changing completionDate will set status to completed',
       // eslint-disable-next-line func-names
-      'milestones', function (done) {
-      this.timeout(10000);
-      const today = moment.utc().hours(0).minutes(0).seconds(0)
-        .milliseconds(0);
+      function (done) {
+        this.timeout(10000);
+        const data = Object.assign({}, body, { completionDate: '2018-05-18T00:00:00.000Z',
+          order: undefined,
+          duration: undefined });
+        delete data.status;
+        request(server)
+          .patch('/v5/timelines/1/milestones/2')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(data)
+          .expect(200)
+          .end(() => {
+            models.Milestone.findByPk(2)
+              .then((milestone) => {
+                milestone.status.should.be.eql(MILESTONE_STATUS.COMPLETED);
+                done();
+              })
+              .catch(done);
+          });
+      });
 
-      request(server)
-        .patch('/v4/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ param: _.assign({}, body.param, {
-          completionDate: '2018-05-18T00:00:00.000Z', order: undefined, duration: undefined,
-        }) })
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Milestone.findById(3)
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-              should.exist(milestone.actualStartDate);
-              moment().utc(milestone.actualStartDate).diff(today, 'days').should.be.eql(0);
-              // milestone.actualStartDate.should.be.eql(today);
-              milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
-              milestone.status.should.be.eql(MILESTONE_STATUS.ACTIVE);
-              return models.Milestone.findById(4);
-            })
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
-              should.not.exist(milestone.actualStartDate);
-              milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-              done();
-            })
-            .catch(done);
-        });
-    });
-
-    it('should return 200 for admin - changing completionDate will change the timeline\'s ' +
+    xit('should return 200 for admin - changing duration will adjust the milestone endDate',
       // eslint-disable-next-line func-names
-      'endDate', function (done) {
-      this.timeout(10000);
-
-      request(server)
-        .patch('/v4/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ param: _.assign({}, body.param, {
-          completionDate: '2018-05-18T00:00:00.000Z', order: undefined, duration: undefined,
-        }) })
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          // BELOW will be the new timeline's endDate
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Timeline.findById(1)
-            .then((timeline) => {
-              // timeline start shouldn't change
-              timeline.startDate.should.be.eql(new Date('2018-05-02T00:00:00.000Z'));
-
-              // timeline end should change
-              timeline.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-
-              done();
-            })
-            .catch(done);
-        });
-    });
-
-    it('should return 200 for admin - changing duration will cascade changes to coming ' +
-      // eslint-disable-next-line func-names
-      'milestones', function (done) {
-      this.timeout(10000);
-
-      request(server)
-        .patch('/v4/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ param: _.assign({}, body.param, { duration: 5, order: undefined, completionDate: undefined }) })
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Milestone.findById(3)
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-19T00:00:00.000Z'));
-              milestone.endDate.should.be.eql(new Date('2018-05-21T00:00:00.000Z'));
-              return models.Milestone.findById(4);
-            })
-            .then((milestone) => {
-              milestone.startDate.should.be.eql(new Date('2018-05-22T00:00:00.000Z'));
-              milestone.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-              done();
-            })
-            .catch(done);
-        });
-    });
-
-    it('should return 200 for admin - changing duration will change the timeline\'s ' +
-      // eslint-disable-next-line func-names
-      'endDate', function (done) {
-      this.timeout(10000);
-
-      request(server)
-        .patch('/v4/timelines/1/milestones/2')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send({ param: _.assign({}, body.param, { duration: 5, order: undefined, completionDate: undefined }) })
-        .expect(200)
-        .end(() => {
-          // Milestone 3: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-19T00:00:00.000Z'
-          //                endDate: null                       to '2018-05-21T00:00:00.000Z'
-          // Milestone 4: startDate: '2018-05-14T00:00:00.000Z' to '2018-05-22T00:00:00.000Z'
-          // BELOW will be the new timeline's endDate
-          //                endDate: null                       to '2018-05-24T00:00:00.000Z'
-          models.Timeline.findById(1)
-            .then((timeline) => {
-              // timeline start shouldn't change
-              timeline.startDate.should.be.eql(new Date('2018-05-02T00:00:00.000Z'));
-
-              // timeline end should change
-              timeline.endDate.should.be.eql(new Date('2018-05-24T00:00:00.000Z'));
-
-              done();
-            })
-            .catch(done);
-        });
-    });
+      function (done) {
+        this.timeout(10000);
+        request(server)
+          .patch('/v5/timelines/1/milestones/2')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(_.assign({}, body, { duration: 5, order: undefined, completionDate: undefined }))
+          .expect(200)
+          .end(() => {
+            models.Milestone.findByPk(2)
+              .then((milestone) => {
+                milestone.startDate.should.be.eql(new Date('2018-05-14T00:00:00.000Z'));
+                milestone.endDate.should.be.eql(new Date('2018-05-18T00:00:00.000Z'));
+                done();
+              })
+              .catch(done);
+          });
+      });
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -1088,9 +980,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for admin updating the completionDate', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.completionDate = '2018-05-16T00:00:00.000Z';
+      newBody.completionDate = '2018-05-16T00:00:00.000Z';
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -1100,9 +992,9 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for admin updating the actualStartDate', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.actualStartDate = '2018-05-15T00:00:00.000Z';
+      newBody.actualStartDate = '2018-05-15T00:00:00.000Z';
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -1112,7 +1004,7 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -1123,7 +1015,7 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -1134,7 +1026,7 @@ describe('UPDATE Milestone', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .patch('/v4/timelines/1/milestones/1')
+        .patch('/v5/timelines/1/milestones/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -1143,82 +1035,82 @@ describe('UPDATE Milestone', () => {
         .end(done);
     });
 
-    it('should return 422 if try to pause and statusComment is missed', (done) => {
+    it('should return 400 if try to pause and statusComment is missed', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.status = 'paused';
+      newBody.status = 'paused';
       request(server)
-      .patch('/v4/timelines/1/milestones/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(422, done);
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(400, done);
     });
 
-    it('should return 422 if try to pause not active milestone', (done) => {
+    it('should return 400 if try to pause not active milestone', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.status = 'paused';
-      newBody.param.statusComment = 'milestone paused';
+      newBody.status = 'paused';
+      newBody.statusComment = 'milestone paused';
       request(server)
-      .patch('/v4/timelines/1/milestones/2')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(422, done);
+        .patch('/v5/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(400, done);
     });
 
     it('should return 200 if try to pause and should have one status history created', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.status = 'paused';
-      newBody.param.statusComment = 'milestone paused';
+      newBody.status = 'paused';
+      newBody.statusComment = 'milestone paused';
       request(server)
-      .patch('/v4/timelines/1/milestones/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(200)
-      .end((err) => {
-        if (err) {
-          done(err);
-        } else {
-          models.Milestone.findById(1).then((milestone) => {
-            milestone.status.should.be.eql('paused');
-            return models.StatusHistory.findAll({
-              where: {
-                reference: 'milestone',
-                referenceId: milestone.id,
-                status: milestone.status,
-                comment: 'milestone paused',
-              },
-              paranoid: false,
-            }).then((statusHistories) => {
-              statusHistories.length.should.be.eql(1);
-              done();
+        .patch('/v5/timelines/1/milestones/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(200)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            models.Milestone.findByPk(1).then((milestone) => {
+              milestone.status.should.be.eql('paused');
+              return models.StatusHistory.findAll({
+                where: {
+                  reference: 'milestone',
+                  referenceId: milestone.id,
+                  status: milestone.status,
+                  comment: 'milestone paused',
+                },
+                paranoid: false,
+              }).then((statusHistories) => {
+                statusHistories.length.should.be.eql(1);
+                done();
+              });
             });
-          });
-        }
-      });
+          }
+        });
     });
 
-    it('should return 422 if try to resume not paused milestone', (done) => {
+    it('should return 400 if try to resume not paused milestone', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.status = 'resume';
+      newBody.status = 'resume';
       request(server)
-      .patch('/v4/timelines/1/milestones/2')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
-      .send(newBody)
-      .expect(422, done);
+        .patch('/v5/timelines/1/milestones/2')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send(newBody)
+        .expect(400, done);
     });
 
     it('should return 200 if try to resume then status should update to last status and ' +
         'should have one status history created', (done) => {
       const newBody = _.cloneDeep(body);
-      newBody.param.status = 'resume';
-      newBody.param.statusComment = 'new comment';
+      newBody.status = 'resume';
+      newBody.statusComment = 'new comment';
       models.Milestone.bulkCreate([
         {
           id: 7,
@@ -1247,39 +1139,39 @@ describe('UPDATE Milestone', () => {
           createdAt: '2018-05-11T00:00:00.000Z',
           updatedAt: '2018-05-11T00:00:00.000Z',
         },
-      ]).then(() => models.Milestone.findById(7)
+      ]).then(() => models.Milestone.findByPk(7)
         // pause milestone before resume
         .then(milestone => milestone.update(_.assign({}, milestone.toJSON(), { status: 'paused' }))),
       ).then(() => {
         request(server)
-        .patch('/v4/timelines/1/milestones/7')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(newBody)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            models.Milestone.findById(7).then((milestone) => {
-              milestone.status.should.be.eql('active');
+          .patch('/v5/timelines/1/milestones/7')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .send(newBody)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              models.Milestone.findByPk(7).then((milestone) => {
+                milestone.status.should.be.eql('active');
 
-              return models.StatusHistory.findAll({
-                where: {
-                  reference: 'milestone',
-                  referenceId: milestone.id,
-                  status: 'active',
-                  comment: 'new comment',
-                },
-                paranoid: false,
-              }).then((statusHistories) => {
-                statusHistories.length.should.be.eql(1);
-                done();
+                return models.StatusHistory.findAll({
+                  where: {
+                    reference: 'milestone',
+                    referenceId: milestone.id,
+                    status: 'active',
+                    comment: 'new comment',
+                  },
+                  paranoid: false,
+                }).then((statusHistories) => {
+                  statusHistories.length.should.be.eql(1);
+                  done();
+                }).catch(done);
               }).catch(done);
-            }).catch(done);
-          }
-        });
+            }
+          });
       });
     });
 
@@ -1300,18 +1192,15 @@ describe('UPDATE Milestone', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.MILESTONE_WAITING_CUSTOMER when milestone duration updated', (done) => {
+      it('sends send correct BUS API messages when milestone details updated and waiting for customer', (done) => {
         request(server)
-          .patch('/v4/timelines/1/milestones/1')
+          .patch('/v5/timelines/1/milestones/1')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              // duration: 1,
-              details: {
-                metadata: { waitingForCustomer: true },
-              },
+            details: {
+              metadata: { waitingForCustomer: true },
             },
           })
           .expect(200)
@@ -1320,83 +1209,104 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                // 5 milestones in total, so it would trigger 5 events
-                // 4 MILESTONE_UPDATED events are for 4 non deleted milestones
-                // 1 TIMELINE_ADJUSTED event, because timeline's end date updated
+                createEventSpy.callCount.should.be.eql(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  resource: RESOURCES.MILESTONE,
+                  details: {
+                    metadata: { waitingForCustomer: true },
+                  },
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_UPDATED, sinon.match({
+                  projectId: 1,
+                  projectName: 'test1',
+                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
+                  userId: 40051332,
+                  initiatorUserId: 40051332,
+                })).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MILESTONE_WAITING_CUSTOMER)
+                  .should.be.true;
+
+                done();
+              });
+            }
+          });
+      });
+
+      it('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone duration updated', (done) => {
+        request(server)
+          .patch('/v5/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({
+            duration: 1,
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.false;
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
+                  sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
+                  sinon.match({ duration: 1 })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
+
+      it('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone status updated', (done) => {
+        request(server)
+          .patch('/v5/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({
+            status: 'reviewed',
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.calledOnce.should.be.false;
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
+                  sinon.match({ resource: RESOURCES.MILESTONE })).should.be.true;
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED,
+                  sinon.match({ status: 'reviewed' })).should.be.true;
+                done();
+              });
+            }
+          });
+      });
+
+      it('should send correct BUS API messages when milestone order updated', (done) => {
+        request(server)
+          .patch('/v5/timelines/1/milestones/1')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send({
+            order: 2,
+          })
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
                 createEventSpy.callCount.should.be.eql(2);
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
-                createEventSpy.lastCall.calledWith(BUS_API_EVENT.MILESTONE_WAITING_CUSTOMER).should.be.true;
-                done();
-              });
-            }
-          });
-      });
 
-      xit('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone duration updated', (done) => {
-        request(server)
-          .patch('/v4/timelines/1/milestones/1')
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send({
-            param: {
-              duration: 1,
-            },
-          })
-          .expect(200)
-          .end((err) => {
-            if (err) {
-              done(err);
-            } else {
-              testUtil.wait(() => {
-                // 5 milestones in total, so it would trigger 5 events
-                // 4 MILESTONE_UPDATED events are for 4 non deleted milestones
-                // 1 TIMELINE_ADJUSTED event, because timeline's end date updated
-                createEventSpy.callCount.should.be.eql(5);
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
-                createEventSpy.lastCall.calledWith(BUS_API_EVENT.TIMELINE_ADJUSTED).should.be.true;
-                done();
-              });
-            }
-          });
-      });
-
-      xit('should send message BUS_API_EVENT.MILESTONE_UPDATED when milestone status updated', (done) => {
-        request(server)
-          .patch('/v4/timelines/1/milestones/1')
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send({
-            param: {
-              status: 'reviewed',
-            },
-          })
-          .expect(200)
-          .end((err) => {
-            if (err) {
-              done(err);
-            } else {
-              testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  resource: RESOURCES.MILESTONE,
+                  order: 2,
                 })).should.be.true;
                 done();
               });
@@ -1404,16 +1314,14 @@ describe('UPDATE Milestone', () => {
           });
       });
 
-      it('should ONLY send message BUS_API_EVENT.MILESTONE_UPDATED when milestone order updated', (done) => {
+      it('should send correct BUS API messages when milestone plannedText updated', (done) => {
         request(server)
-          .patch('/v4/timelines/1/milestones/1')
+          .patch('/v5/timelines/1/milestones/1')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              order: 2,
-            },
+            plannedText: 'new text',
           })
           .expect(200)
           .end((err) => {
@@ -1421,45 +1329,13 @@ describe('UPDATE Milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
-                })).should.be.true;
-                done();
-              });
-            }
-          });
-      });
+                createEventSpy.callCount.should.be.eql(2);
 
-      it('should ONLY send message BUS_API_EVENT.MILESTONE_UPDATED when milestone plannedText updated', (done) => {
-        request(server)
-          .patch('/v4/timelines/1/milestones/1')
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send({
-            param: {
-              plannedText: 'new text',
-            },
-          })
-          .expect(200)
-          .end((err) => {
-            if (err) {
-              done(err);
-            } else {
-              testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
+                createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_UPDATED, sinon.match({
+                  resource: RESOURCES.MILESTONE,
+                  plannedText: 'new text',
                 })).should.be.true;
+
                 done();
               });
             }

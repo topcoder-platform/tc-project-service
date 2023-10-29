@@ -13,6 +13,7 @@ import util from '../../util';
 import {
   PROJECT_STATUS,
   EVENT,
+  RESOURCES,
 } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
@@ -25,7 +26,7 @@ const permissions = tcMiddleware.permissions;
  * @returns {Promise<date>} the latest completed status' creation date, or undefined if not found
  */
 async function findCompletedProjectEndDate(projectId, transaction) {
-  const projectHistoryRecord = await models.ProjectHistory.find({
+  const projectHistoryRecord = await models.ProjectHistory.findOne({
     where: { projectId, status: PROJECT_STATUS.COMPLETED },
     order: [['createdAt', 'DESC']],
     attributes: ['createdAt'],
@@ -92,7 +93,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
   await models.sequelize.transaction(async (transaction) => {
     const products = project.details.products;
 
-    const projectTemplate = await models.ProjectTemplate.find({
+    const projectTemplate = await models.ProjectTemplate.findOne({
       where: { key: products[0] },
       attributes: ['id', 'phases'],
       raw: true,
@@ -146,7 +147,7 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
         } else {
           query = { productKey: phaseProduct.productKey };
         }
-        const productTemplate = await models.ProductTemplate.find({
+        const productTemplate = await models.ProductTemplate.findOne({
           where: query,
           attributes: ['id', 'name', 'productKey', 'template'],
           raw: true,
@@ -182,12 +183,6 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
   newPhasesAndProducts.forEach(({ phase, products }) => {
     const phaseJSON = phase.toJSON();
     phaseJSON.products = products;
-    // Send events to buses (ProjectPhase)
-    req.log.debug('Sending event to RabbitMQ bus for project phase %d', phase.id);
-    req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED,
-      phaseJSON,
-      { correlationId: req.id },
-    );
     req.log.debug('Sending event to Kafka bus for project phase %d', phase.id);
     req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_ADDED, { req, created: phaseJSON });
   });
@@ -195,19 +190,10 @@ async function migrateFromV2ToV3(req, project, defaultProductTemplateId, phaseNa
   // Send events to buses (Project)
   req.log.debug('updated project', project);
 
-  // publish original and updated project data
-  req.app.services.pubsub.publish(
-    EVENT.ROUTING_KEY.PROJECT_UPDATED, {
-      original: previousValue,
-      updated: project,
-    }, {
-      correlationId: req.id,
-    },
-  );
   req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
     req,
     original: previousValue,
-    updated: project,
+    updated: _.assign({ resource: RESOURCES.PROJECT }, project.toJSON()),
   });
 }
 
@@ -218,13 +204,11 @@ const allowedMigrations = {
 };
 
 const schema = {
-  body: {
-    param: Joi.object().keys({
-      targetVersion: Joi.string().valid(Object.keys(allowedMigrations)).required(),
-      defaultProductTemplateId: Joi.number().integer().positive().required(),
-      phaseName: Joi.string(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    targetVersion: Joi.string().valid(Object.keys(allowedMigrations)).required(),
+    defaultProductTemplateId: Joi.number().integer().positive().required(),
+    phaseName: Joi.string(),
+  }).required(),
   options: {
     status: 400,
   },
@@ -236,9 +220,9 @@ module.exports = [
   async (req, res, next) => {
     try {
       const projectId = Number(req.params.projectId);
-      const targetVersion = req.body.param.targetVersion;
+      const targetVersion = req.body.targetVersion;
       const targetVersionMigrationData = allowedMigrations[targetVersion];
-      const project = await models.Project.find({ where: { id: projectId } });
+      const project = await models.Project.findOne({ where: { id: projectId } });
       if (!project) {
         // returning 404
         throw util.buildApiError(`project not found for id ${projectId}`, 404);
@@ -250,8 +234,8 @@ module.exports = [
           targetVersion}`, 400);
       }
       // we have a valid project to be migrated
-      await handler(req, project, req.body.param.defaultProductTemplateId, req.body.param.phaseName);
-      res.status(200).json(util.wrapResponse(req.id, { message: 'Project successfully migrated' }));
+      await handler(req, project, req.body.defaultProductTemplateId, req.body.phaseName);
+      res.status(200).json({ message: 'Project successfully migrated' });
     } catch (err) {
       next(err);
     }

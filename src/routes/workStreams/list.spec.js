@@ -59,20 +59,22 @@ describe('LIST work streams', () => {
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              models.WorkStream.bulkCreate(_.map(workStreams, w => _.assign(w, { projectId }))).then(() => done());
-            });
+              .then((project) => {
+                projectId = project.id;
+                models.WorkStream.bulkCreate(_.map(workStreams, w => _.assign(w, { projectId }))).then(() => done());
+              });
           });
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /projects/{projectId}/workstreams', () => {
     it('should return 200 for admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams`)
+        .get(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -80,7 +82,7 @@ describe('LIST work streams', () => {
         .end((err, res) => {
           const workStream = workStreams[0];
 
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].name.should.be.eql(workStream.name);
           resJson[0].type.should.be.eql(workStream.type);
@@ -100,7 +102,7 @@ describe('LIST work streams', () => {
       models.Project.destroy({ where: { id: projectId } })
         .then(() => {
           request(server)
-            .get(`/v4/projects/${projectId}/workstreams`)
+            .get(`/v5/projects/${projectId}/workstreams`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -110,13 +112,13 @@ describe('LIST work streams', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams`)
+        .get(`/v5/projects/${projectId}/workstreams`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams`)
+        .get(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -125,7 +127,7 @@ describe('LIST work streams', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams`)
+        .get(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -134,7 +136,7 @@ describe('LIST work streams', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams`)
+        .get(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -144,7 +146,7 @@ describe('LIST work streams', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams`)
+        .get(`/v5/projects/${projectId}/workstreams`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })

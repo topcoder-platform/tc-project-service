@@ -1,13 +1,11 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
-import sinon from 'sinon';
 import chai, { expect } from 'chai';
 import config from 'config';
 import util from '../../util';
 import models from '../../models';
 import { projectUpdatedKafkaHandler } from './index';
 import testUtil from '../../tests/util';
-import server from '../../app';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -27,13 +25,7 @@ describe('projectUpdatedKafkaHandler', () => {
     initiatorUserId: 2,
   };
 
-  const mockedApp = {
-    services: {
-      pubsub: {
-        publish: sinon.stub(),
-      },
-    },
-  };
+  const mockedApp = { logger: console, models };
 
   it('should throw validation exception when payload is empty', async () => {
     await expect(projectUpdatedKafkaHandler(mockedApp, topic, {})).to.be.rejectedWith(Error);
@@ -94,6 +86,7 @@ describe('projectUpdatedKafkaHandler', () => {
 
     beforeEach(async () => {
       await testUtil.clearDb();
+      await testUtil.clearES();
       project = await models.Project.create({
         type: 'generic',
         billingAccountId: 1,
@@ -107,7 +100,7 @@ describe('projectUpdatedKafkaHandler', () => {
         lastActivityUserId: '1',
       });
       // add project to ES index
-      await server.services.es.index({
+      await eClient.index({
         index: ES_PROJECT_INDEX,
         type: ES_PROJECT_TYPE,
         id: project.id,
@@ -130,7 +123,7 @@ describe('projectUpdatedKafkaHandler', () => {
     it('should update lastActivityAt and lastActivityUserId columns in db', async () => {
       await projectUpdatedKafkaHandler(mockedApp, topic, validPayload);
 
-      const updatedProject = await models.Project.findById(project.id);
+      const updatedProject = await models.Project.findByPk(project.id);
       expect(updatedProject.lastActivityUserId).to.be.eql('2');
       expect(updatedProject.lastActivityAt).to.be.greaterThan(project.lastActivityAt);
     });

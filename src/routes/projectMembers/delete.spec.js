@@ -9,27 +9,27 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
 const expectAfterDelete = (projectId, id, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.ProjectMember.findOne({
-    where: {
-      id,
-      projectId,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        next();
-      }
-    }), 500);
+    models.ProjectMember.findOne({
+      where: {
+        id,
+        projectId,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          next();
+        }
+      }), 500);
 };
 describe('Project members delete', () => {
   let project1;
@@ -93,53 +93,41 @@ describe('Project members delete', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send({
-          param: {
-            userId: 1,
-            projectId: project1.id,
-            role: 'customer',
-          },
+          userId: 1,
+          projectId: project1.id,
+          role: 'customer',
         })
         .expect(403, done);
     });
 
-    it('should return 403 if user not found', (done) => {
+    it('should return 404 if user not found', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/8888888`)
+        .delete(`/v5/projects/${project1.id}/members/8888888`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userId: 1,
-            projectId: project1.id,
-            role: 'customer',
-          },
+          userId: 1,
+          projectId: project1.id,
+          role: 'customer',
         })
-        .expect(403, done);
+        .expect(404, done);
     });
 
     it('should return 204 if copilot user has access to the project', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .expect(204)
         .end((err) => {
           expectAfterDelete(project1.id, member1.id, err, () => {
-            const removedMember = {
-              projectId: project1.id,
-              userId: 40051332,
-              role: 'copilot',
-              isPrimary: true,
-            };
-            server.services.pubsub.publish.calledWith('project.member.removed',
-              sinon.match(removedMember)).should.be.true;
             done();
           });
 
@@ -184,21 +172,13 @@ describe('Project members delete', () => {
         updatedAt: '2016-08-30 00:33:07+00',
       }]).then(() => {
         request(server)
-          .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+          .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .expect(204)
           .end((err) => {
             expectAfterDelete(project1.id, member1.id, err, () => {
-              const removedMember = {
-                projectId: project1.id,
-                userId: 40051332,
-                role: 'copilot',
-                isPrimary: true,
-              };
-              server.services.pubsub.publish.calledWith('project.member.removed',
-                sinon.match(removedMember)).should.be.true;
               // validate the primary copilot
               models.ProjectMember.findAll({
                 paranoid: true,
@@ -242,21 +222,44 @@ describe('Project members delete', () => {
       const postSpy = sinon.spy(mockHttpClient, 'post');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(204)
         .end((err) => {
           expectAfterDelete(project1.id, member2.id, err, () => {
-            const removedMember = {
-              projectId: project1.id,
-              userId: 40051334,
-              role: 'manager',
-              isPrimary: true,
-            };
-            server.services.pubsub.publish.calledWith('project.member.removed',
-              sinon.match(removedMember)).should.be.true;
+            postSpy.should.have.been.calledOnce;
+            done();
+          });
+        });
+    });
+
+    it('should remove manager from project using M2M token with "write:project-members" scope', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {},
+            },
+          },
+        }),
+      });
+      const postSpy = sinon.spy(mockHttpClient, 'post');
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+        })
+        .expect(204)
+        .end((err) => {
+          expectAfterDelete(project1.id, member2.id, err, () => {
             postSpy.should.have.been.calledOnce;
             done();
           });
@@ -289,21 +292,13 @@ describe('Project members delete', () => {
       })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+            .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
             .expect(204)
             .end((err) => {
               expectAfterDelete(project1.id, member2.id, err, () => {
-                const removedMember = {
-                  projectId: project1.id,
-                  userId: 40051334,
-                  role: 'manager',
-                  isPrimary: true,
-                };
-                server.services.pubsub.publish.calledWith('project.member.removed',
-                  sinon.match(removedMember)).should.be.true;
                 postSpy.should.not.have.been.calledOnce;
                 done();
               });
@@ -313,7 +308,7 @@ describe('Project members delete', () => {
 
     it('should return 403 if copilot user is trying to remove a manager', (done) => {
       request(server)
-        .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -332,7 +327,7 @@ describe('Project members delete', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when manager removed', (done) => {
+      it('should send correct BUS API messages when manager left', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           post: () => Promise.resolve({
             status: 200,
@@ -349,7 +344,7 @@ describe('Project members delete', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-          .delete(`/v4/projects/${project1.id}/members/${member2.id}`)
+          .delete(`/v5/projects/${project1.id}/members/${member2.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
@@ -359,24 +354,32 @@ describe('Project members delete', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_LEFT);
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                createEventSpy.callCount.should.equal(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  id: member2.id,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_LEFT).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
                   projectId: project1.id,
                   projectName: project1.name,
                   projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
                   userId: 40051334,
                   initiatorUserId: 40051334,
                 })).should.be.true;
+
                 done();
               });
             }
           });
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when copilot removed', (done) => {
+      it('should send correct BUS API messages when copilot removed', (done) => {
         request(server)
-          .delete(`/v4/projects/${project1.id}/members/${member1.id}`)
+          .delete(`/v5/projects/${project1.id}/members/${member1.id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
@@ -386,15 +389,23 @@ describe('Project members delete', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.MEMBER_REMOVED);
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                createEventSpy.callCount.should.equal(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_REMOVED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  id: member1.id,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_REMOVED).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
                   projectId: project1.id,
                   projectName: project1.name,
                   projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                  userId: 40051334,
-                  initiatorUserId: 40051334,
+                  userId: member1.userId,
+                  initiatorUserId: testUtil.userIds.manager,
                 })).should.be.true;
+
                 done();
               });
             }

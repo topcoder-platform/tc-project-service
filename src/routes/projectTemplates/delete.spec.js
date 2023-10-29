@@ -11,83 +11,86 @@ import testUtil from '../../tests/util';
 const expectAfterDelete = (id, err, next) => {
   if (err) throw err;
   setTimeout(() =>
-  models.ProjectTemplate.findOne({
-    where: {
-      id,
-    },
-    paranoid: false,
-  })
-    .then((res) => {
-      if (!res) {
-        throw new Error('Should found the entity');
-      } else {
-        chai.assert.isNotNull(res.deletedAt);
-        chai.assert.isNotNull(res.deletedBy);
+    models.ProjectTemplate.findOne({
+      where: {
+        id,
+      },
+      paranoid: false,
+    })
+      .then((res) => {
+        if (!res) {
+          throw new Error('Should found the entity');
+        } else {
+          chai.assert.isNotNull(res.deletedAt);
+          chai.assert.isNotNull(res.deletedBy);
 
-        request(server)
-          .get(`/v4/projects/metadata/projectTemplates/${id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .expect(404, next);
-      }
-    }), 500);
+          request(server)
+            .get(`/v5/projects/metadata/projectTemplates/${id}`)
+            .set({
+              Authorization: `Bearer ${testUtil.jwts.admin}`,
+            })
+            .expect(404, next);
+        }
+      }), 500);
 };
 
 describe('DELETE project template', () => {
   let templateId;
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProjectTemplate.create({
-      name: 'template 1',
-      key: 'key 1',
-      category: 'category 1',
-      icon: 'http://example.com/icon1.ico',
-      question: 'question 1',
-      info: 'info 1',
-      aliases: ['key-1', 'key_1'],
-      scope: {
-        scope1: {
-          subScope1A: 1,
-          subScope1B: 2,
-        },
-        scope2: [1, 2, 3],
-      },
-      phases: {
-        phase1: {
-          name: 'phase 1',
-          details: {
-            anyDetails: 'any details 1',
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProjectTemplate.create({
+        name: 'template 1',
+        key: 'key 1',
+        category: 'category 1',
+        icon: 'http://example.com/icon1.ico',
+        question: 'question 1',
+        info: 'info 1',
+        aliases: ['key-1', 'key_1'],
+        scope: {
+          scope1: {
+            subScope1A: 1,
+            subScope1B: 2,
           },
-          others: ['others 11', 'others 12'],
+          scope2: [1, 2, 3],
         },
-        phase2: {
-          name: 'phase 2',
-          details: {
-            anyDetails: 'any details 2',
+        phases: {
+          phase1: {
+            name: 'phase 1',
+            details: {
+              anyDetails: 'any details 1',
+            },
+            others: ['others 11', 'others 12'],
           },
-          others: ['others 21', 'others 22'],
+          phase2: {
+            name: 'phase 2',
+            details: {
+              anyDetails: 'any details 2',
+            },
+            others: ['others 21', 'others 22'],
+          },
         },
-      },
-      createdBy: 1,
-      updatedBy: 1,
-    })).then((template) => {
-      templateId = template.id;
-      return Promise.resolve();
-    }),
-  );
-  after(testUtil.clearDb);
+        createdBy: 1,
+        updatedBy: 1,
+      }).then((template) => {
+        templateId = template.id;
+        done();
+      }));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('DELETE /projects/metadata/projectTemplates/{templateId}', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .delete(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .delete(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -96,7 +99,7 @@ describe('DELETE project template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .delete(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -105,7 +108,7 @@ describe('DELETE project template', () => {
 
     it('should return 403 for connect manager', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .delete(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -114,7 +117,7 @@ describe('DELETE project template', () => {
 
     it('should return 404 for non-existed template', (done) => {
       request(server)
-        .delete('/v4/projects/metadata/projectTemplates/1234')
+        .delete('/v5/projects/metadata/projectTemplates/1234')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -125,7 +128,7 @@ describe('DELETE project template', () => {
       models.ProjectTemplate.destroy({ where: { id: templateId } })
         .then(() => {
           request(server)
-            .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
+            .delete(`/v5/projects/metadata/projectTemplates/${templateId}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -135,7 +138,7 @@ describe('DELETE project template', () => {
 
     it('should return 204, for admin, if template was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .delete(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -144,7 +147,7 @@ describe('DELETE project template', () => {
 
     it('should return 204, for connect admin, if template was successfully removed', (done) => {
       request(server)
-        .delete(`/v4/projects/metadata/projectTemplates/${templateId}`)
+        .delete(`/v5/projects/metadata/projectTemplates/${templateId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })

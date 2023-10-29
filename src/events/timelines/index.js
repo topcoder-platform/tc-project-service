@@ -60,7 +60,7 @@ const timelineUpdatedHandler = Promise.coroutine(function* (logger, msg, channel
   try {
     // first get the existing document and than merge the updated changes and save the new document
     const doc = yield eClient.get({ index: ES_TIMELINE_INDEX, type: ES_TIMELINE_TYPE, id: data.original.id });
-    const merged = _.merge(doc._source, data.updated);        // eslint-disable-line no-underscore-dangle
+    const merged = _.merge(doc._source, data.updated); // eslint-disable-line no-underscore-dangle
     merged.milestones = data.updated.milestones;
     // update the merged document
     yield eClient.update({

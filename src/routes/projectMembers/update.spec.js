@@ -8,7 +8,7 @@ import server from '../../app';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -88,10 +88,8 @@ describe('Project members update', () => {
 
   describe('PUT /projects/{id}/members/{id}', () => {
     const body = {
-      param: {
-        role: 'manager',
-        isPrimary: false,
-      },
+      role: 'manager',
+      isPrimary: false,
     };
 
     let sandbox;
@@ -104,7 +102,7 @@ describe('Project members update', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -112,49 +110,43 @@ describe('Project members update', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if no role', (done) => {
+    it('should return 400 if no role', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .send({
-          param: {},
-        })
-        .expect(422, done);
+        .send({})
+        .expect(400, done);
     });
 
-    it('should return 422 if role is invalid', (done) => {
+    it('should return 400 if role is invalid', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send({
-          param: {
-            role: 'wrong',
-          },
+          role: 'wrong',
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if isPrimary is invalid', (done) => {
+    it('should return 400 if isPrimary is invalid', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send({
-          param: {
-            isPrimary: 'wrong',
-          },
+          isPrimary: 'wrong',
         })
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 if not exist id', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/999999`)
+        .patch(`/v5/projects/${project1.id}/members/999999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -165,10 +157,7 @@ describe('Project members update', () => {
           if (err) {
             done(err);
           } else {
-            const result = res.body.result;
-            result.success.should.be.false;
-            result.status.should.equal(404);
-            result.content.message.should.equal('project member not found for project id' +
+            res.body.message.should.equal('project member not found for project id' +
               ` ${project1.id} and member id 999999`);
             done();
           }
@@ -192,14 +181,12 @@ describe('Project members update', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            role: 'customer',
-          },
+          role: 'customer',
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -207,12 +194,11 @@ describe('Project members update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.role.should.equal('customer');
             resJson.isPrimary.should.be.true;
-            resJson.updatedBy.should.equal(40051332);
-            server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
+            resJson.updatedBy.should.equal(testUtil.userIds.manager);
             done();
           }
         });
@@ -243,9 +229,9 @@ describe('Project members update', () => {
       })
         .then(() => {
           request(server)
-            .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+            .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
             .set({
-              Authorization: `Bearer ${testUtil.jwts.copilot}`,
+              Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
             .send(body)
             .expect('Content-Type', /json/)
@@ -254,12 +240,11 @@ describe('Project members update', () => {
               if (err) {
                 done(err);
               } else {
-                const resJson = res.body.result.content;
+                const resJson = res.body;
                 should.exist(resJson);
-                resJson.role.should.equal(body.param.role);
+                resJson.role.should.equal(body.role);
                 resJson.isPrimary.should.be.false;
-                resJson.updatedBy.should.equal(40051332);
-                server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
+                resJson.updatedBy.should.equal(testUtil.userIds.manager);
                 done();
               }
             });
@@ -284,9 +269,9 @@ describe('Project members update', () => {
       const deleteSpy = sinon.spy(mockHttpClient, 'delete');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
@@ -295,13 +280,12 @@ describe('Project members update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            resJson.role.should.equal(body.param.role);
+            resJson.role.should.equal(body.role);
             resJson.isPrimary.should.be.false;
-            resJson.updatedBy.should.equal(40051332);
+            resJson.updatedBy.should.equal(testUtil.userIds.manager);
             deleteSpy.should.have.been.calledOnce;
-            server.services.pubsub.publish.calledWith('project.member.updated').should.be.true;
             done();
           }
         });
@@ -314,7 +298,7 @@ describe('Project members update', () => {
       const deleteSpy = sinon.spy(mockHttpClient, 'delete');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -353,15 +337,13 @@ describe('Project members update', () => {
       const postSpy = sinon.spy(mockHttpClient, 'post');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member3.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member3.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            role: 'manager',
-            isPrimary: false,
-          },
+          role: 'manager',
+          isPrimary: false,
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -369,7 +351,7 @@ describe('Project members update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.role.should.equal('manager');
             resJson.isPrimary.should.be.false;
@@ -407,15 +389,13 @@ describe('Project members update', () => {
           const postSpy = sinon.spy(mockHttpClient, 'post');
           sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
           request(server)
-            .patch(`/v4/projects/${project1.id}/members/${member3.id}`)
+            .patch(`/v5/projects/${project1.id}/members/${member3.id}`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.manager}`,
             })
             .send({
-              param: {
-                role: 'manager',
-                isPrimary: false,
-              },
+              role: 'manager',
+              isPrimary: false,
             })
             .expect('Content-Type', /json/)
             .expect(200)
@@ -423,7 +403,7 @@ describe('Project members update', () => {
               if (err) {
                 done(err);
               } else {
-                const resJson = res.body.result.content;
+                const resJson = res.body;
                 should.exist(resJson);
                 resJson.role.should.equal('manager');
                 resJson.isPrimary.should.be.false;
@@ -438,6 +418,18 @@ describe('Project members update', () => {
 
     it('should return 200 if valid user(become copilot) and data', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        get: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: [{ roleName: 'Connect Copilot' }],
+            },
+          },
+        }),
         post: () => Promise.resolve({
           status: 200,
           data: {
@@ -456,15 +448,13 @@ describe('Project members update', () => {
       const postSpy = sinon.spy(mockHttpClient, 'post');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member1.id}`)
+        .patch(`/v5/projects/${project1.id}/members/${member1.id}`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .send({
-          param: {
-            role: 'copilot',
-            isPrimary: true,
-          },
+          role: 'copilot',
+          isPrimary: true,
         })
         .expect('Content-Type', /json/)
         .expect(200)
@@ -472,12 +462,12 @@ describe('Project members update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.role.should.equal('copilot');
             resJson.isPrimary.should.be.true;
             resJson.updatedAt.should.not.equal('2016-06-30 00:33:07+00');
-            resJson.updatedBy.should.equal(40051332);
+            resJson.updatedBy.should.equal(testUtil.userIds.manager);
             postSpy.should.have.been.calledOnce;
             done();
           }
@@ -496,7 +486,7 @@ describe('Project members update', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_TEAM_UPDATED message when user role updated', (done) => {
+      it('should send correct BUS API messages when user role updated', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
@@ -513,34 +503,42 @@ describe('Project members update', () => {
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .patch(`/v4/projects/${project1.id}/members/${member2.id}`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({
-          param: {
+          .patch(`/v5/projects/${project1.id}/members/${member2.id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.manager}`,
+          })
+          .send({
             role: 'customer',
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledOnce.should.be.true;
-              createEventSpy.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
-                userId: 40051332,
-                initiatorUserId: 40051332,
-              })).should.be.true;
-              done();
-            });
-          }
-        });
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.equal(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_UPDATED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  id: member2.id,
+                  role: 'customer',
+                  userId: 40051332,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051332,
+                  initiatorUserId: testUtil.userIds.manager,
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
       });
     });
   });

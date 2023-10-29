@@ -2,14 +2,13 @@
  * API to add a milestone
  */
 import validate from 'express-validation';
-import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import Sequelize from 'sequelize';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
 import models from '../../models';
-import { EVENT } from '../../constants';
+import { EVENT, RESOURCES } from '../../constants';
+import { createMilestone } from './commonHelper';
 
 const permissions = tcMiddleware.permissions;
 
@@ -17,33 +16,31 @@ const schema = {
   params: {
     timelineId: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      id: Joi.any().strip(),
-      name: Joi.string().max(255).required(),
-      description: Joi.string().max(255),
-      duration: Joi.number().integer().required(),
-      startDate: Joi.date().required(),
-      actualStartDate: Joi.date().allow(null),
-      endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      completionDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      status: Joi.string().max(45).required(),
-      type: Joi.string().max(45).required(),
-      details: Joi.object(),
-      order: Joi.number().integer().required(),
-      plannedText: Joi.string().max(512),
-      activeText: Joi.string().max(512),
-      completedText: Joi.string().max(512),
-      blockedText: Joi.string().max(512),
-      hidden: Joi.boolean().optional(),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    id: Joi.any().strip(),
+    name: Joi.string().max(255).required(),
+    description: Joi.string().max(255),
+    duration: Joi.number().integer().required(),
+    startDate: Joi.date().required(),
+    actualStartDate: Joi.date().allow(null),
+    endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
+    completionDate: Joi.date().allow(null),
+    status: Joi.string().max(45).required(),
+    type: Joi.string().max(45).required(),
+    details: Joi.object(),
+    order: Joi.number().integer().required(),
+    plannedText: Joi.string().max(512),
+    activeText: Joi.string().max(512),
+    completedText: Joi.string().max(512),
+    blockedText: Joi.string().max(512),
+    hidden: Joi.boolean().optional(),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
 };
 
 module.exports = [
@@ -52,62 +49,15 @@ module.exports = [
   // for checking by the permissions middleware
   validateTimeline.validateTimelineIdParam,
   permissions('milestone.create'),
-  (req, res, next) => {
-    const entity = _.assign(req.body.param, {
-      createdBy: req.authUser.userId,
-      updatedBy: req.authUser.userId,
-      timelineId: req.params.timelineId,
-    });
-    let result;
-
-    // Validate startDate is not earlier than timeline startDate
-    let error;
-    if (req.body.param.startDate < req.timeline.startDate) {
-      error = 'Milestone startDate must not be before the timeline startDate';
-    }
-    if (error) {
-      const apiErr = new Error(error);
-      apiErr.status = 422;
-      return next(apiErr);
-    }
-
-    return models.sequelize.transaction(() =>
-      // Save to DB
-      models.Milestone.create(entity)
-        .then((createdEntity) => {
-          // Omit deletedAt, deletedBy
-          result = _.omit(createdEntity.toJSON(), 'deletedAt', 'deletedBy');
-
-          // Increase the order of the other milestones in the same timeline,
-          // which have `order` >= this milestone order
-          return models.Milestone.update({ order: Sequelize.literal('"order" + 1') }, {
-            where: {
-              timelineId: result.timelineId,
-              id: { $ne: result.id },
-              order: { $gte: result.order },
-            },
-          });
-        }),
-    )
-    .then(() => {
-      // Do not send events for the updated milestones here,
-      // because it will make 'version conflict' error in ES.
-      // The order of the other milestones need to be updated in the MILESTONE_ADDED event handler
-
-      // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for milestone %d', result.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        result,
-        { correlationId: req.id },
-      );
-
-      req.app.emit(EVENT.ROUTING_KEY.MILESTONE_ADDED,
-        { req, created: result });
-
-      // Write to the response
-      res.status(201).json(util.wrapResponse(req.id, result, 1, 201));
-      return Promise.resolve();
-    })
-    .catch(next);
-  },
+  (req, res, next) =>
+    models.sequelize.transaction(t => createMilestone(req.authUser, req.timeline, req.body, t))
+      .then((result) => {
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.MILESTONE_ADDED,
+          RESOURCES.MILESTONE,
+          result);
+        res.status(201).json(result);
+      })
+      .catch(next),
 ];

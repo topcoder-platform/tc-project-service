@@ -10,11 +10,15 @@
     "host": "PROJECTS_ES_URL",
     "apiVersion": "2.3",
     "indexName": "PROJECTS_ES_INDEX_NAME",
-    "docType": "projectV4",
+    "docType": "PROJECTS_ES_DOC_TYPE",
     "timelineIndexName": "TIMELINES_ES_INDEX_NAME",
-    "timelineDocType": "TIMELINES_ES_DOC_TYPE"
+    "timelineDocType": "TIMELINES_ES_DOC_TYPE",
+    "metadataIndexName": "METADATA_ES_INDEX_NAME",
+    "metadataDocType": "METADATA_ES_DOC_TYPE",
+    "metadataDocDefaultId": "METADATA_ES_DOC_DEFAULT_ID",
+    "customerPaymentIndexName": "CUSTOMER_PAYMENTS_ES_INDEX_NAME",
+    "customerPaymentDocType": "CUSTOMER_PAYMENT_ES_DOC_TYPE"
   },
-  "rabbitmqURL": "RABBITMQ_URL",
   "pubsubQueueName": "PUBSUB_QUEUE_NAME",
   "pubsubExchangeName": "PUBSUB_EXCHANGE_NAME",
   "directProjectServiceEndpoint": "DIRECT_PROJECT_SERVICE_ENDPOINT",
@@ -50,17 +54,30 @@
   "accountsAppUrl": "ACCOUNTS_APP_URL",
   "inviteEmailSubject": "INVITE_EMAIL_SUBJECT",
   "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE",
+  "pageSize": "PAGE_SIZE",
   "SSO_REFCODES": "SSO_REFCODES",
   "lookerConfig": {
+    "EMBED_KEY": "LOOKER_EMBED_KEY",
+    "LOOKER_HOST": "LOOKER_HOST",
+    "SESSION_LENGTH": "LOOKER_SESSION_LENGTH",
     "BASE_URL": "LOOKER_API_BASE_URL",
     "CLIENT_ID": "LOOKER_API_CLIENT_ID",
     "CLIENT_SECRET": "LOOKER_API_CLIENT_SECRET",
     "TOKEN": "TOKEN",
-    "USE_MOCK": "LOOKER_API_ENABLE_MOCK",
+    "USE_MOCK": "ENABLE_MOCK_REPORTS",
     "QUERIES": {
       "REG_STATS": "LOOKER_API_REG_STATS_QUERY_ID",
       "BUDGET": "LOOKER_API_BUDGET_QUERY_ID"
-    }
+    },
+    "EMBED_REPORTS_MAPPING": "EMBED_REPORTS_MAPPING",
+    "ALLOWED_USERS": "REPORTS_ALLOWED_USERS"
   },
-  "DEFAULT_M2M_USERID": "DEFAULT_M2M_USERID"
+  "DEFAULT_M2M_USERID": "DEFAULT_M2M_USERID",
+  "salesforce": {
+    "CLIENT_AUDIENCE": "SALESFORCE_AUDIENCE",
+    "CLIENT_KEY": "SALESFORCE_CLIENT_KEY",
+    "SUBJECT": "SALESFORCE_SUBJECT",
+    "CLIENT_ID": "SALESFORCE_CLIENT_ID"
+  },
+  "STRIPE_SECRET_KEY": "STRIPE_SECRET_KEY"
 }

@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Develop app",
+    "details": {
+      "utm": {
+        "code": "R&amp;D"
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 1,
+    "type": "app",
+    "status": "draft"
+  },
+  {
+    "name": "Develop website",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 2,
+    "type": "chatbot",
+    "status": "in_review"
+  },
+  {
+    "name": "Develop website 2",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 3,
+    "type": "website",
+    "status": "reviewed"
+  },
+  {
+    "name": "Develop chatbot",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 4,
+    "type": "chatbot",
+    "status": "active"
+  },
+  {
+    "name": "Develop app 2",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 1,
+    "type": "app",
+    "status": "completed"
+  },
+  {
+    "name": "Develop website 3",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 2,
+    "type": "website",
+    "status": "paused"
+  },
+  {
+    "name": "Develop app 3",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 1,
+    "type": "app",
+    "status": "cancelled",
+    "cancelReason": "Test cancel"
+  },
+  {
+    "name": "Reviewed project with copilot invited",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 3,
+    "type": "website",
+    "status": "reviewed",
+    "invites": [{
+        "userIds": [40152855],
+        "role": "copilot"
+        }]
+  },
+  {
+    "name": "Reviewed project with copilot as a member with copilot role",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 3,
+    "type": "website",
+    "status": "reviewed",
+    "invites": [{
+        "userIds": [40152855],
+        "role": "copilot"
+    }],
+    "acceptInvitation": true
+  },
+  {
+    "name": "Reviewed project when copilot is not a member and not invited",
+    "details": {
+      "utm": {
+        "code": ""
+      },
+      "appDefinition": {
+        "primaryTarget": "phone",
+        "goal": {
+          "value": "Nothing"
+        },
+        "users": {
+          "value": "No one"
+        },
+        "notes": ""
+      },
+      "hideDiscussions": true
+    },
+    "description": "Hello this is a sample description... This requires at least 160 characters. I'm trying to satisfy this condition. But I could n't if I don't type this unnecessary message",
+    "templateId": 3,
+    "type": "website",
+    "status": "reviewed"
+  }
+]

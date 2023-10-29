@@ -6,7 +6,8 @@ import Joi from 'joi';
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import { EVENT } from '../../constants';
+import util from '../../util';
+import { EVENT, RESOURCES } from '../../constants';
 import validateTimeline from '../../middlewares/validateTimeline';
 
 const permissions = tcMiddleware.permissions;
@@ -25,7 +26,6 @@ module.exports = [
   permissions('timeline.delete'),
   (req, res, next) => {
     const timeline = req.timeline;
-    const deleted = _.omit(timeline.toJSON(), ['deletedAt', 'deletedBy']);
 
     return models.sequelize.transaction(() =>
       // Update the deletedBy, then delete
@@ -33,20 +33,35 @@ module.exports = [
         .then(() => timeline.destroy())
         // Cascade delete the milestones
         .then(() => models.Milestone.update({ deletedBy: req.authUser.userId }, { where: { timelineId: timeline.id } }))
-        .then(() => models.Milestone.destroy({ where: { timelineId: timeline.id } })),
+        .then(() => models.Milestone.destroy({ where: { timelineId: timeline.id } }))
+        .then(itemsDeleted => models.Milestone.findAll({
+          where: {
+            timelineId: timeline.id,
+          },
+          attributes: ['id'],
+          paranoid: false,
+          order: [['deletedAt', 'DESC']],
+          limit: itemsDeleted,
+        })),
     )
-    .then(() => {
-      // Send event to bus
-      req.log.debug('Sending event to RabbitMQ bus for timeline %d', deleted.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_REMOVED,
-        deleted,
-        { correlationId: req.id },
-      );
+      .then((milestones) => {
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.TIMELINE_REMOVED,
+          RESOURCES.TIMELINE,
+          { id: req.params.timelineId });
 
-      // Write to response
-      res.status(204).end();
-      return Promise.resolve();
-    })
-    .catch(next);
+        // emit the event for milestones
+        _.map(milestones, milestone => util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.MILESTONE_REMOVED,
+          RESOURCES.MILESTONE,
+          milestone.toJSON()));
+
+        // Write to response
+        res.status(204).end();
+        return Promise.resolve();
+      })
+      .catch(next);
   },
 ];

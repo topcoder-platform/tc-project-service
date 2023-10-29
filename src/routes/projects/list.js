@@ -1,11 +1,11 @@
-/* globals Promise */
-
 import _ from 'lodash';
 import config from 'config';
 
 import models from '../../models';
-import { MANAGER_ROLES } from '../../constants';
+import { INVITE_STATUS, PROJECT_MEMBER_NON_CUSTOMER_ROLES } from '../../constants';
 import util from '../../util';
+import { PERMISSION } from '../../permissions/constants';
+import permissionUtils from '../../utils/permissions';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
@@ -22,12 +22,14 @@ const MATCH_TYPE_SINGLE_FIELD = 3;
  *
  */
 const PROJECT_ATTRIBUTES = _.without(_.keys(models.Project.rawAttributes),
-   'utm',
-   'deletedAt',
-);
-const PROJECT_MEMBER_ATTRIBUTES = _.without(
-  _.keys(models.ProjectMember.rawAttributes),
+  'utm',
   'deletedAt',
+);
+const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes));
+// project members has some additional fields stored in ES index, which we don't have in DB
+const PROJECT_MEMBER_ATTRIBUTES_ES = _.concat(
+  PROJECT_MEMBER_ATTRIBUTES,
+  ['handle'], // more fields can be added when allowed by `addUserDetailsFieldsIfAllowed`
 );
 const PROJECT_MEMBER_INVITE_ATTRIBUTES = _.without(
   _.keys(models.ProjectMemberInvite.rawAttributes),
@@ -46,8 +48,27 @@ const PROJECT_PHASE_PRODUCTS_ATTRIBUTES = _.without(
   'deletedAt',
 );
 
+const SUPPORTED_FILTERS = [
+  'id',
+  'status',
+  'memberOnly',
+  'keyword',
+  'type',
+  'name',
+  'code',
+  'customer',
+  'manager',
+  'directProjectId',
+];
 
-const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\\\$&');
+/**
+  * ES need to skip special chars else it is considered as RegEx or other ES query string syntax,
+  * see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
+  *
+  * @param  {String}     keyword        keyword being searched for
+  * @return {String}                    result after parsing
+  */
+const escapeEsKeyword = keyword => keyword.replace(/[+-=><!|(){}[&\]^"~*?:\\/]/g, '\\$&');
 
 const buildEsFullTextQuery = (keyword, matchType, singleFieldName) => {
   let should = [
@@ -126,9 +147,20 @@ const buildEsShouldQuery = (userId, email) => {
       nested: {
         path: 'invites',
         query: {
-          query_string: {
-            query: userId,
-            fields: ['invites.userId'],
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: userId,
+                  fields: ['invites.userId'],
+                },
+              }, {
+                query_string: {
+                  query: INVITE_STATUS.PENDING,
+                  fields: ['invites.status'],
+                },
+              },
+            ],
           },
         },
       },
@@ -140,9 +172,20 @@ const buildEsShouldQuery = (userId, email) => {
       nested: {
         path: 'invites',
         query: {
-          query_string: {
-            query: email,
-            fields: ['invites.email'],
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: email,
+                  fields: ['invites.email'],
+                },
+              }, {
+                query_string: {
+                  query: INVITE_STATUS.PENDING,
+                  fields: ['invites.status'],
+                },
+              },
+            ],
           },
         },
       },
@@ -193,13 +236,14 @@ const buildEsQueryWithFilter = (value, keyword, matchType, fieldName) => {
   }
 
   if (value === 'customer' || value === 'manager') {
+    const roles = value === 'customer' ? [value] : PROJECT_MEMBER_NON_CUSTOMER_ROLES;
     should = _.concat(should, {
       nested: {
         path: 'members',
         query: {
           bool: {
             must: [
-              { match: { 'members.role': value } },
+              { terms: { 'members.role': roles } },
               {
                 query_string: {
                   query: keyword,
@@ -278,17 +322,17 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   }
 
   if (sourceInclude) {
-    searchCriteria._sourceInclude = sourceInclude;        // eslint-disable-line no-underscore-dangle
+    searchCriteria._sourceIncludes = sourceInclude; // eslint-disable-line no-underscore-dangle
   }
   // prepare the elasticsearch filter criteria
   const boolQuery = [];
   let mustQuery = [];
   let shouldQuery = [];
   let fullTextQuery;
-  if (_.has(criteria, 'filters.id.$in')) {
+  if (_.has(criteria, 'filters.id') && _.isArray(criteria.filters.id)) {
     boolQuery.push({
       ids: {
-        values: criteria.filters.id.$in,
+        values: criteria.filters.id,
       },
     });
   } else if (_.has(criteria, 'filters.id')) {
@@ -303,6 +347,12 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
     mustQuery = _.concat(mustQuery, setFilter('name', criteria.filters.name, ['name']));
   }
 
+  if (_.has(criteria, 'filters.directProjectId')) {
+    mustQuery = _.concat(mustQuery, setFilter('directProjectId',
+      criteria.filters.directProjectId,
+      ['directProjectId']));
+  }
+
   if (_.has(criteria, 'filters.code')) {
     mustQuery = _.concat(mustQuery, setFilter('details', criteria.filters.code, ['details.utm.code']));
   }
@@ -310,13 +360,13 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   if (_.has(criteria, 'filters.customer')) {
     mustQuery = _.concat(mustQuery, setFilter('customer',
       criteria.filters.customer,
-      ['members.firstName', 'members.lastName']));
+      ['members.firstName', 'members.lastName', 'members.handle']));
   }
 
   if (_.has(criteria, 'filters.manager')) {
     mustQuery = _.concat(mustQuery, setFilter('manager',
       criteria.filters.manager,
-      ['members.firstName', 'members.lastName']));
+      ['members.firstName', 'members.lastName', 'members.handle']));
   }
 
   if (_.has(criteria, 'filters.userId') || _.has(criteria, 'filters.email')) {
@@ -384,7 +434,7 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
 
     if (!keyword) {
       // Not a specific field search nor an exact phrase search, do a wildcard match
-      keyword = criteria.filters.keyword;
+      keyword = escapeEsKeyword(keywordCriterion);
       matchType = MATCH_TYPE_WILDCARD;
     }
 
@@ -430,43 +480,169 @@ const parseElasticSearchCriteria = (criteria, fields, order) => {
   return searchCriteria;
 };
 
+const retrieveProjectsFromDB = (req, criteria, sort, ffields) => {
+  // order by
+  const order = sort ? [sort.split(' ')] : [['createdAt', 'asc']];
+  let fields = ffields ? ffields.split(',') : [];
+  // parse the fields string to determine what fields are to be returned
+  fields = util.parseFields(fields, {
+    projects: PROJECT_ATTRIBUTES,
+    project_members: PROJECT_MEMBER_ATTRIBUTES,
+  });
+
+
+  // make sure project.id is part of fields
+  if (_.indexOf(fields.projects, 'id') < 0) fields.projects.push('id');
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
+  }
+  const retrieveAttachments = !req.query.fields || req.query.fields.indexOf('attachments') > -1;
+  const retrieveMembers = !req.query.fields || !!fields.project_members.length;
+
+  return models.Project.searchText({
+    filters: criteria.filters,
+    order,
+    limit: criteria.limit,
+    offset: criteria.offset,
+    attributes: _.get(fields, 'projects', null),
+  }, req.log)
+    .then(({ rows, count }) => {
+      const projectIds = _.map(rows, 'id');
+      const promises = [];
+      // retrieve members
+      if (projectIds.length && retrieveMembers) {
+        promises.push(
+          models.ProjectMember.findAll({
+            attributes: _.get(fields, 'ProjectMembers'),
+            where: { projectId: { $in: projectIds } },
+            raw: true,
+          }),
+        );
+      }
+      if (projectIds.length && retrieveAttachments) {
+        promises.push(
+          models.ProjectAttachment.findAll({
+            attributes: PROJECT_ATTACHMENT_ATTRIBUTES,
+            where: { projectId: { $in: projectIds } },
+            raw: true,
+          }),
+        );
+      }
+      // return results after promise(s) have resolved
+      return Promise.all(promises)
+        .then((values) => {
+          const allMembers = retrieveMembers ? values.shift() : [];
+          const allAttachments = retrieveAttachments ? values.shift() : [];
+          _.forEach(rows, (fp) => {
+            const p = fp;
+            // if values length is 1 it could be either attachments or members
+            if (retrieveMembers) {
+              const pMembers = _.filter(allMembers, m => m.projectId === p.id);
+              // check if have permission to read project members
+              if (util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, pMembers)) {
+                if (addMembersUserId) {
+                // remove the userId from the returned members array if it was added before
+                // as it is only needed for checking permission.
+                  _.forEach(pMembers, (m) => {
+                    const fm = m;
+                    delete fm.userId;
+                  });
+                }
+                p.members = pMembers;
+              }
+            }
+            if (retrieveAttachments) {
+              p.attachments = _.filter(allAttachments, a => a.projectId === p.id);
+            }
+          });
+          return { rows, count, pageSize: criteria.limit, page: criteria.page };
+        });
+    });
+};
 
 const retrieveProjects = (req, criteria, sort, ffields) => {
   // order by
   const order = sort ? sort.split(' ') : ['createdAt', 'asc'];
   let fields = ffields ? ffields.split(',') : [];
-    // parse the fields string to determine what fields are to be returned
+  // parse the fields string to determine what fields are to be returned
   fields = util.parseFields(fields, {
     projects: PROJECT_ATTRIBUTES,
-    project_members: PROJECT_MEMBER_ATTRIBUTES,
+    project_members: util.addUserDetailsFieldsIfAllowed(PROJECT_MEMBER_ATTRIBUTES_ES, req),
     project_member_invites: PROJECT_MEMBER_INVITE_ATTRIBUTES,
     project_phases: PROJECT_PHASE_ATTRIBUTES,
     project_phases_products: PROJECT_PHASE_PRODUCTS_ATTRIBUTES,
     attachments: PROJECT_ATTACHMENT_ATTRIBUTES,
   });
+
   // make sure project.id is part of fields
   if (_.indexOf(fields.projects, 'id') < 0) {
     fields.projects.push('id');
+  }
+  // add userId to project_members field so it can be used to check READ_PROJECT_MEMBER permission below.
+  const addMembersUserId = fields.project_members.length > 0 && _.indexOf(fields.project_members, 'userId') < 0;
+  if (addMembersUserId) {
+    fields.project_members.push('userId');
   }
 
   const searchCriteria = parseElasticSearchCriteria(criteria, fields, order) || {};
   return new Promise((accept, reject) => {
     const es = util.getElasticSearchClient();
     es.search(searchCriteria).then((docs) => {
-      const rows = _.map(docs.hits.hits, single => single._source);     // eslint-disable-line no-underscore-dangle
-      accept({ rows, count: docs.hits.total });
+      const rows = _.map(docs.hits.hits, single => single._source); // eslint-disable-line no-underscore-dangle
+      if (rows) {
+        if (!util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_NOT_OWN, req)) {
+          if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_INVITE_OWN, req)) {
+            // only include own invites
+            const currentUserId = req.authUser.userId;
+            const currentUserEmail = req.authUser.email;
+            _.forEach(rows, (fp) => {
+              const invites = _.filter(fp.invites, invite => (
+                (invite.userId !== null && invite.userId === currentUserId) ||
+                (invite.email && currentUserEmail && invite.email.toLowerCase() === currentUserEmail.toLowerCase())
+              ));
+              _.set(fp, 'invites', invites);
+            });
+          } else {
+            // return empty invites
+            _.forEach(rows, (fp) => {
+              _.set(fp, 'invites', []);
+            });
+          }
+        }
+        _.forEach(rows, (p) => {
+          const fp = p;
+          if (fp.members) {
+            // check if have permission to read project members
+            if (!util.hasPermission(PERMISSION.READ_PROJECT_MEMBER, req.authUser, fp.members)) {
+              delete fp.members;
+            }
+            if (fp.members && addMembersUserId) {
+              // remove the userId from the returned members array if it was added before
+              // as it is only needed for checking permission.
+              _.forEach(fp.members, (m) => {
+                const fm = m;
+                delete fm.userId;
+              });
+            }
+          }
+        });
+      }
+      accept({ rows, count: docs.hits.total, pageSize: criteria.limit, page: criteria.page });
     }).catch(reject);
   });
 };
 
 module.exports = [
-  /**
+  /*
    * GET projects/
    * Return a list of projects that match the criteria
    */
   (req, res, next) => {
     // handle filters
-    let filters = util.parseQueryFilter(req.query.filter);
+    let filters = _.omit(req.query, 'sort', 'perPage', 'page', 'fields');
+
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt';
     if (sort && sort.indexOf(' ') === -1) {
       sort += ' asc';
@@ -481,8 +657,7 @@ module.exports = [
       'name', 'name asc', 'name desc',
       'type', 'type asc', 'type desc',
     ];
-    if (!util.isValidFilter(filters,
-      ['id', 'status', 'memberOnly', 'keyword', 'type', 'name', 'code', 'customer', 'manager']) ||
+    if (!util.isValidFilter(filters, SUPPORTED_FILTERS) ||
       (sort && _.indexOf(sortableProps, sort) < 0)) {
       return util.handleError('Invalid filters or sort', null, req, next);
     }
@@ -490,19 +665,40 @@ module.exports = [
     const memberOnly = _.get(filters, 'memberOnly', false);
     filters = _.omit(filters, 'memberOnly');
 
+    const limit = Math.min(req.query.perPage || config.pageSize, config.pageSize);
     const criteria = {
       filters,
-      limit: Math.min(req.query.limit || 20, 20),
-      offset: req.query.offset || 0,
+      limit,
+      offset: ((req.query.page - 1) * limit) || 0,
+      page: req.query.page || 1,
     };
     req.log.info(criteria);
-    if (!memberOnly
-      && (util.hasAdminRole(req)
-          || util.hasRoles(req, MANAGER_ROLES))) {
+    // TODO refactor (DRY) code below so we don't repeat the same logic for admins and non-admin users
+    if (!memberOnly && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser)) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
-        .then(result => res.json(util.wrapResponse(req.id,
-          util.maskInviteEmails('$[*].invites[?(@.email)]', result.rows, req), result.count)))
+        .then((result) => {
+          if (result.rows.length === 0) {
+            req.log.debug('No projects found in ES');
+
+            // if we have some filters and didn't get any data from ES
+            // we don't fallback to DB, because DB doesn't support all of the filters
+            // so we don't want DB to return unrelated data, ref issue #450
+            if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
+              req.log.debug('Don\'t fallback to DB because some filters are defined.');
+              return util.setPaginationHeaders(req, res,
+                util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+            }
+
+            return retrieveProjectsFromDB(req, criteria, sort, req.query.fields)
+              .then(r => util.setPaginationHeaders(req, res,
+                util.postProcessInvites('$.rows[*].invites[?(@.email)]', r, req)));
+          }
+          req.log.debug('Projects found in ES');
+          // set header
+          return util.setPaginationHeaders(req, res,
+            util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req));
+        })
         .catch(err => next(err));
     }
 
@@ -510,8 +706,40 @@ module.exports = [
     criteria.filters.email = req.authUser.email;
     criteria.filters.userId = req.authUser.userId;
     return retrieveProjects(req, criteria, sort, req.query.fields)
-      .then(result => res.json(util.wrapResponse(req.id,
-        util.maskInviteEmails('$[*].invites[?(@.email)]', result.rows, req), result.count)))
+      .then((result) => {
+        if (result.rows.length === 0) {
+          req.log.debug('No projects found in ES');
+
+          // if we have some filters and didn't get any data from ES
+          // we don't fallback to DB, because DB doesn't support all of the filters
+          // so we don't want DB to return unrelated data, ref issue #450
+          if (_.intersection(_.keys(filters), SUPPORTED_FILTERS).length > 0) {
+            req.log.debug('Don\'t fallback to DB because some filters are defined.');
+
+            return result;
+          }
+
+          return retrieveProjectsFromDB(req, criteria, sort, req.query.fields);
+        }
+
+        req.log.debug('Projects found in ES');
+
+        return result;
+      }).then((result) => {
+        const postProcessedResult = util.postProcessInvites('$.rows[*].invites[?(@.email)]', result, req);
+
+        postProcessedResult.rows.forEach((project) => {
+          // filter out attachments which user cannot see
+          if (project.attachments) {
+            // eslint-disable-next-line no-param-reassign
+            project.attachments = project.attachments.filter(attachment =>
+              permissionUtils.hasReadAccessToAttachment(attachment, req),
+            );
+          }
+        });
+
+        return util.setPaginationHeaders(req, res, postProcessedResult);
+      })
       .catch(err => next(err));
   },
 ];

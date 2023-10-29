@@ -41,63 +41,64 @@ describe('Phase Products', () => {
   before((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => testUtil.clearES())
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            models.ProjectPhase.create({
+              name: 'test project phase',
+              status: 'active',
+              startDate: '2018-05-15T00:00:00Z',
+              endDate: '2018-05-15T12:00:00Z',
+              budget: 20.0,
+              progress: 1.23456,
+              details: {
+                message: 'This can be any json',
+              },
               createdBy: 1,
               updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
               projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              models.ProjectPhase.create({
-                name: 'test project phase',
-                status: 'active',
-                startDate: '2018-05-15T00:00:00Z',
-                endDate: '2018-05-15T12:00:00Z',
-                budget: 20.0,
-                progress: 1.23456,
-                details: {
-                  message: 'This can be any json',
-                },
-                createdBy: 1,
-                updatedBy: 1,
-                projectId,
-              }).then((phase) => {
-                phaseId = phase.id;
-                _.assign(body, { phaseId, projectId });
+            }).then((phase) => {
+              phaseId = phase.id;
+              _.assign(body, { phaseId, projectId });
 
-                models.PhaseProduct.create(body).then((product) => {
-                  productId = product.id;
-                  done();
-                });
+              models.PhaseProduct.create(body).then((product) => {
+                productId = product.id;
+                done();
               });
             });
           });
         });
+      });
   });
 
   after((done) => {
@@ -107,7 +108,7 @@ describe('Phase Products', () => {
   describe('GET /projects/{id}/phases/{phaseId}/products/{productId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -117,7 +118,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/999/phases/${phaseId}/products/${productId}`)
+        .get(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -127,7 +128,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/99999/products/${productId}`)
+        .get(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -137,7 +138,7 @@ describe('Phase Products', () => {
 
     it('should return 404 when no product with specific productId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -147,7 +148,7 @@ describe('Phase Products', () => {
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -157,7 +158,7 @@ describe('Phase Products', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);
@@ -171,7 +172,7 @@ describe('Phase Products', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -181,7 +182,7 @@ describe('Phase Products', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);

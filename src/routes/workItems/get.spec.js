@@ -74,66 +74,66 @@ describe('GET Work Item', () => {
               lastActivityAt: 1,
               lastActivityUserId: '1',
             })
-            .then((project) => {
-              projectId = project.id;
-              // create members
-              models.ProjectMember.bulkCreate([{
-                id: 1,
-                userId: copilotUser.userId,
-                projectId,
-                role: 'copilot',
-                isPrimary: false,
-                createdBy: 1,
-                updatedBy: 1,
-              }, {
-                id: 2,
-                userId: memberUser.userId,
-                projectId,
-                role: 'customer',
-                isPrimary: true,
-                createdBy: 1,
-                updatedBy: 1,
-              }])
-              .then(() => {
-                models.WorkStream.create({
-                  name: 'Work Stream',
-                  type: 'generic',
-                  status: 'active',
+              .then((project) => {
+                projectId = project.id;
+                // create members
+                models.ProjectMember.bulkCreate([{
+                  id: 1,
+                  userId: copilotUser.userId,
                   projectId,
+                  role: 'copilot',
+                  isPrimary: false,
                   createdBy: 1,
                   updatedBy: 1,
-                }).then((entity) => {
-                  workStreamId = entity.id;
-                  models.ProjectPhase.create({
-                    name: 'test project phase',
-                    status: 'active',
-                    startDate: '2018-05-15T00:00:00Z',
-                    endDate: '2018-05-15T12:00:00Z',
-                    budget: 20.0,
-                    progress: 1.23456,
-                    details: {
-                      message: 'This can be any json',
-                    },
-                    createdBy: 1,
-                    updatedBy: 1,
-                    projectId,
-                  }).then((phase) => {
-                    workId = phase.id;
-                    models.PhaseWorkStream.create({
-                      phaseId: workId,
-                      workStreamId,
-                    })
-                    .then(() => {
-                      _.assign(body, { phaseId: workId, projectId });
-                      models.PhaseProduct.create(body).then((product) => {
-                        productId = product.id;
-                        done();
+                }, {
+                  id: 2,
+                  userId: memberUser.userId,
+                  projectId,
+                  role: 'customer',
+                  isPrimary: true,
+                  createdBy: 1,
+                  updatedBy: 1,
+                }])
+                  .then(() => {
+                    models.WorkStream.create({
+                      name: 'Work Stream',
+                      type: 'generic',
+                      status: 'active',
+                      projectId,
+                      createdBy: 1,
+                      updatedBy: 1,
+                    }).then((entity) => {
+                      workStreamId = entity.id;
+                      models.ProjectPhase.create({
+                        name: 'test project phase',
+                        status: 'active',
+                        startDate: '2018-05-15T00:00:00Z',
+                        endDate: '2018-05-15T12:00:00Z',
+                        budget: 20.0,
+                        progress: 1.23456,
+                        details: {
+                          message: 'This can be any json',
+                        },
+                        createdBy: 1,
+                        updatedBy: 1,
+                        projectId,
+                      }).then((phase) => {
+                        workId = phase.id;
+                        models.PhaseWorkStream.create({
+                          phaseId: workId,
+                          workStreamId,
+                        })
+                          .then(() => {
+                            _.assign(body, { phaseId: workId, projectId });
+                            models.PhaseProduct.create(body).then((product) => {
+                              productId = product.id;
+                              done();
+                            });
+                          });
                       });
                     });
                   });
-                });
               });
-            });
           });
       });
   });
@@ -145,7 +145,7 @@ describe('GET Work Item', () => {
   describe('GET /projects/{projectId}/workstreams/{workStreamId}/works/{workId}/workitems/{productId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -155,7 +155,7 @@ describe('GET Work Item', () => {
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/9999/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/9999/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -165,7 +165,7 @@ describe('GET Work Item', () => {
 
     it('should return 404 when no work stream with specific workStreamId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/999/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/999/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -175,7 +175,7 @@ describe('GET Work Item', () => {
 
     it('should return 404 when no work with specific workId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/999/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/999/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -185,7 +185,7 @@ describe('GET Work Item', () => {
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -195,7 +195,7 @@ describe('GET Work Item', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);
@@ -209,7 +209,7 @@ describe('GET Work Item', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
+        .get(`/v5/projects/${projectId}/workstreams/${workStreamId}/works/${workId}/workitems/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -219,7 +219,7 @@ describe('GET Work Item', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);

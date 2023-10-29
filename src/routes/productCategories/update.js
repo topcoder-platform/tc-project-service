@@ -5,6 +5,7 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { EVENT, RESOURCES } from '../../constants';
 import util from '../../util';
 import models from '../../models';
 
@@ -14,31 +15,31 @@ const schema = {
   params: {
     key: Joi.string().max(45).required(),
   },
-  body: {
-    param: Joi.object().keys({
-      key: Joi.any().strip(),
-      displayName: Joi.string().max(255).optional(),
-      icon: Joi.string().max(255).optional(),
-      question: Joi.string().max(255).optional(),
-      info: Joi.string().max(255).optional(),
-      aliases: Joi.array().optional(),
-      disabled: Joi.boolean().optional(),
-      hidden: Joi.boolean().optional(),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+
+  body: Joi.object().keys({
+    key: Joi.any().strip(),
+    displayName: Joi.string().max(255).optional(),
+    icon: Joi.string().max(255).optional(),
+    question: Joi.string().max(255).optional(),
+    info: Joi.string().max(1024).optional(),
+    aliases: Joi.array().optional(),
+    disabled: Joi.boolean().optional(),
+    hidden: Joi.boolean().optional(),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
+
 };
 
 module.exports = [
   validate(schema),
   permissions('productCategory.edit'),
   (req, res, next) => {
-    const entityToUpdate = _.assign(req.body.param, {
+    const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
 
@@ -59,7 +60,12 @@ module.exports = [
         return productCategory.update(entityToUpdate);
       })
       .then((productCategory) => {
-        res.json(util.wrapResponse(req.id, productCategory));
+        util.sendResourceToKafkaBus(req,
+          EVENT.ROUTING_KEY.PROJECT_METADATA_UPDATE,
+          RESOURCES.PRODUCT_CATEGORY,
+          productCategory.get({ json: true }),
+        );
+        res.json(productCategory);
         return Promise.resolve();
       })
       .catch(next);

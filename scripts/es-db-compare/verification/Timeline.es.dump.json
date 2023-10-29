@@ -1,0 +1,123 @@
+[
+  {
+    "createdAt": "2020-01-24T12:11:35.897Z",
+    "updatedAt": "2020-01-24T12:11:35.898Z",
+    "id": 4,
+    "description": "new description",
+    "startDate": "2018-05-29T00:00:00.000Z",
+    "endDate": "2018-05-30T00:00:00.000Z",
+    "reference": "product",
+    "referenceId": 15,
+    "createdBy": 40051336,
+    "updatedBy": 40051336,
+    "milestones": [
+      {
+        "updatedBy": 40051333,
+        "hidden": false,
+        "endDate": "2018-05-30T00:00:00.000Z",
+        "completedText": "completedText 3",
+        "activeText": "activeText 3",
+        "timelineId": 4,
+        "description": "description 3",
+        "type": "type3",
+        "duration": 4,
+        "createdAt": "2020-01-24T12:21:31.851Z",
+        "statusHistory": [
+          {
+            "reference": "milestone",
+            "createdAt": "2020-01-24T12:21:31.865Z",
+            "updatedBy": 40051333,
+            "createdBy": 40051333,
+            "comment": null,
+            "id": 3,
+            "referenceId": 6,
+            "status": "active",
+            "updatedAt": "2020-01-24T12:21:31.866Z"
+          }
+        ],
+        "createdBy": 40051333,
+        "name": "milestone 3",
+        "plannedText": "plannedText 3",
+        "actualStartDate": null,
+        "completionDate": "2018-05-31T00:00:00.000Z",
+        "details": {
+          "detail1": {
+            "subDetail1C": 3
+          },
+          "detail2": [
+            2,
+            3,
+            4
+          ]
+        },
+        "id": 5,
+        "blockedText": "blockedText 3",
+        "startDate": "2018-05-29T00:00:00.000Z",
+        "updatedAt": "2020-01-24T12:21:31.851Z",
+        "status": "active",
+        "order": 4
+      },
+      {
+        "updatedBy": 40051333,
+        "hidden": false,
+        "endDate": "2018-05-30T00:00:00.000Z",
+        "completedText": "completedText 3",
+        "activeText": "activeText 3",
+        "timelineId": 4,
+        "description": "description 3",
+        "type": "type3",
+        "duration": 4,
+        "createdAt": "2020-01-24T12:21:31.851Z",
+        "statusHistory": [
+          {
+            "reference": "milestone",
+            "createdAt": "2020-01-24T12:21:31.865Z",
+            "updatedBy": 40051333,
+            "createdBy": 40051333,
+            "comment": null,
+            "id": 3,
+            "referenceId": 6,
+            "status": "active",
+            "updatedAt": "2020-01-24T12:21:31.866Z"
+          }
+        ],
+        "createdBy": 40051333,
+        "name": "milestone 3",
+        "plannedText": "plannedText 3",
+        "actualStartDate": null,
+        "completionDate": "2018-05-31T00:00:00.000Z",
+        "details": {
+          "detail1": {
+            "subDetail1C": 3
+          },
+          "detail2": [
+            2,
+            3,
+            4
+          ]
+        },
+        "id": 6,
+        "blockedText": "blockedText 3",
+        "startDate": "2018-05-29T00:00:00.000Z",
+        "updatedAt": "2020-01-24T12:21:31.851Z",
+        "status": "active",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "new name",
+    "description": "new description",
+    "startDate": "2018-05-29T00:00:00.000Z",
+    "endDate": "2018-05-30T00:00:00.000Z",
+    "reference": "product",
+    "referenceId": 18,
+    "deletedAt": null,
+    "createdAt": "2020-01-24T12:11:35.897Z",
+    "updatedAt": "2020-01-24T12:11:35.898Z",
+    "deletedBy": null,
+    "createdBy": 40051336,
+    "updatedBy": 40051336
+  }
+]

@@ -4,7 +4,6 @@
 import validate from 'express-validation';
 import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = tcMiddleware.permissions;
@@ -25,22 +24,22 @@ module.exports = [
         id: projectId,
       },
     })
-    .then((countProject) => {
-      if (countProject === 0) {
-        const apiErr = new Error(`active project not found for project id ${projectId}`);
-        apiErr.status = 404;
-        throw apiErr;
-      }
+      .then((countProject) => {
+        if (countProject === 0) {
+          const apiErr = new Error(`active project not found for project id ${projectId}`);
+          apiErr.status = 404;
+          throw apiErr;
+        }
 
-      return models.WorkStream.findAll({
-        where: {
-          projectId,
-        },
-        attributes: { exclude: ['deletedAt', 'deletedBy'] },
-        raw: true,
-      });
-    })
-    .then(workStreams => res.json(util.wrapResponse(req.id, workStreams, workStreams.length)))
-    .catch(next);
+        return models.WorkStream.findAll({
+          where: {
+            projectId,
+          },
+          attributes: { exclude: ['deletedAt', 'deletedBy'] },
+          raw: true,
+        });
+      })
+      .then(workStreams => res.json(workStreams))
+      .catch(next);
   },
 ];

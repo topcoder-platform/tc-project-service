@@ -1,15 +1,16 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
-import sleep from 'sleep';
 import chai from 'chai';
 import config from 'config';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -104,14 +105,12 @@ describe('Phase Products', () => {
                 // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
                 project.lastActivityAt = 1;
                 // Index to ES
-                return server.services.es.index({
+                return eClient.index({
                   index: ES_PROJECT_INDEX,
                   type: ES_PROJECT_TYPE,
                   id: projectId,
                   body: project,
                 }).then(() => {
-                  // sleep for some time, let elasticsearch indices be settled
-                  sleep.sleep(5);
                   done();
                 });
               });
@@ -128,51 +127,51 @@ describe('Phase Products', () => {
   describe('GET /projects/{id}/phases/{phaseId}/products', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get(`/v4/projects/999/phases/${phaseId}/products`)
+        .get(`/v5/projects/999/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/99999/products`)
+        .get(`/v5/projects/${projectId}/phases/99999/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             done();
@@ -182,18 +181,18 @@ describe('Phase Products', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .get(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             done();

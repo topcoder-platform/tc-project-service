@@ -9,53 +9,74 @@ import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT, ATTACHMENT_TYPES } from '../../constants';
 
+const should = chai.should(); // eslint-disable-line no-unused-vars
 
 describe('Project Attachments delete', () => {
   let project1;
-  let attachment;
+  let attachments = [];
   beforeEach((done) => {
+    attachments = [];
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            directProjectId: 1,
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => testUtil.clearES())
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          directProjectId: 1,
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          project1 = p;
+          // create members
+          return models.ProjectMember.create({
+            userId: 40051332,
+            projectId: project1.id,
+            role: 'copilot',
+            isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            project1 = p;
-            // create members
-            return models.ProjectMember.create({
-              userId: 40051332,
+          }).then(() =>
+            models.ProjectAttachment.create({
               projectId: project1.id,
-              role: 'copilot',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }).then(() => models.ProjectAttachment.create({
-              projectId: project1.id,
-              title: 'test.txt',
+              title: 'file1.txt',
               description: 'blah',
               contentType: 'application/unknown',
               size: 12312,
               category: null,
-              filePath: 'https://media.topcoder.com/projects/1/test.txt',
+              path: 'https://media.topcoder.com/projects/1/test.txt',
+              type: ATTACHMENT_TYPES.FILE,
+              tags: ['tag1', 'tag2'],
               createdBy: testUtil.userIds.copilot,
               updatedBy: 1,
-            }).then((a1) => {
-              attachment = a1;
-              done();
+            }).then((file) => {
+              attachments.push(file);
+              models.ProjectAttachment.create(
+                {
+                  projectId: project1.id,
+                  title: 'Test Link 1',
+                  description: 'Test link 1 description',
+                  size: 123456,
+                  category: null,
+                  path: 'https://connect.topcoder-dev.com/projects/8600/assets',
+                  type: ATTACHMENT_TYPES.LINK,
+                  tags: ['tag3', 'tag4'],
+                  createdBy: testUtil.userIds.copilot,
+                  updatedBy: 1,
+                }).then((link) => {
+                attachments.push(link);
+                done();
+              });
             }));
-          });
         });
+      });
   });
 
   after((done) => {
@@ -73,25 +94,26 @@ describe('Project Attachments delete', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.member}`,
-          })
-          .send({ param: { userId: 1, projectId: project1.id, role: 'customer' } })
-          .expect(403, done);
+        .delete(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send({ userId: 1, projectId: project1.id, role: 'customer' })
+        .expect(403, done);
     });
 
     it('should return 404 if attachment was not found', (done) => {
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/8888888`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .send({ param: { userId: 1, projectId: project1.id, role: 'customer' } })
-          .expect(404, done);
+        .delete(`/v5/projects/${project1.id}/attachments/8888888`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({ userId: 1, projectId: project1.id, role: 'customer' })
+        .expect(404, done);
     });
 
-    it('should return 204 if the CREATOR removes the attachment successfully', (done) => {
+
+    it('should return 204 if the CREATOR removes the file attachment successfully', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         delete: () => Promise.resolve({
           status: 200,
@@ -109,64 +131,196 @@ describe('Project Attachments delete', () => {
       const deleteSpy = sinon.spy(mockHttpClient, 'delete');
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.copilot}`,
-          })
-          .expect(204)
-          .end((err) => {
-            if (err) {
-              done(err);
-            } else {
-              setTimeout(() =>
-                models.ProjectAttachment.findOne({
-                  where: {
-                    projectId: project1.id,
-                    id: attachment.id,
-                  },
-                  paranoid: false,
-                })
-                  .then((res) => {
-                    if (!res) {
-                      throw new Error('Should found the entity');
-                    } else {
-                      deleteSpy.should.have.been.calledOnce;
+        .delete(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            setTimeout(() =>
+              models.ProjectAttachment.findOne({
+                where: {
+                  projectId: project1.id,
+                  id: attachments[0].id,
+                },
+                paranoid: false,
+              })
+                .then((res) => {
+                  if (!res) {
+                    throw new Error('Should found the entity');
+                  } else {
+                    deleteSpy.calledOnce.should.be.true;
 
-                      chai.assert.isNotNull(res.deletedAt);
-                      chai.assert.isNotNull(res.deletedBy);
+                    chai.assert.isNotNull(res.deletedAt);
+                    chai.assert.isNotNull(res.deletedBy);
 
-                      request(server)
-                        .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
-                        .set({
-                          Authorization: `Bearer ${testUtil.jwts.admin}`,
-                        })
-                        .expect(404, done);
-                    }
-                  }), 500);
-            }
-          });
+                    request(server)
+                      .get(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
+                      .set({
+                        Authorization: `Bearer ${testUtil.jwts.admin}`,
+                      })
+                      .expect(404, done);
+                  }
+                }), 500);
+          }
+        });
     });
 
-    it('should return 204 if ADMIN deletes the attachment successfully', (done) => {
+    it('should return 204 if ADMIN deletes the file attachment successfully', (done) => {
       request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
-          .set({
-            Authorization: `Bearer ${testUtil.jwts.admin}`,
-          })
-          .send({ param: { userId: 1, projectId: project1.id, role: 'customer' } })
-          .expect(204, done)
-          .end((err) => {
-            if (err) {
-              done(err);
-            } else {
-              request(server)
-              .get(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+        .delete(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ userId: 1, projectId: project1.id, role: 'customer' })
+        .expect(204, done)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            request(server)
+              .get(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
               .set({
                 Authorization: `Bearer ${testUtil.jwts.admin}`,
               })
               .expect(404, done);
-            }
-          });
+          }
+        });
+    });
+
+    it('should return 204 if the CREATOR removes the link attachment successfully', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        delete: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: true,
+            },
+          },
+        }),
+      });
+      const deleteSpy = sinon.spy(mockHttpClient, 'delete');
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .delete(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            setTimeout(() =>
+              models.ProjectAttachment.findOne({
+                where: {
+                  projectId: project1.id,
+                  id: attachments[1].id,
+                },
+                paranoid: false,
+              })
+                .then((res) => {
+                  if (!res) {
+                    throw new Error('Should found the entity');
+                  } else {
+                    deleteSpy.called.should.be.false;
+                    chai.assert.isNotNull(res.deletedAt);
+                    chai.assert.isNotNull(res.deletedBy);
+
+                    request(server)
+                      .get(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+                      .set({
+                        Authorization: `Bearer ${testUtil.jwts.admin}`,
+                      })
+                      .expect(404, done);
+                  }
+                }), 500);
+          }
+        });
+    });
+
+    it('should return 204 if ADMIN deletes the link attachment successfully', (done) => {
+      request(server)
+        .delete(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({ userId: 1, projectId: project1.id, role: 'customer' })
+        .expect(204, done)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            request(server)
+              .get(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+              .set({
+                Authorization: `Bearer ${testUtil.jwts.admin}`,
+              })
+              .expect(404, done);
+          }
+        });
+    });
+
+    it('should remove attachment file using M2M token with "write:projects" scope', (done) => {
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        delete: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: true,
+            },
+          },
+        }),
+      });
+      const deleteSpy = sinon.spy(mockHttpClient, 'delete');
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .delete(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .expect(204)
+        .end((err) => {
+          if (err) {
+            done(err);
+          } else {
+            setTimeout(() =>
+              models.ProjectAttachment.findOne({
+                where: {
+                  projectId: project1.id,
+                  id: attachments[1].id,
+                },
+                paranoid: false,
+              })
+                .then((res) => {
+                  if (!res) {
+                    throw new Error('Should found the entity');
+                  } else {
+                    deleteSpy.called.should.be.false;
+                    chai.assert.isNotNull(res.deletedAt);
+                    chai.assert.isNotNull(res.deletedBy);
+
+                    request(server)
+                      .get(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+                      .set({
+                        Authorization: `Bearer ${testUtil.jwts.admin}`,
+                      })
+                      .expect(404, done);
+                  }
+                }), 500);
+          }
+        });
     });
 
     describe('Bus api', () => {
@@ -181,9 +335,9 @@ describe('Project Attachments delete', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('sends single BUS_API_EVENT.PROJECT_FILES_UPDATED message when attachment deleted', (done) => {
+      it('sends send correct BUS API messages  when file attachment deleted', (done) => {
         request(server)
-          .delete(`/v4/projects/${project1.id}/attachments/${attachment.id}`)
+          .delete(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.admin}`,
           })
@@ -194,14 +348,57 @@ describe('Project Attachments delete', () => {
             } else {
               // Wait for app message handler to complete
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_FILES_UPDATED, sinon.match({
+                createEventSpy.calledTwice.should.be.true;
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_REMOVED, sinon.match({
+                  resource: RESOURCES.ATTACHMENT,
+                  id: attachments[0].id,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, sinon.match({
                   projectId: project1.id,
                   projectName: project1.name,
                   projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
                   userId: 40051333,
                   initiatorUserId: 40051333,
                 })).should.be.true;
+
+                done();
+              });
+            }
+          });
+      });
+
+      it('sends send correct BUS API messages  when link attachment deleted', (done) => {
+        request(server)
+          .delete(`/v5/projects/${project1.id}/attachments/${attachments[1].id}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(204)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              // Wait for app message handler to complete
+              testUtil.wait(() => {
+                createEventSpy.calledTwice.should.be.true;
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_ATTACHMENT_REMOVED, sinon.match({
+                  resource: RESOURCES.ATTACHMENT,
+                  id: attachments[1].id,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  projectUrl: `https://local.topcoder-dev.com/projects/${project1.id}`,
+                  userId: 40051333,
+                  initiatorUserId: 40051333,
+                })).should.be.true;
+
                 done();
               });
             }

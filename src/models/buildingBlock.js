@@ -37,19 +37,18 @@ module.exports = (sequelize, DataTypes) => {
        * not returned.
        *
        * @param {Object}   options  find/findAll options
-       * @param {Function} callback callback after hook
        */
-      beforeFind: (options, callback) => {
+      afterFind: function removePrivateConfig(buildingBlocks, options) {
         // ONLY FOR INTERNAL USAGE: don't use this option to return the data by API
         if (!options.includePrivateConfigForInternalUsage) {
-          // try to remove privateConfig from attributes
-          const idx = options.attributes.indexOf('privateConfig');
-          if (idx >= 0) {
-            options.attributes.splice(idx, 1);
-          }
+          // try to remove privateConfig from result
+          buildingBlocks.map((block) => {
+            const b = block;
+            delete b.privateConfig;
+            return b;
+          });
         }
-
-        return callback(null);
+        return buildingBlocks;
       },
     },
   });

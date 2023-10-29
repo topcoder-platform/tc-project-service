@@ -10,7 +10,7 @@ import server from '../../app';
 import testUtil from '../../tests/util';
 import models from '../../models';
 import busApi from '../../services/busApi';
-import { EVENT, BUS_API_EVENT } from '../../constants';
+import { RESOURCES, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -72,72 +72,72 @@ describe('CREATE milestone', () => {
               },
             ]).then(() =>
               // Create phase
-               models.ProjectPhase.bulkCreate([
-                 {
-                   projectId: projectId1,
-                   name: 'test project phase 1',
-                   status: 'active',
-                   startDate: '2018-05-15T00:00:00Z',
-                   endDate: '2018-05-15T12:00:00Z',
-                   budget: 20.0,
-                   progress: 1.23456,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 1,
-                   updatedBy: 1,
-                 },
-                 {
-                   projectId: projectId2,
-                   name: 'test project phase 2',
-                   status: 'active',
-                   startDate: '2018-05-16T00:00:00Z',
-                   endDate: '2018-05-16T12:00:00Z',
-                   budget: 21.0,
-                   progress: 1.234567,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 2,
-                   updatedBy: 2,
-                   deletedAt: '2018-05-15T00:00:00Z',
-                 },
-               ]))
+              models.ProjectPhase.bulkCreate([
+                {
+                  projectId: projectId1,
+                  name: 'test project phase 1',
+                  status: 'active',
+                  startDate: '2018-05-15T00:00:00Z',
+                  endDate: '2018-05-15T12:00:00Z',
+                  budget: 20.0,
+                  progress: 1.23456,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 1,
+                  updatedBy: 1,
+                },
+                {
+                  projectId: projectId2,
+                  name: 'test project phase 2',
+                  status: 'active',
+                  startDate: '2018-05-16T00:00:00Z',
+                  endDate: '2018-05-16T12:00:00Z',
+                  budget: 21.0,
+                  progress: 1.234567,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 2,
+                  updatedBy: 2,
+                  deletedAt: '2018-05-15T00:00:00Z',
+                },
+              ]))
               .then(() =>
                 // Create timelines
-                 models.Timeline.bulkCreate([
-                   {
-                     name: 'name 1',
-                     description: 'description 1',
-                     startDate: '2018-05-02T00:00:00.000Z',
-                     endDate: '2018-06-12T00:00:00.000Z',
-                     reference: 'project',
-                     referenceId: 1,
-                     createdBy: 1,
-                     updatedBy: 1,
-                   },
-                   {
-                     name: 'name 2',
-                     description: 'description 2',
-                     startDate: '2018-05-12T00:00:00.000Z',
-                     endDate: '2018-06-13T00:00:00.000Z',
-                     reference: 'phase',
-                     referenceId: 1,
-                     createdBy: 1,
-                     updatedBy: 1,
-                   },
-                   {
-                     name: 'name 3',
-                     description: 'description 3',
-                     startDate: '2018-05-13T00:00:00.000Z',
-                     endDate: '2018-06-14T00:00:00.000Z',
-                     reference: 'phase',
-                     referenceId: 1,
-                     createdBy: 1,
-                     updatedBy: 1,
-                     deletedAt: '2018-05-14T00:00:00.000Z',
-                   },
-                 ]))
+                models.Timeline.bulkCreate([
+                  {
+                    name: 'name 1',
+                    description: 'description 1',
+                    startDate: '2018-05-02T00:00:00.000Z',
+                    endDate: '2018-06-12T00:00:00.000Z',
+                    reference: 'project',
+                    referenceId: 1,
+                    createdBy: 1,
+                    updatedBy: 1,
+                  },
+                  {
+                    name: 'name 2',
+                    description: 'description 2',
+                    startDate: '2018-05-12T00:00:00.000Z',
+                    endDate: '2018-06-13T00:00:00.000Z',
+                    reference: 'phase',
+                    referenceId: 1,
+                    createdBy: 1,
+                    updatedBy: 1,
+                  },
+                  {
+                    name: 'name 3',
+                    description: 'description 3',
+                    startDate: '2018-05-13T00:00:00.000Z',
+                    endDate: '2018-06-14T00:00:00.000Z',
+                    reference: 'phase',
+                    referenceId: 1,
+                    createdBy: 1,
+                    updatedBy: 1,
+                    deletedAt: '2018-05-14T00:00:00.000Z',
+                  },
+                ]))
               .then(() => {
                 // Create milestones
                 models.Milestone.bulkCreate([
@@ -203,48 +203,48 @@ describe('CREATE milestone', () => {
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /timelines/{timelineId}/milestones', () => {
     const body = {
-      param: {
-        name: 'milestone 4',
-        description: 'description 4',
-        duration: 4,
-        startDate: '2018-05-05T00:00:00.000Z',
-        endDate: '2018-05-07T00:00:00.000Z',
-        completionDate: '2018-05-08T00:00:00.000Z',
-        status: 'draft',
-        type: 'type4',
-        details: {
-          detail1: {
-            subDetail1C: 4,
-          },
-          detail2: [
-            3,
-            4,
-            5,
-          ],
+      name: 'milestone 4',
+      description: 'description 4',
+      duration: 4,
+      startDate: '2018-05-05T00:00:00.000Z',
+      endDate: '2018-05-07T00:00:00.000Z',
+      completionDate: '2018-05-08T00:00:00.000Z',
+      status: 'draft',
+      type: 'type4',
+      details: {
+        detail1: {
+          subDetail1C: 4,
         },
-        order: 2,
-        plannedText: 'plannedText 4',
-        activeText: 'activeText 4',
-        completedText: 'completedText 4',
-        blockedText: 'blockedText 4',
-        hidden: true,
+        detail2: [
+          3,
+          4,
+          5,
+        ],
       },
+      order: 2,
+      plannedText: 'plannedText 4',
+      activeText: 'activeText 4',
+      completedText: 'completedText 4',
+      blockedText: 'blockedText 4',
+      hidden: true,
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member who is not in the project', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -252,141 +252,112 @@ describe('CREATE milestone', () => {
         .expect(403, done);
     });
 
-    it('should return 422 if missing name', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          name: undefined,
-        }),
-      };
+    it('should return 400 if missing name', (done) => {
+      const invalidBody = _.assign({}, body, {
+        name: undefined,
+      });
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing duration', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          duration: undefined,
-        }),
-      };
+    it('should return 400 if missing duration', (done) => {
+      const invalidBody = _.assign({}, body, {
+        duration: undefined,
+      });
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing type', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          type: undefined,
-        }),
-      };
+    it('should return 400 if missing type', (done) => {
+      const invalidBody = _.assign({}, body, {
+        type: undefined,
+      });
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing order', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          order: undefined,
-        }),
-      };
+    it('should return 400 if missing order', (done) => {
+      const invalidBody = _.assign({}, body, {
+        order: undefined,
+      });
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is after endDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          endDate: '2018-05-28T00:00:00.000Z',
-        }),
-      };
+    it('should return 400 if startDate is after endDate', (done) => {
+      const invalidBody = _.assign({}, body, {
+        startDate: '2018-05-29T00:00:00.000Z',
+        endDate: '2018-05-28T00:00:00.000Z',
+      });
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is after completionDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-29T00:00:00.000Z',
-          completionDate: '2018-05-28T00:00:00.000Z',
-        }),
-      };
+    it('should return 400 if startDate is after completionDate', (done) => {
+      const invalidBody = _.assign({}, body, {
+        startDate: '2018-05-29T00:00:00.000Z',
+        completionDate: '2018-05-28T00:00:00.000Z',
+      });
 
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if startDate is before the timeline startDate', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          startDate: '2018-05-01T00:00:00.000Z',
-        }),
-      };
-
+    it('should return 400 if invalid timelineId param', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.admin}`,
-        })
-        .send(invalidBody)
-        .expect('Content-Type', /json/)
-        .expect(422, done);
-    });
-
-    it('should return 422 if invalid timelineId param', (done) => {
-      request(server)
-        .post('/v4/timelines/0/milestones')
+        .post('/v5/timelines/0/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 if timeline does not exist', (done) => {
       request(server)
-        .post('/v4/timelines/1000/milestones')
+        .post('/v5/timelines/1000/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -397,7 +368,7 @@ describe('CREATE milestone', () => {
 
     it('should return 404 if timeline was deleted', (done) => {
       request(server)
-        .post('/v4/timelines/3/milestones')
+        .post('/v5/timelines/3/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -408,7 +379,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -416,23 +387,23 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.name.should.be.eql(body.param.name);
-          resJson.description.should.be.eql(body.param.description);
-          resJson.duration.should.be.eql(body.param.duration);
-          resJson.startDate.should.be.eql(body.param.startDate);
-          resJson.endDate.should.be.eql(body.param.endDate);
-          resJson.completionDate.should.be.eql(body.param.completionDate);
-          resJson.status.should.be.eql(body.param.status);
-          resJson.type.should.be.eql(body.param.type);
-          resJson.details.should.be.eql(body.param.details);
-          resJson.order.should.be.eql(body.param.order);
-          resJson.plannedText.should.be.eql(body.param.plannedText);
-          resJson.activeText.should.be.eql(body.param.activeText);
-          resJson.completedText.should.be.eql(body.param.completedText);
-          resJson.blockedText.should.be.eql(body.param.blockedText);
-          resJson.hidden.should.be.eql(body.param.hidden);
+          resJson.name.should.be.eql(body.name);
+          resJson.description.should.be.eql(body.description);
+          resJson.duration.should.be.eql(body.duration);
+          resJson.startDate.should.be.eql(body.startDate);
+          resJson.endDate.should.be.eql(body.endDate);
+          resJson.completionDate.should.be.eql(body.completionDate);
+          resJson.status.should.be.eql(body.status);
+          resJson.type.should.be.eql(body.type);
+          resJson.details.should.be.eql(body.details);
+          resJson.order.should.be.eql(body.order);
+          resJson.plannedText.should.be.eql(body.plannedText);
+          resJson.activeText.should.be.eql(body.activeText);
+          resJson.completedText.should.be.eql(body.completedText);
+          resJson.blockedText.should.be.eql(body.blockedText);
+          resJson.hidden.should.be.eql(body.hidden);
 
           resJson.createdBy.should.be.eql(40051333); // admin
           should.exist(resJson.createdAt);
@@ -444,14 +415,7 @@ describe('CREATE milestone', () => {
           // validate statusHistory
           should.exist(resJson.statusHistory);
           resJson.statusHistory.should.be.an('array');
-          resJson.statusHistory.length.should.be.eql(1);
-          resJson.statusHistory.forEach((statusHistory) => {
-            statusHistory.reference.should.be.eql('milestone');
-            statusHistory.referenceId.should.be.eql(resJson.id);
-          });
-
-          // eslint-disable-next-line no-unused-expressions
-          server.services.pubsub.publish.calledWith(EVENT.ROUTING_KEY.MILESTONE_ADDED).should.be.true;
+          resJson.statusHistory.length.should.be.eql(0);
 
           // Verify 'order' of the other milestones
           models.Milestone.findAll({ where: { timelineId: 1 } })
@@ -460,9 +424,9 @@ describe('CREATE milestone', () => {
                 if (milestone.id === 11) {
                   milestone.order.should.be.eql(1);
                 } else if (milestone.id === 12) {
-                  milestone.order.should.be.eql(2 + 1);
+                  milestone.order.should.be.eql(1 + 1);
                 } else if (milestone.id === 13) {
-                  milestone.order.should.be.eql(3 + 1);
+                  milestone.order.should.be.eql(2 + 1);
                 }
               });
 
@@ -473,7 +437,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for connect manager', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -481,7 +445,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051334); // manager
           resJson.updatedBy.should.be.eql(40051334); // manager
           done();
@@ -490,7 +454,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -498,7 +462,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051336); // connect admin
           resJson.updatedBy.should.be.eql(40051336); // connect admin
           done();
@@ -507,7 +471,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for copilot', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -515,7 +479,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051332); // copilot
           resJson.updatedBy.should.be.eql(40051332); // copilot
           done();
@@ -524,7 +488,7 @@ describe('CREATE milestone', () => {
 
     it('should return 201 for member', (done) => {
       request(server)
-        .post('/v4/timelines/1/milestones')
+        .post('/v5/timelines/1/milestones')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -532,7 +496,7 @@ describe('CREATE milestone', () => {
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.createdBy.should.be.eql(40051331); // member
           resJson.updatedBy.should.be.eql(40051331); // member
           done();
@@ -556,9 +520,9 @@ describe('CREATE milestone', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.TIMELINE_ADJUSTED when milestone created', (done) => {
+      it('sends send correct BUS API messages milestone created', (done) => {
         request(server)
-          .post('/v4/timelines/1/milestones')
+          .post('/v5/timelines/1/milestones')
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
@@ -570,14 +534,16 @@ describe('CREATE milestone', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
+                createEventSpy.callCount.should.be.eql(2);
+
+                // added a new milestone
                 createEventSpy.calledWith(BUS_API_EVENT.MILESTONE_ADDED, sinon.match({
-                  projectId: 1,
-                  projectName: 'test1',
-                  projectUrl: 'https://local.topcoder-dev.com/projects/1',
-                  userId: 40051332,
-                  initiatorUserId: 40051332,
+                  resource: RESOURCES.MILESTONE,
+                  name: 'milestone 4',
+                  description: 'description 4',
+                  order: 2,
                 })).should.be.true;
+
                 done();
               });
             }

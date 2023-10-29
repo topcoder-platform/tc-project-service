@@ -23,7 +23,7 @@ module.exports = [
     const filters = util.parseQueryFilter(req.query.filter);
     // Throw error if projectTemplateId is not present in filter
     if (!filters.projectTemplateId) {
-      return next(util.buildApiError('Missing filter projectTemplateId', 422));
+      return next(util.buildApiError('Missing filter projectTemplateId', 400));
     }
     if (!util.isValidFilter(filters, ['projectTemplateId'])) {
       return util.handleError('Invalid filters', null, req, next);
@@ -35,9 +35,9 @@ module.exports = [
       attributes: { exclude: ['deletedAt', 'deletedBy'] },
       raw: true,
     })
-    .then((result) => {
-      res.json(util.wrapResponse(req.id, result));
-    })
-    .catch(next);
+      .then((result) => {
+        res.json(result);
+      })
+      .catch(next);
   },
 ];

@@ -7,7 +7,7 @@ import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT } from '../../constants';
+import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -54,63 +54,63 @@ describe('Phase Products', () => {
   beforeEach((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            models.ProjectPhase.create({
+              name: 'test project phase',
+              status: 'active',
+              startDate: '2018-05-15T00:00:00Z',
+              endDate: '2018-05-15T12:00:00Z',
+              budget: 20.0,
+              progress: 1.23456,
+              details: {
+                message: 'This can be any json',
+              },
               createdBy: 1,
               updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
               projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              models.ProjectPhase.create({
-                name: 'test project phase',
-                status: 'active',
-                startDate: '2018-05-15T00:00:00Z',
-                endDate: '2018-05-15T12:00:00Z',
-                budget: 20.0,
-                progress: 1.23456,
-                details: {
-                  message: 'This can be any json',
-                },
-                createdBy: 1,
-                updatedBy: 1,
-                projectId,
-              }).then((phase) => {
-                phaseId = phase.id;
-                _.assign(body, { phaseId, projectId });
+            }).then((phase) => {
+              phaseId = phase.id;
+              _.assign(body, { phaseId, projectId });
 
-                models.PhaseProduct.create(body).then((product) => {
-                  productId = product.id;
-                  done();
-                });
+              models.PhaseProduct.create(body).then((product) => {
+                productId = product.id;
+                done();
               });
             });
           });
         });
+      });
   });
 
   after((done) => {
@@ -120,89 +120,87 @@ describe('Phase Products', () => {
   describe('PATCH /projects/{id}/phases/{phaseId}/products/{productId}', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
 
     it('should return 403 when user have no permission (customer)', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .patch(`/v4/projects/999/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/999/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 404 when no phase with specific phaseId', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/99999/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/99999/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 404 when no product with specific productId', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
-    it('should return 422 when parameters are invalid', (done) => {
+    it('should return 400 when parameters are invalid', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/99999`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/99999`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            estimatedPrice: -15,
-          },
+          estimatedPrice: -15,
         })
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
 
     it('should return updated product when user have permission and parameters are valid', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(updateBody.name);
             resJson.type.should.be.eql(updateBody.type);
@@ -216,11 +214,11 @@ describe('Phase Products', () => {
 
     it('should return 200 if requested by admin', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(200)
         .end(done);
@@ -237,11 +235,11 @@ describe('Phase Products', () => {
         updatedBy: 1,
       }).then(() => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
-          .send({ param: updateBody })
+          .send(updateBody)
           .expect('Content-Type', /json/)
           .expect(200)
           .end(done);
@@ -250,11 +248,11 @@ describe('Phase Products', () => {
 
     it('should return 403 if requested by manager which is not a member', (done) => {
       request(server)
-        .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+        .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: updateBody })
+        .send(updateBody)
         .expect('Content-Type', /json/)
         .expect(403)
         .end(done);
@@ -265,11 +263,11 @@ describe('Phase Products', () => {
         where: { userId: testUtil.userIds.copilot, projectId },
       }).then(() => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
-          .send({ param: updateBody })
+          .send(updateBody)
           .expect('Content-Type', /json/)
           .expect(403)
           .end(done);
@@ -293,16 +291,14 @@ describe('Phase Products', () => {
         sandbox.restore();
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when name updated', (done) => {
+      it('should send correct BUS API messages when name updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              name: 'new name',
-            },
+            name: 'new name',
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -311,30 +307,36 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  name: 'new name',
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
                   userId: 40051332,
                   initiatorUserId: 40051332,
                 })).should.be.true;
+
                 done();
               });
             }
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when estimatedPrice updated', (done) => {
+      it('should send correct BUS API messages when estimatedPrice updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              estimatedPrice: 123,
-            },
+            estimatedPrice: 123,
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -343,30 +345,36 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  estimatedPrice: 123,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
                   userId: 40051332,
                   initiatorUserId: 40051332,
                 })).should.be.true;
+
                 done();
               });
             }
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when actualPrice updated', (done) => {
+      it('should send correct BUS API messages when actualPrice updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              actualPrice: 123,
-            },
+            actualPrice: 123,
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -375,30 +383,36 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledOnce.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.callCount.should.be.eql(2);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  actualPrice: 123,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
                   userId: 40051332,
                   initiatorUserId: 40051332,
                 })).should.be.true;
+
                 done();
               });
             }
           });
       });
 
-      it('should send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when details updated', (done) => {
+      it('should send correct BUS API messages when details updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              details: 'something',
-            },
+            details: 'something',
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -407,31 +421,38 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.calledTwice.should.be.true;
-                createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED);
-                createEventSpy.secondCall.calledWith(BUS_API_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
+                createEventSpy.callCount.should.be.eql(3);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  details: 'something',
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PRODUCT_SPECIFICATION_MODIFIED)
+                  .should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED, sinon.match({
                   projectId: 1,
                   projectName: 'test1',
                   projectUrl: 'https://local.topcoder-dev.com/projects/1',
                   userId: 40051332,
                   initiatorUserId: 40051332,
                 })).should.be.true;
+
                 done();
               });
             }
           });
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when type updated', (done) => {
+      it('should send correct BUS API messages when type updated', (done) => {
         request(server)
-          .patch(`/v4/projects/${projectId}/phases/${phaseId}/products/${productId}`)
+          .patch(`/v5/projects/${projectId}/phases/${phaseId}/products/${productId}`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
           .send({
-            param: {
-              type: 'another type',
-            },
+            type: 'another type',
           })
           .expect('Content-Type', /json/)
           .expect(200)
@@ -440,7 +461,13 @@ describe('Phase Products', () => {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.notCalled.should.be.true;
+                createEventSpy.callCount.should.be.eql(1);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_PRODUCT_UPDATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                  type: 'another type',
+                })).should.be.true;
+
                 done();
               });
             }

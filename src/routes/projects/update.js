@@ -7,16 +7,15 @@ import {
 import models from '../../models';
 import {
   PROJECT_STATUS,
-  PROJECT_MEMBER_ROLE,
   EVENT,
-  USER_ROLE,
+  RESOURCES,
   REGEX,
 } from '../../constants';
 import util from '../../util';
-import directProject from '../../services/directProject';
+import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
-
+const xss = require('xss');
 
 /**
  * API to handle updating a project.
@@ -39,51 +38,50 @@ const mergeCustomizer = (objValue, srcValue) => {
 };
 
 const updateProjectValdiations = {
-  body: {
-    param: Joi.object().keys({
-      id: Joi.number().valid(Joi.ref('$params.id')),
-      name: Joi.string(),
-      description: Joi.string().allow(null).allow('').optional(),
-      billingAccountId: Joi.number().positive(),
-      directProjectId: Joi.number().positive().allow(null),
-      status: Joi.any().valid(_.values(PROJECT_STATUS)),
-      estimatedPrice: Joi.number().precision(2).positive().allow(null),
-      actualPrice: Joi.number().precision(2).positive(),
-      terms: Joi.array().items(Joi.number().positive()),
-      external: Joi.object().keys({
-        id: Joi.string(),
-        type: Joi.any().valid('github', 'jira', 'asana', 'other'),
-        data: Joi.string().max(300), // TODO - restrict length
-      }).allow(null),
-      bookmarks: Joi.array().items(Joi.object().keys({
-        title: Joi.string(),
-        address: Joi.string().regex(REGEX.URL),
-        createdAt: Joi.date(),
-        createdBy: Joi.number().integer().positive(),
-        updatedAt: Joi.date(),
-        updatedBy: Joi.number().integer().positive(),
-      })).optional().allow(null),
-      type: Joi.string().max(45),
-      details: Joi.any(),
-      memers: Joi.any(),
-      templateId: Joi.any().strip(), // ignore the template id
-      createdBy: Joi.any(),
-      createdAt: Joi.any(),
-      updatedBy: Joi.any(),
-      updatedAt: Joi.any(),
-      challengeEligibility: Joi.array().items(Joi.object().keys({
-        role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
-        users: Joi.array().items(Joi.number().positive()),
-        groups: Joi.array().items(Joi.number().positive()),
-      })).allow(null),
-      // cancel reason is mandatory when project status is cancelled
-      cancelReason: Joi.when('status', {
-        is: PROJECT_STATUS.CANCELLED,
-        then: Joi.string().required(),
-        otherwise: Joi.string().optional(),
-      }),
+  body: Joi.object().keys({
+    id: Joi.number().valid(Joi.ref('$params.id')),
+    name: Joi.string(),
+    description: Joi.string().allow(null).allow('').optional(),
+    billingAccountId: Joi.number().positive().allow(null),
+    directProjectId: Joi.number().positive().allow(null),
+    status: Joi.any().valid(_.values(PROJECT_STATUS)),
+    estimatedPrice: Joi.number().precision(2).positive().allow(null),
+    actualPrice: Joi.number().precision(2).positive(),
+    terms: Joi.array().items(Joi.string()),
+    groups: Joi.array().items(Joi.string()),
+    external: Joi.object().keys({
+      id: Joi.string(),
+      type: Joi.any().valid('github', 'jira', 'asana', 'other'),
+      data: Joi.string().max(300), // TODO - restrict length
+    }).allow(null),
+    bookmarks: Joi.array().items(Joi.object().keys({
+      title: Joi.string(),
+      address: Joi.string().regex(REGEX.URL),
+      createdAt: Joi.date(),
+      createdBy: Joi.number().integer().positive(),
+      updatedAt: Joi.date(),
+      updatedBy: Joi.number().integer().positive(),
+    })).optional().allow(null),
+    type: Joi.string().max(45),
+    details: Joi.any(),
+    memers: Joi.any(),
+    templateId: Joi.any().strip(), // ignore the template id
+    createdBy: Joi.any(),
+    createdAt: Joi.any(),
+    updatedBy: Joi.any(),
+    updatedAt: Joi.any(),
+    challengeEligibility: Joi.array().items(Joi.object().keys({
+      role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
+      users: Joi.array().items(Joi.number().positive()),
+      groups: Joi.array().items(Joi.number().positive()),
+    })).allow(null),
+    // cancel reason is mandatory when project status is cancelled
+    cancelReason: Joi.when('status', {
+      is: PROJECT_STATUS.CANCELLED,
+      then: Joi.string().required(),
+      otherwise: Joi.string().optional(),
     }),
-  },
+  }),
 };
 
 /**
@@ -146,9 +144,13 @@ const validateUpdates = (existingProject, updatedProps, req) => {
     //   }
   }
   if (_.has(updatedProps, 'directProjectId') &&
-    !util.hasRoles(req, [USER_ROLE.MANAGER, USER_ROLE.TOPCODER_ADMIN])) {
-    errors.push('Don\'t have permission to update \'directProjectId\' property');
+    !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_DIRECT_PROJECT_ID, req)) {
+    errors.push('You do not have permission to update \'directProjectId\' property');
   }
+  // if (_.has(updatedProps, 'billingAccountId') &&
+  //   !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_BILLING_ACCOUNT_ID, req)) {
+  //   errors.push('You do not have permission to update \'billingAccountId\' property');
+  // }
   if ((existingProject.status !== PROJECT_STATUS.DRAFT) && (updatedProps.status === PROJECT_STATUS.DRAFT)) {
     errors.push('cannot update a project status to draft');
   }
@@ -159,18 +161,18 @@ module.exports = [
   // handles request validations
   validate(updateProjectValdiations),
   permissions('project.edit'),
-  /**
+  /*
    * Validate project type to be existed.
    */
   (req, res, next) => {
-    if (req.body.param.type) {
-      models.ProjectType.findOne({ where: { key: req.body.param.type } })
+    if (req.body.type) {
+      models.ProjectType.findOne({ where: { key: req.body.type } })
         .then((projectType) => {
           if (projectType) {
             next();
           } else {
-            const err = new Error(`Project type not found for key ${req.body.param.type}`);
-            err.status = 422;
+            const err = new Error(`Project type not found for key ${req.body.type}`);
+            err.status = 400;
             next(err);
           }
         });
@@ -178,18 +180,22 @@ module.exports = [
       next();
     }
   },
-  /**
+  /*
    * POST projects/
    * Create a project if the user has access
    */
   (req, res, next) => {
     let project;
-    let updatedProps = req.body.param;
+    let updatedProps = req.body;
     const projectId = _.parseInt(req.params.projectId);
     // prune any fields that cannot be updated directly
     updatedProps = _.omit(updatedProps, ['createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'id']);
     traverse(updatedProps).forEach(function (x) { // eslint-disable-line func-names
-      if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+      // if (x && this.isLeaf && typeof x === 'string') this.update(req.sanitize(x));
+      if (x && this.isLeaf && typeof x === 'string') {
+        const sanitizedData = xss(x);
+        this.update(sanitizedData);
+      }
     });
     let previousValue;
     models.sequelize.transaction(() => models.Project.findOne({
@@ -207,7 +213,7 @@ module.exports = [
         }
         if (!_prj.templateId) return Promise.resolve({ _prj });
         return models.ProjectTemplate.getTemplate(_prj.templateId)
-        .then(template => Promise.resolve({ _prj, template }));
+          .then(template => Promise.resolve({ _prj, template }));
       })
       .then(({ _prj, template }) => {
         project = _prj;
@@ -223,23 +229,14 @@ module.exports = [
           });
           return Promise.reject(err);
         }
-        // Only project manager (user with manager role assigned) or topcoder
-        // admin should be allowed to transition project status to 'active'.
-        const members = req.context.currentProjectMembers;
-        const validRoles = [
-          PROJECT_MEMBER_ROLE.MANAGER,
-          PROJECT_MEMBER_ROLE.PROGRAM_MANAGER,
-          PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
-          PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
-        ].map(x => x.toLowerCase());
-        const matchRole = role => _.indexOf(validRoles, role.toLowerCase()) >= 0;
-        if (updatedProps.status === PROJECT_STATUS.ACTIVE &&
-          !util.hasAdminRole(req) &&
-          _.isUndefined(_.find(members,
-            m => m.userId === req.authUser.userId && matchRole(m.role)))
+
+        // check if user has permissions to update project status
+        if (
+          updatedProps.status &&
+          updatedProps.status !== project.status &&
+          !util.hasPermissionByReq(PERMISSION.UPDATE_PROJECT_STATUS, req)
         ) {
-          const err = new Error('Only assigned topcoder-managers or topcoder admins should be allowed ' +
-            'to launch a project');
+          const err = new Error('You are not allowed to update project status.');
           err.status = 403;
           return Promise.reject(err);
         }
@@ -253,20 +250,6 @@ module.exports = [
         const newValues = _.mergeWith({}, previousValue, updatedProps, mergeCustomizer);
         project.set(newValues);
         return project.save();
-      })
-      .then(() => {
-        if (updatedProps.billingAccountId &&
-          (previousValue.billingAccountId !== updatedProps.billingAccountId)) {
-          if (!previousValue.directProjectId) {
-            return Promise.resolve();
-          }
-          // if billing account is updated and exist direct projectId we
-          // should invoke direct project service
-          return directProject.addBillingAccount(req, previousValue.directProjectId, {
-            billingAccountId: updatedProps.billingAccountId,
-          });
-        }
-        return Promise.resolve();
       })
       .then(() => project.reload(project.id))
       // update project history
@@ -288,20 +271,12 @@ module.exports = [
         project = _.omit(project, ['deletedAt']);
         req.log.debug('updated project', project);
         previousValue = _.omit(previousValue, ['deletedAt']);
-        // publish original and updated project data
-        req.app.services.pubsub.publish(
-          EVENT.ROUTING_KEY.PROJECT_UPDATED, {
-            original: previousValue,
-            updated: project,
-          }, {
-            correlationId: req.id,
-          },
-        );
         req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, {
           req,
           original: previousValue,
-          updated: project,
+          updated: _.assign({ resource: RESOURCES.PROJECT }, project),
         });
+
         // check context for project members
         project.members = req.context.currentProjectMembers;
         // get attachments
@@ -310,7 +285,7 @@ module.exports = [
       .then((attachments) => {
         // make sure we only send response after transaction is committed
         project.attachments = attachments;
-        res.json(util.wrapResponse(req.id, project));
+        res.json(project);
       })
       .catch(err => next(err));
   },

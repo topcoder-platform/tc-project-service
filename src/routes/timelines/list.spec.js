@@ -3,16 +3,17 @@
  */
 import chai from 'chai';
 import request from 'supertest';
-import sleep from 'sleep';
 import config from 'config';
 import _ from 'lodash';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
 const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
+const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -150,43 +151,43 @@ describe('LIST timelines', () => {
               },
             ]).then(() =>
               // Create phase
-               models.ProjectPhase.bulkCreate([
-                 {
-                   projectId: 1,
-                   name: 'test project phase 1',
-                   status: 'active',
-                   startDate: '2018-05-15T00:00:00Z',
-                   endDate: '2018-05-15T12:00:00Z',
-                   budget: 20.0,
-                   progress: 1.23456,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 1,
-                   updatedBy: 1,
-                 },
-                 {
-                   projectId: 2,
-                   name: 'test project phase 2',
-                   status: 'active',
-                   startDate: '2018-05-16T00:00:00Z',
-                   endDate: '2018-05-16T12:00:00Z',
-                   budget: 21.0,
-                   progress: 1.234567,
-                   details: {
-                     message: 'This can be any json 2',
-                   },
-                   createdBy: 2,
-                   updatedBy: 2,
-                 },
-               ]))
+              models.ProjectPhase.bulkCreate([
+                {
+                  projectId: 1,
+                  name: 'test project phase 1',
+                  status: 'active',
+                  startDate: '2018-05-15T00:00:00Z',
+                  endDate: '2018-05-15T12:00:00Z',
+                  budget: 20.0,
+                  progress: 1.23456,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 1,
+                  updatedBy: 1,
+                },
+                {
+                  projectId: 2,
+                  name: 'test project phase 2',
+                  status: 'active',
+                  startDate: '2018-05-16T00:00:00Z',
+                  endDate: '2018-05-16T12:00:00Z',
+                  budget: 21.0,
+                  progress: 1.234567,
+                  details: {
+                    message: 'This can be any json 2',
+                  },
+                  createdBy: 2,
+                  updatedBy: 2,
+                },
+              ]))
               .then(() =>
                 // Create timelines
                 models.Timeline.bulkCreate(timelines, { returning: true })
                   .then(createdTimelines => (
                     // create milestones after timelines
                     models.Milestone.bulkCreate(milestones))
-                      .then(createdMilestones => [createdTimelines, createdMilestones]),
+                    .then(createdMilestones => [createdTimelines, createdMilestones]),
                   ),
               ).then(([createdTimelines, createdMilestones]) =>
                 // Index to ES
@@ -200,7 +201,7 @@ describe('LIST timelines', () => {
                     );
                   }
 
-                  return server.services.es.index({
+                  return eClient.index({
                     index: ES_TIMELINE_INDEX,
                     type: ES_TIMELINE_TYPE,
                     id: timelineJson.id,
@@ -208,56 +209,56 @@ describe('LIST timelines', () => {
                   });
                 }))
                   .then(() => {
-                    // sleep for some time, let elasticsearch indices be settled
-                    sleep.sleep(5);
                     done();
                   }));
           });
       });
   });
 
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('GET /timelines', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get('/v4/timelines')
+        .get('/v5/timelines')
         .expect(403, done);
     });
 
-    it('should return 422 for invalid filter key', (done) => {
+    it('should return 400 for invalid filter key', (done) => {
       request(server)
-        .get('/v4/timelines?filter=invalid%3Dproject')
+        .get('/v5/timelines?invalid=project')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422)
+        .expect(400)
         .end(done);
     });
 
-    it('should return 422 for invalid reference filter', (done) => {
+    it('should return 400 for invalid reference filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dinvalid%26referenceId%3D1')
+        .get('/v5/timelines?reference=invalid&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422)
+        .expect(400)
         .end(done);
     });
 
-    it('should return 422 for invalid referenceId filter', (done) => {
+    it('should return 400 for invalid referenceId filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dinvalid%26referenceId%3D0')
+        .get('/v5/timelines?reference=invalid&referenceId=0')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .expect(422)
+        .expect(400)
         .end(done);
     });
 
     it('should return 200 for admin', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?reference=project&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -265,7 +266,7 @@ describe('LIST timelines', () => {
         .end((err, res) => {
           const timeline = timelines[0];
 
-          let resJson = res.body.result.content;
+          let resJson = res.body;
           resJson.should.have.length(1);
           resJson = _.sortBy(resJson, o => o.id);
           resJson[0].id.should.be.eql(1);
@@ -302,13 +303,13 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect admin', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?reference=project&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(1);
 
           done();
@@ -317,13 +318,13 @@ describe('LIST timelines', () => {
 
     it('should return 200 for connect manager', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?reference=project&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(1);
 
           done();
@@ -332,12 +333,12 @@ describe('LIST timelines', () => {
 
     it('should return 200 for member', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?reference=project&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(1);
 
           done();
@@ -346,12 +347,12 @@ describe('LIST timelines', () => {
 
     it('should return 200 for copilot', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?reference=project&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(1);
 
           done();
@@ -360,7 +361,7 @@ describe('LIST timelines', () => {
 
     it('should return 403 for member with not accessible project', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?reference=project&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -369,13 +370,13 @@ describe('LIST timelines', () => {
 
     it('should return 200 with reference and referenceId filter', (done) => {
       request(server)
-        .get('/v4/timelines?filter=reference%3Dproject%26referenceId%3D1')
+        .get('/v5/timelines?reference=project&referenceId=1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .expect(200)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(1);
 
           done();

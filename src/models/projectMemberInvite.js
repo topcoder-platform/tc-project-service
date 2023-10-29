@@ -45,66 +45,112 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
       { fields: ['status'] },
       { fields: ['deletedAt'] },
     ],
-    classMethods: {
-      getPendingInvitesForProject(projectId) {
-        return this.findAll({
-          where: {
-            projectId,
-            status: INVITE_STATUS.PENDING,
-          },
-          raw: true,
-        });
-      },
-      getPendingAndReguestedInvitesForProject(projectId) {
-        return this.findAll({
-          where: {
-            projectId,
-            status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
-          },
-          raw: true,
-        });
-      },
-      getPendingInviteByEmailOrUserId(projectId, email, userId) {
-        const where = { projectId, status: INVITE_STATUS.PENDING };
+  });
 
-        if (email && userId) {
-          _.assign(where, { $or: [
-            { email: { $eq: email.toLowerCase() } },
-            { userId: { $eq: userId } },
-          ] });
-        } else if (email) {
-          _.assign(where, { email });
-        } else if (userId) {
-          _.assign(where, { userId });
-        }
-        return this.findOne({
-          where,
-        });
-      },
-      getRequestedInvite(projectId, userId) {
-        const where = { projectId, status: INVITE_STATUS.REQUESTED };
+  ProjectMemberInvite.getPendingInvitesForProject = projectId => ProjectMemberInvite.findAll({
+    where: {
+      projectId,
+      status: INVITE_STATUS.PENDING,
+    },
+    raw: true,
+  });
 
-        if (userId) {
-          _.assign(where, { userId });
-        }
-        return this.findOne({
-          where,
-        });
-      },
-      getProjectInvitesForUser(email, userId) {
-        const where = { status: INVITE_STATUS.PENDING };
+  ProjectMemberInvite.getPendingAndReguestedInvitesForProject = projectId => ProjectMemberInvite.findAll({
+    where: {
+      projectId,
+      status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
+    },
+    raw: true,
+  });
 
-        if (email && userId) {
-          _.assign(where, { $or: [{ email: { $eq: email } }, { userId: { $eq: userId } }] });
-        } else if (email) {
-          _.assign(where, { email });
-        } else if (userId) {
-          _.assign(where, { userId });
-        }
-        return this.findAll({
-          where,
-        }).then(res => _.without(_.map(res, 'projectId'), null));
-      },
+  ProjectMemberInvite.getPendingOrRequestedProjectInvitesForUser = (projectId, email, userId) => {
+    const where = {
+      projectId,
+      status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
+    };
+
+    if (email && userId) {
+      _.assign(where, { $or: [{ email: { $eq: email } }, { userId: { $eq: userId } }] });
+    } else if (email) {
+      _.assign(where, { email });
+    } else if (userId) {
+      _.assign(where, { userId });
+    }
+    return ProjectMemberInvite.findAll({
+      where,
+      raw: true,
+    });
+  };
+
+  ProjectMemberInvite.getPendingInviteByIdForUser = (projectId, inviteId, email, userId) => {
+    const where = {
+      projectId,
+      id: inviteId,
+      status: INVITE_STATUS.PENDING,
+    };
+
+    if (email && userId) {
+      _.assign(where, { $or: [{ email: { $eq: email } }, { userId: { $eq: userId } }] });
+    } else if (email) {
+      _.assign(where, { email });
+    } else if (userId) {
+      _.assign(where, { userId });
+    }
+    return ProjectMemberInvite.findOne({
+      where,
+      raw: true,
+    });
+  };
+
+  ProjectMemberInvite.getPendingInviteByEmailOrUserId = (projectId, email, userId) => {
+    const where = { projectId, status: INVITE_STATUS.PENDING };
+
+    if (email && userId) {
+      _.assign(where, { $or: [
+        { email: { $eq: email.toLowerCase() } },
+        { userId: { $eq: userId } },
+      ] });
+    } else if (email) {
+      _.assign(where, { email });
+    } else if (userId) {
+      _.assign(where, { userId });
+    }
+    return ProjectMemberInvite.findOne({
+      where,
+    });
+  };
+
+  ProjectMemberInvite.getRequestedInvite = (projectId, userId) => {
+    const where = { projectId, status: INVITE_STATUS.REQUESTED };
+
+    if (userId) {
+      _.assign(where, { userId });
+    }
+    return ProjectMemberInvite.findOne({
+      where,
+    });
+  };
+
+  ProjectMemberInvite.getProjectInvitesForUser = (email, userId) => {
+    const where = { status: INVITE_STATUS.PENDING };
+
+    if (email && userId) {
+      _.assign(where, { $or: [{ email: { $eq: email } }, { userId: { $eq: userId } }] });
+    } else if (email) {
+      _.assign(where, { email });
+    } else if (userId) {
+      _.assign(where, { userId });
+    }
+    return ProjectMemberInvite.findAll({
+      where,
+    }).then(res => _.without(_.map(res, 'projectId'), null));
+  };
+
+  ProjectMemberInvite.getPendingOrRequestedProjectInviteById = (projectId, inviteId) => ProjectMemberInvite.findOne({
+    where: {
+      projectId,
+      id: inviteId,
+      status: { $in: [INVITE_STATUS.PENDING, INVITE_STATUS.REQUESTED] },
     },
   });
 

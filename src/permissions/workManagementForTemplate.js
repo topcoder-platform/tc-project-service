@@ -40,7 +40,7 @@ module.exports = policy => req => new Promise((resolve, reject) => {
         // TODO REMOVE THIS!!!
         // TEMPORARY let all the Topcoder managers to do all the work management
         // if there are no permission records in the DB for the template
-        return util.hasPermission({ topcoderRoles: MANAGER_ROLES }, req.authUser);
+        return util.hasPermissionByReq({ topcoderRoles: MANAGER_ROLES }, req);
         // return false;
       }
 

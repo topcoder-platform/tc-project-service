@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
+import config from 'config';
 import chai from 'chai';
 import moment from 'moment';
 import sinon from 'sinon';
@@ -8,17 +9,17 @@ import request from 'supertest';
 import util from '../../util';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import RabbitMQService from '../../services/rabbitmq';
 import models from '../../models';
+import { ATTACHMENT_TYPES } from '../../constants';
 
 const should = chai.should();
 const expect = chai.expect;
 
 describe('Project create', () => {
-  before((done) => {
-    sinon.stub(RabbitMQService.prototype, 'init', () => {});
-    sinon.stub(RabbitMQService.prototype, 'publish', () => {});
+  before(function beforeHook(done) {
+    this.timeout(20000);
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => models.ProjectType.bulkCreate([
         {
           key: 'generic',
@@ -76,8 +77,16 @@ describe('Project create', () => {
           updatedBy: 4,
         },
       ]))
-      .then(() => models.ProjectTemplate.bulkCreate([
-        {
+      .then(() => {
+        const exceededProducts = [];
+        for (let i = 1; i <= _.parseInt(config.get('maxPhaseProductCount')) + 1; i += 1) {
+          exceededProducts.push({
+            id: i,
+            name: `product ${i}`,
+            productKey: `visual_design_prod${i}`,
+          });
+        }
+        return models.ProjectTemplate.bulkCreate([{
           id: 1,
           name: 'template 1',
           key: 'key 1',
@@ -91,18 +100,7 @@ describe('Project create', () => {
             phase1: {
               name: 'phase 1',
               duration: 5,
-              products: [
-                {
-                  id: 21,
-                  name: 'product 1',
-                  productKey: 'visual_design_prod1',
-                },
-                {
-                  id: 22,
-                  name: 'product 2',
-                  productKey: 'visual_design_prod2',
-                },
-              ],
+              products: exceededProducts,
             },
           },
           createdBy: 1,
@@ -206,8 +204,8 @@ describe('Project create', () => {
           },
           createdBy: 1,
           updatedBy: 2,
-        },
-      ]))
+        }]);
+      })
       .then(() => models.BuildingBlock.bulkCreate([
         {
           id: 1,
@@ -252,24 +250,47 @@ describe('Project create', () => {
   });
 
   after((done) => {
-    RabbitMQService.prototype.init.restore();
-    RabbitMQService.prototype.publish.restore();
     testUtil.clearDb(done);
   });
 
   describe('POST /projects', () => {
     const body = {
-      param: {
-        type: 'generic',
-        description: 'test project',
-        details: {},
-        billingAccountId: 1,
-        name: 'test project1',
-        bookmarks: [{
-          title: 'title1',
-          address: 'http://www.address.com',
-        }],
-      },
+      type: 'generic',
+      description: 'test project',
+      details: {},
+      name: 'test project1',
+      bookmarks: [{
+        title: 'title1',
+        address: 'http://www.address.com',
+      }],
+    };
+
+    const bodyWithAttachments = {
+      type: 'generic',
+      description: 'test project',
+      details: {},
+      name: 'test project1',
+      attachments: [
+        {
+          title: 'file1.txt',
+          description: 'blah',
+          contentType: 'application/unknown',
+          size: 12312,
+          category: 'categ1',
+          path: 'https://media.topcoder.com/projects/1/test.txt',
+          type: ATTACHMENT_TYPES.FILE,
+          tags: ['tag1', 'tag2'],
+        },
+        {
+          title: 'Test Link 1',
+          description: 'Test link 1 description',
+          size: 123456,
+          category: 'categ1',
+          path: 'https://connect.topcoder-dev.com/projects/8600/assets',
+          type: ATTACHMENT_TYPES.LINK,
+          tags: ['tag3', 'tag4'],
+        },
+      ],
     };
 
     let sandbox;
@@ -282,124 +303,124 @@ describe('Project create', () => {
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .send(body)
         .expect(403, done);
     });
 
-    it('should return 422 if validations dont pass', (done) => {
+    it('should return 400 if validations dont pass', (done) => {
       const invalidBody = _.cloneDeep(body);
-      delete invalidBody.param.name;
+      delete invalidBody.name;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project type is missing', (done) => {
+    it('should return 400 if project type is missing', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.type = null;
+      invalidBody.type = null;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if project type does not exist', (done) => {
+    it('should return 400 if project type does not exist', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.type = 'not_exist';
+      invalidBody.type = 'not_exist';
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if templateId does not exist', (done) => {
+    it('should return 400 if templateId does not exist', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.templateId = 3000;
+      invalidBody.templateId = 3000;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if phaseProduct count exceeds max value', (done) => {
+    it('should return 400 if phaseProduct count exceeds max value', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.templateId = 1;
+      invalidBody.templateId = 1;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 with wrong format estimation field', (done) => {
+    it('should return 400 with wrong format estimation field', (done) => {
       const invalidBody = _.cloneDeep(body);
-      invalidBody.param.estimation = [
+      invalidBody.estimation = [
         {
 
         },
       ];
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 201 if error to create direct project', (done) => {
+    xit(`should return 400 when creating project with billingAccountId
+      without "write:projects-billing-accounts" scope in M2M token`, (done) => {
       const validBody = _.cloneDeep(body);
-      validBody.param.templateId = 3;
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        post: () => Promise.reject(new Error('error message')),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      validBody.billingAccountId = 1;
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
         })
         .send(validBody)
         .expect('Content-Type', /json/)
-        .expect(201)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const result = res.body.result;
-            result.success.should.be.truthy;
-            result.status.should.equal(201);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
-            done();
-          }
-        });
+        .expect(400, done);
+    });
+
+    xit(`should return 400 when creating project with directProjectId
+      without "write:projects" scope in M2M token`, (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.directProjectId = 1;
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(400, done);
     });
 
     it('should return 201 if valid user and data', (done) => {
       const validBody = _.cloneDeep(body);
-      validBody.param.templateId = 3;
+      validBody.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
@@ -418,7 +439,7 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -429,13 +450,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v3');
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
@@ -448,7 +468,61 @@ describe('Project create', () => {
             // Check that activity fields are set
             resJson.lastActivityUserId.should.be.eql('40051331');
             resJson.lastActivityAt.should.be.not.null;
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
+            done();
+          }
+        });
+    });
+
+    it('should create project successfully using M2M token with "write:projects" scope', (done) => {
+      const validBody = _.cloneDeep(body);
+      validBody.templateId = 3;
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:projects']}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.not.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.status.should.be.eql('in_review');
+            resJson.type.should.be.eql(body.type);
+            resJson.version.should.be.eql('v3');
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('manager');
+            resJson.members[0].userId.should.be.eql(config.DEFAULT_M2M_USERID);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+            resJson.bookmarks.should.have.lengthOf(1);
+            resJson.bookmarks[0].title.should.be.eql('title1');
+            resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
+            // Check that activity fields are set
+            resJson.lastActivityUserId.should.be.eql(config.DEFAULT_M2M_USERID.toString());
+            resJson.lastActivityAt.should.be.not.null;
             done();
           }
         });
@@ -474,7 +548,7 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -485,13 +559,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v2');
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
@@ -501,13 +574,93 @@ describe('Project create', () => {
             resJson.bookmarks.should.have.lengthOf(1);
             resJson.bookmarks[0].title.should.be.eql('title1');
             resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             // should not create phases without a template id
             resJson.phases.should.have.lengthOf(0);
             done();
           }
         });
     });
+
+    it('should return 201 if valid user and data with attachments', (done) => {
+      const validBody = _.cloneDeep(bodyWithAttachments);
+      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
+        post: () => Promise.resolve({
+          status: 200,
+          data: {
+            id: 'requesterId',
+            version: 'v3',
+            result: {
+              success: true,
+              status: 200,
+              content: {
+                projectId: 128,
+              },
+            },
+          },
+        }),
+      });
+      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      request(server)
+        .post('/v5/projects')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send(validBody)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            should.not.exist(resJson.billingAccountId);
+            should.exist(resJson.name);
+            resJson.status.should.be.eql('in_review');
+            resJson.type.should.be.eql(bodyWithAttachments.type);
+            resJson.version.should.be.eql('v2');
+            resJson.members.should.have.lengthOf(1);
+            resJson.members[0].role.should.be.eql('customer');
+            resJson.members[0].userId.should.be.eql(40051331);
+            resJson.members[0].projectId.should.be.eql(resJson.id);
+            resJson.members[0].isPrimary.should.be.truthy;
+
+            resJson.attachments.should.have.lengthOf(2);
+
+            should.exist(resJson.attachments[0].id);
+            should.exist(resJson.attachments[0].createdAt);
+            should.exist(resJson.attachments[0].updatedAt);
+            resJson.attachments[0].createdBy.should.equal(40051331);
+            resJson.attachments[0].updatedBy.should.equal(40051331);
+            resJson.attachments[0].title.should.equal(bodyWithAttachments.attachments[0].title);
+            resJson.attachments[0].description.should.equal(bodyWithAttachments.attachments[0].description);
+            resJson.attachments[0].contentType.should.equal(bodyWithAttachments.attachments[0].contentType);
+            resJson.attachments[0].size.should.equal(bodyWithAttachments.attachments[0].size);
+            resJson.attachments[0].category.should.equal(bodyWithAttachments.attachments[0].category);
+            resJson.attachments[0].path.should.equal(bodyWithAttachments.attachments[0].path);
+            resJson.attachments[0].type.should.equal(bodyWithAttachments.attachments[0].type);
+            resJson.attachments[0].tags.should.eql(bodyWithAttachments.attachments[0].tags);
+
+            should.exist(resJson.attachments[1].id);
+            should.exist(resJson.attachments[1].createdAt);
+            should.exist(resJson.attachments[1].updatedAt);
+            resJson.attachments[1].createdBy.should.equal(40051331);
+            resJson.attachments[1].updatedBy.should.equal(40051331);
+            resJson.attachments[1].title.should.equal(bodyWithAttachments.attachments[1].title);
+            resJson.attachments[1].description.should.equal(bodyWithAttachments.attachments[1].description);
+            resJson.attachments[1].size.should.equal(bodyWithAttachments.attachments[1].size);
+            resJson.attachments[1].category.should.equal(bodyWithAttachments.attachments[1].category);
+            resJson.attachments[1].path.should.equal(bodyWithAttachments.attachments[1].path);
+            resJson.attachments[1].type.should.equal(bodyWithAttachments.attachments[1].type);
+            resJson.attachments[1].tags.should.eql(bodyWithAttachments.attachments[1].tags);
+
+            // should not create phases without a template id
+            resJson.phases.should.have.lengthOf(0);
+            done();
+          }
+        });
+    });
+
 
     it('should return 201 if valid user and data (with templateId)', (done) => {
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
@@ -528,24 +681,23 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send(_.merge({ param: { templateId: 3 } }, body))
+        .send(_.merge({ templateId: 3 }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
             resJson.members[0].userId.should.be.eql(40051331);
@@ -570,7 +722,6 @@ describe('Project create', () => {
             phases[0].products.should.have.lengthOf(1);
             phases[0].products[0].name.should.be.eql('product 1');
             phases[0].products[0].templateId.should.be.eql(21);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }
         });
@@ -595,17 +746,15 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
         .send(_.merge({
-          param: {
-            templateId: 4,
-            details: {
-              appDefinition: {
-                deliverables: ['dev-qa', 'design'],
-              },
+          templateId: 4,
+          details: {
+            appDefinition: {
+              deliverables: ['dev-qa', 'design'],
             },
           },
         }, body))
@@ -615,13 +764,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
             resJson.members[0].userId.should.be.eql(40051331);
@@ -631,7 +779,6 @@ describe('Project create', () => {
             resJson.bookmarks[0].title.should.be.eql('title1');
             resJson.bookmarks[0].address.should.be.eql('http://www.address.com');
             resJson.phases.should.have.lengthOf(0);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
 
             // verify that project has been marked to use workstreams
             resJson.details.settings.workstreams.should.be.true;
@@ -655,7 +802,7 @@ describe('Project create', () => {
 
     it('should return 201 if valid user and data (with estimation)', (done) => {
       const validBody = _.cloneDeep(body);
-      validBody.param.estimation = [
+      validBody.estimation = [
         {
           conditions: '( HAS_DESIGN_DELIVERABLE && HAS_ZEPLIN_APP_ADDON && CA_NEEDED)',
           price: 6,
@@ -719,7 +866,7 @@ describe('Project create', () => {
           buildingBlockKey: 'HAS_UNIT_TESTING_ADDON_CA',
         },
       ];
-      validBody.param.templateId = 3;
+      validBody.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
@@ -738,7 +885,7 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -749,13 +896,12 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            should.exist(resJson.billingAccountId);
+            should.not.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.version.should.be.eql('v3');
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
@@ -768,7 +914,6 @@ describe('Project create', () => {
             // Check that activity fields are set
             resJson.lastActivityUserId.should.be.eql('40051331');
             resJson.lastActivityAt.should.be.not.null;
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
 
             // Check new ProjectEstimation records are created.
             models.ProjectEstimation.findAll({
@@ -826,11 +971,11 @@ describe('Project create', () => {
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: 'Bearer userId_1800075',
         })
-        .send(_.merge({ param: { templateId: 3 } }, body))
+        .send(_.merge({ templateId: 3 }, body))
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
@@ -838,13 +983,12 @@ describe('Project create', () => {
             server.log.error(err);
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.billingAccountId);
             should.exist(resJson.name);
-            resJson.directProjectId.should.be.eql(128);
             resJson.status.should.be.eql('in_review');
-            resJson.type.should.be.eql(body.param.type);
+            resJson.type.should.be.eql(body.type);
             resJson.members.should.have.lengthOf(1);
             resJson.members[0].role.should.be.eql('customer');
             resJson.members[0].userId.should.be.eql(1800075);
@@ -869,7 +1013,6 @@ describe('Project create', () => {
             phases[0].products.should.have.lengthOf(1);
             phases[0].products[0].name.should.be.eql('product 1');
             phases[0].products[0].templateId.should.be.eql(21);
-            server.services.pubsub.publish.calledWith('project.draft-created').should.be.true;
             done();
           }
         });
@@ -877,7 +1020,7 @@ describe('Project create', () => {
 
     it('should create correct estimation items with estimation', (done) => {
       const validBody = _.cloneDeep(body);
-      validBody.param.estimation = [
+      validBody.estimation = [
         {
           conditions: '( HAS_DEV_DELIVERABLE && (ONLY_ONE_OS_MOBILE) )',
           price: 1000,
@@ -903,26 +1046,18 @@ describe('Project create', () => {
           buildingBlockKey: 'BLOCK_KEY3',
         },
       ];
-      validBody.param.templateId = 3;
+      validBody.templateId = 3;
       const mockHttpClient = _.merge(testUtil.mockHttpClient, {
         post: () => Promise.resolve({
           status: 200,
           data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: {
-                projectId: 128,
-              },
-            },
+            projectId: 128,
           },
         }),
       });
       sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .post('/v4/projects')
+        .post('/v5/projects')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -933,7 +1068,7 @@ describe('Project create', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             should.exist(resJson.name);
             should.exist(resJson.estimations);

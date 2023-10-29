@@ -35,58 +35,58 @@ describe('UPDATE PlanConfig version', () => {
     },
   ];
 
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.PlanConfig.create(planConfigs[0]))
-    .then(() => models.PlanConfig.create(planConfigs[1]))
-    .then(() => Promise.resolve()),
-  );
-  after(testUtil.clearDb);
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.PlanConfig.create(planConfigs[0]))
+      .then(() => models.PlanConfig.create(planConfigs[1]).then(() => done()));
+  });
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('Post /projects/metadata/planConfig/{key}/versions/{version}', () => {
     const body = {
-      param: {
-        config: {
-          'test create': 'test create',
-        },
+      config: {
+        'test create': 'test create',
       },
     };
 
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .patch('/v4/projects/metadata/planConfig/dev/versions/1')
+        .patch('/v5/projects/metadata/planConfig/dev/versions/1')
         .send(body)
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
-    it('should return 422 if missing config', (done) => {
-      const invalidBody = {
-        param: _.assign({}, body.param, {
-          config: undefined,
-        }),
-      };
+    it('should return 400 if missing config', (done) => {
+      const invalidBody = _.assign({}, body, {
+        config: undefined,
+      });
       request(server)
-      .patch('/v4/projects/metadata/planConfig/dev/versions/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .patch('/v5/projects/metadata/planConfig/dev/versions/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400)
+        .end(done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-      .patch('/v4/projects/metadata/planConfig/dev/versions/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.admin}`,
-      })
+        .patch('/v5/projects/metadata/planConfig/dev/versions/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
         .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           should.exist(resJson.id);
-          resJson.config.should.be.eql(body.param.config);
+          resJson.config.should.be.eql(body.config);
           resJson.key.should.be.eql('dev');
           resJson.revision.should.be.eql(3);
           resJson.version.should.be.eql(1);
@@ -102,12 +102,13 @@ describe('UPDATE PlanConfig version', () => {
 
     it('should return 403 for member', (done) => {
       request(server)
-      .patch('/v4/projects/metadata/planConfig/dev/versions/1')
-      .set({
-        Authorization: `Bearer ${testUtil.jwts.member}`,
-      })
+        .patch('/v5/projects/metadata/planConfig/dev/versions/1')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
         .send(body)
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
   });
 });

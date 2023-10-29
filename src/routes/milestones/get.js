@@ -30,19 +30,39 @@ module.exports = [
       id: req.params.milestoneId,
     };
 
-    // Find the milestone
-    models.Milestone.findOne({ where })
-      .then((milestone) => {
-        // Not found
-        if (!milestone) {
-          const apiErr = new Error(`Milestone not found for milestone id ${req.params.milestoneId}`);
-          apiErr.status = 404;
-          return Promise.reject(apiErr);
-        }
+    util.fetchByIdFromES('milestones', {
+      query: {
+        nested: {
+          path: 'milestones',
+          query: {
+            match: { 'milestones.id': req.params.milestoneId },
+          },
+          inner_hits: {},
+        },
+      },
+    }, 'timeline')
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No milestone found in ES');
+          // Find the milestone
+          models.Milestone.findOne({ where })
+            .then((milestone) => {
+            // Not found
+              if (!milestone) {
+                const apiErr = new Error(`Milestone not found for milestone id ${req.params.milestoneId}`);
+                apiErr.status = 404;
+                return Promise.reject(apiErr);
+              }
 
-        // Write to response
-        res.json(util.wrapResponse(req.id, _.omit(milestone.toJSON(), ['deletedBy', 'deletedAt'])));
-        return Promise.resolve();
+              // Write to response
+              res.json(_.omit(milestone.toJSON(), ['deletedBy', 'deletedAt']));
+              return Promise.resolve();
+            })
+            .catch(next);
+        } else {
+          req.log.debug('milestone found in ES');
+          res.json(data[0].inner_hits.milestones.hits.hits[0]._source); // eslint-disable-line no-underscore-dangle
+        }
       })
       .catch(next);
   },

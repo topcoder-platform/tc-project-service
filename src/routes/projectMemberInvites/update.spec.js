@@ -8,20 +8,24 @@ import server from '../../app';
 import util from '../../util';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
-import { BUS_API_EVENT, USER_ROLE, PROJECT_MEMBER_ROLE, INVITE_STATUS } from '../../constants';
+import {
+  BUS_API_EVENT,
+  RESOURCES,
+  PROJECT_MEMBER_ROLE,
+  INVITE_STATUS,
+  CONNECT_NOTIFICATION_EVENT,
+} from '../../constants';
 
 const should = chai.should();
 
 describe('Project member invite update', () => {
   let project1;
-  let invite1;
-  let invite2;
-  let invite3;
+  let project2;
 
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {
-        models.Project.create({
+        const p1 = models.Project.create({
           type: 'generic',
           directProjectId: 1,
           billingAccountId: 1,
@@ -36,8 +40,8 @@ describe('Project member invite update', () => {
         }).then((p) => {
           project1 = p;
           // create members
-          models.ProjectMember.create({
-            userId: 40051334,
+          const pm1 = models.ProjectMember.create({
+            userId: testUtil.userIds.manager,
             projectId: project1.id,
             role: 'manager',
             isPrimary: false,
@@ -45,55 +49,132 @@ describe('Project member invite update', () => {
             updatedBy: 1,
             createdAt: '2016-06-30 00:33:07+00',
             updatedAt: '2016-06-30 00:33:07+00',
-          }).then(() => {
-            models.ProjectMemberInvite.create({
-              projectId: project1.id,
-              userId: 40051331,
-              email: null,
-              role: PROJECT_MEMBER_ROLE.CUSTOMER,
-              status: INVITE_STATUS.PENDING,
-              createdBy: 1,
-              updatedBy: 1,
-              createdAt: '2016-06-30 00:33:07+00',
-              updatedAt: '2016-06-30 00:33:07+00',
-            }).then((in1) => {
-              invite1 = in1.get({
-                plain: true,
-              });
-              models.ProjectMemberInvite.create({
-                projectId: project1.id,
-                userId: 40051334,
-                email: null,
-                role: PROJECT_MEMBER_ROLE.MANAGER,
-                status: INVITE_STATUS.PENDING,
-                createdBy: 1,
-                updatedBy: 1,
-                createdAt: '2016-06-30 00:33:07+00',
-                updatedAt: '2016-06-30 00:33:07+00',
-              }).then((in2) => {
-                invite2 = in2.get({
-                  plain: true,
-                });
-                models.ProjectMemberInvite.create({
-                  projectId: project1.id,
-                  userId: 40051332,
-                  email: null,
-                  role: PROJECT_MEMBER_ROLE.COPILOT,
-                  status: INVITE_STATUS.REQUESTED,
-                  createdBy: 1,
-                  updatedBy: 1,
-                  createdAt: '2016-06-30 00:33:07+00',
-                  updatedAt: '2016-06-30 00:33:07+00',
-                }).then((in3) => {
-                  invite3 = in3.get({
-                    plain: true,
-                  });
-                  done();
-                });
-              });
-            });
           });
+
+          const invite1 = models.ProjectMemberInvite.create({
+            id: 1,
+            projectId: project1.id,
+            userId: testUtil.userIds.member,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+            status: INVITE_STATUS.PENDING,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          const invite2 = models.ProjectMemberInvite.create({
+            id: 2,
+            projectId: project1.id,
+            userId: testUtil.userIds.copilot,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.COPILOT,
+            status: INVITE_STATUS.REQUESTED,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          const invite3 = models.ProjectMemberInvite.create({
+            id: 3,
+            projectId: project1.id,
+            userId: testUtil.userIds.manager,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.MANAGER,
+            status: INVITE_STATUS.PENDING,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          return Promise.all([pm1, invite1, invite2, invite3]);
         });
+
+        const p2 = models.Project.create({
+          type: 'generic',
+          directProjectId: 1,
+          billingAccountId: 1,
+          name: 'test2',
+          description: 'test project2',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          project2 = p;
+          // create members
+          const pm = models.ProjectMember.create({
+            userId: testUtil.userIds.manager,
+            projectId: project2.id,
+            role: 'manager',
+            isPrimary: false,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          const invite4 = models.ProjectMemberInvite.create({
+            id: 4,
+            projectId: project2.id,
+            userId: testUtil.userIds.member,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+            status: INVITE_STATUS.PENDING,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          const invite5 = models.ProjectMemberInvite.create({
+            id: 5,
+            projectId: project2.id,
+            userId: null,
+            email: 'romit.choudhary@rivigo.com',
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+            status: INVITE_STATUS.PENDING,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          const invite6 = models.ProjectMemberInvite.create({
+            id: 6,
+            projectId: project2.id,
+            userId: testUtil.userIds.copilot,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.COPILOT,
+            status: INVITE_STATUS.ACCEPTED,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          const invite7 = models.ProjectMemberInvite.create({
+            id: 7,
+            projectId: project2.id,
+            userId: testUtil.userIds.romit,
+            email: null,
+            role: PROJECT_MEMBER_ROLE.CUSTOMER,
+            status: INVITE_STATUS.PENDING,
+            createdBy: 1,
+            updatedBy: 1,
+            createdAt: '2016-06-30 00:33:07+00',
+            updatedAt: '2016-06-30 00:33:07+00',
+          });
+
+          return Promise.all([pm, invite4, invite5, invite6, invite7]);
+        });
+
+        Promise.all([p1, p2]).then(() => done());
       });
   });
 
@@ -101,11 +182,9 @@ describe('Project member invite update', () => {
     testUtil.clearDb(done);
   });
 
-  describe('PUT /projects/{id}/members/invite', () => {
+  describe('PUT /projects/{id}/invites', () => {
     const body = {
-      param: {
-        status: 'accepted',
-      },
+      status: 'accepted',
     };
 
     let sandbox;
@@ -118,22 +197,19 @@ describe('Project member invite update', () => {
 
     it('should return 403 if user does not have permissions', (done) => {
       request(server)
-        .patch(`/v4/projects/${project1.id}/members/invite`)
+        .patch(`/v5/projects/${project1.id}/invites/1`)
         .send(body)
         .expect(403, done);
     });
 
-    it('should return 404 if user has no invite', (done) => {
+    it('should return 404 if invitation id and project id doesn\'t match', (done) => {
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .patch(`/v5/projects/${project1.id}/invites/5`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            userId: 123,
-            status: INVITE_STATUS.CANCELED,
-          },
+          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(404)
@@ -142,106 +218,62 @@ describe('Project member invite update', () => {
         });
     });
 
-    it('should return 400 no userId or email is presented', (done) => {
+    it('should return 404 if project id doesn\'t exist', (done) => {
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .patch('/v5/projects/99999/invites/1')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            status: INVITE_STATUS.CANCELED,
-          },
+          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-            res.body.result.status.should.equal(400);
-            const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*userId or email should be provided/);
-            done();
-          }
+        .expect(404)
+        .end(() => {
+          done();
         });
     });
 
-    it('should return 403 if try to update MANAGER role invite with copilot', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+    it('should return 404 if invitation id doesn\'t exist', (done) => {
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .patch(`/v5/projects/${project1.id}/invites/99999`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send({
-          param: {
-            userId: invite2.userId,
-            status: INVITE_STATUS.CANCELED,
-          },
+          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
-        .expect(403)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          } else {
-            const resJson = res.body.result.content;
-            should.exist(resJson);
-            res.body.result.status.should.equal(403);
-            const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*Project members can cancel invites only for customer/);
-            done();
-          }
+        .expect(404)
+        .end(() => {
+          done();
+        });
+    });
+
+    it('should return 404 if invitation status is not pending or requested', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project2.id}/invites/6`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          status: INVITE_STATUS.ACCEPTED,
+        })
+        .expect('Content-Type', /json/)
+        .expect(404)
+        .end(() => {
+          done();
         });
     });
 
     it('should return 403 if try to update others invite with CUSTOMER', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: [{
-                roleName: USER_ROLE.CUSTOMER,
-              }],
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .patch(`/v5/projects/${project1.id}/invites/1`)
         .set({
-          Authorization: `Bearer ${testUtil.jwts.member2}`,
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userId: invite2.userId,
-            status: INVITE_STATUS.CANCELED,
-          },
+          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -249,44 +281,26 @@ describe('Project member invite update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, /.*Project members can cancel invites only for customer/);
+            sinon.assert.match(
+              errorMessage,
+              'You don\'t have permissions to update invites for other users.',
+            );
             done();
           }
         });
     });
 
     it('should return 403 if try to update COPILOT role invite with copilot', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        get: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: [{
-                roleName: USER_ROLE.COPILOT,
-              }],
-            },
-          },
-        }),
-      });
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
       request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
+        .patch(`/v5/projects/${project1.id}/invites/2`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
         .send({
-          param: {
-            userId: invite3.userId,
-            status: INVITE_STATUS.ACCEPTED,
-          },
+          status: INVITE_STATUS.ACCEPTED,
         })
         .expect('Content-Type', /json/)
         .expect(403)
@@ -294,16 +308,84 @@ describe('Project member invite update', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
-            res.body.result.status.should.equal(403);
             const errorMessage = _.get(resJson, 'message', '');
-            sinon.assert.match(errorMessage, 'Requested invites can only be updated by Copilot manager');
+            sinon.assert.match(errorMessage, 'You don\'t have permissions to update requested invites.');
             done();
           }
         });
     });
 
+    it('should return 200 if member accepts his/her invitation', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/invites/1`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .send({
+          status: INVITE_STATUS.ACCEPTED,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(() => done());
+    });
+
+    it('should return 200 if admin accepts his/her invitation', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/invites/1`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .send({
+          status: INVITE_STATUS.ACCEPTED,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(() => done());
+    });
+
+    it('should return 200 if copilot accepts his/her invitation', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/invites/2`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .send({
+          status: INVITE_STATUS.ACCEPTED,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(() => done());
+    });
+
+    it('should return 200 if user accept invitation by email', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/invites/5`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.romit}`,
+        })
+        .send({
+          status: INVITE_STATUS.ACCEPTED,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(() => done());
+    });
+
+    it('should return 200 if accept invitation using M2M token with "write:project-members" scope', (done) => {
+      request(server)
+        .patch(`/v5/projects/${project1.id}/invites/7`)
+        .set({
+          Authorization: `Bearer ${testUtil.m2m['write:project-members']}`,
+        })
+        .send({
+          status: INVITE_STATUS.ACCEPTED,
+        })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(() => done());
+    });
 
     describe('Bus api', () => {
       let createEventSpy;
@@ -317,66 +399,74 @@ describe('Project member invite update', () => {
         createEventSpy = sandbox.spy(busApi, 'createEvent');
       });
 
-      it('Accept invite sends BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED ' +
-          'and BUS_API_EVENT.PROJECT_MEMBER_ADDED messages', (done) => {
+      it('should send correct BUS API messages when invite is accepted', (done) => {
         const mockHttpClient = _.merge(testUtil.mockHttpClient, {
           get: () => Promise.resolve({
             status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: [{
-                }],
-              },
-            },
+            data: {},
           }),
         });
         sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
         request(server)
-        .put(`/v4/projects/${project1.id}/members/invite`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.member}`,
-        })
-        .send({
-          param: {
-            userId: invite1.userId,
+          .patch(`/v5/projects/${project1.id}/invites/1`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.member}`,
+          })
+          .send({
             status: INVITE_STATUS.ACCEPTED,
-          },
-        })
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end((err) => {
-          if (err) {
-            done(err);
-          } else {
-            testUtil.wait(() => {
-              createEventSpy.calledThrice.should.be.true;
-              createEventSpy.firstCall.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
-                projectId: project1.id,
-                userId: invite1.userId,
-                status: INVITE_STATUS.ACCEPTED,
-                email: null,
-                isSSO: false,
-              })).should.be.true;
-              createEventSpy.secondCall.calledWith(BUS_API_EVENT.MEMBER_JOINED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: invite1.userId,
-                initiatorUserId: 40051331,
-              })).should.be.true;
-              createEventSpy.thirdCall.calledWith(BUS_API_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
-                projectId: project1.id,
-                projectName: project1.name,
-                userId: invite1.userId,
-                initiatorUserId: 40051331,
-              })).should.be.true;
-              done();
-            });
-          }
-        });
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err) => {
+            if (err) {
+              done(err);
+            } else {
+              testUtil.wait(() => {
+                createEventSpy.callCount.should.be.eql(5);
+
+                // Events for accepted invite
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER_INVITE,
+                  projectId: project1.id,
+                  userId: testUtil.userIds.member,
+                  status: INVITE_STATUS.ACCEPTED,
+                  email: null,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  userId: testUtil.userIds.member,
+                  status: INVITE_STATUS.ACCEPTED,
+                  email: null,
+                  isSSO: false,
+                })).should.be.true;
+
+                // Events for created member (after invite acceptance)
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_MEMBER_ADDED, sinon.match({
+                  resource: RESOURCES.PROJECT_MEMBER,
+                  projectId: project1.id,
+                  userId: testUtil.userIds.member,
+                })).should.be.true;
+
+                // Check Notification Service events
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.MEMBER_JOINED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  userId: testUtil.userIds.member,
+                  initiatorUserId: testUtil.userIds.member,
+                })).should.be.true;
+                createEventSpy.calledWith(CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED, sinon.match({
+                  projectId: project1.id,
+                  projectName: project1.name,
+                  userId: testUtil.userIds.member,
+                  initiatorUserId: testUtil.userIds.member,
+                })).should.be.true;
+
+                done();
+              });
+            }
+          });
       });
     });
   });

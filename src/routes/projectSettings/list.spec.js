@@ -79,30 +79,30 @@ describe('LIST Project Settings', () => {
           lastActivityAt: 1,
           lastActivityUserId: '1',
         })
-        .then((project) => {
-          projectId = project.id;
-          // create members
-          models.ProjectMember.bulkCreate([{
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 2,
-            userId: memberUser.userId,
-            projectId,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1,
-          }])
-          .then(() => {
-            models.ProjectSetting.bulkCreate(_.map(settings, s => _.assign(s, { projectId }))).then(() => done());
+          .then((project) => {
+            projectId = project.id;
+            // create members
+            models.ProjectMember.bulkCreate([{
+              id: 1,
+              userId: copilotUser.userId,
+              projectId,
+              role: 'copilot',
+              isPrimary: false,
+              createdBy: 1,
+              updatedBy: 1,
+            }, {
+              id: 2,
+              userId: memberUser.userId,
+              projectId,
+              role: 'customer',
+              isPrimary: true,
+              createdBy: 1,
+              updatedBy: 1,
+            }])
+              .then(() => {
+                models.ProjectSetting.bulkCreate(_.map(settings, s => _.assign(s, { projectId }))).then(() => done());
+              });
           });
-        });
       });
   });
 
@@ -113,13 +113,13 @@ describe('LIST Project Settings', () => {
   describe('GET /projects/{projectId}/settings', () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/settings`)
+        .get(`/v5/projects/${projectId}/settings`)
         .expect(403, done);
     });
 
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/settings`)
+        .get(`/v5/projects/${projectId}/settings`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
@@ -130,7 +130,7 @@ describe('LIST Project Settings', () => {
       models.Project.destroy({ where: { id: projectId } })
         .then(() => {
           request(server)
-            .get(`/v4/projects/${projectId}/settings`)
+            .get(`/v5/projects/${projectId}/settings`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -140,7 +140,7 @@ describe('LIST Project Settings', () => {
 
     it('should return 404 for non-existed project', (done) => {
       request(server)
-        .get('/v4/projects/99999/settings')
+        .get('/v5/projects/99999/settings')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -149,7 +149,7 @@ describe('LIST Project Settings', () => {
 
     it('should return 0 setting when copilot has readPermission for both denyRule and allowRule', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/settings`)
+        .get(`/v5/projects/${projectId}/settings`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -159,7 +159,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(0);
             done();
@@ -169,7 +169,7 @@ describe('LIST Project Settings', () => {
 
     it('should return 0 setting when connect admin has readPermission for denyRule', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/settings`)
+        .get(`/v5/projects/${projectId}/settings`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
@@ -179,7 +179,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(0);
             done();
@@ -189,7 +189,7 @@ describe('LIST Project Settings', () => {
 
     it('should return 1 setting when user have readPermission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/settings`)
+        .get(`/v5/projects/${projectId}/settings`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -198,7 +198,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             const setting = settings[0];
@@ -215,7 +215,7 @@ describe('LIST Project Settings', () => {
 
     it('should return 2 settings when user have readPermission (administrator)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/settings`)
+        .get(`/v5/projects/${projectId}/settings`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -225,7 +225,7 @@ describe('LIST Project Settings', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(2);
             const setting = settings[0];

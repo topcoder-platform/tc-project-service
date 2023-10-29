@@ -2,14 +2,15 @@
 import _ from 'lodash';
 import request from 'supertest';
 import config from 'config';
-import sleep from 'sleep';
 import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
+import util from '../../util';
 
 const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
 const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
+const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -45,9 +46,10 @@ describe('Project Phases', () => {
     email: 'some@abc.com',
   };
   before(function beforeHook(done) {
-    this.timeout(10000);
+    this.timeout(20000);
     // mocks
     testUtil.clearDb()
+      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',
@@ -83,20 +85,27 @@ describe('Project Phases', () => {
           }]).then(() => {
             _.assign(body, { projectId });
             return models.ProjectPhase.create(body);
-          }).then((phase) => {
-            // Index to ES
-            // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
-            project.lastActivityAt = 1;
-            project.phases = [phase];
-            return server.services.es.index({
-              index: ES_PROJECT_INDEX,
-              type: ES_PROJECT_TYPE,
-              id: projectId,
-              body: project,
-            }).then(() => {
-              // sleep for some time, let elasticsearch indices be settled
-              sleep.sleep(5);
-              done();
+          }).then((ph) => {
+            const phase = ph.toJSON();
+            models.ProjectPhaseMember.create({
+              phaseId: phase.id,
+              userId: copilotUser.userId,
+              createdBy: 1,
+              updatedBy: 1,
+            }).then((phaseMember) => {
+              _.assign(phase, { members: [phaseMember.toJSON()] });
+              // Index to ES
+              // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
+              project.lastActivityAt = 1;
+              project.phases = [phase];
+              return eClient.index({
+                index: ES_PROJECT_INDEX,
+                type: ES_PROJECT_TYPE,
+                id: projectId,
+                body: project,
+              }).then(() => {
+                done();
+              });
             });
           });
         });
@@ -110,40 +119,40 @@ describe('Project Phases', () => {
   describe('GET /projects/{id}/phases/', () => {
     it('should return 403 when user have no permission (non team member)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
 
     it('should return 404 when no project with specific projectId', (done) => {
       request(server)
-        .get('/v4/projects/999/phases/')
+        .get('/v5/projects/999/phases/')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 1 phase when user have project permission (customer)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
             done();
@@ -153,20 +162,62 @@ describe('Project Phases', () => {
 
     it('should return 1 phase when user have project permission (copilot)', (done) => {
       request(server)
-        .get(`/v4/projects/${projectId}/phases/`)
+        .get(`/v5/projects/${projectId}/phases/`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(200)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.should.have.lengthOf(1);
+            done();
+          }
+        });
+    });
+
+    it('should return 1 phase when user have project permission (copilot) with memberOnly', (done) => {
+      request(server)
+        .get(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.copilot}`,
+        })
+        .query({ memberOnly: true })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(1);
+            done();
+          }
+        });
+    });
+
+    it('should return 0 phase when user have project permission (customer) with memberOnly', (done) => {
+      request(server)
+        .get(`/v5/projects/${projectId}/phases/`)
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.member}`,
+        })
+        .query({ memberOnly: true })
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(0);
             done();
           }
         });

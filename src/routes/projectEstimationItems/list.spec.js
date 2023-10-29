@@ -99,15 +99,18 @@ describe('GET project estimation items', () => {
     .then(() => models.ProjectEstimationItem.bulkCreate(projectEstimationItems))
     .then(() => Promise.resolve()),
   );
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
-  const url = '/v4/projects/1/estimations/1/items';
+  const url = '/v5/projects/1/estimations/1/items';
 
   describe(`GET ${url}`, () => {
     it('should return 403 if user is not authenticated', (done) => {
       request(server)
         .get(url)
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 403 if user is not copilot or above', (done) => {
@@ -116,25 +119,28 @@ describe('GET project estimation items', () => {
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .expect(403, done);
+        .expect(403)
+        .end(done);
     });
 
     it('should return 404 if project not exists', (done) => {
       request(server)
-        .get('/v4/projects/999/estimations/1/items')
+        .get('/v5/projects/999/estimations/1/items')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(404, done);
+        .expect(404)
+        .end(done);
     });
 
     it('should return 404 if project estimation not exists', (done) => {
       request(server)
-        .get('/v4/projects/1/estimations/999/items')
+        .get('/v5/projects/1/estimations/999/items')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
-        .expect(404, done);
+        .expect(404)
+        .end(done);
     });
 
     it('should return all project estimation items for admin', (done) => {
@@ -148,7 +154,7 @@ describe('GET project estimation items', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.length.should.be.eql(3);
             // convert items to map with type.
@@ -187,7 +193,7 @@ describe('GET project estimation items', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.length.should.be.eql(1);
             // convert items to map with type.
@@ -215,7 +221,7 @@ describe('GET project estimation items', () => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.length.should.be.eql(0);
             // convert items to map with type.

@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-expressions, no-await-in-loop, no-restricted-syntax */
 
 import { expect } from 'chai';
-import sinon from 'sinon';
 import request from 'supertest';
 import server from '../../app';
 import { PROJECT_STATUS } from '../../constants';
@@ -130,35 +129,25 @@ describe('Project upgrade', () => {
         updatedBy: 2,
       }, specific))));
       validBody = {
-        param: {
-          targetVersion: 'v3',
-          defaultProductTemplateId: defaultProductTemplate.id,
-        },
+        targetVersion: 'v3',
+        defaultProductTemplateId: defaultProductTemplate.id,
       };
-      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
-      server.services.pubsub.init.restore();
-      server.services.pubsub.publish.restore();
-      sinon.stub(server.services.pubsub, 'init', () => {});
-      sinon.stub(server.services.pubsub, 'publish', () => {});
     });
 
     afterEach(async () => {
-      // restoring the stubs in beforeEach instead of afterEach because these methods are already stubbed
-      // server.services.pubsub.init.restore();
-      // server.services.pubsub.publish.restore();
       await testUtil.clearDb();
     });
 
     it('should return 403 if user is not authenticated', async () => {
       await request(server)
-        .post(`/v4/projects/${project.id}/upgrade`)
+        .post(`/v5/projects/${project.id}/upgrade`)
         .send(validBody)
         .expect(403);
     });
 
     it('should return 403 for non admin', async () => {
       await request(server)
-        .post(`/v4/projects/${project.id}/upgrade`)
+        .post(`/v5/projects/${project.id}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -170,7 +159,7 @@ describe('Project upgrade', () => {
       // since the product id is extracted from 'details.products', clearing that should trigger this error
       await project.update({ details: {} });
       await request(server)
-        .post(`/v4/projects/${project.id}/upgrade`)
+        .post(`/v5/projects/${project.id}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -182,7 +171,7 @@ describe('Project upgrade', () => {
       // by changing this we cause no matching product template to be found
       await matchingProductTemplate.update({ productKey: 'non matching product key' });
       await request(server)
-        .post(`/v4/projects/${project.id}/upgrade`)
+        .post(`/v5/projects/${project.id}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -194,9 +183,9 @@ describe('Project upgrade', () => {
       // by changing this the default product template id will be used
       await projectTemplate.update({ phases: { nonMatchingPhase1: { products: ['non existing product'] } } });
       // and we simulate a non existing one
-      validBody.param.defaultProductTemplateId += 1000;
+      validBody.defaultProductTemplateId += 1000;
       await request(server)
-        .post(`/v4/projects/${project.id}/upgrade`)
+        .post(`/v5/projects/${project.id}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -208,7 +197,7 @@ describe('Project upgrade', () => {
       // simulate an already migrated project
       await project.update({ version: 'v3' });
       await request(server)
-        .post(`/v4/projects/${project.id}/upgrade`)
+        .post(`/v5/projects/${project.id}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -217,9 +206,9 @@ describe('Project upgrade', () => {
     });
 
     it('should return 400 if there\'s no migration handler for the sent target version', async () => {
-      validBody.param.targetVersion = 'v4';
+      validBody.targetVersion = 'v4';
       await request(server)
-        .post(`/v4/projects/${project.id}/upgrade`)
+        .post(`/v5/projects/${project.id}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -231,7 +220,7 @@ describe('Project upgrade', () => {
       // simulate an already migrated project
       await project.update({ version: 'v3' });
       await request(server)
-        .post(`/v4/projects/${project.id + 1}/upgrade`)
+        .post(`/v5/projects/${project.id + 1}/upgrade`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
@@ -259,7 +248,7 @@ describe('Project upgrade', () => {
         });
 
         const commonTest = async (testCompleted, completedOnDate, additionalPhaseName) => {
-          const migratedProject = await models.Project.find({ id: project.id });
+          const migratedProject = await models.Project.findOne({ id: project.id });
           expect(migratedProject.version).to.equal('v3');
           expect(migratedProject.templateId).to.equal(projectTemplate.id);
           const newProjectPhases = await models.ProjectPhase.findAll({
@@ -301,17 +290,11 @@ describe('Project upgrade', () => {
               });
             }
           }
-
-          expect(server.services.pubsub.publish.calledWith('project.phase.added')).to.be.true;
-          // we should not raise product added event as when we are adding a phase, it automatically adds the product
-          // product added event should be raised only when a new product is added to an existing phase
-          expect(server.services.pubsub.publish.calledWith('project.phase.product.added')).to.be.false;
-          expect(server.services.pubsub.publish.calledWith('project.updated')).to.be.true;
         };
 
         it('should migrate a non completed project to the expected state', async () => {
           await request(server)
-            .post(`/v4/projects/${project.id}/upgrade`)
+            .post(`/v5/projects/${project.id}/upgrade`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -342,7 +325,7 @@ describe('Project upgrade', () => {
             createdAt: yesterday,
           });
           await request(server)
-            .post(`/v4/projects/${project.id}/upgrade`)
+            .post(`/v5/projects/${project.id}/upgrade`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })
@@ -352,9 +335,9 @@ describe('Project upgrade', () => {
         });
 
         it('should migrate a project and assign the phase name passed in the parameters', async () => {
-          validBody.param.phaseName = 'A custom phase name';
+          validBody.phaseName = 'A custom phase name';
           await request(server)
-            .post(`/v4/projects/${project.id}/upgrade`)
+            .post(`/v5/projects/${project.id}/upgrade`)
             .set({
               Authorization: `Bearer ${testUtil.jwts.admin}`,
             })

@@ -47,18 +47,14 @@ module.exports = [
 
         // find all allowed permissions
         workManagementPermissions.forEach((workManagementPermission) => {
-          const isAllowed = util.hasPermission(
-            workManagementPermission.permission,
-            req.authUser,
-            req.context.currentProjectMembers,
-          );
+          const isAllowed = util.hasPermissionByReq(workManagementPermission.permission, req);
 
           if (isAllowed) {
             allowPermissions[workManagementPermission.policy] = true;
           }
         });
 
-        res.json(util.wrapResponse(req.id, allowPermissions));
+        res.json(allowPermissions);
       })
       .catch(next);
   },

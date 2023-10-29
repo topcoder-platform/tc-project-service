@@ -3,7 +3,8 @@
 import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import { EVENT, TIMELINE_REFERENCES } from '../../constants';
+import util from '../../util';
+import { EVENT, RESOURCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -15,7 +16,7 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
 
-    models.sequelize.transaction(() =>
+    models.sequelize.transaction(transaction =>
       // soft delete the record
       models.ProjectPhase.findOne({
         where: {
@@ -31,19 +32,19 @@ module.exports = [
           err.status = 404;
           return Promise.reject(err);
         }
-        return existing.update({ deletedBy: req.authUser.userId });
+        return existing.update({ deletedBy: req.authUser.userId }, { transaction });
       })
-      .then(entity => entity.destroy()))
+        .then(entity => entity.destroy({ transaction })))
       .then((deleted) => {
         req.log.debug('deleted project phase', JSON.stringify(deleted, null, 2));
 
-        // Send events to buses
-        req.app.services.pubsub.publish(
+        //  emit event
+        util.sendResourceToKafkaBus(
+          req,
           EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED,
-          { deleted, route: TIMELINE_REFERENCES.PHASE },
-          { correlationId: req.id },
+          RESOURCES.PHASE,
+          deleted.toJSON(),
         );
-        req.app.emit(EVENT.ROUTING_KEY.PROJECT_PHASE_REMOVED, { req, deleted });
 
         res.status(204).json({});
       }).catch(err => next(err));

@@ -7,6 +7,7 @@ import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
+import { RESOURCES, BUS_API_EVENT } from '../../constants';
 
 const should = chai.should();
 
@@ -40,58 +41,58 @@ describe('Phase Products', () => {
   beforeEach((done) => {
     // mocks
     testUtil.clearDb()
-        .then(() => {
-          models.Project.create({
-            type: 'generic',
-            billingAccountId: 1,
-            name: 'test1',
-            description: 'test project1',
-            status: 'draft',
-            details: {},
+      .then(() => {
+        models.Project.create({
+          type: 'generic',
+          billingAccountId: 1,
+          name: 'test1',
+          description: 'test project1',
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityAt: 1,
+          lastActivityUserId: '1',
+        }).then((p) => {
+          projectId = p.id;
+          // create members
+          models.ProjectMember.bulkCreate([{
+            id: 1,
+            userId: copilotUser.userId,
+            projectId,
+            role: 'copilot',
+            isPrimary: false,
             createdBy: 1,
             updatedBy: 1,
-            lastActivityAt: 1,
-            lastActivityUserId: '1',
-          }).then((p) => {
-            projectId = p.id;
-            // create members
-            models.ProjectMember.bulkCreate([{
-              id: 1,
-              userId: copilotUser.userId,
-              projectId,
-              role: 'copilot',
-              isPrimary: false,
+          }, {
+            id: 2,
+            userId: memberUser.userId,
+            projectId,
+            role: 'customer',
+            isPrimary: true,
+            createdBy: 1,
+            updatedBy: 1,
+          }]).then(() => {
+            models.ProjectPhase.create({
+              name: 'test project phase',
+              status: 'active',
+              startDate: '2018-05-15T00:00:00Z',
+              endDate: '2018-05-15T12:00:00Z',
+              budget: 20.0,
+              progress: 1.23456,
+              details: {
+                message: 'This can be any json',
+              },
               createdBy: 1,
               updatedBy: 1,
-            }, {
-              id: 2,
-              userId: memberUser.userId,
               projectId,
-              role: 'customer',
-              isPrimary: true,
-              createdBy: 1,
-              updatedBy: 1,
-            }]).then(() => {
-              models.ProjectPhase.create({
-                name: 'test project phase',
-                status: 'active',
-                startDate: '2018-05-15T00:00:00Z',
-                endDate: '2018-05-15T12:00:00Z',
-                budget: 20.0,
-                progress: 1.23456,
-                details: {
-                  message: 'This can be any json',
-                },
-                createdBy: 1,
-                updatedBy: 1,
-                projectId,
-              }).then((phase) => {
-                phaseId = phase.id;
-                done();
-              });
+            }).then((phase) => {
+              phaseId = phase.id;
+              done();
             });
           });
         });
+      });
   });
 
   afterEach((done) => {
@@ -101,114 +102,114 @@ describe('Phase Products', () => {
   describe('POST /projects/{projectId}/phases/{phaseId}/products', () => {
     it('should return 403 if user does not have permissions (non team member)', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member2}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
 
     it('should return 403 if user does not have permissions (customer)', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403, done);
     });
 
-    it('should return 422 when name not provided', (done) => {
+    it('should return 400 when name not provided', (done) => {
       const reqBody = _.cloneDeep(body);
       delete reqBody.name;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when type not provided', (done) => {
+    it('should return 400 when type not provided', (done) => {
       const reqBody = _.cloneDeep(body);
       delete reqBody.type;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when estimatedPrice is negative', (done) => {
+    it('should return 400 when estimatedPrice is negative', (done) => {
       const reqBody = _.cloneDeep(body);
       reqBody.estimatedPrice = -20;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 when actualPrice is negative', (done) => {
+    it('should return 400 when actualPrice is negative', (done) => {
       const reqBody = _.cloneDeep(body);
       reqBody.actualPrice = -20;
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: reqBody })
+        .send(reqBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 404 when project is not found', (done) => {
       request(server)
-        .post(`/v4/projects/99999/phases/${phaseId}/products`)
+        .post(`/v5/projects/99999/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 404 when project phase is not found', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/99999/products`)
+        .post(`/v5/projects/${projectId}/phases/99999/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(404, done);
     });
 
     it('should return 201 if payload is valid', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
         .end((err, res) => {
           if (err) {
             done(err);
           } else {
-            const resJson = res.body.result.content;
+            const resJson = res.body;
             should.exist(resJson);
             resJson.name.should.be.eql(body.name);
             resJson.type.should.be.eql(body.type);
@@ -222,11 +223,11 @@ describe('Phase Products', () => {
 
     it('should return 201 if requested by admin', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(201)
         .end(done);
@@ -243,11 +244,11 @@ describe('Phase Products', () => {
         updatedBy: 1,
       }).then(() => {
         request(server)
-          .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+          .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.manager}`,
           })
-          .send({ param: body })
+          .send(body)
           .expect('Content-Type', /json/)
           .expect(201)
           .end(done);
@@ -256,11 +257,11 @@ describe('Phase Products', () => {
 
     it('should return 403 if requested by manager which is not a member', (done) => {
       request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+        .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
-        .send({ param: body })
+        .send(body)
         .expect('Content-Type', /json/)
         .expect(403)
         .end(done);
@@ -271,11 +272,11 @@ describe('Phase Products', () => {
         where: { userId: testUtil.userIds.copilot, projectId },
       }).then(() => {
         request(server)
-          .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
+          .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
           .set({
             Authorization: `Bearer ${testUtil.jwts.copilot}`,
           })
-          .send({ param: body })
+          .send(body)
           .expect('Content-Type', /json/)
           .expect(403)
           .end(done);
@@ -299,21 +300,26 @@ describe('Phase Products', () => {
         sandbox.restore();
       });
 
-      it('should not send message BUS_API_EVENT.PROJECT_PLAN_UPDATED when product phase created', (done) => {
+      it('should send correct BUS API messages when product phase created', (done) => {
         request(server)
-        .post(`/v4/projects/${projectId}/phases/${phaseId}/products`)
-        .set({
-          Authorization: `Bearer ${testUtil.jwts.copilot}`,
-        })
-        .send({ param: body })
-        .expect('Content-Type', /json/)
-        .expect(201)
+          .post(`/v5/projects/${projectId}/phases/${phaseId}/products`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.copilot}`,
+          })
+          .send(body)
+          .expect('Content-Type', /json/)
+          .expect(201)
           .end((err) => {
             if (err) {
               done(err);
             } else {
               testUtil.wait(() => {
-                createEventSpy.notCalled.should.be.true;
+                createEventSpy.callCount.should.be.eql(1);
+
+                createEventSpy.calledWith(BUS_API_EVENT.PROJECT_PHASE_CREATED, sinon.match({
+                  resource: RESOURCES.PHASE_PRODUCT,
+                })).should.be.true;
+
                 done();
               });
             }

@@ -4,11 +4,11 @@ import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import {
-    SCOPE_CHANGE_REQ_STATUS,
-    PROJECT_MEMBER_ROLE,
-    USER_ROLE,
-    PROJECT_MEMBER_MANAGER_ROLES,
-    EVENT,
+  SCOPE_CHANGE_REQ_STATUS,
+  PROJECT_MEMBER_ROLE,
+  USER_ROLE,
+  PROJECT_MEMBER_MANAGER_ROLES,
+  EVENT,
 } from '../../constants';
 import models from '../../models';
 
@@ -19,10 +19,7 @@ const permissions = tcMiddleware.permissions;
 
 const updateScopeChangeRequestValidations = {
   body: {
-    param: Joi.object()
-      .keys({
-        status: Joi.string().valid(_.values(SCOPE_CHANGE_REQ_STATUS)),
-      }),
+    status: Joi.string().valid(_.values(SCOPE_CHANGE_REQ_STATUS)),
   },
 };
 
@@ -35,7 +32,7 @@ const updateScopeChangeRequestValidations = {
  * @returns {Promise} The promise to update the project with merged data
  */
 function updateProjectDetails(req, newScope, projectId) {
-  return models.Project.findById(projectId).then((project) => {
+  return models.Project.findByPk(projectId).then((project) => {
     const previousValue = _.clone(project.get({ plain: true }));
 
     if (!project) {
@@ -57,12 +54,6 @@ function updateProjectDetails(req, newScope, projectId) {
       const updated = updatedProject.get({ plain: true });
       const original = _.omit(previousValue, ['deletedAt', 'deletedBy']);
 
-      // publish original and updated project data
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_UPDATED,
-        { original, updated },
-        { correlationId: req.id },
-      );
       req.app.emit(EVENT.ROUTING_KEY.PROJECT_UPDATED, { req, original, updated });
 
       return updatedProject;
@@ -77,7 +68,7 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const requestId = _.parseInt(req.params.requestId);
-    const updatedProps = req.body.param;
+    const updatedProps = req.body;
     const members = req.context.currentProjectMembers;
     const member = _.find(members, m => m.userId === req.authUser.userId);
     const isCustomer = member && member.role === PROJECT_MEMBER_ROLE.CUSTOMER;
@@ -87,44 +78,44 @@ module.exports = [
 
     req.log.debug('finding scope change', requestId);
     return models.ScopeChangeRequest.findScopeChangeRequest(projectId, { requestId })
-    .then((scopeChangeReq) => {
+      .then((scopeChangeReq) => {
       // req.log.debug(scopeChangeReq);
-      if (!scopeChangeReq) {
-        const err = new Error('Scope change request does not exist');
-        err.status = 404;
-        return next(err);
-      }
-      const statusesForCustomers = [SCOPE_CHANGE_REQ_STATUS.APPROVED, SCOPE_CHANGE_REQ_STATUS.REJECTED];
-      if (statusesForCustomers.indexOf(updatedProps.status) > -1 && !isCustomer && !isAdmin) {
-        const err = new Error('Only customer can approve the request');
-        err.status = 401;
-        return next(err);
-      }
-      const statusesForManagers = [SCOPE_CHANGE_REQ_STATUS.ACTIVATED];
-      if (statusesForManagers.indexOf(updatedProps.status) > -1 && !isManager && !isAdmin) {
-        const err = new Error('Only managers can activate the request');
-        err.status = 401;
-        return next(err);
-      }
-      const statusesForSelf = [SCOPE_CHANGE_REQ_STATUS.CANCELED];
-      const isSelf = scopeChangeReq.createdBy === req.authUser.userId;
-      if (statusesForSelf.indexOf(updatedProps.status) > -1 && !isSelf && !isAdmin) {
-        const err = new Error('One can cancel only own requests');
-        err.status = 401;
-        return next(err);
-      }
+        if (!scopeChangeReq) {
+          const err = new Error('Scope change request does not exist');
+          err.status = 404;
+          return next(err);
+        }
+        const statusesForCustomers = [SCOPE_CHANGE_REQ_STATUS.APPROVED, SCOPE_CHANGE_REQ_STATUS.REJECTED];
+        if (statusesForCustomers.indexOf(updatedProps.status) > -1 && !isCustomer && !isAdmin) {
+          const err = new Error('Only customer can approve the request');
+          err.status = 401;
+          return next(err);
+        }
+        const statusesForManagers = [SCOPE_CHANGE_REQ_STATUS.ACTIVATED];
+        if (statusesForManagers.indexOf(updatedProps.status) > -1 && !isManager && !isAdmin) {
+          const err = new Error('Only managers can activate the request');
+          err.status = 401;
+          return next(err);
+        }
+        const statusesForSelf = [SCOPE_CHANGE_REQ_STATUS.CANCELED];
+        const isSelf = scopeChangeReq.createdBy === req.authUser.userId;
+        if (statusesForSelf.indexOf(updatedProps.status) > -1 && !isSelf && !isAdmin) {
+          const err = new Error('One can cancel only own requests');
+          err.status = 401;
+          return next(err);
+        }
 
-      return (
-        updatedProps.status === SCOPE_CHANGE_REQ_STATUS.ACTIVATED
-          ? updateProjectDetails(req, scopeChangeReq.newScope, projectId)
-          : Promise.resolve()
-      )
-      .then(() => scopeChangeReq.update(updatedProps))
-      .then((_updatedReq) => {
-        res.json(util.wrapResponse(req.id, _updatedReq));
-        return Promise.resolve();
-      });
-    })
-    .catch(err => next(err));
+        return (
+          updatedProps.status === SCOPE_CHANGE_REQ_STATUS.ACTIVATED
+            ? updateProjectDetails(req, scopeChangeReq.newScope, projectId)
+            : Promise.resolve()
+        )
+          .then(() => scopeChangeReq.update(updatedProps))
+          .then((_updatedReq) => {
+            res.json(_updatedReq);
+            return Promise.resolve();
+          });
+      })
+      .catch(err => next(err));
   },
 ];

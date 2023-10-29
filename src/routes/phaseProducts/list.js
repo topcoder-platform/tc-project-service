@@ -1,14 +1,36 @@
 
 import _ from 'lodash';
-import config from 'config';
 import util from '../../util';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
-
-const eClient = util.getElasticSearchClient();
+import models from '../../models';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
+
+const retrieveFromDB = async (req, res, next) => {
+  const projectId = _.parseInt(req.params.projectId);
+  const phaseId = _.parseInt(req.params.phaseId);
+
+  // check if the project and phase are exist
+  return models.ProjectPhase.findOne({
+    where: { id: phaseId, projectId },
+    raw: true,
+  }).then((countPhase) => {
+    if (!countPhase) {
+      const apiErr = new Error('project phase not found for project id ' +
+                `${projectId} and phase id ${phaseId}`);
+      apiErr.status = 404;
+      throw apiErr;
+    }
+
+    const parameters = {
+      projectId,
+      phaseId,
+    };
+
+    return models.PhaseProduct.search(parameters, req.log)
+      .then(({ rows }) => res.json(rows));
+  })
+    .catch(err => next(err));
+};
 
 module.exports = [
   // check permission
@@ -19,30 +41,37 @@ module.exports = [
     const phaseId = _.parseInt(req.params.phaseId);
 
     // Get project from ES
-    eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: req.params.projectId })
-      .then((doc) => {
-        if (!doc) {
-          const err = new Error(`active project not found for project id ${projectId}`);
-          err.status = 404;
-          throw err;
+    util.fetchByIdFromES('phaseProducts', {
+      query: {
+        nested: {
+          path: 'phases',
+          query:
+          {
+            filtered: {
+              filter: {
+                bool: {
+                  must: [
+                    { term: { 'phases.id': phaseId } },
+                    { term: { 'phases.projectId': projectId } },
+                  ],
+                },
+              },
+            },
+          },
+          inner_hits: {},
+        },
+      },
+    })
+      .then((data) => {
+        if (data.length === 0) {
+          req.log.debug('No phase product found in ES');
+          return retrieveFromDB(req, res, next);
         }
-
+        req.log.debug('phase product found in ES');
         // Get the phases
-        let phases = _.isArray(doc._source.phases) ? doc._source.phases : []; // eslint-disable-line no-underscore-dangle
-
-        // Get the phase by id
-        phases = _.filter(phases, { id: phaseId });
-        if (phases.length <= 0) {
-          const err = new Error(`active project phase not found for phase id ${phaseId}`);
-          err.status = 404;
-          throw err;
-        }
-
-        // Get the products
-        let products = phases[0].products;
-        products = _.isArray(products) ? products : []; // eslint-disable-line no-underscore-dangle
-
-        res.json(util.wrapResponse(req.id, products, products.length));
+        const phases = data[0].inner_hits.phases.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
+        const products = _.isArray(phases.products) ? phases.products : [];
+        return res.json(products);
       })
       .catch(err => next(err));
   },

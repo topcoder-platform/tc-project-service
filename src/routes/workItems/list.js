@@ -4,7 +4,6 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
@@ -42,23 +41,23 @@ module.exports = [
       },
       ],
     })
-    .then((existing) => {
-      if (!existing) {
+      .then((existing) => {
+        if (!existing) {
           // handle 404
-        const err = new Error('No active phase product found for project id ' +
+          const err = new Error('No active phase product found for project id ' +
               `${projectId}, work stream id ${workStreamId} and phase id ${phaseId}`);
-        err.status = 404;
-        throw err;
-      }
+          err.status = 404;
+          throw err;
+        }
 
-      return models.PhaseProduct.findAll({
-        where: {
-          phaseId,
-          projectId,
-        },
-      });
-    })
-    .then(products => res.json(util.wrapResponse(req.id, products, products.length)))
-    .catch(err => next(err));
+        return models.PhaseProduct.findAll({
+          where: {
+            phaseId,
+            projectId,
+          },
+        });
+      })
+      .then(products => res.json(products))
+      .catch(err => next(err));
   },
 ];

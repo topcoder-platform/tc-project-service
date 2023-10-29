@@ -113,32 +113,34 @@ const milestoneTemplates = [
 ];
 
 describe('CLONE milestone template', () => {
-  beforeEach(() => testUtil.clearDb()
-    .then(() => models.ProductTemplate.bulkCreate(productTemplates))
-    .then(() => models.MilestoneTemplate.bulkCreate(milestoneTemplates)),
+  beforeEach((done) => {
+    testUtil.clearDb()
+      .then(() => models.ProductTemplate.bulkCreate(productTemplates))
+      .then(() => { models.MilestoneTemplate.bulkCreate(milestoneTemplates).then(() => done()); });
+  },
   );
-  after(testUtil.clearDb);
+  after((done) => {
+    testUtil.clearDb(done);
+  });
 
   describe('POST /timelines/metadata/milestoneTemplates/clone', () => {
     const body = {
-      param: {
-        sourceReference: 'productTemplate',
-        sourceReferenceId: 1,
-        reference: 'productTemplate',
-        referenceId: 2,
-      },
+      sourceReference: 'productTemplate',
+      sourceReferenceId: 1,
+      reference: 'productTemplate',
+      referenceId: 2,
     };
 
     it('should return 403 if user is not authenticated/clone', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .send(body)
         .expect(403, done);
     });
 
     it('should return 403 for member', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.member}`,
         })
@@ -148,7 +150,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 403 for copilot', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.copilot}`,
         })
@@ -158,7 +160,7 @@ describe('CLONE milestone template', () => {
 
     it('should return 403 for manager', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.manager}`,
         })
@@ -166,73 +168,67 @@ describe('CLONE milestone template', () => {
         .expect(403, done);
     });
 
-    it('should return 422 for non-existent product template', (done) => {
+    it('should return 400 for non-existent product template', (done) => {
       const invalidBody = {
-        param: {
-          sourceReference: 'productTemplate',
-          sourceReferenceId: 1,
-          reference: 'productTemplate',
-          referenceId: 2000,
-        },
+        sourceReference: 'productTemplate',
+        sourceReferenceId: 1,
+        reference: 'productTemplate',
+        referenceId: 2000,
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 for non-existent source product template', (done) => {
+    it('should return 400 for non-existent source product template', (done) => {
       const invalidBody = {
-        param: {
-          sourceReference: 'product',
-          sourceReferenceId: 1000,
-          reference: 'product',
-          referenceId: 2,
-        },
+        sourceReference: 'product',
+        sourceReferenceId: 1000,
+        reference: 'product',
+        referenceId: 2,
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
-        .expect(422, done);
+        .expect(400, done);
     });
 
-    it('should return 422 if missing sourceReference', (done) => {
+    it('should return 400 if missing sourceReference', (done) => {
       const invalidBody = {
-        param: {
-          sourceReferenceId: 1000,
-          reference: 'productTemplate',
-          referenceId: 2,
-        },
+        sourceReferenceId: 1000,
+        reference: 'productTemplate',
+        referenceId: 2,
       };
 
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(invalidBody)
         .expect('Content-Type', /json/)
-        .expect(422, done);
+        .expect(400, done);
     });
 
     it('should return 201 for admin', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })
         .send(body)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           should.not.equal(resJson[0].id, null);
           resJson[0].name.should.be.eql(milestoneTemplates[0].name);
@@ -260,14 +256,14 @@ describe('CLONE milestone template', () => {
 
     it('should return 201 for connect admin', (done) => {
       request(server)
-        .post('/v4/timelines/metadata/milestoneTemplates/clone')
+        .post('/v5/timelines/metadata/milestoneTemplates/clone')
         .set({
           Authorization: `Bearer ${testUtil.jwts.connectAdmin}`,
         })
         .send(body)
         .expect(201)
         .end((err, res) => {
-          const resJson = res.body.result.content;
+          const resJson = res.body;
           resJson.should.have.length(2);
           resJson[0].createdBy.should.be.eql(40051336); // connect admin
           resJson[0].updatedBy.should.be.eql(40051336); // connect admin

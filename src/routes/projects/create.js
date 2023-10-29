@@ -7,13 +7,14 @@ import config from 'config';
 import moment from 'moment';
 
 import models from '../../models';
-import { PROJECT_MEMBER_ROLE, MANAGER_ROLES, PROJECT_STATUS, PROJECT_PHASE_STATUS,
-  EVENT, REGEX, WORKSTREAM_STATUS } from '../../constants';
+import { PROJECT_MEMBER_ROLE, PROJECT_STATUS, PROJECT_PHASE_STATUS,
+  EVENT, RESOURCES, REGEX, WORKSTREAM_STATUS, ATTACHMENT_TYPES } from '../../constants';
 import fieldLookupValidation from '../../middlewares/fieldLookupValidation';
 import util from '../../util';
-import directProject from '../../services/directProject';
+import { PERMISSION } from '../../permissions/constants';
 
 const traverse = require('traverse');
+const xss = require('xss');
 
 /**
  * API to handle creating a new project.
@@ -26,60 +27,61 @@ const traverse = require('traverse');
 const permissions = require('tc-core-library-js').middleware.permissions;
 
 const createProjectValidations = {
-  body: {
-    param: Joi.object().keys({
-      name: Joi.string().required(),
+  body: Joi.object().keys({
+    name: Joi.string().required(),
+    description: Joi.string().allow(null).allow('').optional(),
+    billingAccountId: Joi.number().positive().allow(null),
+    utm: Joi.object().keys({
+      source: Joi.string().allow(null),
+      medium: Joi.string().allow(null),
+      campaign: Joi.string().allow(null),
+    }).allow(null),
+    bookmarks: Joi.array().items(Joi.object().keys({
+      title: Joi.string(),
+      address: Joi.string().regex(REGEX.URL),
+      createdAt: Joi.date(),
+      createdBy: Joi.number().integer().positive(),
+      updatedAt: Joi.date(),
+      updatedBy: Joi.number().integer().positive(),
+    })).optional().allow(null),
+    estimatedPrice: Joi.number().precision(2).positive().optional()
+      .allow(null),
+    terms: Joi.array().items(Joi.string()).optional(),
+    groups: Joi.array().items(Joi.string()).optional(),
+    external: Joi.object().keys({
+      id: Joi.string(),
+      type: Joi.any().valid('github', 'jira', 'asana', 'other'),
+      data: Joi.string().max(300), // TODO - restrict length
+    }).allow(null),
+    type: Joi.string().max(45).required(),
+    details: Joi.any(),
+    challengeEligibility: Joi.array().items(Joi.object().keys({
+      role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
+      users: Joi.array().items(Joi.number().positive()),
+      groups: Joi.array().items(Joi.number().positive()),
+    })).allow(null),
+    templateId: Joi.number().integer().positive(),
+    version: Joi.string(),
+    estimation: Joi.array().items(Joi.object().keys({
+      conditions: Joi.string().required(),
+      price: Joi.number().required(),
+      quantity: Joi.number().optional(),
+      minTime: Joi.number().integer().required(),
+      maxTime: Joi.number().integer().required(),
+      buildingBlockKey: Joi.string().required(),
+      metadata: Joi.object().optional(),
+    })).optional(),
+    attachments: Joi.array().items(Joi.object().keys({
+      category: Joi.string().required(),
+      contentType: Joi.string().when('type', { is: ATTACHMENT_TYPES.FILE, then: Joi.string().required() }),
       description: Joi.string().allow(null).allow('').optional(),
-      billingAccountId: Joi.number().positive(),
-      utm: Joi.object().keys({
-        source: Joi.string().allow(null),
-        medium: Joi.string().allow(null),
-        campaign: Joi.string().allow(null),
-      }).allow(null),
-      bookmarks: Joi.array().items(Joi.object().keys({
-        title: Joi.string(),
-        address: Joi.string().regex(REGEX.URL),
-        createdAt: Joi.date(),
-        createdBy: Joi.number().integer().positive(),
-        updatedAt: Joi.date(),
-        updatedBy: Joi.number().integer().positive(),
-      })).optional().allow(null),
-      estimatedPrice: Joi.number().precision(2).positive().optional()
-        .allow(null),
-      terms: Joi.array().items(Joi.number().positive()).optional(),
-      external: Joi.object().keys({
-        id: Joi.string(),
-        type: Joi.any().valid('github', 'jira', 'asana', 'other'),
-        data: Joi.string().max(300), // TODO - restrict length
-      }).allow(null),
-      type: Joi.string().max(45).required(),
-      details: Joi.any(),
-      challengeEligibility: Joi.array().items(Joi.object().keys({
-        role: Joi.string().valid('submitter', 'reviewer', 'copilot'),
-        users: Joi.array().items(Joi.number().positive()),
-        groups: Joi.array().items(Joi.number().positive()),
-      })).allow(null),
-      templateId: Joi.number().integer().positive(),
-      version: Joi.string(),
-      estimation: Joi.array().items(Joi.object().keys({
-        conditions: Joi.string().required(),
-        price: Joi.number().required(),
-        quantity: Joi.number().optional(),
-        minTime: Joi.number().integer().required(),
-        maxTime: Joi.number().integer().required(),
-        buildingBlockKey: Joi.string().required(),
-        metadata: Joi.object().optional(),
-      })).optional(),
-      attachments: Joi.array().items(Joi.object().keys({
-        category: Joi.string().required(),
-        contentType: Joi.string().required(),
-        description: Joi.string().allow(null).allow('').optional(),
-        filePath: Joi.string().required(),
-        size: Joi.number().required(),
-        title: Joi.string().required(),
-      })).optional(),
-    }).required(),
-  },
+      path: Joi.string().required(),
+      type: Joi.string().required(),
+      tags: Joi.array().items(Joi.string().min(1)).optional(),
+      size: Joi.number().required(),
+      title: Joi.string().required(),
+    })).optional(),
+  }).required(),
 };
 
 /**
@@ -212,11 +214,11 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates,
     req.log.debug('creating project estimation items with building blocks');
     if (result.estimations && result.estimations.length > 0) {
       return createEstimationItemsWithBuildingBlock(result.estimations, req.authUser.userId)
-      .then((estimationItems) => {
-        req.log.debug(`creating ${estimationItems.length} project estimation items`);
-        // ignore project estimation items for now
-        return Promise.resolve(newProject);
-      });
+        .then((estimationItems) => {
+          req.log.debug(`creating ${estimationItems.length} project estimation items`);
+          // ignore project estimation items for now
+          return Promise.resolve(newProject);
+        });
     }
     return Promise.resolve(newProject);
   }).then((newProject) => {
@@ -235,61 +237,61 @@ function createProjectAndPhases(req, project, projectTemplate, productTemplates,
     }
     return Promise.resolve(newProject);
   })
-  .then((newProject) => {
-    result.newProject = newProject;
+    .then((newProject) => {
+      result.newProject = newProject;
 
-    // backward compatibility for releasing the service before releasing the front end
-    if (!projectTemplate) {
-      return Promise.resolve(result);
-    }
-    const productTemplateMap = {};
-    productTemplates.forEach((pt) => {
-      productTemplateMap[pt.id] = pt;
-    });
+      // backward compatibility for releasing the service before releasing the front end
+      if (!projectTemplate) {
+        return Promise.resolve(result);
+      }
+      const productTemplateMap = {};
+      productTemplates.forEach((pt) => {
+        productTemplateMap[pt.id] = pt;
+      });
 
-    if (phasesList) {
-      return Promise.all(_.map(phasesList, (phase, phaseIdx) => {
-        const duration = _.get(phase, 'duration', 1);
-        const startDate = moment.utc().hours(0).minutes(0).seconds(0)
-          .milliseconds(0);
-        // Create phase
-        return models.ProjectPhase.create({
-          projectId: newProject.id,
-          name: _.get(phase, 'name', `Stage ${phaseIdx}`),
-          duration,
-          startDate: startDate.format(),
-          endDate: moment.utc(startDate).add(duration - 1, 'days').format(),
-          status: _.get(phase, 'status', PROJECT_PHASE_STATUS.DRAFT),
-          budget: _.get(phase, 'budget', 0),
-          updatedBy: req.authUser.userId,
-          createdBy: req.authUser.userId,
-        }).then((newPhase) => {
-          req.log.debug(`Creating products in the newly created phase ${newPhase.id}`);
-          // Create products
-          return models.PhaseProduct.bulkCreate(_.map(phase.products, (product, productIndex) => ({
-            phaseId: newPhase.id,
+      if (phasesList) {
+        return Promise.all(_.map(phasesList, (phase, phaseIdx) => {
+          const duration = _.get(phase, 'duration', 1);
+          const startDate = moment.utc().hours(0).minutes(0).seconds(0)
+            .milliseconds(0);
+          // Create phase
+          return models.ProjectPhase.create({
             projectId: newProject.id,
-            estimatedPrice: _.get(product, 'estimatedPrice', 0),
-            name: _.get(product, 'name', _.get(productTemplateMap, `${product.id}.name`, `Product ${productIndex}`)),
-            // assumes that phase template always contains id of each product
-            templateId: parseInt(product.id, 10),
+            name: _.get(phase, 'name', `Stage ${phaseIdx}`),
+            duration,
+            startDate: startDate.format(),
+            endDate: moment.utc(startDate).add(duration - 1, 'days').format(),
+            status: _.get(phase, 'status', PROJECT_PHASE_STATUS.DRAFT),
+            budget: _.get(phase, 'budget', 0),
             updatedBy: req.authUser.userId,
             createdBy: req.authUser.userId,
-          })), { returning: true })
-          .then((products) => {
-            // Add phases and products to the project JSON, so they can be stored to ES later
-            const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
-            newPhaseJson.products = _.map(products, product =>
-              _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
-            result.newPhases.push(newPhaseJson);
-            return Promise.resolve();
+          }).then((newPhase) => {
+            req.log.debug(`Creating products in the newly created phase ${newPhase.id}`);
+            // Create products
+            return models.PhaseProduct.bulkCreate(_.map(phase.products, (product, productIndex) => ({
+              phaseId: newPhase.id,
+              projectId: newProject.id,
+              estimatedPrice: _.get(product, 'estimatedPrice', 0),
+              name: _.get(product, 'name', _.get(productTemplateMap, `${product.id}.name`, `Product ${productIndex}`)),
+              // assumes that phase template always contains id of each product
+              templateId: parseInt(product.id, 10),
+              updatedBy: req.authUser.userId,
+              createdBy: req.authUser.userId,
+            })), { returning: true })
+              .then((products) => {
+                // Add phases and products to the project JSON, so they can be stored to ES later
+                const newPhaseJson = _.omit(newPhase.toJSON(), ['deletedAt', 'deletedBy']);
+                newPhaseJson.products = _.map(products, product =>
+                  _.omit(product.toJSON(), ['deletedAt', 'deletedBy']));
+                result.newPhases.push(newPhaseJson);
+                return Promise.resolve();
+              });
           });
-        });
-      }));
-    }
-    return Promise.resolve();
-  })
-  .then(() => Promise.resolve(result));
+        }));
+      }
+      return Promise.resolve();
+    })
+    .then(() => Promise.resolve(result));
 }
 
 /**
@@ -302,93 +304,105 @@ function validateAndFetchTemplates(templateId) {
   // backward compatibility for releasing the service before releasing the front end
   // we ignore missing template id field and create a project without phase/products
   if (!templateId) return Promise.resolve({});
-  return models.ProjectTemplate.findById(templateId, { raw: true })
-  .then((existingProjectTemplate) => {
-    if (!existingProjectTemplate) {
+  return models.ProjectTemplate.findByPk(templateId, { raw: true })
+    .then((existingProjectTemplate) => {
+      if (!existingProjectTemplate) {
       // Not found
-      const apiErr = new Error(`Project template not found for id ${templateId}`);
-      apiErr.status = 422;
-      return Promise.reject(apiErr);
-    }
-    return Promise.resolve(existingProjectTemplate);
-  })
-  .then((projectTemplate) => {
+        const apiErr = new Error(`Project template not found for id ${templateId}`);
+        apiErr.status = 400;
+        return Promise.reject(apiErr);
+      }
+      return Promise.resolve(existingProjectTemplate);
+    })
+    .then((projectTemplate) => {
     // for old projectTemplate with `phases` just get phases config directly from projectTemplate
-    if (projectTemplate.phases) {
+      if (projectTemplate.phases) {
       // for now support both ways: creating phases and creating workstreams
-      const phasesList = _(projectTemplate.phases).omit('workstreamsConfig').values().value();
-      const workstreamsConfig = _.get(projectTemplate.phases, 'workstreamsConfig');
-
-      return { projectTemplate, phasesList, workstreamsConfig };
-    }
-
-    // for new projectTemplates try to get phases from the `planConfig`, if it's defined
-    if (projectTemplate.planConfig) {
-      return models.PlanConfig.findOneWithLatestRevision(projectTemplate.planConfig).then((planConfig) => {
-        if (!planConfig) {
-          const apiErr = new Error(`Cannot find planConfig ${JSON.stringify(projectTemplate.planConfig)}`);
-          apiErr.status = 422;
-          throw apiErr;
-        }
-
-        // for now support both ways: creating phases and creating workstreams
-        const phasesList = _(planConfig.config).omit('workstreamsConfig').values().value();
-        const workstreamsConfig = _.get(planConfig.config, 'workstreamsConfig');
+        const phasesList = _(projectTemplate.phases).omit('workstreamsConfig').values().value();
+        const workstreamsConfig = _.get(projectTemplate.phases, 'workstreamsConfig');
 
         return { projectTemplate, phasesList, workstreamsConfig };
-      });
-    }
+      }
 
-    return { projectTemplate };
-  })
-  .then(({ projectTemplate, phasesList, workstreamsConfig }) => {
-    const productPromises = [];
-    if (phasesList) {
-      phasesList.forEach((phase) => {
-        // Make sure number of products of per phase <= max value
-        const productCount = _.isArray(phase.products) ? phase.products.length : 0;
-        if (productCount > config.maxPhaseProductCount) {
-          const apiErr = new Error(`Number of products per phase cannot exceed ${config.maxPhaseProductCount}`);
-          apiErr.status = 422;
-          throw apiErr;
-        }
-        _.map(phase.products, (product) => {
-          productPromises.push(models.ProductTemplate.findById(product.id)
-          .then((productTemplate) => {
-            if (!productTemplate) {
-              // Not found
-              const apiErr = new Error(`Product template not found for id ${product.id}`);
-              apiErr.status = 422;
-              return Promise.reject(apiErr);
-            }
-            return Promise.resolve(productTemplate);
-          }));
+      // for new projectTemplates try to get phases from the `planConfig`, if it's defined
+      if (projectTemplate.planConfig) {
+        return models.PlanConfig.findOneWithLatestRevision(projectTemplate.planConfig).then((planConfig) => {
+          if (!planConfig) {
+            const apiErr = new Error(`Cannot find planConfig ${JSON.stringify(projectTemplate.planConfig)}`);
+            apiErr.status = 400;
+            throw apiErr;
+          }
+
+          // for now support both ways: creating phases and creating workstreams
+          const phasesList = _(planConfig.config).omit('workstreamsConfig').values().value();
+          const workstreamsConfig = _.get(planConfig.config, 'workstreamsConfig');
+
+          return { projectTemplate, phasesList, workstreamsConfig };
         });
-      });
-    }
-    if (productPromises.length > 0) {
-      return Promise.all(productPromises).then(productTemplates => (
-        { projectTemplate, productTemplates, phasesList, workstreamsConfig }
-      ));
-    }
-    // if there is no phase or product in a phase is specified, return empty product templates
-    return Promise.resolve({ projectTemplate, productTemplates: [], phasesList, workstreamsConfig });
-  });
+      }
+
+      return { projectTemplate };
+    })
+    .then(({ projectTemplate, phasesList, workstreamsConfig }) => {
+      const productPromises = [];
+      if (phasesList) {
+        phasesList.forEach((phase) => {
+        // Make sure number of products of per phase <= max value
+          const productCount = _.isArray(phase.products) ? phase.products.length : 0;
+          if (productCount > config.maxPhaseProductCount) {
+            const apiErr = new Error(`Number of products per phase cannot exceed ${config.maxPhaseProductCount}`);
+            apiErr.status = 400;
+            throw apiErr;
+          }
+          _.map(phase.products, (product) => {
+            productPromises.push(models.ProductTemplate.findByPk(product.id)
+              .then((productTemplate) => {
+                if (!productTemplate) {
+                  // Not found
+                  const apiErr = new Error(`Product template not found for id ${product.id}`);
+                  apiErr.status = 400;
+                  return Promise.reject(apiErr);
+                }
+                return Promise.resolve(productTemplate);
+              }));
+          });
+        });
+      }
+      if (productPromises.length > 0) {
+        return Promise.all(productPromises).then(productTemplates => (
+          { projectTemplate, productTemplates, phasesList, workstreamsConfig }
+        ));
+      }
+      // if there is no phase or product in a phase is specified, return empty product templates
+      return Promise.resolve({ projectTemplate, productTemplates: [], phasesList, workstreamsConfig });
+    });
 }
 
 module.exports = [
   // handles request validations
   validate(createProjectValidations),
   permissions('project.create'),
-  fieldLookupValidation(models.ProjectType, 'key', 'body.param.type', 'Project type'),
-  /**
+  fieldLookupValidation(models.ProjectType, 'key', 'body.type', 'Project type'),
+  /*
    * POST projects/
    * Create a project if the user has access
    */
   (req, res, next) => {
-    const project = req.body.param;
+    const project = req.body;
+    if (_.has(project, 'directProjectId') &&
+      !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_DIRECT_PROJECT_ID, req)) {
+      const err = new Error('You do not have permission to set \'directProjectId\' property');
+      err.status = 400;
+      throw err;
+    }
+    // if (_.has(project, 'billingAccountId') &&
+    //   !util.hasPermissionByReq(PERMISSION.MANAGE_PROJECT_BILLING_ACCOUNT_ID, req)) {
+    //   const err = new Error('You do not have permission to set \'billingAccountId\' property');
+    //   err.status = 400;
+    //   throw err;
+    // }
     // by default connect admin and managers joins projects as manager
-    const userRole = util.hasRoles(req, MANAGER_ROLES)
+    const userRole = util.hasPermissionByReq(PERMISSION.CREATE_PROJECT_AS_MANAGER, req)
       ? PROJECT_MEMBER_ROLE.MANAGER
       : PROJECT_MEMBER_ROLE.CUSTOMER;
     // set defaults
@@ -405,7 +419,11 @@ module.exports = [
       // keep the raw '&&' string in conditions string in estimation
       const isEstimationCondition =
         (this.path.length === 3) && (this.path[0] === 'estimation') && (this.key === 'conditions');
-      if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
+      // if (this.isLeaf && typeof x === 'string' && (!isEstimationCondition)) this.update(req.sanitize(x));
+      if (this.isLeaf && typeof x === 'string' && !isEstimationCondition) {
+        const sanitizedData = xss(x);
+        this.update(sanitizedData);
+      }
     });
     // override values
     _.assign(project, {
@@ -435,85 +453,70 @@ module.exports = [
       // Validate the templates
       return validateAndFetchTemplates(project.templateId)
       // Create project and phases
-      .then(({ projectTemplate, productTemplates, phasesList, workstreamsConfig }) => {
-        req.log.debug('Creating project, phase and products');
-        // only if workstream config is provided, treat such project as using workstreams
-        // otherwise project would still use phases
-        if (workstreamsConfig) {
-          _.set(project, 'details.settings.workstreams', true);
-        }
-        return createProjectAndPhases(req, project, projectTemplate, productTemplates, phasesList)
-          .then(createdProjectAndPhases =>
-            createWorkstreams(req, createdProjectAndPhases.newProject, workstreamsConfig)
-              .then(() => createdProjectAndPhases),
-          );
-      })
-      .then((createdProjectAndPhases) => {
-        newProject = createdProjectAndPhases.newProject;
-        newPhases = createdProjectAndPhases.newPhases;
-        projectEstimations = createdProjectAndPhases.estimations;
-        projectAttachments = createdProjectAndPhases.attachments;
+        .then(({ projectTemplate, productTemplates, phasesList, workstreamsConfig }) => {
+          req.log.debug('Creating project, phase and products');
+          // only if workstream config is provided, treat such project as using workstreams
+          // otherwise project would still use phases
+          if (workstreamsConfig) {
+            _.set(project, 'details.settings.workstreams', true);
+          }
+          return createProjectAndPhases(req, project, projectTemplate, productTemplates, phasesList)
+            .then(createdProjectAndPhases =>
+              createWorkstreams(req, createdProjectAndPhases.newProject, workstreamsConfig)
+                .then(() => createdProjectAndPhases),
+            );
+        })
+        .then((createdProjectAndPhases) => {
+          newProject = createdProjectAndPhases.newProject;
+          newPhases = createdProjectAndPhases.newPhases;
+          projectEstimations = createdProjectAndPhases.estimations;
+          projectAttachments = createdProjectAndPhases.attachments;
 
-        req.log.debug('new project created (id# %d, name: %s)', newProject.id, newProject.name);
-        // create direct project with name and description
-        const body = {
-          projectName: newProject.name,
-          projectDescription: newProject.description,
-        };
-        // billingAccountId is optional field
-        if (newProject.billingAccountId) {
-          body.billingAccountId = newProject.billingAccountId;
+          req.log.debug('new project created (id# %d, name: %s)', newProject.id, newProject.name);
+          // create direct project with name and description
+          const body = {
+            projectName: newProject.name,
+            projectDescription: newProject.description,
+          };
+          // billingAccountId is optional field
+          if (newProject.billingAccountId) {
+            body.billingAccountId = newProject.billingAccountId;
+          }
+          req.log.debug('creating project history for project %d', newProject.id);
+          // add to project history asynchronously, don't wait for it to complete
+          models.ProjectHistory.create({
+            projectId: newProject.id,
+            status: PROJECT_STATUS.IN_REVIEW,
+            cancelReason: null,
+            updatedBy: req.authUser.userId,
+          }).then(() => req.log.debug('project history created for project %d', newProject.id))
+            .catch(() => req.log.error('project history failed for project %d', newProject.id));
+          return Promise.resolve();
+        });
+    })
+      .then(() => {
+        newProject = newProject.get({ plain: true });
+        // remove utm details & deletedAt field
+        newProject = _.omit(newProject, ['deletedAt', 'utm']);
+        // add the project attachments, if any
+        newProject.attachments = projectAttachments;
+        // set phases array
+        newProject.phases = newPhases;
+        // sets estimations array
+        if (projectEstimations) {
+          newProject.estimations = projectEstimations;
         }
-        req.log.debug('creating project history for project %d', newProject.id);
-        // add to project history asynchronously, don't wait for it to complete
-        models.ProjectHistory.create({
-          projectId: newProject.id,
-          status: PROJECT_STATUS.IN_REVIEW,
-          cancelReason: null,
-          updatedBy: req.authUser.userId,
-        }).then(() => req.log.debug('project history created for project %d', newProject.id))
-          .catch(() => req.log.error('project history failed for project %d', newProject.id));
-        req.log.debug('creating direct project for project %d', newProject.id);
-        return directProject.createDirectProject(req, body)
-          .then((resp) => {
-            newProject.directProjectId = resp.data.result.content.projectId;
-            return newProject.save();
-          })
-          .then(() => newProject.reload(newProject.id))
-          .catch((err) => {
-            // log the error and continue
-            req.log.error('Error creating direct project: %s', _.get(err, 'data.result.content', err));
-            return Promise.resolve();
+
+        req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
+        // emit event
+        req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
+          { req, project: _.assign({ resource: RESOURCES.PROJECT }, newProject),
           });
-        // return Promise.resolve();
+        res.status(201).json(newProject);
+      })
+      .catch((err) => {
+        req.log.error(err.message);
+        util.handleError('Error creating project', err, req, next);
       });
-    })
-    .then(() => {
-      newProject = newProject.get({ plain: true });
-      // remove utm details & deletedAt field
-      newProject = _.omit(newProject, ['deletedAt', 'utm']);
-      // adds the project attachments, if any
-      newProject.attachments = projectAttachments;
-      // set phases array
-      newProject.phases = newPhases;
-      // sets estimations array
-      if (projectEstimations) {
-        newProject.estimations = projectEstimations;
-      }
-
-      req.log.debug('Sending event to RabbitMQ bus for project %d', newProject.id);
-      req.app.services.pubsub.publish(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED,
-        newProject,
-        { correlationId: req.id },
-      );
-      req.log.debug('Sending event to Kafka bus for project %d', newProject.id);
-      // emit event
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_DRAFT_CREATED, { req, project: newProject });
-      res.status(201).json(util.wrapResponse(req.id, newProject, 1, 201));
-    })
-    .catch((err) => {
-      req.log.error(err.message);
-      util.handleError('Error creating project', err, req, next);
-    });
   },
 ];

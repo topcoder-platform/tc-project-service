@@ -1,12 +1,38 @@
 /**
  * Tests for util.js
  */
-import chai from 'chai';
+import chai, { expect } from 'chai';
 import util from './util';
 
 chai.should();
 
 describe('Util method', () => {
+  describe('parseIntStrictly', () => {
+    it('should parse a good integer value sucessfully', () => {
+      util.parseIntStrictly('1234567890', 10, null).should.equal(1234567890);
+    });
+
+    it('should return fallback value if the initial value is a float number', () => {
+      expect(util.parseIntStrictly('1.1', 10, null)).be.equal(null);
+    });
+
+    it('should return fallback value if string can be parsed partially only', () => {
+      expect(util.parseIntStrictly('123XXX', 10, null)).be.equal(null);
+    });
+
+    it('should return fallback value if the initial value is `null`', () => {
+      util.parseIntStrictly(null, 10, 0).should.equal(0);
+    });
+
+    it('should return fallback value if the initial value is `undefined`', () => {
+      expect(util.parseIntStrictly(undefined, 10, null)).be.equal(null);
+    });
+
+    it('should return fallback value if the initial value is `""` (emtpy string)', () => {
+      expect(util.parseIntStrictly('', 10, null)).be.equal(null);
+    });
+  });
+
   describe('maskEmail', () => {
     it('should return the original value if the email is non-string', () => {
       chai.should().not.exist(util.maskEmail(null));
@@ -14,36 +40,36 @@ describe('Util method', () => {
     it('should return the original value if the email is non-email string', () => {
       util.maskEmail('aa.com').should.equal('aa.com');
     });
-    it('should return "*@*.com" if the email is "a@a.com"', () => {
-      util.maskEmail('a@a.com').should.equal('*@*.com');
+    it('should return "a***a@a***a.com" if the email is "a@a.com"', () => {
+      util.maskEmail('a@a.com').should.equal('a***a@a***a.com');
     });
-    it('should return "**@**.com" if the email is "ab@aa.com"', () => {
-      util.maskEmail('ab@aa.com').should.equal('**@**.com');
+    it('should return "a***b@a***a.com" if the email is "ab@aa.com"', () => {
+      util.maskEmail('ab@aa.com').should.equal('a***b@a***a.com');
     });
     it('should return "***@***.com" if the email is "abc@aaa.com"', () => {
-      util.maskEmail('abc@aaa.com').should.equal('***@***.com');
+      util.maskEmail('abc@aaa.com').should.equal('a***c@a***a.com');
     });
     it('should return "ab*d@aa*a.com" if the email is "abcd@aaaa.com"', () => {
-      util.maskEmail('abcd@aaaa.com').should.equal('ab*d@aa*a.com');
+      util.maskEmail('abcd@aaaa.com').should.equal('a***d@a***a.com');
     });
     it('should return "ab**e@aa**a.com" if the email is "abcde@aaaaa.com"', () => {
-      util.maskEmail('abcde@aaaaa.com').should.equal('ab**e@aa**a.com');
+      util.maskEmail('abcde@aaaaa.com').should.equal('a***e@a***a.com');
     });
     it('should return "ab***f@aa***a.com" if the email is "abcdef@aaaaaa.com"', () => {
-      util.maskEmail('abcdef@aaaaaa.com').should.equal('ab***f@aa***a.com');
+      util.maskEmail('abcdef@aaaaaa.com').should.equal('a***f@a***a.com');
     });
     it('should return "ab****g@aa****a.com" if the email is "abcdefg@aaaaaaa.com"', () => {
-      util.maskEmail('abcdefg@aaaaaaa.com').should.equal('ab****g@aa****a.com');
+      util.maskEmail('abcdefg@aaaaaaa.com').should.equal('a***g@a***a.com');
     });
     it('should return "ab*****h@aa****a.com" if the email is "abcdefgh@aaaaaaaa.com"', () => {
-      util.maskEmail('abcdefgh@aaaaaaaa.com').should.equal('ab*****h@aa*****a.com');
+      util.maskEmail('abcdefgh@aaaaaaaa.com').should.equal('a***h@a***a.com');
     });
     it('should return "ab******i@aa*****a.com" if the email is "abcdefghi@aaaaaaaaa.com"', () => {
-      util.maskEmail('abcdefghi@aaaaaaaaa.com').should.equal('ab******i@aa******a.com');
+      util.maskEmail('abcdefghi@aaaaaaaaa.com').should.equal('a***i@a***a.com');
     });
   });
 
-  xdescribe('maskInviteEmails', () => {
+  describe('postProcessInvites', () => {
     it('should mask emails when passing data like for a project list endpoint for non-admin user', () => {
       const list = [
         {
@@ -60,7 +86,7 @@ describe('Util method', () => {
           id: 1,
           invites: [{
             id: 2,
-            email: 'ab*d@aa*a.com',
+            email: 'a***d@a***a.com',
           },
           ],
         },
@@ -68,8 +94,9 @@ describe('Util method', () => {
       const res = {
         authUser: { userId: 2 },
       };
-      util.maskInviteEmails('$..invites[?(@.email)]', list, res).should.deep.equal(list2);
+      util.postProcessInvites('$..invites[?(@.email)]', list, res).should.deep.equal(list2);
     });
+
     it('should mask emails when passing data like for a project details endpoint for non-admin user', () => {
       const detail = {
         id: 1,
@@ -83,14 +110,14 @@ describe('Util method', () => {
         id: 1,
         invites: [{
           id: 2,
-          email: 'ab*d@aa*a.com',
+          email: 'a***d@a***a.com',
         },
         ],
       };
       const res = {
         authUser: { userId: 2 },
       };
-      util.maskInviteEmails('$..invites[?(@.email)]', detail, res).should.deep.equal(detail2);
+      util.postProcessInvites('$..invites[?(@.email)]', detail, res).should.deep.equal(detail2);
     });
 
     it('should mask emails when passing data like for a single invite endpoint for non-admin user', () => {
@@ -106,14 +133,14 @@ describe('Util method', () => {
         success: [
           {
             id: 1,
-            email: 'ab*d@aa*a.com',
+            email: 'a***d@a***a.com',
           },
         ],
       };
       const res = {
         authUser: { userId: 2 },
       };
-      util.maskInviteEmails('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
+      util.postProcessInvites('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
     });
 
     it('should NOT mask emails when passing data like for a single invite endpoint for admin user', () => {
@@ -136,7 +163,84 @@ describe('Util method', () => {
       const res = {
         authUser: { userId: 2, roles: ['administrator'] },
       };
-      util.maskInviteEmails('$..email', detail, res).should.deep.equal(detail2);
+      util.postProcessInvites('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
+    });
+
+    it('should NOT mask emails when passing data like for a single invite endpoint for user\'s own invite', () => {
+      const detail = {
+        success: [
+          {
+            id: 1,
+            email: 'abcd@aaaa.com',
+            createdBy: 2,
+          },
+        ],
+      };
+      const detail2 = {
+        success: [
+          {
+            id: 1,
+            email: 'abcd@aaaa.com',
+            createdBy: 2,
+          },
+        ],
+      };
+      const res = {
+        authUser: { userId: 2, email: 'abcd@aaaa.com' },
+      };
+      util.postProcessInvites('$.success[?(@.email)]', detail, res).should.deep.equal(detail2);
+    });
+
+    it('should NOT mask emails when passing data like for a project details endpoint for user\'s own invite', () => {
+      const detail = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: 'abcd@aaaa.com',
+          createdBy: 2,
+        },
+        ],
+      };
+      const detail2 = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: 'abcd@aaaa.com',
+          createdBy: 2,
+        },
+        ],
+      };
+      const res = {
+        authUser: { userId: 2, email: 'abcd@aaaa.com' },
+      };
+      util.postProcessInvites('$.invites[?(@.email)]', detail, res).should.deep.equal(detail2);
+    });
+
+    it('should not return `userId` for invite by email', () => {
+      const detail = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: 'abcd@aaaa.com',
+          userId: 33,
+          createdBy: 2,
+        },
+        ],
+      };
+      const detail2 = {
+        id: 1,
+        invites: [{
+          id: 2,
+          email: 'abcd@aaaa.com',
+          userId: null,
+          createdBy: 2,
+        },
+        ],
+      };
+      const res = {
+        authUser: { userId: 2 },
+      };
+      util.postProcessInvites('$..invites[?(@.email)]', detail, res).should.deep.equal(detail2);
     });
   });
 

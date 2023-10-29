@@ -1,4 +1,4 @@
-/* globals Promise */
+
 /*
  * Copyright (C) 2016 TopCoder Inc., All Rights Reserved.
  */
@@ -8,24 +8,38 @@
  * @version 1.0
  */
 
-
+import * as fs from 'fs';
+import * as path from 'path';
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
 import elasticsearch from 'elasticsearch';
-// import jp from 'jsonpath';
+import AWS from 'aws-sdk';
+import jp from 'jsonpath';
 import Promise from 'bluebird';
+import coreLib from 'tc-core-library-js';
 import models from './models';
 
-// import AWS from 'aws-sdk';
+import {
+  ADMIN_ROLES,
+  M2M_SCOPES,
+  EVENT,
+  PROJECT_MEMBER_ROLE,
+  VALUE_TYPE,
+  ESTIMATION_TYPE,
+  RESOURCES,
+  USER_ROLE,
+  INVITE_STATUS,
+} from './constants';
+import { PERMISSION, DEFAULT_PROJECT_ROLE } from './permissions/constants';
 
-import { ADMIN_ROLES, TOKEN_SCOPES, EVENT, PROJECT_MEMBER_ROLE, VALUE_TYPE, ESTIMATION_TYPE } from './constants';
-
-const exec = require('child_process').exec;
 const tcCoreLibAuth = require('tc-core-library-js').auth;
 
 const m2m = tcCoreLibAuth.m2m(config);
 
+/**
+ * @type {projectServiceUtils}
+ */
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
 
 const ssoRefCodes = JSON.parse(config.get('SSO_REFCODES'));
@@ -33,7 +47,7 @@ const ssoRefCodes = JSON.parse(config.get('SSO_REFCODES'));
 // the client modifies the config object, so always passed the cloned object
 let esClient = null;
 
-_.assignIn(util, {
+const projectServiceUtils = {
   /**
    * Build API error
    * @param {string} message the API error message
@@ -101,9 +115,9 @@ _.assignIn(util, {
    */
   calculateProjectEstimationItems: (req, projectId) =>
     // delete ALL existent ProjectEstimationItems for the project
-     models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
-       includeAllProjectEstimatinoItemsForInternalUsage: true,
-     })
+    models.ProjectEstimationItem.deleteAllForProject(models, projectId, req.authUser, {
+      includeAllProjectEstimatinoItemsForInternalUsage: true,
+    })
 
       // retrieve ProjectSettings and ProjectEstimations
       .then(() => Promise.all([
@@ -160,7 +174,7 @@ _.assignIn(util, {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
       return false;
     }
     let roles = _.get(req, 'authUser.roles', []);
@@ -177,7 +191,7 @@ _.assignIn(util, {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
       return false;
     }
     let authRoles = _.get(req, 'authUser.roles', []);
@@ -203,7 +217,7 @@ _.assignIn(util, {
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
     const tokenScopes = _.get(req, 'authUser.scopes', []);
     if (isMachineToken) {
-      if (_.indexOf(tokenScopes, TOKEN_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
       return false;
     }
     let roles = _.get(req, 'authUser.roles', []);
@@ -222,19 +236,52 @@ _.assignIn(util, {
     if (queryFields.length) {
       // remove any inavlid fields
       fields.projects = _.intersection(queryFields, allowedFields.projects);
-      fields.project_members = _.filter(queryFields, f => f.indexOf('members.') === 0);
-      // remove members. prefix
-      fields.project_members = _.map(fields.project_members, f => f.substring(8));
-      // remove any errorneous fields
-      fields.project_members = _.intersection(fields.project_members, allowedFields.project_members);
-      if (fields.project_members.length === 0 && _.indexOf(queryFields, 'members') > -1) {
-        fields.project_members = allowedFields.project_members;
+
+      const parseSubFields = (name, strName) => {
+        fields[name] = _.filter(queryFields, f => f.indexOf(`${strName}.`) === 0);
+        fields[name] = _.map(fields[name], f => f.substring(strName.length + 1));
+        fields[name] = _.intersection(fields[name], allowedFields[name]);
+        if (fields[name].length === 0 && _.indexOf(queryFields, strName) > -1) {
+          fields[name] = allowedFields[name];
+        }
+      };
+
+      if (allowedFields.project_members) {
+        parseSubFields('project_members', 'members');
       }
-      // remove attachments if not requested
-      if (fields.attachments && _.indexOf(queryFields, 'attachments') === -1) {
-        fields.attachments = null;
+      if (allowedFields.project_member_invites) {
+        parseSubFields('project_member_invites', 'invites');
+      }
+
+      if (allowedFields.attachments) {
+        parseSubFields('attachments', 'attachments');
+      }
+
+      if (allowedFields.project_phases) {
+        parseSubFields('project_phases', 'phases');
+      }
+
+      if (allowedFields.project_phases_products) {
+        parseSubFields('project_phases_products', 'phases.products');
       }
     }
+    return fields;
+  },
+
+  /**
+   * Add user details fields to the list of field, if it's allowed to a user who made the request
+   *
+   * @param  {Array}  fields fields list
+   * @param  {Object} req    request object
+   *
+   * @return {Array} fields list with 'email' if allowed
+   */
+  addUserDetailsFieldsIfAllowed: (fields, req) => {
+    // Only Topcoder Admins can get email
+    if (util.hasPermissionByReq(PERMISSION.READ_PROJECT_MEMBER_DETAILS, req)) {
+      return _.concat(fields, ['email', 'firstName', 'lastName']);
+    }
+
     return fields;
   },
 
@@ -260,28 +307,48 @@ _.assignIn(util, {
 
   /**
    * Moves file from source to destination
-   * @param  {object} req    request object
-   * @param  {object} source source object
-   * @param  {string} dest   destination url
+   * @param  {object} req          request object
+   * @param  {string} sourceBucket source bucket
+   * @param  {string} sourceKey    source key
+   * @param  {string} destBucket   destination bucket
+   * @param  {string} destKey      destination key
    * @return {promise}       promise
    */
-  s3FileTransfer: (req, source, dest) => new Promise((resolve, reject) => {
-    const cmdStr = _.join([
-      'aws s3 mv',
-      `"${source}"`,
-      `"${dest}"`,
-      '--region us-east-1',
-    ], ' ');
-    exec(cmdStr, (error, stdout, stderr) => {
-      req.log.debug(`s3FileTransfer: stdout: ${stdout}`);
-      req.log.debug(`s3FileTransfer: stderr: ${stderr}`);
-      if (error !== null) {
-        req.log.error(`exec error: ${error}`);
-        return reject(error);
-      }
-      return resolve({ success: true });
+  s3FileTransfer: async (req, sourceBucket, sourceKey, destBucket, destKey) => {
+    const s3 = new AWS.S3({
+      Region: 'us-east-1',
+      apiVersion: '2006-03-01',
     });
-  }),
+
+    try {
+      const sourceParam = {
+        Bucket: sourceBucket,
+        Key: sourceKey,
+      };
+
+      const copyParam = {
+        Bucket: destBucket,
+        Key: destKey,
+        CopySource: `${sourceBucket}/${sourceKey}`,
+      };
+
+      await s3.copyObject(copyParam).promise();
+      req.log.debug(`s3FileTransfer: copyObject successfully: ${sourceBucket}/${sourceKey}`);
+      // we don't want deleteObject to block the request as it's not critical operation
+      (async () => {
+        try {
+          await s3.deleteObject(sourceParam).promise();
+          req.log.debug(`s3FileTransfer: deleteObject successfully: ${sourceBucket}/${sourceKey}`);
+        } catch (e) {
+          req.log.error(`s3FileTransfer: deleteObject failed: ${sourceBucket}/${sourceKey} : ${e.message}`);
+        }
+      })();
+      return { success: true };
+    } catch (e) {
+      req.log.error(`s3FileTransfer: error: ${e.message}`);
+      throw e;
+    }
+  },
 
 
   /**
@@ -309,10 +376,7 @@ _.assignIn(util, {
         if (resp.status !== 200 || resp.data.result.status !== 200) {
           return Promise.reject(new Error('Unable to fetch pre-signed url'));
         }
-        return [
-          filePath,
-          resp.data.result.content.preSignedURL,
-        ];
+        return resp.data.result.content.preSignedURL;
       });
   },
   getProjectAttachments: (req, projectId) => {
@@ -389,8 +453,81 @@ _.assignIn(util, {
     } else {
       esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
     }
+    // during unit tests, we need to refresh the indices
+    // before making get/search requests to make sure all ES data can be visible.
+    if (process.env.NODE_ENV === 'test') {
+      esClient.originalSearch = esClient.search;
+      esClient.search = (params, cb) => esClient.indices.refresh({ index: '' })
+        .then(() => esClient.originalSearch(params, cb)); // refresh index before reply
+      esClient.originalGet = esClient.get;
+      esClient.get = (params, cb) => esClient.indices.refresh({ index: '' })
+        .then(() => esClient.originalGet(params, cb)); // refresh index before reply
+    }
     return esClient;
   },
+
+  /**
+   * Return the searched resource from elastic search
+   * @param resource resource name
+   * @param query    search query
+   * @param index    index to search from
+   * @return {Object}           the searched resource
+   */
+  fetchFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+    let INDEX = config.get('elasticsearchConfig.metadataIndexName');
+    let TYPE = config.get('elasticsearchConfig.metadataDocType');
+    if (index === 'timeline') {
+      INDEX = config.get('elasticsearchConfig.timelineIndexName');
+      TYPE = config.get('elasticsearchConfig.timelineDocType');
+    } else if (index === 'project') {
+      INDEX = config.get('elasticsearchConfig.indexName');
+      TYPE = config.get('elasticsearchConfig.docType');
+    }
+
+    const data = query ? (yield esClient.search({ index: INDEX, type: TYPE, body: query })) :
+      (yield esClient.search({ index: INDEX, type: TYPE }));
+    if (data.hits.hits.length > 0 && data.hits.hits[0].inner_hits) {
+      return data.hits.hits[0].inner_hits;
+    }
+
+    return data.hits.hits.length > 0 ? data.hits.hits[0]._source : { // eslint-disable-line no-underscore-dangle
+      productTemplates: [],
+      forms: [],
+      projectTemplates: [],
+      planConfigs: [],
+      priceConfigs: [],
+      projectTypes: [],
+      productCategories: [],
+      orgConfigs: [],
+      milestoneTemplates: [],
+    };
+  }),
+
+  /**
+   * Return the searched resource from elastic search PROJECT index
+   * @param resource resource name
+   * @param query    search query
+   * @param index    index to search from
+   * @return {Array}           the searched resource
+   */
+  fetchByIdFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
+    let INDEX = config.get('elasticsearchConfig.indexName');
+    let TYPE = config.get('elasticsearchConfig.docType');
+    if (index === 'timeline') {
+      INDEX = config.get('elasticsearchConfig.timelineIndexName');
+      TYPE = config.get('elasticsearchConfig.timelineDocType');
+    } else if (index === 'metadata') {
+      INDEX = config.get('elasticsearchConfig.metadataIndexName');
+      TYPE = config.get('elasticsearchConfig.metadataDocType');
+    }
+
+    return (yield esClient.search({
+      index: INDEX,
+      type: TYPE,
+      _source: false,
+      body: query,
+    })).hits.hits;
+  }),
 
   /**
    * Retrieve member traits from user handle
@@ -450,68 +587,103 @@ _.assignIn(util, {
   maskEmail: (email) => {
     // common function for formating
     const addMask = (str) => {
-      let newStr;
       const len = str.length;
-      if (len <= 3) {
-        newStr = _.repeat('*', len);
-      } else {
-        newStr = str.substr(0, 2) + _.repeat('*', len - 3) + str.substr(-1);
+      if (len === 1) {
+        return `${str}***${str}`;
       }
-      return newStr;
+      return `${str[0]}***${str[len - 1]}`;
     };
 
     try {
       const mailParts = email.split('@');
-      const domainParts = mailParts[1].split('.');
 
       let userName = mailParts[0];
       userName = addMask(userName);
       mailParts[0] = userName;
 
-      let domainName = domainParts[0];
-      domainName = addMask(domainName);
-      domainParts[0] = domainName;
+      const index = mailParts[1].lastIndexOf('.');
+      if (index !== -1) {
+        mailParts[1] = `${addMask(mailParts[1].slice(0, index))}.${mailParts[1].slice(index + 1)}`;
+      }
 
-      mailParts[1] = domainParts.join('.');
       return mailParts.join('@');
     } catch (e) {
       return email;
     }
   },
   /**
-   * Filter member details by input fields
+   * Post-process given invite(s)
+   * Mask `email` and hide `userId` to prevent leaking Personally Identifiable Information (PII)
    *
-   * @param {String}  jsonPath   jsonpath string
+   * Immutable - doesn't modify data, but creates a clone.
+   *
+   * @param {String}  jsonPath  jsonpath string
    * @param {Object}  data      the data which  need to process
    * @param {Object}  req       The request object
    *
    * @return {Object} data has been processed
    */
-  maskInviteEmails: (jsonPath, data, req) => { // eslint-disable-line
-    // temporary disable this feature, because it has some side effects
-    // see relative issues:
-    // - https://github.com/topcoder-platform/tc-project-service/issues/420
-    // - https://github.com/appirio-tech/connect-app/issues/3412
-    // - https://github.com/topcoder-platform/tc-project-service/issues/422
-    // - https://github.com/appirio-tech/connect-app/issues/3413
-    // uncomment code below, to enable masking emails again
+  postProcessInvites: (jsonPath, data, req) => {
+    // clone data to avoid mutations
+    const dataClone = _.cloneDeep(data);
 
-    /*
-    const isAdmin = util.hasPermission({ topcoderRoles: ADMIN_ROLES }, req.authUser);
+    const isAdmin = util.hasPermissionByReq({ topcoderRoles: [USER_ROLE.TOPCODER_ADMIN] }, req);
+    const currentUserId = req.authUser.userId;
+    const currentUserEmail = req.authUser.email;
+
+    // admins can get data as it is
     if (isAdmin) {
-      return data;
+      // even though we didn't make any changes to the data, return a clone here for consistency
+      return dataClone;
     }
 
-    jp.apply(data, jsonPath, (value) => {
-      if (_.isObject(value)) {
-        _.assign(value, { email: util.maskEmail(value.email) });
-        return value;
+    const postProcessInvite = (invite) => {
+      if (!_.has(invite, 'email')) {
+        return invite;
       }
-      // isString or null
-      return util.maskEmail(value);
+
+      if (invite.email) {
+        const canSeeEmail = (
+          isAdmin || // admin
+          invite.createdBy === currentUserId || // user who created invite
+          (invite.userId !== null && invite.userId === currentUserId) || // user who is invited by `handle`
+          ( // user who is invited by `email` (invite doesn't have `userId`)
+            invite.userId === null &&
+            invite.email &&
+            currentUserEmail &&
+            invite.email.toLowerCase() === currentUserEmail.toLowerCase()
+          )
+        );
+        // mask email if user cannot see it
+        _.assign(invite, {
+          email: canSeeEmail ? invite.email : util.maskEmail(invite.email),
+        });
+
+        const canGetUserId = (
+          isAdmin || // admin
+          invite.userId === currentUserId // user who is invited
+        );
+        if (invite.userId && !canGetUserId) {
+          _.assign(invite, {
+            userId: null,
+          });
+        }
+      }
+
+      return invite;
+    };
+
+    jp.apply(dataClone, jsonPath, (value) => {
+      if (_.isObject(value)) {
+        // data contains nested invite object
+        return postProcessInvite(value);
+      }
+      // data is single invite object
+      // value is string or null
+      return postProcessInvite(dataClone).email;
     });
-    */
-    return data;
+
+    return dataClone;
   },
 
   /**
@@ -528,7 +700,10 @@ _.assignIn(util, {
       return members;
     }
     const memberTraitFields = ['photoURL', 'workingHourStart', 'workingHourEnd', 'timeZone'];
-    const memberDetailFields = ['handle', 'firstName', 'lastName'];
+    let memberDetailFields = ['handle'];
+
+    // Only Topcoder admins can get emails, first and last name for users
+    memberDetailFields = util.addUserDetailsFieldsIfAllowed(memberDetailFields, req);
 
     let allMemberDetails = [];
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
@@ -581,9 +756,41 @@ _.assignIn(util, {
     // pick valid fields from fetched member details
     return _.map(members, (member) => {
       let memberDetails = _.find(allMemberDetails, ({ userId }) => userId === member.userId);
-      memberDetails = _.assign({}, member, memberDetails);
+      memberDetails = _.assign({}, member, _.pick(memberDetails, _.union(memberDetailFields, memberTraitFields)));
       return _(memberDetails).pick(fields).defaults(memberDefaults).value();
     });
+  },
+
+  /**
+   * Add member details to Project Phase objects
+   *
+   * @param {Array|Object} phases Array of phase object or single phase object
+   * @param {Object} req The request object
+   *
+   * @return {Array|Object} Phase(s) with member details
+   */
+  populatePhasesWithMemberDetails: async (phases, req) => {
+    if (_.isArray(phases)) {
+      let members = _.reduce(phases, (acc, phase) =>
+        _.concat(acc, _.map(phase.members, member => _.pick(member, 'userId'))), []);
+      members = _.uniqBy(members, 'userId');
+      try {
+        const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
+        return _.map(phases, phase =>
+          _.assign(phase, { members: _.intersectionBy(detailedMembers, phase.members, 'userId') }));
+      } catch (err) {
+        return _.map(phases, phase =>
+          _.assign(phase, { members: _.map(phase.members, member => _.pick(member, 'userId')) }));
+      }
+    } else {
+      const members = _.map(phases.members, member => _.pick(member, 'userId'));
+      try {
+        const detailedMembers = await util.getObjectsWithMemberDetails(members, ['userId', 'handle', 'photoURL'], req);
+        return _.assign(phases, { members: detailedMembers });
+      } catch (err) {
+        return _.assign(phases, { members });
+      }
+    }
   },
 
   /**
@@ -602,7 +809,7 @@ _.assignIn(util, {
           Authorization: `Bearer ${token}`,
         },
       }).then(res => _.get(res, 'data.result.content', [])
-          .map(r => r.roleName));
+        .map(r => r.roleName));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -625,11 +832,35 @@ _.assignIn(util, {
     }),
 
   /**
+     * Send resource to kafka bus
+     * @param  {object} req  Request object
+     * @param  {String} key  the event key
+     * @param  {String} name  the resource name
+     * @param  {object} resource  the resource
+     * @param  {object} [originalResource] original resource in case resource was updated
+     * @param  {String} [route] route which called the event (for phases and works)
+     * @param  {Boolean}[skipNotification] if true, than event is not send to Notification Service
+    */
+    sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource, originalResource, route, skipNotification) {    // eslint-disable-line
+    req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
+
+    // emit event
+    req.app.emit(key, {
+      req,
+      resource: _.assign({ resource: name }, resource),
+      originalResource: originalResource ? _.assign({ resource: name }, originalResource) : undefined,
+      route,
+      skipNotification,
+    });
+  }),
+
+  /**
    * Add userId to project
    * @param  {object} req  Request object that should contain project info and user info
    * @param  {object} member  the member to be added to project
+   * @param  {sequalize.Transaction} transaction
   */
-  addUserToProject: Promise.coroutine(function* (req, member) {    // eslint-disable-line
+  addUserToProject: Promise.coroutine(function* (req, member, transaction) {    // eslint-disable-line
     const members = req.context.currentProjectMembers;
 
     // check if member is already registered
@@ -643,22 +874,38 @@ _.assignIn(util, {
     req.log.debug('creating member', member);
     let newMember = null;
     // register member
-    return models.ProjectMember.create(member)
-    .then((_newMember) => {
-      newMember = _newMember.get({ plain: true });
-      // publish event
-      req.app.services.pubsub.publish(
-        EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
-        newMember,
-        { correlationId: req.id },
-      );
-      req.app.emit(EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED, { req, member: newMember });
-      return newMember;
-    })
-    .catch((err) => {
-      req.log.error('Unable to register ', err);
-      return Promise.reject(err);
-    });
+
+    return models.ProjectMember.create(member, { transaction })
+      .then((_newMember) => {
+        newMember = _newMember.get({ plain: true });
+
+        // we have to remove all pending invites for the member if any, as we can add a member directly without invite
+        return models.ProjectMemberInvite.getPendingInviteByEmailOrUserId(member.projectId, null, newMember.userId)
+          .then((invite) => {
+            if (invite) {
+              return invite.update({
+                status: INVITE_STATUS.CANCELED,
+              }, {
+                transaction,
+              });
+            }
+
+            return Promise.resolve();
+          }).then(() => {
+            // emit the event
+            util.sendResourceToKafkaBus(
+              req,
+              EVENT.ROUTING_KEY.PROJECT_MEMBER_ADDED,
+              RESOURCES.PROJECT_MEMBER,
+              newMember);
+
+            return newMember;
+          });
+      })
+      .catch((err) => {
+        req.log.error('Unable to register ', err);
+        return Promise.reject(err);
+      });
   }),
 
   /**
@@ -676,29 +923,29 @@ _.assignIn(util, {
     }
     req.log.trace('filter for users api call', filter);
     return util.getM2MToken()
-    .then((token) => {
-      req.log.debug(`Bearer ${token}`);
-      const httpClient = util.getHttpClient({ id: req.id, log: req.log });
-      return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        params: {
-          fields: 'handle,id,email',
-          filter,
-        },
-        // set longer timeout as default 3000 could be not enough for identity service response
-        timeout: 15000,
-      })
-      .then((response) => {
-        const data = _.get(response, 'data.result.content', null);
-        if (!data) { throw new Error('Response does not have result.content'); }
-        req.log.debug('UserHandle response', data);
-        return data;
+      .then((token) => {
+        req.log.debug(`Bearer ${token}`);
+        const httpClient = util.getHttpClient({ id: req.id, log: req.log });
+        return httpClient.get(`${config.get('identityServiceEndpoint')}users`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          params: {
+            fields: 'handle,id,email',
+            filter,
+          },
+          // set longer timeout as default 3000 could be not enough for identity service response
+          timeout: 15000,
+        })
+          .then((response) => {
+            const data = _.get(response, 'data.result.content', null);
+            if (!data) { throw new Error('Response does not have result.content'); }
+            req.log.debug('UserHandle response', data);
+            return data;
+          });
       });
-    });
   },
 
   /**
@@ -746,7 +993,7 @@ _.assignIn(util, {
       const start = batch * maximumRequests;
       const end = (batch + 1) * maximumRequests;
       const requests = emails.slice(start, end).map(userEmail =>
-          generateRequest({ token, email: userEmail }));
+        generateRequest({ token, email: userEmail }));
       return Promise.all(requests)
         .then((responses) => {
           const data = responses.reduce((contents, response) => {
@@ -782,6 +1029,67 @@ _.assignIn(util, {
   isSSO: project => ssoRefCodes.indexOf(_.get(project, 'details.utm.code')) > -1,
 
   /**
+  * Set paginated header and respond with data
+  * @param {Object} req HTTP request
+  * @param {Object} res HTTP response
+  * @param {Object} data Data for which pagination need to be applied
+  * @return {Array} data rows to be returned
+  */
+  setPaginationHeaders: (req, res, data) => {
+    const totalPages = Math.ceil(data.count / data.pageSize);
+    let fullUrl = `${req.protocol}://${req.get('host')}${req.url.replace(`&page=${data.page}`, '')}`;
+    // URL formatting to add pagination parameters accordingly
+    if (fullUrl.indexOf('?') === -1) {
+      fullUrl += '?';
+    } else {
+      fullUrl += '&';
+    }
+
+    // Pagination follows github style
+    if (data.count > 0) { // Set Pagination headers only if there is data to paginate
+      let link = ''; // Content for Link header
+
+      // Set first and last page in Link header
+      link += `<${fullUrl}page=1>; rel="first"`;
+      link += `, <${fullUrl}page=${totalPages}>; rel="last"`;
+
+      // Set Prev-Page only if it's not first page and within page limits
+      if (data.page > 1 && data.page <= totalPages) {
+        const prevPage = (data.page - 1);
+        res.set({
+          'X-Prev-Page': prevPage,
+        });
+        link += `, <${fullUrl}page=${prevPage}>; rel="prev"`;
+      }
+
+      // Set Next-Page only if it's not Last page and within page limits
+      if (data.page < totalPages) {
+        const nextPage = (_.parseInt(data.page) + 1);
+        res.set({
+          'X-Next-Page': (_.parseInt(data.page) + 1),
+        });
+        link += `, <${fullUrl}page=${nextPage}>; rel="next"`;
+      }
+
+      // Allow browsers access pagination data in headers
+      let accessControlExposeHeaders = res.get('Access-Control-Expose-Headers') || '';
+      accessControlExposeHeaders += accessControlExposeHeaders ? ', ' : '';
+      accessControlExposeHeaders += 'X-Page, X-Per-Page, X-Total, X-Total-Pages';
+
+      res.set({
+        'Access-Control-Expose-Headers': accessControlExposeHeaders,
+        'X-Page': data.page,
+        'X-Per-Page': data.pageSize,
+        'X-Total': data.count,
+        'X-Total-Pages': totalPages,
+        Link: link,
+      });
+    }
+    // Return the data after setting pagination headers
+    res.json(data.rows);
+  },
+
+  /**
    * Check if the following model exist
    * @param {Object} keyInfo key information, it includes version and key
    * @param {String} modelName name of model
@@ -808,7 +1116,7 @@ _.assignIn(util, {
       })).then((record) => {
         if (_.isNil(record)) {
           const apiErr = new Error(errorMessage);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
       });
@@ -822,7 +1130,7 @@ _.assignIn(util, {
       })).then((record) => {
         if (_.isNil(record)) {
           const apiErr = new Error(errorMessage);
-          apiErr.status = 422;
+          apiErr.status = 400;
           throw apiErr;
         }
       });
@@ -840,36 +1148,81 @@ _.assignIn(util, {
    * If we define a rule with `projectRoles` list, we also should provide `projectMembers`
    * - the list of project members.
    *
+   * `permissionRule.projectRoles` may be equal to `true` which means user is a project member with any role
+   *
+   * `permissionRule.topcoderRoles` may be equal to `true` which means user is a logged-in user
+   *
    * @param {Object}        permissionRule               permission rule
-   * @param {Array<String>} permissionRule.projectRoles  the list of project roles of the user
-   * @param {Array<String>} permissionRule.topcoderRoles the list of Topcoder roles of the user
+   * @param {Array<String>|Array<Object>|Boolean} permissionRule.projectRoles  the list of project roles of the user
+   * @param {Array<String>|Boolean} permissionRule.topcoderRoles the list of Topcoder roles of the user
    * @param {Object}        user                         user for whom we check permissions
    * @param {Object}        user.roles                   list of user roles
-   * @param {Object}        user.isMachine               `true` - if it's machine, `false` - real user
    * @param {Object}        user.scopes                  scopes of user token
    * @param {Array}         projectMembers               (optional) list of project members - required to check `topcoderRoles`
    *
    * @returns {Boolean}     true, if has permission
    */
   matchPermissionRule: (permissionRule, user, projectMembers) => {
-    const member = _.find(projectMembers, { userId: user.userId });
     let hasProjectRole = false;
     let hasTopcoderRole = false;
+    let hasScope = false;
 
-    if (permissionRule) {
-      if (permissionRule.projectRoles
-        && permissionRule.projectRoles.length > 0
-        && !!member
-      ) {
-        hasProjectRole = _.includes(permissionRule.projectRoles, member.role);
-      }
+    // if no rule defined, no access by default
+    if (!permissionRule) {
+      return false;
+    }
 
-      if (permissionRule.topcoderRoles && permissionRule.topcoderRoles.length > 0) {
-        hasTopcoderRole = util.hasRoles({ authUser: user }, permissionRule.topcoderRoles);
+    // check Project Roles
+    if (permissionRule.projectRoles && projectMembers) {
+      const userId = !_.isNumber(user.userId) ? parseInt(user.userId, 10) : user.userId;
+      const member = _.find(projectMembers, { userId });
+
+      // check if user has one of allowed Project roles
+      if (permissionRule.projectRoles.length > 0) {
+        // as we support `projectRoles` as strings and as objects like:
+        // { role: "...", isPrimary: true } we have normalize them to a common shape
+        const normalizedProjectRoles = permissionRule.projectRoles.map(rule => (
+          _.isString(rule) ? { role: rule } : rule
+        ));
+
+        hasProjectRole = member && _.some(normalizedProjectRoles, rule => (
+          // checks that common properties are equal
+          _.isMatch(member, rule)
+        ));
+
+      // `projectRoles === true` means that we check if user is a member of the project
+      // with any role
+      } else if (permissionRule.projectRoles === true) {
+        hasProjectRole = !!member;
       }
     }
 
-    return hasProjectRole || hasTopcoderRole;
+    // check Topcoder Roles
+    if (permissionRule.topcoderRoles) {
+      // check if user has one of allowed Topcoder roles
+      if (permissionRule.topcoderRoles.length > 0) {
+        hasTopcoderRole = _.intersection(
+          _.get(user, 'roles', []).map(role => role.toLowerCase()),
+          permissionRule.topcoderRoles.map(role => role.toLowerCase()),
+        ).length > 0;
+
+      // `topcoderRoles === true` means that we check if user is has any Topcoder role
+      // basically this equals to logged-in user, as all the Topcoder users
+      // have at least one role `Topcoder User`
+      } else if (permissionRule.topcoderRoles === true) {
+        hasTopcoderRole = _.get(user, 'roles', []).length > 0;
+      }
+    }
+
+    // check M2M scopes
+    if (permissionRule.scopes) {
+      hasScope = _.intersection(
+        _.get(user, 'scopes', []),
+        permissionRule.scopes,
+      ).length > 0;
+    }
+
+    return hasProjectRole || hasTopcoderRole || hasScope;
   },
 
   /**
@@ -916,20 +1269,55 @@ _.assignIn(util, {
    * @param {Object} permission     permission or permissionRule
    * @param {Object} user           user for whom we check permissions
    * @param {Object} user.roles     list of user roles
-   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
    * @param {Object} user.scopes    scopes of user token
    * @param {Array}  projectMembers (optional) list of project members - required to check `topcoderRoles`
    *
    * @returns {Boolean}     true, if has permission
    */
   hasPermission: (permission, user, projectMembers) => {
+    if (!permission) {
+      return false;
+    }
+
     const allowRule = permission.allowRule ? permission.allowRule : permission;
     const denyRule = permission.denyRule ? permission.denyRule : null;
 
     const allow = util.matchPermissionRule(allowRule, user, projectMembers);
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
 
+    // console.log('hasPermission', JSON.stringify({ permission, user, projectMembers, allow, deny }, null, 2));
+
     return allow && !deny;
+  },
+
+  hasPermissionByReq: (permission, req) => {
+    // as it's very easy to forget "req" argument, throw error to make debugging easier
+    if (!req) {
+      throw new Error('Method "hasPermissionByReq" requires "req" argument.');
+    }
+
+    return util.hasPermission(permission, _.get(req, 'authUser'), _.get(req, 'context.currentProjectMembers'));
+  },
+
+  /**
+   * Check if permission requires us to provide the list Project Members or no.
+   *
+   * @param {Object} permission     permission or permissionRule
+   *
+   * @return {Boolean} true if has permission
+   */
+  isPermissionRequireProjectMembers: (permission) => {
+    if (!permission) {
+      return false;
+    }
+
+    const allowRule = permission.allowRule ? permission.allowRule : permission;
+    const denyRule = permission.denyRule ? permission.denyRule : null;
+
+    const allowRuleRequiresProjectMembers = _.get(allowRule, 'projectRoles.length') > 0;
+    const denyRuleRequiresProjectMembers = _.get(denyRule, 'projectRoles.length') > 0;
+
+    return allowRuleRequiresProjectMembers || denyRuleRequiresProjectMembers;
   },
 
   /**
@@ -973,7 +1361,6 @@ _.assignIn(util, {
    * @param {Object} permission     permission or permissionRule
    * @param {Object} user           user for whom we check permissions
    * @param {Object} user.roles     list of user roles
-   * @param {Object} user.isMachine `true` - if it's machine, `false` - real user
    * @param {Object} user.scopes    scopes of user token
    * @param {Number} projectId      project id to check permissions for
    *
@@ -998,6 +1385,126 @@ _.assignIn(util, {
 
     return markupKey ? _.includes(_.values(ESTIMATION_TYPE), markupKey) : false;
   },
-});
+
+  /**
+   * Get default Project Role for a user by they Topcoder Roles.
+   *
+   * @param {Object} user       user
+   * @param {Array}  user.roles user Topcoder roles
+   *
+   * @returns {String} project role
+   */
+  getDefaultProjectRole: (user) => {
+    for (let i = 0; i < DEFAULT_PROJECT_ROLE.length; i += 1) {
+      const rule = DEFAULT_PROJECT_ROLE[i];
+
+      if (util.hasPermission({ topcoderRoles: [rule.topcoderRole] }, user)) {
+        return rule.projectRole;
+      }
+    }
+
+    return undefined;
+  },
+
+  /**
+   * Validate if `fields` list has only allowed values from `allowedFields` or throws error.
+   *
+   * @param {Array} fields        fields to validate
+   * @param {Array} allowedFields allowed fields
+   *
+   * @throws {Error}
+   * @returns {void}
+   */
+  validateFields: (fields, allowedFields) => {
+    if (!allowedFields) {
+      throw new Error('List of "allowedFields" has to be provided.');
+    }
+
+    const disallowedFields = _.difference(fields, allowedFields);
+
+    if (disallowedFields.length > 0) {
+      const disallowedFieldsString = disallowedFields.map(field => `"${field}"`).join(', ');
+
+      throw new Error(`values ${disallowedFieldsString} are not allowed`);
+    }
+  },
+  /**
+   * creates directory recursively.
+   * NodeJS < 10.12.0 has no native support to create a directory recursively
+   * So, we added this function. check this url for more details:
+   * https://stackoverflow.com/questions/31645738/how-to-create-full-path-with-nodes-fs-mkdirsync
+   * @param {string}    targetDir        directory path
+   * @return {void}              Returns void
+   */
+  mkdirSyncRecursive: (targetDir) => {
+    const sep = path.sep;
+    const initDir = path.isAbsolute(targetDir) ? sep : '';
+    const baseDir = __dirname;
+
+    return targetDir.split(sep).reduce((parentDir, childDir) => {
+      const curDir = path.resolve(baseDir, parentDir, childDir);
+      try {
+        fs.mkdirSync(curDir);
+      } catch (err) {
+        if (err.code === 'EEXIST') { // curDir already exists!
+          return curDir;
+        }
+
+        // To avoid `EISDIR` error on Mac and `EACCES`-->`ENOENT` and `EPERM` on Windows.
+        if (err.code === 'ENOENT') { // Throw the original parentDir error on curDir `ENOENT` failure.
+          throw new Error(`EACCES: permission denied, mkdir '${parentDir}'`);
+        }
+
+        const caughtErr = ['EACCES', 'EPERM', 'EISDIR'].indexOf(err.code) > -1;
+        if ((!caughtErr) || (caughtErr && curDir === path.resolve(targetDir))) {
+          throw err; // Throw if it's just the last created dir.
+        }
+      }
+
+      return curDir;
+    }, initDir);
+  },
+
+  getScriptsLogger: () => {
+    const appName = 'tc-projects-service';
+    return coreLib.logger({
+      name: appName,
+      level: _.get(config, 'logLevel', 'debug').toLowerCase(),
+      captureLogs: config.get('captureLogs'),
+      logentriesToken: _.get(config, 'logentriesToken', null),
+    });
+  },
+
+  /**
+   * Parse integer value inside string or return fallback value.
+   * Unlike original parseInt, this method parses the whole string
+   * and fails if there are non-integer characters inside the string.
+   *
+   * @param {String} str           number to parse
+   * @param {Number} radix       radix of the number to parse
+   * @param {Any}    fallbackValue value to return if we cannot parse successfully
+   *
+   * @returns {Number} parsed number
+   */
+  parseIntStrictly: (str, radix, fallbackValue) => {
+    const int = parseInt(str, radix);
+
+    if (_.isNaN(int)) {
+      return fallbackValue;
+    }
+
+    // if we parsed only the part of value and it's not the same as intial value
+    // example: "12x" => 12 which is not the same as initial value "12x", which means
+    // we cannot parse the full value sucessfully and treat it like we cannot parse at all
+    if (int.toString() !== str) {
+      return fallbackValue;
+    }
+
+    return int;
+  },
+
+};
+
+_.assignIn(util, projectServiceUtils);
 
 export default util;

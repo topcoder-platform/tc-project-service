@@ -4,18 +4,22 @@
     "logLevel": "debug",
     "captureLogs": "false",
     "logentriesToken": "",
+    "enableFileUpload": "false",
     "elasticsearchConfig": {
       "host": "http://localhost:9200",
-      "apiVersion": "2.3",
+      "apiVersion": "6.8",
       "indexName": "projects_test",
-      "docType": "projectV4",
+      "docType": "doc",
       "timelineIndexName": "timelines_test",
-      "timelineDocType": "timelineV4"
+      "timelineDocType": "doc",
+      "metadataIndexName": "metadata_test",
+      "metadataDocType": "doc",
+      "customerPaymentIndexName": "customer_payments_test",
+    "customerPaymentDocType": "doc"
     },
-    "rabbitmqUrl": "amqp://localhost:5672",
     "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
     "dbConfig": {
-        "masterUrl": "postgres://coder:mysecretpassword@localhost:5433/projectsdb_test",
+        "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",
         "maxPoolSize": 50,
         "minPoolSize": 4,
         "idleTimeout": 1000

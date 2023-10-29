@@ -8,7 +8,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import util from '../../util';
 import validateTimeline from '../../middlewares/validateTimeline';
-import { EVENT, TIMELINE_REFERENCES } from '../../constants';
+import { EVENT, RESOURCES, TIMELINE_REFERENCES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
 
@@ -16,23 +16,21 @@ const schema = {
   params: {
     timelineId: Joi.number().integer().positive().required(),
   },
-  body: {
-    param: Joi.object().keys({
-      id: Joi.any().strip(),
-      name: Joi.string().max(255).required(),
-      description: Joi.string().max(255),
-      startDate: Joi.date().required(),
-      endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
-      reference: Joi.string().valid(_.values(TIMELINE_REFERENCES)).required(),
-      referenceId: Joi.number().integer().positive().required(),
-      createdAt: Joi.any().strip(),
-      updatedAt: Joi.any().strip(),
-      deletedAt: Joi.any().strip(),
-      createdBy: Joi.any().strip(),
-      updatedBy: Joi.any().strip(),
-      deletedBy: Joi.any().strip(),
-    }).required(),
-  },
+  body: Joi.object().keys({
+    id: Joi.any().strip(),
+    name: Joi.string().max(255).required(),
+    description: Joi.string().max(255),
+    startDate: Joi.date().required(),
+    endDate: Joi.date().min(Joi.ref('startDate')).allow(null),
+    reference: Joi.string().valid(_.values(TIMELINE_REFERENCES)).required(),
+    referenceId: Joi.number().integer().positive().required(),
+    createdAt: Joi.any().strip(),
+    updatedAt: Joi.any().strip(),
+    deletedAt: Joi.any().strip(),
+    createdBy: Joi.any().strip(),
+    updatedBy: Joi.any().strip(),
+    deletedBy: Joi.any().strip(),
+  }).required(),
 };
 
 module.exports = [
@@ -43,7 +41,7 @@ module.exports = [
   validateTimeline.validateTimelineRequestBody,
   permissions('timeline.edit'),
   (req, res, next) => {
-    const entityToUpdate = _.assign(req.body.param, {
+    const entityToUpdate = _.assign(req.body, {
       updatedBy: req.authUser.userId,
     });
 
@@ -98,17 +96,16 @@ module.exports = [
         return Promise.resolve();
       })
       .then(() => {
-        // Send event to bus
-        req.log.debug('Sending event to RabbitMQ bus for timeline %d', updated.id);
-        req.app.services.pubsub.publish(EVENT.ROUTING_KEY.TIMELINE_UPDATED,
-          { original, updated },
-          { correlationId: req.id },
-        );
-        req.app.emit(EVENT.ROUTING_KEY.TIMELINE_UPDATED,
-          { req, original, updated });
+        // emit the event
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.TIMELINE_UPDATED,
+          RESOURCES.TIMELINE,
+          updated,
+          original);
 
         // Write to response
-        res.json(util.wrapResponse(req.id, updated));
+        res.json(updated);
         return Promise.resolve();
       })
       .catch(next);

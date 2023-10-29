@@ -9,6 +9,8 @@ logs
 *.log
 npm-debug.log*
 .DS_Store
+.tern-port
+*#
 
 dist/
 
@@ -53,3 +55,6 @@ server.csr
 server.key
 sfdc.csr
 testSalesForceConnection.js
+
+# Report which might be generated using `scripts/es-db-compare` script
+report.html

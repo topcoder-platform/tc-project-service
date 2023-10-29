@@ -18,8 +18,8 @@ module.exports = [
   validate(schema),
   permissions('workManagementPermission.delete'),
   (req, res, next) =>
-     models.sequelize.transaction(() =>
-      models.WorkManagementPermission.findById(req.params.id)
+    models.sequelize.transaction(() =>
+      models.WorkManagementPermission.findByPk(req.params.id)
         .then((entity) => {
           if (!entity) {
             const apiErr = new Error(`Work Management Permission not found for id ${req.params.id}`);
@@ -30,8 +30,8 @@ module.exports = [
           return entity.update({ deletedBy: req.authUser.userId });
         })
         .then(entity => entity.destroy()))
-        .then(() => {
-          res.status(204).end();
-        })
-        .catch(next),
+      .then(() => {
+        res.status(204).end();
+      })
+      .catch(next),
 ];
