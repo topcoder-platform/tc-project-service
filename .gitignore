@@ -47,3 +47,9 @@ jspm_packages
 !.elasticbeanstalk/*.global.yml
 .DS_Store
 .idea
+.vscode/
+server.crt
+server.csr
+server.key
+sfdc.csr
+testSalesForceConnection.js
