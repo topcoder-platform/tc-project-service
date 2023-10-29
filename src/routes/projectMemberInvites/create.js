@@ -295,7 +295,7 @@ module.exports = [
     // users with handles whom we didn't search for
       .then((foundUsers) => {
         const lowerCaseHandles = invite.handles.map(handle => handle.toLowerCase());
-        return foundUsers.filter(foundUser => _.includes(lowerCaseHandles, foundUser.handle));
+        return foundUsers.filter(foundUser => _.includes(lowerCaseHandles, foundUser.handleLower));
       })
       .then((inviteUsers) => {
         const members = req.context.currentProjectMembers;
@@ -352,9 +352,12 @@ module.exports = [
         if (promises.length === 0) {
           promises.push(Promise.resolve());
         }
+        req.log.debug(`All promises: ${JSON.stringify(promises)}`);
         return Promise.all(promises).then((rolesList) => {
+          req.log.debug(`RoleList: ${JSON.stringify(rolesList)}`);
           if (inviteUserIds && invite.role !== PROJECT_MEMBER_ROLE.CUSTOMER) {
-            req.log.debug('Checking if users are allowed to be invited with desired Project Role.');
+            req.log.debug(`Checking if users: ${JSON.stringify(inviteUserIds)}
+              are allowed to be invited with desired Project Role.`);
             const forbidUserList = [];
             _.zip(inviteUserIds, rolesList).forEach((data) => {
               const [userId, roles] = data;
@@ -430,6 +433,10 @@ module.exports = [
               res.status(201).json(response);
             }
           });
-      }).catch(err => next(err));
+      }).catch((err) => {
+        if (failed.length) {
+          res.status(403).json(_.assign({}, { success: [] }, { failed }));
+        } else next(err);
+      });
   },
 ];

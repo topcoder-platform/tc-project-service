@@ -754,6 +754,7 @@ export const PROJECT_TO_TOPCODER_ROLES_MATRIX = {
   ],
   [PROJECT_MEMBER_ROLE.COPILOT]: [
     USER_ROLE.COPILOT,
+    'copilot',
   ],
 };
 

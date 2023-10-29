@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --fix || true",
     "build": "babel src -d dist --presets es2015 --copy-files",
     "start": "node dist",
-    "start:dev": "cross-env NODE_ENV=development PORT=8001 nodemon -w src --exec \"./node_modules/.bin/env-cmd npm run babel-node-script -- src\" | bunyan",
+    "start:dev": "cross-env NODE_ENV=development PORT=3000 nodemon -w src --exec \"./node_modules/.bin/env-cmd npm run babel-node-script -- src\" | bunyan",
     "startKafkaConsumers": "node dist/index-kafka.js",
     "startKafkaConsumers:dev": "cross-env NODE_ENV=development nodemon -w src --exec \"./node_modules/.bin/env-cmd npm run babel-node-script src/index-kafka.js\" | bunyan",
     "test": "cross-env NODE_ENV=test npm run lint && cross-env NODE_ENV=test npm run reset:db && cross-env NODE_ENV=test npm run reset:es && cross-env NODE_ENV=test istanbul cover node_modules/mocha/bin/_mocha -- --timeout 10000 --require babel-core/register --require ./src/tests \"./src/**/*.spec.js*\" --exit",

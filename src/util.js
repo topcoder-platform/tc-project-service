@@ -590,7 +590,7 @@ const projectServiceUtils = {
       if (logger) {
         logger.trace(handles);
       }
-      const handleArr = _.map(handles, h => `"${h}"`);
+      const handleArr = _.map(handles, h => `"${h.toLowerCase()}"`);
       return httpClient.get(`${config.memberServiceEndpoint}`, {
         params: {
           handles: `[${handleArr.join(',')}]`,
@@ -840,8 +840,10 @@ const projectServiceUtils = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', [])
-        .map(r => r.roleName));
+      }).then((res) => {
+        logger.debug(`Roles for user ${userId}: ${JSON.stringify(res.data.result.content)}`);
+        return _.get(res, 'data.result.content', []).map(r => r.roleName);
+      });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -1316,8 +1318,6 @@ const projectServiceUtils = {
 
     const allow = util.matchPermissionRule(allowRule, user, projectMembers);
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
-
-    // console.log('hasPermission', JSON.stringify({ permission, user, projectMembers, allow, deny }, null, 2));
 
     return allow && !deny;
   },
