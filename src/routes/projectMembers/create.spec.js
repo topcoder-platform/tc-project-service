@@ -92,21 +92,13 @@ describe('Project Members create', () => {
           };
           const ret = {
             status: 200,
-            data: {
-              id: 'requesterId',
-              version: 'v3',
-              result: {
-                success: true,
-                status: 200,
-                content: [],
-              },
-            },
+            data: [],
           };
 
-          if (url.indexOf('/_search') >= 0) {
-            ret.data.result.content.push(testCopilot);
+          if (url.indexOf('userIds') >= 0) {
+            ret.data(testCopilot);
           } else {
-            ret.data.result.content.push(testRoleName);
+            ret.data(testRoleName);
           }
           return Promise.resolve(ret);
         },
@@ -430,21 +422,13 @@ describe('Project Members create', () => {
             };
             const ret = {
               status: 200,
-              data: {
-                id: 'requesterId',
-                version: 'v3',
-                result: {
-                  success: true,
-                  status: 200,
-                  content: [],
-                },
-              },
+              data: [],
             };
 
-            if (url.indexOf('/_search') >= 0) {
-              ret.data.result.content.push(testCopilot);
+            if (url.indexOf('?userIds') >= 0) {
+              ret.data.push(testCopilot);
             } else {
-              ret.data.result.content.push(testRoleName);
+              ret.data.push(testRoleName);
             }
             return Promise.resolve(ret);
           },
