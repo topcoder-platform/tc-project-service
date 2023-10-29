@@ -13,7 +13,6 @@ import * as path from 'path';
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
-import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';

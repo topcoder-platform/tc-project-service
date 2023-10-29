@@ -8,3 +8,4 @@ dist
 .elasticbeanstalk
 coverage
 docs
+testSalesForceConnection.js
