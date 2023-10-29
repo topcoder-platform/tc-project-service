@@ -12,7 +12,6 @@
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
-import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 // import jp from 'jsonpath';
 import Promise from 'bluebird';
