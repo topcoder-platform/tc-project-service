@@ -4,7 +4,7 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import config from 'config';
-import { logger, middleware as tcMiddleware } from 'tc-core-library-js';
+import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import {
