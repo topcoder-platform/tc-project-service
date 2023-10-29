@@ -594,13 +594,16 @@ const projectServiceUtils = {
       return httpClient.get(`${config.memberServiceEndpoint}`, {
         params: {
           handles: `[${handleArr.join(',')}]`,
-          fields: 'userId,handle,firstName,lastName,email',
+          fields: 'userId,handle,firstName,lastName,email,handleLower',
         },
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data', null));
+      }).then((res) => {
+        logger.debug('getMemberDetailsByHandles response', res.data);
+        return _.get(res, 'data', null);
+      });
     } catch (err) {
       return Promise.reject(err);
     }

@@ -4,7 +4,7 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import config from 'config';
-import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { logger, middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import {
@@ -293,21 +293,27 @@ module.exports = [
     // we have to filter users returned by the Member Service so we only invite the users
     // whom we are inviting, because Member Service has a loose search logic and may return
     // users with handles whom we didn't search for
-      .then(foundUsers => foundUsers.filter(foundUser => _.includes(invite.handles, foundUser.handle)))
+      .then((foundUsers) => {
+        const lowerCaseHandles = invite.handles.map(handle => handle.toLowerCase());
+        return foundUsers.filter(foundUser => _.includes(lowerCaseHandles, foundUser.handle));
+      })
       .then((inviteUsers) => {
         const members = req.context.currentProjectMembers;
         const projectId = _.parseInt(req.params.projectId);
         // check user handle exists in returned result
         const errorMessageHandleNotExist = 'User with such handle does not exist';
         if (!!invite.handles && invite.handles.length > 0) {
-          const existentHandles = _.map(inviteUsers, 'handle');
-          failed = _.concat(failed, _.map(_.difference(invite.handles, existentHandles), handle => _.assign({}, {
+          const lowerCaseHandles = invite.handles.map(handle => handle.toLowerCase());
+          const existentHandles = _.map(inviteUsers, 'handleLower');
+          failed = _.concat(failed, _.map(_.difference(lowerCaseHandles, existentHandles), handle => _.assign({}, {
             handle,
             message: errorMessageHandleNotExist,
           })));
         }
 
+        req.log.debug(`Invite users: ${JSON.stringify(inviteUsers)}`);
         let inviteUserIds = _.map(inviteUsers, 'userId');
+        req.log.debug(`Invite user ids: ${JSON.stringify(inviteUserIds)}`);
         const promises = [];
         const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
