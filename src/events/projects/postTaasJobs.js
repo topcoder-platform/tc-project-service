@@ -46,23 +46,21 @@ async function createTaasJobsFromProject(req, project, logger) {
   await Promise.all(
     _.map(
       jobs,
-      (job) => {
-        return createTaasJob(req.headers.authorization, {
-          projectId: project.id,
-          title: job.title,
-          description: job.description,
-          duration: Number(job.duration),
-          skills: job.skills,
-          numPositions: Number(job.people),
-          resourceType: _.get(job, 'role.value', ''),
-          rateType: 'weekly', // hardcode for now
-          workload: _.get(job, 'workLoad.title', '').toLowerCase(),
-        }).then((createdJob) => {
-          logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
-        }).catch((err) => {
-          logger.error(`Unable to create job with title "${job.title}": ${err.message}`);
-        });
-      },
+      job => createTaasJob(req.headers.authorization, {
+        projectId: project.id,
+        title: job.title,
+        description: job.description,
+        duration: Number(job.duration),
+        skills: job.skills,
+        numPositions: Number(job.people),
+        resourceType: _.get(job, 'role.value', ''),
+        rateType: 'weekly', // hardcode for now
+        workload: _.get(job, 'workLoad.title', '').toLowerCase(),
+      }).then((createdJob) => {
+        logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
+      }).catch((err) => {
+        logger.error(`Unable to create job with title "${job.title}": ${err.message}`);
+      }),
     ),
   );
 }
