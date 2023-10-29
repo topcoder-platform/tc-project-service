@@ -410,7 +410,7 @@ _.assignIn(util, {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', null));
+      }).then(res => _.get(res, 'data', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -426,16 +426,16 @@ _.assignIn(util, {
       if (logger) {
         logger.trace(userIds);
       }
-      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
+      return httpClient.get(`${config.memberServiceEndpoint}`, {
         params: {
-          query: `${userIds.join(urlencode(' OR ', 'utf8'))}`,
+          userIds: `[${userIds.join(',')}]`,
           fields: 'userId,handle,firstName,lastName,email',
         },
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', null));
+      }).then(res => _.get(res, 'data', null));
     } catch (err) {
       return Promise.reject(err);
     }

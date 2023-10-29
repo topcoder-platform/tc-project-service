@@ -97,7 +97,7 @@ workflows:
             - test
           filters:
             branches:
-              only: ['dev', 'dev-sts', 'feature/looker-api-integration']
+              only: ['dev', 'UPGRADE-TO-V5-MEMBER-API']
       - deployProd:
           context : org-global
           requires:
