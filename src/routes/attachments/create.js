@@ -70,7 +70,7 @@ module.exports = [
 
     const sourceBucket = data.s3Bucket;
     const sourceKey = data.path;
-    const destBucket = config.get('attachmentsDMZS3Bucket');
+    const destBucket = config.get('attachmentsS3Bucket');
     const destKey = path;
 
     if (data.type === ATTACHMENT_TYPES.LINK) {

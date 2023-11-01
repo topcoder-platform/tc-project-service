@@ -154,7 +154,7 @@ workflows:
             - UnitTests
           filters:
             branches:
-              only: ['dev', 'UPGRADE-TO-V5-MEMBER-API']
+              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept']
       - deployProd:
           context : org-global
           requires:
