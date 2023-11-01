@@ -13,7 +13,6 @@ import * as path from 'path';
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
-import urlencode from 'urlencode';
 import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';
@@ -547,7 +546,7 @@ const projectServiceUtils = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', null));
+      }).then(res => _.get(res, 'data', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -563,16 +562,16 @@ const projectServiceUtils = {
       if (logger) {
         logger.trace(userIds);
       }
-      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
+      return httpClient.get(`${config.memberServiceEndpoint}`, {
         params: {
-          query: `${_.map(userIds, id => `userId:${id}`).join(urlencode(' OR ', 'utf8'))}`,
+          userIds: `[${userIds.join(',')}]`,
           fields: 'userId,handle,firstName,lastName,email',
         },
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', null));
+      }).then(res => _.get(res, 'data', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -591,17 +590,20 @@ const projectServiceUtils = {
       if (logger) {
         logger.trace(handles);
       }
-      const handleArr = _.map(handles, h => `handleLower:${h.toLowerCase()}`);
-      return httpClient.get(`${config.memberServiceEndpoint}/_search`, {
+      const handleArr = _.map(handles, h => `"${h.toLowerCase()}"`);
+      return httpClient.get(`${config.memberServiceEndpoint}`, {
         params: {
-          query: `${handleArr.join(urlencode(' OR ', 'utf8'))}`,
-          fields: 'userId,handle,firstName,lastName,email',
+          handles: `[${handleArr.join(',')}]`,
+          fields: 'userId,handle,firstName,lastName,email,handleLower',
         },
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', null));
+      }).then((res) => {
+        logger.debug('getMemberDetailsByHandles response', res.data);
+        return _.get(res, 'data', null);
+      });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -838,8 +840,10 @@ const projectServiceUtils = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data.result.content', [])
-        .map(r => r.roleName));
+      }).then((res) => {
+        logger.debug(`Roles for user ${userId}: ${JSON.stringify(res.data.result.content)}`);
+        return _.get(res, 'data.result.content', []).map(r => r.roleName);
+      });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -1314,8 +1318,6 @@ const projectServiceUtils = {
 
     const allow = util.matchPermissionRule(allowRule, user, projectMembers);
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
-
-    // console.log('hasPermission', JSON.stringify({ permission, user, projectMembers, allow, deny }, null, 2));
 
     return allow && !deny;
   },
