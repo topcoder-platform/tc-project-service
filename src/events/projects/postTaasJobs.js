@@ -46,26 +46,21 @@ async function createTaasJobsFromProject(req, project, logger) {
   await Promise.all(
     _.map(
       jobs,
-      (job) => {
-        // make sure that skills would be unique in the list and only include ones with 'skillId' (actually they all suppose to be with skillId)
-        const skills = _.chain(job.skills).map('skillId').uniq().compact()
-          .value();
-        return createTaasJob(req.headers.authorization, {
-          projectId: project.id,
-          title: job.title,
-          description: job.description,
-          duration: Number(job.duration),
-          skills,
-          numPositions: Number(job.people),
-          resourceType: _.get(job, 'role.value', ''),
-          rateType: 'weekly', // hardcode for now
-          workload: _.get(job, 'workLoad.title', '').toLowerCase(),
-        }).then((createdJob) => {
-          logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
-        }).catch((err) => {
-          logger.error(`Unable to create job with title "${job.title}": ${err.message}`);
-        });
-      },
+      job => createTaasJob(req.headers.authorization, {
+        projectId: project.id,
+        title: job.title,
+        description: job.description,
+        duration: Number(job.duration),
+        skills: job.skills,
+        numPositions: Number(job.people),
+        resourceType: _.get(job, 'role.value', ''),
+        rateType: 'weekly', // hardcode for now
+        workload: _.get(job, 'workLoad.title', '').toLowerCase(),
+      }).then((createdJob) => {
+        logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
+      }).catch((err) => {
+        logger.error(`Unable to create job with title "${job.title}": ${err.message}`);
+      }),
     ),
   );
 }
