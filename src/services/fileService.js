@@ -31,7 +31,7 @@ const deleteFile = async (bucket, key) => {
   );
 };
 
-export default {
+module.exports = {
   getDownloadUrl,
   getUploadUrl,
   deleteFile,
