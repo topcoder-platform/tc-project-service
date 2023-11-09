@@ -16,7 +16,6 @@ const permissions = tcMiddleware.permissions;
 /**
  * This private function gets the pre-signed url if the attachment is a file
  *
- * @param {Object} req The http request
  * @param {Object} attachment The project attachment object
  * @returns {Array<Promise>} The array of two promises, first one if the attachment object promise,
  *                           The second promise is for the file pre-signed url (if attachment type is file)
@@ -33,7 +32,7 @@ const getPreSignedUrl = async (attachment) => {
     return [attachment, 'dummy://url'];
   }
   // Not in development mode or file upload is not disabled
-  const url = await getDownloadUrl(config.get('attachmentsS3Bucket'), attachment.path)
+  const url = await getDownloadUrl(config.get('attachmentsS3Bucket'), attachment.path);
   return [attachment, url];
 };
 

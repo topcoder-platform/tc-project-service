@@ -11,7 +11,7 @@ import Path from 'path';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { getDownloadUrl } from '../../services/fileService'
+import { getDownloadUrl } from '../../services/fileService';
 import { EVENT, RESOURCES, ATTACHMENT_TYPES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
@@ -130,7 +130,7 @@ module.exports = [
         if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
           // retrieve download url for the response
           req.log.debug('retrieving download url');
-          return getDownloadUrl(destBucket, path)
+          return getDownloadUrl(destBucket, path);
         }
         return Promise.resolve();
       }).then((url) => {
@@ -152,7 +152,7 @@ module.exports = [
             newAttachment,
           );
           res.status(201).json(response);
-          accept();
+          return Promise.resolve();
         }
         let response = _.cloneDeep(newAttachment);
         response = _.omit(response, ['path', 'deletedAt']);
