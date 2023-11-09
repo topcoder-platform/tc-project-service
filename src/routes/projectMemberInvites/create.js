@@ -301,7 +301,9 @@ module.exports = [
         const members = req.context.currentProjectMembers;
         const projectId = _.parseInt(req.params.projectId);
         // check user handle exists in returned result
-        const errorMessageHandleNotExist = 'User with such handle does not exist';
+        const errorMessageHandleNotExist = 'We couldn\'t find a user with the provided username. ' +
+        'Please ensure that the username is accurate, including its letter casing. ' +
+        'If you\'re still having trouble, double-check the spelling and try again.';
         if (!!invite.handles && invite.handles.length > 0) {
           const lowerCaseHandles = invite.handles.map(handle => handle.toLowerCase());
           const existentHandles = _.map(inviteUsers, 'handleLower');
