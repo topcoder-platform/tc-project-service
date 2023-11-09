@@ -5,7 +5,7 @@ import request from 'supertest';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import util from '../../util';
+import fileService from '../../services/fileService';
 import { ATTACHMENT_TYPES } from '../../constants';
 
 describe('Get Project attachments Tests', () => {
@@ -14,7 +14,7 @@ describe('Get Project attachments Tests', () => {
   let getFileDownloadUrlStub;
 
   before(() => {
-    getFileDownloadUrlStub = sinon.stub(util, 'getFileDownloadUrl');
+    getFileDownloadUrlStub = sinon.stub(fileService, 'getDownloadUrl');
     getFileDownloadUrlStub.returns('dummy://url');
   });
 

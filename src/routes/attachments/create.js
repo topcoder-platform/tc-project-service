@@ -11,6 +11,7 @@ import Path from 'path';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { getDownloadUrl } from '../../services/fileService'
 import { EVENT, RESOURCES, ATTACHMENT_TYPES } from '../../constants';
 
 const permissions = tcMiddleware.permissions;
@@ -59,14 +60,6 @@ module.exports = [
       fileName,
     ], '/');
     let newAttachment = null;
-
-    const httpClient = util.getHttpClient(req);
-    // get presigned Url
-    httpClient.defaults.headers.common.Authorization = req.headers.authorization;
-    let fileServiceUrl = config.get('fileServiceEndpoint');
-    if (fileServiceUrl.substr(-1) !== '/') {
-      fileServiceUrl += '/';
-    }
 
     const sourceBucket = data.s3Bucket;
     const sourceKey = data.path;
@@ -137,35 +130,29 @@ module.exports = [
         if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
           // retrieve download url for the response
           req.log.debug('retrieving download url');
-          return httpClient.post(`${fileServiceUrl}downloadurl`, {
-            param: {
-              filePath: path,
-            },
-          });
+          return getDownloadUrl(destBucket, path)
         }
         return Promise.resolve();
-      }).then((resp) => {
-        if (process.env.NODE_ENV !== 'development' || config.get('enableFileUpload') === 'true') {
-          req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data));
-          return new Promise((accept, reject) => {
-            if (resp.status !== 200 || resp.data.result.status !== 200) {
-              reject(new Error('Unable to fetch pre-signed url'));
-            } else {
-              let response = _.cloneDeep(newAttachment);
-              response = _.omit(response, ['path', 'deletedAt']);
+      }).then((url) => {
+        if (
+          process.env.NODE_ENV !== 'development' ||
+          config.get('enableFileUpload') === 'true'
+        ) {
+          req.log.debug('Retreiving Presigned Url resp: ', url);
+          let response = _.cloneDeep(newAttachment);
+          response = _.omit(response, ['path', 'deletedAt']);
 
-              response.downloadUrl = resp.data.result.content.preSignedURL;
+          response.downloadUrl = url;
 
-              // emit the event
-              util.sendResourceToKafkaBus(
-                req,
-                EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
-                RESOURCES.ATTACHMENT,
-                newAttachment);
-              res.status(201).json(response);
-              accept();
-            }
-          });
+          // emit the event
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.PROJECT_ATTACHMENT_ADDED,
+            RESOURCES.ATTACHMENT,
+            newAttachment,
+          );
+          res.status(201).json(response);
+          accept();
         }
         let response = _.cloneDeep(newAttachment);
         response = _.omit(response, ['path', 'deletedAt']);

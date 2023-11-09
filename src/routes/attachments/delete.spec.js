@@ -6,6 +6,7 @@ import chai from 'chai';
 
 import models from '../../models';
 import util from '../../util';
+import fileService from '../../services/fileService';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
@@ -114,22 +115,9 @@ describe('Project Attachments delete', () => {
 
 
     it('should return 204 if the CREATOR removes the file attachment successfully', (done) => {
-      const mockHttpClient = _.merge(testUtil.mockHttpClient, {
-        delete: () => Promise.resolve({
-          status: 200,
-          data: {
-            id: 'requesterId',
-            version: 'v3',
-            result: {
-              success: true,
-              status: 200,
-              content: true,
-            },
-          },
-        }),
-      });
-      const deleteSpy = sinon.spy(mockHttpClient, 'delete');
-      sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+      sinon.stub(fileService, 'deleteFile');
+      const deleteSpy = sinon.spy(fileService, 'deleteFile');
+      sandbox.stub(fileService, 'deleteFile', () => '');
       request(server)
         .delete(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
         .set({

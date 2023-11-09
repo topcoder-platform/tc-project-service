@@ -3,6 +3,7 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
+import { getDownloadUrl } from '../../services/fileService';
 import { ATTACHMENT_TYPES } from '../../constants';
 import permissionUtils from '../../utils/permissions';
 
@@ -20,7 +21,7 @@ const permissions = tcMiddleware.permissions;
  * @returns {Array<Promise>} The array of two promises, first one if the attachment object promise,
  *                           The second promise is for the file pre-signed url (if attachment type is file)
  */
-const getPreSignedUrl = async (req, attachment) => {
+const getPreSignedUrl = async (attachment) => {
   // If the attachment is a link return it as-is without getting the pre-signed url
   if (attachment.type === ATTACHMENT_TYPES.LINK) {
     return [attachment, ''];
@@ -32,7 +33,7 @@ const getPreSignedUrl = async (req, attachment) => {
     return [attachment, 'dummy://url'];
   }
   // Not in development mode or file upload is not disabled
-  const url = await util.getFileDownloadUrl(req, attachment.path);
+  const url = await getDownloadUrl(config.get('attachmentsS3Bucket'), attachment.path)
   return [attachment, url];
 };
 
@@ -98,7 +99,7 @@ module.exports = [
           err.status = 404;
           return Promise.reject(err);
         }
-        return getPreSignedUrl(req, attachment);
+        return getPreSignedUrl(attachment);
       })
       .then((result) => {
         req.log.debug('getPresigned url result: ', JSON.stringify(result));

@@ -350,35 +350,6 @@ const projectServiceUtils = {
     }
   },
 
-
-  /**
-   * retrieve download urls for all attachments
-   * @param  {Object}     req         original request
-   * @param  {String}     filePath    the file path
-   * @return {String}                 the download url
-   */
-  getFileDownloadUrl: (req, filePath) => {
-    if (!filePath) {
-      return Promise.reject(new Error('file path empty'));
-    }
-    let fileServiceUrl = config.get('fileServiceEndpoint');
-    if (fileServiceUrl.substr(-1) !== '/') fileServiceUrl += '/';
-    // get presigned Url
-    const httpClient = util.getHttpClient(req);
-    httpClient.defaults.headers.common.Authorization = req.headers.authorization;
-    return httpClient.post(`${fileServiceUrl}downloadurl`, {
-      param: {
-        filePath,
-      },
-    })
-      .then((resp) => {
-        req.log.debug('Retreiving Presigned Url resp: ', JSON.stringify(resp.data, null, 2));
-        if (resp.status !== 200 || resp.data.result.status !== 200) {
-          return Promise.reject(new Error('Unable to fetch pre-signed url'));
-        }
-        return resp.data.result.content.preSignedURL;
-      });
-  },
   getProjectAttachments: (req, projectId) => {
     let attachments = [];
     let attachmentsPromise;
