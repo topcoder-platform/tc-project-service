@@ -7,7 +7,7 @@ const getDownloadUrl = async (bucket, key) => {
   const { data } = await axios.post(
     `${config.get('fileServiceEndpoint')}/downloadurl`,
     { Bucket: bucket, Key: key },
-    { headers: { Autorization: `Bearer ${token}` } },
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return data.url;
 };
@@ -17,7 +17,7 @@ const getUploadUrl = async (bucket, key) => {
   const { data } = await axios.post(
     `${config.get('fileServiceEndpoint')}/uploadurl`,
     { Bucket: bucket, Key: key },
-    { headers: { Autorization: `Bearer ${token}` } },
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return data.url;
 };
@@ -27,7 +27,7 @@ const deleteFile = async (bucket, key) => {
   await axios.post(
     `${config.get('fileServiceEndpoint')}/deletefile`,
     { Bucket: bucket, Key: key },
-    { headers: { Autorization: `Bearer ${token}` } },
+    { headers: { Authorization: `Bearer ${token}` } },
   );
 };
 
