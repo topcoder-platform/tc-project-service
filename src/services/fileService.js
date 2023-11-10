@@ -6,7 +6,7 @@ const getDownloadUrl = async (bucket, key) => {
   const token = await util.getM2MToken();
   const { data } = await axios.post(
     `${config.get('fileServiceEndpoint')}/downloadurl`,
-    { Bucket: bucket, Key: key },
+    { bucket, key },
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return data.url;
@@ -16,7 +16,7 @@ const getUploadUrl = async (bucket, key) => {
   const token = await util.getM2MToken();
   const { data } = await axios.post(
     `${config.get('fileServiceEndpoint')}/uploadurl`,
-    { Bucket: bucket, Key: key },
+    { bucket, key },
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return data.url;
@@ -26,7 +26,7 @@ const deleteFile = async (bucket, key) => {
   const token = await util.getM2MToken();
   await axios.post(
     `${config.get('fileServiceEndpoint')}/deletefile`,
-    { Bucket: bucket, Key: key },
+    { bucket, key },
     { headers: { Authorization: `Bearer ${token}` } },
   );
 };
