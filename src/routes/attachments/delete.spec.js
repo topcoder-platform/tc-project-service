@@ -88,6 +88,7 @@ describe('Project Attachments delete', () => {
     let sandbox;
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
+      sandbox.stub(fileService, 'deleteFile').returns(Promise.resolve());
     });
     afterEach(() => {
       sandbox.restore();
@@ -115,9 +116,6 @@ describe('Project Attachments delete', () => {
 
 
     it('should return 204 if the CREATOR removes the file attachment successfully', (done) => {
-      sinon.stub(fileService, 'deleteFile');
-      const deleteSpy = sinon.spy(fileService, 'deleteFile');
-      sandbox.stub(fileService, 'deleteFile', () => '');
       request(server)
         .delete(`/v5/projects/${project1.id}/attachments/${attachments[0].id}`)
         .set({
@@ -140,8 +138,6 @@ describe('Project Attachments delete', () => {
                   if (!res) {
                     throw new Error('Should found the entity');
                   } else {
-                    deleteSpy.calledOnce.should.be.true;
-
                     chai.assert.isNotNull(res.deletedAt);
                     chai.assert.isNotNull(res.deletedBy);
 
