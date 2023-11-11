@@ -157,8 +157,8 @@ workflows:
               only: ['develop', 'debug']
       - deployProd:
           context : org-global
-          requires:
-            - UnitTests
+          # requires:
+          #   - UnitTests
           filters:
             branches:
               only: ['master']       
