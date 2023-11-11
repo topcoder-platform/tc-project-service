@@ -45,8 +45,11 @@ module.exports = [
       const sql = `SELECT  TopCoder_Billing_Account_Id__c, Mark_Up__c, Active__c, Start_Date__c, End_Date__c from Topcoder_Billing_Account__c tba where TopCoder_Billing_Account_Id__c='${billingAccountId}'`;
       req.log.debug(sql);
       const billingAccount = await SalesforceService.queryBillingAccount(sql, accessToken, instanceUrl, req.log);
+      req.log.debug(billingAccount);
       const isMachineToken = _.get(req, 'authUser.isMachine', false);
+      req.log.debug(`isMachineToken: ${isMachineToken}`);
       if (!isMachineToken) {
+        req.log.debug('Not machine token');
         // delete sensitive information for non machine access
         // does not revalidate the scope as it assumes that is already taken care
         delete billingAccount.markup;
