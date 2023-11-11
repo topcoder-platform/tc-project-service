@@ -8,6 +8,5 @@
   "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/",
   "taasJobApiUrl": "https://api.topcoder-dev.com/v5/jobs",
   "sfdcBillingAccountNameField": "Billing_Account_Name__c",
-  "sfdcBillingAccountMarkupField": "Mark_Up__c",
   "sfdcBillingAccountActiveField": "Active__c"
 }
