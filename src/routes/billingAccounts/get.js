@@ -42,15 +42,18 @@ module.exports = [
       }
       const { accessToken, instanceUrl } = await SalesforceService.authenticate();
       // eslint-disable-next-line
-      const sql = `SELECT  TopCoder_Billing_Account_Id__c, Mark_Up__c, Active__c, Start_Date__c, End_Date__c from Topcoder_Billing_Account__c tba where TopCoder_Billing_Account_Id__c='${billingAccountId}'`;
+      const sql = `SELECT TopCoder_Billing_Account_Id__c, Mark_Up__c, Active__c, Start_Date__c, End_Date__c from Topcoder_Billing_Account__c tba where TopCoder_Billing_Account_Id__c='${billingAccountId}'`;
       req.log.debug(sql);
       const billingAccount = await SalesforceService.queryBillingAccount(sql, accessToken, instanceUrl, req.log);
       const isMachineToken = _.get(req, 'authUser.isMachine', false);
+      req.log.debug(`BillingAccount: ${JSON.stringify(billingAccount)}`)
+      req.log.debug(`IsMachineToken: ${isMachineToken}`)
       if (!isMachineToken) {
         // delete sensitive information for non machine access
         // does not revalidate the scope as it assumes that is already taken care
         delete billingAccount.markup;
       }
+      req.log.debug(`FinalResponse: ${billingAccount}`)
       res.json(billingAccount);
     } catch (error) {
       req.log.error(error);
