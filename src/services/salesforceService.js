@@ -56,7 +56,7 @@ class SalesforceService {
    */
   static queryUserBillingAccounts(sql, accessToken, instanceUrl, logger) {
     return axios({
-      url: `${instanceUrl}/services/data/v37.0/query?q=${sql}`,
+      url: `${instanceUrl}/services/data/v59.0/query?q=${sql}`,
       method: 'get',
       headers: { authorization: `Bearer ${accessToken}` },
     }).then((res) => {
@@ -64,7 +64,7 @@ class SalesforceService {
         logger.debug(_.get(res, 'data.records', []));
       }
       const billingAccounts = _.get(res, 'data.records', []).map(o => ({
-        sfBillingAccountId: _.get(o, 'Topcoder_Billing_Account__r.Id'),
+        sfBillingAccountId: _.get(o, 'Id'),
         tcBillingAccountId: util.parseIntStrictly(
           _.get(o, 'Topcoder_Billing_Account__r.TopCoder_Billing_Account_Id__c'),
           10,
@@ -88,7 +88,7 @@ class SalesforceService {
    */
   static queryBillingAccount(sql, accessToken, instanceUrl, logger) {
     return axios({
-      url: `${instanceUrl}/services/data/v37.0/query?q=${sql}`,
+      url: `${instanceUrl}/services/data/v59.0/query?q=${sql}`,
       method: 'get',
       headers: { authorization: `Bearer ${accessToken}` },
     }).then((res) => {
@@ -101,8 +101,8 @@ class SalesforceService {
           10,
           null, // fallback to null if cannot parse
         ),
-        markup: _.get(o, 'Mark_Up__c'),
-        active: _.get(o, config.get('sfdcBillingAccountActiveField')),
+        markup: _.get(o, 'Mark_up__c'),
+        active: _.get(o, 'Active__c'),
         startDate: _.get(o, 'Start_Date__c'),
         endDate: _.get(o, 'End_Date__c'),
       }));
