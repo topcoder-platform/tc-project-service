@@ -5,14 +5,14 @@ if (process.env.NODE_ENV === 'test') {
   config = require('./test.json');
 } else {
   config = {
-    busApiUrl: "http://localhost:8002/v5",
-    identityServiceEndpoint: "http://dockerhost:3001/",
+    busApiUrl: 'http://localhost:8002/v5',
+    identityServiceEndpoint: 'http://dockerhost:3001/',
     authSecret: 'secret',
     authDomain: 'topcoder-dev.com',
     logLevel: 'debug',
     captureLogs: 'false',
     logentriesToken: '',
-    fileServiceEndpoint: 'https://api.topcoder-dev.com/v3/files/',
+    fileServiceEndpoint: 'https://api.topcoder-dev.com/v5/files',
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',
     memberServiceEndpoint: 'http://dockerhost:3001/v3/members',
@@ -23,9 +23,9 @@ if (process.env.NODE_ENV === 'test') {
       idleTimeout: 1000,
     },
     elasticsearchConfig: {
-      host: 'dockerhost:9200'
+      host: 'dockerhost:9200',
     },
-    whitelistedOriginsForUserIdAuth: "[\"\"]",
+    whitelistedOriginsForUserIdAuth: '[""]',
   };
 }
 module.exports = config;

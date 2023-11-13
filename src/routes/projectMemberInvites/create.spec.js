@@ -655,7 +655,9 @@ describe.skip('Project Member Invite create', () => {
             const resJson = res.body.failed[0];
             should.exist(resJson);
             resJson.handle.should.equal('invalid_handle');
-            resJson.message.should.equal('User with such handle does not exist');
+            resJson.message.should.equal('We couldn\'t find a user with the provided username. ' +
+                            'Please ensure that the username is accurate, including its letter casing. ' +
+                            'If you\'re still having trouble, double-check the spelling and try again.');
             done();
           }
         });

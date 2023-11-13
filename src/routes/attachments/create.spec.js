@@ -6,6 +6,7 @@ import request from 'supertest';
 import server from '../../app';
 import models from '../../models';
 import util from '../../util';
+import fileService from '../../services/fileService';
 import testUtil from '../../tests/util';
 import busApi from '../../services/busApi';
 import { BUS_API_EVENT, RESOURCES, CONNECT_NOTIFICATION_EVENT, ATTACHMENT_TYPES } from '../../constants';
@@ -34,43 +35,10 @@ const linkAttachmentBody = {
 
 describe('Project Attachments', () => {
   let project1;
-  let postSpy;
-  let getSpy;
   let stub;
   let sandbox;
 
   beforeEach((done) => {
-    const mockHttpClient = {
-      defaults: { headers: { common: {} } },
-      post: () => new Promise(resolve => resolve({
-        status: 200,
-        data: {
-          status: 200,
-          result: {
-            success: true,
-            status: 200,
-            content: {
-              path: 'tmp/spec.pdf',
-              preSignedURL: 'www.topcoder.com/media/spec.pdf',
-            },
-          },
-        },
-      })),
-      get: () => new Promise(resolve => resolve({
-        status: 200,
-        data: {
-          result: {
-            success: true,
-            status: 200,
-            content: {
-              path: 'tmp/spec.pdf',
-              preSignedURL: 'http://topcoder-media.s3.amazon.com/projects/1/spec.pdf',
-            },
-          },
-        },
-      })),
-    };
-
     // mocks
     testUtil.clearDb()
       .then(() => {
@@ -97,9 +65,11 @@ describe('Project Attachments', () => {
             updatedBy: 1,
           }).then(() => {
             sandbox = sinon.sandbox.create();
-            postSpy = sandbox.spy(mockHttpClient, 'post');
-            getSpy = sandbox.spy(mockHttpClient, 'get');
-            stub = sandbox.stub(util, 'getHttpClient', () => mockHttpClient);
+            stub = sandbox.stub(
+              fileService,
+              'getDownloadUrl',
+              () => 'http://topcoder-media.s3.amazon.com/projects/1/spec.pdf',
+            );
             sandbox.stub(util, 's3FileTransfer').returns(Promise.resolve(true));
             done();
           });
@@ -163,8 +133,6 @@ describe('Project Attachments', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            postSpy.should.have.been.calledOnce;
-            getSpy.should.have.been.calledOnce;
             stub.restore();
             resJson.title.should.equal(fileAttachmentBody.title);
             resJson.tags.should.eql(fileAttachmentBody.tags);
@@ -191,8 +159,6 @@ describe('Project Attachments', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            postSpy.should.have.been.calledOnce;
-            getSpy.should.have.been.calledOnce;
             stub.restore();
             resJson.title.should.equal(linkAttachmentBody.title);
             resJson.path.should.equal(linkAttachmentBody.path);
@@ -220,8 +186,6 @@ describe('Project Attachments', () => {
           } else {
             const resJson = res.body;
             should.exist(resJson);
-            postSpy.should.have.been.calledOnce;
-            getSpy.should.have.been.calledOnce;
             stub.restore();
             resJson.title.should.equal(fileAttachmentBody.title);
             resJson.tags.should.eql(fileAttachmentBody.tags);
