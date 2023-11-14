@@ -154,7 +154,7 @@ workflows:
             - UnitTests
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept']
+              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'TSJR-282']
       - deployProd:
           context : org-global
           requires:
