@@ -5,6 +5,7 @@
 import _ from 'lodash';
 import config from 'config';
 import axios from 'axios';
+import models from '../../models';
 
 /**
  * Create taas job.
@@ -58,11 +59,20 @@ async function createTaasJobsFromProject(req, project, logger) {
         workload: _.get(job, 'workLoad.title', '').toLowerCase(),
       }).then((createdJob) => {
         logger.debug(`jobId: ${createdJob.id} job created with title "${createdJob.title}"`);
+        job.jobId=createdJob.id
       }).catch((err) => {
         logger.error(`Unable to create job with title "${job.title}": ${err.message}`);
       }),
     ),
   );
+  const _prj = await models.Project.findByPk(project.id);
+  if (!_prj) {
+    logger.error(`Project not found for id ${project.id}, so couldn't save TaaS Job IDs`);
+  }
+  _prj.details.taasDefinition.taasJobs = jobs
+  _prj.changed("details", true)
+  await _prj.save();
+  logger.info("Updated project saved:", JSON.stringify(_prj.details.taasDefinition.taasJobs, null, 4))
 }
 
 module.exports = createTaasJobsFromProject;
