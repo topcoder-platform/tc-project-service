@@ -15,7 +15,7 @@ import {
 import { createEvent } from '../services/busApi';
 import models from '../models';
 import util from '../util';
-import createTaasJobsFromProject from '../events/projects/postTaasJobs';
+import { createTaasJobsFromProject, updateTaasJobsFromProject } from '../events/projects/postTaasJobs';
 
 /**
  * Map of project status and event name sent to bus api
@@ -158,6 +158,13 @@ module.exports = (app, logger) => {
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
+          // create taas jobs from project of type `talent-as-a-service`
+      if (updated.type === 'talent-as-a-service') {
+        updateTaasJobsFromProject(req, updated, logger)
+          .catch((error) => {
+            logger.error(`Error while updating TaaS jobs: ${error}`);
+          });
+      }
     }
   });
 

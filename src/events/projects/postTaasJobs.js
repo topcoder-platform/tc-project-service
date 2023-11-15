@@ -76,3 +76,73 @@ async function createTaasJobsFromProject(req, project, logger) {
 }
 
 module.exports = createTaasJobsFromProject;
+
+
+/**
+ * Update taas job.
+ *
+ * @param {String} authHeader the authorization header
+ * @param {Object} data the job data
+ * @param {Object} logger the logger object
+ * @return {Object} the job created
+ */
+async function updateTaasJob(authHeader, data, logger) {
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: authHeader,
+  };
+  // Remove the jobId because it can't be passed to the taas API PATCH call
+  let jobId = data.jobId
+  delete data.jobId
+
+  const res = await axios
+    .patch(`${config.taasJobApiUrl}/${jobId}`, data, { headers })
+    .catch((err) => {
+      const error = new Error();
+      error.message = _.get(err, 'response.data.message', error.message);
+      throw error;
+    });
+  return res.data;
+}
+
+/**
+ * Update taas jobs from project of type `talent-as-a-service` using the token from current user.
+ * This is called when a `talent-as-a-service` project is updated
+ *
+ * @param {Object} req the request object
+ * @param {Object} project the project data
+ * @param {Object} logger the logger object
+ * @return {Object} the taas jobs created
+ */
+async function updateTaasJobsFromProject(req, project, logger) {
+  const jobs = _.get(project, 'details.taasDefinition.taasJobs');
+  if (!jobs || !jobs.length) {
+    logger.debug(`No jobs found in the project id to update: ${project.id}`);
+    return;
+  }
+  logger.debug(`${jobs.length} jobs found in the project id to update: ${project.id}`);
+  await Promise.all(
+    _.map(
+      jobs,
+      job => updateTaasJob(req.headers.authorization, {
+        jobId: job.jobId,
+        title: job.title,
+        description: job.description,
+        duration: Number(job.duration),
+        skills: job.skills,
+        numPositions: Number(job.people),
+        resourceType: _.get(job, 'role.value', ''),
+        workload: _.get(job, 'workLoad.title', '').toLowerCase(),
+      }, logger).then((createdJob) => {
+        logger.debug(`jobId: ${createdJob.id} job updated with title "${createdJob.title}"`);
+      }).catch((err) => {
+        logger.error(`Unable to update job with title "${job.title}": ${err.message}`);
+      }),
+    ),
+  );
+}
+
+module.exports = { 
+  createTaasJobsFromProject, 
+  updateTaasJobsFromProject
+};
