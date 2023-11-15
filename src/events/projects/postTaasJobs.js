@@ -83,17 +83,16 @@ module.exports = createTaasJobsFromProject;
  *
  * @param {String} authHeader the authorization header
  * @param {Object} data the job data
- * @param {Object} logger the logger object
  * @return {Object} the job created
  */
-async function updateTaasJob(authHeader, data, logger) {
+async function updateTaasJob(authHeader, data) {
   const headers = {
     'Content-Type': 'application/json',
     Authorization: authHeader,
   };
   // Remove the jobId because it can't be passed to the taas API PATCH call
-  let jobId = data.jobId
-  delete data.jobId
+  const jobId = data.jobId;
+  delete data.jobId;
 
   const res = await axios
     .patch(`${config.taasJobApiUrl}/${jobId}`, data, { headers })
@@ -133,7 +132,7 @@ async function updateTaasJobsFromProject(req, project, logger) {
         numPositions: Number(job.people),
         resourceType: _.get(job, 'role.value', ''),
         workload: _.get(job, 'workLoad.title', '').toLowerCase(),
-      }, logger).then((createdJob) => {
+      }).then((createdJob) => {
         logger.debug(`jobId: ${createdJob.id} job updated with title "${createdJob.title}"`);
       }).catch((err) => {
         logger.error(`Unable to update job with title "${job.title}": ${err.message}`);
@@ -142,7 +141,7 @@ async function updateTaasJobsFromProject(req, project, logger) {
   );
 }
 
-module.exports = { 
-  createTaasJobsFromProject, 
-  updateTaasJobsFromProject
+module.exports = {
+  createTaasJobsFromProject,
+  updateTaasJobsFromProject,
 };

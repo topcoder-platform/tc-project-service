@@ -158,7 +158,7 @@ module.exports = (app, logger) => {
         userId: req.authUser.userId,
         initiatorUserId: req.authUser.userId,
       }, logger);
-          // create taas jobs from project of type `talent-as-a-service`
+      // update taas jobs from project of type `talent-as-a-service`
       if (updated.type === 'talent-as-a-service') {
         updateTaasJobsFromProject(req, updated, logger)
           .catch((error) => {
