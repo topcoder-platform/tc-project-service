@@ -161,7 +161,7 @@ workflows:
             - UnitTests
           filters:
             branches:
-              only: ['master']       
+              only: ['master', 'PLAT-3739']       
       - Hold [Performance-Testing]:
           type: approval
           requires:

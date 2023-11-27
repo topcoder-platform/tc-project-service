@@ -517,7 +517,10 @@ const projectServiceUtils = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data', null));
+      }).then(res => {
+        console.log(JSON.stringify(res))
+        return _.get(res, 'data', null)
+      });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -542,7 +545,10 @@ const projectServiceUtils = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => _.get(res, 'data', null));
+      }).then(res => {
+        console.log(JSON.stringify(res))
+        return _.get(res, 'data', null)
+      });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -712,6 +718,7 @@ const projectServiceUtils = {
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
       const userIds = _.reject(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
       allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+      console.info(JSON.stringify(allMemberDetails))
 
       if (_.intersection(fields, memberTraitFields).length > 0) {
         const promises = _.map(
@@ -722,6 +729,7 @@ const projectServiceUtils = {
           }),
         );
         const traits = await Promise.all(promises);
+        console.info(JSON.stringify(traits))
         _.each(traits, (memberTraits) => {
           // if we didn't manage to get traits for the user, skip it
           if (!memberTraits) return;
