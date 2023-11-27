@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+
 /*
  * Copyright (C) 2016 TopCoder Inc., All Rights Reserved.
  */
@@ -512,15 +512,14 @@ const projectServiceUtils = {
       }
 
       return httpClient.get(`${config.memberServiceEndpoint}/${handle}/traits`, {
-        params: {},
+        params: {
+          traitIds: 'basic_info,connect_info',
+        },
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then((res) => {
-        console.info(res);
-        return _.get(res, 'data', null);
-      });
+      }).then(res => _.get(res, 'data', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -545,10 +544,7 @@ const projectServiceUtils = {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-      }).then((res) => {
-        console.info(res);
-        return _.get(res, 'data', null);
-      });
+      }).then(res => _.get(res, 'data', null));
     } catch (err) {
       return Promise.reject(err);
     }
@@ -718,7 +714,6 @@ const projectServiceUtils = {
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
       const userIds = _.reject(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
       allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
-      console.info(allMemberDetails);
 
       if (_.intersection(fields, memberTraitFields).length > 0) {
         const promises = _.map(
@@ -729,16 +724,15 @@ const projectServiceUtils = {
           }),
         );
         const traits = await Promise.all(promises);
-        console.info(traits);
         _.each(traits, (memberTraits) => {
           // if we didn't manage to get traits for the user, skip it
-          if (!memberTraits) return;
+          if (_.isEmpty(memberTraits)) return;
 
           const basicInfo = _.find(memberTraits, trait => trait.traitId === 'basic_info');
           const connectInfo = _.find(memberTraits, trait => trait.traitId === 'connect_info');
           const memberIndex = _.findIndex(
             allMemberDetails,
-            member => member.userId === _.get(basicInfo, 'traits.data[0].userId'),
+            member => member.userId === _.get(memberTraits, '[0].userId'),
           );
           const basicDetails = {
             photoURL: _.get(basicInfo, 'traits.data[0].photoURL'),
