@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'test') {
     fileServiceEndpoint: 'https://api.topcoder-dev.com/v5/files',
     directProjectServiceEndpoint: 'https://api.topcoder-dev.com/v3/direct',
     connectProjectsUrl: 'https://connect.topcoder-dev.com/projects/',
-    memberServiceEndpoint: 'https://api.topcoder-dev.com/v3/members',
+    memberServiceEndpoint: 'https://api.topcoder-dev.com/v5/members',
     dbConfig: {
       masterUrl: 'postgres://coder:mysecretpassword@dockerhost:5432/projectsdb',
       maxPoolSize: 50,
