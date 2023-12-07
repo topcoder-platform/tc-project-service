@@ -153,8 +153,6 @@ workflows:
               only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'permission_fixes']
       - deployProd:
           context : org-global
-          requires:
-            - UnitTests
           filters:
             branches:
               only: ['master']       

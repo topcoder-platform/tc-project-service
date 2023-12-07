@@ -18,7 +18,7 @@ module.exports = freq => new Promise((resolve, reject) => {
       const req = freq;
       req.context = req.context || {};
       req.context.currentProjectMembers = members;
-      console.log(`Request user ID: ${req.authUser.userId} and members: ${JSON.stringify(members)}`)
+      console.log(`Request user ID: ${req.authUser.userId} and members: ${JSON.stringify(members)}`);
       // check if auth user has acecss to this project
       const hasAccess = util.hasAdminRole(req)
           || util.hasRoles(req, MANAGER_ROLES)
