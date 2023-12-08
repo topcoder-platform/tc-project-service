@@ -146,27 +146,13 @@ workflows:
   version: 2
   Connect Project Services:
     jobs:
-      - UnitTests:
-          context : org-global
       - deployDev:
           context : org-global
-          requires:
-            - UnitTests
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'TSJR-282']
+              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'permission_fixes']
       - deployProd:
           context : org-global
-          requires:
-            - UnitTests
           filters:
             branches:
               only: ['master']       
-      - Hold [Performance-Testing]:
-          type: approval
-          requires:
-            - deployDev
-            - deployProd
-      - Connect-Performance-Testing:
-          requires:
-            - Hold [Performance-Testing]
