@@ -559,7 +559,6 @@ const projectServiceUtils = {
     }
     try {
       const token = yield this.getM2MToken();
-      console.log(`TOKEN: ${token}`)
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       if (logger) {
         logger.trace(handles);
