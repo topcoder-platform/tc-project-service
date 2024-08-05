@@ -294,8 +294,13 @@ module.exports = [
     // whom we are inviting, because Member Service has a loose search logic and may return
     // users with handles whom we didn't search for
       .then((foundUsers) => {
-        const lowerCaseHandles = invite.handles.map(handle => handle.toLowerCase());
-        return foundUsers.filter(foundUser => _.includes(lowerCaseHandles, foundUser.handleLower));
+        if(invite.handles) {
+          const lowerCaseHandles = invite.handles.map(handle => handle.toLowerCase());
+          return foundUsers.filter(foundUser => _.includes(lowerCaseHandles, foundUser.handleLower));
+        }
+        else {
+          return []
+        }
       })
       .then((inviteUsers) => {
         const members = req.context.currentProjectMembers;
@@ -436,6 +441,7 @@ module.exports = [
             }
           });
       }).catch((err) => {
+        console.log(err)
         if (failed.length) {
           res.status(403).json(_.assign({}, { success: [] }, { failed }));
         } else next(err);
