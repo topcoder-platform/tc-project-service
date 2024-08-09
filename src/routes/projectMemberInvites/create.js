@@ -199,6 +199,7 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
 };
 
 const sendInviteEmail = (req, projectId, invite) => {
+  req.log.debug(`Sending invite email: ${JSON.stringify(req)}, ${projectId}, ${JSON.stringify(invite)}`)
   req.log.debug(req.authUser);
   const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
@@ -413,6 +414,7 @@ module.exports = [
                       RESOURCES.PROJECT_MEMBER_INVITE,
                       v.toJSON());
 
+                    req.log.debug(`V: ${JSON.stringify(v)}`)
                     // send email invite (async)
                     if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
                       sendInviteEmail(req, projectId, v);
