@@ -5,7 +5,7 @@
   "connectProjectsUrl": "https://connect.topcoder-dev.com/projects/",
   "fileServiceEndpoint": "https://api.topcoder-dev.com/v5/files",
   "memberServiceEndpoint": "https://api.topcoder-dev.com/v5/members",
-  "identityServiceEndpoint": "https://api.topcoder-dev.com/v5/",
+  "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/",
   "taasJobApiUrl": "https://api.topcoder-dev.com/v5/jobs",
   "sfdcBillingAccountNameField": "Billing_Account_Name__c",
   "sfdcBillingAccountMarkupField": "Mark_Up__c",
