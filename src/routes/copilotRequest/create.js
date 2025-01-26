@@ -1,0 +1,62 @@
+import validate from 'express-validation';
+import _ from 'lodash';
+import Joi from 'joi';
+
+import models from '../../models';
+import util from '../../util';
+import { COPILOT_REQUEST_STATUS } from '../../constants';
+import { PERMISSION } from '../../permissions/constants';
+
+const addCopilotRequestValidations = {
+  body: Joi.object().keys({
+    data: Joi.object().required(),
+  }), 
+};
+
+module.exports = [
+  validate(addCopilotRequestValidations),
+  (req, res, next) => {
+    const data = req.body;
+    if(!util.hasPermissionByReq(PERMISSION.MANAGE_COPILOT_REQUEST, req)) {
+      const err = new Error('Unable to create copilot request');
+      _.assign(err, {
+        details: JSON.stringify({ message: 'You do not have permission to create copilot request' }),
+        status: 400,
+      });
+      return Promise.reject(err);
+    }
+    // default values
+    const projectId = _.parseInt(req.params.projectId);
+    _.assign(data, {
+      projectId,
+      status: COPILOT_REQUEST_STATUS.NEW,
+      createdBy: req.authUser.userId,
+      updatedBy: req.authUser.userId,
+    });
+
+    models.sequelize.transaction((transaction) => {
+      req.log.debug('Create Copilot request transaction');
+      return models.Project.findOne({
+        where: { id: projectId, deletedAt: { $eq: null } },
+      })
+        .then((existingProject) => {
+          if (!existingProject) {
+            const err = new Error(`active project not found for project id ${projectId}`);
+            err.status = 404;
+            throw err;
+          }
+          return models.CopilotRequest
+            .create(data, { transaction })
+            .then((_newCopilotRequest) => {
+                return res.status(201).json(_newCopilotRequest);
+            });
+        })
+    })
+      .catch((err) => {
+        if (err.message) {
+          _.assign(err, { details: err.message });
+        }
+        util.handleError('Error creating copilot request', err, req, next);
+      });
+  },
+];

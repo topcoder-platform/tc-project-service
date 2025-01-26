@@ -9,6 +9,15 @@ export const PROJECT_STATUS = {
   CANCELLED: 'cancelled',
 };
 
+export const COPILOT_REQUEST_STATUS = {
+  NEW: 'new',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  SEEKING: 'seeking',
+  CANCELED: 'canceled',
+  FULFILLED: 'fulfiled',
+};
+
 export const WORKSTREAM_STATUS = {
   DRAFT: 'draft',
   REVIEWED: 'reviewed',

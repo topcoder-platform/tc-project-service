@@ -24,7 +24,7 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-paths:
+paths:              
   "/projects":
     get:
       tags:
@@ -244,6 +244,38 @@ paths:
           description: Internal Server Error
           schema:
             $ref: "#/definitions/ErrorModel"
+  "/projects/{projectId}/copilot-request":
+    post:
+      tags:
+        - projects copilot request
+      operationId: createCopilotRequest
+      security:
+        - Bearer: []
+      description: "create copilot request"
+      responses:
+        "200":
+          description: Created copilot request
+          schema:
+            $ref: "#/definitions/Copilot"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+      parameters:
+      - $ref: "#/parameters/projectIdParam"
+      - name: body
+        in: body
+        required: true
+        schema:
+          $ref: "#/definitions/NewCopilotRequest"
   "/projects/{projectId}/attachments":
     get:
       tags:
@@ -5459,6 +5491,14 @@ definitions:
         type: string
       address:
         type: string
+  NewCopilotRequest:
+    type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: copilot request data
   NewProject:
     type: object
     required:
@@ -5581,6 +5621,37 @@ definitions:
           type: integer
           format: int64
 
+  Copilot:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      data:
+        description: copilot data
+        type: object
+      status:
+        description: status of the copilot request
+        type: string
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
   Project:
     type: object
     properties:
