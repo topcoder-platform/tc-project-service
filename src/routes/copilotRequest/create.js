@@ -45,11 +45,21 @@ module.exports = [
             err.status = 404;
             throw err;
           }
-          return models.CopilotRequest
-            .create(data, { transaction })
-            .then((_newCopilotRequest) => {
-                return res.status(201).json(_newCopilotRequest);
-            });
+          return models.CopilotRequest.findOne({
+            where: {
+              createdBy: req.authUser.userId,
+              projectId: projectId,
+            },
+          }).then((existingCopilotRequest) => {
+            if (existingCopilotRequest) {
+              return res.status(200).json(existingCopilotRequest);
+            }
+            return models.CopilotRequest
+              .create(data, { transaction })
+              .then((_newCopilotRequest) => {
+                  return res.status(201).json(_newCopilotRequest);
+              });
+          })
         })
     })
       .catch((err) => {

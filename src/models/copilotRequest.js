@@ -16,11 +16,6 @@ module.exports = function defineCopilotRequest(sequelize, DataTypes) {
     createdAt: 'createdAt',
     indexes: [],
   });
-
-  CopliotRequest.associate = (models) => {
-    CopliotRequest.hasMany(models.Project, { as: 'projects', foreignKey: 'projectId' });
-  };
-
   
   return CopliotRequest;
 };
