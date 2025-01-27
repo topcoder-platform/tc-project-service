@@ -1,8 +1,8 @@
 module.exports = function defineCopilotRequest(sequelize, DataTypes) {
   const CopliotRequest = sequelize.define('CopilotRequest', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-    status: { type: DataTypes.STRING, defaultValue: 'new' },
-    data: { type: DataTypes.JSON, defaultValue: {} },
+    status: { type: DataTypes.STRING(16), defaultValue: 'new', allowNull: false }, 
+    data: { type: DataTypes.JSON, defaultValue: {}, allowNull: false },
 
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

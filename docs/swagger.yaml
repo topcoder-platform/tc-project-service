@@ -244,7 +244,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: "#/definitions/ErrorModel"
-  "/projects/{projectId}/copilot-request":
+  "/projects/{projectId}/copilots/request":
     post:
       tags:
         - projects copilot request
