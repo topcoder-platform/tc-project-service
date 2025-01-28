@@ -149,7 +149,7 @@ workflows:
           context : org-global
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'permission_fixes']
+              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'permission_fixes', 'pm-571']
       - deployProd:
           context : org-global
           filters:
