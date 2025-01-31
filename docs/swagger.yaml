@@ -256,7 +256,7 @@ paths:
         "200":
           description: Created copilot request
           schema:
-            $ref: "#/definitions/Copilot"
+            $ref: "#/definitions/CopilotRequest"
         "401":
           description: Unauthorized
           schema:
