@@ -7,13 +7,14 @@ const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
   dialect: 'postgres',
 });
 
-console.log('Umzug migrations running in:', __dirname);
+console.log('Umzug migration script:', __dirname);
 
 // Initialize Umzug
 const umzug = new Umzug({
   migrations: {
-    glob: __dirname + '/migrations/*.js',
+    glob: '__dirname/migrations/*.js',
     resolve: ({ name, path, context }) => {
+      console.log('Loading migration:', name, path);
       const migration = require(path);
       return {
         name,
