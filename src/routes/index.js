@@ -28,7 +28,7 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/(projects|timelines|orgConfig|customer-payments)(?!\\/health).*`), (req, res, next) => (
+  RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`), (req, res, next) => (
     // JWT authentication
     jwtAuth(config)(req, res, next)
   ),
@@ -377,6 +377,10 @@ router.route('/v5/projects/:projectId(\\d+)/settings/:id(\\d+)')
 router.route('/v5/projects/:projectId(\\d+)/settings')
   .get(require('./projectSettings/list'))
   .post(require('./projectSettings/create'));
+
+// Project Copilot Request
+router.route('/v5/projects/:projectId(\\d+)/copilots/request')
+  .post(require('./copilotRequest/create'));
 
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
