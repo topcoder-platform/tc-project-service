@@ -39,6 +39,7 @@ deploy_steps: &deploy_steps
         ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-consumers-deployvar
         source buildenvvar
         ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
+        
 
 jobs:
   UnitTests:
@@ -149,7 +150,7 @@ workflows:
           context : org-global
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'permission_fixes', 'pm-571']
+              only: ['develop', 'migration-setup']
       - deployProd:
           context : org-global
           filters:

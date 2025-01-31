@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix || true",
     "build": "babel src -d dist --presets es2015 --copy-files",
-    "start": "node dist",
+    "start": "npm run migrate && node dist",
     "start:dev": "cross-env NODE_ENV=development PORT=3000 nodemon -w src --exec \"./node_modules/.bin/env-cmd npm run babel-node-script -- src\" | bunyan",
     "startKafkaConsumers": "node dist/index-kafka.js",
     "startKafkaConsumers:dev": "cross-env NODE_ENV=development nodemon -w src --exec \"./node_modules/.bin/env-cmd npm run babel-node-script src/index-kafka.js\" | bunyan",
