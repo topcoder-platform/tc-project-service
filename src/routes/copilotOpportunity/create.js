@@ -5,6 +5,7 @@ import Joi from 'joi';
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
+import { COPILOT_REQUEST_STATUS } from '../../constants';
 
 const addCopilotOportunityValidations = {
   body: Joi.object().keys({
@@ -59,7 +60,11 @@ module.exports = [
               err.status = 404;
               throw err;
             }
-            return models.CopilotOpportunity
+
+            return existingCopilotRequest.update({
+              status: COPILOT_REQUEST_STATUS.APPROVED,
+            }, {transaction}).then(() => {
+              return models.CopilotOpportunity
               .findOne({
                 where: {
                   projectId,
@@ -81,10 +86,12 @@ module.exports = [
                       return res.status(201).json(_newCopilotOpportunity);
                   });
               });
+            });
           })
         })
     })
       .catch((err) => {
+        transaction.rollback();
         if (err.message) {
           _.assign(err, { details: err.message });
         }
