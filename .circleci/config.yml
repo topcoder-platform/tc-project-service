@@ -39,7 +39,6 @@ deploy_steps: &deploy_steps
         ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-consumers-deployvar
         source buildenvvar
         ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
-        
 
 jobs:
   UnitTests:
