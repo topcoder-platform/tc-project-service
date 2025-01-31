@@ -1,18 +1,18 @@
 const config = require('config');
-const { Sequelize } = require("sequelize");
-const { Umzug, SequelizeStorage } = require("umzug");
+const { Sequelize } = require('sequelize');
+const { SequelizeStorage } = require('umzug');
 
 // Initialize Sequelize
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
-  dialect: "postgres",
+  dialect: 'postgres',
 });
 
-console.log(__dirname);
+console.log('Umzug migrations running in:', __dirname);
 
 // Initialize Umzug
 const umzug = new Umzug({
   migrations: {
-    glob: "__dirname/migrations/*.js",
+    glob: 'migrations/*.js',
     resolve: ({ name, path, context }) => {
       const migration = require(path);
       return {
@@ -29,13 +29,16 @@ const umzug = new Umzug({
 
 // Run migrations
 if (require.main === module) {
-  umzug.up().then(() => {
-    console.log("Migrations executed successfully");
-    process.exit(0);
-  }).catch((err) => {
-    console.error("Migration failed", err);
-    process.exit(1);
-  });
+  umzug
+    .up()
+    .then(() => {
+      console.log('Migrations executed successfully');
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error('Migration failed', err);
+      process.exit(1);
+    });
 }
 
 module.exports = umzug;
