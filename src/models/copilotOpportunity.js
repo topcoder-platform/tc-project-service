@@ -1,18 +1,26 @@
 import _ from 'lodash';
-import { COPILOT_REQUEST_STATUS } from '../constants';
+import { COPILOT_OPPORTUNITY_STATUS, COPILOT_OPPORTUNITY_TYPE } from '../constants';
 
-module.exports = function defineCopilotRequest(sequelize, DataTypes) {
-  const CopliotRequest = sequelize.define('CopilotRequest', {
+module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
+  const CopilotOpportunity = sequelize.define('CopilotOpportunity', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     status: { 
       type: DataTypes.STRING(16),
-      defaultValue: 'new',
+      defaultValue: 'active',
       allowNull: false,
       validate: {
-        isIn: [_.values(COPILOT_REQUEST_STATUS)],
+        isIn: [_.values(COPILOT_OPPORTUNITY_STATUS)],
       }
     },
     data: { type: DataTypes.JSON, defaultValue: {}, allowNull: false },
+    skills: { type: DataTypes.ARRAY({ type: DataTypes.STRING(16), allowNull: true }), defaultValue: [], allowNull: false },  
+    type: { 
+      type: DataTypes.STRING(16),
+      allowNull: false,
+      validate: {
+        isIn: [_.values(COPILOT_OPPORTUNITY_TYPE)],
+      }
+    },
 
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -21,7 +29,7 @@ module.exports = function defineCopilotRequest(sequelize, DataTypes) {
     createdBy: { type: DataTypes.INTEGER, allowNull: false },
     updatedBy: { type: DataTypes.INTEGER, allowNull: false },
   }, {
-    tableName: 'copilot_requests',
+    tableName: 'copilot_opportunities',
     paranoid: true,
     timestamps: true,
     updatedAt: 'updatedAt',
@@ -29,10 +37,6 @@ module.exports = function defineCopilotRequest(sequelize, DataTypes) {
     deletedAt: 'deletedAt',
     indexes: [],
   });
-
-  CopliotRequest.associate = (models) => {
-    CopliotRequest.hasMany(models.CopilotOpportunity, { as: 'copilotOpportunity', foreignKey: 'copilotRequestId' });
-  };
   
-  return CopliotRequest;
+  return CopilotOpportunity;
 };

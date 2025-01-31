@@ -276,6 +276,39 @@ paths:
         required: true
         schema:
           $ref: "#/definitions/NewCopilotRequest"
+  "/projects/{projectId}/copilots/request/{copilotRequestId}/approve":
+    post:
+      tags:
+        - projects copilot opportunity approve
+      operationId: createCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "create copilot opportunity"
+      responses:
+        "200":
+          description: Created copilot opportunity
+          schema:
+            $ref: "#/definitions/CopilotOpportunity"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+      parameters:
+      - $ref: "#/parameters/projectIdParam"
+      - $ref: "#/parameters/copilotRequestIdParam"
+      - name: body
+        in: body
+        required: true
+        schema:
+          $ref: "#/definitions/NewCopilotOpportunity"
   "/projects/{projectId}/attachments":
     get:
       tags:
@@ -5246,6 +5279,13 @@ parameters:
     required: true
     type: integer
     format: int64
+  copilotRequestIdParam:
+    name: copilotRequestId
+    in: path
+    description: copilot request identifier
+    required: true
+    type: integer
+    format: int64
   phaseIdParam:
     name: phaseId
     in: path
@@ -5499,6 +5539,24 @@ definitions:
       data:
         type: object
         description: copilot request data
+  NewCopilotOpportunity:
+    type: object
+    required:
+      - data
+      - type
+      - skills
+    properties:
+      data:
+        type: object
+        description: copilot opportunity data
+      type:
+        type: string
+        description: type of the copilot opportunity
+      skills:
+        type: array
+        items:
+          type: string
+          description: skills of the copilot opportunity
   NewProject:
     type: object
     required:
@@ -5634,6 +5692,51 @@ definitions:
       status:
         description: status of the copilot request
         type: string
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  CopilotOpportunity:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      data:
+        description: copilot opportunity data
+        type: object
+      status:
+        description: status of the copilot opportunity
+        type: string
+      type:
+        description: type of the copilot opportunity
+        type: string
+      copilotRequestId:
+        description: copilot request id
+        type: integer
+      projectId:
+        description: project id
+        type: integer
+      skills:
+        type: array
+        items:
+          type: string
+          description: skills of the copilot opportunity
       createdAt:
         type: string
         description: Datetime (GMT) when task was created
