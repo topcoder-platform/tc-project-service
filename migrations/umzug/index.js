@@ -1,6 +1,6 @@
 const config = require('config');
 const { Sequelize } = require('sequelize');
-const { SequelizeStorage } = require('umzug');
+const { Umzug, SequelizeStorage } = require('umzug');
 
 // Initialize Sequelize
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
@@ -12,7 +12,7 @@ console.log('Umzug migration script:', __dirname);
 // Initialize Umzug
 const umzug = new Umzug({
   migrations: {
-    glob: '__dirname/migrations/*.js',
+    glob: 'migrations/*.js',
     resolve: ({ name, path, context }) => {
       console.log('Loading migration:', name, path);
       const migration = require(path);
