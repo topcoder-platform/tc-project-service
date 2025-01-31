@@ -12,7 +12,7 @@ console.log('Umzug migrations running in:', __dirname);
 // Initialize Umzug
 const umzug = new Umzug({
   migrations: {
-    glob: 'migrations/*.js',
+    glob: __dirname + '/migrations/*.js',
     resolve: ({ name, path, context }) => {
       const migration = require(path);
       return {
