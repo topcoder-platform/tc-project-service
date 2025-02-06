@@ -5513,7 +5513,7 @@ definitions:
             - numHoursPerWeek
         properties:
           projectId:
-            type: string
+            type: number
             description: The ID of the project
           copilotUsername:
             type: string

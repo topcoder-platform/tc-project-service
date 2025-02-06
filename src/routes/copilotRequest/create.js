@@ -12,7 +12,7 @@ const addCopilotRequestValidations = {
   body: Joi.object().keys({
     data: Joi.object()
     .keys({
-      projectId: Joi.string().required(),
+      projectId: Joi.number().required(),
       copilotUsername: Joi.string(),
       complexity: Joi.string().valid('low', 'medium', 'high').required(),
       requiresCommunication: Joi.string().valid('yes', 'no').required(),
