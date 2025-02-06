@@ -5539,6 +5539,78 @@ definitions:
       data:
         type: object
         description: copilot request data
+        required:
+            - projectId
+            - complexity
+            - requiresCommunication
+            - paymentType
+            - projectType
+            - overview
+            - skills
+            - startDate
+            - numWeeks
+            - tzRestrictions
+            - numHoursPerWeek
+        properties:
+          projectId:
+            type: number
+            description: The ID of the project
+          copilotUsername:
+            type: string
+            description: The username of the copilot (if applicable)
+          existingCopilot:
+            type: string
+            enum: [yes, no]
+            description: Indicates if an existing copilot is assigned
+          complexity:
+            type: string
+            enum: [low, medium, high]
+            description: Complexity level of the copilot request
+          requiresCommunication:
+            type: string
+            enum: [yes, no]
+            description: Whether the request requires communication
+          paymentType:
+            type: string
+            enum: [standard, other]
+            description: Payment type for the copilot
+          otherPaymentType:
+            type: string
+            nullable: true
+            description: If `paymentType` is "other", specify additional details
+          projectType:
+            type: string
+            description: Type of project
+          overview:
+            type: string
+            minLength: 10
+            description: Overview of the copilot request
+          skills:
+            type: array
+            description: List of required skills
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Skill ID
+                name:
+                  type: string
+                  description: Skill name
+            minItems: 1
+          startDate:
+            type: string
+            format: date
+            description: Start date for the copilot
+          numWeeks:
+            type: integer
+            description: Duration for which copilot is needed
+          tzRestrictions:
+            type: string
+            description: Timezone restrictions (if any)
+          numHoursPerWeek:
+            type: integer
+            description: Expected hours per week
   NewCopilotOpportunity:
     type: object
     required:
