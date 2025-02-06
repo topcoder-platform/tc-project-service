@@ -18,6 +18,20 @@ export const COPILOT_REQUEST_STATUS = {
   FULFILLED: 'fulfiled',
 };
 
+export const COPILOT_OPPORTUNITY_STATUS = {
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  CANCELED: 'canceled',
+};
+
+export const COPILOT_OPPORTUNITY_TYPE = {
+  DEV: 'dev',
+  QA: 'qa',
+  DESIGN: 'design',
+  AI: 'ai'
+};
+
+
 export const WORKSTREAM_STATUS = {
   DRAFT: 'draft',
   REVIEWED: 'reviewed',
