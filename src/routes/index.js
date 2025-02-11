@@ -380,10 +380,12 @@ router.route('/v5/projects/:projectId(\\d+)/settings')
 
 // Project Copilot Request
 router.route('/v5/projects/:projectId(\\d+)/copilots/request')
+  .get(require('./copilotRequest/list'));
   .post(require('./copilotRequest/create'));
 
-router.route('/v5/projects/copilots/requests')
-  .get(require('./copilotRequest/list'));
+// Project Copilot Opportunity
+router.route('/v5/projects/:projectId(\\d+)/copilots/request/:copilotRequestId(\\d+)/approve')
+  .post(require('./copilotOpportunity/create'));
 
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
