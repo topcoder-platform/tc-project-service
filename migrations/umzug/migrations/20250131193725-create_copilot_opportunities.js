@@ -1,8 +1,6 @@
-'use strict';
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("copilot_opportunities", {
+    await queryInterface.createTable('copilot_opportunities', {
       id: {
         type: Sequelize.BIGINT,
         allowNull: false,
@@ -21,30 +19,25 @@ module.exports = {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: {
-          model: "projects",
-          key: "id",
+          model: 'projects',
+          key: 'id',
         },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       copilotRequestId: {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: {
-          model: "copilot_requests",
-          key: "id",
+          model: 'copilot_requests',
+          key: 'id',
         },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       type: {
         type: Sequelize.STRING(16),
         allowNull: false,
-      },
-      skills: {
-        type: DataTypes.ARRAY({ type: DataTypes.STRING(16), allowNull: true }), 
-        allowNull: false,
-        defaultValue: [],
       },
       deletedAt: {
         type: Sequelize.DATE,
@@ -73,7 +66,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("copilot_opportunities");
-  }
+  down: async (queryInterface) => {
+    await queryInterface.dropTable('copilot_opportunities');
+  },
 };
