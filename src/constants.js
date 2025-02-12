@@ -28,7 +28,7 @@ export const COPILOT_OPPORTUNITY_TYPE = {
   DEV: 'dev',
   QA: 'qa',
   DESIGN: 'design',
-  AI: 'ai'
+  AI: 'ai',
 };
 
 

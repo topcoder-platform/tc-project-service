@@ -4,13 +4,13 @@ import { COPILOT_REQUEST_STATUS } from '../constants';
 module.exports = function defineCopilotRequest(sequelize, DataTypes) {
   const CopliotRequest = sequelize.define('CopilotRequest', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-    status: { 
+    status: {
       type: DataTypes.STRING(16),
       defaultValue: 'new',
       allowNull: false,
       validate: {
         isIn: [_.values(COPILOT_REQUEST_STATUS)],
-      }
+      },
     },
     data: { type: DataTypes.JSON, defaultValue: {}, allowNull: false },
 
@@ -33,6 +33,6 @@ module.exports = function defineCopilotRequest(sequelize, DataTypes) {
   CopliotRequest.associate = (models) => {
     CopliotRequest.hasMany(models.CopilotOpportunity, { as: 'copilotOpportunity', foreignKey: 'copilotRequestId' });
   };
-  
+
   return CopliotRequest;
 };

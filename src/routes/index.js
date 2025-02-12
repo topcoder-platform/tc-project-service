@@ -380,6 +380,7 @@ router.route('/v5/projects/:projectId(\\d+)/settings')
 
 // Project Copilot Request
 router.route('/v5/projects/:projectId(\\d+)/copilots/request')
+  .get(require('./copilotRequest/list'))
   .post(require('./copilotRequest/create'));
 
 // Project Copilot Opportunity
