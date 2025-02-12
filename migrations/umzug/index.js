@@ -7,8 +7,6 @@ const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
   dialect: 'postgres',
 });
 
-console.log('Umzug migration script:', __dirname);
-
 // Initialize Umzug
 const umzug = new Umzug({
   migrations: {

@@ -1,22 +1,23 @@
-import validate from 'express-validation';
 import _ from 'lodash';
-import Joi from 'joi';
 
 import models from '../../models';
+import { ADMIN_ROLES } from '../../constants';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 
 module.exports = [
   (req, res, next) => {
     if (!util.hasPermissionByReq(PERMISSION.MANAGE_COPILOT_REQUEST, req)) {
-        const err = new Error('Unauthorized to view copilot requests');
-        _.assign(err, {
-          details: JSON.stringify({ message: 'You do not have permission to view copilot requests' }),
-          status: 403,
-        });
-        return next(err);
+      const err = new Error('Unauthorized to view copilot requests');
+      _.assign(err, {
+        details: JSON.stringify({ message: 'You do not have permission to view copilot requests' }),
+        status: 403,
+      });
+      return next(err);
     }
-  
+
+    const isAdmin = util.hasRoles(req, ADMIN_ROLES);
+
     const userId = req.authUser.userId;
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
@@ -36,13 +37,13 @@ module.exports = [
       where: whereCondition,
       include: [
         {
-          model: models.CopilotOpportunity, 
-          as: 'opportunity',
+          model: models.CopilotOpportunity,
+          as: 'copilotOpportunity',
         },
       ],
       order: [[sortParams[0], sortParams[1]]],
     })
-      .then((copilotRequests) => res.json(copilotRequests))
+      .then(copilotRequests => res.json(copilotRequests))
       .catch((err) => {
         util.handleError('Error fetching copilot requests', err, req, next);
       });
