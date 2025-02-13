@@ -276,6 +276,41 @@ paths:
         required: true
         schema:
           $ref: "#/definitions/NewCopilotRequest"
+    get:
+      tags:
+        - projects copilot request
+      operationId: getCopilotRequest
+      security:
+        - Bearer: []
+      description: "Retrieve a list of copilot requests."
+      parameters:
+        - name: sort
+          required: false
+          type: string
+          enum:
+            - createdAt asc
+            - createdAt desc
+          in: query
+          description: Sorting criteria for the requests. Default is 'createdAt desc'.
+      responses:
+        "200":
+          description: "List of copilot requests"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Copilot"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
   "/projects/{projectId}/copilots/request/{copilotRequestId}/approve":
     post:
       tags:
