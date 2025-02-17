@@ -4,10 +4,13 @@ import Joi from 'joi';
 
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
+import { COPILOT_OPPORTUNITY_TYPE } from '../../constants';
 import approveRequest from './approveRequest.service';
 
 const addCopilotOportunityValidations = {
-  body: Joi.object().empty(),
+  body: Joi.object().keys({
+    type: Joi.string().valid(_.values(COPILOT_OPPORTUNITY_TYPE)).required(),
+  }),
 };
 
 module.exports = [

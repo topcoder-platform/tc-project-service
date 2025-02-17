@@ -379,10 +379,14 @@ router.route('/v5/projects/:projectId(\\d+)/settings')
   .post(require('./projectSettings/create'));
 
 // Project Copilot Request
-router.route('/v5/projects/:projectId(\\d+)/copilots/request')
+router.route('/v5/projects/copilots/requests')
+  .get(require('./copilotRequest/list'));
+router.route('/v5/projects/copilots/requests/:copilotRequestId(\\d+)')
+  .get(require('./copilotRequest/get'));
+router.route('/v5/projects/:projectId(\\d+)/copilots/requests')
   .get(require('./copilotRequest/list'))
   .post(require('./copilotRequest/create'));
-router.route('/v5/projects/:projectId(\\d+)/copilots/request/:copilotRequestId(\\d+)/approve')
+router.route('/v5/projects/:projectId(\\d+)/copilots/requests/:copilotRequestId(\\d+)/approve')
   .post(require('./copilotRequest/approveRequest'));
 
 // Project Estimation Items
