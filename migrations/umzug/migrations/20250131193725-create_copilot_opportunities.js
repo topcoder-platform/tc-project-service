@@ -7,10 +7,6 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      data: {
-        type: Sequelize.JSON,
-        allowNull: false,
-      },
       status: {
         type: Sequelize.STRING(16),
         allowNull: false,
