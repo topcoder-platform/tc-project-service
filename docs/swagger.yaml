@@ -244,7 +244,43 @@ paths:
           description: Internal Server Error
           schema:
             $ref: "#/definitions/ErrorModel"
-  "/projects/{projectId}/copilots/request":
+  "/projects/copilots/requests":
+    get:
+      tags:
+        - projects copilot request
+      operationId: getAllCopilotRequests
+      security:
+        - Bearer: []
+      description: "Retrieve a list of copilot requests."
+      parameters:
+        - name: sort
+          required: false
+          type: string
+          enum:
+            - createdAt asc
+            - createdAt desc
+          in: query
+          description: Sorting criteria for the requests. Default is 'createdAt desc'.
+      responses:
+        "200":
+          description: "List of copilot requests"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Copilot"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/{projectId}/copilots/requests":
     post:
       tags:
         - projects copilot request
@@ -279,7 +315,7 @@ paths:
     get:
       tags:
         - projects copilot request
-      operationId: getCopilotRequest
+      operationId: getCopilotRequests
       security:
         - Bearer: []
       description: "Retrieve a list of copilot requests."
@@ -311,7 +347,34 @@ paths:
           description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
-  "/projects/{projectId}/copilots/request/{copilotRequestId}/approve":
+  "/projects/{projectId}/copilots/requests/{copilotRequestId}":
+    get:
+      tags:
+        - projects copilot request
+      operationId: getCopilotRequest
+      security:
+        - Bearer: []
+      description: "Retrieve a specific copilot request."
+      parameters:
+        - $ref: "#/parameters/copilotRequestIdParam"
+      responses:
+        "200":
+          description: "The copilot request"
+          schema:
+            $ref: "#/definitions/Copilot"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/{projectId}/copilots/requests/{copilotRequestId}/approve":
     post:
       tags:
         - projects copilot request

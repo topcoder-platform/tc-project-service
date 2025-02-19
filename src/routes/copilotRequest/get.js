@@ -19,25 +19,15 @@ module.exports = [
     const isAdmin = util.hasRoles(req, ADMIN_ROLES);
 
     const userId = req.authUser.userId;
-    const projectId = _.parseInt(req.params.projectId);
-
-    let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
-    if (sort.indexOf(' ') === -1) {
-      sort += ' asc';
-    }
-    const sortableProps = ['createdAt asc', 'createdAt desc'];
-    if (_.indexOf(sortableProps, sort) < 0) {
-      return util.handleError('Invalid sort criteria', null, req, next);
-    }
-    const sortParams = sort.split(' ');
+    const copilotRequestId = _.parseInt(req.params.copilotRequestId);
 
     // Admin can see all requests and the PM can only see requests created by them
     const whereCondition = _.assign({},
       isAdmin ? {} : { createdBy: userId },
-      projectId ? { projectId } : {},
+      { id: copilotRequestId },
     );
 
-    return models.CopilotRequest.findAll({
+    return models.CopilotRequest.findOne({
       where: whereCondition,
       include: [
         {
@@ -45,11 +35,10 @@ module.exports = [
           as: 'copilotOpportunity',
         },
       ],
-      order: [[sortParams[0], sortParams[1]]],
     })
-      .then(copilotRequests => res.json(copilotRequests))
+      .then(copilotRequest => res.json(copilotRequest))
       .catch((err) => {
-        util.handleError('Error fetching copilot requests', err, req, next);
+        util.handleError(`Error fetching copilot request ${copilotRequestId}`, err, req, next);
       });
   },
 ];
