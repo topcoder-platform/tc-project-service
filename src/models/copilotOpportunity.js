@@ -12,8 +12,6 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
         isIn: [_.values(COPILOT_OPPORTUNITY_STATUS)],
       },
     },
-    data: { type: DataTypes.JSON, defaultValue: {}, allowNull: false },
-    skills: { type: DataTypes.ARRAY({ type: DataTypes.STRING(16), allowNull: true }), defaultValue: [], allowNull: false },
     type: {
       type: DataTypes.STRING(16),
       allowNull: false,
@@ -21,7 +19,6 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
         isIn: [_.values(COPILOT_OPPORTUNITY_TYPE)],
       },
     },
-
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -37,6 +34,10 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
     deletedAt: 'deletedAt',
     indexes: [],
   });
+
+  CopilotOpportunity.associate = (models) => {
+    CopilotOpportunity.belongsTo(models.CopilotRequest, { as: 'copilotRequest' });
+  };
 
   return CopilotOpportunity;
 };

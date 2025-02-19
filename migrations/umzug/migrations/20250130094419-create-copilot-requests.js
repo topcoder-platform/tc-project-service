@@ -1,8 +1,6 @@
-'use strict';
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("copilot_requests", {
+    await queryInterface.createTable('copilot_requests', {
       id: {
         type: Sequelize.BIGINT,
         allowNull: false,
@@ -21,11 +19,11 @@ module.exports = {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: {
-          model: "projects",
-          key: "id",
+          model: 'projects',
+          key: 'id',
         },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
       },
       deletedAt: {
         type: Sequelize.DATE,
@@ -54,7 +52,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("copilot_requests");
-  }
+  down: async (queryInterface) => {
+    await queryInterface.dropTable('copilot_requests');
+  },
 };

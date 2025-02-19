@@ -314,7 +314,7 @@ paths:
   "/projects/{projectId}/copilots/request/{copilotRequestId}/approve":
     post:
       tags:
-        - projects copilot opportunity approve
+        - projects copilot request
       operationId: createCopilotOpportunity
       security:
         - Bearer: []
@@ -5649,21 +5649,7 @@ definitions:
   NewCopilotOpportunity:
     type: object
     required:
-      - data
-      - type
-      - skills
     properties:
-      data:
-        type: object
-        description: copilot opportunity data
-      type:
-        type: string
-        description: type of the copilot opportunity
-      skills:
-        type: array
-        items:
-          type: string
-          description: skills of the copilot opportunity
   NewProject:
     type: object
     required:
