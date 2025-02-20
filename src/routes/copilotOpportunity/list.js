@@ -33,9 +33,10 @@ module.exports = [
       .then(copilotOpportunities => {
         const formattedOpportunities = copilotOpportunities.map(opportunity => {
             const plainOpportunity = opportunity.get({ plain: true });     
-            return Object.assign({}, plainOpportunity, {
-              requestData: (plainOpportunity.copilotRequest && plainOpportunity.copilotRequest.data) || {},
-            });
+            return Object.assign({}, plainOpportunity, 
+                plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
+                { copilotRequest: undefined }
+            );
         });
         return res.json(formattedOpportunities);
       })
