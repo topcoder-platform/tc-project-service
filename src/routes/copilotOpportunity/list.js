@@ -7,19 +7,6 @@ import { PERMISSION } from '../../permissions/constants';
 
 module.exports = [
   (req, res, next) => {
-    if (!util.hasPermissionByReq(PERMISSION.MANAGE_COPILOT_REQUEST, req)) {
-      const err = new Error('Unauthorized to view copilot opportunities');
-      _.assign(err, {
-        details: JSON.stringify({ message: 'You do not have permission to view copilot opportunities' }),
-        status: 403,
-      });
-      return next(err);
-    }
-
-    const isAdmin = util.hasRoles(req, ADMIN_ROLES);
-  
-    const userId = req.authUser.userId;
-
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
     if (sort.indexOf(' ') === -1) {
       sort += ' asc';
@@ -30,14 +17,28 @@ module.exports = [
     }
     const sortParams = sort.split(' ');
 
-    // Admin can see all opportunities and the PM can only see opportunities created by them
-    const whereCondition = isAdmin ? {} : { createdBy: userId };
-
     models.CopilotOpportunity.findAll({
-      where: whereCondition,
-      order: [[sortParams[0], sortParams[1]]],
+        include: [
+            {
+                model: models.CopilotRequest, 
+                as: 'copilotRequest',
+            },
+            {
+                model: models.Project,
+                as: 'project',
+            }
+            ],
+        order: [[sortParams[0], sortParams[1]]],
     })
-      .then(copilotOpportunities => res.json(copilotOpportunities))
+      .then(copilotOpportunities => {
+        const formattedOpportunities = copilotOpportunities.map(opportunity => {
+            const plainOpportunity = opportunity.get({ plain: true });     
+            return Object.assign({}, plainOpportunity, {
+              requestData: (plainOpportunity.copilotRequest && plainOpportunity.copilotRequest.data) || {},
+            });
+        });
+        return res.json(formattedOpportunities);
+      })
       .catch((err) => {
         util.handleError('Error fetching copilot opportunities', err, req, next);
       });

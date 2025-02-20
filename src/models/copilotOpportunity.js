@@ -36,7 +36,8 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
   });
 
   CopilotOpportunity.associate = (models) => {
-    CopilotOpportunity.belongsTo(models.CopilotRequest, { as: 'copilotRequest' });
+    CopilotOpportunity.belongsTo(models.CopilotRequest, { as: 'copilotRequest', foreignKey: 'copilotRequestId' });
+    CopilotOpportunity.belongsTo(models.Project, { as: 'project', foreignKey: 'projectId' });
   };
 
   return CopilotOpportunity;
