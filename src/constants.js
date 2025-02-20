@@ -29,6 +29,7 @@ export const COPILOT_OPPORTUNITY_TYPE = {
   QA: 'qa',
   DESIGN: 'design',
   AI: 'ai',
+  DATA_SCIENCE: 'datascience',
 };
 
 
