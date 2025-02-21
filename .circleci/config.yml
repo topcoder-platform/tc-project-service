@@ -32,13 +32,13 @@ deploy_steps: &deploy_steps
         source awsenvconf
         ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-deployvar
         source buildenvvar
-        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME} -p FARGATE
 
          echo "======= Running Masterscript - deploy projects-api-consumers ==========="
         if [ -e ${LOGICAL_ENV}-${APPNAME}-appvar.json ]; then  sudo rm -vf ${LOGICAL_ENV}-${APPNAME}-appvar.json; fi
         ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-consumers-deployvar
         source buildenvvar
-        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME}
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME} -p FARGATE
 
 jobs:
   UnitTests:
