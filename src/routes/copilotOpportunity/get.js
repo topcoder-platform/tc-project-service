@@ -23,6 +23,7 @@ module.exports = [
             {
                 model: models.Project,
                 as: 'project',
+                attributes: ['name'],
             }
         ],
     })
