@@ -48,7 +48,9 @@ module.exports = [
           return deleteFile(
             config.get('attachmentsS3Bucket'),
             _attachment.path,
-          );
+          ).catch((error) => {
+            req.log.debug('Project attachment file deletion failed!', error);
+          });
         }
         return Promise.resolve();
       })

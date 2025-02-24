@@ -26,6 +26,7 @@ module.exports = [
             {
                 model: models.Project,
                 as: 'project',
+                attributes: ['name'],
             }
             ],
         order: [[sortParams[0], sortParams[1]]],
