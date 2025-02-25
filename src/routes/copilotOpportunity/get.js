@@ -28,7 +28,12 @@ module.exports = [
         ],
     })
       .then((copilotOpportunity) => {
-        res.json(copilotOpportunity);
+        const plainOpportunity = copilotOpportunity.get({ plain: true }); 
+        const formattedOpportunity = Object.assign({}, plainOpportunity, 
+            plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
+            { copilotRequest: undefined }
+        );    
+        res.json(formattedOpportunity);
       })
       .catch((err) => {
         util.handleError('Error fetching copilot opportunity', err, req, next);
