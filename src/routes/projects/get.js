@@ -209,7 +209,14 @@ module.exports = [
     const projectId = Number(req.params.projectId);
     // parse the fields string to determine what fields are to be returned
 
-    return retrieveProjectFromDB(projectId, req).then((project) => {
+    return retrieveProjectFromES(projectId, req).then((result) => {
+      if (result === undefined) {
+        req.log.debug('No project found in ES');
+        return retrieveProjectFromDB(projectId, req);
+      }
+      req.log.debug('Project found in ES');
+      return result;
+    }).then((project) => {
       const postProcessedProject = util.postProcessInvites('$.invites[?(@.email)]', project, req);
 
       // filter out attachments which user cannot see
