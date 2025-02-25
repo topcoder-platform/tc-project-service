@@ -149,7 +149,7 @@ workflows:
           context : org-global
           filters:
             branches:
-              only: ['develop', 'test_delete_attachment']
+              only: ['develop']
       - deployProd:
           context : org-global
           filters:
