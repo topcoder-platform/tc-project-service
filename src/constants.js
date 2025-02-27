@@ -580,3 +580,5 @@ export const CUSTOMER_PAYMENT_CURRENCY = {
   ZAR: 'ZAR',
   ZMW: 'ZMW',
 };
+
+export const DEFAULT_PAGE_SIZE = 10;

@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import models from '../../models';
 import util from '../../util';
+import DEFAULT_PAGE_SIZE from '../../constants';
 
 module.exports = [
   (req, res, next) => {
@@ -17,7 +18,7 @@ module.exports = [
 
     // Extract pagination parameters
     const page = parseInt(req.query.page, 10) || 1;
-    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+    const pageSize = parseInt(req.query.pageSize, 10) || DEFAULT_PAGE_SIZE;
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
 
