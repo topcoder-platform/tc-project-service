@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "e80dcb5f-34f8-4b52-83cb-ce96082f9c31",
-		"_postman_id": "6418ac6e-a797-4e30-b4d3-a1dd0cdead22",
+		"_postman_id": "b9af878f-fca0-427d-baf3-38c6c91a055d",
 		"name": "Project API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "215943"
 	},
 	"item": [
 		{
@@ -1257,7 +1257,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -1311,7 +1310,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -1365,7 +1363,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -1404,7 +1401,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -1473,7 +1469,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -1514,7 +1509,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -1554,7 +1548,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -1594,7 +1587,6 @@
 							},
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -5830,23 +5822,13 @@
 								],
 								"type": "text/javascript"
 							}
-						],
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
-							"raw": "{{api-url}}/projects/{{projectId}}/phases?sort=order desc",
-							"host": [
-								"{{api-url}}"
-							],
-							"path": [
-								"projects",
-								"{{projectId}}",
-								"phases"
-							],
-							"query": [
-								{
-									"key": "sort",
-									"value": "order desc"
-								}
-							]
+							"raw": ""
 						}
 					},
 					"response": []
@@ -6237,7 +6219,6 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t}\n}"
-
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
@@ -6274,7 +6255,6 @@
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
-
 							"host": [
 								"{{api-url}}"
 							],
@@ -6289,11 +6269,9 @@
 					"response": []
 				},
 				{
-
 					"name": "Update Phase with members",
 					"request": {
 						"method": "PATCH",
-
 						"header": [
 							{
 								"key": "Authorization",
@@ -6304,14 +6282,12 @@
 								"value": "application/json"
 							}
 						],
-
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"name\": \"test project phase xxx\",\n\t\"status\": \"in_review\",\n\t\"startDate\": \"2018-05-14T00:00:00\",\n\t\"endDate\": \"2018-05-15T00:00:00\",\n\t\"budget\": 30,\n\t\"progress\": 15,\n\t\"details\": {\n\t\t\"message\": \"phase details\"\n\t},\n    \"members\": [{{phaseMemberId-1}},{{phaseMemberId-2}}]\n}"
 						},
 						"url": {
 							"raw": "{{api-url}}/projects/{{projectId}}/phases/{{phaseId}}",
-
 							"host": [
 								"{{api-url}}"
 							],
@@ -6319,9 +6295,7 @@
 								"projects",
 								"{{projectId}}",
 								"phases",
-
 								"{{phaseId}}"
-
 							]
 						}
 					},
@@ -6329,7 +6303,6 @@
 				},
 				{
 					"name": "Delete Phase",
-
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -6362,9 +6335,7 @@
 					"response": []
 				},
 				{
-
 					"name": "Bulk Delete Phase",
-
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -7366,7 +7337,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"scope\":{\r\n      \"scope1\":\"scope 1\"\r\n    },\r\n    \"phases\":{\r\n      \"phase1\":\"phase 1\"\r\n    }\r\n  }"
@@ -7413,7 +7383,6 @@
 								"value": "Bearer {{jwt-token}}"
 							}
 						],
-
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1\r\n    }\r\n  }"
@@ -7528,7 +7497,6 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"name\":\"new name\",\r\n    \"key\":\"new key\",\r\n    \"category\":\"app\",\r\n    \"subCategory\":\"app\",\r\n    \"metadata\":{},\r\n    \"icon\": \"http://example.com/icon1.ico\",\r\n    \"question\": \"question 1\",\r\n    \"info\": \"info 1\",\r\n    \"aliases\": [\"key-1\", \"key_1\"],\r\n    \"form\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    },\r\n    \"priceConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    },\r\n    \"planConfig\": {\r\n    \t\"key\": \"dev\",\r\n    \t\"version\": 1123\r\n    }\r\n  }"
 						},
-
 						"url": {
 							"raw": "{{api-url}}/projects/metadata/projectTemplates",
 							"host": [
@@ -10659,9 +10627,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -10701,9 +10668,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -10744,9 +10710,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -10873,9 +10838,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -10917,7 +10881,6 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -10961,9 +10924,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11119,9 +11081,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11161,9 +11122,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11204,9 +11164,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11353,7 +11312,6 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -11397,9 +11355,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11441,9 +11398,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11599,9 +11555,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11641,9 +11596,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11684,9 +11638,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11813,7 +11766,6 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -11857,9 +11809,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -11901,9 +11852,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -12006,8 +11956,8 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"type": "text",
-										"value": "Bearer {{jwt-token-admin-40051333}}"
+										"value": "Bearer {{jwt-token-admin-40051333}}",
+										"type": "text"
 									}
 								],
 								"url": {
@@ -12037,8 +11987,8 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"type": "text",
-										"value": "Bearer {{jwt-token-admin-40051333}}"
+										"value": "Bearer {{jwt-token-admin-40051333}}",
+										"type": "text"
 									}
 								],
 								"url": {
@@ -12073,8 +12023,8 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"type": "text",
-										"value": "Bearer {{jwt-token-admin-40051333}}"
+										"value": "Bearer {{jwt-token-admin-40051333}}",
+										"type": "text"
 									}
 								],
 								"url": {
@@ -13194,6 +13144,91 @@
 							"path": [
 								"customer-payments",
 								"{{customerPaymentId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Copilots",
+			"item": [
+				{
+					"name": "Request Copilot",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"data\": {\r\n        \"projectId\": 1,\r\n        \"copilotUsername\": \"testCopilot1\",\r\n        \"complexity\": \"low\",\r\n        \"requiresCommunication\": \"no\",\r\n        \"paymentType\": \"standard\",\r\n        \"otherPaymentType\": \"no\",\r\n        \"projectType\": \"design\",\r\n        \"overview\": \"some text is allowed\",\r\n        \"skills\": [{\"id\": \"css\", \"name\":\"css\"}],\r\n        \"startDate\": \"2025-02-12 12:00:00\",\r\n        \"numWeeks\": 2,\r\n        \"tzRestrictions\": \"no\",\r\n        \"numHoursPerWeek\": 40\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/1/copilots/request",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"1",
+								"copilots",
+								"request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Request Copilot",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt-token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"type\": \"ai\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api-url}}/projects/1/copilots/request/21/approve",
+							"host": [
+								"{{api-url}}"
+							],
+							"path": [
+								"projects",
+								"1",
+								"copilots",
+								"request",
+								"21",
+								"approve"
 							]
 						}
 					},

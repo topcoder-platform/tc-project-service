@@ -250,6 +250,19 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
+  MANAGE_COPILOT_REQUEST: {
+    meta: {
+      title: 'Manage Copilot Request',
+      group: 'Copilot Request',
+      description: 'Who can create, update, delete copilot request.',
+    },
+    topcoderRoles: [
+      USER_ROLE.PROJECT_MANAGER,
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
   MANAGE_PROJECT_BILLING_ACCOUNT_ID: {
     meta: {
       title: 'Manage Project property "billingAccountId"',
