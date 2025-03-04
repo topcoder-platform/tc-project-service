@@ -23,15 +23,24 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
   });
 });
 
+// List of public routes
+const publicRoutes = [
+  `/${apiVersion}/projects/copilots/opportunities`,
+  `/${apiVersion}/projects/copilot/opportunities/:id(\\d+)`,
+];
 
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`), (req, res, next) => (
+  RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`),
+  (req, res, next) => {
+    if (publicRoutes.some(route => req.path.match(new RegExp(`^${route}$`)))) {
+      return next();
+    }
     // JWT authentication
-    jwtAuth(config)(req, res, next)
-  ),
+    return jwtAuth(config)(req, res, next);
+  },
 );
 
 router.all(
@@ -392,8 +401,8 @@ router.route('/v5/projects/:projectId(\\d+)/copilots/requests/:copilotRequestId(
 // Project Copilot Opportunity
 router.route('/v5/projects/copilots/opportunities')
   .get(require('./copilotOpportunity/list'));
-router.route('/v5/projects/copilots/opportunities/:id(\\d+)')
-  .get(require('./copilotOpportunity/get'))
+router.route('/v5/projects/copilot/opportunities/:id(\\d+)')
+  .get(require('./copilotOpportunity/get'));
 
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
