@@ -86,5 +86,5 @@
     "CLIENT_ID": ""
   },
   "STRIPE_SECRET_KEY": "",
-  "sfdcBillingAccountNameField": "Billing_Account_Name__c"
+  "sfdcBillingAccountNameField": "Billing_Account_name__c"
 }
