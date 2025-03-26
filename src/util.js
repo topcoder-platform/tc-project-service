@@ -1176,7 +1176,7 @@ const projectServiceUtils = {
 
     // if no rule defined, no access by default
     if (!permissionRule) {
-      req.log.debug('no rule defined');
+      if (req) req.log.debug('no rule defined');
       return false;
     }
 
@@ -1221,7 +1221,7 @@ const projectServiceUtils = {
         hasTopcoderRole = _.get(user, 'roles', []).length > 0;
       }
 
-      req.log.debug(hasTopcoderRole, 'hasTopcoderRole');
+      if (req) req.log.debug(hasTopcoderRole, 'hasTopcoderRole');
     }
 
     // check M2M scopes
@@ -1232,7 +1232,7 @@ const projectServiceUtils = {
       ).length > 0;
     }
 
-    req.log.debug(hasProjectRole || hasTopcoderRole || hasScope, 'hasPermissionRule');
+    if (req) req.log.debug(hasProjectRole || hasTopcoderRole || hasScope, 'hasPermissionRule');
 
     return hasProjectRole || hasTopcoderRole || hasScope;
   },
@@ -1297,8 +1297,8 @@ const projectServiceUtils = {
     const allow = util.matchPermissionRule(allowRule, user, projectMembers, req);
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
 
-    req.log.debug('allow', allow);
-    req.log.debug('deny', deny);
+    if (req) req.log.debug('allow', allow);
+    if (req) req.log.debug('deny', deny);
     return allow && !deny;
   },
 
