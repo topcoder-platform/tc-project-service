@@ -677,7 +677,7 @@ module.exports = [
     req.log.debug('get all projects');
     req.log.debug(PERMISSION.READ_PROJECT_ANY);
     // TODO refactor (DRY) code below so we don't repeat the same logic for admins and non-admin users
-    if (!memberOnly && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser)) {
+    if (!memberOnly && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser, [], req)) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
         .then((result) => {
