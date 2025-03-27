@@ -1289,7 +1289,7 @@ const projectServiceUtils = {
     const allowRule = permission.allowRule ? permission.allowRule : permission;
     const denyRule = permission.denyRule ? permission.denyRule : null;
 
-    const allow = util.matchPermissionRule(allowRule, user, projectMembers, req);
+    const allow = util.matchPermissionRule(allowRule, user, projectMembers);
     const deny = util.matchPermissionRule(denyRule, user, projectMembers);
 
     return allow && !deny;
