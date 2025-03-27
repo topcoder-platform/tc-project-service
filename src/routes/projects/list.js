@@ -663,7 +663,7 @@ module.exports = [
     }
 
     // check if user only wants to retrieve projects where he/she is a member
-    const memberOnly = Boolean(_.get(filters, 'memberOnly', false));
+    const memberOnly = _.get(filters, 'memberOnly', false);
     filters = _.omit(filters, 'memberOnly');
 
     const limit = Math.min(req.query.perPage || config.pageSize, config.pageSize);
@@ -675,6 +675,7 @@ module.exports = [
     };
     req.log.info(criteria);
     req.log.debug(typeof memberOnly);
+    req.log.debug(memberOnly);
     // TODO refactor (DRY) code below so we don't repeat the same logic for admins and non-admin users
     if (memberOnly !== 'true' && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser, [], req)) { 
       req.log.debug("get all projects");
