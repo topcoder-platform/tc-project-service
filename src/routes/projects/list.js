@@ -661,6 +661,7 @@ module.exports = [
       (sort && _.indexOf(sortableProps, sort) < 0)) {
       return util.handleError('Invalid filters or sort', null, req, next);
     }
+
     // check if user only wants to retrieve projects where he/she is a member
     const memberOnly = _.get(filters, 'memberOnly', false);
     filters = _.omit(filters, 'memberOnly');
@@ -674,7 +675,7 @@ module.exports = [
     };
     req.log.info(criteria);
     // TODO refactor (DRY) code below so we don't repeat the same logic for admins and non-admin users
-    if (!memberOnly && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser)) {
+    if (memberOnly !== 'true' && util.hasPermission(PERMISSION.READ_PROJECT_ANY, req.authUser)) {
       // admins & topcoder managers can see all projects
       return retrieveProjects(req, criteria, sort, req.query.fields)
         .then((result) => {
