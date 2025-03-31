@@ -308,6 +308,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     topcoderRoles: TOPCODER_ROLES_ADMINS,
     scopes: SCOPES_PROJECTS_READ_AVL_BILLING_ACCOUNTS,
