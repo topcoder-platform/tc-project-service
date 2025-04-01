@@ -309,7 +309,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
     ],
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     scopes: SCOPES_PROJECTS_READ_AVL_BILLING_ACCOUNTS,
   },
 
@@ -328,6 +328,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     ],
     topcoderRoles: [
       USER_ROLE.TOPCODER_ADMIN,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     scopes: SCOPES_PROJECTS_READ_BILLING_ACCOUNT_DETAILS,
   },
