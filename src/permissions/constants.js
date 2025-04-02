@@ -384,7 +384,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can update project members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
@@ -398,7 +398,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can update project members with non "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
