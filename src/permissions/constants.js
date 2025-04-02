@@ -364,7 +364,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can add themselves as project members.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_MANAGERS_AND_ADMINS, USER_ROLE.PROJECT_MANAGER],
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -374,7 +374,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can add other users as project members.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
