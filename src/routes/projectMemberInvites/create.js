@@ -219,7 +219,7 @@ const sendInviteEmail = (req, projectId, invite) => {
     };
     createEvent(emailEventType, {
       data: {
-        connectURL: config.get('connectUrl'),
+        workManagerUrl: config.get('workManagerUrl'),
         accountsAppURL: config.get('accountsAppUrl'),
         subject: config.get('inviteEmailSubject'),
         projects: [{

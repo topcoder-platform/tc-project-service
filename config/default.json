@@ -29,7 +29,6 @@
     "customerPaymentIndexName": "customer_payments",
     "customerPaymentDocType": "doc"
   },
-  "connectProjectUrl": "",
   "dbConfig": {
     "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb",
     "maxPoolSize": 50,
@@ -40,8 +39,8 @@
     "url": "localhost:9092"
   },
   "analyticsKey": "",
-  "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\",\"https:\/\/topcoder-dev.auth0.com\/\"]",
-  "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\",\"https:\/\/topcoder-dev.auth0.com\/\"]",
+  "VALID_ISSUERS": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\",\"https:\/\/topcoder-dev.auth0.com\/\", \"https:\/\/auth.topcoder-dev.com\/\"]",
+  "validIssuers": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\",\"https:\/\/topcoder-dev.auth0.com\/\", \"https:\/\/auth.topcoder-dev.com\/\"]",
   "jwksUri": "",
   "busApiUrl": "http://api.topcoder-dev.com/v5",
   "messageApiUrl": "http://api.topcoder-dev.com/v5",
@@ -54,7 +53,7 @@
   "EMAIL_INVITE_FROM_EMAIL": "noreply@connect.topcoder.com",
   "inviteEmailSubject": "You are invited to Topcoder",
   "inviteEmailSectionTitle": "Project Invitation",
-  "connectUrl": "https://connect.topcoder-dev.com",
+  "workManagerUrl": "https://challenges.topcoder-dev.com",
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
   "MAX_REVISION_NUMBER": 100,
   "UNIQUE_GMAIL_VALIDATION": false,
