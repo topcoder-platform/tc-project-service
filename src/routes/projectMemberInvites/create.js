@@ -199,7 +199,7 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
 };
 
 const sendInviteEmail = (req, projectId, invite) => {
-  req.log.debug(`Sending invite email: ${JSON.stringify(req)}, ${projectId}, ${JSON.stringify(invite)}`)
+  req.log.debug(`Sending invite email: ${JSON.stringify(req.body)}, ${projectId}, ${JSON.stringify(invite)}`)
   req.log.debug(req.authUser);
   const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
@@ -219,7 +219,7 @@ const sendInviteEmail = (req, projectId, invite) => {
     };
     createEvent(emailEventType, {
       data: {
-        connectURL: config.get('connectUrl'),
+        workManagerUrl: config.get('workManagerUrl'),
         accountsAppURL: config.get('accountsAppUrl'),
         subject: config.get('inviteEmailSubject'),
         projects: [{

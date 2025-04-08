@@ -21,8 +21,8 @@ const eClient = util.getElasticSearchClient();
  * @param {string|number} projectId the project id
  * @returns {string} the connect project url
  */
-function connectProjectUrl(projectId) {
-  return `${config.get('connectProjectsUrl')}${projectId}`;
+function wmProjectUrl(projectId) {
+  return `${config.get('workManagerUrl')}projects/${projectId}`;
 }
 
 /**
@@ -169,7 +169,7 @@ async function timelineAdjustedKafkaHandler(app, topic, payload) {
     createEvent(BUS_API_EVENT.PROJECT_PLAN_UPDATED, {
       projectId: project.id,
       projectName: project.name,
-      projectUrl: connectProjectUrl(project.id),
+      projectUrl: wmProjectUrl(project.id),
       userId: payload.userId,
       initiatorUserId: payload.userId,
     }, app.logger);

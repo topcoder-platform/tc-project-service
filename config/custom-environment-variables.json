@@ -51,6 +51,7 @@
   "whitelistedOriginsForUserIdAuth": "WHITELISTED_ORIGINS_FOR_USERID_AUTH",
   "AUTH0_PROXY_SERVER_URL" : "AUTH0_PROXY_SERVER_URL",
   "connectUrl": "CONNECT_URL",
+  "workManagerUrl": "WORK_MANAGER_URL",
   "accountsAppUrl": "ACCOUNTS_APP_URL",
   "inviteEmailSubject": "INVITE_EMAIL_SUBJECT",
   "inviteEmailSectionTitle": "INVITE_EMAIL_SECTION_TITLE",
