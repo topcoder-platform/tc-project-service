@@ -218,6 +218,8 @@ module.exports = [
       return result;
     }).then((project) => {
       const postProcessedProject = util.postProcessInvites('$.invites[?(@.email)]', project, req);
+      req.log.debug(postProcessedProject, 'postProcessedProject');
+      req.log.debug(project, 'project after postProcessedProject');
 
       // filter out attachments which user cannot see
       if (postProcessedProject.attachments) {
