@@ -2,12 +2,12 @@
   "pubsubQueueName": "dev.project.service",
   "pubsubExchangeName": "dev.projects",
   "attachmentsS3Bucket": "topcoder-dev-media",
-  "connectProjectsUrl": "https://connect.topcoder-dev.com/projects/",
+  "workManagerUrl": "https://challenges.topcoder-dev.com",
   "fileServiceEndpoint": "https://api.topcoder-dev.com/v5/files",
   "memberServiceEndpoint": "https://api.topcoder-dev.com/v5/members",
-  "identityServiceEndpoint": "https://api.topcoder-dev.com/v5/",
+  "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/",
   "taasJobApiUrl": "https://api.topcoder-dev.com/v5/jobs",
-  "sfdcBillingAccountNameField": "Billing_Account_Name__c",
+  "sfdcBillingAccountNameField": "Billing_Account_name__c",
   "sfdcBillingAccountMarkupField": "Mark_Up__c",
   "sfdcBillingAccountActiveField": "Active__c"
 }

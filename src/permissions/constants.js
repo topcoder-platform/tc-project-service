@@ -191,6 +191,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     topcoderRoles: [
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.MANAGER,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     projectRoles: ALL,
     scopes: SCOPES_PROJECTS_READ,
@@ -205,6 +206,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     topcoderRoles: [
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.MANAGER,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     scopes: SCOPES_PROJECTS_READ,
   },
@@ -245,6 +247,19 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     },
     topcoderRoles: [
       USER_ROLE.MANAGER,
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
+  MANAGE_COPILOT_REQUEST: {
+    meta: {
+      title: 'Manage Copilot Request',
+      group: 'Copilot Request',
+      description: 'Who can create, update, delete copilot request.',
+    },
+    topcoderRoles: [
+      USER_ROLE.PROJECT_MANAGER,
       USER_ROLE.TOPCODER_ADMIN,
     ],
     scopes: SCOPES_PROJECTS_WRITE,
@@ -294,7 +309,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
     ],
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     scopes: SCOPES_PROJECTS_READ_AVL_BILLING_ACCOUNTS,
   },
 
@@ -313,6 +328,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     ],
     topcoderRoles: [
       USER_ROLE.TOPCODER_ADMIN,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     scopes: SCOPES_PROJECTS_READ_BILLING_ACCOUNT_DETAILS,
   },
@@ -348,7 +364,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can add themselves as project members.',
     },
-    topcoderRoles: TOPCODER_ROLES_MANAGERS_AND_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_MANAGERS_AND_ADMINS, USER_ROLE.PROJECT_MANAGER],
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -358,7 +374,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can add other users as project members.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
 
@@ -368,7 +384,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can update project members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
@@ -382,7 +398,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can update project members with non "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
@@ -393,7 +409,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can delete project members with "customer" role.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,
       PROJECT_MEMBER_ROLE.COPILOT,
@@ -407,7 +423,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       group: 'Project Member',
       description: 'Who can delete project members with some topcoder role like "manager" etc.',
     },
-    topcoderRoles: TOPCODER_ROLES_ADMINS,
+    topcoderRoles: [...TOPCODER_ROLES_ADMINS, USER_ROLE.PROJECT_MANAGER],
     projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_MEMBERS_WRITE,
   },
@@ -421,6 +437,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     topcoderRoles: [
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     projectRoles: [
       ...PROJECT_ROLES_MANAGEMENT,

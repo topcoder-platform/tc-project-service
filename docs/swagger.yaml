@@ -24,7 +24,7 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-paths:
+paths:              
   "/projects":
     get:
       tags:
@@ -242,6 +242,233 @@ paths:
             $ref: "#/definitions/ErrorModel"
         "500":
           description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/requests":
+    get:
+      tags:
+        - projects copilot request
+      operationId: getAllCopilotRequests
+      security:
+        - Bearer: []
+      description: "Retrieve a list of copilot requests."
+      parameters:
+        - name: sort
+          required: false
+          type: string
+          enum:
+            - createdAt asc
+            - createdAt desc
+          in: query
+          description: Sorting criteria for the requests. Default is 'createdAt desc'.
+      responses:
+        "200":
+          description: "List of copilot requests"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Copilot"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/{projectId}/copilots/requests":
+    post:
+      tags:
+        - projects copilot request
+      operationId: createCopilotRequest
+      security:
+        - Bearer: []
+      description: "create copilot request"
+      responses:
+        "200":
+          description: Created copilot request
+          schema:
+            $ref: "#/definitions/NewCopilotRequest"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+      parameters:
+      - $ref: "#/parameters/projectIdParam"
+      - name: body
+        in: body
+        required: true
+        schema:
+          $ref: "#/definitions/NewCopilotRequest"
+    get:
+      tags:
+        - projects copilot request
+      operationId: getCopilotRequests
+      security:
+        - Bearer: []
+      description: "Retrieve a list of copilot requests."
+      parameters:
+        - $ref: "#/parameters/projectIdParam"
+        - name: sort
+          required: false
+          type: string
+          enum:
+            - createdAt asc
+            - createdAt desc
+          in: query
+          description: Sorting criteria for the requests. Default is 'createdAt desc'.
+      responses:
+        "200":
+          description: "List of copilot requests"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Copilot"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/{projectId}/copilots/requests/{copilotRequestId}":
+    get:
+      tags:
+        - projects copilot request
+      operationId: getCopilotRequest
+      security:
+        - Bearer: []
+      description: "Retrieve a specific copilot request."
+      parameters:
+        - $ref: "#/parameters/copilotRequestIdParam"
+      responses:
+        "200":
+          description: "The copilot request"
+          schema:
+            $ref: "#/definitions/Copilot"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/{projectId}/copilots/requests/{copilotRequestId}/approve":
+    post:
+      tags:
+        - projects copilot request
+      operationId: createCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "create copilot opportunity"
+      responses:
+        "200":
+          description: Created copilot opportunity
+          schema:
+            $ref: "#/definitions/CopilotOpportunity"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+      parameters:
+      - $ref: "#/parameters/projectIdParam"
+      - $ref: "#/parameters/copilotRequestIdParam"
+      - name: body
+        in: body
+        required: true
+        schema:
+          $ref: "#/definitions/NewCopilotOpportunity"
+  "/projects/copilots/opportunities":
+    get:
+      tags:
+        - projects copilot opportunities
+      operationId: getAllCopilotOpportunities
+      security:
+        - Bearer: []
+      description: "Retrieve a list of copilot opportunities."
+      parameters:
+        - name: sort
+          required: false
+          type: string
+          enum:
+            - createdAt asc
+            - createdAt desc
+          in: query
+          description: Sorting criteria for the opportunities. Default is 'createdAt desc'.
+      responses:
+        "200":
+          description: "List of copilot opportunities"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CopilotOpportunity"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunities/{copilotOpportunityId}":
+    get:
+      tags:
+        - projects copilot opportunity
+      operationId: getCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Retrieve a specific copilot opportunity."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+      responses:
+        "200":
+          description: "The copilot opportunity"
+          schema:
+            $ref: "#/definitions/CopilotOpportunity"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
   "/projects/{projectId}/attachments":
@@ -5214,6 +5441,13 @@ parameters:
     required: true
     type: integer
     format: int64
+  copilotRequestIdParam:
+    name: copilotRequestId
+    in: path
+    description: copilot request identifier
+    required: true
+    type: integer
+    format: int64
   phaseIdParam:
     name: phaseId
     in: path
@@ -5459,6 +5693,90 @@ definitions:
         type: string
       address:
         type: string
+  NewCopilotRequest:
+    type: object
+    required:
+      - data
+    properties:
+      data:
+        type: object
+        description: copilot request data
+        required:
+            - projectId
+            - complexity
+            - requiresCommunication
+            - paymentType
+            - projectType
+            - overview
+            - skills
+            - startDate
+            - numWeeks
+            - tzRestrictions
+            - numHoursPerWeek
+        properties:
+          projectId:
+            type: number
+            description: The ID of the project
+          copilotUsername:
+            type: string
+            description: The username of the copilot (if applicable)
+          existingCopilot:
+            type: string
+            enum: [yes, no]
+            description: Indicates if an existing copilot is assigned
+          complexity:
+            type: string
+            enum: [low, medium, high]
+            description: Complexity level of the copilot request
+          requiresCommunication:
+            type: string
+            enum: [yes, no]
+            description: Whether the request requires communication
+          paymentType:
+            type: string
+            enum: [standard, other]
+            description: Payment type for the copilot
+          otherPaymentType:
+            type: string
+            nullable: true
+            description: If `paymentType` is "other", specify additional details
+          projectType:
+            type: string
+            description: Type of project
+          overview:
+            type: string
+            minLength: 10
+            description: Overview of the copilot request
+          skills:
+            type: array
+            description: List of required skills
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Skill ID
+                name:
+                  type: string
+                  description: Skill name
+            minItems: 1
+          startDate:
+            type: string
+            format: date
+            description: Start date for the copilot
+          numWeeks:
+            type: integer
+            description: Duration for which copilot is needed
+          tzRestrictions:
+            type: string
+            description: Timezone restrictions (if any)
+          numHoursPerWeek:
+            type: integer
+            description: Expected hours per week
+  NewCopilotOpportunity:
+    type: object
+    required:
+    properties:
   NewProject:
     type: object
     required:
@@ -5581,6 +5899,82 @@ definitions:
           type: integer
           format: int64
 
+  Copilot:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      data:
+        description: copilot data
+        type: object
+      status:
+        description: status of the copilot request
+        type: string
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+  CopilotOpportunity:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      data:
+        description: copilot opportunity data
+        type: object
+      status:
+        description: status of the copilot opportunity
+        type: string
+      type:
+        description: type of the copilot opportunity
+        type: string
+      copilotRequestId:
+        description: copilot request id
+        type: integer
+      projectId:
+        description: project id
+        type: integer
+      skills:
+        type: array
+        items:
+          type: string
+          description: skills of the copilot opportunity
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
   Project:
     type: object
     properties:

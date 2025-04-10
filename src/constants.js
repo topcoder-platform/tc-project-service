@@ -9,6 +9,30 @@ export const PROJECT_STATUS = {
   CANCELLED: 'cancelled',
 };
 
+export const COPILOT_REQUEST_STATUS = {
+  NEW: 'new',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  SEEKING: 'seeking',
+  CANCELED: 'canceled',
+  FULFILLED: 'fulfiled',
+};
+
+export const COPILOT_OPPORTUNITY_STATUS = {
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  CANCELED: 'canceled',
+};
+
+export const COPILOT_OPPORTUNITY_TYPE = {
+  DEV: 'dev',
+  QA: 'qa',
+  DESIGN: 'design',
+  AI: 'ai',
+  DATA_SCIENCE: 'datascience',
+};
+
+
 export const WORKSTREAM_STATUS = {
   DRAFT: 'draft',
   REVIEWED: 'reviewed',
@@ -556,3 +580,5 @@ export const CUSTOMER_PAYMENT_CURRENCY = {
   ZAR: 'ZAR',
   ZMW: 'ZMW',
 };
+
+export const DEFAULT_PAGE_SIZE = 10;

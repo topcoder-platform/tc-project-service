@@ -1,7 +1,7 @@
 version: 2.1
 python_env: &python_env
   docker:
-    - image: cimg/python:3.11.7-browsers
+    - image: cimg/python:3.11.11-browsers
 install_awscli: &install_awscli
   name: "Install awscli"
   command: |
@@ -149,7 +149,7 @@ workflows:
           context : org-global
           filters:
             branches:
-              only: ['develop', 'connect-performance-testing', 'feature/new-milestone-concept', 'permission_fixes']
+              only: ['develop', 'migration-setup']
       - deployProd:
           context : org-global
           filters:

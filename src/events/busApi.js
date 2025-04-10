@@ -38,7 +38,7 @@ const mapEventTypes = {
  * @returns {string} the connect project attachment url
  */
 function connectProjectAttachmentUrl(projectId, attachmentId) {
-  return `${config.get('connectProjectsUrl')}${projectId}/attachments/${attachmentId}`;
+  return `${config.get('workManagerUrl')}projects/${projectId}/attachments/${attachmentId}`;
 }
 
 /**
@@ -48,7 +48,7 @@ function connectProjectAttachmentUrl(projectId, attachmentId) {
  * @returns {string} the connect project url
  */
 function connectProjectUrl(projectId) {
-  return `${config.get('connectProjectsUrl')}${projectId}`;
+  return `${config.get('workManagerUrl')}projects/${projectId}`;
 }
 
 module.exports = (app, logger) => {
