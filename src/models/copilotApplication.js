@@ -2,23 +2,10 @@ import _ from 'lodash';
 import { COPILOT_OPPORTUNITY_STATUS, COPILOT_OPPORTUNITY_TYPE } from '../constants';
 
 module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
-  const CopilotOpportunity = sequelize.define('CopilotOpportunity', {
+  const CopilotApplication = sequelize.define('CopilotApplication', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
-    status: {
-      type: DataTypes.STRING(16),
-      defaultValue: 'active',
-      allowNull: false,
-      validate: {
-        isIn: [_.values(COPILOT_OPPORTUNITY_STATUS)],
-      },
-    },
-    type: {
-      type: DataTypes.STRING(16),
-      allowNull: false,
-      validate: {
-        isIn: [_.values(COPILOT_OPPORTUNITY_TYPE)],
-      },
-    },
+    opportunityId: { type: DataTypes.BIGINT, allowNull: false },
+    userId: { type: DataTypes.BIGINT, allowNull: false },
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
@@ -35,11 +22,9 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
     indexes: [],
   });
 
-  CopilotOpportunity.associate = (models) => {
-    CopilotOpportunity.belongsTo(models.CopilotRequest, { as: 'copilotRequest', foreignKey: 'copilotRequestId' });
-    CopilotOpportunity.belongsTo(models.Project, { as: 'project', foreignKey: 'projectId' });
-    CopilotOpportunity.belongsTo(models.CopilotApplication, { as: 'copilotApplication', foreignKey: 'copilotOpportunityId' });
+  CopilotApplication.associate = (models) => {
+    CopilotApplication.belongsTo(models.CopilotOpportunity, { as: 'copilotOpportunity', foreignKey: 'copilotOpportunityId' });
   };
 
-  return CopilotOpportunity;
+  return CopilotApplication;
 };
