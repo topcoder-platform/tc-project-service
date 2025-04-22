@@ -2,7 +2,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addColumn('copilot_requests', 'copilotOpportunityId', {
       type: Sequelize.BIGINT,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'copilot_opportunities',
         key: 'id',
