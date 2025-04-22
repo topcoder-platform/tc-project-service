@@ -585,7 +585,6 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     topcoderRoles: [
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
-      USER_ROLE.PROJECT_MANAGER,
     ],
     projectRoles: PROJECT_ROLES_MANAGEMENT,
     scopes: SCOPES_PROJECT_INVITES_WRITE,
@@ -600,6 +599,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     topcoderRoles: [
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },
