@@ -40,7 +40,7 @@ module.exports = [
         return next(err);
       });
     }).catch((e) => {
-      util.handleError('Error finding the copilot opportunity', err, req, next);
+      util.handleError('Error applying for copilot opportunity', e, req, next);
     });
   },
 ];
