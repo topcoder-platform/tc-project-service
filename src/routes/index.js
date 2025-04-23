@@ -26,7 +26,7 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 // List of public routes
 const publicRoutes = [
   `/${apiVersion}/projects/copilots/opportunities`,
-  `/${apiVersion}/projects/copilot/opportunities/:id(\\d+)`,
+  `/${apiVersion}/projects/copilot/opportunity/:id(\\d+)`,
 ];
 
 // All project service endpoints need authentication
