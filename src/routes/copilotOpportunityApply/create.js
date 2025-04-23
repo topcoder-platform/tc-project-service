@@ -19,7 +19,8 @@ const addCopilotApplicationValidations = {
 module.exports = [
   validate(addCopilotApplicationValidations),
   async (req, res, next) => {
-    const { data } = req.body;
+    const data = {};
+    const copilotOpportunityId = _.parseInt(req.params.id);
     if (!util.hasPermissionByReq(PERMISSION.APPLY_COPILOT_OPPORTUNITY, req)) {
       const err = new Error('Unable to apply for copilot opportunity');
       _.assign(err, {
@@ -33,11 +34,12 @@ module.exports = [
       userId: req.authUser.userId,
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
+      opportunityId: copilotOpportunityId,
     });
 
     return models.CopilotOpportunity.findOne({
       where: {
-        id: data.opportunityId,
+        id: copilotOpportunityId,
       },
     }).then((opportunity) => {
       if (!opportunity) {

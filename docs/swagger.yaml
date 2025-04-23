@@ -411,7 +411,7 @@ paths:
   "/projects/copilots/opportunities":
     get:
       tags:
-        - projects copilot opportunities
+        - projects copilot opportunity
       operationId: getAllCopilotOpportunities
       security:
         - Bearer: []
@@ -444,11 +444,38 @@ paths:
           description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
-  "/projects/copilots/opportunities/{copilotOpportunityId}":
+  "/projects/copilots/opportunity/{copilotOpportunityId}":
     get:
       tags:
         - projects copilot opportunity
       operationId: getCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Retrieve a specific copilot opportunity."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+      responses:
+        "200":
+          description: "The copilot opportunity"
+          schema:
+            $ref: "#/definitions/CopilotOpportunity"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/apply":
+    post:
+      tags:
+        - projects copilot opportunity
+      operationId: applyCopilotOpportunity
       security:
         - Bearer: []
       description: "Retrieve a specific copilot opportunity."
@@ -5445,6 +5472,13 @@ parameters:
     name: copilotRequestId
     in: path
     description: copilot request identifier
+    required: true
+    type: integer
+    format: int64
+  copilotOpportunityIdParam:
+    name: copilotOpportunityId
+    in: path
+    description: copilot opportunity identifier
     required: true
     type: integer
     format: int64
