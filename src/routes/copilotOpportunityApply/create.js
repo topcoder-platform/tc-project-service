@@ -1,23 +1,10 @@
-import validate from 'express-validation';
 import _ from 'lodash';
-import Joi from 'joi';
 
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 
-const addCopilotApplicationValidations = {
-  body: Joi.object().keys({
-    data: Joi.object()
-      .keys({
-        opportunityId: Joi.number().required(),
-      })
-      .required(),
-  }),
-};
-
 module.exports = [
-  validate(addCopilotApplicationValidations),
   async (req, res, next) => {
     const data = {};
     const copilotOpportunityId = _.parseInt(req.params.id);
