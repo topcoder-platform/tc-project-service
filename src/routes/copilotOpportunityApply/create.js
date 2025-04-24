@@ -3,6 +3,7 @@ import _ from 'lodash';
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
+import { COPILOT_OPPORTUNITY_STATUS } from '../../constants';
 
 module.exports = [
   async (req, res, next) => {
@@ -28,10 +29,29 @@ module.exports = [
       where: {
         id: copilotOpportunityId,
       },
-    }).then((opportunity) => {
+    }).then(async (opportunity) => {
       if (!opportunity) {
         const err = new Error('No opportunity found');
         err.status = 404;
+        return next(err);
+      }
+
+      if (opportunity.status !== COPILOT_OPPORTUNITY_STATUS.ACTIVE) {
+        const err = new Error('Opportunity is not active');
+        err.status = 400;
+        return next(err);
+      }
+
+      const existingApplication = await models.CopilotApplication.findOne({
+        where: {
+          opportunityId: opportunity.id,
+          userId: req.authUser.userId,
+        },
+      });
+
+      if (existingApplication) {
+        const err = new Error('User already applied for this opportunity');
+        err.status = 400;
         return next(err);
       }
   
