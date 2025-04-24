@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { COPILOT_OPPORTUNITY_STATUS, COPILOT_OPPORTUNITY_TYPE } from '../constants';
 
 module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
   const CopilotApplication = sequelize.define('CopilotApplication', {
