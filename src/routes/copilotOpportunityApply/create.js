@@ -35,7 +35,12 @@ module.exports = [
         return next(err);
       }
   
-      return models.CopilotApplication.create(data).catch((err) => {
+      return models.CopilotApplication.create(data)
+        .then((result) => {
+          res.status(201).json(result);
+          return Promise.resolve();
+        })
+        .catch((err) => {
         util.handleError('Error creating copilot application', err, req, next);
         return next(err);
       });
