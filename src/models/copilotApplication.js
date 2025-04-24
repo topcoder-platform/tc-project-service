@@ -22,9 +22,5 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
     indexes: [],
   });
 
-  CopilotApplication.associate = (models) => {
-    CopilotApplication.hasMany(models.CopilotOpportunity, { as: 'copilotOpportunity', foreignKey: 'opportunityId' });
-  };
-
   return CopilotApplication;
 };
