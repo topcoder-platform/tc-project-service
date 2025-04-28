@@ -1,13 +1,24 @@
 import _ from 'lodash';
+import validate from 'express-validation';
 
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 import { COPILOT_OPPORTUNITY_STATUS } from '../../constants';
 
+const applyCopilotRequestValidations = {
+  body: Joi.object().keys({
+    data: Joi.object()
+      .keys({
+        notes: Joi.string(),
+      }),
+  }),
+};
+
 module.exports = [
+  validate(applyCopilotRequestValidations),
   async (req, res, next) => {
-    const data = {};
+    const data = req.body;
     const copilotOpportunityId = _.parseInt(req.params.id);
     if (!util.hasPermissionByReq(PERMISSION.APPLY_COPILOT_OPPORTUNITY, req)) {
       const err = new Error('Unable to apply for copilot opportunity');
