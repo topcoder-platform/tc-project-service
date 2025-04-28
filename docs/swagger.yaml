@@ -11,10 +11,10 @@ info:
       You can also set a custom page size up to 100 with the `perPage` parameter.
 
       Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
-host: "localhost:3000"
+host: "api.topcoder-dev.com"
 basePath: /v5
 schemes:
-  - http
+  - https
 produces:
   - application/json
 consumes:
@@ -481,6 +481,10 @@ paths:
       description: "Retrieve a specific copilot opportunity."
       parameters:
         - $ref: "#/parameters/copilotOpportunityIdParam"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ApplyCopilotOpportunity"
       responses:
         "200":
           description: "The copilot opportunity"
@@ -6218,6 +6222,13 @@ definitions:
           - customer
           - manager
           - copilot
+  ApplyCopilotOpportunity:
+    title: Apply copilot CopilotOpportunity
+    type: object
+    properties:
+      notes:
+        type: string
+        description: notes about applying copilot opportunity
   NewProjectAttachment:
     title: Project attachment request
     type: object
