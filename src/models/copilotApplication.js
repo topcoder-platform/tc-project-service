@@ -13,6 +13,10 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     userId: { type: DataTypes.BIGINT, allowNull: false },
     deletedAt: { type: DataTypes.DATE, allowNull: true },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
