@@ -35,8 +35,6 @@ module.exports = [
       notes: notes ? req.sanitize(notes) : null,
     };
 
-    console.log(data, 'debug data data');
-
     return models.CopilotOpportunity.findOne({
       where: {
         id: copilotOpportunityId,
