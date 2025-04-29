@@ -26,14 +26,14 @@ module.exports = [
       });
       return next(err);
     }
-    // default values
-    _.assign(data, {
+
+    const data = {
       userId: req.authUser.userId,
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       opportunityId: copilotOpportunityId,
       notes: notes ? req.sanitize(notes) : null,
-    });
+    };
 
     console.log(data, 'debug data data');
 
