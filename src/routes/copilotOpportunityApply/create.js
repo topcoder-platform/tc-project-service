@@ -9,18 +9,14 @@ import { COPILOT_OPPORTUNITY_STATUS } from '../../constants';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
-    data: Joi.object()
-      .keys({
-        notes: Joi.string(),
-      }),
+    notes: Joi.string(),
   }),
 };
 
 module.exports = [
   validate(applyCopilotRequestValidations),
   async (req, res, next) => {
-    const data = req.body;
-    console.log(data, 'debug data');
+    const { notes } = req.body;
     const copilotOpportunityId = _.parseInt(req.params.id);
     if (!util.hasPermissionByReq(PERMISSION.APPLY_COPILOT_OPPORTUNITY, req)) {
       const err = new Error('Unable to apply for copilot opportunity');
@@ -36,7 +32,10 @@ module.exports = [
       createdBy: req.authUser.userId,
       updatedBy: req.authUser.userId,
       opportunityId: copilotOpportunityId,
+      notes: notes ? req.sanitize(notes) : null,
     });
+
+    console.log(data, 'debug data data');
 
     return models.CopilotOpportunity.findOne({
       where: {
