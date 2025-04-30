@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 import models from '../../models';
-import { ADMIN_ROLES } from '../../constants';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 
@@ -16,9 +15,6 @@ module.exports = [
       return next(err);
     }
 
-    const isAdmin = util.hasRoles(req, ADMIN_ROLES);
-
-    const userId = req.authUser.userId;
     const projectId = _.parseInt(req.params.projectId);
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
@@ -31,11 +27,7 @@ module.exports = [
     }
     const sortParams = sort.split(' ');
 
-    // Admin can see all requests and the PM can only see requests created by them
-    const whereCondition = _.assign({},
-      isAdmin ? {} : { createdBy: userId },
-      projectId ? { projectId } : {},
-    );
+    const whereCondition = projectId ? { projectId } : {};
 
     return models.CopilotRequest.findAll({
       where: whereCondition,
