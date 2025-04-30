@@ -11,10 +11,10 @@ info:
       You can also set a custom page size up to 100 with the `perPage` parameter.
 
       Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
-host: "localhost:3000"
+host: "api.topcoder-dev.com"
 basePath: /v5
 schemes:
-  - http
+  - https
 produces:
   - application/json
 consumes:
@@ -411,7 +411,7 @@ paths:
   "/projects/copilots/opportunities":
     get:
       tags:
-        - projects copilot opportunities
+        - projects copilot opportunity
       operationId: getAllCopilotOpportunities
       security:
         - Bearer: []
@@ -444,7 +444,7 @@ paths:
           description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
-  "/projects/copilots/opportunities/{copilotOpportunityId}":
+  "/projects/copilots/opportunity/{copilotOpportunityId}":
     get:
       tags:
         - projects copilot opportunity
@@ -454,6 +454,37 @@ paths:
       description: "Retrieve a specific copilot opportunity."
       parameters:
         - $ref: "#/parameters/copilotOpportunityIdParam"
+      responses:
+        "200":
+          description: "The copilot opportunity"
+          schema:
+            $ref: "#/definitions/CopilotOpportunity"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/apply":
+    post:
+      tags:
+        - projects copilot opportunity
+      operationId: applyCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Retrieve a specific copilot opportunity."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ApplyCopilotOpportunity"
       responses:
         "200":
           description: "The copilot opportunity"
@@ -5448,6 +5479,13 @@ parameters:
     required: true
     type: integer
     format: int64
+  copilotOpportunityIdParam:
+    name: copilotOpportunityId
+    in: path
+    description: copilot opportunity identifier
+    required: true
+    type: integer
+    format: int64
   phaseIdParam:
     name: phaseId
     in: path
@@ -6184,6 +6222,13 @@ definitions:
           - customer
           - manager
           - copilot
+  ApplyCopilotOpportunity:
+    title: Apply copilot CopilotOpportunity
+    type: object
+    properties:
+      notes:
+        type: string
+        description: notes about applying copilot opportunity
   NewProjectAttachment:
     title: Project attachment request
     type: object

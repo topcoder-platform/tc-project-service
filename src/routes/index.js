@@ -404,6 +404,10 @@ router.route('/v5/projects/copilots/opportunities')
 router.route('/v5/projects/copilot/opportunity/:id(\\d+)')
   .get(require('./copilotOpportunity/get'));
 
+// Project copilot opportunity apply
+router.route('/v5/projects/copilots/opportunity/:id(\\d+)/apply')
+  .post(require('./copilotOpportunityApply/create'));
+
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
   .get(require('./projectEstimationItems/list'));
