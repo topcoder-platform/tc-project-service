@@ -60,9 +60,8 @@ module.exports = [
       });
 
       if (existingApplication) {
-        const err = new Error('User already applied for this opportunity');
-        err.status = 400;
-        return next(err);
+        res.status(200).json(existingApplication);
+        return Promise.resolve();
       }
   
       return models.CopilotApplication.create(data)
