@@ -487,9 +487,9 @@ paths:
             $ref: "#/definitions/ApplyCopilotOpportunity"
       responses:
         "200":
-          description: "The copilot opportunity"
+          description: "The copilot opportunity application"
           schema:
-            $ref: "#/definitions/CopilotOpportunity"
+            $ref: "#/definitions/CopilotOpportunityApplication"
         "401":
           description: "Unauthorized"
           schema:
@@ -6012,6 +6012,46 @@ definitions:
         type: integer
         format: int64
         description: READ-ONLY. User that last updated this task
+        readOnly: true
+  CopilotOpportunityApplication:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      notes:
+        description: notes regarding the application
+        type: string
+      opportunityId:
+        description: copilot request id
+        type: integer
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+      deletedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was deleted
+        readOnly: true
+      deletedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that deleted this task
         readOnly: true
   Project:
     type: object
