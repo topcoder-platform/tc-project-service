@@ -9,6 +9,7 @@ const copilotAndAbove = require('./copilotAndAbove');
 const workManagementPermissions = require('./workManagementForTemplate');
 const projectSettingEdit = require('./projectSetting.edit');
 const customerPaymentConfirm = require('./customerPayment.confirm');
+const viewCopilotApplications = require('./copilotApplications.view');
 
 const generalPermission = require('./generalPermission');
 const { PERMISSION } = require('./constants');
@@ -199,4 +200,7 @@ module.exports = () => {
   Authorizer.setPolicy('customerPayment.view', generalPermission(PERMISSION.VIEW_CUSTOMER_PAYMENT));
   Authorizer.setPolicy('customerPayment.edit', generalPermission(PERMISSION.UPDATE_CUSTOMER_PAYMENT));
   Authorizer.setPolicy('customerPayment.confirm', customerPaymentConfirm);
+
+  // Copilot opportunity
+  Authorizer.setPolicy('copilotApplications.view', viewCopilotApplications);
 };

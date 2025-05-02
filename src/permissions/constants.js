@@ -277,6 +277,21 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
+  LIST_COPILOT_OPPORTUNITY: {
+    meta: {
+      title: 'Apply copilot opportunity',
+      group: 'Apply Copilot',
+      description: 'Who can apply for copilot opportunity.',
+    },
+    topcoderRoles: [
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    projectRoles: [
+      USER_ROLE.PROJECT_MANAGER,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
   MANAGE_PROJECT_BILLING_ACCOUNT_ID: {
     meta: {
       title: 'Manage Project property "billingAccountId"',
