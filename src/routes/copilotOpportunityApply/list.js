@@ -13,6 +13,7 @@ module.exports = [
 
     console.log("start list operation");
     const isAdmin = util.hasRoles(req, ADMIN_ROLES);
+    const userId = req.authUser.userId;
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
     if (sort.indexOf(' ') === -1) {
