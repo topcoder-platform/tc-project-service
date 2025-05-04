@@ -13,7 +13,7 @@ module.exports = freq => new Promise((resolve, reject) => {
   console.log("start permission check");
   const opportunityId = _.parseInt(freq.params.id);
   const currentUserId = freq.authUser.userId;
-  return models.CopilotOpportunity.find({
+  return models.CopilotOpportunity.findOne({
     where: {
       id: opportunityId,
     },
