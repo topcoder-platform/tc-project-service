@@ -14,6 +14,7 @@ module.exports = [
     console.log("start list operation");
     const isAdmin = util.hasRoles(req, ADMIN_ROLES);
     const userId = req.authUser.userId;
+    const opportunityId = _.parseInt(req.params.id);
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
     if (sort.indexOf(' ') === -1) {
@@ -26,7 +27,9 @@ module.exports = [
     const sortParams = sort.split(' ');
 
     // Admin can see all requests and the PM can only see requests created by them
-    const whereCondition = _.assign({},
+    const whereCondition = _.assign({
+      opportunityId,
+    },
       isAdmin ? {} : { createdBy: userId },
     );
 
