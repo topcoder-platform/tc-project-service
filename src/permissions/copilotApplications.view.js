@@ -10,7 +10,6 @@ import models from '../models';
  * @return {Promise}              Returns a promise
  */
 module.exports = freq => new Promise((resolve, reject) => {
-  console.log("start permission check");
   const opportunityId = _.parseInt(freq.params.id);
   const currentUserId = freq.authUser.userId;
   return models.CopilotOpportunity.findOne({
@@ -25,11 +24,9 @@ module.exports = freq => new Promise((resolve, reject) => {
       const projectId = opportunity.projectId;
       const isProjectManager = util.hasProjectManagerRole(req);
 
-      console.log("got opportunity", opportunityId);
       return models.ProjectMember.getActiveProjectMembers(projectId)
       .then((members) => {
 
-        console.log("got active members", projectId);
         return models.CopilotApplication.findOne({
           where: {
             opportunityId: opportunityId,
@@ -37,9 +34,8 @@ module.exports = freq => new Promise((resolve, reject) => {
           },
         }).then((copilotApplication) => {
           const isPartOfProject = isProjectManager && members.find(member => member.userId === currentUserId);
-          // check if auth user has acecss to this project
+          // check if auth user has access to this project
           const hasAccess = util.hasAdminRole(req) || isPartOfProject || !!copilotApplication;
-          console.log("got assigned application", hasAccess);
           return Promise.resolve(hasAccess);
         })
       })

@@ -11,8 +11,7 @@ module.exports = [
   permissions('copilotApplications.view'),
   (req, res, next) => {
 
-    console.log("start list operation");
-    const isAdmin = util.hasRoles(req, ADMIN_ROLES);
+    const canAccessAllApplications = util.hasRoles(req, ADMIN_ROLES) || util.hasProjectManagerRole(req);
     const userId = req.authUser.userId;
     const opportunityId = _.parseInt(req.params.id);
 
@@ -30,7 +29,7 @@ module.exports = [
     const whereCondition = _.assign({
       opportunityId,
     },
-      isAdmin ? {} : { createdBy: userId },
+      canAccessAllApplications ? {} : { createdBy: userId },
     );
 
     return models.CopilotApplication.findAll({
