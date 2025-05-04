@@ -30,7 +30,7 @@ module.exports = freq => new Promise((resolve, reject) => {
       .then((members) => {
 
         console.log("got active members", projectId);
-        return models.CopilotApplications.findOne({
+        return models.CopilotApplication.findOne({
           where: {
             opportunityId: opportunityId,
             userId: currentUserId,
