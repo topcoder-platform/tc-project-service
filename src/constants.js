@@ -90,6 +90,7 @@ export const USER_ROLE = {
   PROJECT_MANAGER: 'Project Manager',
   TOPCODER_USER: 'Topcoder User',
   TG_ADMIN: 'tgadmin',
+  TC_COPILOT: 'copilot',
 };
 
 export const ADMIN_ROLES = [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN, USER_ROLE.TG_ADMIN];

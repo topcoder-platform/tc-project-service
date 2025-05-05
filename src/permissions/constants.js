@@ -272,7 +272,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
       description: 'Who can apply for copilot opportunity.',
     },
     topcoderRoles: [
-      USER_ROLE.COPILOT,
+      USER_ROLE.TC_COPILOT,
     ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
