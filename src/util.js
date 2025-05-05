@@ -226,6 +226,23 @@ const projectServiceUtils = {
   },
 
   /**
+   * Helper funtion to verify if user has project manager role
+   * @param  {object} req  Request object that should contain authUser
+   * @return {boolean}      true/false
+   */
+  hasProjectManagerRole: (req) => {
+    const isMachineToken = _.get(req, 'authUser.isMachine', false);
+    const tokenScopes = _.get(req, 'authUser.scopes', []);
+    if (isMachineToken) {
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      return false;
+    }
+    let roles = _.get(req, 'authUser.roles', []);
+    roles = roles.map(s => s.toLowerCase());
+    return roles.includes(USER_ROLE.PROJECT_MANAGER.toLowerCase());
+  },
+
+  /**
    * Parses query fields and groups them per table
    * @param  {array}      queryFields     list of query fields
    * @param  {Object}     allowedFields   the allowed fields

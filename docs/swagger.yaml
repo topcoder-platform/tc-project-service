@@ -502,6 +502,64 @@ paths:
           description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/applications":
+    get:
+      tags:
+        - projects copilot opportunity applications
+      operationId: listCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Retrieve the list copilot opportunity applications."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+        - name: sort
+          required: false
+          description: >
+            sort projects by createdAt, updatedAt. Default
+            is createdAt asc
+          in: query
+          type: string
+      responses:
+        "200":
+          description: A list of projects
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CopilotOpportunityApplication"
+          headers:
+            X-Next-Page:
+              type: integer
+              description: The index of the next page
+            X-Page:
+              type: integer
+              description: The index of the current page (starting at 1)
+            X-Per-Page:
+              type: integer
+              description: The number of items to list per page
+            X-Prev-Page:
+              type: integer
+              description: The index of the previous page
+            X-Total:
+              type: integer
+              description: The total number of items
+            X-Total-Pages:
+              type: integer
+              description: The total number of pages
+            Link:
+              type: string
+              description: Pagination link header.
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
   "/projects/{projectId}/attachments":
     get:
       tags:
