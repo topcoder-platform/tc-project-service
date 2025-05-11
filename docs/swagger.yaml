@@ -567,7 +567,7 @@ paths:
       operationId: assignCopilotOpportunity
       security:
         - Bearer: []
-      description: "Retrieve a specific copilot opportunity."
+      description: "Assign a copilot opportunity with copilot."
       parameters:
         - $ref: "#/parameters/copilotOpportunityIdParam"
         - in: body
@@ -6359,19 +6359,19 @@ definitions:
           - manager
           - copilot
   ApplyCopilotOpportunity:
-    title: Apply copilot CopilotOpportunity
+    title: Apply Copilot Opportunity
     type: object
     properties:
       notes:
         type: string
         description: notes about applying copilot opportunity
   AssignCopilotOpportunity:
-    title: Assign copilot CopilotOpportunity
+    title: Assign Copilot Opportunity
     type: object
     properties:
       applicationId:
         type: string
-        description: application id which has to be accepted
+        description: The ID of the application to be accepted for the copilot opportunity.
   NewProjectAttachment:
     title: Project attachment request
     type: object

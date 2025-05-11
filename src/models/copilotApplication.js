@@ -21,7 +21,6 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
     status: {
       type: DataTypes.STRING(16),
       defaultValue: 'pending',
-      allowNull: false,
       validate: {
         isIn: [_.values(COPILOT_APPLICATION_STATUS)],
       },

@@ -80,13 +80,16 @@ module.exports = [
         return opportunity.update({status: COPILOT_OPPORTUNITY_STATUS.COMPLETED})
       })
       .then(() => {
-        return models.CopilotApplication.update({
-          status: 'ACCEPTED'
+        const updatedApplication = models.CopilotApplication.update({
+          status: COPILOT_APPLICATION_STATUS.ACCEPTED,
         }, {
           where: {
             id: applicationId,
           }
-        })
+        });
+
+        res.status(200).send(updatedApplication);
+        return Promise.resolve()
       })
     })
     .catch(err => next(err));
