@@ -276,6 +276,18 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
+  ASSIGN_COPILOT_OPPORTUNITY: {
+    meta: {
+      title: 'Assign copilot to opportunity',
+      group: 'Assign Copilot',
+      description: 'Who can assign for copilot opportunity.',
+    },
+    topcoderRoles: [
+      USER_ROLE.PROJECT_MANAGER,
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
 
   LIST_COPILOT_OPPORTUNITY: {
     meta: {

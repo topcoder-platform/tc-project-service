@@ -560,6 +560,37 @@ paths:
           description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/assign":
+    post:
+      tags:
+        - assign project copilot opportunity
+      operationId: assignCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Retrieve a specific copilot opportunity."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/AssignCopilotOpportunity"
+      responses:
+        "200":
+          description: "The copilot opportunity application"
+          schema:
+            $ref: "#/definitions/CopilotOpportunityApplication"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
   "/projects/{projectId}/attachments":
     get:
       tags:
@@ -6081,6 +6112,13 @@ definitions:
       notes:
         description: notes regarding the application
         type: string
+      status:
+        description: status of the application
+        type: string
+        enum:
+          - pending
+          - accepted
+        example: pending
       opportunityId:
         description: copilot request id
         type: integer
@@ -6327,6 +6365,13 @@ definitions:
       notes:
         type: string
         description: notes about applying copilot opportunity
+  AssignCopilotOpportunity:
+    title: Assign copilot CopilotOpportunity
+    type: object
+    properties:
+      applicationId:
+        type: string
+        description: application id which has to be accepted
   NewProjectAttachment:
     title: Project attachment request
     type: object
