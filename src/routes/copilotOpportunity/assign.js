@@ -79,8 +79,8 @@ module.exports = [
 
         return opportunity.update({status: COPILOT_OPPORTUNITY_STATUS.COMPLETED})
       })
-      .then(() => {
-        const updatedApplication = models.CopilotApplication.update({
+      .then(async () => {
+        const [, affected] = await models.CopilotApplication.update({
           status: COPILOT_APPLICATION_STATUS.ACCEPTED,
         }, {
           where: {
@@ -88,7 +88,7 @@ module.exports = [
           }
         });
 
-        res.status(200).send(updatedApplication);
+        res.status(200).send(affected[0]);
         return Promise.resolve()
       })
     })
