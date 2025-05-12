@@ -576,7 +576,7 @@ paths:
             $ref: "#/definitions/AssignCopilotOpportunity"
       responses:
         "200":
-          description: "The copilot opportunity application"
+          description: "The response after assigning an copilot opportunity"
           schema:
             $ref: "#/definitions/CopilotOpportunityAssignResponse"
         "401":
