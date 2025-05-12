@@ -578,7 +578,7 @@ paths:
         "200":
           description: "The copilot opportunity application"
           schema:
-            $ref: "#/definitions/CopilotOpportunityApplication"
+            $ref: "#/definitions/CopilotOpportunityAssignResponse"
         "401":
           description: "Unauthorized"
           schema:
@@ -6149,6 +6149,13 @@ definitions:
         format: int64
         description: READ-ONLY. User that deleted this task
         readOnly: true
+  CopilotOpportunityAssignResponse:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
   Project:
     type: object
     properties:
