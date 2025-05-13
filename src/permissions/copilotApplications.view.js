@@ -33,9 +33,8 @@ module.exports = freq => new Promise((resolve, reject) => {
             userId: currentUserId,
           },
         }).then((copilotApplication) => {
-          const isPartOfProject = isProjectManager && members.find(member => member.userId === currentUserId);
           // check if auth user has access to this project
-          const hasAccess = util.hasAdminRole(req) || isPartOfProject || !!copilotApplication;
+          const hasAccess = util.hasAdminRole(req) || isProjectManager || !!copilotApplication;
           return Promise.resolve(hasAccess);
         })
       })
