@@ -5,7 +5,7 @@ import Joi from 'joi';
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
-import { COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS } from '../../constants';
+import { COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS } from '../../constants';
 
 const assignCopilotOpportunityValidations = {
   body: Joi.object().keys({
@@ -27,71 +27,68 @@ module.exports = [
       return next(err);
     }
 
-    return models.sequelize.transaction(() => {
-      models.CopilotOpportunity.findOne({
-        where: {
-          id: copilotOpportunityId,
-        },
-      }).then(async (opportunity) => {
-        if (!opportunity) {
-          const err = new Error('No opportunity found');
-          err.status = 404;
-          return next(err);
-        }
-  
-        if (opportunity.status !== COPILOT_OPPORTUNITY_STATUS.ACTIVE) {
-          const err = new Error('Opportunity is not active');
-          err.status = 400;
-          return next(err);
-        }
+    return models.sequelize.transaction(async (t) => {
+      const opportunity = await models.CopilotOpportunity.findOne({
+        where: { id: copilotOpportunityId },
+        transaction: t,
+      });
 
-        const application = models.CopilotApplication.findOne({
-          where: {
-            id: applicationId,
-          },
-        });
+      if (!opportunity) {
+        const err = new Error('No opportunity found');
+        err.status = 404;
+        throw err;
+      }
 
-        if (!application) {
-          const err = new Error('No such application available');
-          err.status = 400;
-          return next(err);
-        }
+      if (opportunity.status !== COPILOT_OPPORTUNITY_STATUS.ACTIVE) {
+        const err = new Error('Opportunity is not active');
+        err.status = 400;
+        throw err;
+      }
 
-        if (application.status === COPILOT_APPLICATION_STATUS.ACCEPTED) {
-          const err = new Error('Application already accepted');
-          err.status = 400;
-          return next(err);
-        }
+      const application = await models.CopilotApplication.findOne({
+        where: { id: applicationId },
+        transaction: t,
+      });
 
-        const projectId = opportunity.projectId;
-        const userId = application.userId;
+      if (!application) {
+        const err = new Error('No such application available');
+        err.status = 400;
+        throw err;
+      }
 
-        const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId);
+      if (application.status === COPILOT_APPLICATION_STATUS.ACCEPTED) {
+        const err = new Error('Application already accepted');
+        err.status = 400;
+        throw err;
+      }
 
-        const existingUser = activeMembers.find(item => item.userId === userId);
+      const projectId = opportunity.projectId;
+      const userId = application.userId;
+      const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId);
 
-        if (existingUser) {
-          const err = new Error(`User is already part of the project as ${existingUser.role}`);
-          err.status = 400;
-          return next(err);
-        }
+      const existingUser = activeMembers.find(item => item.userId === userId);
+      if (existingUser) {
+        const err = new Error(`User is already part of the project as ${existingUser.role}`);
+        err.status = 400;
+        throw err;
+      }
 
+      await models.CopilotRequest.update(
+        { status: COPILOT_REQUEST_STATUS.FULFILLED },
+        { where: { id: opportunity.copilotRequestId }, transaction: t },
+      );
 
-        return opportunity.update({status: COPILOT_OPPORTUNITY_STATUS.COMPLETED})
-      })
-      .then(async () => {
-        await models.CopilotApplication.update({
-          status: COPILOT_APPLICATION_STATUS.ACCEPTED,
-        }, {
-          where: {
-            id: applicationId,
-          }
-        });
+      await opportunity.update(
+        { status: COPILOT_OPPORTUNITY_STATUS.COMPLETED },
+        { transaction: t },
+      );
 
-        res.status(200).send({id: applicationId});
-        return Promise.resolve()
-      })
-    })
-    .catch(err => next(err));
+      await models.CopilotApplication.update(
+        { status: COPILOT_APPLICATION_STATUS.ACCEPTED },
+        { where: { id: applicationId }, transaction: t },
+      );
+
+      res.status(200).send({ id: applicationId });
+    }).catch(err => next(err));
   },
 ];

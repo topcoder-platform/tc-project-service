@@ -63,16 +63,16 @@ module.exports = [
         res.status(200).json(existingApplication);
         return Promise.resolve();
       }
-  
+
       return models.CopilotApplication.create(data)
         .then((result) => {
           res.status(201).json(result);
           return Promise.resolve();
         })
         .catch((err) => {
-        util.handleError('Error creating copilot application', err, req, next);
-        return next(err);
-      });
+          util.handleError('Error creating copilot application', err, req, next);
+          return next(err);
+        });
     }).catch((e) => {
       util.handleError('Error applying for copilot opportunity', e, req, next);
     });

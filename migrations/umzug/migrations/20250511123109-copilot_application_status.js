@@ -6,7 +6,7 @@ module.exports = {
     });
 
     await queryInterface.sequelize.query(
-      `UPDATE copilot_applications SET status = 'pending' WHERE status IS NULL`
+      'UPDATE copilot_applications SET status = \'pending\' WHERE status IS NULL',
     );
 
     await queryInterface.changeColumn('copilot_applications', 'status', {

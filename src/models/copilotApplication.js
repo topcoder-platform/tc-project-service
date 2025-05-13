@@ -9,14 +9,14 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
       allowNull: false,
       references: {
         model: 'copilot_opportunities',
-        key: 'id'
+        key: 'id',
       },
       onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
+      onDelete: 'CASCADE',
     },
     notes: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
     },
     status: {
       type: DataTypes.STRING(16),

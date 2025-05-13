@@ -199,7 +199,7 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
 };
 
 const sendInviteEmail = (req, projectId, invite) => {
-  req.log.debug(`Sending invite email: ${JSON.stringify(req.body)}, ${projectId}, ${JSON.stringify(invite)}`)
+  req.log.debug(`Sending invite email: ${JSON.stringify(req.body)}, ${projectId}, ${JSON.stringify(invite)}`);
   req.log.debug(req.authUser);
   const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
   const promises = [
@@ -295,13 +295,12 @@ module.exports = [
     // whom we are inviting, because Member Service has a loose search logic and may return
     // users with handles whom we didn't search for
       .then((foundUsers) => {
-        if(invite.handles) {
+        if (invite.handles) {
           const lowerCaseHandles = invite.handles.map(handle => handle.toLowerCase());
           return foundUsers.filter(foundUser => _.includes(lowerCaseHandles, foundUser.handleLower));
         }
-        else {
-          return []
-        }
+
+        return [];
       })
       .then((inviteUsers) => {
         const members = req.context.currentProjectMembers;
@@ -414,7 +413,7 @@ module.exports = [
                       RESOURCES.PROJECT_MEMBER_INVITE,
                       v.toJSON());
 
-                    req.log.debug(`V: ${JSON.stringify(v)}`)
+                    req.log.debug(`V: ${JSON.stringify(v)}`);
                     // send email invite (async)
                     if (v.email && !v.userId && v.status === INVITE_STATUS.PENDING) {
                       sendInviteEmail(req, projectId, v);
@@ -443,7 +442,7 @@ module.exports = [
             }
           });
       }).catch((err) => {
-        console.log(err)
+        console.log(err);
         if (failed.length) {
           res.status(403).json(_.assign({}, { success: [] }, { failed }));
         } else next(err);

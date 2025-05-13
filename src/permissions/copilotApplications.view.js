@@ -25,11 +25,9 @@ module.exports = freq => new Promise((resolve, reject) => {
       const isProjectManager = util.hasProjectManagerRole(req);
 
       return models.ProjectMember.getActiveProjectMembers(projectId)
-      .then((members) => {
-
-        return models.CopilotApplication.findOne({
+        .then(members => models.CopilotApplication.findOne({
           where: {
-            opportunityId: opportunityId,
+            opportunityId,
             userId: currentUserId,
           },
         }).then((copilotApplication) => {
@@ -37,8 +35,7 @@ module.exports = freq => new Promise((resolve, reject) => {
           // check if auth user has access to this project
           const hasAccess = util.hasAdminRole(req) || isPartOfProject || !!copilotApplication;
           return Promise.resolve(hasAccess);
-        })
-      })
+        }));
     })
     .then((hasAccess) => {
       if (!hasAccess) {
