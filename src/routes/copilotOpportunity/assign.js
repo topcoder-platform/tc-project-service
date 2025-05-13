@@ -67,8 +67,8 @@ module.exports = [
       const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId);
 
       const existingUser = activeMembers.find(item => item.userId === userId);
-      if (existingUser) {
-        const err = new Error(`User is already part of the project as ${existingUser.role}`);
+      if (existingUser && existingUser.role === 'copilot') {
+        const err = new Error(`User is already a copilot of this project`);
         err.status = 400;
         throw err;
       }
