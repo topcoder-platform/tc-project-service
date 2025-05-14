@@ -9,7 +9,7 @@ import { COPILOT_OPPORTUNITY_STATUS } from '../../constants';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
-    notes: Joi.string(),
+    notes: Joi.string().optional(),
   }),
 };
 
