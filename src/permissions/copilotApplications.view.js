@@ -21,23 +21,17 @@ module.exports = freq => new Promise((resolve, reject) => {
       const req = freq;
       req.context = req.context || {};
       req.context.currentOpportunity = opportunity;
-      const projectId = opportunity.projectId;
       const isProjectManager = util.hasProjectManagerRole(req);
 
-      return models.ProjectMember.getActiveProjectMembers(projectId)
-      .then((members) => {
-
-        return models.CopilotApplication.findOne({
-          where: {
-            opportunityId: opportunityId,
-            userId: currentUserId,
-          },
-        }).then((copilotApplication) => {
-          const isPartOfProject = isProjectManager && members.find(member => member.userId === currentUserId);
-          // check if auth user has access to this project
-          const hasAccess = util.hasAdminRole(req) || isPartOfProject || !!copilotApplication;
-          return Promise.resolve(hasAccess);
-        })
+      return models.CopilotApplication.findOne({
+        where: {
+          opportunityId: opportunityId,
+          userId: currentUserId,
+        },
+      }).then((copilotApplication) => {
+        // check if auth user has access to this project
+        const hasAccess = util.hasAdminRole(req) || isProjectManager || !!copilotApplication;
+        return Promise.resolve(hasAccess);
       })
     })
     .then((hasAccess) => {
