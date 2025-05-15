@@ -560,6 +560,37 @@ paths:
           description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/assign":
+    post:
+      tags:
+        - assign project copilot opportunity
+      operationId: assignCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Assign a copilot opportunity with copilot."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/AssignCopilotOpportunity"
+      responses:
+        "200":
+          description: "The response after assigning an copilot opportunity"
+          schema:
+            $ref: "#/definitions/CopilotOpportunityAssignResponse"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
   "/projects/{projectId}/attachments":
     get:
       tags:
@@ -6081,6 +6112,13 @@ definitions:
       notes:
         description: notes regarding the application
         type: string
+      status:
+        description: status of the application
+        type: string
+        enum:
+          - pending
+          - accepted
+        example: pending
       opportunityId:
         description: copilot request id
         type: integer
@@ -6111,6 +6149,13 @@ definitions:
         format: int64
         description: READ-ONLY. User that deleted this task
         readOnly: true
+  CopilotOpportunityAssignResponse:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
   Project:
     type: object
     properties:
@@ -6321,12 +6366,19 @@ definitions:
           - manager
           - copilot
   ApplyCopilotOpportunity:
-    title: Apply copilot CopilotOpportunity
+    title: Apply Copilot Opportunity
     type: object
     properties:
       notes:
         type: string
         description: notes about applying copilot opportunity
+  AssignCopilotOpportunity:
+    title: Assign Copilot Opportunity
+    type: object
+    properties:
+      applicationId:
+        type: string
+        description: The ID of the application to be accepted for the copilot opportunity.
   NewProjectAttachment:
     title: Project attachment request
     type: object

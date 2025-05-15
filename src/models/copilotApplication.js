@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { COPILOT_APPLICATION_STATUS } from '../constants';
 
 module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
   const CopilotApplication = sequelize.define('CopilotApplication', {
@@ -8,14 +9,22 @@ module.exports = function defineCopilotOpportunity(sequelize, DataTypes) {
       allowNull: false,
       references: {
         model: 'copilot_opportunities',
-        key: 'id'
+        key: 'id',
       },
       onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
+      onDelete: 'CASCADE',
     },
     notes: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.STRING(16),
+      defaultValue: 'pending',
+      validate: {
+        isIn: [_.values(COPILOT_APPLICATION_STATUS)],
+      },
+      allowNull: false,
     },
     userId: { type: DataTypes.BIGINT, allowNull: false },
     deletedAt: { type: DataTypes.DATE, allowNull: true },

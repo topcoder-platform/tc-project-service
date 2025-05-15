@@ -18,6 +18,11 @@ export const COPILOT_REQUEST_STATUS = {
   FULFILLED: 'fulfiled',
 };
 
+export const COPILOT_APPLICATION_STATUS = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+};
+
 export const COPILOT_OPPORTUNITY_STATUS = {
   ACTIVE: 'active',
   COMPLETED: 'completed',
