@@ -25,8 +25,8 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 
 // List of public routes
 const publicRoutes = [
-  `/${apiVersion}/projects/copilots/opportunities`,
-  `/${apiVersion}/projects/copilot/opportunity/:id(\\d+)`,
+  new RegExp(`^/${apiVersion}/projects/copilots/opportunities$`),
+  new RegExp(`^/${apiVersion}/projects/copilot/opportunity/\\d+$`),
 ];
 
 // All project service endpoints need authentication
@@ -35,7 +35,7 @@ const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 router.all(
   RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`),
   (req, res, next) => {
-    if (publicRoutes.some(route => req.path.match(new RegExp(`^${route}$`)))) {
+    if (publicRoutes.some(routeRegex => routeRegex.test(req.path))) {
       return next();
     }
     // JWT authentication
@@ -403,16 +403,6 @@ router.route('/v5/projects/copilots/opportunities')
   .get(require('./copilotOpportunity/list'));
 router.route('/v5/projects/copilot/opportunity/:id(\\d+)')
   .get(require('./copilotOpportunity/get'));
-
-// Project copilot opportunity apply
-router.route('/v5/projects/copilots/opportunity/:id(\\d+)/apply')
-  .post(require('./copilotOpportunityApply/create'));
-router.route('/v5/projects/copilots/opportunity/:id(\\d+)/applications')
-  .get(require('./copilotOpportunityApply/list'));
-
-// Copilot opportunity assign
-router.route('/v5/projects/copilots/opportunity/:id(\\d+)/assign')
-  .post(require('./copilotOpportunity/assign'));
 
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
