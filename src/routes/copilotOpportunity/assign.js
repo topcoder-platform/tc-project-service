@@ -88,6 +88,8 @@ module.exports = [
         email: existingUser.email,
       })
 
+      console.log("aftr create", invite)
+
       util.sendResourceToKafkaBus(
         req,
         EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
@@ -117,7 +119,7 @@ module.exports = [
             ],
           }],
         },
-        recipients: [invite.email],
+        recipients: [existingUser.email],
         version: 'v3',
         from: {
           name: config.get('EMAIL_INVITE_FROM_NAME'),
