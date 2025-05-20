@@ -83,7 +83,7 @@ module.exports = [
 
       const applicationUser = await util.getMemberDetailsByUserIds([userId], req.log, req.id);
 
-      req.log.info("before create", applicationUser, userId, applicationUser[0])
+      req.log.info("before create", applicationUser, userId, applicationUser[0].email)
 
       const invite = await models.ProjectMemberInvite.create({
         status: INVITE_STATUS.PENDING,
@@ -92,6 +92,8 @@ module.exports = [
         email: applicationUser[0].email,
         createdBy: req.authUser.userId,
         createdAt: new Date(),
+        updatedBy: req.authUser.userId,
+        updatedAt: new Date(),
       })
 
       req.log.info("aftr create", invite)
