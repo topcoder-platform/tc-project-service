@@ -81,6 +81,8 @@ module.exports = [
         },
       });
 
+      req.log.info("before create", existingUser)
+
       const invite = await models.ProjectMemberInvite.create({
         status: INVITE_STATUS.PENDING,
         role: PROJECT_MEMBER_ROLE.COPILOT,
@@ -88,7 +90,7 @@ module.exports = [
         email: existingUser.email,
       })
 
-      console.log("aftr create", invite)
+      req.log.info("aftr create", invite)
 
       util.sendResourceToKafkaBus(
         req,
