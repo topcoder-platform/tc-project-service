@@ -83,20 +83,19 @@ module.exports = [
 
       const applicationUser = await util.getMemberDetailsByUserIds([userId], req.log, req.id);
 
-      req.log.info("before create", applicationUser, userId, applicationUser[0].email)
-
       const invite = await models.ProjectMemberInvite.create({
         status: INVITE_STATUS.PENDING,
         role: PROJECT_MEMBER_ROLE.COPILOT,
         userId,
+        projectId,
         email: applicationUser[0].email,
         createdBy: req.authUser.userId,
         createdAt: new Date(),
         updatedBy: req.authUser.userId,
         updatedAt: new Date(),
+      }, {
+        transaction: t,
       })
-
-      req.log.info("aftr create", invite)
 
       util.sendResourceToKafkaBus(
         req,
@@ -104,7 +103,7 @@ module.exports = [
         RESOURCES.PROJECT_MEMBER_INVITE,
         invite.toJSON());
 
-      const initiator = await util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id);
+      const authUserDetails = await util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id);
 
       const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
       await createEvent(emailEventType, {
@@ -121,7 +120,7 @@ module.exports = [
                 title: config.get('inviteEmailSectionTitle'),
                 projectName: project.name,
                 projectId,
-                initiator,
+                initiator: authUserDetails[0],
                 isSSO: util.isSSO(project),
               },
             ],
