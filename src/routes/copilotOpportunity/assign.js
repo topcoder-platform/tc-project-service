@@ -81,13 +81,15 @@ module.exports = [
         },
       });
 
-      req.log.info("before create", existingUser)
+      const applicationUser = await util.getMemberDetailsByUserIds([userId], req.log, req.id)[0];
+
+      req.log.info("before create", applicationUser)
 
       const invite = await models.ProjectMemberInvite.create({
         status: INVITE_STATUS.PENDING,
         role: PROJECT_MEMBER_ROLE.COPILOT,
         userId,
-        email: existingUser.email,
+        email: applicationUser.email,
       })
 
       req.log.info("aftr create", invite)
@@ -121,7 +123,7 @@ module.exports = [
             ],
           }],
         },
-        recipients: [existingUser.email],
+        recipients: [applicationUser.email],
         version: 'v3',
         from: {
           name: config.get('EMAIL_INVITE_FROM_NAME'),
