@@ -119,7 +119,9 @@ module.exports = [
                   };
                   return util
                     .addUserToProject(req, member)
-                    .then(() => res.json(util.postProcessInvites('$.email', updatedInvite, req)))
+                    .then(async () => {
+                      return res.json(util.postProcessInvites('$.email', updatedInvite, req))
+                    })
                     .catch(err => next(err));
                 });
             }

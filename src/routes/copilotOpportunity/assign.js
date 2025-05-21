@@ -81,6 +81,21 @@ module.exports = [
         },
       });
 
+      const existingInvite = await models.ProjectMemberInvite.findAll({
+        where: {
+          userId,
+          projectId,
+          role: PROJECT_MEMBER_ROLE.COPILOT,
+          status: INVITE_STATUS.PENDING,
+        },
+      });
+
+      if (existingInvite) {
+        const err = new Error(`User already has an pending invite to the project`);
+        err.status = 400;
+        throw err;
+      }
+
       const applicationUser = await util.getMemberDetailsByUserIds([userId], req.log, req.id);
 
       const invite = await models.ProjectMemberInvite.create({
@@ -134,21 +149,6 @@ module.exports = [
         },
         categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
       }, req.log);
-
-      await models.CopilotRequest.update(
-        { status: COPILOT_REQUEST_STATUS.FULFILLED },
-        { where: { id: opportunity.copilotRequestId }, transaction: t },
-      );
-
-      await opportunity.update(
-        { status: COPILOT_OPPORTUNITY_STATUS.COMPLETED },
-        { transaction: t },
-      );
-
-      await models.CopilotApplication.update(
-        { status: COPILOT_APPLICATION_STATUS.ACCEPTED },
-        { where: { id: applicationId }, transaction: t },
-      );
 
       res.status(200).send({ id: applicationId });
     }).catch(err => next(err));
