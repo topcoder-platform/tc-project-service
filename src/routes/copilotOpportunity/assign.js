@@ -66,7 +66,7 @@ module.exports = [
 
       const projectId = opportunity.projectId;
       const userId = application.userId;
-      const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId);
+      const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId, t);
 
       const existingUser = activeMembers.find(item => item.userId === userId);
       if (existingUser && existingUser.role === 'copilot') {
@@ -79,6 +79,7 @@ module.exports = [
         where: {
           id: projectId,
         },
+        transaction: t,
       });
 
       const existingInvite = await models.ProjectMemberInvite.findAll({
@@ -88,6 +89,7 @@ module.exports = [
           role: PROJECT_MEMBER_ROLE.COPILOT,
           status: INVITE_STATUS.PENDING,
         },
+        transaction: t,
       });
 
       if (existingInvite) {
@@ -103,6 +105,7 @@ module.exports = [
         role: PROJECT_MEMBER_ROLE.COPILOT,
         userId,
         projectId,
+        applicationId: application.id,
         email: applicationUser[0].email,
         createdBy: req.authUser.userId,
         createdAt: new Date(),
