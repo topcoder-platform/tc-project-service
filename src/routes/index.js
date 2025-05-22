@@ -25,8 +25,8 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 
 // List of public routes
 const publicRoutes = [
-  `/${apiVersion}/projects/copilots/opportunities`,
-  `/${apiVersion}/projects/copilot/opportunity/:id(\\d+)`,
+  new RegExp(`^/${apiVersion}/projects/copilots/opportunities$`),
+  new RegExp(`^/${apiVersion}/projects/copilot/opportunity/\\d+$`),
 ];
 
 // All project service endpoints need authentication
@@ -35,7 +35,7 @@ const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 router.all(
   RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`),
   (req, res, next) => {
-    if (publicRoutes.some(route => req.path.match(new RegExp(`^${route}$`)))) {
+    if (publicRoutes.some(routeRegex => routeRegex.test(req.path))) {
       return next();
     }
     // JWT authentication
