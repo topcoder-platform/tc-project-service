@@ -153,6 +153,12 @@ module.exports = [
         categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
       }, req.log);
 
+      await application.update({
+        status: COPILOT_APPLICATION_STATUS.INVITED,
+      }, {
+        transaction: t,
+      });
+
       res.status(200).send({ id: applicationId });
     }).catch(err => next(err));
   },
