@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS } from '../../constants';
+import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
 
 /**
