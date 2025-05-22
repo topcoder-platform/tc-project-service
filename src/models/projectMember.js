@@ -44,11 +44,12 @@ module.exports = function defineProjectMember(sequelize, DataTypes) {
   })
     .then(res => _.without(_.map(res, 'projectId'), null));
 
-  ProjectMember.getActiveProjectMembers = projectId => ProjectMember.findAll({
+  ProjectMember.getActiveProjectMembers = (projectId, t) => ProjectMember.findAll({
     where: {
       deletedAt: { $eq: null },
       projectId,
     },
+    transaction: t,
     raw: true,
   });
 

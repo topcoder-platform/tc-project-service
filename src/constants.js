@@ -20,6 +20,7 @@ export const COPILOT_REQUEST_STATUS = {
 
 export const COPILOT_APPLICATION_STATUS = {
   PENDING: 'pending',
+  INVITED: 'invited',
   ACCEPTED: 'accepted',
 };
 

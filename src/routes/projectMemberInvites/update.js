@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { INVITE_STATUS, EVENT, RESOURCES } from '../../constants';
+import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
 
 /**
@@ -94,7 +94,7 @@ module.exports = [
             if (updatedInvite.status === INVITE_STATUS.ACCEPTED ||
               updatedInvite.status === INVITE_STATUS.REQUEST_APPROVED) {
               return models.ProjectMember.getActiveProjectMembers(projectId)
-                .then((members) => {
+                .then(async (members) => {
                   req.context = req.context || {};
                   req.context.currentProjectMembers = members;
                   let userId = updatedInvite.userId;
@@ -117,10 +117,54 @@ module.exports = [
                     createdBy: req.authUser.userId,
                     updatedBy: req.authUser.userId,
                   };
-                  return util
-                    .addUserToProject(req, member)
-                    .then(() => res.json(util.postProcessInvites('$.email', updatedInvite, req)))
-                    .catch(err => next(err));
+                  const t = await models.sequelize.transaction();
+                  try {
+                    await util.addUserToProject(req, member, t);
+                    if (invite.applicationId) {
+                      const application = await models.CopilotApplication.findOne({
+                        where: {
+                          id: invite.applicationId,
+                        },
+                        transaction: t,
+                      });
+
+                      await application.update({ status: COPILOT_APPLICATION_STATUS.ACCEPTED }, {
+                        transaction: t
+                      });
+
+                      const opportunity = await models.CopilotOpportunity.findOne({
+                        where: {
+                          id: application.opportunityId,
+                        },
+                        transaction: t,
+                      });
+
+                      await opportunity.update({
+                        status: COPILOT_OPPORTUNITY_STATUS.COMPLETED
+                      }, {
+                        transaction: t,
+                      });
+
+                      const request = await models.CopilotRequest.findOne({
+                        where: {
+                          id: opportunity.copilotRequestId,
+                        },
+                        transaction: t,
+                      });
+
+                      await request.update({
+                        status: COPILOT_REQUEST_STATUS.FULFILLED
+                      }, {
+                        transaction: t,
+                      });
+                    }
+
+                    await t.commit();
+                    return res.json(util.postProcessInvites('$.email', updatedInvite, req));
+                  } catch (e) {
+                    await t.rollback();
+                    return next(e);
+                  }
                 });
             }
             return res.json(util.postProcessInvites('$.email', updatedInvite, req));

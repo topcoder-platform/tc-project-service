@@ -13,6 +13,16 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
         isEmail: true,
       },
     },
+    applicationId: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'copilot_applications',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    },
     role: {
       type: DataTypes.STRING,
       allowNull: false,
