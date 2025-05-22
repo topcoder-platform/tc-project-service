@@ -92,7 +92,7 @@ module.exports = [
         transaction: t,
       });
 
-      console.log(existingInvite, 'existingInvite asdas')
+      req.log.info(existingInvite, 'existingInvite asdas')
 
       if (existingInvite && existingInvite.length) {
         const err = new Error(`User already has an pending invite to the project`);
