@@ -92,8 +92,6 @@ module.exports = [
         transaction: t,
       });
 
-      req.log.info(existingInvite, 'existingInvite asdas')
-
       if (existingInvite && existingInvite.length) {
         const err = new Error(`User already has an pending invite to the project`);
         err.status = 400;
