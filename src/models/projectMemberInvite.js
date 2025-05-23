@@ -65,6 +65,14 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
     raw: true,
   });
 
+  ProjectMemberInvite.getPendingInvitesForApplication = applicationId => ProjectMemberInvite.findAll({
+    where: {
+      applicationId,
+      status: INVITE_STATUS.PENDING,
+    },
+    raw: true,
+  });
+
   ProjectMemberInvite.getPendingAndReguestedInvitesForProject = projectId => ProjectMemberInvite.findAll({
     where: {
       projectId,
