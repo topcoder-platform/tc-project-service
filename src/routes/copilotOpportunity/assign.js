@@ -48,7 +48,7 @@ module.exports = [
       }
 
       const application = await models.CopilotApplication.findOne({
-        where: { id: applicationId },
+        where: { id: applicationId, opportunityId: copilotOpportunityId },
         transaction: t,
       });
 
