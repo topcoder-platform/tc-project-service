@@ -176,7 +176,7 @@ module.exports = [
                 req.log.info("All pending invites which are open", allPendingInvitesForApplication);
                 // If only the current invite is the open one's
                 // then the application status has to be moved to pending status
-                if (allPendingInvitesForApplication.length === 1) {
+                if (allPendingInvitesForApplication.length === 0) {
                   await models.CopilotApplication.update({
                     status: COPILOT_APPLICATION_STATUS.PENDING,
                   }, {
