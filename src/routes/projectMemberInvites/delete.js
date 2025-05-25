@@ -86,13 +86,13 @@ module.exports = [
               // originated from copilot opportunity
               if (invite.applicationId) {
                 req.log.info("Invite originated from the application id", invite.applicationId);
-                const allPendingInvitesForApplication = await models.Sequelize.ProjectMemberInvite.getPendingInvitesForApplication(invite.applicationId);
+                const allPendingInvitesForApplication = await models.ProjectMemberInvite.getPendingInvitesForApplication(invite.applicationId);
 
                 req.log.info("All pending invites which are open", allPendingInvitesForApplication);
                 // If only the current invite is the open one's
                 // then the application status has to be moved to pending status
                 if (allPendingInvitesForApplication.length === 1) {
-                  await models.Sequelize.CopilotApplication.update({
+                  await models.CopilotApplication.update({
                     status: COPILOT_APPLICATION_STATUS.PENDING,
                   }, {
                     where: {
