@@ -99,7 +99,7 @@ module.exports = [
       }
 
       const applicationUser = await util.getMemberDetailsByUserIds([userId], req.log, req.id);
-      req.log.info(applicationUser, 'applicationUser');
+      req.log.info(applicationUser, 'applicationUser asdsd', userId);
 
       const invite = await models.ProjectMemberInvite.create({
         status: INVITE_STATUS.PENDING,
