@@ -992,11 +992,13 @@ module.exports = (app, logger) => {
     /*
       Send event for Notification Service
      */
-    const projectId = _.parseInt(req.params.projectId);
+    const projectId = resource.projectId;
     const userId = resource.userId;
     const email = resource.email;
     const status = resource.status;
     const role = resource.role;
+
+    console.log(projectId, 'projectId asjdasd')
 
     models.Project.findOne({
       where: { id: projectId },
