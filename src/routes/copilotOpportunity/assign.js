@@ -1,13 +1,11 @@
 import _ from 'lodash';
 import validate from 'express-validation';
 import Joi from 'joi';
-import config from 'config';
 
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
-import { createEvent } from '../../services/busApi';
-import { CONNECT_NOTIFICATION_EVENT, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, PROJECT_MEMBER_ROLE, RESOURCES } from '../../constants';
+import { COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, PROJECT_MEMBER_ROLE, RESOURCES } from '../../constants';
 
 const assignCopilotOpportunityValidations = {
   body: Joi.object().keys({
@@ -75,13 +73,6 @@ module.exports = [
         throw err;
       }
 
-      const project = await models.Project.findOne({
-        where: {
-          id: projectId,
-        },
-        transaction: t,
-      });
-
       const existingInvite = await models.ProjectMemberInvite.findAll({
         where: {
           userId,
@@ -98,16 +89,12 @@ module.exports = [
         throw err;
       }
 
-      const applicationUser = await util.getMemberDetailsByUserIds([userId], req.log, req.id);
-      req.log.info(applicationUser, 'applicationUser asdsd', userId);
-
       const invite = await models.ProjectMemberInvite.create({
         status: INVITE_STATUS.PENDING,
         role: PROJECT_MEMBER_ROLE.COPILOT,
         userId,
         projectId,
         applicationId: application.id,
-        email: applicationUser[0].email,
         createdBy: req.authUser.userId,
         createdAt: new Date(),
         updatedBy: req.authUser.userId,
@@ -121,38 +108,6 @@ module.exports = [
         EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
         RESOURCES.PROJECT_MEMBER_INVITE,
         invite.toJSON());
-
-      const authUserDetails = await util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id);
-
-      const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
-      await createEvent(emailEventType, {
-        data: {
-          workManagerUrl: config.get('workManagerUrl'),
-          accountsAppURL: config.get('accountsAppUrl'),
-          subject: config.get('inviteEmailSubject'),
-          projects: [{
-            name: project.name,
-            projectId,
-            sections: [
-              {
-                EMAIL_INVITES: true,
-                title: config.get('inviteEmailSectionTitle'),
-                projectName: project.name,
-                projectId,
-                initiator: authUserDetails[0],
-                isSSO: util.isSSO(project),
-              },
-            ],
-          }],
-        },
-        recipients: [applicationUser[0].email],
-        version: 'v3',
-        from: {
-          name: config.get('EMAIL_INVITE_FROM_NAME'),
-          email: config.get('EMAIL_INVITE_FROM_EMAIL'),
-        },
-        categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
-      }, req.log);
 
       await application.update({
         status: COPILOT_APPLICATION_STATUS.INVITED,
