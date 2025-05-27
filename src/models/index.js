@@ -29,6 +29,7 @@ const operatorsAliases = {
 
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
   operatorsAliases,
+  schema: config.get('dbConfig.schema'),
   logging: false,
   dialectOptions: {
     ssl: false,
