@@ -106,7 +106,6 @@ module.exports = [
         userId,
         projectId,
         applicationId: application.id,
-        email: applicationUser[0].email,
         createdBy: req.authUser.userId,
         createdAt: new Date(),
         updatedBy: req.authUser.userId,
