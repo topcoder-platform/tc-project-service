@@ -406,7 +406,6 @@ module.exports = [
                 req, invite.emails, inviteUserIds, invites, data, failed, members, inviteUsers))
                 .then((values) => {
                   values.forEach((v) => {
-                    console.log(v.toJSON(), 'v checking')
                     // emit the event
                     util.sendResourceToKafkaBus(
                       req,
