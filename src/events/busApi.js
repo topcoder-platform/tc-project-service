@@ -998,8 +998,6 @@ module.exports = (app, logger) => {
     const status = resource.status;
     const role = resource.role;
 
-    console.log(projectId, 'projectId asjdasd')
-
     models.Project.findOne({
       where: { id: projectId },
     })
