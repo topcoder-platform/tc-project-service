@@ -81,7 +81,7 @@ module.exports = [
           .update({
             status: newStatus,
           })
-          .then((updatedInvite) => {
+          .then(async (updatedInvite) => {
             // emit the event
             util.sendResourceToKafkaBus(
               req,
@@ -166,6 +166,23 @@ module.exports = [
                     return next(e);
                   }
                 });
+            } else if (updatedInvite.status === INVITE_STATUS.REFUSED) {
+              // update the application if the invite
+              // originated from copilot opportunity
+              if (updatedInvite.applicationId) {
+                const allPendingInvitesForApplication = await models.ProjectMemberInvite.getPendingInvitesForApplication(invite.applicationId);
+                // If only the current invite is the open one's
+                // then the application status has to be moved to pending status
+                if (allPendingInvitesForApplication.length === 0) {
+                  await models.CopilotApplication.update({
+                    status: COPILOT_APPLICATION_STATUS.PENDING,
+                  }, {
+                    where: {
+                      id: updatedInvite.applicationId,
+                    },
+                  });
+                }
+              }
             }
             return res.json(util.postProcessInvites('$.email', updatedInvite, req));
           });

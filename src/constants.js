@@ -15,7 +15,7 @@ export const COPILOT_REQUEST_STATUS = {
   REJECTED: 'rejected',
   SEEKING: 'seeking',
   CANCELED: 'canceled',
-  FULFILLED: 'fulfiled',
+  FULFILLED: 'fulfilled',
 };
 
 export const COPILOT_APPLICATION_STATUS = {
