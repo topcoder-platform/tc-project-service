@@ -114,7 +114,7 @@ module.exports = [
         transaction: t,
       })
 
-      console.log(invite, 'invite askjdhasd')
+      console.log(invite.toJSON(), 'invite askjdhasd')
 
       util.sendResourceToKafkaBus(
         req,
