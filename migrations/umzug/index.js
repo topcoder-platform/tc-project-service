@@ -10,6 +10,10 @@ const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
   migrationStorageTableSchema: config.get('dbConfig.schema'),
   seederStorageTableSchema: config.get('dbConfig.schema'),
   searchPath: config.get('dbConfig.schema'),
+  searchPath: 'custom',
+  dialectOptions: {
+    prependSearchPath: true
+  }
 });
 
 // Initialize Umzug
