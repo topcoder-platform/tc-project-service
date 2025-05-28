@@ -7,6 +7,9 @@ console.log(`DB Schema: ${config.get('dbConfig.schema')}`)
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
   dialect: 'postgres',
   schema: config.get('dbConfig.schema'),
+  migrationStorageTableSchema: config.get('dbConfig.schema'),
+  seederStorageTableSchema: config.get('dbConfig.schema'),
+  searchPath: config.get('dbConfig.schema'),
 });
 
 // Initialize Umzug
