@@ -2,6 +2,7 @@ const config = require('config');
 const { Sequelize } = require('sequelize');
 const { Umzug, SequelizeStorage } = require('umzug');
 
+console.log(`DB Schema: ${config.get('dbConfig.schema')}`)
 // Initialize Sequelize
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
   dialect: 'postgres',
