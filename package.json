@@ -75,7 +75,7 @@
     "no-kafka": "^3.4.3",
     "pg": "^7.11.0",
     "pg-native": "^3.0.0",
-    "sequelize": "^5.8.7",
+    "sequelize": "^6.37.7",
     "stripe": "^8.195.0",
     "swagger-ui-express": "^4.0.6",
     "tc-core-library-js": "github:appirio-tech/tc-core-library-js#v2.6.6",
