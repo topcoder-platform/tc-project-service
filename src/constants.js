@@ -301,6 +301,9 @@ export const CONNECT_NOTIFICATION_EVENT = {
   TOPIC_UPDATED: 'connect.notification.project.topic.updated',
   POST_CREATED: 'connect.notification.project.post.created',
   POST_UPDATED: 'connect.notification.project.post.edited',
+
+  // Copilot events
+  COPILOT_OPPORTUNITY_CREATED: 'connect.notification.project.copilot.opportunity.created',
 };
 
 export const REGEX = {

@@ -56,7 +56,9 @@ module.exports = (data, existingTransaction) => {
               .then((opportunity) => {
                 console.log(opportunity);
                 const roles = util.getRolesByRoleName('copilot');
-                console.log(roles, 'roles by copilot');
+                const roleInfo = util.getRoleInfo(roles[0]);
+                console.log(roles, roleInfo, 'roles by copilot');
+
                 return opportunity;
               })
               .catch((err) => {
