@@ -53,10 +53,10 @@ module.exports = (data, existingTransaction) => {
                 return models.CopilotOpportunity
                   .create(data, { transaction });
               }))
-              .then((opportunity) => {
+              .then(async (opportunity) => {
                 console.log(opportunity);
-                const roles = util.getRolesByRoleName('copilot');
-                const roleInfo = util.getRoleInfo(roles[0]);
+                const roles = await util.getRolesByRoleName('copilot');
+                const roleInfo = await util.getRoleInfo(roles[0]);
                 console.log(roles, roleInfo, 'roles by copilot');
 
                 return opportunity;
