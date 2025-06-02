@@ -3,6 +3,7 @@
   "pubsubExchangeName": "dev.projects",
   "attachmentsS3Bucket": "topcoder-dev-media",
   "workManagerUrl": "https://challenges.topcoder-dev.com",
+  "copilotPortalUrl": "https://copilots.topcoder-dev.com",
   "fileServiceEndpoint": "https://api.topcoder-dev.com/v5/files",
   "memberServiceEndpoint": "https://api.topcoder-dev.com/v5/members",
   "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/",

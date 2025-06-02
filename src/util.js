@@ -850,7 +850,9 @@ const projectServiceUtils = {
         },
       }).then((res) => {
         logger.debug(`Roles by ${roleName}: ${JSON.stringify(res.data.result.content)}`);
-        return _.get(res, 'data.result.content', []).map(r => r.id);
+        return _.get(res, 'data.result.content', [])
+          .filter(item => item.roleName === roleName)
+          .map(r => r.id);
       });
     } catch (err) {
       return Promise.reject(err);

@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import config from 'config';
 
 import models from '../../models';
-import { COPILOT_REQUEST_STATUS } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS } from '../../constants';
 import util from '../../util';
+import { createEvent } from '../../services/busApi';
 
 const resolveTransaction = (transaction, callback) => {
   if (transaction) {
@@ -54,11 +56,31 @@ module.exports = (req, data, existingTransaction) => {
                   .create(data, { transaction });
               }))
               .then(async (opportunity) => {
-                console.log(opportunity);
                 const roles = await util.getRolesByRoleName('copilot', req.log, req.id);
-                const roleInfo = await util.getRoleInfo(roles[0], req.log, req.id);
-                console.log(roles, roleInfo, 'roles by copilot');
+                const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
+                req.log.info("getting subjects for roles", roles[0]);
+                const emailEventType = CONNECT_NOTIFICATION_EVENT.COPILOT_OPPORTUNITY_CREATED;
+                const copilotPortalUrl = config.get('copilotPortalUrl');
+                req.log.info("Sending emails to all copilots about new opportunity");
+                subjects.forEach(subject => {
+                  req.log.info("Each copilot members", subject);
+                  createEvent(emailEventType, {
+                    data: {
+                      handle: subject.handle,
+                      opportunityDetailsUrl: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+                    },
+                    recipients: [subject.email],
+                    version: 'v3',
+                    from: {
+                      name: config.get('EMAIL_INVITE_FROM_NAME'),
+                      email: config.get('EMAIL_INVITE_FROM_EMAIL'),
+                    },
+                    categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
+                  }, req.log);
+                });
 
+                req.log.info("Finished sending emails to copilots");
+                
                 return opportunity;
               })
               .catch((err) => {
