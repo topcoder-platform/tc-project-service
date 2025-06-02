@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import models from '../../models';
 import { COPILOT_REQUEST_STATUS } from '../../constants';
+import util from '../../util';
 
 const resolveTransaction = (transaction, callback) => {
   if (transaction) {
@@ -52,6 +53,12 @@ module.exports = (data, existingTransaction) => {
                 return models.CopilotOpportunity
                   .create(data, { transaction });
               }))
+              .then((opportunity) => {
+                console.log(opportunity);
+                const roles = util.getRolesByRoleName('copilot');
+                console.log(roles, 'roles by copilot');
+                return opportunity;
+              })
               .catch((err) => {
                 transaction.rollback();
                 return Promise.reject(err);
