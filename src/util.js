@@ -840,6 +840,7 @@ const projectServiceUtils = {
     try {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      httpClient.defaults.timeout = 6000;
       return httpClient.get(`${config.identityServiceEndpoint}roles`, {
         params: {
           filter: `roleName=${roleName}`,
