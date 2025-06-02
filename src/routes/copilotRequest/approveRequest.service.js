@@ -12,7 +12,7 @@ const resolveTransaction = (transaction, callback) => {
   return models.sequelize.transaction(callback);
 };
 
-module.exports = (data, existingTransaction) => {
+module.exports = (req, data, existingTransaction) => {
   const { projectId, copilotRequestId } = data;
 
   return resolveTransaction(existingTransaction, transaction =>
@@ -55,8 +55,8 @@ module.exports = (data, existingTransaction) => {
               }))
               .then(async (opportunity) => {
                 console.log(opportunity);
-                const roles = await util.getRolesByRoleName('copilot');
-                const roleInfo = await util.getRoleInfo(roles[0]);
+                const roles = await util.getRolesByRoleName('copilot', req.log, req.id);
+                const roleInfo = await util.getRoleInfo(roles[0], req.log, req.id);
                 console.log(roles, roleInfo, 'roles by copilot');
 
                 return opportunity;

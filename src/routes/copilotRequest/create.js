@@ -98,7 +98,7 @@ module.exports = [
               updatedBy: req.authUser.userId,
               type: copilotRequest.data.projectType,
             });
-            return approveRequest(approveData, transaction).then(() => copilotRequest);
+            return approveRequest(req, approveData, transaction).then(() => copilotRequest);
           }).then(copilotRequest => res.status(201).json(copilotRequest))
             .catch((err) => {
               try {
