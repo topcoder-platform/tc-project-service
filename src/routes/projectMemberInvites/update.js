@@ -19,7 +19,7 @@ const updateMemberValidations = {
       status: Joi.any()
         .valid(_.values(INVITE_STATUS))
         .required(),
-      source: Joi.any()
+      source: Joi.string()
         .valid(_.values(INVITE_SOURCE))
         .default(INVITE_SOURCE.WORK_MANAGER),
     })
