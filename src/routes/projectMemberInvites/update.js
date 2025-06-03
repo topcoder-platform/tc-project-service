@@ -1,12 +1,13 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import { Op } from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
 import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, INVITE_SOURCE } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
-import { Op } from 'sequelize';
+
 
 /**
  * API to update invite member to project.
