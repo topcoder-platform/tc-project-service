@@ -171,7 +171,7 @@ module.exports = [
                       }, {
                         transaction: t,
                       });
-                    } else {
+                    } else if (source === INVITE_SOURCE.WORK_MANAGER) {
                       const allCopilotRequestsByProjectId = await models.CopilotRequest.findAll({
                         where: {
                           projectId: invite.projectId,
