@@ -213,13 +213,35 @@ module.exports = [
                         transaction: t,
                       });
 
-                      await models.CopilotApplication.update({
-                        status: COPILOT_APPLICATION_STATUS.CANCELED,
-                      }, {
+                      const copilotApplications = await models.CopilotApplication.findAll({
                         where: {
                           opportunityId: {
                             [Op.in]: allCopilotOpportunityByRequestIds.map(item => item.id),
                           },
+                        },
+                        transaction: t,
+                      });
+
+                      await models.CopilotApplication.update({
+                        status: COPILOT_APPLICATION_STATUS.CANCELED,
+                      }, {
+                        where: {
+                          id: {
+                            [Op.in]: copilotApplications.map(item => item.id),
+                          },
+                        },
+                        transaction: t,
+                      });
+
+                      // Cancel the existing invites which are opened via 
+                      // applications
+                      await models.ProjectMemberInvite.update({
+                        status: INVITE_STATUS.CANCELED,
+                      }, {
+                        where: {
+                          applicationId: {
+                            [Op.in]: copilotApplications.map(item => item.id),
+                          }
                         },
                         transaction: t,
                       });
