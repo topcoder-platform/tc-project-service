@@ -6,6 +6,7 @@ import models from '../../models';
 import util from '../../util';
 import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, INVITE_SOURCE } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
+import { Op } from 'sequelize';
 
 /**
  * API to update invite member to project.
@@ -168,6 +169,57 @@ module.exports = [
                       await request.update({
                         status: nextOpportunityRequestStatus,
                       }, {
+                        transaction: t,
+                      });
+                    } else {
+                      const allCopilotRequestsByProjectId = await models.CopilotRequest.findAll({
+                        where: {
+                          projectId: invite.projectId,
+                        },
+                        transaction: t,
+                      });
+
+                      const requestIds = allCopilotRequestsByProjectId.map(item => item.id);
+
+                      await models.CopilotRequest.update({
+                        status: COPILOT_REQUEST_STATUS.CANCELED,
+                      }, {
+                        where: {
+                          id: {
+                            [Op.in]: requestIds,
+                          }
+                        },
+                        transaction: t,
+                      });
+
+                      const allCopilotOpportunityByRequestIds = await models.CopilotOpportunity.findAll({
+                        where: {
+                          copilotRequestId: {
+                            [Op.in]: requestIds,
+                          },
+                        },
+                        transaction: t,
+                      });
+
+                      await models.CopilotOpportunity.update({
+                        status: COPILOT_OPPORTUNITY_STATUS.CANCELED,
+                      }, {
+                        where: {
+                          copilotRequestId: {
+                            [Op.in]: allCopilotOpportunityByRequestIds,
+                          },
+                        },
+                        transaction: t,
+                      });
+
+                      await models.CopilotApplication.update({
+                        status: COPILOT_APPLICATION_STATUS.CANCELED,
+                      }, {
+                        where: {
+                          opportunityId: {
+                            [Op.in]: allCopilotOpportunityByRequestIds.map(item => item.id),
+                          },
+                        },
                         transaction: t,
                       });
                     }
