@@ -173,6 +173,7 @@ module.exports = [
                         transaction: t,
                       });
                     } else if (source === INVITE_SOURCE.WORK_MANAGER) {
+                      req.log.info("cancelling all existing requests", source);
                       const allCopilotRequestsByProjectId = await models.CopilotRequest.findAll({
                         where: {
                           projectId: invite.projectId,
@@ -181,6 +182,7 @@ module.exports = [
                       });
 
                       const requestIds = allCopilotRequestsByProjectId.map(item => item.id);
+                      req.log.info("requestIds", requestIds);
 
                       await models.CopilotRequest.update({
                         status: COPILOT_REQUEST_STATUS.CANCELED,
@@ -193,6 +195,8 @@ module.exports = [
                         transaction: t,
                       });
 
+                      req.log.info("updated copilot request");
+
                       const allCopilotOpportunityByRequestIds = await models.CopilotOpportunity.findAll({
                         where: {
                           copilotRequestId: {
@@ -201,6 +205,8 @@ module.exports = [
                         },
                         transaction: t,
                       });
+
+                      req.log.info("allCopilotOpportunityByRequestIds", allCopilotOpportunityByRequestIds.length);
 
                       await models.CopilotOpportunity.update({
                         status: COPILOT_OPPORTUNITY_STATUS.CANCELED,
@@ -213,6 +219,8 @@ module.exports = [
                         transaction: t,
                       });
 
+                      req.log.info("updated copilot opportunity");
+
                       await models.CopilotApplication.update({
                         status: COPILOT_APPLICATION_STATUS.CANCELED,
                       }, {
@@ -223,6 +231,8 @@ module.exports = [
                         },
                         transaction: t,
                       });
+
+                      req.log.info("updated CopilotApplication");
                     }
 
                     await t.commit();
