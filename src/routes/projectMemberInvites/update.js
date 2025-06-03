@@ -212,8 +212,8 @@ module.exports = [
                         status: COPILOT_OPPORTUNITY_STATUS.CANCELED,
                       }, {
                         where: {
-                          copilotRequestId: {
-                            [Op.in]: allCopilotOpportunityByRequestIds,
+                          id: {
+                            [Op.in]: allCopilotOpportunityByRequestIds.map(item => item.id),
                           },
                         },
                         transaction: t,
