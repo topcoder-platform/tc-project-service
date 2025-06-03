@@ -411,7 +411,10 @@ module.exports = [
                       req,
                       EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
                       RESOURCES.PROJECT_MEMBER_INVITE,
-                      v.toJSON());
+                      Object.assign({}, v.toJSON(), {
+                        source: 'work_manager',
+                      }),
+                     );
 
                     req.log.debug(`V: ${JSON.stringify(v)}`);
                     // send email invite (async)

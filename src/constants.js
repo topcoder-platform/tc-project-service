@@ -22,6 +22,7 @@ export const COPILOT_APPLICATION_STATUS = {
   PENDING: 'pending',
   INVITED: 'invited',
   ACCEPTED: 'accepted',
+  CANCELED: 'canceled',
 };
 
 export const COPILOT_OPPORTUNITY_STATUS = {
@@ -358,6 +359,11 @@ export const INVITE_STATUS = {
   REQUEST_REJECTED: 'request_rejected',
   REQUEST_APPROVED: 'request_approved',
   CANCELED: 'canceled',
+};
+
+export const INVITE_SOURCE = {
+  WORK_MANAGER: "work_manager",
+  COPILOT_PORTAL: "copilot_portal",
 };
 
 export const SCOPE_CHANGE_REQ_STATUS = {
