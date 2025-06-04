@@ -233,6 +233,15 @@ module.exports = [
                         transaction: t,
                       });
 
+                      const invitesToBeUpdated = await models.ProjectMemberInvite.findAll({
+                        where: {
+                          applicationId: {
+                            [Op.in]: copilotApplications.map(item => item.id),
+                          }
+                        },
+                        transaction: t,
+                      });
+
                       // Cancel the existing invites which are opened via 
                       // applications
                       await models.ProjectMemberInvite.update({
@@ -245,6 +254,15 @@ module.exports = [
                         },
                         transaction: t,
                       });
+
+                      invitesToBeUpdated.forEach((inviteToBeUpdated) => {
+                        req.log.info(inviteToBeUpdated.toJSON(), 'invite to be updated')
+                        util.sendResourceToKafkaBus(
+                          req,
+                          EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED,
+                          RESOURCES.PROJECT_MEMBER_INVITE,
+                          inviteToBeUpdated.toJSON());
+                      })
                     }
 
                     await t.commit();
