@@ -256,7 +256,6 @@ module.exports = [
                       });
 
                       invitesToBeUpdated.forEach((inviteToBeUpdated) => {
-                        req.log.info(inviteToBeUpdated.toJSON(), 'invite to be updated')
                         util.sendResourceToKafkaBus(
                           req,
                           EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED,
