@@ -997,6 +997,7 @@ module.exports = (app, logger) => {
     const email = resource.email;
     const status = resource.status;
     const role = resource.role;
+    const source = resource.source;
 
     models.Project.findOne({
       where: { id: projectId },
@@ -1011,6 +1012,7 @@ module.exports = (app, logger) => {
             role,
             initiatorUserId: req.authUser.userId,
             isSSO: util.isSSO(project),
+            source,
           }, logger);
         } else {
         // send event to bus api
@@ -1021,6 +1023,7 @@ module.exports = (app, logger) => {
             role,
             initiatorUserId: req.authUser.userId,
             isSSO: util.isSSO(project),
+            source,
           });
           createEvent(CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_INVITE_CREATED, {
             projectId,
@@ -1029,6 +1032,7 @@ module.exports = (app, logger) => {
             role,
             initiatorUserId: req.authUser.userId,
             isSSO: util.isSSO(project),
+            source,
           }, logger);
         }
       }).catch(err => logger.error(err)); // eslint-disable-line no-unused-vars
