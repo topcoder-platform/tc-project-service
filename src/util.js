@@ -822,6 +822,9 @@ const projectServiceUtils = {
       httpClient.defaults.timeout = 6000;
       logger.debug(`${config.identityServiceEndpoint}roles/${roleId}`, "fetching role info");
       return httpClient.get(`${config.identityServiceEndpoint}roles/${roleId}`, {
+        params: {
+          fields: `subjects`,
+        },
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
