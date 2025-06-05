@@ -59,23 +59,19 @@ module.exports = (req, data, existingTransaction) => {
                 const roles = await util.getRolesByRoleName('copilot', req.log, req.id);
                 req.log.info("getting subjects for roles", roles[0]);
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
-                const emailEventType = CONNECT_NOTIFICATION_EVENT.COPILOT_OPPORTUNITY_CREATED;
+                const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
                 const copilotPortalUrl = config.get('copilotPortalUrl');
                 req.log.info("Sending emails to all copilots about new opportunity");
                 subjects.forEach(subject => {
                   req.log.info("Each copilot members", subject);
                   createEvent(emailEventType, {
                     data: {
-                      handle: subject.handle,
+                      user_name: subject.handle,
                       opportunityDetailsUrl: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                     },
+                    sendgrid_template_id: "d-3efdc91da580479d810c7acd50a4c17f",
                     recipients: [subject.email],
-                    version: 'v3',
-                    from: {
-                      name: config.get('EMAIL_INVITE_FROM_NAME'),
-                      email: config.get('EMAIL_INVITE_FROM_EMAIL'),
-                    },
-                    categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
+                    version: '433b1688-c543-4656-a295-efcbea57444d',
                   }, req.log);
                 });
 

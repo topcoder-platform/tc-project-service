@@ -303,8 +303,8 @@ export const CONNECT_NOTIFICATION_EVENT = {
   POST_CREATED: 'connect.notification.project.post.created',
   POST_UPDATED: 'connect.notification.project.post.edited',
 
-  // Copilot events
-  COPILOT_OPPORTUNITY_CREATED: 'connect.notification.project.copilot.opportunity.created',
+  // External action email
+  EXTERNAL_ACTION_EMAIL: 'external.action.email',
 };
 
 export const REGEX = {
