@@ -2,7 +2,7 @@ import _ from 'lodash';
 import config from 'config';
 
 import models from '../../models';
-import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
 
@@ -56,19 +56,18 @@ module.exports = (req, data, existingTransaction) => {
                   .create(data, { transaction });
               }))
               .then(async (opportunity) => {
-                const roles = await util.getRolesByRoleName('copilot', req.log, req.id);
+                const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
                 const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
                 const copilotPortalUrl = config.get('copilotPortalUrl');
                 req.log.info("Sending emails to all copilots about new opportunity");
                 subjects.forEach(subject => {
-                  req.log.info("Each copilot members", subject);
                   createEvent(emailEventType, {
                     data: {
                       user_name: subject.handle,
                       opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                     },
-                    sendgrid_template_id: "d-3efdc91da580479d810c7acd50a4c17f",
+                    sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
                     recipients: [subject.email],
                     version: 'v3',
                   }, req.log);
