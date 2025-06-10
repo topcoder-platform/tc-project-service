@@ -7,6 +7,7 @@ import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 import { CONNECT_NOTIFICATION_EVENT, COPILOT_OPPORTUNITY_STATUS } from '../../constants';
+import { createEvent } from '../../services/busApi';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
@@ -76,8 +77,8 @@ module.exports = [
             const isCreatorPartofSubjects = subjects.find(item => item.email === creator[0].email);
             if (!isCreatorPartofSubjects) {
               listOfSubjects.push({
-                email: creator.email,
-                handle: creator.handle,
+                email: creator[0].email,
+                handle: creator[0].handle,
               });
             }
           }
