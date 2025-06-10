@@ -72,7 +72,7 @@ module.exports = (req, data, existingTransaction) => {
                     },
                     sendgrid_template_id: "d-3efdc91da580479d810c7acd50a4c17f",
                     recipients: [subject.email],
-                    version: '433b1688-c543-4656-a295-efcbea57444d',
+                    version: 'v3',
                   }, req.log);
                 });
 
