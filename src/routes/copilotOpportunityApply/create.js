@@ -70,7 +70,7 @@ module.exports = [
           const pmRole = await util.getRolesByRoleName('Project Manager', req.log, req.id);
           const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
 
-          const creator = await util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id);
+          const creator = await util.getMemberDetailsByUserIds([opportunity.userId], req.log, req.id);
           const listOfSubjects = subjects;
           if (creator) {
             const isCreatorPartofSubjects = subjects.find(item => item.email === creator[0].email);
