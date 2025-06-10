@@ -67,8 +67,8 @@ module.exports = (req, data, existingTransaction) => {
                   req.log.info("Each copilot members", subject);
                   createEvent(emailEventType, {
                     data: {
-                      userName: subject.handle,
-                      opportunityDetailsUrl: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+                      user_name: subject.handle,
+                      opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                     },
                     sendgrid_template_id: "d-3efdc91da580479d810c7acd50a4c17f",
                     recipients: [subject.email],
