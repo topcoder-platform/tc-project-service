@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
-import { COPILOT_OPPORTUNITY_STATUS } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_OPPORTUNITY_STATUS } from '../../constants';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
@@ -65,7 +66,36 @@ module.exports = [
       }
 
       return models.CopilotApplication.create(data)
-        .then((result) => {
+        .then(async (result) => {
+          const pmRole = await util.getRolesByRoleName('Project Manager', req.log, req.id);
+          const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
+
+          const creator = await util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id);
+          const listOfSubjects = subjects;
+          if (creator) {
+            const isCreatorPartofSubjects = subjects.find(item => item.email === creator[0].email);
+            if (!isCreatorPartofSubjects) {
+              listOfSubjects.push({
+                email: creator.email,
+                handle: creator.handle,
+              });
+            }
+          }
+          
+          const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+          const copilotPortalUrl = config.get('copilotPortalUrl');
+          listOfSubjects.forEach((subject) => {
+            createEvent(emailEventType, {
+                data: {
+                  user_name: subject.handle,
+                  opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}#applications`,
+                },
+                sendgrid_template_id: "d-d7c1f48628654798a05c8e09e52db14f",
+                recipients: [subject.email],
+                version: 'v3',
+              }, req.log);
+          });
+
           res.status(201).json(result);
           return Promise.resolve();
         })

@@ -57,12 +57,10 @@ module.exports = (req, data, existingTransaction) => {
               }))
               .then(async (opportunity) => {
                 const roles = await util.getRolesByRoleName('copilot', req.log, req.id);
-                req.log.info("getting subjects for roles", roles[0]);
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
                 const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
                 const copilotPortalUrl = config.get('copilotPortalUrl');
                 req.log.info("Sending emails to all copilots about new opportunity");
-                req.log.info(`${copilotPortalUrl}/opportunity/${opportunity.id}`, '`${copilotPortalUrl}/opportunity/${opportunity.id}`');
                 subjects.forEach(subject => {
                   req.log.info("Each copilot members", subject);
                   createEvent(emailEventType, {
