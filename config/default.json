@@ -54,6 +54,7 @@
   "inviteEmailSubject": "You are invited to Topcoder",
   "inviteEmailSectionTitle": "Project Invitation",
   "workManagerUrl": "https://challenges.topcoder-dev.com",
+  "copilotPortalUrl": "https://copilots.topcoder-dev.com",
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
   "MAX_REVISION_NUMBER": 100,
   "UNIQUE_GMAIL_VALIDATION": false,

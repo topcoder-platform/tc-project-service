@@ -815,6 +815,54 @@ const projectServiceUtils = {
     }
   },
 
+  getRoleInfo: Promise.coroutine(function* (roleId, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      httpClient.defaults.timeout = 6000;
+      logger.debug(`${config.identityServiceEndpoint}roles/${roleId}`, "fetching role info");
+      return httpClient.get(`${config.identityServiceEndpoint}roles/${roleId}`, {
+        params: {
+          fields: `subjects`,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        logger.debug(`Role info by ${roleId}: ${JSON.stringify(res.data.result.content)}`);
+        return _.get(res, 'data.result.content', []);
+      });
+    } catch (err) {
+      logger.debug(err, "error on getting role info");
+      return Promise.reject(err);
+    }
+  }),
+
+  getRolesByRoleName: Promise.coroutine(function* (roleName, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      httpClient.defaults.timeout = 6000;
+      return httpClient.get(`${config.identityServiceEndpoint}roles`, {
+        params: {
+          filter: `roleName=${roleName}`,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        logger.debug(`Roles by ${roleName}: ${JSON.stringify(res.data.result.content)}`);
+        return _.get(res, 'data.result.content', [])
+          .filter(item => item.roleName === roleName)
+          .map(r => r.id);
+      });
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
+
   /**
    * Retrieve member details from userIds
    */
