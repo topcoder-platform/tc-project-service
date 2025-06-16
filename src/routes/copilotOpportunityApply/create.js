@@ -75,7 +75,7 @@ module.exports = [
 
           const creator = await util.getMemberDetailsByUserIds([opportunity.userId], req.log, req.id);
 
-          req.log.debug(subjects, 'creator');
+          req.log.debug(creator, 'creator');
 
           const listOfSubjects = subjects;
           if (creator) {
