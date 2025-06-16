@@ -71,10 +71,17 @@ module.exports = [
           const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
           const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
 
-          const creator = await util.getMemberDetailsByUserIds([opportunity.userId], req.log, req.id);
+          const creator = await util.getMemberDetailsByUserIds([opportunity.createdBy], req.log, req.id);
+
           const listOfSubjects = subjects;
-          if (creator) {
-            const isCreatorPartofSubjects = subjects.find(item => item.email.toLowerCase() === creator[0].email.toLowerCase());
+          if (creator && creator[0] && creator[0].email) {
+            const isCreatorPartofSubjects = subjects.find(item => {
+              if (!item.email) {
+                return false;
+              }
+
+              return item.email.toLowerCase() === creator[0].email.toLowerCase();
+            });
             if (!isCreatorPartofSubjects) {
               listOfSubjects.push({
                 email: creator[0].email,
