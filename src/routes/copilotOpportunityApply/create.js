@@ -74,12 +74,17 @@ module.exports = [
           req.log.debug(subjects, 'all manager subjects');
 
           const creator = await util.getMemberDetailsByUserIds([opportunity.createdBy], req.log, req.id);
-
           req.log.debug(creator, 'creator', opportunity.createdBy);
 
           const listOfSubjects = subjects;
-          if (creator) {
-            const isCreatorPartofSubjects = subjects.find(item => item.email.toLowerCase() === creator[0].email.toLowerCase());
+          if (creator && creator[0] && creator[0].email) {
+            const isCreatorPartofSubjects = subjects.find(item => {
+              if (!item.email) {
+                return false;
+              }
+
+              return item.email.toLowerCase() === creator[0].email.toLowerCase();
+            });
             req.log.debug(isCreatorPartofSubjects, 'isCreatorPartofSubjects');
             if (!isCreatorPartofSubjects) {
               listOfSubjects.push({
