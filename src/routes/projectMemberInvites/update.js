@@ -23,8 +23,11 @@ const updateMemberValidations = {
         .required(),
       source: Joi
         .string()
-        .optional()
-        .default(INVITE_SOURCE.WORK_MANAGER),
+        .allow(null)
+        .default(INVITE_SOURCE.WORK_MANAGER)
+        .custom((value) => {
+          return value === null ? undefined : value;
+        }),
     })
     .required(),
 };
