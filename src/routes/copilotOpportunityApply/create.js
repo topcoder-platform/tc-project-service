@@ -90,6 +90,7 @@ module.exports = [
                 data: {
                   user_name: subject.handle,
                   opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}#applications`,
+                  workManagerUrl: config.get('workManagerUrl'),
                 },
                 sendgrid_template_id: TEMPLATE_IDS.APPLY_COPILOT,
                 recipients: [subject.email],
