@@ -66,7 +66,7 @@ module.exports = (req, data, existingTransaction) => {
                     data: {
                       user_name: subject.handle,
                       opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
-                      workManagerUrl: config.get('workManagerUrl'),
+                      work_manager_url: config.get('workManagerUrl'),
                     },
                     sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
                     recipients: [subject.email],
