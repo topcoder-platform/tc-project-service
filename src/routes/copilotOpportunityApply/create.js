@@ -73,7 +73,7 @@ module.exports = [
 
           req.log.debug(subjects, 'all manager subjects');
 
-          const creator = await util.getMemberDetailsByUserIds([opportunity.userId], req.log, req.id);
+          const creator = await util.getMemberDetailsByUserIds([opportunity.createdBy], req.log, req.id);
 
           req.log.debug(creator, 'creator');
 
