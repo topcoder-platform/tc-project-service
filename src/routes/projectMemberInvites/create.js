@@ -14,6 +14,7 @@ import {
   RESOURCES,
   MAX_PARALLEL_REQUEST_QTY,
   CONNECT_NOTIFICATION_EVENT,
+  TEMPLATE_IDS,
 } from '../../constants';
 import { createEvent } from '../../services/busApi';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
@@ -201,7 +202,7 @@ const buildCreateInvitePromises = (req, inviteEmails, inviteUserIds, invites, da
 const sendInviteEmail = (req, projectId, invite) => {
   req.log.debug(`Sending invite email: ${JSON.stringify(req.body)}, ${projectId}, ${JSON.stringify(invite)}`);
   req.log.debug(req.authUser);
-  const emailEventType = CONNECT_NOTIFICATION_EVENT.PROJECT_MEMBER_EMAIL_INVITE_CREATED;
+  const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
   const promises = [
     models.Project.findOne({
       where: { id: projectId },
@@ -237,13 +238,9 @@ const sendInviteEmail = (req, projectId, invite) => {
           ],
         }],
       },
+      sendgrid_template_id: TEMPLATE_IDS.PROJECT_MEMBER_INVITED,
       recipients: [invite.email],
       version: 'v3',
-      from: {
-        name: config.get('EMAIL_INVITE_FROM_NAME'),
-        email: config.get('EMAIL_INVITE_FROM_EMAIL'),
-      },
-      categories: [`${process.env.NODE_ENV}:${emailEventType}`.toLowerCase()],
     }, req.log);
   }).catch((error) => {
     req.log.error(error);

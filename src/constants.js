@@ -310,6 +310,7 @@ export const CONNECT_NOTIFICATION_EVENT = {
 export const TEMPLATE_IDS = {
   APPLY_COPILOT: 'd-d7c1f48628654798a05c8e09e52db14f',
   CREATE_REQUEST: 'd-3efdc91da580479d810c7acd50a4c17f',
+  PROJECT_MEMBER_INVITED: 'd-b47a25b103604bc28fc0ce77e77fb681',
 }
 export const REGEX = {
   URL: /^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=;]*)?$/, // eslint-disable-line
