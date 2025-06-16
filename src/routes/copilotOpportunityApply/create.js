@@ -71,10 +71,7 @@ module.exports = [
           const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
           const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
 
-          req.log.debug(subjects, 'all manager subjects');
-
           const creator = await util.getMemberDetailsByUserIds([opportunity.createdBy], req.log, req.id);
-          req.log.debug(creator, 'creator', opportunity.createdBy);
 
           const listOfSubjects = subjects;
           if (creator && creator[0] && creator[0].email) {
@@ -85,7 +82,6 @@ module.exports = [
 
               return item.email.toLowerCase() === creator[0].email.toLowerCase();
             });
-            req.log.debug(isCreatorPartofSubjects, 'isCreatorPartofSubjects');
             if (!isCreatorPartofSubjects) {
               listOfSubjects.push({
                 email: creator[0].email,
@@ -93,8 +89,6 @@ module.exports = [
               });
             }
           }
-
-          req.log.debug(listOfSubjects, 'final list of subjects');
           
           const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
           const copilotPortalUrl = config.get('copilotPortalUrl');
