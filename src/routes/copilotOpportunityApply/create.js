@@ -71,7 +71,14 @@ module.exports = [
           const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
           const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
 
-          const creator = await util.getMemberDetailsByUserIds([opportunity.createdBy], req.log, req.id);
+          const project = await models.Project.findOne({
+            where: {
+              id: opportunity.projectId,
+            },
+          });
+
+
+          const creator = await util.getMemberDetailsByUserIds([project.createdBy], req.log, req.id);
 
           const listOfSubjects = subjects;
           if (creator && creator[0] && creator[0].email) {
