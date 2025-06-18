@@ -34,10 +34,12 @@ module.exports = [
         const plainOpportunity = copilotOpportunity.get({ plain: true });
         req.log.info("authUser", req.authUser);
         const memberIds = plainOpportunity.project.members.map((member) => member.userId);
+        const canApplyAsCopilot = !memberIds.includes(req.authUser.userId)
         // This shouldn't be exposed to the clientside
         delete plainOpportunity.project.members;
         const formattedOpportunity = Object.assign({
           members: memberIds,
+          canApplyAsCopilot,
         }, plainOpportunity,
           plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
           { copilotRequest: undefined },
