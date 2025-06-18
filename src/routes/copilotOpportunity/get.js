@@ -19,7 +19,14 @@ module.exports = [
         {
           model: models.Project,
           as: 'project',
-          attributes: ['name', 'members'],
+          attributes: ['name'],
+          include: [
+            {
+              model: models.ProjectMember,
+              as: 'members',
+              attributes: ['id', 'userId', 'role'],
+            },
+          ]
         },
       ],
     })
