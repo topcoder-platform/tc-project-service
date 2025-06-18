@@ -33,8 +33,11 @@ module.exports = [
       .then((copilotOpportunity) => {
         const plainOpportunity = copilotOpportunity.get({ plain: true });
         let canApplyAsCopilot = false;
+        req.log.info(plainOpportunity.project.members);
+        req.log.info(req.authUser, 'authuser');
         if (plainOpportunity && plainOpportunity.project && plainOpportunity.project.members && req.authUser) {
           const existingMember = plainOpportunity.project.members.find(item => item.userId === req.authUser.userId);
+          req.log.info(existingMember, 'existingMember');
           canApplyAsCopilot = !!!existingMember;
         }
         // This shouldn't be exposed to the clientside
