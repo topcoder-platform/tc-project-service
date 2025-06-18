@@ -35,9 +35,14 @@ const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 router.all(
   RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`),
   (req, res, next) => {
-    if (publicRoutes.some(routeRegex => routeRegex.test(req.path))) {
+    let token
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      token = req.headers.authorization.split(' ')[1]
+    }
+    if (publicRoutes.some(routeRegex => routeRegex.test(req.path)) && !token) {
       return next();
     }
+    req.log.info("token available", token);
     // JWT authentication
     return jwtAuth(config)(req, res, next);
   },

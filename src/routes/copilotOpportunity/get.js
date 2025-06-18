@@ -32,6 +32,7 @@ module.exports = [
     })
       .then((copilotOpportunity) => {
         const plainOpportunity = copilotOpportunity.get({ plain: true });
+        req.log.info("authUser", req.authUser);
         const memberIds = plainOpportunity.project.members.map((member) => member.userId);
         // This shouldn't be exposed to the clientside
         delete plainOpportunity.project.members;
