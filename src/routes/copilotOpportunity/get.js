@@ -32,7 +32,16 @@ module.exports = [
     })
       .then((copilotOpportunity) => {
         const plainOpportunity = copilotOpportunity.get({ plain: true });
-        const formattedOpportunity = Object.assign({}, plainOpportunity,
+        let canApplyAsCopilot = false;
+        if (plainOpportunity && plainOpportunity.project && plainOpportunity.project.members && req.authUser) {
+          const existingMember = plainOpportunity.project.members.find(item => item.userId === req.authUser.userId);
+          canApplyAsCopilot = !!!existingMember;
+        }
+        // This shouldn't be exposed to the clientside
+        delete plainOpportunity.project.members;
+        const formattedOpportunity = Object.assign({
+          canApplyAsCopilot,
+        }, plainOpportunity,
           plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
           { copilotRequest: undefined },
         );
