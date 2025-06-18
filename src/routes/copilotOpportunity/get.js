@@ -19,7 +19,7 @@ module.exports = [
         {
           model: models.Project,
           as: 'project',
-          attributes: ['name'],
+          attributes: ['name', 'members'],
         },
       ],
     })
