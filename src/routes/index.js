@@ -419,6 +419,10 @@ router.route('/v5/projects/copilots/opportunity/:id(\\d+)/applications')
 router.route('/v5/projects/copilots/opportunity/:id(\\d+)/assign')
   .post(require('./copilotOpportunity/assign'));
 
+// Cancel Copilot opportunity
+router.route('/v5/projects/copilots/opportunity/:id(\\d+)/cancel')
+.delete(require('./copilotOpportunity/delete'));
+
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')
   .get(require('./projectEstimationItems/list'));

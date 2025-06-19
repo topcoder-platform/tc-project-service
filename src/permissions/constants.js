@@ -288,6 +288,19 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     ],
     scopes: SCOPES_PROJECTS_WRITE,
   },
+  
+  CANCEL_COPILOT_OPPORTUNITY: {
+    meta: {
+      title: 'Cancel copilot opportunity',
+      group: 'Cancel copilot opportunity',
+      description: 'Who can cancel copilot opportunity.',
+    },
+    topcoderRoles: [
+      USER_ROLE.PROJECT_MANAGER,
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
 
   LIST_COPILOT_OPPORTUNITY: {
     meta: {
