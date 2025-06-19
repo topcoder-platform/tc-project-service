@@ -38,7 +38,7 @@ module.exports = [
         transaction,
       });
 
-      const applications = await models.CopilotApplications.findAll({
+      const applications = await models.CopilotApplication.findAll({
         where: {
           opportunityId: opportunity.id,
         },
