@@ -45,19 +45,21 @@ module.exports = [
         transaction,
       });
 
-      applications.update({
-        status: COPILOT_APPLICATION_STATUS.CANCELED,
-      }, {
-        transaction,
+      applications.forEach(async (application) => {
+        await application.update({
+          status: COPILOT_APPLICATION_STATUS.CANCELED,
+        }, {
+          transaction,
+        });
       });
 
-      copilotRequest.update({
+      await copilotRequest.update({
         status: COPILOT_REQUEST_STATUS.CANCELED,
       }, {
         transaction,
       });
 
-      opportunity.update({
+      await opportunity.update({
         status: COPILOT_OPPORTUNITY_STATUS.CANCELED,
       }, {
         transaction,
