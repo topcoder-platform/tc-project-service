@@ -46,7 +46,7 @@ module.exports = [
       });
 
       const promises = [];
-      applications.forEach(async (application) => {
+      applications.forEach((application) => {
         promises.push(application.update({
           status: COPILOT_APPLICATION_STATUS.CANCELED,
         }, {
