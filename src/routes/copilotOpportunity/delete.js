@@ -19,7 +19,7 @@ module.exports = [
     const opportunityId = _.parseInt(req.params.id);
 
     return models.sequelize.transaction(async (transaction) => {
-      req.log.debug('Canceling Copilot opportunity transaction', data);
+      req.log.debug('Canceling Copilot opportunity transaction', opportunityId);
       const opportunity = await models.CopilotOpportunity.findOne({
         where: { id: opportunityId },
         transaction,
