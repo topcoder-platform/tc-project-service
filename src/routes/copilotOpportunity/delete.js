@@ -45,13 +45,16 @@ module.exports = [
         transaction,
       });
 
+      const promises = [];
       applications.forEach(async (application) => {
-        await application.update({
+        promises.push(application.update({
           status: COPILOT_APPLICATION_STATUS.CANCELED,
         }, {
           transaction,
-        });
+        }));
       });
+
+      await Promise.all(promises);
 
       await copilotRequest.update({
         status: COPILOT_REQUEST_STATUS.CANCELED,
