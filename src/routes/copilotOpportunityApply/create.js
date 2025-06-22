@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
-import { COPILOT_OPPORTUNITY_STATUS } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_OPPORTUNITY_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
+import { createEvent } from '../../services/busApi';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
@@ -65,7 +67,44 @@ module.exports = [
       }
 
       return models.CopilotApplication.create(data)
-        .then((result) => {
+        .then(async (result) => {
+          const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
+          const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
+
+          const creator = await util.getMemberDetailsByUserIds([opportunity.createdBy], req.log, req.id);
+
+          const listOfSubjects = subjects;
+          if (creator && creator[0] && creator[0].email) {
+            const isCreatorPartofSubjects = subjects.find(item => {
+              if (!item.email) {
+                return false;
+              }
+
+              return item.email.toLowerCase() === creator[0].email.toLowerCase();
+            });
+            if (!isCreatorPartofSubjects) {
+              listOfSubjects.push({
+                email: creator[0].email,
+                handle: creator[0].handle,
+              });
+            }
+          }
+          
+          const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+          const copilotPortalUrl = config.get('copilotPortalUrl');
+          listOfSubjects.forEach((subject) => {
+            createEvent(emailEventType, {
+                data: {
+                  user_name: subject.handle,
+                  opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}#applications`,
+                  work_manager_url: config.get('workManagerUrl'),
+                },
+                sendgrid_template_id: TEMPLATE_IDS.APPLY_COPILOT,
+                recipients: [subject.email],
+                version: 'v3',
+              }, req.log);
+          });
+
           res.status(201).json(result);
           return Promise.resolve();
         })

@@ -35,7 +35,7 @@ module.exports = [
       updatedBy: req.authUser.userId,
     });
 
-    return approveRequest(data)
+    return approveRequest(req, data)
       .then(_newCopilotOpportunity => res.status(201).json(_newCopilotOpportunity))
       .catch((err) => {
         if (err.message) {

@@ -107,7 +107,10 @@ module.exports = [
         req,
         EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
         RESOURCES.PROJECT_MEMBER_INVITE,
-        invite.toJSON());
+        Object.assign({}, invite.toJSON(), {
+          source: 'copilot_portal',
+        }),
+      );
 
       await application.update({
         status: COPILOT_APPLICATION_STATUS.INVITED,

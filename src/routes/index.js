@@ -35,9 +35,14 @@ const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 router.all(
   RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`),
   (req, res, next) => {
-    if (publicRoutes.some(routeRegex => routeRegex.test(req.path))) {
+    let token
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      token = req.headers.authorization.split(' ')[1]
+    }
+    if (publicRoutes.some(routeRegex => routeRegex.test(req.path)) && !token) {
       return next();
     }
+    req.log.info("token available", token);
     // JWT authentication
     return jwtAuth(config)(req, res, next);
   },
@@ -413,6 +418,10 @@ router.route('/v5/projects/copilots/opportunity/:id(\\d+)/applications')
 // Copilot opportunity assign
 router.route('/v5/projects/copilots/opportunity/:id(\\d+)/assign')
   .post(require('./copilotOpportunity/assign'));
+
+// Cancel Copilot opportunity
+router.route('/v5/projects/copilots/opportunity/:id(\\d+)/cancel')
+.delete(require('./copilotOpportunity/delete'));
 
 // Project Estimation Items
 router.route('/v5/projects/:projectId(\\d+)/estimations/:estimationId(\\d+)/items')

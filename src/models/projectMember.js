@@ -34,6 +34,10 @@ module.exports = function defineProjectMember(sequelize, DataTypes) {
     ],
   });
 
+  ProjectMember.associate = (models) => {
+    ProjectMember.belongsTo(models.Project, { foreignKey: 'projectId' });
+  };
+
   ProjectMember.getProjectIdsForUser = userId => ProjectMember.findAll({
     where: {
       deletedAt: { $eq: null },
