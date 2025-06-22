@@ -265,6 +265,58 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     scopes: SCOPES_PROJECTS_WRITE,
   },
 
+  APPLY_COPILOT_OPPORTUNITY: {
+    meta: {
+      title: 'Apply copilot opportunity',
+      group: 'Apply Copilot',
+      description: 'Who can apply for copilot opportunity.',
+    },
+    topcoderRoles: [
+      USER_ROLE.TC_COPILOT,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+  ASSIGN_COPILOT_OPPORTUNITY: {
+    meta: {
+      title: 'Assign copilot to opportunity',
+      group: 'Assign Copilot',
+      description: 'Who can assign for copilot opportunity.',
+    },
+    topcoderRoles: [
+      USER_ROLE.PROJECT_MANAGER,
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+  
+  CANCEL_COPILOT_OPPORTUNITY: {
+    meta: {
+      title: 'Cancel copilot opportunity',
+      group: 'Cancel copilot opportunity',
+      description: 'Who can cancel copilot opportunity.',
+    },
+    topcoderRoles: [
+      USER_ROLE.PROJECT_MANAGER,
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
+  LIST_COPILOT_OPPORTUNITY: {
+    meta: {
+      title: 'Apply copilot opportunity',
+      group: 'Apply Copilot',
+      description: 'Who can apply for copilot opportunity.',
+    },
+    topcoderRoles: [
+      USER_ROLE.TOPCODER_ADMIN,
+    ],
+    projectRoles: [
+      USER_ROLE.PROJECT_MANAGER,
+    ],
+    scopes: SCOPES_PROJECTS_WRITE,
+  },
+
   MANAGE_PROJECT_BILLING_ACCOUNT_ID: {
     meta: {
       title: 'Manage Project property "billingAccountId"',
@@ -599,6 +651,7 @@ export const PERMISSION = { // eslint-disable-line import/prefer-default-export
     topcoderRoles: [
       ...TOPCODER_ROLES_ADMINS,
       USER_ROLE.COPILOT_MANAGER,
+      USER_ROLE.PROJECT_MANAGER,
     ],
     scopes: SCOPES_PROJECT_INVITES_WRITE,
   },

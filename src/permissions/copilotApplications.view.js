@@ -1,0 +1,45 @@
+
+import _ from 'lodash';
+import util from '../util';
+import models from '../models';
+
+/**
+ * Topcoder admin and Project managers who are part of the project can view the copilot applications in it
+ * Also, users who had an application will have access to view it.
+ * @param {Object}    freq        the express request instance
+ * @return {Promise}              Returns a promise
+ */
+module.exports = freq => new Promise((resolve, reject) => {
+  const opportunityId = _.parseInt(freq.params.id);
+  const currentUserId = freq.authUser.userId;
+  return models.CopilotOpportunity.findOne({
+    where: {
+      id: opportunityId,
+    },
+  })
+    .then((opportunity) => {
+      const req = freq;
+      req.context = req.context || {};
+      req.context.currentOpportunity = opportunity;
+      const isProjectManager = util.hasProjectManagerRole(req);
+
+      return models.CopilotApplication.findOne({
+        where: {
+          opportunityId: opportunityId,
+          userId: currentUserId,
+        },
+      }).then((copilotApplication) => {
+        // check if auth user has access to this project
+        const hasAccess = util.hasAdminRole(req) || isProjectManager || !!copilotApplication;
+        return Promise.resolve(hasAccess);
+      })
+    })
+    .then((hasAccess) => {
+      if (!hasAccess) {
+        const errorMessage = 'You do not have permissions to perform this action';
+        // user is not an admin nor is a registered project member
+        return reject(new Error(errorMessage));
+      }
+      return resolve(true);
+    });
+});

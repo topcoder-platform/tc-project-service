@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { PROJECT_MEMBER_ROLE, INVITE_STATUS, EVENT, RESOURCES } from '../../constants';
+import { PROJECT_MEMBER_ROLE, INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
 
 /**
@@ -74,13 +74,30 @@ module.exports = [
           .update({
             status: INVITE_STATUS.CANCELED,
           })
-          .then((updatedInvite) => {
+          .then(async (updatedInvite) => {
             // emit the event
             util.sendResourceToKafkaBus(
               req,
               EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_REMOVED,
               RESOURCES.PROJECT_MEMBER_INVITE,
               updatedInvite.toJSON());
+
+              // update the application if the invite
+              // originated from copilot opportunity
+              if (invite.applicationId) {
+                const allPendingInvitesForApplication = await models.ProjectMemberInvite.getPendingInvitesForApplication(invite.applicationId);
+                // If only the current invite is the open one's
+                // then the application status has to be moved to pending status
+                if (allPendingInvitesForApplication.length === 0) {
+                  await models.CopilotApplication.update({
+                    status: COPILOT_APPLICATION_STATUS.PENDING,
+                  }, {
+                    where: {
+                      id: invite.applicationId,
+                    },
+                  });
+                }
+              }
 
             res.status(204).end();
           });

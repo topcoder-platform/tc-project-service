@@ -34,6 +34,10 @@ module.exports = function defineProjectMember(sequelize, DataTypes) {
     ],
   });
 
+  ProjectMember.associate = (models) => {
+    ProjectMember.belongsTo(models.Project, { foreignKey: 'projectId' });
+  };
+
   ProjectMember.getProjectIdsForUser = userId => ProjectMember.findAll({
     where: {
       deletedAt: { $eq: null },
@@ -44,11 +48,12 @@ module.exports = function defineProjectMember(sequelize, DataTypes) {
   })
     .then(res => _.without(_.map(res, 'projectId'), null));
 
-  ProjectMember.getActiveProjectMembers = projectId => ProjectMember.findAll({
+  ProjectMember.getActiveProjectMembers = (projectId, t) => ProjectMember.findAll({
     where: {
       deletedAt: { $eq: null },
       projectId,
     },
+    transaction: t,
     raw: true,
   });
 

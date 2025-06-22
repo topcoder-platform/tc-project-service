@@ -226,6 +226,23 @@ const projectServiceUtils = {
   },
 
   /**
+   * Helper funtion to verify if user has project manager role
+   * @param  {object} req  Request object that should contain authUser
+   * @return {boolean}      true/false
+   */
+  hasProjectManagerRole: (req) => {
+    const isMachineToken = _.get(req, 'authUser.isMachine', false);
+    const tokenScopes = _.get(req, 'authUser.scopes', []);
+    if (isMachineToken) {
+      if (_.indexOf(tokenScopes, M2M_SCOPES.CONNECT_PROJECT_ADMIN) >= 0) return true;
+      return false;
+    }
+    let roles = _.get(req, 'authUser.roles', []);
+    roles = roles.map(s => s.toLowerCase());
+    return roles.includes(USER_ROLE.PROJECT_MANAGER.toLowerCase());
+  },
+
+  /**
    * Parses query fields and groups them per table
    * @param  {array}      queryFields     list of query fields
    * @param  {Object}     allowedFields   the allowed fields
@@ -797,6 +814,54 @@ const projectServiceUtils = {
       }
     }
   },
+
+  getRoleInfo: Promise.coroutine(function* (roleId, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      httpClient.defaults.timeout = 6000;
+      logger.debug(`${config.identityServiceEndpoint}roles/${roleId}`, "fetching role info");
+      return httpClient.get(`${config.identityServiceEndpoint}roles/${roleId}`, {
+        params: {
+          fields: `subjects`,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        logger.debug(`Role info by ${roleId}: ${JSON.stringify(res.data.result.content)}`);
+        return _.get(res, 'data.result.content', []);
+      });
+    } catch (err) {
+      logger.debug(err, "error on getting role info");
+      return Promise.reject(err);
+    }
+  }),
+
+  getRolesByRoleName: Promise.coroutine(function* (roleName, logger, requestId) { // eslint-disable-line func-names
+    try {
+      const token = yield this.getM2MToken();
+      const httpClient = this.getHttpClient({ id: requestId, log: logger });
+      httpClient.defaults.timeout = 6000;
+      return httpClient.get(`${config.identityServiceEndpoint}roles`, {
+        params: {
+          filter: `roleName=${roleName}`,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        logger.debug(`Roles by ${roleName}: ${JSON.stringify(res.data.result.content)}`);
+        return _.get(res, 'data.result.content', [])
+          .filter(item => item.roleName === roleName)
+          .map(r => r.id);
+      });
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }),
 
   /**
    * Retrieve member details from userIds

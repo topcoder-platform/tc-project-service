@@ -11,10 +11,10 @@ info:
       You can also set a custom page size up to 100 with the `perPage` parameter.
 
       Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
-host: "localhost:3000"
+host: "api.topcoder-dev.com"
 basePath: /v5
 schemes:
-  - http
+  - https
 produces:
   - application/json
 consumes:
@@ -411,7 +411,7 @@ paths:
   "/projects/copilots/opportunities":
     get:
       tags:
-        - projects copilot opportunities
+        - projects copilot opportunity
       operationId: getAllCopilotOpportunities
       security:
         - Bearer: []
@@ -444,7 +444,7 @@ paths:
           description: "Internal Server Error"
           schema:
             $ref: "#/definitions/ErrorModel"
-  "/projects/copilots/opportunities/{copilotOpportunityId}":
+  "/projects/copilots/opportunity/{copilotOpportunityId}":
     get:
       tags:
         - projects copilot opportunity
@@ -459,6 +459,126 @@ paths:
           description: "The copilot opportunity"
           schema:
             $ref: "#/definitions/CopilotOpportunity"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/apply":
+    post:
+      tags:
+        - projects copilot opportunity
+      operationId: applyCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Retrieve a specific copilot opportunity."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ApplyCopilotOpportunity"
+      responses:
+        "200":
+          description: "The copilot opportunity application"
+          schema:
+            $ref: "#/definitions/CopilotOpportunityApplication"
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/applications":
+    get:
+      tags:
+        - projects copilot opportunity applications
+      operationId: listCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Retrieve the list copilot opportunity applications."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+        - name: sort
+          required: false
+          description: >
+            sort projects by createdAt, updatedAt. Default
+            is createdAt asc
+          in: query
+          type: string
+      responses:
+        "200":
+          description: A list of projects
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CopilotOpportunityApplication"
+          headers:
+            X-Next-Page:
+              type: integer
+              description: The index of the next page
+            X-Page:
+              type: integer
+              description: The index of the current page (starting at 1)
+            X-Per-Page:
+              type: integer
+              description: The number of items to list per page
+            X-Prev-Page:
+              type: integer
+              description: The index of the previous page
+            X-Total:
+              type: integer
+              description: The total number of items
+            X-Total-Pages:
+              type: integer
+              description: The total number of pages
+            Link:
+              type: string
+              description: Pagination link header.
+        "401":
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "403":
+          description: "Forbidden - User does not have permission"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        "500":
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  "/projects/copilots/opportunity/{copilotOpportunityId}/assign":
+    post:
+      tags:
+        - assign project copilot opportunity
+      operationId: assignCopilotOpportunity
+      security:
+        - Bearer: []
+      description: "Assign a copilot opportunity with copilot."
+      parameters:
+        - $ref: "#/parameters/copilotOpportunityIdParam"
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/AssignCopilotOpportunity"
+      responses:
+        "200":
+          description: "The response after assigning an copilot opportunity"
+          schema:
+            $ref: "#/definitions/CopilotOpportunityAssignResponse"
         "401":
           description: "Unauthorized"
           schema:
@@ -5448,6 +5568,13 @@ parameters:
     required: true
     type: integer
     format: int64
+  copilotOpportunityIdParam:
+    name: copilotOpportunityId
+    in: path
+    description: copilot opportunity identifier
+    required: true
+    type: integer
+    format: int64
   phaseIdParam:
     name: phaseId
     in: path
@@ -5975,6 +6102,60 @@ definitions:
         format: int64
         description: READ-ONLY. User that last updated this task
         readOnly: true
+  CopilotOpportunityApplication:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
+      notes:
+        description: notes regarding the application
+        type: string
+      status:
+        description: status of the application
+        type: string
+        enum:
+          - pending
+          - accepted
+        example: pending
+      opportunityId:
+        description: copilot request id
+        type: integer
+      createdAt:
+        type: string
+        description: Datetime (GMT) when task was created
+        readOnly: true
+      createdBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User who created this task
+        readOnly: true
+      updatedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was updated
+        readOnly: true
+      updatedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that last updated this task
+        readOnly: true
+      deletedAt:
+        type: string
+        description: READ-ONLY. Datetime (GMT) when task was deleted
+        readOnly: true
+      deletedBy:
+        type: integer
+        format: int64
+        description: READ-ONLY. User that deleted this task
+        readOnly: true
+  CopilotOpportunityAssignResponse:
+    type: object
+    properties:
+      id:
+        description: unique identifier
+        type: integer
+        format: int64
   Project:
     type: object
     properties:
@@ -6184,6 +6365,20 @@ definitions:
           - customer
           - manager
           - copilot
+  ApplyCopilotOpportunity:
+    title: Apply Copilot Opportunity
+    type: object
+    properties:
+      notes:
+        type: string
+        description: notes about applying copilot opportunity
+  AssignCopilotOpportunity:
+    title: Assign Copilot Opportunity
+    type: object
+    properties:
+      applicationId:
+        type: string
+        description: The ID of the application to be accepted for the copilot opportunity.
   NewProjectAttachment:
     title: Project attachment request
     type: object

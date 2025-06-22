@@ -1,0 +1,143 @@
+commit 4b5eecc32d6cf2e5b8f4bc00d1b56b27447e88ba
+Author: himaniraghav3 <himaniraghav@gmail.com>
+Date:   Thu Feb 27 14:33:45 2025 +0530
+
+    Add pagination to copilot opportunities response
+
+diff --git a/src/routes/copilotOpportunity/get.js b/src/routes/copilotOpportunity/get.js
+index 9ceb6a57..a968af13 100644
+--- a/src/routes/copilotOpportunity/get.js
++++ b/src/routes/copilotOpportunity/get.js
+@@ -1,9 +1,5 @@
+-import _ from 'lodash';
+-
+ import models from '../../models';
+-import { ADMIN_ROLES } from '../../constants';
+ import util from '../../util';
+-import { PERMISSION } from '../../permissions/constants';
+ 
+ module.exports = [
+   (req, res, next) => {
+@@ -13,26 +9,26 @@ module.exports = [
+       return util.handleError('Invalid opportunity ID', null, req, next, 400);
+     }
+ 
+-    models.CopilotOpportunity.findOne({ 
+-        where: { id },
+-        include: [
+-            {
+-                model: models.CopilotRequest, 
+-                as: 'copilotRequest',
+-            },
+-            {
+-                model: models.Project,
+-                as: 'project',
+-                attributes: ['name'],
+-            }
+-        ],
++    return models.CopilotOpportunity.findOne({
++      where: { id },
++      include: [
++        {
++          model: models.CopilotRequest,
++          as: 'copilotRequest',
++        },
++        {
++          model: models.Project,
++          as: 'project',
++          attributes: ['name'],
++        },
++      ],
+     })
+       .then((copilotOpportunity) => {
+-        const plainOpportunity = copilotOpportunity.get({ plain: true }); 
+-        const formattedOpportunity = Object.assign({}, plainOpportunity, 
+-            plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
+-            { copilotRequest: undefined }
+-        );    
++        const plainOpportunity = copilotOpportunity.get({ plain: true });
++        const formattedOpportunity = Object.assign({}, plainOpportunity,
++          plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
++          { copilotRequest: undefined },
++        );
+         res.json(formattedOpportunity);
+       })
+       .catch((err) => {
+diff --git a/src/routes/copilotOpportunity/list.js b/src/routes/copilotOpportunity/list.js
+index 1f1e003f..f8d45bde 100644
+--- a/src/routes/copilotOpportunity/list.js
++++ b/src/routes/copilotOpportunity/list.js
+@@ -1,9 +1,7 @@
+ import _ from 'lodash';
+ 
+ import models from '../../models';
+-import { ADMIN_ROLES } from '../../constants';
+ import util from '../../util';
+-import { PERMISSION } from '../../permissions/constants';
+ 
+ module.exports = [
+   (req, res, next) => {
+@@ -17,29 +15,42 @@ module.exports = [
+     }
+     const sortParams = sort.split(' ');
+ 
+-    models.CopilotOpportunity.findAll({
+-        include: [
+-            {
+-                model: models.CopilotRequest, 
+-                as: 'copilotRequest',
+-            },
+-            {
+-                model: models.Project,
+-                as: 'project',
+-                attributes: ['name'],
+-            }
+-            ],
+-        order: [[sortParams[0], sortParams[1]]],
++    // Extract pagination parameters
++    const page = parseInt(req.query.page, 10) || 1;
++    const pageSize = parseInt(req.query.pageSize, 10) || 10;
++    const offset = (page - 1) * pageSize;
++    const limit = pageSize;
++
++    return models.CopilotOpportunity.findAll({
++      include: [
++        {
++          model: models.CopilotRequest,
++          as: 'copilotRequest',
++        },
++        {
++          model: models.Project,
++          as: 'project',
++          attributes: ['name'],
++        },
++      ],
++      order: [[sortParams[0], sortParams[1]]],
++      limit,
++      offset,
+     })
+-      .then(copilotOpportunities => {
+-        const formattedOpportunities = copilotOpportunities.map(opportunity => {
+-            const plainOpportunity = opportunity.get({ plain: true });     
+-            return Object.assign({}, plainOpportunity, 
+-                plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
+-                { copilotRequest: undefined }
+-            );
++      .then((copilotOpportunities) => {
++        const formattedOpportunities = copilotOpportunities.map((opportunity) => {
++          const plainOpportunity = opportunity.get({ plain: true });
++          return Object.assign({}, plainOpportunity,
++            plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
++            { copilotRequest: undefined },
++          );
++        });
++        return util.setPaginationHeaders(req, res, {
++          count: copilotOpportunities.count,
++          rows: formattedOpportunities,
++          page,
++          pageSize,
+         });
+-        return res.json(formattedOpportunities);
+       })
+       .catch((err) => {
+         util.handleError('Error fetching copilot opportunities', err, req, next);

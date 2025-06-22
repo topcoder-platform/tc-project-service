@@ -13,6 +13,16 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
         isEmail: true,
       },
     },
+    applicationId: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: 'copilot_applications',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    },
     role: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -50,6 +60,14 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
   ProjectMemberInvite.getPendingInvitesForProject = projectId => ProjectMemberInvite.findAll({
     where: {
       projectId,
+      status: INVITE_STATUS.PENDING,
+    },
+    raw: true,
+  });
+
+  ProjectMemberInvite.getPendingInvitesForApplication = applicationId => ProjectMemberInvite.findAll({
+    where: {
+      applicationId,
       status: INVITE_STATUS.PENDING,
     },
     raw: true,

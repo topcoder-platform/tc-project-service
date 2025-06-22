@@ -1,7 +1,10 @@
 import _ from 'lodash';
+import config from 'config';
 
 import models from '../../models';
-import { COPILOT_REQUEST_STATUS } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
+import util from '../../util';
+import { createEvent } from '../../services/busApi';
 
 const resolveTransaction = (transaction, callback) => {
   if (transaction) {
@@ -11,7 +14,7 @@ const resolveTransaction = (transaction, callback) => {
   return models.sequelize.transaction(callback);
 };
 
-module.exports = (data, existingTransaction) => {
+module.exports = (req, data, existingTransaction) => {
   const { projectId, copilotRequestId } = data;
 
   return resolveTransaction(existingTransaction, transaction =>
@@ -52,6 +55,29 @@ module.exports = (data, existingTransaction) => {
                 return models.CopilotOpportunity
                   .create(data, { transaction });
               }))
+              .then(async (opportunity) => {
+                const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
+                const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
+                const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+                const copilotPortalUrl = config.get('copilotPortalUrl');
+                req.log.info("Sending emails to all copilots about new opportunity");
+                subjects.forEach(subject => {
+                  createEvent(emailEventType, {
+                    data: {
+                      user_name: subject.handle,
+                      opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+                      work_manager_url: config.get('workManagerUrl'),
+                    },
+                    sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
+                    recipients: [subject.email],
+                    version: 'v3',
+                  }, req.log);
+                });
+
+                req.log.info("Finished sending emails to copilots");
+                
+                return opportunity;
+              })
               .catch((err) => {
                 transaction.rollback();
                 return Promise.reject(err);
