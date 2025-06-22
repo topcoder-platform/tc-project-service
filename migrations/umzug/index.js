@@ -6,6 +6,10 @@ const { Umzug, SequelizeStorage } = require('umzug');
 const sequelize = new Sequelize(config.get('dbConfig.masterUrl'), {
   dialect: 'postgres',
   schema: config.get('dbConfig.schema'),
+  dialectOptions: {
+      prependSearchPath: true
+  },
+  searchPath: config.get('dbConfig.schema'),
 });
 
 // Initialize Umzug
