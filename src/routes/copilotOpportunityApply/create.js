@@ -11,7 +11,7 @@ import { createEvent } from '../../services/busApi';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
-    notes: Joi.string().optional(),
+    notes: Joi.string().required(),
   }),
 };
 
