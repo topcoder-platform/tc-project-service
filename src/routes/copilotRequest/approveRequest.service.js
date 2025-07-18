@@ -49,7 +49,6 @@ module.exports = (req, data, existingTransaction) => {
                 },
               })
               .then((existingCopilotOpportunityOfSameType) => {
-                req.log.debug(existingCopilotOpportunityOfSameType, 'askdjlasd');
                 if (existingCopilotOpportunityOfSameType) {
                   const err = new Error('There\'s an opportunity of same type already!');
                   _.assign(err, {
