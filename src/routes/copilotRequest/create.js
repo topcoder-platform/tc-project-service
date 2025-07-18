@@ -77,6 +77,7 @@ module.exports = [
               },
             },
           }).then((copilotRequest) => {
+            req.log.info(copilotRequest, 'copilotRequest')
             if (copilotRequest && copilotRequest.data.projectType === data.data.projectType) {
               const err = new Error('There\'s a request of same type already!');
               _.assign(err, {
