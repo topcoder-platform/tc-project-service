@@ -34,7 +34,10 @@ module.exports = [
           attributes: ['name'],
         },
       ],
-      order: [[sortParams[0], sortParams[1]]],
+      order: [
+        [models.Sequelize.literal(`CASE WHEN "CopilotOpportunity"."status" = 'active' THEN 0 ELSE 1 END`), 'ASC'],
+        [sortParams[0], sortParams[1]]
+      ],
       limit,
       offset,
     })

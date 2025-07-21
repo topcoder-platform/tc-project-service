@@ -5,6 +5,7 @@ import models from '../../models';
 import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
+import { Op } from 'sequelize';
 
 const resolveTransaction = (transaction, callback) => {
   if (transaction) {
@@ -42,6 +43,9 @@ module.exports = (req, data, existingTransaction) => {
                 where: {
                   projectId,
                   type: data.type,
+                  status: {
+                    [Op.notIn]: [COPILOT_REQUEST_STATUS.CANCELED],
+                  }
                 },
               })
               .then((existingCopilotOpportunityOfSameType) => {
