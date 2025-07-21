@@ -6,6 +6,7 @@ import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
 import { Op } from 'sequelize';
+import { getCopilotTypeLabel } from '../../utils/copilot';
 
 const resolveTransaction = (transaction, callback) => {
   if (transaction) {
@@ -60,6 +61,30 @@ module.exports = (req, data, existingTransaction) => {
                   .create(data, { transaction });
               }))
               .then(async (opportunity) => {
+                const opportunityWithProjectInfo = await models.CopilotOpportunity.findOne({
+                  where: { id: opportunity.id },
+                  include: [
+                    {
+                      model: models.CopilotRequest,
+                      as: 'copilotRequest',
+                    },
+                    {
+                      model: models.Project,
+                      as: 'project',
+                      attributes: ['name'],
+                      include: [
+                        {
+                          model: models.ProjectMember,
+                          as: 'members',
+                          attributes: ['id', 'userId', 'role'],
+                        },
+                      ],
+                    },
+                  ],
+                });
+                req.log.debug(opportunityWithProjectInfo, "debug log opportunityWithProjectInfo");
+                const data = opportunityWithProjectInfo.copilotRequest.data;
+                req.log.debug(data, "debug log data");
                 const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
                 const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
@@ -71,6 +96,9 @@ module.exports = (req, data, existingTransaction) => {
                       user_name: subject.handle,
                       opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                       work_manager_url: config.get('workManagerUrl'),
+                      opportunity_type: getCopilotTypeLabel(opportunity.type),
+                      opportunity_title: opportunityWithProjectInfo.project.name,
+                      start_date: moment.utc(data.startDate).format(),
                     },
                     sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
                     recipients: [subject.email],
