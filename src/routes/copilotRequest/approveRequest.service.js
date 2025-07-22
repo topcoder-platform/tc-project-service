@@ -63,20 +63,6 @@ module.exports = (req, data, existingTransaction) => {
               .then(async (opportunity) => {
                 const copilotRequestWithProjectInfo = await models.CopilotRequest.findOne({
                   where: { id: opportunity.copilotRequestId },
-                  include: [
-                    {
-                      model: models.Project,
-                      as: 'project',
-                      attributes: ['name'],
-                      include: [
-                        {
-                          model: models.ProjectMember,
-                          as: 'members',
-                          attributes: ['id', 'userId', 'role'],
-                        },
-                      ],
-                    },
-                  ],
                 });
                 req.log.info(copilotRequestWithProjectInfo);
                 req.log.debug("debug log copilotRequestWithProjectInfo")
@@ -94,7 +80,7 @@ module.exports = (req, data, existingTransaction) => {
                       opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                       work_manager_url: config.get('workManagerUrl'),
                       opportunity_type: getCopilotTypeLabel(opportunity.type),
-                      opportunity_title: copilotRequestWithProjectInfo.project.name,
+                      opportunity_title: data.opportunityTitle,
                       start_date: moment.utc(data.startDate).format(),
                     },
                     sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
