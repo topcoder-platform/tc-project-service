@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import config from 'config';
+import moment from 'moment';
 
 import models from '../../models';
 import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
