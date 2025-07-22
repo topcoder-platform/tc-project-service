@@ -61,13 +61,9 @@ module.exports = (req, data, existingTransaction) => {
                   .create(data, { transaction });
               }))
               .then(async (opportunity) => {
-                const opportunityWithProjectInfo = await models.CopilotOpportunity.findOne({
-                  where: { id: opportunity.id },
+                const copilotRequestWithProjectInfo = await models.CopilotRequest.findOne({
+                  where: { id: opportunity.copilotRequestId },
                   include: [
-                    {
-                      model: models.CopilotRequest,
-                      as: 'copilotRequest',
-                    },
                     {
                       model: models.Project,
                       as: 'project',
@@ -82,10 +78,9 @@ module.exports = (req, data, existingTransaction) => {
                     },
                   ],
                 });
-                req.log.info(opportunity);
-                req.log.info(opportunityWithProjectInfo);
-                req.log.debug("debug log opportunityWithProjectInfo")
-                const data = opportunityWithProjectInfo.copilotRequest.data;
+                req.log.info(copilotRequestWithProjectInfo);
+                req.log.debug("debug log copilotRequestWithProjectInfo")
+                const data = copilotRequestWithProjectInfo.data;
                 req.log.debug(data, "debug log data");
                 const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
@@ -99,7 +94,7 @@ module.exports = (req, data, existingTransaction) => {
                       opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                       work_manager_url: config.get('workManagerUrl'),
                       opportunity_type: getCopilotTypeLabel(opportunity.type),
-                      opportunity_title: opportunityWithProjectInfo.project.name,
+                      opportunity_title: copilotRequestWithProjectInfo.project.name,
                       start_date: moment.utc(data.startDate).format(),
                     },
                     sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
