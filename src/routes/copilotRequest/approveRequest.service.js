@@ -82,7 +82,8 @@ module.exports = (req, data, existingTransaction) => {
                     },
                   ],
                 });
-                req.log.debug(opportunityWithProjectInfo);
+                req.log.info(opportunity);
+                req.log.info(opportunityWithProjectInfo);
                 req.log.debug("debug log opportunityWithProjectInfo")
                 const data = opportunityWithProjectInfo.copilotRequest.data;
                 req.log.debug(data, "debug log data");
