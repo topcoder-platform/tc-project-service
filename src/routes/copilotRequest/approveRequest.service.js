@@ -65,6 +65,7 @@ module.exports = (req, data, existingTransaction) => {
                   where: { id: opportunity.copilotRequestId },
                 });
                 req.log.info(copilotRequestWithProjectInfo);
+                req.log.info(opportunity.copilotRequestId);
                 req.log.debug("debug log copilotRequestWithProjectInfo")
                 const data = copilotRequestWithProjectInfo.data;
                 req.log.debug(data, "debug log data");
