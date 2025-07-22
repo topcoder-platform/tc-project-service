@@ -17,7 +17,7 @@ const resolveTransaction = (transaction, callback) => {
 };
 
 module.exports = (req, data, existingTransaction) => {
-  const { projectId, copilotRequestId } = data;
+  const { projectId, copilotRequestId, opportunityTitle, type } = data;
 
   return resolveTransaction(existingTransaction, transaction =>
     models.Project.findOne({
@@ -61,14 +61,6 @@ module.exports = (req, data, existingTransaction) => {
                   .create(data, { transaction });
               }))
               .then(async (opportunity) => {
-                const copilotRequestWithProjectInfo = await models.CopilotRequest.findOne({
-                  where: { id: opportunity.copilotRequestId },
-                });
-                req.log.info(copilotRequestWithProjectInfo);
-                req.log.info(opportunity.copilotRequestId);
-                req.log.debug("debug log copilotRequestWithProjectInfo")
-                const data = copilotRequestWithProjectInfo.data;
-                req.log.debug(data, "debug log data");
                 const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
                 const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
@@ -80,8 +72,8 @@ module.exports = (req, data, existingTransaction) => {
                       user_name: subject.handle,
                       opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                       work_manager_url: config.get('workManagerUrl'),
-                      opportunity_type: getCopilotTypeLabel(opportunity.type),
-                      opportunity_title: data.opportunityTitle,
+                      opportunity_type: getCopilotTypeLabel(type),
+                      opportunity_title: opportunityTitle,
                       start_date: moment.utc(data.startDate).format(),
                     },
                     sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
