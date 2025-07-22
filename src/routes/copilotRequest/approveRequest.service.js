@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import config from 'config';
 import moment from 'moment';
+import { Op } from 'sequelize';
 
 import models from '../../models';
 import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
-import { Op } from 'sequelize';
 import { getCopilotTypeLabel } from '../../utils/copilot';
 
 const resolveTransaction = (transaction, callback) => {
