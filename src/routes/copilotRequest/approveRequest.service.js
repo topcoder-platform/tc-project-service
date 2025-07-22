@@ -82,7 +82,8 @@ module.exports = (req, data, existingTransaction) => {
                     },
                   ],
                 });
-                req.log.debug(opportunityWithProjectInfo, "debug log opportunityWithProjectInfo");
+                req.log.debug(opportunityWithProjectInfo);
+                req.log.debug("debug log opportunityWithProjectInfo")
                 const data = opportunityWithProjectInfo.copilotRequest.data;
                 req.log.debug(data, "debug log data");
                 const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
