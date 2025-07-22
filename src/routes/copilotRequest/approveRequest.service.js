@@ -17,7 +17,7 @@ const resolveTransaction = (transaction, callback) => {
 };
 
 module.exports = (req, data, existingTransaction) => {
-  const { projectId, copilotRequestId, opportunityTitle, type } = data;
+  const { projectId, copilotRequestId, opportunityTitle, type, startDate } = data;
 
   return resolveTransaction(existingTransaction, transaction =>
     models.Project.findOne({
@@ -74,7 +74,7 @@ module.exports = (req, data, existingTransaction) => {
                       work_manager_url: config.get('workManagerUrl'),
                       opportunity_type: getCopilotTypeLabel(type),
                       opportunity_title: opportunityTitle,
-                      start_date: moment.utc(data.startDate).format(),
+                      start_date: moment.utc(startDate).format(),
                     },
                     sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
                     recipients: [subject.email],
