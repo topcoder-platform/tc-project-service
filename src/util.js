@@ -949,10 +949,10 @@ const projectServiceUtils = {
       yield models.ProjectMember
           .update(
             { deletedBy: req.authUser.userId },
-            { where: { userId: member.userId }, transaction}
+            { where: { userId: existingMember.userId }, transaction}
           );
       yield models.ProjectMember.destroy({
-        where: { userId: member.userId },
+        where: { userId: existingMember.userId },
         transaction
       });
     } else if (existingMember) {
