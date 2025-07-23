@@ -4,5 +4,6 @@
   "copilotPortalUrl": "https://copilots.topcoder.com",
   "sfdcBillingAccountNameField": "Billing_Account_name__c",
   "sfdcBillingAccountMarkupField": "Mark_up__c",
-  "sfdcBillingAccountActiveField": "Active__c"
+  "sfdcBillingAccountActiveField": "Active__c",
+  "copilotsSlackEmail": "mem-copilots-aaaaaa4m4blyjxrlrv7yr37y6u@topcoder.slack.com"
 }

@@ -56,6 +56,7 @@
   "workManagerUrl": "https://challenges.topcoder-dev.com",
   "copilotPortalUrl": "https://copilots.topcoder-dev.com",
   "accountsAppUrl": "https://accounts.topcoder-dev.com",
+  "copilotsSlackEmail": "aaaaplg3e4y6ccn3qniivvnxva@topcoder.slack.com",
   "MAX_REVISION_NUMBER": 100,
   "UNIQUE_GMAIL_VALIDATION": false,
   "pageSize": 20,
