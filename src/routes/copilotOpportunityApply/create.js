@@ -8,6 +8,7 @@ import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 import { CONNECT_NOTIFICATION_EVENT, COPILOT_OPPORTUNITY_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import { createEvent } from '../../services/busApi';
+import { getCopilotTypeLabel } from '../../utils/copilot';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
