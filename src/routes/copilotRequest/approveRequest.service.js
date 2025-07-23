@@ -67,26 +67,10 @@ module.exports = (req, data, existingTransaction) => {
                 const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
                 const copilotPortalUrl = config.get('copilotPortalUrl');
                 req.log.info("Sending emails to all copilots about new opportunity");
-                subjects.forEach(subject => {
-                  createEvent(emailEventType, {
-                    data: {
-                      user_name: subject.handle,
-                      opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
-                      work_manager_url: config.get('workManagerUrl'),
-                      opportunity_type: getCopilotTypeLabel(type),
-                      opportunity_title: opportunityTitle,
-                      start_date: moment.utc(startDate).format("YYYY-MM-DD HH:mm:ss [UTC]"),
-                    },
-                    sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
-                    recipients: [subject.email],
-                    version: 'v3',
-                  }, req.log);
-                });
 
-                // send email to notify via slack
-                createEvent(emailEventType, {
+                const sendNotification = (userName, recipients) => createEvent(emailEventType, {
                   data: {
-                    user_name: 'Copilots',
+                    user_name: userName,
                     opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                     work_manager_url: config.get('workManagerUrl'),
                     opportunity_type: getCopilotTypeLabel(type),
@@ -94,9 +78,14 @@ module.exports = (req, data, existingTransaction) => {
                     start_date: moment.utc(startDate).format("YYYY-MM-DD HH:mm:ss [UTC]"),
                   },
                   sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
-                  recipients: [config.copilotsSlackEmail],
+                  recipients,
                   version: 'v3',
                 }, req.log);
+
+                subjects.forEach(subject => sendNotification(subject.handle, subject.email));
+
+                // send email to notify via slack
+                sendNotification('Copilots', [config.copilotsSlackEmail]);
 
                 req.log.info("Finished sending emails to copilots");
                 
