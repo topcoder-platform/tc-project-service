@@ -947,7 +947,10 @@ const projectServiceUtils = {
         && member.role === PROJECT_MEMBER_ROLE.COPILOT
         && existingMember.role === PROJECT_MEMBER_ROLE.OBSERVER) {
       yield models.ProjectMember
-          .update({ deletedBy: req.authUser.userId })
+          .update(
+            { deletedBy: req.authUser.userId },
+            { where: { userId: member.userId }, transaction}
+          )
           .then(entity => entity.destroy());
     } else if (existingMember) {
       const err = new Error(`User already registered for role: ${existingMember.role}`);
