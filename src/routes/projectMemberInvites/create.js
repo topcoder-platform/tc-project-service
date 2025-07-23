@@ -322,18 +322,6 @@ module.exports = [
         const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
         if (inviteUserIds) {
-        // remove members already in the team
-          _.remove(inviteUserIds, u => _.some(members, (m) => {
-            const isPresent = m.userId === u;
-            if (isPresent) {
-              failed.push(_.assign({}, {
-                handle: getUserHandleById(m.userId, inviteUsers),
-                message: errorMessageForAlreadyMemberUser,
-              }));
-            }
-            return isPresent;
-          }));
-
           // for each user invited by `handle` (userId) we have to load they Topcoder Roles,
           // so we can check if such a user can be invited with desired Project Role
           // for customers we don't check it to avoid extra call, as any Topcoder user can be invited as customer
