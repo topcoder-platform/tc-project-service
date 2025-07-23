@@ -396,7 +396,8 @@ router.route('/v5/projects/:projectId(\\d+)/settings')
 router.route('/v5/projects/copilots/requests')
   .get(require('./copilotRequest/list'));
 router.route('/v5/projects/copilots/requests/:copilotRequestId(\\d+)')
-  .get(require('./copilotRequest/get'));
+  .get(require('./copilotRequest/get'))
+  .patch(require('./copilotRequest/update'));
 router.route('/v5/projects/:projectId(\\d+)/copilots/requests')
   .get(require('./copilotRequest/list'))
   .post(require('./copilotRequest/create'));
