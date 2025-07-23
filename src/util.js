@@ -950,8 +950,11 @@ const projectServiceUtils = {
           .update(
             { deletedBy: req.authUser.userId },
             { where: { userId: member.userId }, transaction}
-          )
-          .then(entity => entity.destroy());
+          );
+      yield models.ProjectMember.destroy({
+        where: { userId: member.userId },
+        transaction
+      });
     } else if (existingMember) {
       const err = new Error(`User already registered for role: ${existingMember.role}`);
       err.status = 400;
