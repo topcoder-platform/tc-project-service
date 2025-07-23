@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import config from 'config';
+import moment from 'moment';
+import { Op } from 'sequelize';
 
 import models from '../../models';
 import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
-import { Op } from 'sequelize';
+import { getCopilotTypeLabel } from '../../utils/copilot';
 
 const resolveTransaction = (transaction, callback) => {
   if (transaction) {
@@ -16,7 +18,7 @@ const resolveTransaction = (transaction, callback) => {
 };
 
 module.exports = (req, data, existingTransaction) => {
-  const { projectId, copilotRequestId } = data;
+  const { projectId, copilotRequestId, opportunityTitle, type, startDate } = data;
 
   return resolveTransaction(existingTransaction, transaction =>
     models.Project.findOne({
@@ -71,6 +73,9 @@ module.exports = (req, data, existingTransaction) => {
                       user_name: subject.handle,
                       opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
                       work_manager_url: config.get('workManagerUrl'),
+                      opportunity_type: getCopilotTypeLabel(type),
+                      opportunity_title: opportunityTitle,
+                      start_date: moment.utc(startDate).format("YYYY-MM-DD HH:mm:ss [UTC]"),
                     },
                     sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
                     recipients: [subject.email],

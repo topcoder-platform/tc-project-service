@@ -98,6 +98,8 @@ module.exports = [
               createdBy: req.authUser.userId,
               updatedBy: req.authUser.userId,
               type: copilotRequest.data.projectType,
+              opportunityTitle: copilotRequest.data.opportunityTitle,
+              startDate: copilotRequest.data.startDate,
             });
             return approveRequest(req, approveData, transaction).then(() => copilotRequest);
           }).then(copilotRequest => res.status(201).json(copilotRequest))
