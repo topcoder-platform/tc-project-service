@@ -83,6 +83,21 @@ module.exports = (req, data, existingTransaction) => {
                   }, req.log);
                 });
 
+                // send email to notify via slack
+                createEvent(emailEventType, {
+                  data: {
+                    user_name: 'Copilots',
+                    opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+                    work_manager_url: config.get('workManagerUrl'),
+                    opportunity_type: getCopilotTypeLabel(type),
+                    opportunity_title: opportunityTitle,
+                    start_date: moment.utc(startDate).format("YYYY-MM-DD HH:mm:ss [UTC]"),
+                  },
+                  sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
+                  recipients: [config.copilotsSlackEmail],
+                  version: 'v3',
+                }, req.log);
+
                 req.log.info("Finished sending emails to copilots");
                 
                 return opportunity;
