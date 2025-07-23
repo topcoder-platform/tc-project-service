@@ -75,7 +75,7 @@ module.exports = (req, data, existingTransaction) => {
                     work_manager_url: config.get('workManagerUrl'),
                     opportunity_type: getCopilotTypeLabel(type),
                     opportunity_title: opportunityTitle,
-                    start_date: moment.utc(startDate).format("YYYY-MM-DD HH:mm:ss [UTC]"),
+                    start_date: moment(startDate).format("DD-MM-YYYY"),
                   },
                   sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
                   recipients: [recipient],
