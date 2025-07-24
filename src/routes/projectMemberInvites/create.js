@@ -356,7 +356,7 @@ module.exports = [
               return Promise.all(updatePromises).then(async () => {
                 const updatedMembers = await models.ProjectMember.findAll({
                   where: {
-                    usedId: {
+                    userId: {
                       [Op.in]: existingMemberIds,
                     },
                   },
