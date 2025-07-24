@@ -361,6 +361,15 @@ module.exports = [
                     },
                   },
                 });
+
+                updatedMembers.forEach((updatedMember) => {
+                  util.sendResourceToKafkaBus(
+                    req,
+                    EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
+                    RESOURCES.PROJECT_MEMBER,
+                    updatedMember,
+                   );
+                });
                 req.log.debug(`Updated member: ${JSON.stringify(updatedMembers)}`);
                 return updatedMembers;
               }).then(values => (

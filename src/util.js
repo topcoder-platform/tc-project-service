@@ -937,25 +937,7 @@ const projectServiceUtils = {
 
     // check if member is already registered
     const existingMember = _.find(members, m => m.userId === member.userId);
-    // if (existingMember) {
-    //   const err = new Error(`User already registered for role: ${existingMember.role}`);
-    //   err.status = 400;
-    //   return Promise.reject(err);
-    // }
-
-    if (existingMember
-        && member.role === PROJECT_MEMBER_ROLE.COPILOT
-        && existingMember.role === PROJECT_MEMBER_ROLE.OBSERVER) {
-      yield models.ProjectMember
-          .update(
-            { deletedBy: req.authUser.userId },
-            { where: { userId: existingMember.userId }, transaction}
-          );
-      yield models.ProjectMember.destroy({
-        where: { userId: existingMember.userId },
-        transaction
-      });
-    } else if (existingMember) {
+    if (existingMember) {
       const err = new Error(`User already registered for role: ${existingMember.role}`);
       err.status = 400;
       return Promise.reject(err);
