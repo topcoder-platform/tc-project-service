@@ -339,6 +339,8 @@ module.exports = [
               return inviteUserIds.includes(m.userId);
             });
 
+            req.log.debug(`Existing members: ${JSON.stringify(existingMembers)}`);
+
             if (existingMembers.length > 0) {
               const updatePromises = existingMembers.map(item =>  models.ProjectMember.update({
                 role: invite.role,
@@ -351,6 +353,7 @@ module.exports = [
               }));
               return Promise.all(updatePromises).then((response) => {
                 const [, updatedRecord] = response;
+                req.log.debug(`Updated member: ${JSON.stringify(updatedRecord)}`);
                 return updatedRecord;
               }).then(values => (
                 // populate successful invites with user details if required
@@ -364,6 +367,7 @@ module.exports = [
               ))
               .then((values) => {
                 const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
+                req.log.debug(`Response: ${JSON.stringify(response)} ${JSON.stringify(values)}`);
                 if (failed.length) {
                   res.status(403).json(_.assign({}, response, { failed }));
                 } else {
