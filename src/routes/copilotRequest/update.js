@@ -4,8 +4,9 @@ import Joi from 'joi';
 
 import models from '../../models';
 import util from '../../util';
-import { COPILOT_OPPORTUNITY_TYPE } from '../../constants';
+import { COPILOT_OPPORTUNITY_TYPE, COPILOT_REQUEST_STATUS } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
+import { Op } from 'sequelize';
 
 const updateCopilotRequestValidations = {
   body: Joi.object().keys({
@@ -62,9 +63,33 @@ module.exports = [
         throw err;
       }
 
+      // check if same type of copilot request already exists
+      if (patchData.projectType !== undefined && patchData.projectType !== copilotRequest.data.projectType) {
+        const sameTypeRequest = await models.CopilotRequest.findOne({
+          where: {
+            projectId: copilotRequest.projectId,
+            status: {
+              [Op.in]: [COPILOT_REQUEST_STATUS.NEW, COPILOT_REQUEST_STATUS.APPROVED, COPILOT_REQUEST_STATUS.SEEKING],
+            },
+            data: {
+              projectType: patchData.projectType,
+            },
+            id: { [Op.not]: copilotRequestId },
+          },
+        });
+
+        if (sameTypeRequest) {
+          const err = new Error('There\'s a request of same type already!');
+          _.assign(err, {
+            status: 400,
+          });
+          throw err;
+        }
+      }
+
       // Only update fields provided in patchData
-      await copilotRequest.update(_.extend({
-        data: patchData,
+      await copilotRequest.update(_.assign({
+        data: _.assign(copilotRequest.data, patchData),
         updatedBy: req.authUser.userId,
       }));
 
