@@ -323,89 +323,16 @@ module.exports = [
         const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
         if (inviteUserIds) {
-          if (invite.role !== PROJECT_MEMBER_ROLE.COPILOT) {
-            // remove members already in the team
-            _.remove(inviteUserIds, u => _.some(members, (m) => {
-              const isPresent = m.userId === u;
-              if (isPresent) {
-                failed.push(_.assign({}, {
-                  handle: getUserHandleById(m.userId, inviteUsers),
-                  message: errorMessageForAlreadyMemberUser,
-                }));
-              }
-              return isPresent;
-            }));
-          } else {
-            const existingMembers = _.filter(members, (m) => {
-              return inviteUserIds.includes(m.userId) && m.projectId === projectId;
-            });
-
-            req.log.debug(`Existing members: ${JSON.stringify(existingMembers)}`);
-
-            if (existingMembers.length > 0) {
-              const existingMemberIds = existingMembers.map(item => item.userId);
-              const membersBeforeUpdate = await models.ProjectMember.findAll({
-                where: {
-                  userId: {
-                    [Op.in]: existingMemberIds,
-                  },
-                },
-              });
-              const membersMap = membersBeforeUpdate.reduce((acc, member) => {
-                acc[member.id] = member;
-                return acc;
-              }, {});
-              
-              const updatePromises = existingMemberIds.map(userId =>  models.ProjectMember.update({
-                role: invite.role,
-                updatedBy: req.authUser.userId,
-              }, {
-                where: {
-                  userId,
-                },
-                returning: true
+          _.remove(inviteUserIds, u => _.some(members, (m) => {
+            const isPresent = m.userId === u;
+            if (isPresent) {
+              failed.push(_.assign({}, {
+                handle: getUserHandleById(m.userId, inviteUsers),
+                message: errorMessageForAlreadyMemberUser,
               }));
-              return Promise.all(updatePromises).then(async () => {
-                const updatedMembers = await models.ProjectMember.findAll({
-                  where: {
-                    userId: {
-                      [Op.in]: existingMemberIds,
-                    },
-                  },
-                });
-
-                updatedMembers.forEach((updatedMember) => {
-                  util.sendResourceToKafkaBus(
-                    req,
-                    EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
-                    RESOURCES.PROJECT_MEMBER,
-                    updatedMember,
-                    membersMap[updatedMember.id]
-                   );
-                });
-                req.log.debug(`Updated member: ${JSON.stringify(updatedMembers)}`);
-                return updatedMembers;
-              }).then(values => (
-                // populate successful invites with user details if required
-                util.getObjectsWithMemberDetails(values, fields, req)
-                  .catch((err) => {
-                    req.log.error('Cannot get user details for invites.');
-                    req.log.debug('Error during getting user details for invites', err);
-                    // continues without details anyway
-                    return values;
-                  })
-              ))
-              .then((values) => {
-                const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
-                req.log.debug(`Response: ${JSON.stringify(response)} ${JSON.stringify(values)}`);
-                if (failed.length) {
-                  res.status(403).json(_.assign({}, response, { failed }));
-                } else {
-                  res.status(201).json(response);
-                }
-              });
             }
-          }
+            return isPresent;
+          }));
 
           // for each user invited by `handle` (userId) we have to load they Topcoder Roles,
           // so we can check if such a user can be invited with desired Project Role
