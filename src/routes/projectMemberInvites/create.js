@@ -346,8 +346,8 @@ module.exports = [
               }, {
                 where: {
                   userId: item.userId,
-                  returning: true
                 },
+                returning: true
               }));
               return Promise.all(updatePromises).then((response) => {
                 const [, updatedRecord] = response;
