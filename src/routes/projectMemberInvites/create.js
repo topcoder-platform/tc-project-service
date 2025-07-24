@@ -18,6 +18,7 @@ import {
 } from '../../constants';
 import { createEvent } from '../../services/busApi';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
+import { Op } from 'sequelize';
 
 const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
 
@@ -342,19 +343,26 @@ module.exports = [
             req.log.debug(`Existing members: ${JSON.stringify(existingMembers)}`);
 
             if (existingMembers.length > 0) {
-              const updatePromises = existingMembers.map(item =>  models.ProjectMember.update({
+              const existingMemberIds = existingMembers.map(item => item.userId);
+              const updatePromises = existingMemberIds.map(userId =>  models.ProjectMember.update({
                 role: invite.role,
                 updatedBy: req.authUser.userId,
               }, {
                 where: {
-                  userId: item.userId,
+                  userId,
                 },
                 returning: true
               }));
-              return Promise.all(updatePromises).then((response) => {
-                const [, updatedRecord] = response;
-                req.log.debug(`Updated member: ${JSON.stringify(updatedRecord)}`);
-                return updatedRecord;
+              return Promise.all(updatePromises).then(async () => {
+                const updatedMembers = await models.ProjectMember.findAll({
+                  where: {
+                    usedId: {
+                      [Op.in]: existingMemberIds,
+                    },
+                  },
+                });
+                req.log.debug(`Updated member: ${JSON.stringify(updatedMembers)}`);
+                return updatedMembers;
               }).then(values => (
                 // populate successful invites with user details if required
                 util.getObjectsWithMemberDetails(values, fields, req)
