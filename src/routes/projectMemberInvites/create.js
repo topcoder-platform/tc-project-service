@@ -334,6 +334,43 @@ module.exports = [
               }
               return isPresent;
             }));
+          } else {
+            const existingMembers = _.filter(members, (m) => {
+              return inviteUserIds.includes(m.userId);
+            });
+
+            if (existingMembers.length > 0) {
+              const updatePromises = existingMembers.map(item =>  models.ProjectMember.update({
+                role: invite.role,
+                updatedBy: req.authUser.userId,
+              }, {
+                where: {
+                  userId: item.userId,
+                  returning: true
+                },
+              }));
+              return Promise.all(updatePromises).then((response) => {
+                const [, updatedRecord] = response;
+                return updatedRecord;
+              }).then(values => (
+                // populate successful invites with user details if required
+                util.getObjectsWithMemberDetails(values, fields, req)
+                  .catch((err) => {
+                    req.log.error('Cannot get user details for invites.');
+                    req.log.debug('Error during getting user details for invites', err);
+                    // continues without details anyway
+                    return values;
+                  })
+              ))
+              .then((values) => {
+                const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
+                if (failed.length) {
+                  res.status(403).json(_.assign({}, response, { failed }));
+                } else {
+                  res.status(201).json(response);
+                }
+              });
+            }
           }
 
           // for each user invited by `handle` (userId) we have to load they Topcoder Roles,
