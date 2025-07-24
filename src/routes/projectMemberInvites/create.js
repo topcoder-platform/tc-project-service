@@ -300,7 +300,7 @@ module.exports = [
 
         return [];
       })
-      .then((inviteUsers) => {
+      .then(async (inviteUsers) => {
         const members = req.context.currentProjectMembers;
         const projectId = _.parseInt(req.params.projectId);
         // check user handle exists in returned result
@@ -337,13 +337,25 @@ module.exports = [
             }));
           } else {
             const existingMembers = _.filter(members, (m) => {
-              return inviteUserIds.includes(m.userId);
+              return inviteUserIds.includes(m.userId) && m.projectId === projectId;
             });
 
             req.log.debug(`Existing members: ${JSON.stringify(existingMembers)}`);
 
             if (existingMembers.length > 0) {
               const existingMemberIds = existingMembers.map(item => item.userId);
+              const membersBeforeUpdate = await models.ProjectMember.findAll({
+                where: {
+                  userId: {
+                    [Op.in]: existingMemberIds,
+                  },
+                },
+              });
+              const membersMap = membersBeforeUpdate.reduce((acc, member) => {
+                acc[member.id] = member;
+                return acc;
+              }, {});
+              
               const updatePromises = existingMemberIds.map(userId =>  models.ProjectMember.update({
                 role: invite.role,
                 updatedBy: req.authUser.userId,
@@ -368,6 +380,7 @@ module.exports = [
                     EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
                     RESOURCES.PROJECT_MEMBER,
                     updatedMember,
+                    membersMap[updatedMember.id]
                    );
                 });
                 req.log.debug(`Updated member: ${JSON.stringify(updatedMembers)}`);
