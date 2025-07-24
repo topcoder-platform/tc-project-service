@@ -18,7 +18,6 @@ import {
 } from '../../constants';
 import { createEvent } from '../../services/busApi';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
-import { Op } from 'sequelize';
 
 const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
 
@@ -300,7 +299,7 @@ module.exports = [
 
         return [];
       })
-      .then(async (inviteUsers) => {
+      .then((inviteUsers) => {
         const members = req.context.currentProjectMembers;
         const projectId = _.parseInt(req.params.projectId);
         // check user handle exists in returned result
