@@ -77,6 +77,8 @@ module.exports = [
           return Promise.reject(err);
         }
 
+        req.log.debug(`updated props ${JSON.stringify(updatedProps)}`);
+        req.log.debug(`previous values ${JSON.stringify(previousValue)}`);
         // no updates if no change
         if (updatedProps.role === previousValue.role &&
               (_.isUndefined(updatedProps.isPrimary) ||
