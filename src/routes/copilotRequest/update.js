@@ -63,6 +63,12 @@ module.exports = [
         throw err;
       }
 
+      if (['canceled', 'fulfilled'].includes(copilotRequest.status)) {
+        const err = new Error(`Copilot request with status ${copilotRequest.status} cannot be updated!`);
+        err.status = 400;
+        throw err;
+      }
+
       // check if same type of copilot request already exists
       if (patchData.projectType !== undefined && patchData.projectType !== copilotRequest.data.projectType) {
         const sameTypeRequest = await models.CopilotRequest.findOne({
@@ -85,6 +91,11 @@ module.exports = [
           });
           throw err;
         }
+      }
+
+      // if type changes, make sure we update "type" on opportunity as well
+      if (patchData.projectType) {
+        patchData.type = patchData.projectType;
       }
 
       // Only update fields provided in patchData
