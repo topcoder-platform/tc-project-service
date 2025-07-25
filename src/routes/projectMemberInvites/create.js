@@ -18,6 +18,7 @@ import {
 } from '../../constants';
 import { createEvent } from '../../services/busApi';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
+import { Op } from 'sequelize';
 
 const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
 
@@ -299,7 +300,7 @@ module.exports = [
 
         return [];
       })
-      .then((inviteUsers) => {
+      .then(async (inviteUsers) => {
         const members = req.context.currentProjectMembers;
         const projectId = _.parseInt(req.params.projectId);
         // check user handle exists in returned result
@@ -322,6 +323,30 @@ module.exports = [
         const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
         if (inviteUserIds) {
+          const existingMembers = _.some(members, (m) => {
+            const isPresent = m.userId === u;
+            return isPresent;
+          });
+
+          const projectMembers = await models.ProjectMember.findAll({
+            where: {
+              userId: {
+                [Op.in]: existingMembers.map(item => item.userId),
+              }
+            }
+          });
+
+          req.log.debug(`Existing Project Members: ${JSON.stringify(projectMembers)}`);
+
+          const existingProjectMembersMap = projectMembers.reduce((acc, current) => {
+            return {
+              ...acc,
+              [current.id]: current,
+            };
+          }, {});
+
+          req.log.debug(`Existing Project Members Map: ${JSON.stringify(existingProjectMembersMap)}`);
+          
           _.remove(inviteUserIds, u => _.some(members, (m) => {
             const isPresent = m.userId === u;
             if (isPresent) {
@@ -329,7 +354,7 @@ module.exports = [
                 handle: getUserHandleById(m.userId, inviteUsers),
                 message: errorMessageForAlreadyMemberUser,
                 error: "ALREADY_MEMBER",
-                role: m.role,
+                role: existingProjectMembersMap[m.userId].role,
               }));
             }
             return isPresent;
