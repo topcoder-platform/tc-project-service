@@ -328,6 +328,8 @@ module.exports = [
               failed.push(_.assign({}, {
                 handle: getUserHandleById(m.userId, inviteUsers),
                 message: errorMessageForAlreadyMemberUser,
+                error: "ALREADY_MEMBER",
+                role: m.role,
               }));
             }
             return isPresent;
