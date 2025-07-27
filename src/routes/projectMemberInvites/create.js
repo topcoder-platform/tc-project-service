@@ -324,8 +324,7 @@ module.exports = [
 
         if (inviteUserIds) {
           const existingMembers = _.some(members, (m) => {
-            const isPresent = m.userId === u;
-            return isPresent;
+            return inviteUserIds.includes(m.userId);
           });
 
           const projectMembers = await models.ProjectMember.findAll({
