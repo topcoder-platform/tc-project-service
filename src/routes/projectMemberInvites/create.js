@@ -323,9 +323,11 @@ module.exports = [
         const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
         if (inviteUserIds) {
-          const existingMembers = _.some(members, (m) => {
+          const existingMembers = _.filter(members, (m) => {
             return inviteUserIds.includes(m.userId);
           });
+
+          req.log.debug(`Existing members: ${JSON.stringify(existingMembers)}`);
 
           const projectMembers = await models.ProjectMember.findAll({
             where: {
