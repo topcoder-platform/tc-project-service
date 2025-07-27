@@ -28,6 +28,7 @@ const updateProjectMemberValdiations = {
       PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
       PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
     ).required(),
+    action: Joi.string().optional(),
   }),
   query: {
     fields: Joi.string().optional(),
@@ -80,7 +81,7 @@ module.exports = [
         req.log.debug(`updated props ${JSON.stringify(updatedProps)}`);
         req.log.debug(`previous values ${JSON.stringify(previousValue)}`);
         // no updates if no change
-        if (updatedProps.role === previousValue.role &&
+        if ((updatedProps.role === previousValue.role || updatedProps.action === 'overwrite') &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
 
