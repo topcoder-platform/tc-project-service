@@ -35,6 +35,78 @@ const updateProjectMemberValdiations = {
   },
 };
 
+const completeAllCopilotRequests = async (req, projectId, _transaction) => {
+  const allCopilotRequests = await models.CopilotRequest.findAll({
+    where: {
+      projectId,
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`all copilot requests ${JSON.stringify(allCopilotRequests)}`);
+
+  await models.CopilotRequest.update({
+    status: COPILOT_REQUEST_STATUS.FULFILLED,
+  }, {
+    where: {
+      id: {
+        [Op.in]: allCopilotRequests.map(item => item.id),
+      }
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`updated all copilot requests`);
+
+  const copilotOpportunites = await models.CopilotOpportunity.findAll({
+    where: {
+      copilotRequestId: {
+        [Op.in]: allCopilotRequests.map(item => item.id),
+      },
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`all copilot opportunities ${JSON.stringify(copilotOpportunites)}`);
+
+  await models.CopilotOpportunity.update({
+    status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
+  }, {
+    where: {
+      id: {
+        [Op.in]: copilotOpportunites.map(item => item.id),
+      }
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`updated all copilot opportunities`);
+
+  const allCopilotApplications = await models.CopilotApplication.findAll({
+    where: {
+      opportunityId: {
+        [Op.in]: copilotOpportunites.map(item => item.id),
+      },
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`all copilot applications ${JSON.stringify(allCopilotApplications)}`);
+
+  await models.CopilotApplication.update({
+    status: COPILOT_APPLICATION_STATUS.CANCELED,
+  }, {
+    where: {
+      id: {
+        [Op.in]: allCopilotApplications.map(item => item.id),
+      },
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`updated all copilot applications`);
+};
+
 module.exports = [
   // handles request validations
   validate(updateProjectMemberValdiations),
@@ -84,77 +156,7 @@ module.exports = [
         if ((updatedProps.role === previousValue.role || updatedProps.action === 'overwrite') &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
-
-          const allCopilotRequests = await models.CopilotRequest.findAll({
-            where: {
-              projectId,
-            },
-            transaction: _transaction,
-          });
-
-          req.log.debug(`all copilot requests ${JSON.stringify(allCopilotRequests)}`);
-
-          await models.CopilotRequest.update({
-            status: COPILOT_REQUEST_STATUS.FULFILLED,
-          }, {
-            where: {
-              id: {
-                [Op.in]: allCopilotRequests.map(item => item.id),
-              }
-            },
-            transaction: _transaction,
-          });
-
-          req.log.debug(`updated all copilot requests`);
-
-          const copilotOpportunites = await models.CopilotOpportunity.findAll({
-            where: {
-              copilotRequestId: {
-                [Op.in]: allCopilotRequests.map(item => item.id),
-              },
-            },
-            transaction: _transaction,
-          });
-
-          req.log.debug(`all copilot opportunities ${JSON.stringify(copilotOpportunites)}`);
-
-          await models.CopilotOpportunity.update({
-            status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
-          }, {
-            where: {
-              id: {
-                [Op.in]: copilotOpportunites.map(item => item.id),
-              }
-            },
-            transaction: _transaction,
-          });
-
-          req.log.debug(`updated all copilot opportunities`);
-
-          const allCopilotApplications = await models.CopilotApplication.findAll({
-            where: {
-              opportunityId: {
-                [Op.in]: copilotOpportunites.map(item => item.id),
-              },
-            },
-            transaction: _transaction,
-          });
-
-          req.log.debug(`all copilot applications ${JSON.stringify(allCopilotApplications)}`);
-
-          await models.CopilotApplication.update({
-            status: COPILOT_APPLICATION_STATUS.CANCELED,
-          }, {
-            where: {
-              id: {
-                [Op.in]: allCopilotApplications.map(item => item.id),
-              },
-            },
-            transaction: _transaction,
-          });
-
-          req.log.debug(`updated all copilot applications`);
-
+          await completeAllCopilotRequests(req, projectId, _transaction);
           return Promise.resolve();
         }
 
@@ -196,9 +198,13 @@ module.exports = [
         });
       })
       .then(() => projectMember.reload(projectMember.id))
-      .then(() => {
+      .then(async () => {
         projectMember = projectMember.get({ plain: true });
         projectMember = _.omit(projectMember, ['deletedAt']);
+
+        if (['observer', 'customer'].includes(updatedProps.role)) {
+          await completeAllCopilotRequests(req, projectId, _transaction);
+        }
       })
       .then(() => (
         util.getObjectsWithMemberDetails([projectMember], fields, req)
