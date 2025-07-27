@@ -333,7 +333,8 @@ module.exports = [
             where: {
               userId: {
                 [Op.in]: existingMembers.map(item => item.userId),
-              }
+              },
+              projectId,
             }
           });
 
@@ -341,7 +342,7 @@ module.exports = [
 
           const existingProjectMembersMap = projectMembers.reduce((acc, current) => {
             return Object.assign({}, acc, {
-              [current.id]: current,
+              [current.userId]: current,
             });
           }, {});
 
