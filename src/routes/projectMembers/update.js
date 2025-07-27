@@ -119,6 +119,7 @@ module.exports = [
     let updatedProps = req.body;
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
+    const action = updatedProps.action;
     updatedProps = _.pick(updatedProps, ['isPrimary', 'role']);
     const fields = req.query.fields ? req.query.fields.split(',') : null;
 
@@ -153,7 +154,7 @@ module.exports = [
         req.log.debug(`updated props ${JSON.stringify(updatedProps)}`);
         req.log.debug(`previous values ${JSON.stringify(previousValue)}`);
         // no updates if no change
-        if ((updatedProps.role === previousValue.role || updatedProps.action === 'overwrite') &&
+        if ((updatedProps.role === previousValue.role || action === 'overwrite') &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
           await completeAllCopilotRequests(req, projectId, _transaction);
