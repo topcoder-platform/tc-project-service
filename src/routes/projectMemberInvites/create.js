@@ -339,14 +339,13 @@ module.exports = [
           req.log.debug(`Existing Project Members: ${JSON.stringify(projectMembers)}`);
 
           const existingProjectMembersMap = projectMembers.reduce((acc, current) => {
-            return {
-              ...acc,
+            return Object.assign({}, acc, {
               [current.id]: current,
-            };
+            });
           }, {});
 
           req.log.debug(`Existing Project Members Map: ${JSON.stringify(existingProjectMembersMap)}`);
-          
+
           _.remove(inviteUserIds, u => _.some(members, (m) => {
             const isPresent = m.userId === u;
             if (isPresent) {
