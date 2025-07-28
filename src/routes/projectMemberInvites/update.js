@@ -2,10 +2,12 @@ import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
 import { Op } from 'sequelize';
+import config from 'config';
+
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, INVITE_SOURCE } from '../../constants';
+import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, INVITE_SOURCE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
 
 
@@ -264,6 +266,70 @@ module.exports = [
                     }
 
                     await t.commit();
+                    if (source === 'copilot_portal' && invite.applicationId) {
+                      const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
+                      const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
+
+                      const userDetails = await util.getMemberDetailsByUserIds([opportunity.createdBy, invite.userId], req.log, req.id);
+                      const creator = userDetails[0];
+                      const invitee = userDetails[1];
+                      const listOfSubjects = subjects;
+                      if (creator && creator.email) {
+                        const isCreatorPartofSubjects = subjects.find(item => {
+                          if (!item.email) {
+                            return false;
+                          }
+
+                          return item.email.toLowerCase() === creator[0].email.toLowerCase();
+                        });
+                        if (!isCreatorPartofSubjects) {
+                          listOfSubjects.push({
+                            email: creator[0].email,
+                            handle: creator[0].handle,
+                          });
+                        }
+                      }
+
+                      
+                      const application = await models.CopilotApplication.findOne({
+                        where: {
+                          id: invite.applicationId,
+                        },
+                      });
+
+                      const opportunity = await models.CopilotOpportunity.findOne({
+                        where: {
+                          id: application.opportunityId,
+                        },
+                        include: [
+                          {
+                            model: models.CopilotRequest,
+                            as: 'copilotRequest',
+                          },
+                        ],
+                      });
+
+                      const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+                      const copilotPortalUrl = config.get('copilotPortalUrl');
+                      const requestData = opportunity.copilotRequest.data;
+                      listOfSubjects.forEach((subject) => {
+                        createEvent(emailEventType, {
+                            data: {
+                              user_name: subject.handle,
+                              opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}#applications`,
+                              work_manager_url: config.get('workManagerUrl'),
+                              opportunity_type: getCopilotTypeLabel(requestData.projectType),
+                              opportunity_title: requestData.opportunityTitle,
+                              copilot_handle: invitee ? invitee.handle : "",
+                            },
+                            sendgrid_template_id: TEMPLATE_IDS.INFORM_PM_COPILOT_APPLICATION_ACCEPTED,
+                            recipients: [subject.email],
+                            version: 'v3',
+                          }, req.log);
+                      });
+
+
+                    }
                     return res.json(util.postProcessInvites('$.email', updatedInvite, req));
                   } catch (e) {
                     await t.rollback();
