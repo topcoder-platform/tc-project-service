@@ -288,9 +288,10 @@ module.exports = [
                       const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
                       const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
 
-                      const userDetails = await util.getMemberDetailsByUserIds([opportunity.createdBy, invite.userId], req.log, req.id);
-                      const creator = userDetails[0];
-                      const invitee = userDetails[1];
+                      const creatorDetails = await util.getMemberDetailsByUserIds([opportunity.createdBy], req.log, req.id);
+                      const inviteeDetails = await util.getMemberDetailsByUserIds([application.userId], req.log, req.id);
+                      const creator = creatorDetails[0];
+                      const invitee = inviteeDetails[0];
                       const listOfSubjects = subjects;
                       if (creator && creator.email) {
                         const isCreatorPartofSubjects = subjects.find(item => {
