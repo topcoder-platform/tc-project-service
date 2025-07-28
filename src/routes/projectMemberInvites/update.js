@@ -9,6 +9,8 @@ import models from '../../models';
 import util from '../../util';
 import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, INVITE_SOURCE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
+import { getCopilotTypeLabel } from '../../utils/copilot';
+import { createEvent } from '../../services/busApi';
 
 
 /**
@@ -265,7 +267,6 @@ module.exports = [
                       })
                     }
 
-                    await t.commit();
                     if (source === 'copilot_portal' && invite.applicationId) {
                       const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
                       const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
@@ -327,9 +328,9 @@ module.exports = [
                             version: 'v3',
                           }, req.log);
                       });
-
-
                     }
+
+                    await t.commit();
                     return res.json(util.postProcessInvites('$.email', updatedInvite, req));
                   } catch (e) {
                     await t.rollback();

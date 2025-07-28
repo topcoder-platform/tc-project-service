@@ -105,6 +105,8 @@ const completeAllCopilotRequests = async (req, projectId, _transaction) => {
   });
 
   req.log.debug(`updated all copilot applications`);
+
+  await _transaction.commit();
 };
 
 module.exports = [
@@ -125,7 +127,7 @@ module.exports = [
 
     let previousValue;
     // let newValue;
-    models.sequelize.transaction((_transaction) => models.ProjectMember.findOne({
+    models.sequelize.transaction(async (_transaction) => models.ProjectMember.findOne({
       where: { id: memberRecordId, projectId },
     })
       .then(async (_member) => {
@@ -227,6 +229,9 @@ module.exports = [
         req.log.debug('updated project member', projectMember);
         res.json(memberWithDetails || projectMember);
       })
-      .catch(err => next(err)));
+      .catch(async (err) => {
+        await _transaction.rollback();
+        return next(err);
+      }));
   },
 ];
