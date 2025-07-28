@@ -5,6 +5,7 @@ import _ from 'lodash';
 import Joi from 'joi';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { Op } from 'sequelize';
 import models from '../../models';
 import util from '../../util';
 import {
@@ -18,7 +19,6 @@ import {
 } from '../../constants';
 import { createEvent } from '../../services/busApi';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
-import { Op } from 'sequelize';
 
 const ALLOWED_FIELDS = _.keys(models.ProjectMemberInvite.rawAttributes).concat(['handle']);
 
