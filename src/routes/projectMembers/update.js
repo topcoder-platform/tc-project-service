@@ -154,7 +154,7 @@ module.exports = [
         req.log.debug(`updated props ${JSON.stringify(updatedProps)}`);
         req.log.debug(`previous values ${JSON.stringify(previousValue)}`);
         // no updates if no change
-        if ((updatedProps.role === previousValue.role || action === 'overwrite') &&
+        if ((updatedProps.role === previousValue.role || action === 'complete-copilot-requests') &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
           await completeAllCopilotRequests(req, projectId, _transaction);
