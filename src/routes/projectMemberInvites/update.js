@@ -7,7 +7,7 @@ import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, INVITE_SOURCE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS } from '../../constants';
+import { INVITE_STATUS, EVENT, RESOURCES, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, INVITE_SOURCE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
 import { getCopilotTypeLabel } from '../../utils/copilot';
 import { createEvent } from '../../services/busApi';
@@ -281,12 +281,12 @@ module.exports = [
                             return false;
                           }
 
-                          return item.email.toLowerCase() === creator[0].email.toLowerCase();
+                          return item.email.toLowerCase() === creator.email.toLowerCase();
                         });
                         if (!isCreatorPartofSubjects) {
                           listOfSubjects.push({
-                            email: creator[0].email,
-                            handle: creator[0].handle,
+                            email: creator.email,
+                            handle: creator.handle,
                           });
                         }
                       }
