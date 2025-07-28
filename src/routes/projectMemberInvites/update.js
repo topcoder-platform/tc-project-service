@@ -268,6 +268,23 @@ module.exports = [
                     }
 
                     if (source === 'copilot_portal' && invite.applicationId) {
+                      const application = await models.CopilotApplication.findOne({
+                        where: {
+                          id: invite.applicationId,
+                        },
+                      });
+
+                      const opportunity = await models.CopilotOpportunity.findOne({
+                        where: {
+                          id: application.opportunityId,
+                        },
+                        include: [
+                          {
+                            model: models.CopilotRequest,
+                            as: 'copilotRequest',
+                          },
+                        ],
+                      });
                       const pmRole = await util.getRolesByRoleName(USER_ROLE.PROJECT_MANAGER, req.log, req.id);
                       const { subjects = [] } = await util.getRoleInfo(pmRole[0], req.log, req.id);
 
@@ -290,25 +307,6 @@ module.exports = [
                           });
                         }
                       }
-
-                      
-                      const application = await models.CopilotApplication.findOne({
-                        where: {
-                          id: invite.applicationId,
-                        },
-                      });
-
-                      const opportunity = await models.CopilotOpportunity.findOne({
-                        where: {
-                          id: application.opportunityId,
-                        },
-                        include: [
-                          {
-                            model: models.CopilotRequest,
-                            as: 'copilotRequest',
-                          },
-                        ],
-                      });
 
                       const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
                       const copilotPortalUrl = config.get('copilotPortalUrl');
