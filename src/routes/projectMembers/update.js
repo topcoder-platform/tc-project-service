@@ -44,6 +44,13 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
   const allCopilotRequests = await models.CopilotRequest.findAll({
     where: {
       projectId,
+      status: {
+        [Op.in]: [
+          COPILOT_REQUEST_STATUS.APPROVED,
+          COPILOT_REQUEST_STATUS.NEW,
+          COPILOT_REQUEST_STATUS.SEEKING,
+        ],
+      }
     },
     transaction: _transaction,
   });
@@ -127,8 +134,9 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
   req.log.debug(`updated all copilot applications`);
 
   const memberDetails = await util.getMemberDetailsByUserIds([_member.userId], req.log, req.id);
+  const member = memberDetails[0];
 
-  req.log.debug(`member details: ${JSON.stringify(memberDetails)}`);
+  req.log.debug(`member details: ${JSON.stringify(member)}`);
 
   const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
   const copilotPortalUrl = config.get('copilotPortalUrl');
@@ -146,14 +154,14 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
         opportunity_type: getCopilotTypeLabel(requestData.projectType),
         opportunity_title: requestData.opportunityTitle,
         start_date: moment.utc(requestData.startDate).format('DD-MM-YYYY'),
-        user_name: memberDetails ? memberDetails.handle : "",
+        user_name: member ? member.handle : "",
       },
       sendgrid_template_id: TEMPLATE_IDS.COPILOT_ALREADY_PART_OF_PROJECT,
-      recipients: [memberDetails.email],
+      recipients: [member.email],
       version: 'v3',
     }, req.log);
 
-    req.log.debug(`Sent email to ${memberDetails.email}`);
+    req.log.debug(`Sent email to ${member.email}`);
   });
 
   await _transaction.commit();
