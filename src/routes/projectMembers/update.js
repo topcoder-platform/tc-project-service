@@ -94,6 +94,9 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
     transaction: _transaction,
   });
 
+  const memberApplication = allCopilotApplications.find(app => app.userId === _member.userId);
+  const applicationsWithoutMemberApplication = allCopilotApplications.filter(app => app.userId !== _member.userId);
+
   req.log.debug(`all copilot applications ${JSON.stringify(allCopilotApplications)}`);
 
   await models.CopilotApplication.update({
@@ -101,11 +104,23 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
   }, {
     where: {
       id: {
-        [Op.in]: allCopilotApplications.map(item => item.id),
+        [Op.in]: applicationsWithoutMemberApplication.map(item => item.id),
       },
     },
     transaction: _transaction,
   });
+
+  // If the invited member
+  if (memberApplication) {
+    await models.CopilotApplication.update({
+      status: COPILOT_APPLICATION_STATUS.ACCEPTED,
+    }, {
+      where: {
+        id: memberApplication.id,
+      },
+      transaction: _transaction,
+    });
+  }
 
   req.log.debug(`updated all copilot applications`);
 
