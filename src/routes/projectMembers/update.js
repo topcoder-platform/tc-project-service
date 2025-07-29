@@ -10,6 +10,7 @@ import models from '../../models';
 import util from '../../util';
 import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, COPILOT_REQUEST_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_APPLICATION_STATUS, USER_ROLE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS } from '../../constants';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
+import { createEvent } from '../../services/busApi';
 
 
 /**
@@ -135,10 +136,10 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
   allCopilotRequests.forEach((request) => {
     const requestData = request.data;
 
-    req.log.debug(`Copilot request data: ${requestData}`);
+    req.log.debug(`Copilot request data: ${JSON.stringify(requestData)}`);
     const opportunity = copilotOpportunites.find(item => item.copilotRequestId === request.id);
 
-    req.log.debug(`Opportunity: ${opportunity}`);
+    req.log.debug(`Opportunity: ${JSON.stringify(opportunity)}`);
     createEvent(emailEventType, {
       data: {
         opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
