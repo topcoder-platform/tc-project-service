@@ -125,8 +125,6 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
 
   req.log.debug(`updated all copilot applications`);
 
-  await _transaction.commit();
-
   const memberDetails = await util.getMemberDetailsByUserIds([_member.userId], req.log, req.id);
 
   req.log.debug(`member details: ${JSON.stringify(memberDetails)}`);
@@ -156,6 +154,8 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
 
     req.log.debug(`Sent email to ${memberDetails.email}`);
   });
+
+  await _transaction.commit();
 };
 
 module.exports = [
