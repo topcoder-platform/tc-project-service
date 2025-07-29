@@ -31,7 +31,7 @@ const updateProjectMemberValdiations = {
       PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
       PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
     ).required(),
-    action: Joi.string().optional(),
+    action: Joi.string().allow('').optional(),
   }),
   query: {
     fields: Joi.string().optional(),
