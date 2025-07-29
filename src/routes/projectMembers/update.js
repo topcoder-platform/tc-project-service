@@ -2,12 +2,15 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import config from 'config';
+import moment from 'moment';
+import { Op } from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, COPILOT_REQUEST_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_APPLICATION_STATUS } from '../../constants';
+import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, COPILOT_REQUEST_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_APPLICATION_STATUS, USER_ROLE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS } from '../../constants';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
-import { Op } from 'sequelize';
+
 
 /**
  * API to update a project member.
@@ -35,7 +38,7 @@ const updateProjectMemberValdiations = {
   },
 };
 
-const completeAllCopilotRequests = async (req, projectId, _transaction) => {
+const completeAllCopilotRequests = async (req, projectId, _transaction, _member) => {
   const allCopilotRequests = await models.CopilotRequest.findAll({
     where: {
       projectId,
@@ -107,6 +110,36 @@ const completeAllCopilotRequests = async (req, projectId, _transaction) => {
   req.log.debug(`updated all copilot applications`);
 
   await _transaction.commit();
+
+  const memberDetails = await util.getMemberDetailsByUserIds([_member.userId], req.log, req.id);
+
+  req.log.debug(`member details: ${JSON.stringify(memberDetails)}`);
+
+  const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+  const copilotPortalUrl = config.get('copilotPortalUrl');
+  allCopilotRequests.forEach((request) => {
+    const requestData = request.data;
+
+    req.log.debug(`Copilot request data: ${requestData}`);
+    const opportunity = copilotOpportunites.find(item => item.copilotRequestId === request.id);
+
+    req.log.debug(`Opportunity: ${opportunity}`);
+    createEvent(emailEventType, {
+      data: {
+        opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+        work_manager_url: config.get('workManagerUrl'),
+        opportunity_type: getCopilotTypeLabel(requestData.projectType),
+        opportunity_title: requestData.opportunityTitle,
+        start_date: moment.utc(requestData.startDate).format('DD-MM-YYYY'),
+        user_name: memberDetails ? memberDetails.handle : "",
+      },
+      sendgrid_template_id: TEMPLATE_IDS.COPILOT_ALREADY_PART_OF_PROJECT,
+      recipients: [memberDetails.email],
+      version: 'v3',
+    }, req.log);
+
+    req.log.debug(`Sent email to ${memberDetails.email}`);
+  });
 };
 
 module.exports = [
@@ -206,7 +239,7 @@ module.exports = [
         projectMember = _.omit(projectMember, ['deletedAt']);
 
         if (['observer', 'customer'].includes(updatedProps.role)) {
-          await completeAllCopilotRequests(req, projectId, _transaction);
+          await completeAllCopilotRequests(req, projectId, _transaction, _member);
         }
       })
       .then(() => (
