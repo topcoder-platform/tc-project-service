@@ -5,8 +5,9 @@ import Joi from 'joi';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE } from '../../constants';
+import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, COPILOT_REQUEST_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_APPLICATION_STATUS } from '../../constants';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
+import { Op } from 'sequelize';
 
 /**
  * API to update a project member.
@@ -27,10 +28,83 @@ const updateProjectMemberValdiations = {
       PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
       PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
     ).required(),
+    action: Joi.string().optional(),
   }),
   query: {
     fields: Joi.string().optional(),
   },
+};
+
+const completeAllCopilotRequests = async (req, projectId, _transaction) => {
+  const allCopilotRequests = await models.CopilotRequest.findAll({
+    where: {
+      projectId,
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`all copilot requests ${JSON.stringify(allCopilotRequests)}`);
+
+  await models.CopilotRequest.update({
+    status: COPILOT_REQUEST_STATUS.FULFILLED,
+  }, {
+    where: {
+      id: {
+        [Op.in]: allCopilotRequests.map(item => item.id),
+      }
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`updated all copilot requests`);
+
+  const copilotOpportunites = await models.CopilotOpportunity.findAll({
+    where: {
+      copilotRequestId: {
+        [Op.in]: allCopilotRequests.map(item => item.id),
+      },
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`all copilot opportunities ${JSON.stringify(copilotOpportunites)}`);
+
+  await models.CopilotOpportunity.update({
+    status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
+  }, {
+    where: {
+      id: {
+        [Op.in]: copilotOpportunites.map(item => item.id),
+      }
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`updated all copilot opportunities`);
+
+  const allCopilotApplications = await models.CopilotApplication.findAll({
+    where: {
+      opportunityId: {
+        [Op.in]: copilotOpportunites.map(item => item.id),
+      },
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`all copilot applications ${JSON.stringify(allCopilotApplications)}`);
+
+  await models.CopilotApplication.update({
+    status: COPILOT_APPLICATION_STATUS.CANCELED,
+  }, {
+    where: {
+      id: {
+        [Op.in]: allCopilotApplications.map(item => item.id),
+      },
+    },
+    transaction: _transaction,
+  });
+
+  req.log.debug(`updated all copilot applications`);
 };
 
 module.exports = [
@@ -45,15 +119,16 @@ module.exports = [
     let updatedProps = req.body;
     const projectId = _.parseInt(req.params.projectId);
     const memberRecordId = _.parseInt(req.params.id);
+    const action = updatedProps.action;
     updatedProps = _.pick(updatedProps, ['isPrimary', 'role']);
     const fields = req.query.fields ? req.query.fields.split(',') : null;
 
     let previousValue;
     // let newValue;
-    models.sequelize.transaction(() => models.ProjectMember.findOne({
+    models.sequelize.transaction((_transaction) => models.ProjectMember.findOne({
       where: { id: memberRecordId, projectId },
     })
-      .then((_member) => {
+      .then(async (_member) => {
         if (!_member) {
           // handle 404
           const err = new Error(`project member not found for project id ${projectId} ` +
@@ -76,10 +151,13 @@ module.exports = [
           return Promise.reject(err);
         }
 
+        req.log.debug(`updated props ${JSON.stringify(updatedProps)}`);
+        req.log.debug(`previous values ${JSON.stringify(previousValue)}`);
         // no updates if no change
-        if (updatedProps.role === previousValue.role &&
+        if ((updatedProps.role === previousValue.role || action === 'complete-copilot-requests') &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
+          await completeAllCopilotRequests(req, projectId, _transaction);
           return Promise.resolve();
         }
 
@@ -121,9 +199,13 @@ module.exports = [
         });
       })
       .then(() => projectMember.reload(projectMember.id))
-      .then(() => {
+      .then(async () => {
         projectMember = projectMember.get({ plain: true });
         projectMember = _.omit(projectMember, ['deletedAt']);
+
+        if (['observer', 'customer'].includes(updatedProps.role)) {
+          await completeAllCopilotRequests(req, projectId, _transaction);
+        }
       })
       .then(() => (
         util.getObjectsWithMemberDetails([projectMember], fields, req)

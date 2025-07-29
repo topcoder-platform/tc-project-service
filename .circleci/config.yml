@@ -149,7 +149,7 @@ workflows:
           context : org-global
           filters:
             branches:
-              only: ['develop', 'migration-setup', 'pm-1497']
+              only: ['develop', 'migration-setup', 'pm-1506']
       - deployProd:
           context : org-global
           filters:
