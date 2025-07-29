@@ -11,6 +11,7 @@ import util from '../../util';
 import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, COPILOT_REQUEST_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_APPLICATION_STATUS, USER_ROLE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS } from '../../constants';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
 import { createEvent } from '../../services/busApi';
+import { getCopilotTypeLabel } from '../../utils/copilot';
 
 
 /**
