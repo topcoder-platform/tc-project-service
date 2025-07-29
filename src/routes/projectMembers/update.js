@@ -207,7 +207,7 @@ module.exports = [
         if ((updatedProps.role === previousValue.role || action === 'complete-copilot-requests') &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
-          await completeAllCopilotRequests(req, projectId, _transaction);
+          await completeAllCopilotRequests(req, projectId, _transaction, _member);
           return Promise.resolve();
         }
 
