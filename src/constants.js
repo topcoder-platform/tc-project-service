@@ -311,6 +311,8 @@ export const TEMPLATE_IDS = {
   APPLY_COPILOT: 'd-d7c1f48628654798a05c8e09e52db14f',
   CREATE_REQUEST: 'd-3efdc91da580479d810c7acd50a4c17f',
   PROJECT_MEMBER_INVITED: 'd-b47a25b103604bc28fc0ce77e77fb681',
+  INFORM_PM_COPILOT_APPLICATION_ACCEPTED: 'd-b35d073e302b4279a1bd208fcfe96f58',
+  COPILOT_ALREADY_PART_OF_PROJECT: 'd-003d41cdc9de4bbc9e14538e8f2e0585',
 }
 export const REGEX = {
   URL: /^(http(s?):\/\/)?(www\.)?[a-zA-Z0-9\.\-\_]+(\.[a-zA-Z]{2,15})+(\:[0-9]{2,5})?(\/[a-zA-Z0-9\_\-\s\.\/\?\%\#\&\=;]*)?$/, // eslint-disable-line

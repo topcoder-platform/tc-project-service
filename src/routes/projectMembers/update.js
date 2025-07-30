@@ -2,12 +2,17 @@
 import validate from 'express-validation';
 import _ from 'lodash';
 import Joi from 'joi';
+import config from 'config';
+import moment from 'moment';
+import { Op } from 'sequelize';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
-import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, COPILOT_REQUEST_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_APPLICATION_STATUS } from '../../constants';
+import { EVENT, RESOURCES, PROJECT_MEMBER_ROLE, COPILOT_REQUEST_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_APPLICATION_STATUS, USER_ROLE, CONNECT_NOTIFICATION_EVENT, TEMPLATE_IDS } from '../../constants';
 import { PERMISSION, PROJECT_TO_TOPCODER_ROLES_MATRIX } from '../../permissions/constants';
-import { Op } from 'sequelize';
+import { createEvent } from '../../services/busApi';
+import { getCopilotTypeLabel } from '../../utils/copilot';
+
 
 /**
  * API to update a project member.
@@ -28,17 +33,24 @@ const updateProjectMemberValdiations = {
       PROJECT_MEMBER_ROLE.SOLUTION_ARCHITECT,
       PROJECT_MEMBER_ROLE.PROJECT_MANAGER,
     ).required(),
-    action: Joi.string().optional(),
+    action: Joi.string().allow('').optional(),
   }),
   query: {
     fields: Joi.string().optional(),
   },
 };
 
-const completeAllCopilotRequests = async (req, projectId, _transaction) => {
+const completeAllCopilotRequests = async (req, projectId, _transaction, _member) => {
   const allCopilotRequests = await models.CopilotRequest.findAll({
     where: {
       projectId,
+      status: {
+        [Op.in]: [
+          COPILOT_REQUEST_STATUS.APPROVED,
+          COPILOT_REQUEST_STATUS.NEW,
+          COPILOT_REQUEST_STATUS.SEEKING,
+        ],
+      }
     },
     transaction: _transaction,
   });
@@ -91,6 +103,9 @@ const completeAllCopilotRequests = async (req, projectId, _transaction) => {
     transaction: _transaction,
   });
 
+  const memberApplication = allCopilotApplications.find(app => app.userId === _member.userId);
+  const applicationsWithoutMemberApplication = allCopilotApplications.filter(app => app.userId !== _member.userId);
+
   req.log.debug(`all copilot applications ${JSON.stringify(allCopilotApplications)}`);
 
   await models.CopilotApplication.update({
@@ -98,13 +113,58 @@ const completeAllCopilotRequests = async (req, projectId, _transaction) => {
   }, {
     where: {
       id: {
-        [Op.in]: allCopilotApplications.map(item => item.id),
+        [Op.in]: applicationsWithoutMemberApplication.map(item => item.id),
       },
     },
     transaction: _transaction,
   });
 
+  // If the invited member
+  if (memberApplication) {
+    await models.CopilotApplication.update({
+      status: COPILOT_APPLICATION_STATUS.ACCEPTED,
+    }, {
+      where: {
+        id: memberApplication.id,
+      },
+      transaction: _transaction,
+    });
+  }
+
   req.log.debug(`updated all copilot applications`);
+
+  const memberDetails = await util.getMemberDetailsByUserIds([_member.userId], req.log, req.id);
+  const member = memberDetails[0];
+
+  req.log.debug(`member details: ${JSON.stringify(member)}`);
+
+  const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+  const copilotPortalUrl = config.get('copilotPortalUrl');
+  allCopilotRequests.forEach((request) => {
+    const requestData = request.data;
+
+    req.log.debug(`Copilot request data: ${JSON.stringify(requestData)}`);
+    const opportunity = copilotOpportunites.find(item => item.copilotRequestId === request.id);
+
+    req.log.debug(`Opportunity: ${JSON.stringify(opportunity)}`);
+    createEvent(emailEventType, {
+      data: {
+        opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+        work_manager_url: config.get('workManagerUrl'),
+        opportunity_type: getCopilotTypeLabel(requestData.projectType),
+        opportunity_title: requestData.opportunityTitle,
+        start_date: moment.utc(requestData.startDate).format('DD-MM-YYYY'),
+        user_name: member ? member.handle : "",
+      },
+      sendgrid_template_id: TEMPLATE_IDS.COPILOT_ALREADY_PART_OF_PROJECT,
+      recipients: [member.email],
+      version: 'v3',
+    }, req.log);
+
+    req.log.debug(`Sent email to ${member.email}`);
+  });
+
+  await _transaction.commit();
 };
 
 module.exports = [
@@ -125,7 +185,7 @@ module.exports = [
 
     let previousValue;
     // let newValue;
-    models.sequelize.transaction((_transaction) => models.ProjectMember.findOne({
+    models.sequelize.transaction(async (_transaction) => models.ProjectMember.findOne({
       where: { id: memberRecordId, projectId },
     })
       .then(async (_member) => {
@@ -157,7 +217,7 @@ module.exports = [
         if ((updatedProps.role === previousValue.role || action === 'complete-copilot-requests') &&
               (_.isUndefined(updatedProps.isPrimary) ||
                 updatedProps.isPrimary === previousValue.isPrimary)) {
-          await completeAllCopilotRequests(req, projectId, _transaction);
+          await completeAllCopilotRequests(req, projectId, _transaction, _member);
           return Promise.resolve();
         }
 
@@ -204,7 +264,7 @@ module.exports = [
         projectMember = _.omit(projectMember, ['deletedAt']);
 
         if (['observer', 'customer'].includes(updatedProps.role)) {
-          await completeAllCopilotRequests(req, projectId, _transaction);
+          await completeAllCopilotRequests(req, projectId, _transaction, _member);
         }
       })
       .then(() => (
@@ -227,6 +287,9 @@ module.exports = [
         req.log.debug('updated project member', projectMember);
         res.json(memberWithDetails || projectMember);
       })
-      .catch(err => next(err)));
+      .catch(async (err) => {
+        await _transaction.rollback();
+        return next(err);
+      }));
   },
 ];
