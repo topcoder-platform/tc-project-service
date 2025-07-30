@@ -163,8 +163,6 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
 
     req.log.debug(`Sent email to ${member.email}`);
   });
-
-  await _transaction.commit();
 };
 
 module.exports = [
@@ -263,8 +261,8 @@ module.exports = [
         projectMember = projectMember.get({ plain: true });
         projectMember = _.omit(projectMember, ['deletedAt']);
 
-        if (['observer', 'customer'].includes(updatedProps.role)) {
-          await completeAllCopilotRequests(req, projectId, _transaction, _member);
+        if (['observer', 'customer'].includes(previousValue.role) && ['copilot', 'manager'].includes(updatedProps.role)) {
+          await completeAllCopilotRequests(req, projectId, _transaction, projectMember);
         }
       })
       .then(() => (
