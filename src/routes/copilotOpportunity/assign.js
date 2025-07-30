@@ -104,11 +104,12 @@ module.exports = [
 
       const existingMember = activeMembers.find(item => item.userId === userId);
       if (existingMember) {
+        req.log.debug(`User already part of project: ${JSON.stringify(existingMember)}`);
         if (['copilot', 'manager'].includes(existingMember.role)) {
-          
+          req.log.debug(`User is a copilot or manager`);
           updateCopilotOpportunity();
-          
         } else {
+          req.log.debug(`User has read/write role`);
           await models.ProjectMember.update({
             role: 'copilot',
           }, {
@@ -123,14 +124,16 @@ module.exports = [
             },
           });
 
+          req.log.debug(`Updated project member: ${JSON.stringify(projectMember.get({plain: true}))}`);
+
           util.sendResourceToKafkaBus(
             req,
             EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
             RESOURCES.PROJECT_MEMBER,
             projectMember.get({ plain: true }),
             existingMember);
-
-            updateCopilotOpportunity();
+          req.log.debug(`Member updated in kafka`);
+          updateCopilotOpportunity();
         }
         res.status(200).send({ id: applicationId });
         return;
