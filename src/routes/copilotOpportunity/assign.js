@@ -45,10 +45,16 @@ module.exports = [
         throw err;
       }
 
+      const copilotRequest = await models.CopilotRequest.findOne({
+        where: { id: opportunity.copilotRequestId },
+        transaction: t,
+      });
+
       const application = await models.CopilotApplication.findOne({
         where: { id: applicationId, opportunityId: copilotOpportunityId },
         transaction: t,
       });
+
 
       if (!application) {
         const err = new Error('No such application available');
@@ -65,12 +71,69 @@ module.exports = [
       const projectId = opportunity.projectId;
       const userId = application.userId;
       const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId, t);
+      const updateCopilotOpportunity = async () => {
+        await opportunity.update({
+          status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
+        }, {
+          transaction: t,
+        });
+        await application.update({
+          status: COPILOT_APPLICATION_STATUS.ACCEPTED,
+        }, {
+          transaction: t,
+        });
 
-      const existingUser = activeMembers.find(item => item.userId === userId);
-      if (existingUser && existingUser.role === 'copilot') {
-        const err = new Error(`User is already a copilot of this project`);
-        err.status = 400;
-        throw err;
+        await copilotRequest.update({
+          status: COPILOT_REQUEST_STATUS.FULFILLED,
+        }, {
+          transaction: t,
+        });
+
+        await models.CopilotApplication.update({
+          status: COPILOT_APPLICATION_STATUS.CANCELED,
+        }, {
+          where: {
+            projectId,
+            opportunityId: opportunity.id,
+            id: {
+              $ne: application.id,
+            },
+          }
+        });
+      };
+
+      const existingMember = activeMembers.find(item => item.userId === userId);
+      if (existingMember) {
+        if (['copilot', 'manager'].includes(existingMember.role)) {
+          
+          updateCopilotOpportunity();
+          
+        } else {
+          await models.ProjectMember.update({
+            role: 'copilot',
+          }, {
+            where: {
+              id: existingMember.id,
+            },
+          });
+
+          const projectMember = await models.ProjectMember.findOne({
+            where: {
+              id: existingMember.id,
+            },
+          });
+
+          util.sendResourceToKafkaBus(
+            req,
+            EVENT.ROUTING_KEY.PROJECT_MEMBER_UPDATED,
+            RESOURCES.PROJECT_MEMBER,
+            projectMember.get({ plain: true }),
+            existingMember);
+
+            updateCopilotOpportunity();
+        }
+        res.status(200).send({ id: applicationId });
+        return;
       }
 
       const existingInvite = await models.ProjectMemberInvite.findAll({
