@@ -72,23 +72,27 @@ module.exports = [
       const userId = application.userId;
       const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId, t);
       const updateCopilotOpportunity = async () => {
+        req.log.debug(`Updating opportunity: ${JSON.stringify(opportunity)}`);
         await opportunity.update({
           status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
         }, {
           transaction: t,
         });
+        req.log.debug(`Updating application: ${JSON.stringify(application)}`);
         await application.update({
           status: COPILOT_APPLICATION_STATUS.ACCEPTED,
         }, {
           transaction: t,
         });
 
+        req.log.debug(`Updating request: ${JSON.stringify(copilotRequest)}`);
         await copilotRequest.update({
           status: COPILOT_REQUEST_STATUS.FULFILLED,
         }, {
           transaction: t,
         });
 
+        req.log.debug(`Updating other applications: ${JSON.stringify(copilotRequest)}`);
         await models.CopilotApplication.update({
           status: COPILOT_APPLICATION_STATUS.CANCELED,
         }, {
@@ -100,6 +104,8 @@ module.exports = [
             },
           }
         });
+
+        req.log.debug(`All updations done`);
       };
 
       const existingMember = activeMembers.find(item => item.userId === userId);
@@ -135,6 +141,7 @@ module.exports = [
           req.log.debug(`Member updated in kafka`);
           updateCopilotOpportunity();
         }
+        t.commit();
         res.status(200).send({ id: applicationId });
         return;
       }
