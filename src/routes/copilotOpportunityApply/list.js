@@ -61,9 +61,9 @@ module.exports = [
               req.log.debug(`Existing member to application ${JSON.stringify(Object.assign({}, application, {
                 existingMembership: m,
               }))}`);
-              return Object.assign({}, application, {
+              return Object.assign({}, application, m ? {
                 existingMembership: m,
-              });
+              } : {});
             });
 
             req.log.debug(`Enriched Applications ${JSON.stringify(enrichedApplications)}`);
