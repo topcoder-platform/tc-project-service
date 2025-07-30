@@ -163,8 +163,6 @@ const completeAllCopilotRequests = async (req, projectId, _transaction, _member)
 
     req.log.debug(`Sent email to ${member.email}`);
   });
-
-  await _transaction.commit();
 };
 
 module.exports = [
