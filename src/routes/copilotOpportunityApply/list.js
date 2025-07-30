@@ -58,11 +58,12 @@ module.exports = [
             req.log.debug(`Applications ${JSON.stringify(copilotApplications)}`);
             const enrichedApplications = copilotApplications.map(application => {
               const m = members.find(m => m.userId === application.userId);
-              // req.log.debug(`Existing member to application ${JSON.stringify(m)}`);
-              return {
-                ...application,
+              req.log.debug(`Existing member to application ${JSON.stringify(Object.assign({}, application, {
                 existingMembership: m,
-              };
+              }))}`);
+              return Object.assign({}, application, {
+                existingMembership: m,
+              });
             });
 
             req.log.debug(`Enriched Applications ${JSON.stringify(enrichedApplications)}`);
