@@ -102,7 +102,6 @@ module.exports = [
           status: COPILOT_APPLICATION_STATUS.CANCELED,
         }, {
           where: {
-            projectId,
             opportunityId: opportunity.id,
             id: {
               $ne: application.id,
