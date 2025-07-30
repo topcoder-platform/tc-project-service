@@ -58,12 +58,32 @@ module.exports = [
             req.log.debug(`Applications ${JSON.stringify(copilotApplications)}`);
             const enrichedApplications = copilotApplications.map(application => {
               const m = members.find(m => m.userId === application.userId);
-              req.log.debug(`Existing member to application ${JSON.stringify(Object.assign({}, application, m ? {
-                existingMembership: m,
-              } : {}))}`);
-              return Object.assign({}, application, m ? {
-                existingMembership: m,
-              } : {});
+
+              // Using spread operator fails in lint check
+              // While Object.assign fails silently during run time
+              // So using this method
+              const enriched = {
+                id: application.id,
+                opportunityId: application.opportunityId,
+                notes: application.notes,
+                status: application.status,
+                userId: application.userId,
+                deletedAt: application.deletedAt,
+                createdAt: application.createdAt,
+                updatedAt: application.updatedAt,
+                deletedBy: application.deletedBy,
+                createdBy: application.createdBy,
+                updatedBy: application.updatedBy,
+                copilotOpportunity: application.copilotOpportunity,
+              };
+
+              if (m) {
+                enriched.existingMembership = m;
+              }
+
+              req.log.debug(`Existing member to application ${JSON.stringify(enriched)}`);
+
+              return enriched;
             });
 
             req.log.debug(`Enriched Applications ${JSON.stringify(enrichedApplications)}`);
