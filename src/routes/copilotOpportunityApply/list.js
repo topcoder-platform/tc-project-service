@@ -52,11 +52,11 @@ module.exports = [
         order: [[sortParams[0], sortParams[1]]],
       })
         .then(copilotApplications => {
+          req.log.debug(`CopilotApplications ${JSON.stringify(copilotApplications)}`);
           return models.ProjectMember.getActiveProjectMembers(opportunity.projectId).then((members) => {
-            const applications = copilotApplications.get({plain: true});
             req.log.debug(`Fetched existing active members ${JSON.stringify(members)}`);
-            req.log.debug(`Applications ${JSON.stringify(applications)}`);
-            return res.json(applications.map(application => {
+            req.log.debug(`Applications ${JSON.stringify(copilotApplications)}`);
+            return res.json(copilotApplications.map(application => {
               req.log.debug(`Existing member to application ${JSON.stringify(members.find(m => m.userId === application.userId))}`);
               return Object.assign({}, application, {
                 existingMembership: members.find(m => m.userId === application.userId),
