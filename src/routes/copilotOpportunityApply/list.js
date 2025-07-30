@@ -56,12 +56,15 @@ module.exports = [
           return models.ProjectMember.getActiveProjectMembers(opportunity.projectId).then((members) => {
             req.log.debug(`Fetched existing active members ${JSON.stringify(members)}`);
             req.log.debug(`Applications ${JSON.stringify(copilotApplications)}`);
-            return res.json(copilotApplications.map(application => {
+            const enrichedApplications = copilotApplications.map(application => {
               req.log.debug(`Existing member to application ${JSON.stringify(members.find(m => m.userId === application.userId))}`);
               return Object.assign({}, application, {
                 existingMembership: members.find(m => m.userId === application.userId),
               });
-            }));
+            });
+
+            req.log.debug(`Enriched Applications ${JSON.stringify(enrichedApplications)}`);
+            return res.json(enrichedApplications);
           });
         })
     })
