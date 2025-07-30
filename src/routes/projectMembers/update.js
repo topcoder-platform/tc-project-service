@@ -263,7 +263,7 @@ module.exports = [
         projectMember = projectMember.get({ plain: true });
         projectMember = _.omit(projectMember, ['deletedAt']);
 
-        if (['observer', 'customer'].includes(updatedProps.role)) {
+        if (['observer', 'customer'].includes(previousValue.role)) {
           await completeAllCopilotRequests(req, projectId, _transaction, _member);
         }
       })
