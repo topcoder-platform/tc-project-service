@@ -264,7 +264,7 @@ module.exports = [
         projectMember = _.omit(projectMember, ['deletedAt']);
 
         if (['observer', 'customer'].includes(previousValue.role)) {
-          await completeAllCopilotRequests(req, projectId, _transaction, _member);
+          await completeAllCopilotRequests(req, projectId, _transaction, projectMember);
         }
       })
       .then(() => (
