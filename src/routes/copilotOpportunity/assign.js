@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import validate from 'express-validation';
 import Joi from 'joi';
+import config from 'config';
 
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
-import { COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, PROJECT_MEMBER_ROLE, RESOURCES } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, PROJECT_MEMBER_ROLE, RESOURCES, TEMPLATE_IDS } from '../../constants';
+import { getCopilotTypeLabel } from '../../utils/copilot';
 
 const assignCopilotOpportunityValidations = {
   body: Joi.object().keys({
@@ -73,6 +75,8 @@ module.exports = [
       const activeMembers = await models.ProjectMember.getActiveProjectMembers(projectId, t);
       const updateCopilotOpportunity = async () => {
         const transaction = await models.sequelize.transaction();
+        const memberDetails = await util.getMemberDetailsByUserIds([application.userId], req.log, req.id);
+        const member = memberDetails[0];
         req.log.debug(`Updating opportunity: ${JSON.stringify(opportunity)}`);
         await opportunity.update({
           status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
@@ -108,6 +112,26 @@ module.exports = [
 
         req.log.debug(`All updations done`);
         transaction.commit();
+
+        req.log.debug(`Sending email notification`);
+        const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+        const copilotPortalUrl = config.get('copilotPortalUrl');
+        const requestData = copilotRequest.data;
+        createEvent(emailEventType, {
+          data: {
+            opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+            work_manager_url: config.get('workManagerUrl'),
+            opportunity_type: getCopilotTypeLabel(requestData.projectType),
+            opportunity_title: requestData.opportunityTitle,
+            start_date: moment.utc(requestData.startDate).format('DD-MM-YYYY'),
+            user_name: member ? member.handle : "",
+          },
+          sendgrid_template_id: TEMPLATE_IDS.COPILOT_ALREADY_PART_OF_PROJECT,
+          recipients: [member.email],
+          version: 'v3',
+        }, req.log);
+
+        req.log.debug(`Email sent`);
       };
 
       const existingMember = activeMembers.find(item => item.userId === userId);
@@ -115,7 +139,7 @@ module.exports = [
         req.log.debug(`User already part of project: ${JSON.stringify(existingMember)}`);
         if (['copilot', 'manager'].includes(existingMember.role)) {
           req.log.debug(`User is a copilot or manager`);
-          updateCopilotOpportunity();
+          await updateCopilotOpportunity();
         } else {
           req.log.debug(`User has read/write role`);
           await models.ProjectMember.update({
@@ -141,7 +165,7 @@ module.exports = [
             projectMember.get({ plain: true }),
             existingMember);
           req.log.debug(`Member updated in kafka`);
-          updateCopilotOpportunity();
+          await updateCopilotOpportunity();
         }
         res.status(200).send({ id: applicationId });
         return;
