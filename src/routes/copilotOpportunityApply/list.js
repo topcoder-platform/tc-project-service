@@ -9,10 +9,22 @@ const permissions = tcMiddleware.permissions;
 
 module.exports = [
   permissions('copilotApplications.view'),
-  (req, res, next) => {
+  async (req, res, next) => {
     const canAccessAllApplications = util.hasRoles(req, ADMIN_ROLES) || util.hasProjectManagerRole(req);
     const userId = req.authUser.userId;
     const opportunityId = _.parseInt(req.params.id);
+
+    const opportunity = await models.CopilotOpportunity.findOne({
+      where: {
+        id: opportunityId,
+      }
+    });
+
+    if (!opportunity) {
+      const err = new Error('No opportunity found');
+      err.status = 404;
+      throw err;
+    }
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
     if (sort.indexOf(' ') === -1) {
@@ -41,7 +53,15 @@ module.exports = [
       ],
       order: [[sortParams[0], sortParams[1]]],
     })
-      .then(copilotApplications => res.json(copilotApplications))
+      .then(copilotApplications => {
+        return models.ProjectMember.getActiveProjectMembers(opportunity.projectId).then((members) => {
+          return res.json(copilotApplications.map(application => {
+            return Object.assign({}, application, {
+              existingMembership: members.find(m => m.userId === application.userId),
+            });
+          }));
+        });
+      })
       .catch((err) => {
         util.handleError('Error fetching copilot applications', err, req, next);
       });
