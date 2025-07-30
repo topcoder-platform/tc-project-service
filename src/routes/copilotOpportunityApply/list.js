@@ -9,22 +9,10 @@ const permissions = tcMiddleware.permissions;
 
 module.exports = [
   permissions('copilotApplications.view'),
-  async (req, res, next) => {
+  (req, res, next) => {
     const canAccessAllApplications = util.hasRoles(req, ADMIN_ROLES) || util.hasProjectManagerRole(req);
     const userId = req.authUser.userId;
     const opportunityId = _.parseInt(req.params.id);
-
-    const opportunity = await models.CopilotOpportunity.findOne({
-      where: {
-        id: opportunityId,
-      }
-    });
-
-    if (!opportunity) {
-      const err = new Error('No opportunity found');
-      err.status = 404;
-      throw err;
-    }
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
     if (sort.indexOf(' ') === -1) {
@@ -43,31 +31,42 @@ module.exports = [
     canAccessAllApplications ? {} : { createdBy: userId },
     );
 
-    return models.CopilotApplication.findAll({
-      where: whereCondition,
-      include: [
-        {
-          model: models.CopilotOpportunity,
-          as: 'copilotOpportunity',
-        },
-      ],
-      order: [[sortParams[0], sortParams[1]]],
-    })
-      .then(copilotApplications => {
-        return models.ProjectMember.getActiveProjectMembers(opportunity.projectId).then((members) => {
-          const applications = copilotApplications.get({plain: true});
-          req.log.debug(`Fetched existing active members ${JSON.stringify(members)}`);
-          req.log.debug(`Applications ${JSON.stringify(applications)}`);
-          return res.json(applications.map(application => {
-            req.log.debug(`Existing member to application ${JSON.stringify(members.find(m => m.userId === application.userId))}`);
-            return Object.assign({}, application, {
-              existingMembership: members.find(m => m.userId === application.userId),
-            });
-          }));
-        });
+    return models.CopilotOpportunity.findOne({
+      where: {
+        id: opportunityId,
+      }
+    }).then((opportunity) => {
+      if (!opportunity) {
+        const err = new Error('No opportunity found');
+        err.status = 404;
+        throw err;
+      }
+      return models.CopilotApplication.findAll({
+        where: whereCondition,
+        include: [
+          {
+            model: models.CopilotOpportunity,
+            as: 'copilotOpportunity',
+          },
+        ],
+        order: [[sortParams[0], sortParams[1]]],
       })
-      .catch((err) => {
-        util.handleError('Error fetching copilot applications', err, req, next);
-      });
+        .then(copilotApplications => {
+          return models.ProjectMember.getActiveProjectMembers(opportunity.projectId).then((members) => {
+            const applications = copilotApplications.get({plain: true});
+            req.log.debug(`Fetched existing active members ${JSON.stringify(members)}`);
+            req.log.debug(`Applications ${JSON.stringify(applications)}`);
+            return res.json(applications.map(application => {
+              req.log.debug(`Existing member to application ${JSON.stringify(members.find(m => m.userId === application.userId))}`);
+              return Object.assign({}, application, {
+                existingMembership: members.find(m => m.userId === application.userId),
+              });
+            }));
+          });
+        })
+    })
+    .catch((err) => {
+      util.handleError('Error fetching copilot applications', err, req, next);
+    });
   },
 ];
