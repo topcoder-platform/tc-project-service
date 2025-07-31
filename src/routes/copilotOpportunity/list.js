@@ -35,14 +35,6 @@ module.exports = [
         },
       ],
       order: [
-        [models.Sequelize.literal(`
-          CASE
-            WHEN "CopilotOpportunity"."status" = 'active' THEN 0
-            WHEN "CopilotOpportunity"."status" = 'cancelled' THEN 1
-            WHEN "CopilotOpportunity"."status" = 'completed' THEN 2
-            ELSE 3
-          END
-        `), 'ASC'],
         [sortParams[0], sortParams[1]],
       ],
       limit,
