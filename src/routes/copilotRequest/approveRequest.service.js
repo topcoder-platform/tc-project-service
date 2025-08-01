@@ -4,7 +4,7 @@ import moment from 'moment';
 import { Op } from 'sequelize';
 
 import models from '../../models';
-import { CONNECT_NOTIFICATION_EVENT, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
 import { getCopilotTypeLabel } from '../../utils/copilot';
@@ -46,13 +46,13 @@ module.exports = (req, data, existingTransaction) => {
                   projectId,
                   type: data.type,
                   status: {
-                    [Op.notIn]: [COPILOT_REQUEST_STATUS.CANCELED],
+                    [Op.in]: [COPILOT_OPPORTUNITY_STATUS.ACTIVE],
                   }
                 },
               })
               .then((existingCopilotOpportunityOfSameType) => {
                 if (existingCopilotOpportunityOfSameType) {
-                  const err = new Error('There\'s an opportunity of same type already!');
+                  const err = new Error('There\'s an active opportunity of same type already!');
                   _.assign(err, {
                     status: 403,
                   });
