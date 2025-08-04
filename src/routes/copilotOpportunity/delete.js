@@ -1,9 +1,11 @@
 import _ from 'lodash';
+import { Op } from 'sequelize';
 
 import models from '../../models';
 import util from '../../util';
-import { COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS } from '../../constants';
+import { COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, RESOURCES } from '../../constants';
 import { PERMISSION } from '../../permissions/constants';
+
 
 module.exports = [
   (req, res, next) => {
@@ -54,6 +56,14 @@ module.exports = [
         }));
       });
 
+      const allInvites = await models.ProjectMemberInvite.findAll({
+        where: {
+          applicationId: {
+            [Op.in]: applications.map(item => item.id),
+          },
+        },
+      });
+
       await Promise.all(promises);
 
       await copilotRequest.update({
@@ -67,6 +77,21 @@ module.exports = [
       }, {
         transaction,
       });
+
+      // update all the existing invites which are 
+      // associated to the copilot opportunity
+      // with cancel status
+      for (const invite of allInvites) {
+        await invite.update({
+          status: INVITE_STATUS.CANCELED,
+        });
+        await invite.reload();
+        util.sendResourceToKafkaBus(
+          req,
+          EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_UPDATED,
+          RESOURCES.PROJECT_MEMBER_INVITE,
+          invite.toJSON());
+      }
 
       res.status(200).send({ id: opportunity.id });
     })

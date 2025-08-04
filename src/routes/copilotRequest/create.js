@@ -14,6 +14,7 @@ const addCopilotRequestValidations = {
     data: Joi.object()
       .keys({
         projectId: Joi.number().required(),
+        opportunityTitle: Joi.string().required(),
         copilotUsername: Joi.string(),
         complexity: Joi.string().valid('low', 'medium', 'high').required(),
         requiresCommunication: Joi.string().valid('yes', 'no').required(),
@@ -97,6 +98,8 @@ module.exports = [
               createdBy: req.authUser.userId,
               updatedBy: req.authUser.userId,
               type: copilotRequest.data.projectType,
+              opportunityTitle: copilotRequest.data.opportunityTitle,
+              startDate: copilotRequest.data.startDate,
             });
             return approveRequest(req, approveData, transaction).then(() => copilotRequest);
           }).then(copilotRequest => res.status(201).json(copilotRequest))

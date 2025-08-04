@@ -21,6 +21,25 @@ module.exports = [
     const pageSize = parseInt(req.query.pageSize, 10) || DEFAULT_PAGE_SIZE;
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
+    const noGroupingByStatus = req.query.noGrouping === 'true';
+
+    const baseOrder = [];
+
+    // If grouping is enabled (default), add custom ordering based on status
+    if (!noGroupingByStatus) {
+      baseOrder.push([
+        models.Sequelize.literal(`
+          CASE
+            WHEN "CopilotOpportunity"."status" = 'active' THEN 0
+            WHEN "CopilotOpportunity"."status" = 'cancelled' THEN 1
+            WHEN "CopilotOpportunity"."status" = 'completed' THEN 2
+            ELSE 3
+          END
+        `),
+        'ASC',
+      ]);
+    }
+    baseOrder.push([sortParams[0], sortParams[1]]);
 
     return models.CopilotOpportunity.findAll({
       include: [
@@ -34,7 +53,7 @@ module.exports = [
           attributes: ['name'],
         },
       ],
-      order: [[sortParams[0], sortParams[1]]],
+      order: baseOrder,
       limit,
       offset,
     })

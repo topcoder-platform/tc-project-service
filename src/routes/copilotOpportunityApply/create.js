@@ -8,10 +8,11 @@ import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
 import { CONNECT_NOTIFICATION_EVENT, COPILOT_OPPORTUNITY_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import { createEvent } from '../../services/busApi';
+import { getCopilotTypeLabel } from '../../utils/copilot';
 
 const applyCopilotRequestValidations = {
   body: Joi.object().keys({
-    notes: Joi.string().optional(),
+    notes: Joi.string().required(),
   }),
 };
 
@@ -41,6 +42,12 @@ module.exports = [
       where: {
         id: copilotOpportunityId,
       },
+      include: [
+        {
+          model: models.CopilotRequest,
+          as: 'copilotRequest',
+        },
+      ],
     }).then(async (opportunity) => {
       if (!opportunity) {
         const err = new Error('No opportunity found');
@@ -92,12 +99,15 @@ module.exports = [
           
           const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
           const copilotPortalUrl = config.get('copilotPortalUrl');
+          const requestData = opportunity.copilotRequest.data;
           listOfSubjects.forEach((subject) => {
             createEvent(emailEventType, {
                 data: {
                   user_name: subject.handle,
                   opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}#applications`,
                   work_manager_url: config.get('workManagerUrl'),
+                  opportunity_type: getCopilotTypeLabel(requestData.projectType),
+                  opportunity_title: requestData.opportunityTitle,
                 },
                 sendgrid_template_id: TEMPLATE_IDS.APPLY_COPILOT,
                 recipients: [subject.email],
