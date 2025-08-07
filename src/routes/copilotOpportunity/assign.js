@@ -180,7 +180,7 @@ module.exports = [
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
       };
-
+      req.context.currentProjectMembers = activeMembers;
       await util.addUserToProject(req, member, t)
 
       await application.update({
