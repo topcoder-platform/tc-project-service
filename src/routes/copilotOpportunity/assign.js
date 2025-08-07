@@ -190,6 +190,19 @@ module.exports = [
         transaction: t,
       });
 
+      await opportunity.update({
+        status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
+      }, {
+        transaction: t,
+      });
+
+
+      await copilotRequest.update({
+        status: COPILOT_REQUEST_STATUS.FULFILLED,
+      }, {
+        transaction: t,
+      });
+
       // Cancel other applications
       const otherApplications = await models.CopilotApplication.findAll({
         where: {
