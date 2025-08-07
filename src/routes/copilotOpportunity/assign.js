@@ -175,7 +175,7 @@ module.exports = [
 
       const member = {
         projectId,
-        role: USER_ROLE.COPILOT,
+        role: USER_ROLE.TC_COPILOT,
         userId,
         createdBy: req.authUser.userId,
         updatedBy: req.authUser.userId,
