@@ -203,6 +203,30 @@ module.exports = [
         transaction: t,
       });
 
+      const sendEmailToCopilot = async () => {
+        const memberDetails = await util.getMemberDetailsByUserIds([application.userId], req.log, req.id);
+        const member = memberDetails[0];
+        req.log.debug(`Sending email notification to accepted copilot`);
+        const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+        const copilotPortalUrl = config.get('copilotPortalUrl');
+        const requestData = copilotRequest.data;
+        createEvent(emailEventType, {
+          data: {
+            opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+            opportunity_title: requestData.opportunityTitle,
+            start_date: moment.utc(requestData.startDate).format('DD-MM-YYYY'),
+            user_name: member ? member.handle : "",
+          },
+          sendgrid_template_id: TEMPLATE_IDS.COPILOT_APPLICATION_ACCEPTED,
+          recipients: [member.email],
+          version: 'v3',
+        }, req.log);
+
+        req.log.debug(`Email sent to copilot`);
+      };
+
+      await sendEmailToCopilot();
+
       // Cancel other applications
       const otherApplications = await models.CopilotApplication.findAll({
         where: {
