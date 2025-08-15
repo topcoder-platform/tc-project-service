@@ -40,8 +40,8 @@ module.exports = [
       include: [
         { model: models.CopilotOpportunity, as: 'copilotOpportunity', required: false },
       ],
-      order: [[sortParams[0], sortParams[1]]], // e.g. ['createdAt','DESC']
-      limit: perPage,
+      order: [[sortParams[0], sortParams[1]]],
+      limit: pageSize,
       offset,
     }).then((copilotRequests) => util.setPaginationHeaders(req, res, {
       count: copilotRequests.count,
