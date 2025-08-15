@@ -35,7 +35,7 @@ module.exports = [
 
     const whereCondition = projectId ? { projectId } : {};
 
-    return models.CopilotRequest.findAll({
+    return models.CopilotRequest.findAndCountAll({
       where: whereCondition,
       include: [
         { model: models.CopilotOpportunity, as: 'copilotOpportunity', required: false },
@@ -43,8 +43,10 @@ module.exports = [
       order: [[sortParams[0], sortParams[1]]],
       limit: pageSize,
       offset,
-    }).then((copilotRequests) => util.setPaginationHeaders(req, res, {
-      count: copilotRequests.count,
+      distinct: true,
+      subQuery: false,
+    }).then((copilotRequests, count) => util.setPaginationHeaders(req, res, {
+      count: count,
       rows: copilotRequests,
       page,
       pageSize,
