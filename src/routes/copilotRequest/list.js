@@ -45,7 +45,7 @@ module.exports = [
       offset,
       distinct: true,
       subQuery: false,
-    }).then((copilotRequests, count) => util.setPaginationHeaders(req, res, {
+    }).then(({rows: copilotRequests, count}) => util.setPaginationHeaders(req, res, {
       count: count,
       rows: copilotRequests,
       page,
