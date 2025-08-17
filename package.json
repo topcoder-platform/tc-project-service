@@ -77,7 +77,7 @@
     "pg-native": "^3.0.0",
     "sequelize": "^5.8.7",
     "stripe": "^8.195.0",
-    "swagger-ui-express": "^4.0.6",
+    "swagger-ui-express": "^4.2.0",
     "tc-core-library-js": "github:appirio-tech/tc-core-library-js#v2.6.6",
     "traverse": "^0.6.6",
     "umzug": "^3.8.2",
