@@ -39,6 +39,7 @@ module.exports = [
       where: whereCondition,
       include: [
         { model: models.CopilotOpportunity, as: 'copilotOpportunity', required: false },
+        { model: models.Project, as: 'project', required: false },
       ],
       order: [[sortParams[0], sortParams[1]]],
       limit: pageSize,
