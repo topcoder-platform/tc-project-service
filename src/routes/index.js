@@ -473,6 +473,7 @@ router.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 
 // catch 404 and forward to error handler
 router.use((req, res, next) => {
+  req.log.info("reached middleware")
   const err = new Error('Not Found');
   err.status = 404;
   next(err);

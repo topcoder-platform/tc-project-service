@@ -4,7 +4,7 @@ import util from '../../util';
 module.exports = [
   (req, res, next) => {
     const { id } = req.params;
-
+    req.log.info("Reached get endpoint");
     if (!id || isNaN(id)) {
       return util.handleError('Invalid opportunity ID', null, req, next, 400);
     }
