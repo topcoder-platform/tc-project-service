@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { Op } from 'sequelize';
+import config from 'config';
 
 import models from '../../models';
 import util from '../../util';
