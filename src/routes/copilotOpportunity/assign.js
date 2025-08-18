@@ -18,41 +18,6 @@ const assignCopilotOpportunityValidations = {
   }),
 };
 
-const sendEmailToAllApplicants = async (req, opportunity, copilotRequest, applicationId) => {
-  const allApplications = await models.Sequelize.CopilotApplication.findAll({
-    where: {
-      opportunityId: opportunity.id,
-      id: {
-        [Op.notIn]: [applicationId],
-      }
-    }
-  });
-
-  const userIds = allApplications.map(item => item.userId);
-
-  const users = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
-
-  users.forEach(async (user) => {
-    req.log.debug(`Sending email notification to copilots who are not accepted`);
-    const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
-    const copilotPortalUrl = config.get('copilotPortalUrl');
-    const requestData = copilotRequest.data;
-    createEvent(emailEventType, {
-      data: {
-        opportunity_details_url: `${copilotPortalUrl}/opportunity`,
-        opportunity_title: requestData.opportunityTitle,
-        user_name: user ? user.handle : "",
-      },
-      sendgrid_template_id: TEMPLATE_IDS.COPILOT_OPPORTUNITY_COMPLETED,
-      recipients: [user.email],
-      version: 'v3',
-    }, req.log);
-  
-    req.log.debug(`Email sent to copilots who are not accepted`);
-  });
-
-};
-
 module.exports = [
   validate(assignCopilotOpportunityValidations),
   async (req, res, next) => {
@@ -66,6 +31,41 @@ module.exports = [
       });
       return next(err);
     }
+
+    const sendEmailToAllApplicants = async (opportunity, copilotRequest, applicationId) => {
+      const allApplications = await models.Sequelize.CopilotApplication.findAll({
+        where: {
+          opportunityId: opportunity.id,
+          id: {
+            [Op.notIn]: [applicationId],
+          }
+        }
+      });
+    
+      const userIds = allApplications.map(item => item.userId);
+    
+      const users = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+    
+      users.forEach(async (user) => {
+        req.log.debug(`Sending email notification to copilots who are not accepted`);
+        const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+        const copilotPortalUrl = config.get('copilotPortalUrl');
+        const requestData = copilotRequest.data;
+        createEvent(emailEventType, {
+          data: {
+            opportunity_details_url: `${copilotPortalUrl}/opportunity`,
+            opportunity_title: requestData.opportunityTitle,
+            user_name: user ? user.handle : "",
+          },
+          sendgrid_template_id: TEMPLATE_IDS.COPILOT_OPPORTUNITY_COMPLETED,
+          recipients: [user.email],
+          version: 'v3',
+        }, req.log);
+      
+        req.log.debug(`Email sent to copilots who are not accepted`);
+      });
+    
+    };
 
     return models.sequelize.transaction(async (t) => {
       const opportunity = await models.CopilotOpportunity.findOne({
@@ -171,7 +171,7 @@ module.exports = [
         req.log.debug(`Email sent`);
 
         // Send email to all applicants about opportunity completion
-        await sendEmailToAllApplicants(req, opportunity, copilotRequest, application.id);
+        await sendEmailToAllApplicants(opportunity, copilotRequest, application.id);
       };
 
       const existingMember = activeMembers.find(item => item.userId === userId);
