@@ -32,15 +32,7 @@ module.exports = [
       return next(err);
     }
 
-    const sendEmailToAllApplicants = async (opportunity, copilotRequest, applicationId) => {
-      const allApplications = await models.Sequelize.CopilotApplication.findAll({
-        where: {
-          opportunityId: opportunity.id,
-          id: {
-            [Op.notIn]: [applicationId],
-          }
-        }
-      });
+    const sendEmailToAllApplicants = async (copilotRequest, allApplications) => {
     
       const userIds = allApplications.map(item => item.userId);
     
@@ -262,9 +254,6 @@ module.exports = [
 
       await sendEmailToCopilot();
 
-      // Send email to all applicants about opportunity completion
-      await sendEmailToAllApplicants(opportunity, copilotRequest, application.id);
-
       // Cancel other applications
       const otherApplications = await models.CopilotApplication.findAll({
         where: {
@@ -275,6 +264,9 @@ module.exports = [
         },
         transaction: t,
       });
+
+      // Send email to all applicants about opportunity completion
+      await sendEmailToAllApplicants(copilotRequest, otherApplications);
 
       for (const otherApplication of otherApplications) {
         await otherApplication.update({
