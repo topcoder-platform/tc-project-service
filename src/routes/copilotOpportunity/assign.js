@@ -169,9 +169,6 @@ module.exports = [
         }, req.log);
 
         req.log.debug(`Email sent`);
-
-        // Send email to all applicants about opportunity completion
-        await sendEmailToAllApplicants(opportunity, copilotRequest, application.id);
       };
 
       const existingMember = activeMembers.find(item => item.userId === userId);
@@ -264,6 +261,9 @@ module.exports = [
       };
 
       await sendEmailToCopilot();
+
+      // Send email to all applicants about opportunity completion
+      await sendEmailToAllApplicants(opportunity, copilotRequest, application.id);
 
       // Cancel other applications
       const otherApplications = await models.CopilotApplication.findAll({
