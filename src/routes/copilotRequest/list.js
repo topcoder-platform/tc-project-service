@@ -27,14 +27,29 @@ module.exports = [
     if (sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
-    const sortableProps = ['createdAt asc', 'createdAt desc'];
+    const sortableProps = [
+      'createdAt asc',
+      'createdAt desc',
+      'projectName asc',
+      'projectName desc',
+      'opportunityTitle asc',
+      'opportunityTitle desc',
+      'projectType asc',
+      'projectType desc',
+    ];
     if (_.indexOf(sortableProps, sort) < 0) {
       return util.handleError('Invalid sort criteria', null, req, next);
     }
     let sortParams = sort.split(' ');
-    let order = [[sortParams[0], sortParams[1]]]
-    if (sortParams[0] === 'projectName') {
+    let order = [[sortParams[0], sortParams[1]]];
+    const relationBasedSortParams = ['projectName'];
+    const jsonBasedSortParams = ['opportunityTitle', 'projectType'];
+    if (relationBasedSortParams.includes(sortParams[0])) {
       order = [[{model: models.Project, as: 'project'}, 'name', sortParams[1]]]
+    }
+
+    if (jsonBasedSortParams.includes(sortParams[0])) {
+      order = [[models.sequelize.literal(`("CopilotRequest"."data"->>'${sortParams[0]}')`), sortParams[1]]]
     }
 
     const whereCondition = projectId ? { projectId } : {};
