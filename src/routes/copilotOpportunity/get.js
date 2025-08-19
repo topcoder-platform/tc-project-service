@@ -4,7 +4,6 @@ import util from '../../util';
 module.exports = [
   (req, res, next) => {
     const { id } = req.params;
-
     if (!id || isNaN(id)) {
       return util.handleError('Invalid opportunity ID', null, req, next, 400);
     }

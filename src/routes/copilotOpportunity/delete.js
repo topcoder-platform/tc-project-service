@@ -1,9 +1,11 @@
 import _ from 'lodash';
 import { Op } from 'sequelize';
+import config from 'config';
 
 import models from '../../models';
 import util from '../../util';
-import { COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, RESOURCES } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, RESOURCES, TEMPLATE_IDS } from '../../constants';
+import { createEvent } from '../../services/busApi';
 import { PERMISSION } from '../../permissions/constants';
 
 
@@ -19,6 +21,31 @@ module.exports = [
     }
     // default values
     const opportunityId = _.parseInt(req.params.id);
+
+    const sendEmailToAllApplicants = async (copilotRequest, applications) => {
+      const userIds = applications.map(item => item.userId);
+      const users = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+    
+      users.forEach(async (user) => {
+        req.log.debug(`Sending email notification to copilots who applied`);
+        const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+        const copilotPortalUrl = config.get('copilotPortalUrl');
+        const requestData = copilotRequest.data;
+        createEvent(emailEventType, {
+          data: {
+            opportunity_details_url: `${copilotPortalUrl}/opportunity`,
+            opportunity_title: requestData.opportunityTitle,
+            user_name: user ? user.handle : "",
+          },
+          sendgrid_template_id: TEMPLATE_IDS.COPILOT_OPPORTUNITY_CANCELED,
+          recipients: [user.email],
+          version: 'v3',
+        }, req.log);
+      
+        req.log.debug(`Email sent to copilots who applied`);
+      });
+    
+    };
 
     return models.sequelize.transaction(async (transaction) => {
       req.log.debug('Canceling Copilot opportunity transaction', opportunityId);
@@ -92,6 +119,8 @@ module.exports = [
           RESOURCES.PROJECT_MEMBER_INVITE,
           invite.toJSON());
       }
+
+      await sendEmailToAllApplicants(copilotRequest, applications)
 
       res.status(200).send({ id: opportunity.id });
     })
