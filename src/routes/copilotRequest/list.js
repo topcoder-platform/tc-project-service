@@ -31,7 +31,11 @@ module.exports = [
     if (_.indexOf(sortableProps, sort) < 0) {
       return util.handleError('Invalid sort criteria', null, req, next);
     }
-    const sortParams = sort.split(' ');
+    let sortParams = sort.split(' ');
+    let order = [[sortParams[0], sortParams[1]]]
+    if (sortParams[0] === 'projectName') {
+      order = [[{model: models.Project, as: 'project'}, 'name', sortParams[1]]]
+    }
 
     const whereCondition = projectId ? { projectId } : {};
 
@@ -41,7 +45,7 @@ module.exports = [
         { model: models.CopilotOpportunity, as: 'copilotOpportunity', required: false },
         { model: models.Project, as: 'project', required: false },
       ],
-      order: [[sortParams[0], sortParams[1]]],
+      order,
       limit: pageSize,
       offset,
       distinct: true,
