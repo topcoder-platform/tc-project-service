@@ -36,6 +36,8 @@ module.exports = [
       'opportunityTitle desc',
       'projectType asc',
       'projectType desc',
+      'status asc',
+      'status desc',
     ];
     if (_.indexOf(sortableProps, sort) < 0) {
       return util.handleError('Invalid sort criteria', null, req, next);
@@ -45,11 +47,17 @@ module.exports = [
     const relationBasedSortParams = ['projectName'];
     const jsonBasedSortParams = ['opportunityTitle', 'projectType'];
     if (relationBasedSortParams.includes(sortParams[0])) {
-      order = [[{model: models.Project, as: 'project'}, 'name', sortParams[1]]]
+      order = [
+        [{model: models.Project, as: 'project'}, 'name', sortParams[1]],
+        ['id', 'DESC']
+      ]
     }
 
     if (jsonBasedSortParams.includes(sortParams[0])) {
-      order = [[models.sequelize.literal(`("CopilotRequest"."data"->>'${sortParams[0]}')`), sortParams[1]]]
+      order = [
+        [models.sequelize.literal(`("CopilotRequest"."data"->>'${sortParams[0]}')`), sortParams[1]],
+        ['id', 'DESC'],
+      ]
     }
 
     const whereCondition = projectId ? { projectId } : {};
