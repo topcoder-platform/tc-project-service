@@ -46,6 +46,7 @@ module.exports = [
         createEvent(emailEventType, {
           data: {
             opportunity_details_url: copilotPortalUrl,
+            work_manager_url: config.get('workManagerUrl'),
             opportunity_title: requestData.opportunityTitle,
             user_name: user ? user.handle : "",
           },
