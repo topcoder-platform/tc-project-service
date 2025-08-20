@@ -45,7 +45,7 @@ module.exports = [
         const requestData = copilotRequest.data;
         createEvent(emailEventType, {
           data: {
-            opportunity_details_url: `${copilotPortalUrl}/opportunity`,
+            opportunity_details_url: copilotPortalUrl,
             opportunity_title: requestData.opportunityTitle,
             user_name: user ? user.handle : "",
           },
