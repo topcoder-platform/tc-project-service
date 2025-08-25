@@ -6,10 +6,11 @@ import config from 'config';
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
-import { CONNECT_NOTIFICATION_EVENT, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, PROJECT_MEMBER_ROLE, RESOURCES, TEMPLATE_IDS } from '../../constants';
+import { CONNECT_NOTIFICATION_EVENT, COPILOT_APPLICATION_STATUS, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, EVENT, INVITE_STATUS, PROJECT_MEMBER_ROLE, RESOURCES, TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import { getCopilotTypeLabel } from '../../utils/copilot';
 import { createEvent } from '../../services/busApi';
 import moment from 'moment';
+import { Op } from 'sequelize';
 
 const assignCopilotOpportunityValidations = {
   body: Joi.object().keys({
@@ -30,6 +31,34 @@ module.exports = [
       });
       return next(err);
     }
+
+    const sendEmailToAllApplicants = async (copilotRequest, allApplications) => {
+    
+      const userIds = allApplications.map(item => item.userId);
+    
+      const users = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+    
+      users.forEach(async (user) => {
+        req.log.debug(`Sending email notification to copilots who are not accepted`);
+        const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+        const copilotPortalUrl = config.get('copilotPortalUrl');
+        const requestData = copilotRequest.data;
+        createEvent(emailEventType, {
+          data: {
+            opportunity_details_url: copilotPortalUrl,
+            work_manager_url: config.get('workManagerUrl'),
+            opportunity_title: requestData.opportunityTitle,
+            user_name: user ? user.handle : "",
+          },
+          sendgrid_template_id: TEMPLATE_IDS.COPILOT_OPPORTUNITY_COMPLETED,
+          recipients: [user.email],
+          version: 'v3',
+        }, req.log);
+      
+        req.log.debug(`Email sent to copilots who are not accepted`);
+      });
+    
+    };
 
     return models.sequelize.transaction(async (t) => {
       const opportunity = await models.CopilotOpportunity.findOne({
@@ -172,50 +201,81 @@ module.exports = [
         return;
       }
 
-      const existingInvite = await models.ProjectMemberInvite.findAll({
+      const member = {
+        projectId,
+        role: USER_ROLE.TC_COPILOT,
+        userId,
+        createdBy: req.authUser.userId,
+        updatedBy: req.authUser.userId,
+      };
+      req.context = req.context || {};
+      req.context.currentProjectMembers = activeMembers;
+      await util.addUserToProject(req, member, t)
+
+      await application.update({
+        status: COPILOT_APPLICATION_STATUS.ACCEPTED,
+      }, {
+        transaction: t,
+      });
+
+      await opportunity.update({
+        status: COPILOT_OPPORTUNITY_STATUS.COMPLETED,
+      }, {
+        transaction: t,
+      });
+
+
+      await copilotRequest.update({
+        status: COPILOT_REQUEST_STATUS.FULFILLED,
+      }, {
+        transaction: t,
+      });
+
+      const sendEmailToCopilot = async () => {
+        const memberDetails = await util.getMemberDetailsByUserIds([application.userId], req.log, req.id);
+        const member = memberDetails[0];
+        req.log.debug(`Sending email notification to accepted copilot`);
+        const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
+        const copilotPortalUrl = config.get('copilotPortalUrl');
+        const requestData = copilotRequest.data;
+        createEvent(emailEventType, {
+          data: {
+            opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+            opportunity_title: requestData.opportunityTitle,
+            start_date: moment.utc(requestData.startDate).format('DD-MM-YYYY'),
+            user_name: member ? member.handle : "",
+          },
+          sendgrid_template_id: TEMPLATE_IDS.COPILOT_APPLICATION_ACCEPTED,
+          recipients: [member.email],
+          version: 'v3',
+        }, req.log);
+
+        req.log.debug(`Email sent to copilot`);
+      };
+
+      await sendEmailToCopilot();
+
+      // Cancel other applications
+      const otherApplications = await models.CopilotApplication.findAll({
         where: {
-          userId,
-          projectId,
-          role: PROJECT_MEMBER_ROLE.COPILOT,
-          status: INVITE_STATUS.PENDING,
+          opportunityId: copilotOpportunityId,
+          id: {
+            [Op.notIn]: [applicationId],
+          },
         },
         transaction: t,
       });
 
-      if (existingInvite && existingInvite.length) {
-        const err = new Error(`User already has an pending invite to the project`);
-        err.status = 400;
-        throw err;
+      // Send email to all applicants about opportunity completion
+      await sendEmailToAllApplicants(copilotRequest, otherApplications);
+
+      for (const otherApplication of otherApplications) {
+        await otherApplication.update({
+          status: COPILOT_APPLICATION_STATUS.CANCELED,
+        }, {
+          transaction: t,
+        });
       }
-
-      const invite = await models.ProjectMemberInvite.create({
-        status: INVITE_STATUS.PENDING,
-        role: PROJECT_MEMBER_ROLE.COPILOT,
-        userId,
-        projectId,
-        applicationId: application.id,
-        createdBy: req.authUser.userId,
-        createdAt: new Date(),
-        updatedBy: req.authUser.userId,
-        updatedAt: new Date(),
-      }, {
-        transaction: t,
-      })
-
-      util.sendResourceToKafkaBus(
-        req,
-        EVENT.ROUTING_KEY.PROJECT_MEMBER_INVITE_CREATED,
-        RESOURCES.PROJECT_MEMBER_INVITE,
-        Object.assign({}, invite.toJSON(), {
-          source: 'copilot_portal',
-        }),
-      );
-
-      await application.update({
-        status: COPILOT_APPLICATION_STATUS.INVITED,
-      }, {
-        transaction: t,
-      });
 
       res.status(200).send({ id: applicationId });
     }).catch(err => next(err));

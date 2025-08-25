@@ -50,7 +50,7 @@ module.exports = [
 
     // get invite by id and project id
     return models.ProjectMemberInvite.getPendingOrRequestedProjectInviteById(projectId, inviteId)
-      .then((invite) => {
+      .then(async (invite) => {
         // if invite doesn't exist, return 404
         if (!invite) {
           const err = new Error(`invite not found for project id ${projectId}, inviteId ${inviteId},` +
@@ -83,6 +83,31 @@ module.exports = [
           const err = new Error(error);
           err.status = 403;
           return next(err);
+        }
+
+        // Check if the copilot opportunity is still active
+        // When the invited user tries to accept the invite
+        if (invite.applicationId) {
+          req.log.debug(`Invite from copilot application: ${invite.applicationId}`);
+          const application = await models.CopilotApplication.findOne({
+            where: {
+              id: invite.applicationId,
+            }
+          });
+
+          const opportunity = await models.CopilotOpportunity.findOne({
+            where: {
+              id: application.opportunityId,
+            },
+          });
+
+          req.log.debug(`Copilot opportunity status: ${opportunity.status}`);
+          if (opportunity.status !== COPILOT_OPPORTUNITY_STATUS.ACTIVE) {
+            req.log.debug(`Copilot opportunity status is not active`);
+            const err = new Error('The copilot opportunity is not in active status');
+            err.status = 409;
+            return next(err);
+          }
         }
 
         req.log.debug('Updating invite status');
