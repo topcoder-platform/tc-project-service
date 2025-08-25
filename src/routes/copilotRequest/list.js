@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import { Op, Sequelize } from 'sequelize';
 
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
+import { DEFAULT_PAGE_SIZE } from '../../constants';
 
 module.exports = [
   (req, res, next) => {
@@ -15,33 +17,67 @@ module.exports = [
       return next(err);
     }
 
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || DEFAULT_PAGE_SIZE; 
+    const offset = (page - 1) * pageSize;
+
     const projectId = _.parseInt(req.params.projectId);
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
     if (sort.indexOf(' ') === -1) {
       sort += ' asc';
     }
-    const sortableProps = ['createdAt asc', 'createdAt desc'];
+    const sortableProps = [
+      'createdAt asc',
+      'createdAt desc',
+      'projectName asc',
+      'projectName desc',
+      'opportunityTitle asc',
+      'opportunityTitle desc',
+      'projectType asc',
+      'projectType desc',
+      'status asc',
+      'status desc',
+    ];
     if (_.indexOf(sortableProps, sort) < 0) {
       return util.handleError('Invalid sort criteria', null, req, next);
     }
-    const sortParams = sort.split(' ');
+    let sortParams = sort.split(' ');
+    let order = [[sortParams[0], sortParams[1]]];
+    const relationBasedSortParams = ['projectName'];
+    const jsonBasedSortParams = ['opportunityTitle', 'projectType'];
+    if (relationBasedSortParams.includes(sortParams[0])) {
+      order = [
+        [{model: models.Project, as: 'project'}, 'name', sortParams[1]],
+        ['id', 'DESC']
+      ]
+    }
+
+    if (jsonBasedSortParams.includes(sortParams[0])) {
+      order = [
+        [models.sequelize.literal(`("CopilotRequest"."data"->>'${sortParams[0]}')`), sortParams[1]],
+        ['id', 'DESC'],
+      ]
+    }
 
     const whereCondition = projectId ? { projectId } : {};
 
-    return models.CopilotRequest.findAll({
+    return models.CopilotRequest.findAndCountAll({
       where: whereCondition,
       include: [
-        {
-          model: models.CopilotOpportunity,
-          as: 'copilotOpportunity',
-        },
+        { model: models.CopilotOpportunity, as: 'copilotOpportunity', required: false },
+        { model: models.Project, as: 'project', required: false },
       ],
-      order: [[sortParams[0], sortParams[1]]],
-    })
-      .then(copilotRequests => res.json(copilotRequests))
-      .catch((err) => {
-        util.handleError('Error fetching copilot requests', err, req, next);
-      });
+      order,
+      limit: pageSize,
+      offset,
+      distinct: true,
+      subQuery: false,
+    }).then(({rows: copilotRequests, count}) => util.setPaginationHeaders(req, res, {
+      count: count,
+      rows: copilotRequests,
+      page,
+      pageSize,
+    }));
   },
 ];
