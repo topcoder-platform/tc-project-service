@@ -6,7 +6,7 @@ import util from '../../util';
 
 module.exports = [
   (req, res, next) => {
-    const canAccessAllApplications = util.hasRoles(req, ADMIN_ROLES) || util.hasProjectManagerRole(req);
+    const isAdminOrPM = util.hasRoles(req, ADMIN_ROLES) || util.hasProjectManagerRole(req);
     const opportunityId = _.parseInt(req.params.id);
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
@@ -50,7 +50,7 @@ module.exports = [
             req.log.debug(`Fetched existing active members ${JSON.stringify(members)}`);
             req.log.debug(`Applications ${JSON.stringify(copilotApplications)}`);
             const enrichedApplications = copilotApplications.map((application) => {
-              const m = members.find(member => member.userId === application.userId);
+              const member = members.find(memberItem => memberItem.userId === application.userId);
 
               // Using spread operator fails in lint check
               // While Object.assign fails silently during run time
@@ -70,8 +70,8 @@ module.exports = [
                 copilotOpportunity: application.copilotOpportunity,
               };
 
-              if (m) {
-                enriched.existingMembership = m;
+              if (member) {
+                enriched.existingMembership = member;
               }
 
               req.log.debug(`Existing member to application ${JSON.stringify(enriched)}`);
@@ -79,7 +79,7 @@ module.exports = [
               return enriched;
             });
 
-            const response = canAccessAllApplications
+            const response = isAdminOrPM
               ? enrichedApplications
               : enrichedApplications.map(app => ({
                 userId: app.userId,
