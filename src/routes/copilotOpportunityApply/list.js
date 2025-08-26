@@ -1,17 +1,12 @@
 import _ from 'lodash';
-import { middleware as tcMiddleware } from 'tc-core-library-js';
 
 import models from '../../models';
 import { ADMIN_ROLES } from '../../constants';
 import util from '../../util';
 
-const permissions = tcMiddleware.permissions;
-
 module.exports = [
-  permissions('copilotApplications.view'),
   (req, res, next) => {
-    const canAccessAllApplications = util.hasRoles(req, ADMIN_ROLES) || util.hasProjectManagerRole(req);
-    const userId = req.authUser.userId;
+    const isAdminOrPM = util.hasRoles(req, ADMIN_ROLES) || util.hasProjectManagerRole(req);
     const opportunityId = _.parseInt(req.params.id);
 
     let sort = req.query.sort ? decodeURIComponent(req.query.sort) : 'createdAt desc';
@@ -24,17 +19,15 @@ module.exports = [
     }
     const sortParams = sort.split(' ');
 
-    // Admin can see all requests and the PM can only see requests created by them
     const whereCondition = _.assign({
       opportunityId,
     },
-    canAccessAllApplications ? {} : { createdBy: userId },
     );
 
     return models.CopilotOpportunity.findOne({
       where: {
         id: opportunityId,
-      }
+      },
     }).then((opportunity) => {
       if (!opportunity) {
         const err = new Error('No opportunity found');
@@ -51,13 +44,13 @@ module.exports = [
         ],
         order: [[sortParams[0], sortParams[1]]],
       })
-        .then(copilotApplications => {
+        .then((copilotApplications) => {
           req.log.debug(`CopilotApplications ${JSON.stringify(copilotApplications)}`);
           return models.ProjectMember.getActiveProjectMembers(opportunity.projectId).then((members) => {
             req.log.debug(`Fetched existing active members ${JSON.stringify(members)}`);
             req.log.debug(`Applications ${JSON.stringify(copilotApplications)}`);
-            const enrichedApplications = copilotApplications.map(application => {
-              const m = members.find(m => m.userId === application.userId);
+            const enrichedApplications = copilotApplications.map((application) => {
+              const member = members.find(memberItem => memberItem.userId === application.userId);
 
               // Using spread operator fails in lint check
               // While Object.assign fails silently during run time
@@ -77,8 +70,8 @@ module.exports = [
                 copilotOpportunity: application.copilotOpportunity,
               };
 
-              if (m) {
-                enriched.existingMembership = m;
+              if (member) {
+                enriched.existingMembership = member;
               }
 
               req.log.debug(`Existing member to application ${JSON.stringify(enriched)}`);
@@ -86,13 +79,21 @@ module.exports = [
               return enriched;
             });
 
+            const response = isAdminOrPM
+              ? enrichedApplications
+              : enrichedApplications.map(app => ({
+                userId: app.userId,
+                status: app.status,
+                createdAt: app.createdAt,
+              }));
+
             req.log.debug(`Enriched Applications ${JSON.stringify(enrichedApplications)}`);
-            res.status(200).send(enrichedApplications);
+            res.status(200).send(response);
           });
-        })
+        });
     })
-    .catch((err) => {
-      util.handleError('Error fetching copilot applications', err, req, next);
-    });
+      .catch((err) => {
+        util.handleError('Error fetching copilot applications', err, req, next);
+      });
   },
 ];
