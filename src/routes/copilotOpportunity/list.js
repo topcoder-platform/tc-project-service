@@ -68,15 +68,18 @@ module.exports = [
           const plainOpportunity = opportunity.get({ plain: true });
 
           req.log.debug(isAdminOrManager, 'admin or manager', plainOpportunity);
+          
+          const formatted = Object.assign({}, plainOpportunity,
+            plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
+            { copilotRequest: undefined },
+          );
+          
           // For users who are not admin or manager, we dont want to expose
           // the project id
           if (!isAdminOrManager) {
             delete plainOpportunity.projectId;
           }
-          return Object.assign({}, plainOpportunity,
-            plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
-            { copilotRequest: undefined },
-          );
+          return formatted;
         });
         return util.setPaginationHeaders(req, res, {
           count: copilotOpportunities.count,
