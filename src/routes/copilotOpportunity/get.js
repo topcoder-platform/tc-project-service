@@ -1,3 +1,4 @@
+import { USER_ROLE } from '../../constants';
 import models from '../../models';
 import util from '../../util';
 
@@ -8,9 +9,10 @@ module.exports = [
       return util.handleError('Invalid opportunity ID', null, req, next, 400);
     }
 
+    const isAdminOrManager = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN, USER_ROLE.PROJECT_MANAGER]);
     return models.CopilotOpportunity.findOne({
       where: { id },
-      include: [
+      include: isAdminOrManager ? [
         {
           model: models.CopilotRequest,
           as: 'copilotRequest',
@@ -27,17 +29,24 @@ module.exports = [
             },
           ]
         },
+      ]: [
+        {
+          model: models.CopilotRequest,
+          as: 'copilotRequest',
+        },
       ],
     })
       .then((copilotOpportunity) => {
         const plainOpportunity = copilotOpportunity.get({ plain: true });
-        const memberIds = plainOpportunity.project.members && plainOpportunity.project.members.map((member) => member.userId);
+        const memberIds = (plainOpportunity.project && plainOpportunity.project.members && plainOpportunity.project.members.map((member) => member.userId)) || [];
         let canApplyAsCopilot = false;
         if (req.authUser) {
           canApplyAsCopilot = !memberIds.includes(req.authUser.userId)
         }
-        // This shouldn't be exposed to the clientside
-        delete plainOpportunity.project.members;
+        if (plainOpportunity.project) {
+          // This shouldn't be exposed to the clientside
+          delete plainOpportunity.project.members;
+        }
         const formattedOpportunity = Object.assign({
           members: memberIds,
           canApplyAsCopilot,
@@ -45,6 +54,9 @@ module.exports = [
           plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
           { copilotRequest: undefined },
         );
+        if (!isAdminOrManager) {
+          delete formattedOpportunity.projectId;
+        }
         res.json(formattedOpportunity);
       })
       .catch((err) => {
