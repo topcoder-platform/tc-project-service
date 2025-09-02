@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import models from '../../models';
 import util from '../../util';
-import DEFAULT_PAGE_SIZE from '../../constants';
+import DEFAULT_PAGE_SIZE, { USER_ROLE } from '../../constants';
 
 module.exports = [
   (req, res, next) => {
@@ -15,6 +15,7 @@ module.exports = [
       return util.handleError('Invalid sort criteria', null, req, next);
     }
     const sortParams = sort.split(' ');
+    const isAdminOrManager = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN, USER_ROLE.PROJECT_MANAGER]);
 
     // Extract pagination parameters
     const page = parseInt(req.query.page, 10) || 1;
@@ -42,7 +43,7 @@ module.exports = [
     baseOrder.push([sortParams[0], sortParams[1]]);
 
     return models.CopilotOpportunity.findAll({
-      include: [
+      include: isAdminOrManager ? [
         {
           model: models.CopilotRequest,
           as: 'copilotRequest',
@@ -52,6 +53,11 @@ module.exports = [
           as: 'project',
           attributes: ['name'],
         },
+      ] : [
+        {
+          model: models.CopilotRequest,
+          as: 'copilotRequest',
+        },
       ],
       order: baseOrder,
       limit,
@@ -60,10 +66,17 @@ module.exports = [
       .then((copilotOpportunities) => {
         const formattedOpportunities = copilotOpportunities.map((opportunity) => {
           const plainOpportunity = opportunity.get({ plain: true });
-          return Object.assign({}, plainOpportunity,
+          const formatted = Object.assign({}, plainOpportunity,
             plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
             { copilotRequest: undefined },
           );
+
+          // For users who are not admin or manager, we dont want to expose
+          // the project id
+          if (!isAdminOrManager) {
+            delete formatted.projectId;
+          }
+          return ;
         });
         return util.setPaginationHeaders(req, res, {
           count: copilotOpportunities.count,
