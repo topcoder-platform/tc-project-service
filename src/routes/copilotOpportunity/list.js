@@ -66,8 +66,6 @@ module.exports = [
       .then((copilotOpportunities) => {
         const formattedOpportunities = copilotOpportunities.map((opportunity) => {
           const plainOpportunity = opportunity.get({ plain: true });
-
-          req.log.debug(isAdminOrManager, 'admin or manager', plainOpportunity);
           
           const formatted = Object.assign({}, plainOpportunity,
             plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
