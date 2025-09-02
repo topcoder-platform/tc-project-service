@@ -66,6 +66,11 @@ module.exports = [
       .then((copilotOpportunities) => {
         const formattedOpportunities = copilotOpportunities.map((opportunity) => {
           const plainOpportunity = opportunity.get({ plain: true });
+          // For users who are not admin or manager, we dont want to expose
+          // the project id
+          if (!isAdminOrManager) {
+            delete plainOpportunity.projectId;
+          }
           return Object.assign({}, plainOpportunity,
             plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
             { copilotRequest: undefined },
