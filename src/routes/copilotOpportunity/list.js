@@ -73,11 +73,11 @@ module.exports = [
             plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
             { copilotRequest: undefined },
           );
-          
+
           // For users who are not admin or manager, we dont want to expose
           // the project id
           if (!isAdminOrManager) {
-            delete plainOpportunity.projectId;
+            delete formatted.projectId;
           }
           return formatted;
         });
