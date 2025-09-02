@@ -4,7 +4,7 @@ import { Op, Sequelize } from 'sequelize';
 import models from '../../models';
 import util from '../../util';
 import { PERMISSION } from '../../permissions/constants';
-import { DEFAULT_PAGE_SIZE } from '../../constants';
+import { DEFAULT_PAGE_SIZE, USER_ROLE } from '../../constants';
 
 module.exports = [
   (req, res, next) => {
@@ -16,6 +16,8 @@ module.exports = [
       });
       return next(err);
     }
+
+    const isAdminOrManager = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN, USER_ROLE.PROJECT_MANAGER]);
 
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || DEFAULT_PAGE_SIZE; 
@@ -46,7 +48,7 @@ module.exports = [
     let order = [[sortParams[0], sortParams[1]]];
     const relationBasedSortParams = ['projectName'];
     const jsonBasedSortParams = ['opportunityTitle', 'projectType'];
-    if (relationBasedSortParams.includes(sortParams[0])) {
+    if (relationBasedSortParams.includes(sortParams[0]) && isAdminOrManager) {
       order = [
         [{model: models.Project, as: 'project'}, 'name', sortParams[1]],
         ['id', 'DESC']
@@ -64,9 +66,11 @@ module.exports = [
 
     return models.CopilotRequest.findAndCountAll({
       where: whereCondition,
-      include: [
+      include: isAdminOrManager ? [
         { model: models.CopilotOpportunity, as: 'copilotOpportunity', required: false },
         { model: models.Project, as: 'project', required: false },
+      ] : [
+        { model: models.CopilotOpportunity, as: 'copilotOpportunity', required: false },
       ],
       order,
       limit: pageSize,
