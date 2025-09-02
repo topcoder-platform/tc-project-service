@@ -76,7 +76,7 @@ module.exports = [
           if (!isAdminOrManager) {
             delete formatted.projectId;
           }
-          return ;
+          return formatted;
         });
         return util.setPaginationHeaders(req, res, {
           count: copilotOpportunities.count,
