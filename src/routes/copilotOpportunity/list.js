@@ -67,7 +67,7 @@ module.exports = [
         const formattedOpportunities = copilotOpportunities.map((opportunity) => {
           const plainOpportunity = opportunity.get({ plain: true });
 
-          req.debug.info(isAdminOrManager, 'admin or manager', plainOpportunity);
+          req.log.debug(isAdminOrManager, 'admin or manager', plainOpportunity);
           // For users who are not admin or manager, we dont want to expose
           // the project id
           if (!isAdminOrManager) {
