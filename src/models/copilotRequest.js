@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { COPILOT_REQUEST_STATUS } from '../constants';
 
 module.exports = function defineCopilotRequest(sequelize, DataTypes) {
-  const CopliotRequest = sequelize.define('CopilotRequest', {
+  const CopilotRequest = sequelize.define('CopilotRequest', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     status: {
       type: DataTypes.STRING(16),
@@ -30,9 +30,10 @@ module.exports = function defineCopilotRequest(sequelize, DataTypes) {
     indexes: [],
   });
 
-  CopliotRequest.associate = (models) => {
-    CopliotRequest.hasMany(models.CopilotOpportunity, { as: 'copilotOpportunity', foreignKey: 'copilotRequestId' });
+  CopilotRequest.associate = (models) => {
+    CopilotRequest.hasMany(models.CopilotOpportunity, { as: 'copilotOpportunity', foreignKey: 'copilotRequestId' });
+    CopilotRequest.belongsTo(models.Project, { as: 'project', foreignKey: 'projectId' });
   };
 
-  return CopliotRequest;
+  return CopilotRequest;
 };

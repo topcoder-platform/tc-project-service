@@ -5,6 +5,7 @@ import _ from 'lodash';
 import Joi from 'joi';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
+import { Op } from 'sequelize';
 import models from '../../models';
 import util from '../../util';
 import {
@@ -299,7 +300,7 @@ module.exports = [
 
         return [];
       })
-      .then((inviteUsers) => {
+      .then(async (inviteUsers) => {
         const members = req.context.currentProjectMembers;
         const projectId = _.parseInt(req.params.projectId);
         // check user handle exists in returned result
@@ -322,13 +323,39 @@ module.exports = [
         const errorMessageForAlreadyMemberUser = 'User with such handle is already a member of the team.';
 
         if (inviteUserIds) {
-        // remove members already in the team
+          const existingMembers = _.filter(members, (m) => {
+            return inviteUserIds.includes(m.userId);
+          });
+
+          req.log.debug(`Existing members: ${JSON.stringify(existingMembers)}`);
+
+          const projectMembers = await models.ProjectMember.findAll({
+            where: {
+              userId: {
+                [Op.in]: existingMembers.map(item => item.userId),
+              },
+              projectId,
+            }
+          });
+
+          req.log.debug(`Existing Project Members: ${JSON.stringify(projectMembers)}`);
+
+          const existingProjectMembersMap = projectMembers.reduce((acc, current) => {
+            return Object.assign({}, acc, {
+              [current.userId]: current,
+            });
+          }, {});
+
+          req.log.debug(`Existing Project Members Map: ${JSON.stringify(existingProjectMembersMap)}`);
+
           _.remove(inviteUserIds, u => _.some(members, (m) => {
             const isPresent = m.userId === u;
             if (isPresent) {
               failed.push(_.assign({}, {
                 handle: getUserHandleById(m.userId, inviteUsers),
                 message: errorMessageForAlreadyMemberUser,
+                error: "ALREADY_MEMBER",
+                role: existingProjectMembersMap[m.userId].role,
               }));
             }
             return isPresent;
