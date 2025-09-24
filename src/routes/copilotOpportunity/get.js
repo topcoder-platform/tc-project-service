@@ -10,6 +10,7 @@ module.exports = [
     }
 
     const isAdminOrManager = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN, USER_ROLE.PROJECT_MANAGER]);
+
     return models.CopilotOpportunity.findOne({
       where: { id },
       include: isAdminOrManager ? [
@@ -43,6 +44,7 @@ module.exports = [
         if (req.authUser) {
           canApplyAsCopilot = !memberIds.includes(req.authUser.userId)
         }
+
         if (plainOpportunity.project) {
           // This shouldn't be exposed to the clientside
           delete plainOpportunity.project.members;

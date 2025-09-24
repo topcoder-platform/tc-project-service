@@ -43,7 +43,7 @@ module.exports = [
     baseOrder.push([sortParams[0], sortParams[1]]);
 
     return models.CopilotOpportunity.findAll({
-      include: isAdminOrManager ? [
+      include: isAdminOrManager ?[
         {
           model: models.CopilotRequest,
           as: 'copilotRequest',
@@ -57,7 +57,7 @@ module.exports = [
         {
           model: models.CopilotRequest,
           as: 'copilotRequest',
-        },
+        }
       ],
       order: baseOrder,
       limit,
