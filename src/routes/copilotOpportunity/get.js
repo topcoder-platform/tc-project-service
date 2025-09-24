@@ -56,7 +56,6 @@ module.exports = [
           plainOpportunity.copilotRequest ? plainOpportunity.copilotRequest.data : {},
           { copilotRequest: undefined },
         );
-
         if (!isAdminOrManager) {
           delete formattedOpportunity.projectId;
         }

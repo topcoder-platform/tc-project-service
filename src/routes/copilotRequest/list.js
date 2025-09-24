@@ -18,7 +18,6 @@ module.exports = [
     }
 
     const isAdminOrManager = util.hasRoles(req, [USER_ROLE.CONNECT_ADMIN, USER_ROLE.TOPCODER_ADMIN, USER_ROLE.PROJECT_MANAGER]);
-
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || DEFAULT_PAGE_SIZE; 
     const offset = (page - 1) * pageSize;

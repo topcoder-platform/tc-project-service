@@ -50,7 +50,7 @@
   "TOKEN_CACHE_TIME": "86000",
   "whitelistedOriginsForUserIdAuth": "[\"https:\/\/topcoder-newauth.auth0.com\/\",\"https:\/\/api.topcoder-dev.com\"]",
   "EMAIL_INVITE_FROM_NAME": "Topcoder",
-  "EMAIL_INVITE_FROM_EMAIL": "noreply@connect.topcoder.com",
+  "EMAIL_INVITE_FROM_EMAIL": "noreply@topcoder.com",
   "inviteEmailSubject": "You are invited to Topcoder",
   "inviteEmailSectionTitle": "Project Invitation",
   "workManagerUrl": "https://challenges.topcoder-dev.com",
