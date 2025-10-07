@@ -66,7 +66,11 @@ module.exports = (req, data, existingTransaction) => {
                   .create(data, { transaction });
               }))
               .then(async (opportunity) => {
+                // eslint-disable-next-line no-console
+                console.time('getRolesByRoleName');
                 const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
+                // eslint-disable-next-line no-console
+                console.timeEnd('getRolesByRoleName');
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
                 const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
                 const copilotPortalUrl = config.get('copilotPortalUrl');
