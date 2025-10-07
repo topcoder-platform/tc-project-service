@@ -4,7 +4,11 @@ import moment from 'moment';
 import { Op } from 'sequelize';
 
 import models from '../../models';
-import { CONNECT_NOTIFICATION_EVENT, COPILOT_OPPORTUNITY_STATUS, COPILOT_REQUEST_STATUS, TEMPLATE_IDS, USER_ROLE } from '../../constants';
+import {
+  CONNECT_NOTIFICATION_EVENT,
+  COPILOT_OPPORTUNITY_STATUS,
+  COPILOT_REQUEST_STATUS,
+  TEMPLATE_IDS, USER_ROLE } from '../../constants';
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
 import { getCopilotTypeLabel } from '../../utils/copilot';
@@ -47,7 +51,7 @@ module.exports = (req, data, existingTransaction) => {
                   type: data.type,
                   status: {
                     [Op.in]: [COPILOT_OPPORTUNITY_STATUS.ACTIVE],
-                  }
+                  },
                 },
               })
               .then((existingCopilotOpportunityOfSameType) => {
@@ -66,7 +70,7 @@ module.exports = (req, data, existingTransaction) => {
                 const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
                 const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
                 const copilotPortalUrl = config.get('copilotPortalUrl');
-                req.log.info("Sending emails to all copilots about new opportunity");
+                req.log.info('Sending emails to all copilots about new opportunity');
 
                 const sendNotification = (userName, recipient) => createEvent(emailEventType, {
                   data: {
@@ -75,20 +79,28 @@ module.exports = (req, data, existingTransaction) => {
                     work_manager_url: config.get('workManagerUrl'),
                     opportunity_type: getCopilotTypeLabel(type),
                     opportunity_title: opportunityTitle,
-                    start_date: moment(startDate).format("DD-MM-YYYY"),
+                    start_date: moment(startDate).format('DD-MM-YYYY'),
                   },
                   sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
                   recipients: [recipient],
                   version: 'v3',
                 }, req.log);
 
-                subjects.forEach(subject => sendNotification(subject.handle, subject.email));
+                const notificationPromises = subjects.map(subject =>
+                  sendNotification(subject.handle, subject.email),
+                );
+
+                notificationPromises.push(
+                  sendNotification('Copilots', config.copilotsSlackEmail),
+                );
+
+                await Promise.all(notificationPromises);
 
                 // send email to notify via slack
                 sendNotification('Copilots', config.copilotsSlackEmail);
 
-                req.log.info("Finished sending emails to copilots");
-                
+                req.log.info('Finished sending emails to copilots');
+
                 return opportunity;
               })
               .catch((err) => {
