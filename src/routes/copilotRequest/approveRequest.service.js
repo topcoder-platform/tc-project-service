@@ -96,9 +96,6 @@ module.exports = (req, data, existingTransaction) => {
 
                 await Promise.all(notificationPromises);
 
-                // send email to notify via slack
-                sendNotification('Copilots', config.copilotsSlackEmail);
-
                 req.log.info('Finished sending emails to copilots');
 
                 return opportunity;
