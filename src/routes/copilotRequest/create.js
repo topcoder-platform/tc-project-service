@@ -60,7 +60,7 @@ module.exports = [
 
     try {
       const copilotRequest = await models.sequelize.transaction(async (transaction) => {
-        req.log.debug('Starting create copilot request transaction', { data });
+        req.log.debug('Create copilot request transaction', { data });
 
         const existingProject = await models.Project.findOne({
           where: { id: projectId, deletedAt: { $eq: null } },

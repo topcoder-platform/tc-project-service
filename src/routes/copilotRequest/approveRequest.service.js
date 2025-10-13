@@ -7,7 +7,8 @@ import {
   CONNECT_NOTIFICATION_EVENT,
   COPILOT_OPPORTUNITY_STATUS,
   COPILOT_REQUEST_STATUS,
-  TEMPLATE_IDS, USER_ROLE,
+  TEMPLATE_IDS,
+  USER_ROLE,
 } from '../../constants';
 import util from '../../util';
 import { createEvent } from '../../services/busApi';
@@ -26,8 +27,6 @@ module.exports = async (req, data, existingTransaction) => {
 
   return resolveTransaction(existingTransaction, async (transaction) => {
     try {
-      req.log.debug('approveRequest: finding project', { projectId });
-
       const existingProject = await models.Project.findOne({
         where: { id: projectId, deletedAt: { $eq: null } },
         transaction,
@@ -40,7 +39,6 @@ module.exports = async (req, data, existingTransaction) => {
       }
 
       const copilotRequest = await models.CopilotRequest.findByPk(copilotRequestId, { transaction });
-      req.log.debug('approveRequest: found copilot request', { copilotRequestId: copilotRequest.id });
 
       if (!copilotRequest) {
         const err = new Error(`no active copilot request found for copilot request id ${copilotRequestId}`);
@@ -49,7 +47,6 @@ module.exports = async (req, data, existingTransaction) => {
       }
 
       await copilotRequest.update({ status: COPILOT_REQUEST_STATUS.APPROVED }, { transaction });
-      req.log.debug('Copilot request status updated to APPROVED', { copilotRequestId });
 
       const existingOpportunity = await models.CopilotOpportunity.findOne({
         where: {
@@ -72,7 +69,6 @@ module.exports = async (req, data, existingTransaction) => {
       // Send notifications
       try {
         const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
-        req.log.debug('Roles fetched', { roles });
 
         const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
         const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
