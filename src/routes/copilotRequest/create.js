@@ -39,7 +39,7 @@ const addCopilotRequestValidations = {
 
 module.exports = [
   validate(addCopilotRequestValidations),
-  (req, res, next) => {
+  async (req, res, next) => {
     const data = req.body;
     if (!util.hasPermissionByReq(PERMISSION.MANAGE_COPILOT_REQUEST, req)) {
       const err = new Error('Unable to create copilot request');
@@ -58,66 +58,64 @@ module.exports = [
       updatedBy: req.authUser.userId,
     });
 
-    return models.sequelize.transaction((transaction) => {
-      req.log.debug('Create Copilot request transaction', data);
-      return models.Project.findOne({
-        where: { id: projectId, deletedAt: { $eq: null } },
-      })
-        .then((existingProject) => {
-          if (!existingProject) {
-            const err = new Error(`active project not found for project id ${projectId}`);
-            err.status = 404;
-            throw err;
-          }
-          return models.CopilotRequest.findOne({
-            where: {
-              createdBy: req.authUser.userId,
-              projectId,
-              status: {
-                [Op.in]: [COPILOT_REQUEST_STATUS.NEW, COPILOT_REQUEST_STATUS.APPROVED, COPILOT_REQUEST_STATUS.SEEKING],
-              },
-            },
-          }).then((copilotRequest) => {
-            if (copilotRequest && copilotRequest.data.projectType === data.data.projectType) {
-              const err = new Error('There\'s a request of same type already!');
-              _.assign(err, {
-                status: 400,
-              });
-              throw err;
-            }
+    try {
+      const copilotRequest = await models.sequelize.transaction(async (transaction) => {
+        req.log.debug('Starting create copilot request transaction', { data });
 
-            return models.CopilotRequest
-              .create(data, { transaction });
-          }).then((copilotRequest) => {
-            /**
-             * Automatically approve the copilot request.
-             */
-            const approveData = _.assign({
-              projectId,
-              copilotRequestId: copilotRequest.id,
-              createdBy: req.authUser.userId,
-              updatedBy: req.authUser.userId,
-              type: copilotRequest.data.projectType,
-              opportunityTitle: copilotRequest.data.opportunityTitle,
-              startDate: copilotRequest.data.startDate,
-            });
-            return approveRequest(req, approveData, transaction).then(() => copilotRequest);
-          }).then(copilotRequest => res.status(201).json(copilotRequest))
-            .catch((err) => {
-              try {
-                transaction.rollback();
-              } catch (e) {
-                _.noop(e);
-              }
-              return Promise.reject(err);
-            });
+        const existingProject = await models.Project.findOne({
+          where: { id: projectId, deletedAt: { $eq: null } },
+          transaction,
         });
-    })
-      .catch((err) => {
-        if (err.message) {
-          _.assign(err, { details: err.message });
+
+        if (!existingProject) {
+          const err = new Error(`Active project not found for project id ${projectId}`);
+          err.status = 404;
+          throw err;
         }
-        util.handleError('Error creating copilot request', err, req, next);
+
+        const existingRequest = await models.CopilotRequest.findOne({
+          where: {
+            createdBy: req.authUser.userId,
+            projectId,
+            status: {
+              [Op.in]: [
+                COPILOT_REQUEST_STATUS.NEW,
+                COPILOT_REQUEST_STATUS.APPROVED,
+                COPILOT_REQUEST_STATUS.SEEKING,
+              ],
+            },
+          },
+          transaction,
+        });
+
+        if (existingRequest && existingRequest.data.projectType === data.data.projectType) {
+          const err = new Error('There\'s a request of same type already!');
+          err.status = 400;
+          throw err;
+        }
+
+        const newRequest = await models.CopilotRequest.create(data, { transaction });
+
+        await approveRequest(req, {
+          projectId,
+          copilotRequestId: newRequest.id,
+          createdBy: req.authUser.userId,
+          updatedBy: req.authUser.userId,
+          type: newRequest.data.projectType,
+          opportunityTitle: newRequest.data.opportunityTitle,
+          startDate: newRequest.data.startDate,
+        }, transaction);
+
+        return newRequest;
       });
+
+      return res.status(201).json(copilotRequest);
+    } catch (err) {
+      req.log.error('Error creating copilot request', { error: err });
+      if (err.message) _.assign(err, { details: err.message });
+      util.handleError('Error creating copilot request', err, req, next);
+      return undefined;
+    }
   },
 ];
+
