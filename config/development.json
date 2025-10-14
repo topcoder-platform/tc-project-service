@@ -6,7 +6,7 @@
   "copilotPortalUrl": "https://copilots.topcoder-dev.com",
   "fileServiceEndpoint": "https://api.topcoder-dev.com/v5/files",
   "memberServiceEndpoint": "https://api.topcoder-dev.com/v5/members",
-  "identityServiceEndpoint": "https://api.topcoder-dev.com/v3/",
+  "identityServiceEndpoint": "https://api.topcoder-dev.com/v6/",
   "taasJobApiUrl": "https://api.topcoder-dev.com/v5/jobs",
   "sfdcBillingAccountNameField": "Billing_Account_name__c",
   "sfdcBillingAccountMarkupField": "Mark_Up__c",
