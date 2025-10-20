@@ -853,7 +853,7 @@ const projectServiceUtils = {
           Authorization: `Bearer ${token}`,
         },
       }).then((res) => {
-        const roles = res.data;
+        const roles = res.result.content;
         logger.debug(`Roles by ${roleName}: ${JSON.stringify(roles)}`);
         return roles
           .filter(item => item.roleName === roleName)
