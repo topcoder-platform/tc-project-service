@@ -855,7 +855,7 @@ const projectServiceUtils = {
       }).then((res) => {
         const roles = res.data;
         logger.debug(`Roles by ${roleName}: ${JSON.stringify(roles)}`);
-        return roles
+        return roles.result.content
           .filter(item => item.roleName === roleName)
           .map(r => r.id);
       });
