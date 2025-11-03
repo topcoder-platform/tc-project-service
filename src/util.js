@@ -732,7 +732,7 @@ const projectServiceUtils = {
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
       const userIds = _.reject(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
       allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
-
+      req.log.debug(`allMemberDetails : ${JSON.stringify(allMemberDetails)}`)
       if (_.intersection(fields, memberTraitFields).length > 0) {
         const promises = _.map(
           allMemberDetails,
@@ -742,6 +742,7 @@ const projectServiceUtils = {
           }),
         );
         const traits = await Promise.all(promises);
+        req.log.debug(`traits in getObjectsWithMemberDetails : ${JSON.stringify(traits)}`)
         _.each(traits, (memberTraits) => {
           // if we didn't manage to get traits for the user, skip it
           if (_.isEmpty(memberTraits)) return;

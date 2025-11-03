@@ -212,7 +212,7 @@ const sendInviteEmail = (req, projectId, invite) => {
     util.getMemberDetailsByUserIds([req.authUser.userId], req.log, req.id),
   ];
   return Promise.all(promises).then((responses) => {
-    req.log.debug(responses);
+    req.log.debug(`Response from project and member details - ${JSON.stringify(responses)}`);
     const project = responses[0];
     const initiator = responses[1] && responses[1].length ? responses[1][0] : {
       userId: req.authUser.userId,
