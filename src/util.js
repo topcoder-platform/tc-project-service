@@ -731,7 +731,9 @@ const projectServiceUtils = {
     let allMemberDetails = [];
     if (_.intersection(fields, _.union(memberDetailFields, memberTraitFields)).length > 0) {
       const userIds = _.reject(_.map(members, 'userId'), _.isNil); // some invites may have no `userId`
-      allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+      if (userIds.length > 0) {
+        allMemberDetails = await util.getMemberDetailsByUserIds(userIds, req.log, req.id);
+      }
       req.log.debug(`allMemberDetails : ${JSON.stringify(allMemberDetails)}`)
       if (_.intersection(fields, memberTraitFields).length > 0) {
         const promises = _.map(
