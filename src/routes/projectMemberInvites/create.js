@@ -464,11 +464,15 @@ module.exports = [
               );
           })
           .then((values) => {
-            const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
-            if (failed.length) {
-              res.status(403).json(_.assign({}, response, { failed }));
-            } else {
-              res.status(201).json(response);
+            try {
+              const response = _.assign({}, { success: util.postProcessInvites('$[*]', values, req) });
+              if (failed.length) {
+                res.status(403).json(_.assign({}, response, { failed }));
+              } else {
+                res.status(201).json(response);
+              } 
+            } catch (e) {
+              req.log.error(e);
             }
           });
       }).catch((err) => {
