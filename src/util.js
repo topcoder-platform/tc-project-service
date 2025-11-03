@@ -660,6 +660,7 @@ const projectServiceUtils = {
     }
 
     const postProcessInvite = (invite) => {
+      req.log.debug(`Invite details in postProcessInvite - ${JSON.stringify(invite)}`)
       if (!_.has(invite, 'email')) {
         return invite;
       }
