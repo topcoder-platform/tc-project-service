@@ -820,10 +820,10 @@ const projectServiceUtils = {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       httpClient.defaults.timeout = 6000;
-      logger.debug(`${config.identityServiceEndpoint}roles/${roleId}`, "fetching role info");
+      logger.debug(`${config.identityServiceEndpoint}roles/${roleId}`, 'fetching role info');
       return httpClient.get(`${config.identityServiceEndpoint}roles/${roleId}`, {
         params: {
-          fields: `subjects`,
+          fields: 'subjects',
         },
         headers: {
           'Content-Type': 'application/json',
@@ -834,7 +834,7 @@ const projectServiceUtils = {
         return _.get(res, 'data.result.content', []);
       });
     } catch (err) {
-      logger.debug(err, "error on getting role info");
+      logger.debug(err, 'error on getting role info');
       return Promise.reject(err);
     }
   }),
@@ -853,8 +853,9 @@ const projectServiceUtils = {
           Authorization: `Bearer ${token}`,
         },
       }).then((res) => {
-        logger.debug(`Roles by ${roleName}: ${JSON.stringify(res.data.result.content)}`);
-        return _.get(res, 'data.result.content', [])
+        const roles = res.data;
+        logger.debug(`Roles by ${roleName}: ${JSON.stringify(roles)}`);
+        return roles.result.content
           .filter(item => item.roleName === roleName)
           .map(r => r.id);
       });
