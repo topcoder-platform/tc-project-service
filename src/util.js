@@ -412,10 +412,8 @@ const projectServiceUtils = {
       },
     })
       .then((response) => {
-        if (response.data && response.data.result
-        && response.data.result.status === 200 && response.data.result.content
-        && response.data.result.content.length === 1) {
-          return response.data.result.content[0];
+        if (response.data && response.status === 200 && response.data.length === 1) {
+          return response.data[0];
         }
         return null;
       });
@@ -830,8 +828,8 @@ const projectServiceUtils = {
           Authorization: `Bearer ${token}`,
         },
       }).then((res) => {
-        logger.debug(`Role info by ${roleId}: ${JSON.stringify(res.data.result.content)}`);
-        return _.get(res, 'data.result.content', []);
+        logger.debug(`Role info by ${roleId}: ${JSON.stringify(res.data)}`);
+        return res.data;
       });
     } catch (err) {
       logger.debug(err, 'error on getting role info');
@@ -855,7 +853,7 @@ const projectServiceUtils = {
       }).then((res) => {
         const roles = res.data;
         logger.debug(`Roles by ${roleName}: ${JSON.stringify(roles)}`);
-        return roles.result.content
+        return roles
           .filter(item => item.roleName === roleName)
           .map(r => r.id);
       });
@@ -880,8 +878,8 @@ const projectServiceUtils = {
           Authorization: `Bearer ${token}`,
         },
       }).then((res) => {
-        logger.debug(`Roles for user ${userId}: ${JSON.stringify(res.data.result.content)}`);
-        return _.get(res, 'data.result.content', []).map(r => r.roleName);
+        logger.debug(`Roles for user ${userId}: ${JSON.stringify(res.data)}`);
+        return (res.data || []).map(r => r.roleName);
       });
     } catch (err) {
       return Promise.reject(err);
@@ -914,7 +912,7 @@ const projectServiceUtils = {
      * @param  {String} [route] route which called the event (for phases and works)
      * @param  {Boolean}[skipNotification] if true, than event is not send to Notification Service
     */
-    sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource, originalResource, route, skipNotification) {    // eslint-disable-line
+  sendResourceToKafkaBus: Promise.coroutine(function* (req, key, name, resource, originalResource, route, skipNotification) {    // eslint-disable-line
     req.log.debug('Sending event to Kafka bus for resource %s %s', name, resource.id || resource.key);
 
     // emit event
@@ -1013,8 +1011,8 @@ const projectServiceUtils = {
           timeout: 15000,
         })
           .then((response) => {
-            const data = _.get(response, 'data.result.content', null);
-            if (!data) { throw new Error('Response does not have result.content'); }
+            const data = _.get(response, 'data', null);
+            if (!data) { throw new Error('Response does not have data'); }
             req.log.debug('UserHandle response', data);
             return data;
           });
@@ -1070,7 +1068,7 @@ const projectServiceUtils = {
       return Promise.all(requests)
         .then((responses) => {
           const data = responses.reduce((contents, response) => {
-            const content = _.get(response, 'data.result.content', []);
+            const content = response.data || [];
             return _.concat(contents, content);
           }, users);
           req.log.debug(`UserHandle response batch-${batch}`, data);
@@ -1263,8 +1261,8 @@ const projectServiceUtils = {
           _.isMatch(member, rule)
         ));
 
-      // `projectRoles === true` means that we check if user is a member of the project
-      // with any role
+        // `projectRoles === true` means that we check if user is a member of the project
+        // with any role
       } else if (permissionRule.projectRoles === true) {
         hasProjectRole = !!member;
       }
@@ -1279,9 +1277,9 @@ const projectServiceUtils = {
           permissionRule.topcoderRoles.map(role => role.toLowerCase()),
         ).length > 0;
 
-      // `topcoderRoles === true` means that we check if user is has any Topcoder role
-      // basically this equals to logged-in user, as all the Topcoder users
-      // have at least one role `Topcoder User`
+        // `topcoderRoles === true` means that we check if user is has any Topcoder role
+        // basically this equals to logged-in user, as all the Topcoder users
+        // have at least one role `Topcoder User`
       } else if (permissionRule.topcoderRoles === true) {
         hasTopcoderRole = _.get(user, 'roles', []).length > 0;
       }

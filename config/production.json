@@ -5,5 +5,6 @@
   "sfdcBillingAccountNameField": "Billing_Account_name__c",
   "sfdcBillingAccountMarkupField": "Mark_up__c",
   "sfdcBillingAccountActiveField": "Active__c",
-  "copilotsSlackEmail": "mem-ops-copilot-aaaadbvbjvvek6ojnwpfdh5qq4@topcoder.slack.com"
+  "copilotsSlackEmail": "mem-ops-copilot-aaaadbvbjvvek6ojnwpfdh5qq4@topcoder.slack.com",
+  "identityServiceEndpoint": "https://api.topcoder.com/v6/"
 }
