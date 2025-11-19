@@ -40,9 +40,6 @@ describe('LIST project types', () => {
     },
   ];
 
-  before((done) => {
-    testUtil.clearES(done);
-  });
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => models.ProjectType.create(types[0]))

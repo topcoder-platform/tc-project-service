@@ -113,9 +113,6 @@ const milestoneTemplates = [
 ];
 
 describe('LIST milestone template', () => {
-  before((done) => {
-    testUtil.clearES(done);
-  });
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => models.ProductTemplate.bulkCreate(productTemplates))

@@ -3,16 +3,10 @@
 import chai from 'chai';
 import request from 'supertest';
 import _ from 'lodash';
-import config from 'config';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import { ATTACHMENT_TYPES } from '../../constants';
-import util from '../../util';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
-const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -86,7 +80,7 @@ const data = [
       {
         id: 1,
         title: 'Spec',
-        projectId: 1,
+        projectId: 5,
         description: 'specification',
         path: 'projects/1/spec.pdf',
         type: ATTACHMENT_TYPES.FILE,
@@ -98,7 +92,7 @@ const data = [
       {
         id: 2,
         title: 'Link 1',
-        projectId: 1,
+        projectId: 5,
         description: 'specification link',
         path: 'projects/1/linkA',
         type: ATTACHMENT_TYPES.LINK,
@@ -111,49 +105,67 @@ const data = [
 ];
 
 describe('GET Project', () => {
-  // only add project1 to es
+  // prepare test projects
   let project1;
   let project2;
   before((done) => {
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => {
         const p1 = models.Project.create({
-          id: 5,
+          id: data[0].id,
           type: 'generic',
           billingAccountId: 1,
           name: 'test1',
-          description: 'test project1',
+          description: data[0].description,
+          cancelReason: data[0].cancelReason,
           status: 'draft',
-          details: {},
+          details: data[0].details,
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 1,
           lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
-          // create members
-          const pm1 = models.ProjectMember.create({
-            userId: 40051331,
+          const members = data[0].members.map(member => models.ProjectMember.create({
+            ...member,
             projectId: project1.id,
-            role: 'customer',
-            isPrimary: true,
-            firstName: 'Firstname',
-            lastName: 'Lastname',
-            handle: 'test_tourist_handle',
-            email: 'test@test.com',
+            createdBy: member.createdBy || 1,
+            updatedBy: member.updatedBy || 1,
+          }));
+          const invites = data[0].invites.map(invite => models.ProjectMemberInvite.create({
+            ...invite,
+            projectId: project1.id,
+            createdBy: invite.createdBy || 1,
+            updatedBy: invite.updatedBy || 1,
+          }));
+          const attachments = data[0].attachments.map(attachment => models.ProjectAttachment.create({
+            ...attachment,
+            projectId: project1.id,
+          }));
+          const phasePromise = models.ProjectPhase.create({
+            name: data[0].phases[0].name,
+            status: 'active',
+            startDate: '2018-05-15T00:00:00Z',
+            endDate: '2018-05-16T00:00:00Z',
+            budget: 20.0,
+            progress: 0.12,
+            spentBudget: data[0].phases[0].spentBudget,
+            details: {},
             createdBy: 1,
             updatedBy: 1,
-          });
-          const pm2 = models.ProjectMember.create({
-            userId: 40051333,
             projectId: project1.id,
-            role: 'copilot',
-            isPrimary: true,
+          }).then(phase => models.PhaseProduct.create({
+            phaseId: phase.id,
+            projectId: project1.id,
+            name: data[0].phases[0].products[0].name,
+            type: 'product1',
+            estimatedPrice: 20.0,
+            actualPrice: 1.23456,
+            details: {},
             createdBy: 1,
             updatedBy: 1,
-          });
-          return Promise.all([pm1, pm2]);
+          }));
+          return Promise.all([...members, ...invites, ...attachments, phasePromise]);
         });
 
         const p2 = models.Project.create({
@@ -180,23 +192,14 @@ describe('GET Project', () => {
             updatedBy: 1,
           });
         });
-        return Promise.all([p1, p2])
-          .then(() => eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: data[0].id,
-            body: data[0],
-          })).then(() => {
-            testUtil.wait(done);
-            // done();
-          });
-      });
+        return Promise.all([p1, p2]);
+      })
+      .then(() => done())
+      .catch(done);
   });
 
   after((done) => {
-    testUtil.clearDb()
-      .then(() => testUtil.clearES())
-      .then(done);
+    testUtil.clearDb(done);
   });
 
   describe('GET /projects/{id}', () => {
@@ -295,9 +298,9 @@ describe('GET Project', () => {
         });
     });
 
-    it('should return project with "members", "invites", and "attachments" by default when data comes from ES', (done) => {
+    it('should return project with "members", "invites", and "attachments" by default', (done) => {
       request(server)
-        .get(`/v5/projects/${data[0].id}`)
+        .get(`/v5/projects/${project1.id}`)
         .set({
           Authorization: `Bearer ${testUtil.jwts.admin}`,
         })

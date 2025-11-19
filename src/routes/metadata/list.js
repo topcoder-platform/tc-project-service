@@ -2,12 +2,10 @@
  * API to list all metadata
  */
 import { middleware as tcMiddleware } from 'tc-core-library-js';
-import _ from 'lodash';
 import Joi from 'joi';
 import validate from 'express-validation';
 
 import models from '../../models';
-import util from '../../util';
 
 const metadataProperties = [
   'productTemplates',
@@ -128,18 +126,29 @@ function loadMetadataFromDb(includeAllReferred) {
           Promise.resolve(latestVersion[0]),
           Promise.resolve(latestVersion[1]),
           Promise.resolve(latestVersion[2]),
+          models.BuildingBlock.findAll(query),
         ]);
-      }).then(queryAllResult => ({
-        projectTemplates: queryAllResult[0],
-        productTemplates: queryAllResult[1],
-        milestoneTemplates: queryAllResult[2],
-        projectTypes: queryAllResult[3],
-        productCategories: queryAllResult[4],
-        forms: queryAllResult[5],
-        priceConfigs: queryAllResult[6],
-        planConfigs: queryAllResult[7],
-      }),
-      );
+      }).then(([
+        projectTemplates,
+        productTemplates,
+        milestoneTemplates,
+        projectTypes,
+        productCategories,
+        forms,
+        priceConfigs,
+        planConfigs,
+        buildingBlocks,
+      ]) => ({
+        projectTemplates,
+        productTemplates,
+        milestoneTemplates,
+        projectTypes,
+        productCategories,
+        forms,
+        priceConfigs,
+        planConfigs,
+        buildingBlocks,
+      }));
   }
   return Promise.all([
     models.ProjectTemplate.findAll(projectProductTemplateQuery),
@@ -168,59 +177,8 @@ module.exports = [
   validate(schema),
   permissions('metadata.list'),
   (req, res, next) => {
-    // As we are generally return all the data from metadata ES index we just get all the index data
-    // instead of creating a detailed request to get each type of object
-    // There are few reasons for this:
-    // + getting all the index works much faster than making detailed request:
-    //   ~2.5 seconds using detailed query vs 0.15 seconds without query (including JS filtering)
-    // + making request we have to get data from `inner_hits` and specify `size` which is by default is `3`
-    //   otherwise we wouldn't get all the data, but we want to get all the data
-    // Disadvantage:
-    // - we have to filter disabled Project Templates and Product Templates by JS
-    util.fetchFromES(null, null, 'metadata')
-      .then((data) => {
-        const esDataToReturn = _.pick(data, metadataProperties);
-        // if some metadata properties are not returned from ES, then initialize such properties with empty array
-        // for consistency
-        metadataProperties.forEach((prop) => {
-          if (!esDataToReturn[prop]) {
-            esDataToReturn[prop] = [];
-          }
-        });
-
-        // return only non-disabled Project Templates
-        if (esDataToReturn.projectTemplates && esDataToReturn.projectTemplates.length > 0) {
-          esDataToReturn.projectTemplates = _.filter(esDataToReturn.projectTemplates, { disabled: false });
-        }
-
-        // return only non-disabled Product Templates
-        if (esDataToReturn.productTemplates && esDataToReturn.productTemplates.length > 0) {
-          esDataToReturn.productTemplates = _.filter(esDataToReturn.productTemplates, { disabled: false });
-        }
-
-        // WARNING: `BuildingBlock` model contains sensitive data!
-        //
-        // We should NEVER return `privateConfig` property for `buildingBlocks`.
-        // For the DB we use hooks to always clear it out, see `src/models/buildingBlock.js`.
-        // For the ES so far we should always remember about it and filter it out.
-        if (esDataToReturn.buildingBlocks && esDataToReturn.buildingBlocks.length > 0) {
-          esDataToReturn.buildingBlocks = _.map(
-            esDataToReturn.buildingBlocks,
-            buildingBlock => _.omit(buildingBlock, 'privateConfig'),
-          );
-        }
-
-        // check if any data is returned from ES
-        const hasDataInES = _.some(esDataToReturn, propData => propData && propData.length > 0);
-
-        if (hasDataInES) {
-          req.log.debug('Metadata is found in ES');
-          return res.json(esDataToReturn);
-        }
-
-        req.log.debug('Metadata is not found in ES');
-        return loadMetadataFromDb(req.query.includeAllReferred).then(dbDataToReturn => res.json(dbDataToReturn));
-      })
+    loadMetadataFromDb(req.query.includeAllReferred)
+      .then(dbDataToReturn => res.json(dbDataToReturn))
       .catch(next);
   },
 ];

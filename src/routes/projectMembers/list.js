@@ -9,7 +9,10 @@ import models from '../../models';
 import util from '../../util';
 import { PROJECT_MEMBER_ROLE } from '../../constants';
 
-const PROJECT_MEMBER_ATTRIBUTES = _.without(_.keys(models.ProjectMember.rawAttributes));
+const PROJECT_MEMBER_ATTRIBUTES = _.union(
+  _.without(_.keys(models.ProjectMember.rawAttributes), 'deletedAt', 'deletedBy'),
+  ['projectId'],
+);
 
 const permissions = tcMiddleware.permissions;
 
@@ -34,82 +37,41 @@ module.exports = [
   (req, res, next) => {
     const projectId = _.parseInt(req.params.projectId);
     const fields = req.query.fields ? req.query.fields.split(',') : [];
-    const must = [
-      { term: { 'members.projectId': projectId } },
-    ];
-
+    const where = {
+      projectId,
+    };
     if (req.query.role) {
-      must.push({ term: { 'members.role': req.query.role } });
+      where.role = req.query.role;
     }
 
-    util.fetchByIdFromES('members', {
-      sort: [
-        { id: { order: 'asc' } },
+    return models.ProjectMember.findAll({
+      where,
+      order: [
+        ['id', 'ASC'],
       ],
-      query: {
-        nested: {
-          path: 'members',
-          query:
-          {
-            filtered: {
-              filter: {
-                bool: {
-                  must,
-                },
-              },
-            },
-          },
-          inner_hits: {
-            // TODO: replace this temporary fix with a better solution
-            // we have to get all the members of the project,
-            // should we just get a project object instead of creating such a detailed request?
-            // I guess just retrieving project by id and after returning members from it
-            // should work much faster
-            size: 1000,
-          },
-        },
-      },
+      attributes: { exclude: ['deletedAt', 'deletedBy'] },
+      raw: true,
     })
-      .then((data) => {
-        if (data.length === 0) {
-          req.log.debug('No project members found in ES');
-          // Get all project members
-          const where = {
-            projectId,
-          };
-          if (req.query.role) {
-            where.role = req.query.role;
-          }
-          return models.ProjectMember.findAll({
-            where,
-            // Add order
-            order: [
-              ['id', 'ASC'],
-            ],
-            attributes: { exclude: ['deletedAt', 'deletedBy'] },
-            raw: true,
-          });
+      .then((members) => {
+        const baseMembers = members.map(member => _.pick(member, PROJECT_MEMBER_ATTRIBUTES));
+        if (!fields.length) {
+          return baseMembers;
         }
-        req.log.debug('project members found in ES');
-        return data[0].inner_hits.members.hits.hits.map(hit => _.pick(
-          hit._source, // eslint-disable-line no-underscore-dangle
-          // Elasticsearch index might have additional fields added to members like
-          // 'handle', 'firstName', 'lastName', 'email'
-          // but we shouldn't return them, as they might be outdated
-          // method "getObjectsWithMemberDetails" would populate these fields again
-          // with up to date data from Member Service if necessary
-          PROJECT_MEMBER_ATTRIBUTES,
-        ));
-      })
-      .then(members => (
-        util.getObjectsWithMemberDetails(members, fields, req)
+        return util.getObjectsWithMemberDetails(baseMembers, fields, req)
+          .then((memberDetails) => {
+            if (!memberDetails) {
+              return baseMembers;
+            }
+            return baseMembers.map((member, index) =>
+              _.assign({}, member, memberDetails[index] || {}));
+          })
           .catch((err) => {
             req.log.error('Cannot get user details for member.');
             req.log.debug('Error during getting user details for member.', err);
             // continues without details anyway
-            return members;
-          })
-      ))
+            return baseMembers;
+          });
+      })
       .then(members => res.json(members))
       .catch(next);
   },

@@ -1,7 +1,12 @@
 /* eslint-disable valid-jsdoc */
 
 import _ from 'lodash';
-import { PROJECT_STATUS, INVITE_STATUS } from '../constants';
+import {
+  PROJECT_STATUS,
+  INVITE_STATUS,
+  PROJECT_MEMBER_ROLE,
+  PROJECT_MEMBER_NON_CUSTOMER_ROLES,
+} from '../constants';
 
 module.exports = function defineProject(sequelize, DataTypes) {
   const Project = sequelize.define('Project', {
@@ -89,6 +94,99 @@ module.exports = function defineProject(sequelize, DataTypes) {
     .then(res => res.directProjectId);
 
 
+  const ORDERABLE_COLUMNS = [
+    'createdAt',
+    'updatedAt',
+    'lastActivityAt',
+    'id',
+    'status',
+    'name',
+    'type',
+  ];
+
+  const normalizeArrayFilter = (value) => {
+    if (_.isNil(value)) {
+      return [];
+    }
+    if (_.isObject(value) && _.has(value, '$in')) {
+      return normalizeArrayFilter(value.$in);
+    }
+
+    return _
+      .chain(value)
+      .thru(v => (_.isArray(v) ? v : [v]))
+      .filter(v => !_.isNil(v))
+      .value();
+  };
+
+  const stripMatchingQuotes = (value) => {
+    if (!_.isString(value) || value.length < 2) {
+      return value;
+    }
+    const firstChar = value[0];
+    const lastChar = value[value.length - 1];
+    if ((firstChar === '"' && lastChar === '"') || (firstChar === '\'' && lastChar === '\'')) {
+      return value.substring(1, value.length - 1);
+    }
+    return value;
+  };
+
+  const buildKeywordFilter = (keyword) => {
+    if (!_.isString(keyword)) {
+      return null;
+    }
+    let term = _.trim(keyword);
+    if (!term) {
+      return null;
+    }
+
+    const toSearchTerm = value => (_.isString(value) && _.trim(value)
+      ? _.toLower(_.trim(value)) : null);
+
+    if (_.startsWith(_.toLower(term), 'ref:')) {
+      let code = term.substring(4);
+      code = _.trim(stripMatchingQuotes(code));
+      if (!code) {
+        return null;
+      }
+      return {
+        clause: 'LOWER(details -> \'utm\' ->> \'code\') = LOWER(:keywordRef)',
+        replacements: { keywordRef: code },
+        searchTerm: toSearchTerm(code),
+      };
+    }
+
+    const quoted = (
+      (term.startsWith('"') && term.endsWith('"')) ||
+      (term.startsWith('\'') && term.endsWith('\''))
+    );
+    if (quoted) {
+      term = stripMatchingQuotes(term);
+      if (!term) {
+        return null;
+      }
+      return {
+        clause: 'projects."projectFullText" ~* :keywordExact',
+        replacements: { keywordExact: _.escapeRegExp(term) },
+        searchTerm: toSearchTerm(term),
+      };
+    }
+
+    const hasWildcard = term.indexOf('*') !== -1;
+    const patternSegments = _.map(term.split('*'), part => _.escapeRegExp(part));
+    let pattern = patternSegments.join('.*');
+    if (!hasWildcard) {
+      pattern = `.*${pattern}.*`;
+    }
+    const sanitizedTerm = _.trim(term.replace(/\*/g, ' '));
+
+    return {
+      clause: 'projects."projectFullText" ~* :keywordWildcard',
+      replacements: { keywordWildcard: pattern },
+      searchTerm: toSearchTerm(sanitizedTerm || term.replace(/\*/g, '')),
+    };
+  };
+
   /**
    * Search keyword in name, description, details.utm.code (To be deprecated)
    * @param parameters the parameters
@@ -100,105 +198,216 @@ module.exports = function defineProject(sequelize, DataTypes) {
    * @param log the request log
    * @return the result rows and count
    */
-  Project.searchText = (parameters, log) => {
-    // special handling for keyword filter
-    let query = '1=1 ';
-    const replacements = {
-      INVITE_STATUS_PENDING: INVITE_STATUS.PENDING,
+  Project.searchText = async (parameters, log) => {
+    const filters = _.get(parameters, 'filters', {});
+    const replacements = {};
+    const whereParts = ['1=1', 'projects."deletedAt" IS NULL'];
+    const joins = [];
+    const bestMatchSort = Boolean(parameters.bestMatchSort);
+    let keywordSearchTerm = null;
+
+    const appendJoin = (joinStr) => {
+      if (!joins.includes(joinStr)) {
+        joins.push(joinStr);
+      }
     };
-    if (_.has(parameters.filters, 'id')) {
-      if (_.isArray(parameters.filters.id)) {
-        if (parameters.filters.id.length === 0) {
-          parameters.filters.id.push(-1);
+
+    if (_.has(filters, 'id')) {
+      const idFilter = filters.id;
+      if (_.isArray(idFilter)) {
+        if (!idFilter.length) {
+          return { rows: [], count: 0 };
         }
-        query += 'AND projects.id IN(:id) ';
-        replacements.id = parameters.filters.id;
-      } else if (_.isString(parameters.filters.id) || _.isNumber(parameters.filters.id)) {
-        query += 'AND projects.id = :id ';
-        replacements.id = parameters.filters.id;
+        whereParts.push('projects.id IN (:id)');
+        replacements.id = idFilter;
+      } else if (_.isObject(idFilter) && _.has(idFilter, '$in')) {
+        if (!idFilter.$in.length) {
+          return { rows: [], count: 0 };
+        }
+        whereParts.push('projects.id IN (:id)');
+        replacements.id = idFilter.$in;
+      } else if (_.isString(idFilter) || _.isNumber(idFilter)) {
+        whereParts.push('projects.id = :id');
+        replacements.id = idFilter;
       }
     }
-    if (_.has(parameters.filters, 'status')) {
-      const statusFilter = parameters.filters.status;
-      if (_.isObject(statusFilter)) {
-        query += 'AND projects.status IN (:status) ';
+
+    if (_.has(filters, 'status')) {
+      const statusFilter = filters.status;
+      if (_.isObject(statusFilter) && _.has(statusFilter, '$in')) {
+        whereParts.push('projects.status IN (:status)');
         replacements.status = statusFilter.$in;
+      } else if (_.isArray(statusFilter)) {
+        if (!statusFilter.length) {
+          return { rows: [], count: 0 };
+        }
+        whereParts.push('projects.status IN (:status)');
+        replacements.status = statusFilter;
       } else if (_.isString(statusFilter)) {
-        query += 'AND projects.status = :status ';
+        whereParts.push('projects.status = :status');
         replacements.status = statusFilter;
       }
     }
-    if (_.has(parameters.filters, 'type')) {
-      query += 'AND projects.type = :type ';
-      replacements.type = parameters.filters.type;
-    }
-    if (_.has(parameters.filters, 'keyword')) {
-      query += 'AND projects."projectFullText" ~ lower(:keyword) ';
-      replacements.keyword = parameters.filters.keyword;
-    }
-    if (_.has(parameters.filters, 'name')) {
-      query += 'AND projects.name = :name ';
-      replacements.name = parameters.filters.name;
-    }
-    if (_.has(parameters.filters, 'directProjectId')) {
-      query += 'AND projects."directProjectId" = :directProjectId ';
-      replacements.directProjectId = parameters.filters.directProjectId;
-    }
-    if (_.has(parameters.filters, 'code')) {
-      query += 'AND details -> \'utm\' ->> \'code\' = :code ';
-      replacements.code = parameters.filters.code;
+
+    if (_.has(filters, 'type')) {
+      whereParts.push('projects.type = :type');
+      replacements.type = filters.type;
     }
 
-    let joinQuery = '';
-    if (_.has(parameters.filters, 'userId') || _.has(parameters.filters, 'email')) {
-      query += ` AND (
-        members."userId" = :userId AND members."deletedAt" IS NULL
-        OR (
-          invites.status = :INVITE_STATUS_PENDING AND
-          (invites."userId" = :userId OR invites."email" = :email)
-        )
-      ) GROUP BY projects.id`;
-
-      joinQuery = `LEFT OUTER JOIN project_members AS members ON projects.id = members."projectId"
-      LEFT OUTER JOIN project_member_invites AS invites ON projects.id = invites."projectId"`;
-
-      replacements.userId = parameters.filters.userId;
-      replacements.email = parameters.filters.email;
-    }
-
-    let attributesStr = _.map(parameters.attributes, attr => `projects."${attr}"`);
-    attributesStr = `${attributesStr.join(',')}`;
-    const orderStr = `"${parameters.order[0][0]}" ${parameters.order[0][1]}`;
-
-    // select count of projects
-    return sequelize.query(`SELECT COUNT(1) FROM projects AS projects
-      ${joinQuery}
-      WHERE ${query}`,
-    { type: sequelize.QueryTypes.SELECT,
-      replacements,
-      logging: (str) => { log.debug(str); },
-      raw: true,
-    })
-      .then((fcount) => {
-        let count = fcount.length;
-        if (fcount.length === 1) {
-          count = fcount[0].count;
+    if (_.has(filters, 'keyword')) {
+      const keywordClause = buildKeywordFilter(filters.keyword);
+      if (keywordClause) {
+        whereParts.push(keywordClause.clause);
+        _.assign(replacements, keywordClause.replacements);
+        if (keywordClause.searchTerm) {
+          keywordSearchTerm = keywordClause.searchTerm;
         }
+      }
+    }
 
-        replacements.limit = parameters.limit;
-        replacements.offset = parameters.offset;
-        // select project attributes
-        return sequelize.query(`SELECT ${attributesStr} FROM projects AS projects
-          ${joinQuery}
-          WHERE ${query} ORDER BY ` +
-          ` projects.${orderStr} LIMIT :limit OFFSET :offset`,
-        { type: sequelize.QueryTypes.SELECT,
-          replacements,
-          logging: (str) => { log.debug(str); },
-          raw: true,
-        })
-          .then(projects => ({ rows: projects, count }));
-      });
+    if (_.has(filters, 'name')) {
+      whereParts.push('projects.name = :name');
+      replacements.name = filters.name;
+    }
+
+    if (_.has(filters, 'directProjectId')) {
+      whereParts.push('projects."directProjectId" = :directProjectId');
+      replacements.directProjectId = filters.directProjectId;
+    }
+
+    if (_.has(filters, 'code')) {
+      whereParts.push('details -> \'utm\' ->> \'code\' = :code');
+      replacements.code = filters.code;
+    }
+
+    const customerUserIds = normalizeArrayFilter(filters.customerUserIds);
+    if (!_.isNil(filters.customerUserIds) && !customerUserIds.length) {
+      return { rows: [], count: 0 };
+    }
+    if (customerUserIds.length) {
+      appendJoin(`INNER JOIN project_members AS customerMembers
+        ON projects.id = customerMembers."projectId"
+        AND customerMembers."deletedAt" IS NULL
+        AND customerMembers.role = :customerRole`);
+      whereParts.push('customerMembers."userId" IN (:customerUserIds)');
+      replacements.customerUserIds = customerUserIds;
+      replacements.customerRole = PROJECT_MEMBER_ROLE.CUSTOMER;
+    }
+
+    const managerUserIds = normalizeArrayFilter(filters.managerUserIds);
+    if (!_.isNil(filters.managerUserIds) && !managerUserIds.length) {
+      return { rows: [], count: 0 };
+    }
+    if (managerUserIds.length) {
+      appendJoin(`INNER JOIN project_members AS managerMembers
+        ON projects.id = managerMembers."projectId"
+        AND managerMembers."deletedAt" IS NULL
+        AND managerMembers.role IN (:managerRoles)`);
+      whereParts.push('managerMembers."userId" IN (:managerUserIds)');
+      replacements.managerUserIds = managerUserIds;
+      replacements.managerRoles = PROJECT_MEMBER_NON_CUSTOMER_ROLES;
+    }
+
+    if (_.has(filters, 'userId') || _.has(filters, 'email')) {
+      appendJoin(`LEFT OUTER JOIN project_members AS members
+        ON projects.id = members."projectId"
+        AND members."deletedAt" IS NULL`);
+      appendJoin(`LEFT OUTER JOIN project_member_invites AS invites
+        ON projects.id = invites."projectId"
+        AND invites."deletedAt" IS NULL`);
+
+      const membershipClauses = [];
+      const inviteStatusClause = 'invites.status IN (:INVITE_STATUSES)';
+      if (_.has(filters, 'userId')) {
+        membershipClauses.push('members."userId" = :filterUserId');
+        membershipClauses.push(`(
+          ${inviteStatusClause} AND
+          invites."userId" = :filterUserId
+        )`);
+        replacements.filterUserId = filters.userId;
+      }
+      if (_.has(filters, 'email')) {
+        membershipClauses.push(`(
+          ${inviteStatusClause} AND
+          LOWER(invites."email") = LOWER(:filterEmail)
+        )`);
+        replacements.filterEmail = filters.email;
+      }
+
+      if (membershipClauses.length) {
+        replacements.INVITE_STATUSES = [
+          INVITE_STATUS.PENDING,
+          INVITE_STATUS.REQUESTED,
+        ];
+        whereParts.push(`(${membershipClauses.join(' OR ')})`);
+      }
+    }
+
+    const attributes = _.isArray(parameters.attributes)
+      ? _.clone(parameters.attributes)
+      : [];
+    if (!attributes.length) {
+      attributes.push('id');
+    }
+    if (!attributes.includes('id')) {
+      attributes.push('id');
+    }
+    const attributesStr = attributes
+      .map(attr => `projects."${attr}"`)
+      .join(', ');
+
+    const order = _.get(parameters, 'order[0]', ['createdAt', 'asc']);
+    let orderColumn = _.get(order, '[0]', 'createdAt');
+    let orderDirection = _.get(order, '[1]', 'asc');
+    if (!ORDERABLE_COLUMNS.includes(orderColumn)) {
+      orderColumn = 'createdAt';
+    }
+    orderDirection = _.toUpper(orderDirection) === 'DESC' ? 'DESC' : 'ASC';
+    let orderClause = `projects."${orderColumn}" ${orderDirection}`;
+    if (bestMatchSort && keywordSearchTerm) {
+      replacements.keywordSimilarity = keywordSearchTerm;
+      orderClause = 'similarity(projects."projectFullText", :keywordSimilarity) DESC, projects."id" DESC';
+    }
+
+    const joinClause = joins.length ? ` ${joins.join(' ')}` : '';
+    const whereClause = whereParts.join(' AND ');
+
+    const countResult = await sequelize.query(
+      `SELECT COUNT(DISTINCT projects.id) AS count FROM projects AS projects${joinClause}
+        WHERE ${whereClause}`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+        replacements,
+        logging: (str) => { log.debug(str); },
+        raw: true,
+      },
+    );
+    const count = countResult.length ? Number(countResult[0].count) : 0;
+
+    const limitParam = _.get(parameters, 'limit');
+    const offsetParam = _.get(parameters, 'offset', 0);
+    const hasPagination = !_.isNil(limitParam);
+    if (hasPagination) {
+      replacements.limit = Number(limitParam);
+      replacements.offset = Number(offsetParam) || 0;
+    }
+    const paginationClause = hasPagination ? 'LIMIT :limit OFFSET :offset' : '';
+
+    const rows = await sequelize.query(
+      `SELECT ${attributesStr} FROM projects AS projects${joinClause}
+        WHERE ${whereClause}
+        GROUP BY projects.id
+        ORDER BY ${orderClause}
+        ${paginationClause}`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+        replacements,
+        logging: (str) => { log.debug(str); },
+        raw: true,
+      },
+    );
+
+    return { rows, count };
   };
 
   Project.findProjectRange = (models, startId, endId, fields, raw = true) => Project.findAll({

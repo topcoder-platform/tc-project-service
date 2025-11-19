@@ -2,7 +2,6 @@ import _ from 'lodash';
 import config from 'config';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import util from '../../util';
 import { getDownloadUrl } from '../../services/fileService';
 import { ATTACHMENT_TYPES } from '../../constants';
 import permissionUtils from '../../utils/permissions';
@@ -42,49 +41,25 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const attachmentId = _.parseInt(req.params.id);
 
-    util.fetchByIdFromES('attachments', {
-      query: {
-        nested: {
-          path: 'attachments',
-          query:
-          {
-            filtered: {
-              filter: {
-                bool: {
-                  must: [
-                    { term: { 'attachments.id': attachmentId } },
-                    { term: { 'attachments.projectId': projectId } },
-                  ],
-                },
-              },
-            },
-          },
-          inner_hits: {},
-        },
+    return models.ProjectAttachment.findOne({
+      where: {
+        id: attachmentId,
+        projectId,
       },
+      attributes: { exclude: ['deletedAt', 'deletedBy'] },
+      raw: true,
     })
-      .then((data) => {
-        if (data.length === 0) {
-          req.log.debug('No attachment found in ES');
-          return models.ProjectAttachment.findOne(
-            {
-              where: {
-                id: attachmentId,
-                projectId,
-              },
-            })
-            .catch((error) => {
-              req.log.error('Error fetching attachment', error);
-              const rerr = error;
-              rerr.status = rerr.status || 500;
-              next(rerr);
-            });
-        }
-        req.log.debug('attachment found in ES');
-        return data[0].inner_hits.attachments.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
+      .catch((error) => {
+        req.log.error('Error fetching attachment', error);
+        const rerr = error;
+        rerr.status = rerr.status || 500;
+        throw rerr;
       })
       // check permissions
       .then((attachment) => {
+        if (!attachment) {
+          return null;
+        }
         // if don't have permissions we would return 404 below as users shouldn't even know if attachment exists
         if (!permissionUtils.hasReadAccessToAttachment(attachment, req)) {
           return null;
@@ -96,7 +71,7 @@ module.exports = [
         if (!attachment) {
           const err = new Error('Record not found');
           err.status = 404;
-          return Promise.reject(err);
+          throw err;
         }
         return getPreSignedUrl(attachment);
       })

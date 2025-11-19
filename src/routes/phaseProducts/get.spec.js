@@ -41,7 +41,6 @@ describe('Phase Products', () => {
   before((done) => {
     // mocks
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',

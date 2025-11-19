@@ -45,7 +45,8 @@ module.exports = function definePhaseProduct(sequelize, DataTypes) {
    * @return {Object} the result rows and count
    */
   PhaseProduct.search = async (parameters = {}, log) => {
-    const whereQuery = 'phase_products."projectId"= :projectId AND phase_products."phaseId" = :phaseId';
+    const whereQuery = 'phase_products."projectId" = :projectId AND '
+      + 'phase_products."phaseId" = :phaseId AND phase_products."deletedAt" IS NULL';
     const dbQuery = `SELECT * FROM phase_products WHERE ${whereQuery}`;
     return sequelize.query(dbQuery,
       { type: sequelize.QueryTypes.SELECT,

@@ -19,7 +19,6 @@ describe('Project create', () => {
   before(function beforeHook(done) {
     this.timeout(20000);
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => models.ProjectType.bulkCreate([
         {
           key: 'generic',

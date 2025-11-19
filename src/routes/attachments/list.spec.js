@@ -14,7 +14,6 @@ describe('Project Attachments download', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => {
         models.Project.create({
           type: 'generic',

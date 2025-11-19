@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import models from '../../../src/models';
 import { dataModels, validateDataModels } from '../dataModels';
-import { indexMetadata, indexProjectsRange } from '../../../src/utils/es';
 
 /**
  * import data from json file to database
@@ -103,20 +102,7 @@ async function writeDataToDatabase(filePath, logger) {
  * @return {Promise}              Returns a promise
  */
 async function indexDataToES(logger) {
-  logger.info('Indexing metatdata...');
-  await indexMetadata();
-
-  logger.info('Indexing projects data...');
-  const req = {
-    logger,
-    projectIdStart: 1,
-    projectIdEnd: Number.MAX_SAFE_INTEGER,
-    indexName: null,
-    docType: null,
-    fields: null,
-    id: 0,
-  };
-  await indexProjectsRange(req);
+  logger.info('Elasticsearch indexing is disabled; skipping indexing step.');
 }
 
 /**

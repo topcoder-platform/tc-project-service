@@ -5,18 +5,6 @@
     "captureLogs": "false",
     "logentriesToken": "",
     "enableFileUpload": "false",
-    "elasticsearchConfig": {
-      "host": "http://localhost:9200",
-      "apiVersion": "6.8",
-      "indexName": "projects_test",
-      "docType": "doc",
-      "timelineIndexName": "timelines_test",
-      "timelineDocType": "doc",
-      "metadataIndexName": "metadata_test",
-      "metadataDocType": "doc",
-      "customerPaymentIndexName": "customer_payments_test",
-    "customerPaymentDocType": "doc"
-    },
     "connectProjectsUrl": "https://local.topcoder-dev.com/projects/",
     "dbConfig": {
         "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb_test",

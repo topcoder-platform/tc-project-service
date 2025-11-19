@@ -1,16 +1,10 @@
 /* eslint-disable no-unused-expressions */
 import _ from 'lodash';
 import request from 'supertest';
-import config from 'config';
 import chai from 'chai';
 import server from '../../app';
 import models from '../../models';
 import testUtil from '../../tests/util';
-import util from '../../util';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
-const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -30,7 +24,6 @@ const body = {
 
 describe('Project Phases', () => {
   let projectId;
-  let project;
   const memberUser = {
     handle: testUtil.getDecodedToken(testUtil.jwts.member).handle,
     userId: testUtil.getDecodedToken(testUtil.jwts.member).userId,
@@ -49,67 +42,51 @@ describe('Project Phases', () => {
     this.timeout(20000);
     // mocks
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
-      .then(() => {
-        models.Project.create({
-          type: 'generic',
-          billingAccountId: 1,
-          name: 'test1',
-          description: 'test project1',
-          status: 'draft',
-          details: {},
+      .then(() => models.Project.create({
+        type: 'generic',
+        billingAccountId: 1,
+        name: 'test1',
+        description: 'test project1',
+        status: 'draft',
+        details: {},
+        createdBy: 1,
+        updatedBy: 1,
+        lastActivityAt: 1,
+        lastActivityUserId: '1',
+      }))
+      .then((project) => {
+        projectId = project.id;
+        // create members
+        return models.ProjectMember.bulkCreate([{
+          id: 1,
+          userId: copilotUser.userId,
+          projectId,
+          role: 'copilot',
+          isPrimary: false,
           createdBy: 1,
           updatedBy: 1,
-          lastActivityAt: 1,
-          lastActivityUserId: '1',
-        }).then((p) => {
-          projectId = p.id;
-          project = p.toJSON();
-          // create members
-          models.ProjectMember.bulkCreate([{
-            id: 1,
-            userId: copilotUser.userId,
-            projectId,
-            role: 'copilot',
-            isPrimary: false,
-            createdBy: 1,
-            updatedBy: 1,
-          }, {
-            id: 2,
-            userId: memberUser.userId,
-            projectId,
-            role: 'customer',
-            isPrimary: true,
-            createdBy: 1,
-            updatedBy: 1,
-          }]).then(() => {
-            _.assign(body, { projectId });
-            return models.ProjectPhase.create(body);
-          }).then((ph) => {
-            const phase = ph.toJSON();
-            models.ProjectPhaseMember.create({
-              phaseId: phase.id,
-              userId: copilotUser.userId,
-              createdBy: 1,
-              updatedBy: 1,
-            }).then((phaseMember) => {
-              _.assign(phase, { members: [phaseMember.toJSON()] });
-              // Index to ES
-              // Overwrite lastActivityAt as otherwise ES fill not be able to parse it
-              project.lastActivityAt = 1;
-              project.phases = [phase];
-              return eClient.index({
-                index: ES_PROJECT_INDEX,
-                type: ES_PROJECT_TYPE,
-                id: projectId,
-                body: project,
-              }).then(() => {
-                done();
-              });
-            });
-          });
-        });
-      });
+        }, {
+          id: 2,
+          userId: memberUser.userId,
+          projectId,
+          role: 'customer',
+          isPrimary: true,
+          createdBy: 1,
+          updatedBy: 1,
+        }]);
+      })
+      .then(() => {
+        _.assign(body, { projectId });
+        return models.ProjectPhase.create(body);
+      })
+      .then(phase => models.ProjectPhaseMember.create({
+        phaseId: phase.id,
+        userId: copilotUser.userId,
+        createdBy: 1,
+        updatedBy: 1,
+      }))
+      .then(() => done())
+      .catch(done);
   });
 
   after((done) => {

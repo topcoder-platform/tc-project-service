@@ -4,74 +4,8 @@
 import _ from 'lodash';
 import Joi from 'joi';
 import Promise from 'bluebird';
-import config from 'config';
-import util from '../../util';
-import models from '../../models';
 import { createPhaseTopic } from '../projectPhases';
 import { PROJECT_STATUS, REGEX, TIMELINE_REFERENCES } from '../../constants';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
-const eClient = util.getElasticSearchClient();
-
-/**
- * Payload for deprecated BUS events like `connect.notification.project.updated`.
- */
-const projectUpdatedPayloadSchema = Joi.object().keys({
-  projectId: Joi.number().integer().positive().required(),
-  projectName: Joi.string().optional(),
-  projectUrl: Joi.string().regex(REGEX.URL).optional(),
-  userId: Joi.number().integer().positive().required(),
-  initiatorUserId: Joi.number().integer().positive().required(),
-}).unknown(true).required();
-
-/**
- * Updates project activity fields. throws exceptions in case of error
- * @param   {Object}  app       Application object used to interact with RMQ service
- * @param   {String}  topic     Kafka topic
- * @param   {Object}  payload   Message payload
- * @return  {Promise} Promise
- */
-async function projectUpdatedKafkaHandler(app, topic, payload) {
-  // Validate payload
-  const result = Joi.validate(payload, projectUpdatedPayloadSchema);
-  if (result.error) {
-    throw new Error(result.error);
-  }
-
-  // Find project by id and update activity. Single update is used as there is no need to wrap it into transaction
-  const projectId = payload.projectId;
-  const project = await models.Project.findByPk(projectId);
-  if (!project) {
-    throw new Error(`Project with id ${projectId} not found`);
-  }
-  const previousValue = project.get({ plain: true });
-  project.lastActivityAt = new Date();
-  project.lastActivityUserId = payload.initiatorUserId.toString();
-
-  await project.save();
-
-  // first get the existing document and than merge the updated changes and save the new document
-  try {
-    const doc = await eClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: previousValue.id });
-    // console.log(doc._source, 'Received project from ES');// eslint-disable-line no-underscore-dangle
-    const merged = _.merge(doc._source, project.get({ plain: true })); // eslint-disable-line no-underscore-dangle
-    app.logger.debug(merged, 'Merged project');
-    // update the merged document
-    await eClient.update({
-      index: ES_PROJECT_INDEX,
-      type: ES_PROJECT_TYPE,
-      id: previousValue.id,
-      body: {
-        doc: merged,
-      },
-    });
-    app.logger.debug(`Succesfully updated project document in ES (projectId: ${previousValue.id})`);
-  } catch (error) {
-    throw Error(`failed to updated project document in elasitcsearch index (projectId: ${previousValue.id})` +
-      `. Details: '${error}'.`);
-  }
-}
 
 /**
  * Payload for new unified BUS events like `project.action.created` with `resource=project`
@@ -167,6 +101,5 @@ async function projectCreatedKafkaHandler(app, topic, payload) {
 }
 
 module.exports = {
-  projectUpdatedKafkaHandler,
   projectCreatedKafkaHandler,
 };

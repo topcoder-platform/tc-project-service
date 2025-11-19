@@ -41,9 +41,6 @@ const expectAfterDelete = (timelineId, id, err, next) => {
 };
 
 describe('DELETE milestone', () => {
-  before((done) => {
-    testUtil.clearES(done);
-  });
   beforeEach((done) => {
     testUtil.clearDb()
       .then(() => {

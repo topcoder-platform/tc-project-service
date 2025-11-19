@@ -96,6 +96,9 @@ module.exports = function defineProjectMemberInvite(sequelize, DataTypes) {
     }
     return ProjectMemberInvite.findAll({
       where,
+      order: [
+        ['id', 'ASC'],
+      ],
       raw: true,
     });
   };

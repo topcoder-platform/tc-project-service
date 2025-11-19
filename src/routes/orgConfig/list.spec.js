@@ -7,7 +7,6 @@ import request from 'supertest';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import esUtils from '../../utils/es';
 
 const should = chai.should();
 
@@ -62,10 +61,10 @@ const configs = [
 
 describe('LIST organization config', () => {
   after((done) => {
-    // clear data after tests in DB and ES
+    // clear data after tests in DB
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
-      .then(done);
+      .then(done)
+      .catch(done);
   });
 
   describe('GET /orgConfig', () => {
@@ -131,77 +130,65 @@ describe('LIST organization config', () => {
       });
     });
 
-    // we are testing all the endpoints with the same data when it comes from DB and ES
-    ['ES', 'DB'].forEach((dataSource) => {
-      describe(`data from ${dataSource}`, () => {
-        before((done) => {
-          // clear data in DB and ES before tests
-          testUtil.clearDb()
-            .then(() => testUtil.clearES())
-            // create data in DB first
-            .then(() => models.OrgConfig.bulkCreate(configs))
-            .then(() => {
-              // if we want to test data in ES, then we index data from DB to ES
-              // and clear data in DB after that, so we only have data in ES
-              if (dataSource === 'ES') {
-                return esUtils.indexMetadata()
-                  .then(() => testUtil.clearDb());
+    describe('data from DB', () => {
+      before((done) => {
+        // clear data in DB before tests
+        testUtil.clearDb()
+          // create data in DB
+          .then(() => models.OrgConfig.bulkCreate(configs))
+          .then(() => done())
+          .catch(done);
+      });
+
+      it('should get one record for admin with filter (DB)', (done) => {
+        request(server)
+          .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            const config1 = configs[0];
+
+            const resJson = res.body;
+            resJson.should.have.length(1);
+            validateOrgConfig(resJson[0], config1);
+
+            return done();
+          });
+      });
+
+      it('should return 2 records for admin with filter by multiple orgId (DB)', (done) => {
+        request(server)
+          .get(`${orgConfigPath}?orgId=${configs[0].orgId},${configs[1].orgId}`)
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            const config1 = configs[0];
+            const config2 = configs[1];
+
+            const resJson = res.body;
+            resJson.should.have.length(2);
+            resJson.forEach((result) => {
+              if (result.id === 1) {
+                validateOrgConfig(result, config1);
+              } else {
+                validateOrgConfig(result, config2);
               }
-              return Promise.resolve();
-            })
-            .then(() => done());
-        });
-
-        it(`should get one record for admin with filter (${dataSource})`, (done) => {
-          request(server)
-            .get(`${orgConfigPath}?orgId=${configs[0].orgId}&configName=${configs[0].configName}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.admin}`,
-            })
-            .expect(200)
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              const config1 = configs[0];
-
-              const resJson = res.body;
-              resJson.should.have.length(1);
-              validateOrgConfig(resJson[0], config1);
-
-              return done();
             });
-        });
 
-        it(`should return 2 records for admin with filter by multiple orgId (${dataSource})`, (done) => {
-          request(server)
-            .get(`${orgConfigPath}?orgId=${configs[0].orgId},${configs[1].orgId}`)
-            .set({
-              Authorization: `Bearer ${testUtil.jwts.admin}`,
-            })
-            .expect(200)
-            .end((err, res) => {
-              if (err) {
-                return done(err);
-              }
-
-              const config1 = configs[0];
-              const config2 = configs[1];
-
-              const resJson = res.body;
-              resJson.should.have.length(2);
-              resJson.forEach((result) => {
-                if (result.id === 1) {
-                  validateOrgConfig(result, config1);
-                } else {
-                  validateOrgConfig(result, config2);
-                }
-              });
-
-              return done();
-            });
-        });
+            return done();
+          });
       });
     });
   });

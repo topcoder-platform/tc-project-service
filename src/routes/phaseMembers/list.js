@@ -1,13 +1,8 @@
 import _ from 'lodash';
-import config from 'config';
 import Joi from 'joi';
 import validate from 'express-validation';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
-import util from '../../util';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
 
 /**
  * API to list a project phase members.
@@ -29,20 +24,6 @@ module.exports = [
     const projectId = _.parseInt(req.params.projectId);
     const phaseId = _.parseInt(req.params.phaseId);
     try {
-      const esClient = util.getElasticSearchClient();
-      const project = await esClient.get({ index: ES_PROJECT_INDEX, type: ES_PROJECT_TYPE, id: projectId });
-      // eslint-disable-next-line no-underscore-dangle
-      const phases = _.isArray(project._source.phases) ? project._source.phases : []; // eslint-disable-line no-underscore-dangle
-      const phase = _.find(phases, ['id', phaseId]);
-      const phaseMembers = phase.members || [];
-      res.json(phaseMembers);
-      return;
-    } catch (err) {
-      req.log.debug('No active project phase found in ES for project id ' +
-      `${projectId} and phase id ${phaseId}`);
-    }
-    try {
-      req.log.debug('Fall back to DB');
       const phase = await models.ProjectPhase.findOne({
         where: {
           id: phaseId,

@@ -13,10 +13,8 @@ describe('GET Project Member Invite', () => {
   let project1;
   let project2;
   before((done) => {
-    // clear ES and db
-    testUtil.clearES().then(() => {
-      testUtil.clearDb()
-        .then(() => {
+    testUtil.clearDb()
+      .then(() => {
           const p1 = models.Project.create({
             type: 'generic',
             billingAccountId: 1,
@@ -107,7 +105,6 @@ describe('GET Project Member Invite', () => {
           return Promise.all([p1, p2])
             .then(() => done());
         });
-    });
   });
 
   after((done) => {

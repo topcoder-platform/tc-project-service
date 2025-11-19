@@ -22,9 +22,6 @@ if (process.env.NODE_ENV === 'test') {
       minPoolSize: 4,
       idleTimeout: 1000,
     },
-    elasticsearchConfig: {
-      host: 'dockerhost:9200',
-    },
     whitelistedOriginsForUserIdAuth: '[""]',
   };
 }

@@ -1,31 +1,23 @@
 # Topcoder Project Service Architecture
 
 - [Overview](#overview)
-- [Elasticsearch indexing](#elasticsearch-indexing)
-  - [Read data](#read-data)
-  - [Write data](#write-data)
+- [Data Architecture](#data-architecture)
 - [Kafka messages structure](#kafka-messages-structure)
 
 ## Overview
 
-Topcoder Project Service is a microservice to manage CRUD operations for all things related to Projects. To communicate with other microservices like `tc-notifications`, `project-processor-es`, `legacy-project-processor` and event with itself **Project Service** produces Kafka messages and these service listen to the Kafka messages do some stuff. **Project Service** don't send Kafka messages directly, but uses a special service to send Kafka messages called `tc-bus-api`. So no matter what service we want to update, first we have to setup Kafka with Zookeeper and `tc-bus-api`.
+Topcoder Project Service is a microservice to manage CRUD operations for all things related to Projects. To communicate with other microservices like `tc-notifications`, `legacy-project-processor`, and even with itself, **Project Service** produces Kafka messages and these services listen to the Kafka messages to perform their work. **Project Service** doesn't send Kafka messages directly, but uses a special service called `tc-bus-api`. So no matter what service we want to update, first we have to setup Kafka with Zookeeper and `tc-bus-api`. Project data is stored and retrieved directly from PostgreSQL.
 
 ![diagram](./images/diagram.svg)
 
-*This diagram shows just some part of relations and services that are most important, it doesn't show all of them.*
+*This diagram shows just some part of relations and services that are most important, it doesn't show all of them. Review and update the diagram if it still shows Elasticsearch components.*
 
-## Elasticsearch indexing
+## Data Architecture
 
-It's important to keep in mind how the indexing and reading data from Elasticsearch works.
-
-### Read data
-
-As per global Topcoder API V5 standards, all endpoints in **Project Service** should get data from the Elasticsearch index first. If no data is found, endpoints should try to get data from Database.
-
-### Write data
-
-When some data is updated by **Project Service** it's directly changed in the Database. But **Project Service** doesn't change data in Elasticsearch directly. Instead of that, when some data is changed **Project Service** sends event to the Kafka (using `tc-bus-api`), and `project-processor-es` listens to the Kafka event and index updated data in Elasticsearch for **Project Service**.
-As a consequences, data in Elasticsearch is not updated immediately.
+- All project data is stored in PostgreSQL.
+- Read operations query PostgreSQL directly using Sequelize ORM models; there is no caching or secondary index for reads.
+- Write operations update PostgreSQL directly; Kafka events are emitted for downstream consumers but no additional indexing step is required.
+- There is no separate Elasticsearch indexing or syncing service involved.
 
 ## Kafka messages structure
 

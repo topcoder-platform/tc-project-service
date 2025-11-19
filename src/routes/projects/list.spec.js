@@ -3,192 +3,12 @@
 import chai from 'chai';
 import _ from 'lodash';
 import request from 'supertest';
-import config from 'config';
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
 import { ATTACHMENT_TYPES } from '../../constants';
-import util from '../../util';
-
-const ES_PROJECT_INDEX = config.get('elasticsearchConfig.indexName');
-const ES_PROJECT_TYPE = config.get('elasticsearchConfig.docType');
-const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
-// test data for 3 projects
-const data = [
-  {
-    id: 1,
-    type: 'generic',
-    billingAccountId: 1,
-    name: 'test1',
-    description: 'test project1 abc/d',
-    status: 'active',
-    details: {
-      utm: {
-        code: 'code1',
-      },
-    },
-    createdBy: 1,
-    updatedBy: 1,
-    cancelReason: 'price/cost',
-    lastActivityAt: 1,
-    lastActivityUserId: '1',
-    members: [
-      {
-        id: 1,
-        userId: 40051331,
-        projectId: 1,
-        role: 'customer',
-        firstName: 'Firstname',
-        lastName: 'Lastname',
-        handle: 'test_tourist_handle',
-        email: 'test@test.com',
-        isPrimary: true,
-        createdBy: 1,
-        updatedBy: 1,
-      },
-      {
-        id: 2,
-        userId: 40051332,
-        projectId: 1,
-        role: 'copilot',
-        isPrimary: true,
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ],
-    invites: [
-      {
-        id: 1,
-        userId: 40051335,
-        email: 'test@topcoder.com',
-        status: 'pending',
-      },
-      {
-        id: 2,
-        email: 'hello@world.com',
-        status: 'pending',
-        createdBy: 1,
-      },
-    ],
-    phases: [
-
-      {
-        id: 45,
-        name: 'test phases',
-        spentBudget: 0,
-        products: [
-          {
-
-            phaseId: 45,
-            id: 3,
-            name: 'tet product',
-          },
-        ],
-      },
-    ],
-    attachments: [
-      {
-        id: 1,
-        title: 'Spec',
-        projectId: 1,
-        description: 'specification',
-        path: 'projects/1/spec.pdf',
-        type: ATTACHMENT_TYPES.FILE,
-        tags: ['tag1'],
-        contentType: 'application/pdf',
-        createdBy: 1,
-        updatedBy: 1,
-      },
-      {
-        id: 2,
-        title: 'Link 1',
-        projectId: 1,
-        description: 'specification link',
-        path: 'projects/1/linkA',
-        type: ATTACHMENT_TYPES.LINK,
-        tags: ['tag2'],
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ],
-  },
-  {
-    id: 2,
-    type: 'visual_design',
-    billingAccountId: 1,
-    name: 'test2',
-    description: 'test project2',
-    status: 'draft',
-    details: {},
-    createdBy: 1,
-    updatedBy: 1,
-    lastActivityAt: 2,
-    lastActivityUserId: '1',
-    members: [
-      {
-        id: 1,
-        userId: 40051332,
-        projectId: 2,
-        role: 'copilot',
-        firstName: 'copi',
-        lastName: 'lott',
-        handle: 'tolipoc',
-        isPrimary: true,
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ],
-    invites: [
-      {
-        id: 1,
-        userId: 40051335,
-        email: 'test@topcoder.com',
-        status: 'requested',
-      },
-    ],
-    attachments: [
-      {
-        id: 1,
-        title: 'Spec',
-        projectId: 1,
-        description: 'specification',
-        filePath: 'projects/1/spec.pdf',
-        contentType: 'application/pdf',
-        createdBy: 1,
-        updatedBy: 1,
-      },
-    ],
-  },
-  {
-    id: 3,
-    type: 'visual_design',
-    billingAccountId: 1,
-    name: 'test3',
-    description: 'test project3',
-    status: 'reviewed',
-    details: {},
-    createdBy: 1,
-    updatedBy: 1,
-    lastActivityAt: 3,
-    lastActivityUserId: '1',
-    members: [{
-      id: 5,
-      userId: 40051334,
-      projectId: 2,
-      role: 'manager',
-      firstName: 'first',
-      lastName: 'last',
-      handle: 'MANAGER_HANDLE',
-      isPrimary: true,
-      createdBy: 1,
-      updatedBy: 1,
-    },
-    ],
-  },
-];
-
 describe('LIST Project', () => {
   let project1;
   let project2;
@@ -196,30 +16,33 @@ describe('LIST Project', () => {
   before(function inner(done) {
     this.timeout(10000);
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => {
         const p1 = models.Project.create({
           type: 'generic',
           billingAccountId: 1,
           name: 'test1',
-          description: 'test project1',
+          description: 'test project1 abc/d',
           status: 'active',
           details: {
             utm: {
               code: 'code1',
             },
           },
+          cancelReason: 'price/cost',
           createdBy: 1,
           updatedBy: 1,
           lastActivityAt: 1,
           lastActivityUserId: '1',
         }).then((p) => {
           project1 = p;
-          // create members
           const pm1 = models.ProjectMember.create({
             userId: 40051331,
             projectId: project1.id,
             role: 'customer',
+            firstName: 'Firstname',
+            lastName: 'Lastname',
+            handle: 'test_tourist_handle',
+            email: 'test@test.com',
             isPrimary: true,
             createdBy: 1,
             updatedBy: 1,
@@ -232,18 +55,70 @@ describe('LIST Project', () => {
             createdBy: 1,
             updatedBy: 1,
           });
-          const pa1 = models.ProjectAttachment.create({
-            title: 'Spec',
-            projectId: project1.id,
-            description: 'specification',
-            path: 'projects/1/spec.pdf',
-            type: ATTACHMENT_TYPES.FILE,
-            tags: ['tag1'],
-            contentType: 'application/pdf',
+          const attachments = [
+            models.ProjectAttachment.create({
+              title: 'Spec',
+              projectId: project1.id,
+              description: 'specification',
+              path: 'projects/1/spec.pdf',
+              type: ATTACHMENT_TYPES.FILE,
+              tags: ['tag1'],
+              contentType: 'application/pdf',
+              createdBy: 1,
+              updatedBy: 1,
+            }),
+            models.ProjectAttachment.create({
+              title: 'Link 1',
+              projectId: project1.id,
+              description: 'specification link',
+              path: 'projects/1/linkA',
+              type: ATTACHMENT_TYPES.LINK,
+              tags: ['tag2'],
+              createdBy: 1,
+              updatedBy: 1,
+            }),
+          ];
+          const invites = [
+            models.ProjectMemberInvite.create({
+              userId: 40051335,
+              email: 'test@topcoder.com',
+              status: 'pending',
+              projectId: project1.id,
+              createdBy: 1,
+              updatedBy: 1,
+            }),
+            models.ProjectMemberInvite.create({
+              email: 'hello@world.com',
+              status: 'pending',
+              projectId: project1.id,
+              createdBy: 1,
+              updatedBy: 1,
+            }),
+          ];
+          const phasePromise = models.ProjectPhase.create({
+            name: 'test phases',
+            status: 'active',
+            startDate: '2018-05-15T00:00:00Z',
+            endDate: '2018-05-16T00:00:00Z',
+            budget: 20.0,
+            progress: 0.12,
+            spentBudget: 0,
+            details: {},
             createdBy: 1,
             updatedBy: 1,
-          });
-          return Promise.all([pm1, pm2, pa1]);
+            projectId: project1.id,
+          }).then(phase => models.PhaseProduct.create({
+            phaseId: phase.id,
+            projectId: project1.id,
+            name: 'tet product',
+            type: 'product1',
+            estimatedPrice: 20.0,
+            actualPrice: 1.23456,
+            details: {},
+            createdBy: 1,
+            updatedBy: 1,
+          }));
+          return Promise.all([pm1, pm2, ...attachments, ...invites, phasePromise]);
         });
 
         const p2 = models.Project.create({
@@ -259,7 +134,7 @@ describe('LIST Project', () => {
           lastActivityUserId: '1',
         }).then((p) => {
           project2 = p;
-          return models.ProjectMember.create({
+          const member = models.ProjectMember.create({
             userId: 40051332,
             projectId: project2.id,
             role: 'copilot',
@@ -270,6 +145,26 @@ describe('LIST Project', () => {
             createdBy: 1,
             updatedBy: 1,
           });
+          const invite = models.ProjectMemberInvite.create({
+            userId: 40051335,
+            email: 'test@topcoder.com',
+            status: 'requested',
+            projectId: project2.id,
+            createdBy: 1,
+            updatedBy: 1,
+          });
+          const attachment = models.ProjectAttachment.create({
+            title: 'Spec',
+            projectId: project2.id,
+            description: 'specification',
+            path: 'projects/1/spec.pdf',
+            type: ATTACHMENT_TYPES.FILE,
+            tags: ['tag1'],
+            contentType: 'application/pdf',
+            createdBy: 1,
+            updatedBy: 1,
+          });
+          return Promise.all([member, invite, attachment]);
         });
         const p3 = models.Project.create({
           type: 'visual_design',
@@ -298,39 +193,10 @@ describe('LIST Project', () => {
           });
         });
 
-        return Promise.all([p1, p2, p3]).then(() => {
-          data[0].id = project1.id;
-          data[1].id = project2.id;
-          data[2].id = project3.id;
-          const esp1 = eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project1.id,
-            body: data[0],
-            refresh: 'wait_for',
-          });
-
-          const esp2 = eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project2.id,
-            body: data[1],
-            refresh: 'wait_for',
-          });
-
-          const esp3 = eClient.index({
-            index: ES_PROJECT_INDEX,
-            type: ES_PROJECT_TYPE,
-            id: project3.id,
-            body: data[2],
-            refresh: 'wait_for',
-          });
-          return Promise.all([esp1, esp2, esp3]);
-        }).then(() => {
-          testUtil.wait(done);
-          // done();
-        });
-      });
+        return Promise.all([p1, p2, p3]);
+      })
+      .then(() => done())
+      .catch(done);
   });
 
   after((done) => {
@@ -1057,6 +923,117 @@ describe('LIST Project', () => {
         });
     });
 
+    it('should fall back to lastActivityAt desc when best match sort has no keyword', (done) => {
+      request(server)
+        .get('/v5/projects/?sort=best%20match')
+        .set({
+          Authorization: `Bearer ${testUtil.jwts.admin}`,
+        })
+        .expect(200)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          } else {
+            const resJson = res.body;
+            should.exist(resJson);
+            resJson.should.have.lengthOf(3);
+            resJson[0].id.should.equal(project3.id);
+            resJson[1].id.should.equal(project2.id);
+            resJson[2].id.should.equal(project1.id);
+            done();
+          }
+        });
+    });
+
+    describe('best match sorting', () => {
+      let alphaHeavyProject;
+      let alphaLightProject;
+
+      before((done) => {
+        const baseAttrs = {
+          type: 'visual_design',
+          billingAccountId: 1,
+          status: 'draft',
+          details: {},
+          createdBy: 1,
+          updatedBy: 1,
+          lastActivityUserId: '1',
+        };
+        const heavyAttrs = {
+          ...baseAttrs,
+          name: 'Alpha heavy project',
+          description: 'alpha alpha alpha focus term',
+          lastActivityAt: new Date('2020-01-01T00:00:00Z'),
+        };
+        const lightAttrs = {
+          ...baseAttrs,
+          name: 'Alpha light project',
+          description: 'alpha marker',
+          lastActivityAt: new Date('2020-02-01T00:00:00Z'),
+        };
+        const createHeavy = models.Project.create(heavyAttrs).then((project) => {
+          alphaHeavyProject = project;
+        });
+        const createLight = models.Project.create(lightAttrs).then((project) => {
+          alphaLightProject = project;
+        });
+        Promise.all([createHeavy, createLight])
+          .then(() => done())
+          .catch(done);
+      });
+
+      after((done) => {
+        Promise.all([
+          alphaHeavyProject && alphaHeavyProject.destroy({ force: true }),
+          alphaLightProject && alphaLightProject.destroy({ force: true }),
+        ])
+          .then(() => done())
+          .catch(done);
+      });
+
+      it('should respect explicit sort when using lastActivityAt desc', (done) => {
+        request(server)
+          .get('/v5/projects/?keyword=alpha&sort=lastActivityAt%20desc')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(2);
+              resJson[0].id.should.equal(alphaLightProject.id);
+              resJson[1].id.should.equal(alphaHeavyProject.id);
+              done();
+            }
+          });
+      });
+
+      it('should order by similarity when using best match sort', (done) => {
+        request(server)
+          .get('/v5/projects/?keyword=alpha&sort=best%20match')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(2);
+              resJson[0].id.should.equal(alphaHeavyProject.id);
+              resJson[1].id.should.equal(alphaLightProject.id);
+              done();
+            }
+          });
+      });
+    });
+
     describe('GET All /projects/ for Connect Admin, ', () => {
       it('should return the project ', (done) => {
         request(server)
@@ -1184,7 +1161,7 @@ describe('LIST Project', () => {
             }
           });
       });
-      it('should not return projects where a non-admin user has an invitation in requested status', (done) => {
+      it('should return projects where a non-admin user has an invitation in requested status', (done) => {
         request(server)
           .get(`/v5/projects/?id=${project2.id}`)
           .set({
@@ -1198,7 +1175,9 @@ describe('LIST Project', () => {
             } else {
               const resJson = res.body;
               should.exist(resJson);
-              resJson.should.have.lengthOf(0);
+              resJson.should.have.lengthOf(1);
+              resJson[0].id.should.equal(project2.id);
+              resJson[0].invites.should.have.lengthOf(1);
               done();
             }
           });
@@ -1244,6 +1223,33 @@ describe('LIST Project', () => {
               should.exist(resJson);
               resJson.should.have.lengthOf(1);
               resJson[0].members[0].should.not.have.property('email');
+              done();
+            }
+          });
+      });
+
+      it('should not allow requesting members.deletedAt attribute', (done) => {
+        request(server)
+          .get('/v5/projects/?fields=members.id,members.deletedAt')
+          .set({
+            Authorization: `Bearer ${testUtil.jwts.admin}`,
+          })
+          .expect('Content-Type', /json/)
+          .expect(200)
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              const resJson = res.body;
+              should.exist(resJson);
+              resJson.should.have.lengthOf(3);
+              resJson.forEach((project) => {
+                if (project.members) {
+                  project.members.forEach((member) => {
+                    member.should.not.have.property('deletedAt');
+                  });
+                }
+              });
               done();
             }
           });

@@ -13,7 +13,6 @@ import * as path from 'path';
 import _ from 'lodash';
 import querystring from 'querystring';
 import config from 'config';
-import elasticsearch from 'elasticsearch';
 import AWS from 'aws-sdk';
 import jp from 'jsonpath';
 import Promise from 'bluebird';
@@ -43,9 +42,6 @@ const m2m = tcCoreLibAuth.m2m(config);
 const util = _.cloneDeep(require('tc-core-library-js').util(config));
 
 const ssoRefCodes = JSON.parse(config.get('SSO_REFCODES'));
-
-// the client modifies the config object, so always passed the cloned object
-let esClient = null;
 
 const projectServiceUtils = {
   /**
@@ -420,102 +416,6 @@ const projectServiceUtils = {
         return null;
       });
   },
-
-  /**
-   * Return the initialized elastic search client
-   * @return {Object}           the elasticsearch client instance
-   */
-  getElasticSearchClient: () => {
-    if (esClient) return esClient;
-    const esHost = config.get('elasticsearchConfig.host');
-    if (/.*amazonaws.*/.test(esHost)) {
-      esClient = elasticsearch.Client({
-        apiVersion: config.get('elasticsearchConfig.apiVersion'),
-        hosts: esHost,
-        connectionClass: require('http-aws-es'), // eslint-disable-line global-require
-        // amazonES: {
-        //   region: 'us-east-1',
-        //   credentials: new AWS.EnvironmentCredentials('AWS'),
-        // },
-      });
-    } else {
-      esClient = new elasticsearch.Client(_.cloneDeep(config.elasticsearchConfig));
-    }
-    // during unit tests, we need to refresh the indices
-    // before making get/search requests to make sure all ES data can be visible.
-    if (process.env.NODE_ENV === 'test') {
-      esClient.originalSearch = esClient.search;
-      esClient.search = (params, cb) => esClient.indices.refresh({ index: '' })
-        .then(() => esClient.originalSearch(params, cb)); // refresh index before reply
-      esClient.originalGet = esClient.get;
-      esClient.get = (params, cb) => esClient.indices.refresh({ index: '' })
-        .then(() => esClient.originalGet(params, cb)); // refresh index before reply
-    }
-    return esClient;
-  },
-
-  /**
-   * Return the searched resource from elastic search
-   * @param resource resource name
-   * @param query    search query
-   * @param index    index to search from
-   * @return {Object}           the searched resource
-   */
-  fetchFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
-    let INDEX = config.get('elasticsearchConfig.metadataIndexName');
-    let TYPE = config.get('elasticsearchConfig.metadataDocType');
-    if (index === 'timeline') {
-      INDEX = config.get('elasticsearchConfig.timelineIndexName');
-      TYPE = config.get('elasticsearchConfig.timelineDocType');
-    } else if (index === 'project') {
-      INDEX = config.get('elasticsearchConfig.indexName');
-      TYPE = config.get('elasticsearchConfig.docType');
-    }
-
-    const data = query ? (yield esClient.search({ index: INDEX, type: TYPE, body: query })) :
-      (yield esClient.search({ index: INDEX, type: TYPE }));
-    if (data.hits.hits.length > 0 && data.hits.hits[0].inner_hits) {
-      return data.hits.hits[0].inner_hits;
-    }
-
-    return data.hits.hits.length > 0 ? data.hits.hits[0]._source : { // eslint-disable-line no-underscore-dangle
-      productTemplates: [],
-      forms: [],
-      projectTemplates: [],
-      planConfigs: [],
-      priceConfigs: [],
-      projectTypes: [],
-      productCategories: [],
-      orgConfigs: [],
-      milestoneTemplates: [],
-    };
-  }),
-
-  /**
-   * Return the searched resource from elastic search PROJECT index
-   * @param resource resource name
-   * @param query    search query
-   * @param index    index to search from
-   * @return {Array}           the searched resource
-   */
-  fetchByIdFromES: Promise.coroutine(function* (resource, query, index) { // eslint-disable-line func-names
-    let INDEX = config.get('elasticsearchConfig.indexName');
-    let TYPE = config.get('elasticsearchConfig.docType');
-    if (index === 'timeline') {
-      INDEX = config.get('elasticsearchConfig.timelineIndexName');
-      TYPE = config.get('elasticsearchConfig.timelineDocType');
-    } else if (index === 'metadata') {
-      INDEX = config.get('elasticsearchConfig.metadataIndexName');
-      TYPE = config.get('elasticsearchConfig.metadataDocType');
-    }
-
-    return (yield esClient.search({
-      index: INDEX,
-      type: TYPE,
-      _source: false,
-      body: query,
-    })).hits.hits;
-  }),
 
   /**
    * Retrieve member traits from user handle
@@ -1573,6 +1473,47 @@ const projectServiceUtils = {
 
     return int;
   },
+
+  /**
+   * Stub for legacy Elasticsearch client usage.
+   * Provides no-op methods to avoid runtime errors after ES removal.
+   *
+   * @returns {Object} elasticsearch client stub
+   */
+  getElasticSearchClient: () => {
+    const noop = async () => ({});
+    const emptySearchResult = { hits: { hits: [] } };
+
+    return {
+      search: async () => emptySearchResult,
+      index: noop,
+      bulk: noop,
+      delete: noop,
+      refresh: noop,
+      indices: {
+        create: noop,
+        delete: noop,
+        exists: async () => false,
+      },
+    };
+  },
+
+  /**
+   * Stub for legacy Elasticsearch searches.
+   * Always resolves with an empty payload for the requested resource.
+   *
+   * @param {String} resourceName the requested resource name
+   * @returns {Promise<Object>} empty ES-like result
+   */
+  fetchFromES: async resourceName => ({ [resourceName]: [] }),
+
+  /**
+   * Stub for legacy Elasticsearch lookups.
+   * Always resolves with an empty array so callers fall back to DB queries.
+   *
+   * @returns {Promise<Array>} empty results
+   */
+  fetchByIdFromES: async () => [],
 
 };
 

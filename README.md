@@ -52,7 +52,6 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
        AUTH0_PROXY_SERVER_URL=
 
        # Locally deployed services (via docker-compose)
-       PROJECTS_ES_URL=dockerhost:9200
        DB_MASTER_URL=postgres://coder:mysecretpassword@dockerhost:5432/projectsdb
        BUS_API_URL=http://dockerhost:8002/v5
 
@@ -75,45 +74,26 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
    npm run services:up
    ```
 
-   Wait until all containers are fully started. As a good indicator, wait until `project-processor-es` successfully started by viewing its logs:
+   Wait until all containers are fully started. Ensure the database and Kafka containers finish initialization by checking their logs if needed, for example:
 
    ```bash
-   npm run services:logs -- -f project-processor-es
+   npm run services:logs -- -f db
+   npm run services:logs -- -f kafka
    ```
-
-   <details><summary>Click to see a good logs example</summary>
-   <br>
-
-      - first it would be waiting for `kafka-client` to create all the required topics and exit, you would see:
-
-         ```
-         project-processor-es_1        | Waiting for kafka-client to exit....
-         ```
-
-      - after that, `project-processor-es` would be started itself. Make sure it successfully connected to Kafka, you should see 3 lines with text `Subscribed to project.action.`:
-
-      ```
-      project-processor-es_1        | 2020-02-19T03:18:46.523Z DEBUG no-kafka-client Subscribed to project.action.update:0 offset 0 leader kafka:9093
-      project-processor-es_1        | 2020-02-19T03:18:46.524Z DEBUG no-kafka-client Subscribed to project.action.delete:0 offset 0 leader kafka:9093
-      project-processor-es_1        | 2020-02-19T03:18:46.528Z DEBUG no-kafka-client Subscribed to project.action.create:0 offset 0 leader kafka:9093
-      ```
-   </details>
 
    <br>
    If you want to learn more about docker-compose configuration
-   <details><summary>see more details here</summary>
+         <details><summary>see more details here</summary>
    <br>
 
       This docker-compose file starts the next services:
       |  Service | Name | Port  |
       |----------|:-----:|:----:|
       | PostgreSQL | db | 5432 |
-      | Elasticsearch | esearch | 9200 |
       | Mock Service (not in use) | jsonserver | 3001  |
       | Zookeeper | zookeeper | 2181  |
       | Kafka | kafka | 9092  |
       | [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) | tc-bus-api | 8002  |
-      | [project-processor-es](https://github.com/topcoder-platform/project-processor-es) | project-processor-es | 5000  |
       | [tc-notifications-api](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-api | 4000  |
       | [tc-notifications-processor](https://github.com/topcoder-platform/tc-notifications) | tc-notifications-processor | 4001  |
 
@@ -134,7 +114,7 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
          <details><summary>Click to see details about minimal docker-compose</summary>
          <br>
 
-         *Use this docker-compose if you only want to test and modify code of Project Service and you don't need Elasticsearch (ES) to work.*
+         *Use this docker-compose for a minimal setup when you only need the database and mock service for basic Project Service development.*
 
          Run, in the project root folder:
          ```bash
@@ -145,7 +125,6 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
          |  Service | Name | Port  |
          |----------|:-----:|:----:|
          | PostgreSQL | db | 5432 |
-         | Elasticsearch | esearch | 9200 |
          | Mock Service (not in use) | jsonserver | 3001  |
 
          </details>
@@ -154,15 +133,14 @@ Local setup should work good on **Linux**, **macOS** and **Windows**.
 
    *NOTE: In production these dependencies / services are hosted & managed outside Project Service.*
 
-2. ♻ Init DB, ES and demo data (it clears any existent data)
+2. ♻ Init DB and demo data (it clears any existent data)
 
    ```bash
    npm run local:init
    ```
 
-   This command will do 3 things:
+   This command will do 2 things:
    - create Database tables (remove if exists)
-   - create Elasticsearch indexes (remove if exists)
    - import demo data from `data/demo-data.json`
 
 3. 🚀 Start Project Service
@@ -236,7 +214,7 @@ npm run data:export -- --file path/to-file.json
 
 ### 📥 Import data
 
-*During importing, data would be first imported to the database, and after from the database it would be indexed to the Elasticsearch index.*
+*During importing, data is written directly to the database; no additional indexing steps are required.*
 
 To import data from the default file `data/demo-data.json`, run:
 ```bash
@@ -251,7 +229,7 @@ npm run data:import -- --file path/to-file.json
 
 - As this commands calls topcoder services to get data like members details, so you have to provide environment variables `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_URL`, `AUTH0_AUDIENCE`, `AUTH0_PROXY_SERVER_URL`, they would automatically picked up from the `.env` file if provided.
 
-- If you encounter conflicts errors during import, you may need to recreated database tables and Elasticssearch indexes by `npm run local:reset`.
+- If you encounter conflicts errors during import, you may need to recreate database tables by running `npm run local:reset`.
 
 - List of models that will be imported are defined in `scripts/data/dataModels.js`. You can add new models to this list, but make sure that new models are added to list such that each model comes after its dependencies.
 
@@ -264,8 +242,7 @@ To retrieve data from DEV env we have to provide a valid user token (`CONNECT_US
 
 This command for importing data uses API to create demo data. Which has a few pecularities:
 - data in DB would be for sure created
-- data in ElasticSearch Index (ES) would be only created if services [project-processor-es](https://github.com/topcoder-platform/project-processor-es) and [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api) are also started locally. If you don't start them, then imported data wouldn't be indexed in ES, and would be only added to DB. You may start them locally separately, or better use `local/full/docker-compose.yml` as described [next section](#local-deployment-with-other-topcoder-services) which would start them automatically.
-   - **NOTE** During data importing a lot of records has to be indexed in ES, so you have to wait about 5-10 minutes after `npm run import-from-api` is finished until imported data is indexed in ES. You may watch logs of `project-processor-es` to see if its done or no.
+- ensure supporting services from `local/full/docker-compose.yml` are running so API calls succeed.
 
 ## Run via Docker
 
@@ -297,16 +274,14 @@ This command for importing data uses API to create demo data. Which has a few pe
 | `npm run test`  | Run tests. |
 | `npm run test:watch`  | Run tests and re-run them on changes (not useful now as it re-runs all the test). |
 | `npm run reset:db`  | Recreate Database schemas (removes any existent data). |
-| `npm run reset:es`  | Recreate Elasticsearch indexes (removes any existent data). |
 | `npm run import-from-api`  | Import Metadata from DEV environment, see [docs](#import-metadata-from-apitopcoder-devcom-deprecated). |
-| `npm run es-db-compare`  | Run helper script to compare data in Database and Elasticsearch indexes, see [docs](./scripts/es-db-compare/README.md). |
 | `npm run data:export`  | Export data from Database to file, see [docs](#📤-export-data) |
-| `npm run data:import`  | Import data from file to Database and index it to Elasticsearch, see [docs](#📥-import-data) |
+| `npm run data:import`  | Import data from file to Database, see [docs](#📥-import-data) |
 | `npm run services:up`  | Start services via docker-compose for local development. |
 | `npm run services:down`  | Stop services via docker-compose for local development. |
 | `npm run services:logs -- -f <service_name>`  | View logs of some service inside docker-compose. |
-| `npm run local:init` | Recreate Database and Elasticsearch indexes and populate demo data for local development (removes any existent data). |
-| `npm run local:reset` | Recreate Database and Elasticsearch indexes (removes any existent data). |
+| `npm run local:init` | Recreate Database and populate demo data for local development (removes any existent data). |
+| `npm run local:reset` | Recreate Database (removes any existent data). |
 | `npm run babel-node-script -- <path/to/script>` | Helper command which is used by other commands to run node scripts using `babel-node` and `dotenv` so variables from `.env` file are automatically applied. |
 | `npm run generate:doc:permissions` | Generate [permissions.html](docs/permissions.html) which later can be viewed by [link](https://htmlpreview.github.io/?https://github.com/topcoder-platform/tc-project-service/blob/develop/docs/permissions.html). |
 | `npm run generate:doc:permissions:dev` | Generate [permissions.html](docs/permissions.html) on any changes (useful during development). |

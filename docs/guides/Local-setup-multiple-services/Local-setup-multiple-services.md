@@ -5,31 +5,19 @@
 If you want to change the code only of **Topcoder Project Service** (`tc-project-service`), it's enough to use the main [README](../../../README.md).
 
 Follow this guide in case you want to change the code of **Topcoder Project Service** (`tc-project-service`) **together** with the code of one of the next services:
-- [project-processor-es](https://github.com/topcoder-platform/project-processor-es)
 - [legacy-project-processor](https://github.com/topcoder-platform/legacy-project-processor)
 - [tc-notifications](https://github.com/topcoder-platform/tc-notifications)
 - [tc-bus-api](https://github.com/topcoder-platform/tc-bus-api)
 
 ## How it works
 
-To communicate with any of the next services `tc-notifications`, `project-processor-es`, `legacy-project-processor` **Project Service** sends Kafka events and these service listen to the Kafka events do some stuff. **Project Service** don't send Kafka events directly, but uses a special service to send Kafka events called `tc-bus-api`. So no matter what service we want to update, first we have to setup Kafka with Zookeeper and `tc-bus-api`.
+To communicate with services such as `tc-notifications` and `legacy-project-processor`, **Project Service** sends Kafka events and these services listen to the Kafka events to do their work. **Project Service** doesn't send Kafka events directly, but uses a special service called `tc-bus-api`. So no matter what service we want to update, first we have to setup Kafka with Zookeeper and `tc-bus-api`. Project data is stored and retrieved directly from PostgreSQL.
 
 ![diagram](./images/diagram.svg)
 
-*This diagram shows just some part of relations and services that are important for this guide, it doesn't show all of them.*
+*This diagram shows just some part of relations and services that are important for this guide, it doesn't show all of them. Review and update the diagram if it still shows Elasticsearch or related processors.*
 
-### Elasticsearch indexing
-
-It's important to keep in mind how the indexing and reading data from Elasticsearch works.
-
-#### Read data
-
-Endpoints in **Project Service** should get data from the Elasticsearch index first. If no data is found, endpoints should try to get data from Database.
-
-#### Write data
-
-When some data is updated by **Project Service** it's directly changed in the Database. But **Project Service** doesn't change data in Elasticsearch directly. Instead of that, when some data is changed **Project Service** sends event to the Kafka (using `tc-bus-api`), and `project-processor-es` listens to the Kafka event and index updated data in Elasticsearch for **Project Service**.
-As a consequences, data in Elasticsearch is not updated immediately.
+> **Data flow note:** Project Service now reads from and writes to PostgreSQL directly. Kafka events are emitted for downstream consumers, but there is no separate Elasticsearch indexing step.
 
 ## Steps to run locally
 
@@ -80,11 +68,7 @@ To run **Project Service**, please, follow its README section "[Steps to run loc
 |--|
 | Then next services are optional and you may start them only if need to change them or to test. |
 
-### 4. Run `project-processor-es` (optional)
-
-To run `project-processor-es`, please, follow its README section "[Local setup](https://github.com/topcoder-platform/project-processor-es#local-setup)", but **skip** the second step "Run docker compose with dependant services" as we already run the same docker in this guide.
-
-### 5. Run `tc-notifications` (optional)
+### 4. Run `tc-notifications` (optional)
 
 Clone [tc-notifications](https://github.com/topcoder-platform/tc-notifications) repository. You would have to start 2 services to make the Notification service fully work.
 
@@ -125,6 +109,6 @@ Clone [tc-notifications](https://github.com/topcoder-platform/tc-notifications) 
 6. In another terminal window:
    - Run `PORT=4001 npm run start` - Processor of Kafka events
 
-### 6. Run Connect App (optional)
+### 5. Run Connect App (optional)
 
 You may also run [Connect App](https://github.com/appirio-tech/connect-app) locally together with the current setup. Please, follow section "[Run Connect App with Project Service locally](../../../README.md#run-connect-app-with-project-service-locally)".

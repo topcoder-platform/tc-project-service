@@ -3,17 +3,11 @@
  */
 import chai from 'chai';
 import request from 'supertest';
-import config from 'config';
 import _ from 'lodash';
 
 import models from '../../models';
 import server from '../../app';
 import testUtil from '../../tests/util';
-import util from '../../util';
-
-const ES_TIMELINE_INDEX = config.get('elasticsearchConfig.timelineIndexName');
-const ES_TIMELINE_TYPE = config.get('elasticsearchConfig.timelineDocType');
-const eClient = util.getElasticSearchClient();
 
 const should = chai.should();
 
@@ -189,28 +183,9 @@ describe('LIST timelines', () => {
                     models.Milestone.bulkCreate(milestones))
                     .then(createdMilestones => [createdTimelines, createdMilestones]),
                   ),
-              ).then(([createdTimelines, createdMilestones]) =>
-                // Index to ES
-                Promise.all(_.map(createdTimelines, (createdTimeline) => {
-                  const timelineJson = _.omit(createdTimeline.toJSON(), 'deletedAt', 'deletedBy');
-                  timelineJson.projectId = createdTimeline.id !== 3 ? 1 : 2;
-                  if (timelineJson.id === 1) {
-                    timelineJson.milestones = _.map(
-                      createdMilestones,
-                      cm => _.omit(cm.toJSON(), 'deletedAt', 'deletedBy'),
-                    );
-                  }
-
-                  return eClient.index({
-                    index: ES_TIMELINE_INDEX,
-                    type: ES_TIMELINE_TYPE,
-                    id: timelineJson.id,
-                    body: timelineJson,
-                  });
-                }))
-                  .then(() => {
-                    done();
-                  }));
+              ).then(() => {
+                done();
+              }));
           });
       });
   });

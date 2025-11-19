@@ -12,11 +12,6 @@ services:
       - POSTGRES_PASSWORD=mysecretpassword
       - POSTGRES_USER=coder
       - POSTGRES_MULTIPLE_DATABASES=projectsdb,projectsdb_test,tc_notifications
-  esearch:
-    image: "elasticsearch:2.3"
-    ports:
-      - "9200:9200"
-      - "9300:9300"
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
@@ -61,29 +56,6 @@ services:
       - KAFKA_URL=kafka:9093
       - JWT_TOKEN_SECRET=secret
       - VALID_ISSUERS="[\"https://topcoder-newauth.auth0.com/\",\"https://api.topcoder-dev.com\"]"
-      - AUTH0_CLIENT_ID
-      - AUTH0_CLIENT_SECRET
-      - AUTH0_URL
-      - AUTH0_AUDIENCE
-      - AUTH0_PROXY_SERVER_URL
-  project-processor-es:
-    build:
-      context: ./generic-tc-service
-      args:
-        NODE_VERSION: 8.11.3
-        GIT_URL: https://github.com/topcoder-platform/project-processor-es
-        GIT_BRANCH: develop
-    command: start kafka-client
-    expose:
-      - "5000"
-    ports:
-      - "5000:5000"
-    depends_on:
-      - kafka-client
-    environment:
-      - PORT=5000
-      - KAFKA_URL=kafka:9093
-      - ES_HOST=esearch:9200
       - AUTH0_CLIENT_ID
       - AUTH0_CLIENT_SECRET
       - AUTH0_URL

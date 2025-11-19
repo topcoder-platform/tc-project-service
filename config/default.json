@@ -16,19 +16,6 @@
   "attachmentsS3Bucket": "topcoder-prod-media",
   "projectAttachmentPathPrefix": "projects",
   "projectAttachmentPathSuffix": "attachments",
-  "elasticsearchConfig": {
-    "host": "",
-    "apiVersion": "6.8",
-    "indexName": "projects",
-    "docType": "doc",
-    "timelineIndexName": "timelines",
-    "timelineDocType": "doc",
-    "metadataIndexName": "metadata",
-    "metadataDocType": "doc",
-    "metadataDocDefaultId": 1,
-    "customerPaymentIndexName": "customer_payments",
-    "customerPaymentDocType": "doc"
-  },
   "dbConfig": {
     "masterUrl": "postgres://coder:mysecretpassword@localhost:5432/projectsdb",
     "maxPoolSize": 50,

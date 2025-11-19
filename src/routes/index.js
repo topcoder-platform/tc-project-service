@@ -107,20 +107,6 @@ router.route('/v5/projects')
   .post(require('./projects/create'))
   .get(require('./projects/list'));
 
-router.route('/v5/projects/admin/es/createIndex')
-  .post(require('./admin/es-create-index'));
-router.route('/v5/projects/admin/es/deleteIndex')
-  .delete(require('./admin/es-delete-index'));
-router.route('/v5/projects/admin/es/migrateFromDb')
-  .patch(require('./admin/es-migrate-from-db'));
-router.route('/v5/projects/admin/es/fixMetadataForEs')
-  .patch(require('./admin/es-fix-metadata-for-es'));
-router.route('/v5/projects/admin/es/fixProjectsForEs')
-  .patch(require('./admin/es-fix-projects-for-es'));
-router.route('/v5/projects/admin/es/project/index')
-  .post(require('./admin/project-index-create'));
-router.route('/v5/projects/admin/es/project/remove')
-  .delete(require('./admin/project-index-delete'));
 
 router.route('/v5/projects/:projectId(\\d+)')
   .get(require('./projects/get'))

@@ -33,7 +33,6 @@ describe('GET project member', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => {
         // Create projects
         models.Project.create({

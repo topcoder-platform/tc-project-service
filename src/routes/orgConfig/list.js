@@ -3,7 +3,6 @@
  */
 import validate from 'express-validation';
 import Joi from 'joi';
-import _ from 'lodash';
 import { middleware as tcMiddleware } from 'tc-core-library-js';
 import models from '../../models';
 import util from '../../util';
@@ -33,52 +32,16 @@ module.exports = [
     req.log.debug(filters);
     const orgIds = filters.orgId.split(',');
 
-    // build filter query for ES
-    const must = [{
-      terms: {
-        'orgConfigs.orgId': orgIds,
-      },
-    }];
+    const where = { orgId: { $in: orgIds } };
     if (filters.configName) {
-      must.push({
-        term: {
-          'orgConfigs.configName': filters.configName,
-        },
-      });
+      where.configName = filters.configName;
     }
-
-    util.fetchFromES('orgConfigs', {
-      query: {
-        nested: {
-          path: 'orgConfigs',
-          query: {
-            bool: {
-              must,
-            },
-          },
-          inner_hits: {},
-        },
-      },
-    }, 'metadata')
-      .then((data) => {
-        if (data.orgConfigs.length === 0) {
-          req.log.debug('No orgConfig found in ES');
-
-          // Get all organization config
-          const where = filters ? _.assign({}, filters, { orgId: { $in: orgIds } }) : {};
-          models.OrgConfig.findAll({
-            where,
-            attributes: { exclude: ['deletedAt', 'deletedBy'] },
-            raw: true,
-          })
-            .then((orgConfigs) => {
-              res.json(orgConfigs);
-            })
-            .catch(next);
-        } else {
-          req.log.debug('orgConfigs found in ES');
-          res.json(data.orgConfigs.hits.hits.map(hit => hit._source)); // eslint-disable-line no-underscore-dangle
-        }
-      });
+    return models.OrgConfig.findAll({
+      where,
+      attributes: { exclude: ['deletedAt', 'deletedBy'] },
+      raw: true,
+    })
+      .then(orgConfigs => res.json(orgConfigs))
+      .catch(next);
   },
 ];

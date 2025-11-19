@@ -8,7 +8,6 @@ import {
 } from '../constants';
 import {
   projectCreatedKafkaHandler,
-  projectUpdatedKafkaHandler,
 } from './projects';
 import {
   projectPhaseAddedKafkaHandler,
@@ -22,18 +21,6 @@ const kafkaHandlers = {
   /**
    * Deprecated specific Bus Events
    */
-  // Events defined by project-api
-  [CONNECT_NOTIFICATION_EVENT.PROJECT_UPDATED]: projectUpdatedKafkaHandler,
-  [CONNECT_NOTIFICATION_EVENT.PROJECT_ATTACHMENT_UPDATED]: projectUpdatedKafkaHandler,
-  [CONNECT_NOTIFICATION_EVENT.PROJECT_TEAM_UPDATED]: projectUpdatedKafkaHandler,
-  [CONNECT_NOTIFICATION_EVENT.PROJECT_PLAN_UPDATED]: projectUpdatedKafkaHandler,
-
-  // Events from message-service
-  [CONNECT_NOTIFICATION_EVENT.TOPIC_CREATED]: projectUpdatedKafkaHandler,
-  [CONNECT_NOTIFICATION_EVENT.TOPIC_UPDATED]: projectUpdatedKafkaHandler,
-  [CONNECT_NOTIFICATION_EVENT.POST_CREATED]: projectUpdatedKafkaHandler,
-  [CONNECT_NOTIFICATION_EVENT.POST_UPDATED]: projectUpdatedKafkaHandler,
-
   // Events coming from timeline/milestones (considering it as a separate module/service in future)
   [CONNECT_NOTIFICATION_EVENT.MILESTONE_TRANSITION_COMPLETED]: milestoneUpdatedKafkaHandler,
   [CONNECT_NOTIFICATION_EVENT.TIMELINE_ADJUSTED]: timelineAdjustedKafkaHandler,

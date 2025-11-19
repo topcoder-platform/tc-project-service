@@ -24,7 +24,6 @@ describe('Project Billing Accounts list', () => {
 
   beforeEach((done) => {
     testUtil.clearDb()
-      .then(() => testUtil.clearES())
       .then(() => models.Project.create({
         type: 'generic',
         directProjectId: 1,

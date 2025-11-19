@@ -1,6 +1,5 @@
 
 import _ from 'lodash';
-import util from '../../util';
 import models from '../../models';
 
 const permissions = require('tc-core-library-js').middleware.permissions;
@@ -35,44 +34,5 @@ const retrieveFromDB = async (req, res, next) => {
 module.exports = [
   // check permission
   permissions('project.view'),
-
-  (req, res, next) => {
-    const projectId = _.parseInt(req.params.projectId);
-    const phaseId = _.parseInt(req.params.phaseId);
-
-    // Get project from ES
-    util.fetchByIdFromES('phaseProducts', {
-      query: {
-        nested: {
-          path: 'phases',
-          query:
-          {
-            filtered: {
-              filter: {
-                bool: {
-                  must: [
-                    { term: { 'phases.id': phaseId } },
-                    { term: { 'phases.projectId': projectId } },
-                  ],
-                },
-              },
-            },
-          },
-          inner_hits: {},
-        },
-      },
-    })
-      .then((data) => {
-        if (data.length === 0) {
-          req.log.debug('No phase product found in ES');
-          return retrieveFromDB(req, res, next);
-        }
-        req.log.debug('phase product found in ES');
-        // Get the phases
-        const phases = data[0].inner_hits.phases.hits.hits[0]._source; // eslint-disable-line no-underscore-dangle
-        const products = _.isArray(phases.products) ? phases.products : [];
-        return res.json(products);
-      })
-      .catch(err => next(err));
-  },
+  retrieveFromDB,
 ];
