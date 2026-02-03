@@ -1,20 +1,19 @@
 version: 2.1
 python_env: &python_env
   docker:
-    - image: cimg/python:3.11.11-browsers
+    - image: cimg/python:3.12.1-browsers
 install_awscli: &install_awscli
   name: "Install awscli"
   command: |
-    sudo apt update
-    sudo apt install jq python3-pip
-    sudo pip3 install awscli --upgrade
+    pip3 install awscli --upgrade
 install_deploysuite: &install_deploysuite
   name: Installation of install_deploysuite.
   command: |
-    git clone --branch v1.4.15 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+    git clone --branch v1.4.19 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
     cp ./../buildscript/master_deploy.sh .
     cp ./../buildscript/buildenv.sh .
     cp ./../buildscript/awsconfiguration.sh .
+    cp ./../buildscript/psvar-processor.sh .
 
 # Instructions of deployment
 deploy_steps: &deploy_steps
@@ -30,15 +29,22 @@ deploy_steps: &deploy_steps
       command: |
         ./awsconfiguration.sh $DEPLOY_ENV
         source awsenvconf
-        ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-deployvar
-        source buildenvvar
-        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME} -p FARGATE
+        # ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-deployvar
+        # source buildenvvar
+        # ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME} -p FARGATE
+        ./psvar-processor.sh -t appenv -p /config/${APPNAME}/deployvar
+        source deployvar_env
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -j /config/${APPNAME}/appvar,/config/common/global-appvar -i ${APPNAME} -p FARGATE        
 
          echo "======= Running Masterscript - deploy projects-api-consumers ==========="
         if [ -e ${LOGICAL_ENV}-${APPNAME}-appvar.json ]; then  sudo rm -vf ${LOGICAL_ENV}-${APPNAME}-appvar.json; fi
-        ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-consumers-deployvar
-        source buildenvvar
-        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME} -p FARGATE
+        # ./buildenv.sh -e $DEPLOY_ENV -b ${LOGICAL_ENV}-${APPNAME}-consumers-deployvar
+        # source buildenvvar
+        # ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${LOGICAL_ENV}-global-appvar,${LOGICAL_ENV}-${APPNAME}-appvar -i ${APPNAME} -p FARGATE
+        ./psvar-processor.sh -t appenv -p /config/${APPNAME}-consumers/deployvar
+        source deployvar_env
+        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -j /config/${APPNAME}/appvar,/config/common/global-appvar -i ${APPNAME} -p FARGATE        
+
 
 jobs:
   UnitTests:

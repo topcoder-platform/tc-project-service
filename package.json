@@ -36,14 +36,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/appirio-tech/tc-projects-service.git"
+    "url": "git+https://github.com/topcoder-platform/tc-projects-service.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/appirio-tech/tc-projects-service/issues"
+    "url": "https://github.com/topcoder-platform/tc-projects-service/issues"
   },
-  "homepage": "https://github.com/appirio-tech/tc-projects-service#readme",
+  "homepage": "https://github.com/topcoder-platform/tc-projects-service#readme",
   "dependencies": {
     "ajv": "^8.17.1",
     "analytics-node": "^2.1.1",
@@ -79,7 +79,7 @@
     "sequelize": "^5.8.7",
     "stripe": "^8.195.0",
     "swagger-ui-express": "^4.0.6",
-    "tc-core-library-js": "github:appirio-tech/tc-core-library-js#security",
+    "tc-core-library-js": "github:topcoder-platform/tc-core-library-js#master",
     "traverse": "^0.6.6",
     "umzug": "^3.8.2",
     "urlencode": "^1.1.0",
