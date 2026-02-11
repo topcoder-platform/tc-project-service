@@ -818,11 +818,9 @@ const projectServiceUtils = {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       httpClient.defaults.timeout = 6000;
-      logger.debug(`${config.identityServiceEndpoint}roles/${roleId}`, 'fetching role info');
-      return httpClient.get(`${config.identityServiceEndpoint}roles/${roleId}`, {
-        params: {
-          fields: 'subjects',
-        },
+      const url = `${config.identityServiceEndpoint}roles/${roleId}/subjects`;
+      logger.debug(`${url}`, 'fetching role subjects');
+      return httpClient.get(url, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
