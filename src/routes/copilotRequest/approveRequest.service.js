@@ -73,7 +73,7 @@ module.exports = async (req, data, existingTransaction) => {
         const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
         const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
         const copilotPortalUrl = config.get('copilotPortalUrl');
-        req.log.info('Sending emails to all copilots about new opportunity');
+        req.log.info('Sending emails to all copilots about new opportunity', { opportunityId: opportunity.id });
 
         const sendNotification = (userName, recipient) => createEvent(emailEventType, {
           data: {
@@ -92,7 +92,7 @@ module.exports = async (req, data, existingTransaction) => {
         subjects.forEach(subject => sendNotification(subject.handle, subject.email));
 
         // send email to notify via slack
-        sendNotification('Copilots', config.copilotsSlackEmail);
+        sendNotification('Copilots', config.get('copilotsSlackEmail'));
         req.log.info('Finished sending emails to copilots');
       } catch (emailErr) {
         req.log.error('Error sending notifications', { error: emailErr });
