@@ -1,6 +1,7 @@
 import config from 'config';
 import moment from 'moment';
 import { Op } from 'sequelize';
+import Promise from 'bluebird';
 
 import models from '../../models';
 import {
