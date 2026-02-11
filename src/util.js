@@ -827,7 +827,7 @@ const projectServiceUtils = {
         },
       }).then((res) => {
         logger.debug(`Role info by ${roleId}: ${JSON.stringify(res.data)}`);
-        return res.data;
+        return { subjects: res.data || [] };
       });
     } catch (err) {
       logger.debug(err, 'error on getting role info');
