@@ -79,10 +79,7 @@ module.exports = async (req, data, existingTransaction) => {
         req.log.info('Copilot roles debug', {
           requestedRole: USER_ROLE.TC_COPILOT,
           rolesCount: roles ? roles.length : 0,
-          rolesSample: (roles || []).slice(0, 3).map(r => ({
-            id: r.id,
-            name: r.name || r.roleName,
-          })),
+          rolesSample: roles && roles[0],
         });
 
         const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
