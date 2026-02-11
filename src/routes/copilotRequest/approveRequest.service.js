@@ -76,8 +76,22 @@ module.exports = async (req, data, existingTransaction) => {
       // Send notifications
       try {
         const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
+        req.log.info('Copilot roles debug', {
+          requestedRole: USER_ROLE.TC_COPILOT,
+          rolesCount: roles ? roles.length : 0,
+          rolesSample: (roles || []).slice(0, 3).map(r => ({
+            id: r.id,
+            name: r.name || r.roleName,
+          })),
+        });
 
         const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
+
+        req.log.info('Copilot role subjects debug', {
+          subjectsCount: subjects.length,
+          sampleSubjects: subjects.slice(0, 3),
+          sampleEmails: subjects.slice(0, 3).map(s => s.email),
+        });
         const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
         const copilotPortalUrl = config.get('copilotPortalUrl');
         const slackEmail = config.has('copilotsSlackEmail') ?
