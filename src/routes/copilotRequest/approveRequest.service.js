@@ -1,6 +1,7 @@
 import config from 'config';
 import moment from 'moment';
 import { Op } from 'sequelize';
+import Promise from 'bluebird';
 
 import models from '../../models';
 import {
@@ -21,6 +22,12 @@ const resolveTransaction = (transaction, callback) => {
 
   return models.sequelize.transaction(callback);
 };
+
+const EMAIL_BATCH_SIZE = config.has('copilotEmailBatchSize') ? config.get('copilotEmailBatchSize') : 500;
+const EMAIL_CONCURRENCY = config.has('copilotEmailConcurrency') ? config.get('copilotEmailConcurrency') : 20;
+const PER_RECIPIENT_DEBUG = config.has('copilotEmailPerRecipientDebug') ?
+  config.get('copilotEmailPerRecipientDebug') : false;
+
 
 module.exports = async (req, data, existingTransaction) => {
   const { projectId, copilotRequestId, opportunityTitle, type, startDate } = data;
@@ -71,31 +78,90 @@ module.exports = async (req, data, existingTransaction) => {
         const roles = await util.getRolesByRoleName(USER_ROLE.TC_COPILOT, req.log, req.id);
 
         const { subjects = [] } = await util.getRoleInfo(roles[0], req.log, req.id);
+
         const emailEventType = CONNECT_NOTIFICATION_EVENT.EXTERNAL_ACTION_EMAIL;
         const copilotPortalUrl = config.get('copilotPortalUrl');
-        req.log.info('Sending emails to all copilots about new opportunity');
+        const slackEmail = config.has('copilotsSlackEmail') ?
+          config.get('copilotsSlackEmail') : config.copilotsSlackEmail;
 
-        const sendNotification = (userName, recipient) => createEvent(emailEventType, {
-          data: {
-            user_name: userName,
-            opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
-            work_manager_url: config.get('workManagerUrl'),
-            opportunity_type: getCopilotTypeLabel(type),
-            opportunity_title: opportunityTitle,
-            start_date: moment(startDate).format('DD-MM-YYYY'),
-          },
-          sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
-          recipients: [recipient],
-          version: 'v3',
-        }, req.log);
+        req.log.info('Sending emails to all copilots about new opportunity', { opportunityId: opportunity.id });
 
-        subjects.forEach(subject => sendNotification(subject.handle, subject.email));
+        const sendNotification = async (userName, recipient) => {
+          if (PER_RECIPIENT_DEBUG) {
+            req.log.debug('Dispatching email event', { opportunityId: opportunity.id, recipient, userName });
+          }
+          await createEvent(emailEventType, {
+            data: {
+              user_name: userName,
+              opportunity_details_url: `${copilotPortalUrl}/opportunity/${opportunity.id}`,
+              work_manager_url: config.get('workManagerUrl'),
+              opportunity_type: getCopilotTypeLabel(type),
+              opportunity_title: opportunityTitle,
+              start_date: moment(startDate).format('DD-MM-YYYY'),
+            },
+            sendgrid_template_id: TEMPLATE_IDS.CREATE_REQUEST,
+            recipients: [recipient],
+            version: 'v3',
+          }, req.log);
+        };
 
-        // send email to notify via slack
-        sendNotification('Copilots', config.copilotsSlackEmail);
-        req.log.info('Finished sending emails to copilots');
+        const recipients = subjects
+          .filter(s => s && s.email)
+          .map(s => ({ userName: s.handle, recipient: s.email }));
+
+        if (slackEmail) {
+          recipients.push({ userName: 'Copilots', recipient: slackEmail });
+        }
+
+        // Batch + concurrency limit
+        const total = recipients.length;
+        const startedAt = Date.now();
+
+        for (let offset = 0; offset < total; offset += EMAIL_BATCH_SIZE) {
+          const batch = recipients.slice(offset, offset + EMAIL_BATCH_SIZE);
+          const batchNo = Math.floor(offset / EMAIL_BATCH_SIZE) + 1;
+          const batchCount = Math.ceil(total / EMAIL_BATCH_SIZE);
+          const t0 = Date.now();
+
+          req.log.info('Sending email batch', {
+            opportunityId: opportunity.id,
+            batch: batchNo,
+            of: batchCount,
+            batchSize: batch.length,
+            processedBefore: offset,
+            total,
+            sample: batch.slice(0, 3).map(r => ({ userName: r.userName, recipient: r.recipient })),
+          });
+
+          // eslint-disable-next-line no-await-in-loop
+          await Promise.map(
+            batch,
+            r => sendNotification(r.userName, r.recipient),
+            { concurrency: EMAIL_CONCURRENCY },
+          );
+
+          req.log.info('Finished email batch', {
+            opportunityId: opportunity.id,
+            batch: batchNo,
+            of: batchCount,
+            processedNow: Math.min(offset + batch.length, total),
+            total,
+            batchMs: Date.now() - t0,
+            totalMsSoFar: Date.now() - startedAt,
+          });
+        }
+
+        req.log.info('Finished sending emails to copilots', {
+          opportunityId: opportunity.id,
+          totalRecipients: total,
+          totalMs: Date.now() - startedAt,
+        });
       } catch (emailErr) {
-        req.log.error('Error sending notifications', { error: emailErr });
+        req.log.error('Error sending notifications', {
+          opportunityId: opportunity.id,
+          message: emailErr && emailErr.message,
+          stack: emailErr && emailErr.stack,
+        });
       }
 
       return opportunity;
