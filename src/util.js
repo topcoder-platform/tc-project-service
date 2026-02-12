@@ -818,17 +818,26 @@ const projectServiceUtils = {
       const token = yield this.getM2MToken();
       const httpClient = this.getHttpClient({ id: requestId, log: logger });
       httpClient.defaults.timeout = 6000;
+
+      const perPage = 200;
+      let page = 1;
+      let subjects = [];
+      let batch = [];
+
       const url = `${config.identityServiceEndpoint}roles/${roleId}/subjects`;
       logger.debug(`${url}`, 'fetching role subjects');
-      return httpClient.get(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }).then((res) => {
-        logger.debug(`Role info by ${roleId}: ${JSON.stringify(res.data)}`);
-        return { subjects: res.data || [] };
-      });
+      do {
+        const res = yield httpClient.get(url, {
+          params: { page, perPage },
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+
+        batch = res.data || [];
+        subjects = subjects.concat(batch);
+        page += 1;
+      } while (batch.length === perPage);
+
+      return { subjects };
     } catch (err) {
       logger.debug(err, 'error on getting role info');
       return Promise.reject(err);
