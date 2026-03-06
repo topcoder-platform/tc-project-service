@@ -60,6 +60,16 @@ router.all(
   },
 );
 
+router.all(
+  RegExp(`\\/${apiVersion}\\/.*`), (req, res, next) => {
+    if (req.authUser && !req.authUser.email) {
+      req.log.debug(`Email not found for user with id ${req.authUser.userId}`);
+      req.authUser.email = _.find(req.authUser, (value, key) => (key.indexOf('email') !== -1));
+    }
+    return next();
+  },
+);
+
 router.route('/v5/projects/metadata/projectTemplates')
   .get(require('./projectTemplates/list'));
 router.route('/v5/projects/metadata/projectTemplates/:templateId(\\d+)')
