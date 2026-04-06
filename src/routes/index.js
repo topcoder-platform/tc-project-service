@@ -25,10 +25,12 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 });
 
 // List of public routes
-const publicRoutes = supportedApiVersions.flatMap((version) => ([
-  new RegExp(`^/${version}/projects/copilots/opportunities$`),
-  new RegExp(`^/${version}/projects/copilot/opportunity/\\d+$`),
-]));
+const publicRoutes = [
+  new RegExp('^/v5/projects/copilots/opportunities$'),
+  new RegExp('^/v6/projects/copilots/opportunities$'),
+  new RegExp('^/v5/projects/copilot/opportunity/\\d+$'),
+  new RegExp('^/v6/projects/copilot/opportunity/\\d+$'),
+];
 
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
