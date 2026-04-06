@@ -8,6 +8,7 @@ import compression from 'compression';
 const router = Router();
 
 const apiVersion = config.apiVersion;
+const supportedApiVersions = _.uniq([apiVersion, 'v6']);
 
 validate.options({
   status: 400,
@@ -24,16 +25,16 @@ router.get(`/${apiVersion}/projects/health`, (req, res) => {
 });
 
 // List of public routes
-const publicRoutes = [
-  new RegExp(`^/${apiVersion}/projects/copilots/opportunities$`),
-  new RegExp(`^/${apiVersion}/projects/copilot/opportunity/\\d+$`),
-];
+const publicRoutes = supportedApiVersions.flatMap((version) => ([
+  new RegExp(`^/${version}/projects/copilots/opportunities$`),
+  new RegExp(`^/${version}/projects/copilot/opportunity/\\d+$`),
+]));
 
 // All project service endpoints need authentication
 const jwtAuth = require('tc-core-library-js').middleware.jwtAuthenticator;
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`),
+  RegExp(`\\/(${supportedApiVersions.join('|')})\\/(copilots|projects|timelines|orgConfig|customer-payments)(?!\\/health).*`),
   (req, res, next) => {
     let token
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
@@ -49,7 +50,7 @@ router.all(
 );
 
 router.all(
-  RegExp(`\\/${apiVersion}\\/.*`), (req, res, next) => {
+  RegExp(`\\/(${supportedApiVersions.join('|')})\\/.*`), (req, res, next) => {
     // if it is an M2M call, hard code user id to a deafult value to avoid errors
     // Ideally, the m2m token should have unique userId, which may not be an actual user, as well
     const isMachineToken = _.get(req, 'authUser.isMachine', false);
@@ -407,7 +408,11 @@ router.route('/v5/projects/:projectId(\\d+)/copilots/requests/:copilotRequestId(
 // Project Copilot Opportunity
 router.route('/v5/projects/copilots/opportunities')
   .get(require('./copilotOpportunity/list'));
+router.route('/v6/projects/copilots/opportunities')
+  .get(require('./copilotOpportunity/list'));
 router.route('/v5/projects/copilot/opportunity/:id(\\d+)')
+  .get(require('./copilotOpportunity/get'));
+router.route('/v6/projects/copilot/opportunity/:id(\\d+)')
   .get(require('./copilotOpportunity/get'));
 
 // Project copilot opportunity apply

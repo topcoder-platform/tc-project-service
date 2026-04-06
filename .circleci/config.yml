@@ -155,7 +155,7 @@ workflows:
           context : org-global
           filters:
             branches:
-              only: ['develop','PM-3343']
+              only: ['develop','PM-4720']
       - deployProd:
           context : org-global
           filters:
